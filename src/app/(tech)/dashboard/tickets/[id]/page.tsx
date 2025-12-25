@@ -1,8 +1,9 @@
+import { TicketPartsManager } from "@/components/tickets/ticket-parts-manager";
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { attachments, laborLogs, tickets, users } from "@/db/schema";
+import { attachments, laborLogs, locations, spareParts, ticketParts, tickets, users } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatDate, formatRelativeTime } from "@/lib/utils";
@@ -85,6 +86,28 @@ export default async function TicketDetailPage({ params }: PageProps) {
       user: true,
     },
     orderBy: (logs, { desc }) => [desc(logs.createdAt)],
+  });
+
+  // Fetch ticket parts
+  // Fetch ticket parts
+  const consumedParts = await db.query.ticketParts.findMany({
+    where: eq(ticketParts.ticketId, ticketId),
+    with: {
+        part: true,
+        addedBy: true,
+    },
+    orderBy: (tp, { desc }) => [desc(tp.addedAt)],
+  });
+
+  // Fetch all parts and locations for the manager
+  const allParts = await db.query.spareParts.findMany({
+    where: eq(spareParts.isActive, true),
+    columns: { id: true, name: true, sku: true },
+  });
+
+  const activeLocations = await db.query.locations.findMany({
+    where: eq(locations.isActive, true),
+    columns: { id: true, name: true },
   });
 
   // Status Configuration
@@ -401,6 +424,16 @@ export default async function TicketDetailPage({ params }: PageProps) {
                 />
               </div>
             </div>
+          )}
+
+          {/* Ticket Parts Manager */}
+          {(user.role === "tech" || user.role === "admin") && (
+            <TicketPartsManager
+              ticketId={ticket.id}
+              parts={consumedParts}
+              allParts={allParts}
+              locations={activeLocations}
+            />
           )}
 
           {/* Meta Details */}

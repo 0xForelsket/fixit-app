@@ -150,7 +150,7 @@ export const machines = sqliteTable("machines", {
   locationId: integer("location_id")
     .references(() => locations.id)
     .notNull(),
-  ownerId: integer("owner_id").references(() => users.id), // 5S owner
+  ownerId: integer("owner_id").references(() => users.id), // Owner
   status: text("status", { enum: machineStatuses })
     .notNull()
     .default("operational"),
@@ -485,6 +485,7 @@ export const ticketsRelations = relations(tickets, ({ one, many }) => ({
     relationName: "ticketAssignee",
   }),
   logs: many(ticketLogs),
+  parts: many(ticketParts),
 }));
 
 export const maintenanceSchedulesRelations = relations(

@@ -2,6 +2,7 @@
 
 import {
   createScheduleAction,
+  deleteScheduleAction,
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { Button } from "@/components/ui/button";
@@ -124,31 +125,24 @@ export function ScheduleForm({
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this schedule?")) return;
 
+    if (!schedule?.id) return;
+
     setSaving(true);
     setDeleteError(null);
     try {
-      // We haven't migrated delete yet, keeping fetch or migrating it too?
-      // Wait, I implemented deleteScheduleAction in maintenance.ts!
-      // Let's use it, but it requires a separate import handling or just fetch if dynamic route is deleted.
-      // Since I plan to delete the route, I SHOULD use the action or keep the route.
-      // The implementation plan said: "Migrate ... create/update".
-      // But I implemented deleteScheduleAction too. Let's use it.
-      
-      // Wait, deleteScheduleAction is not imported. I need to import it.
-      // I will update the import statement above.
-      
-      const res = await fetch(`/api/maintenance/schedules/${schedule?.id}`, {
-        method: "DELETE",
-      });
+      const result = await deleteScheduleAction(schedule.id);
 
-      if (!res.ok) {
-         throw new Error("Failed to delete schedule");
+      if (result.error) {
+        throw new Error(result.error);
       }
-
+      
+      // Action handles revalidate, client router ensures we go back to list
       router.push("/dashboard/maintenance/schedules");
       router.refresh();
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "Something went wrong");
+      setDeleteError(
+        err instanceof Error ? err.message : "Something went wrong"
+      );
       setSaving(false);
     }
   };

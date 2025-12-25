@@ -1,4 +1,5 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { MaintenanceTrigger } from "@/components/maintenance-trigger";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { redirect } from "next/navigation";
@@ -22,6 +23,7 @@ export default async function DashboardLayout({
 
   return (
     <DashboardShell user={user} avatarUrl={avatarUrl} title="Dashboard">
+      <MaintenanceTrigger />
       {children}
     </DashboardShell>
   );

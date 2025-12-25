@@ -56,7 +56,7 @@
 | `name` | TEXT | e.g., "Injection Molder A" |
 | `code` | TEXT UNIQUE | e.g., "IM-001" - for QR codes |
 | `location_id` | INTEGER FK | References `locations.id` |
-| `owner_id` | INTEGER FK | References `users.id` - 5S owner (nullable) |
+| `owner_id` | INTEGER FK | References `users.id` - Owner (nullable) |
 | `status` | TEXT | Enum: 'operational', 'down', 'maintenance' |
 | `created_at` | TIMESTAMP | Record creation time |
 | `updated_at` | TIMESTAMP | Last modification time |
@@ -311,7 +311,7 @@ docker run -d --name minio \
 |-------|------------|---------|
 | New critical/high ticket | All active techs | In-app + Email (optional) |
 | Ticket assigned to you | Assigned tech | In-app + Email |
-| Your machine has new ticket | Machine 5S owner | In-app + Email |
+| Your machine has new ticket | Machine Owner | In-app + Email |
 | Ticket escalated (overdue) | Admins + assigned tech | In-app + Email |
 | Scheduled maintenance due | Assigned tech or all techs | In-app |
 
@@ -513,7 +513,7 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
 - [x] **QR Code Generator:** Print page for machine QR codes at `/admin/qr-codes`
   - Links to `/report/[code]` (e.g., `/report/IM-001`)
   - Include machine name, code, location path
-  - Include 5S owner info: name, photo, employee ID
+  - Include Owner info: name, photo, employee ID
 - [x] **Reports Page:** at `/admin/reports`
   - Ticket history with filters + CSV export
   - Machine reports (downtime, MTBF)
@@ -654,13 +654,13 @@ GET /api/analytics/export         # CSV/PDF export
   - Track quantity per location
   - Low stock alerts (reorder point)
   - Lead time tracking
-- [ ] **Inventory Transactions:**
+- [x] **Inventory Transactions:**
   - Stock in (receiving)
   - Stock out (usage on tickets)
   - Transfers between locations
   - Adjustments (inventory count)
   - Full audit trail
-- [ ] **Work Order Integration:**
+- [x] **Work Order Integration:**
   - Add parts used when resolving tickets
   - Auto-deduct from inventory
   - Parts cost tracking per ticket

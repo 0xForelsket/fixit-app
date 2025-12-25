@@ -163,7 +163,7 @@ export default async function MachineDetailPage({
                 </span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-sm text-muted-foreground">5S Owner</span>
+                <span className="text-sm text-muted-foreground">Owner</span>
                 <span className="font-medium flex items-center gap-1">
                   <User className="h-3 w-3" />
                   {machine.owner?.name || "Unassigned"}
@@ -181,6 +181,64 @@ export default async function MachineDetailPage({
               )}
             </div>
           </div>
+        </div>
+
+        
+        {/* Compliance/Health Card */}
+        <div className="space-y-6">
+           <div className="rounded-xl border bg-white p-6 shadow-sm">
+             <h3 className="font-semibold mb-4 flex items-center gap-2">
+               <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+               Maintenance Health
+             </h3>
+             
+             <div className="space-y-4">
+                {(() => {
+                  const maintenanceTickets = machine.tickets.filter(
+                    t => t.type === 'maintenance' || t.type === 'calibration'
+                  );
+                  const resolved = maintenanceTickets.filter(t => t.status === 'resolved' || t.status === 'closed');
+                  const totalResolved = resolved.length;
+                  
+                  // Simple compliance: % of maintenance tickets that are resolved
+                  // Better compliance: On-time rate (if dueBy exists)
+                  const onTime = resolved.filter(t => {
+                     if (!t.dueBy || !t.resolvedAt) return true; // Assume on time if no deadline
+                     return t.resolvedAt <= t.dueBy;
+                  }).length;
+
+                  const rate = totalResolved > 0 ? Math.round((onTime / totalResolved) * 100) : 100;
+                  
+                  return (
+                    <>
+                      <div className="flex items-end justify-between">
+                         <span className="text-3xl font-bold">{rate}%</span>
+                         <span className="text-xs text-muted-foreground mb-1">On-Time Rate</span>
+                      </div>
+                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                         <div 
+                           className={cn("h-full rounded-full transition-all", 
+                             rate >= 90 ? "bg-emerald-500" : rate >= 70 ? "bg-amber-500" : "bg-rose-500"
+                           )} 
+                           style={{ width: `${rate}%` }} 
+                         />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 pt-2">
+                         <div>
+                            <p className="text-xs text-muted-foreground">Completed</p>
+                            <p className="font-medium text-lg">{totalResolved}</p>
+                         </div>
+                         <div>
+                            <p className="text-xs text-muted-foreground">Total Tickets</p>
+                            <p className="font-medium text-lg">{maintenanceTickets.length}</p>
+                         </div>
+                      </div>
+                    </>
+                  );
+                })()}
+             </div>
+           </div>
         </div>
 
         {/* Main Content Tabs */}

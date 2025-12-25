@@ -197,7 +197,7 @@ export default async function MachinesPage({
                 <th className="p-4 hidden md:table-cell">Code</th>
                 <th className="p-4 hidden lg:table-cell">Location</th>
                 <th className="p-4">Status</th>
-                <th className="p-4 hidden xl:table-cell">5S Owner</th>
+                <th className="p-4 hidden xl:table-cell">Owner</th>
                 <th className="p-4 hidden sm:table-cell">Created</th>
                 <th className="p-4" />
               </tr>

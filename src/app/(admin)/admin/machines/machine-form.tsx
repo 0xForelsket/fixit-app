@@ -238,7 +238,7 @@ export function MachineForm({
 
           <div>
             <label htmlFor="owner" className="mb-1 block text-sm font-medium">
-              5S Owner
+              Owner
             </label>
             <select
               id="owner"

@@ -5,6 +5,7 @@ import type { UserRole } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
+  BarChart3,
   ClipboardList,
   Cog,
   FileText,
@@ -34,6 +35,12 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     icon: <Home className="h-5 w-5" />,
     roles: ["tech", "admin"],
+  },
+  {
+    label: "Analytics",
+    href: "/admin/analytics",
+    icon: <BarChart3 className="h-5 w-5" />,
+    roles: ["admin"],
   },
   {
     label: "Tickets",
