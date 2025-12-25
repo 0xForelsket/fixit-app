@@ -397,10 +397,11 @@ export function ScheduleForm({
                       <button
                         type="button"
                         onClick={() => {
-                          const current =
-                            watchedChecklists?.[index]?.isRequired ?? true;
+                          const currentItem = watchedChecklists?.[index];
+                          if (!currentItem) return;
+                          const current = currentItem.isRequired ?? true;
                           update(index, {
-                            ...watchedChecklists[index],
+                            ...currentItem,
                             isRequired: !current,
                           });
                         }}
