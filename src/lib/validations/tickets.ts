@@ -31,6 +31,16 @@ export const createTicketSchema = z.object({
     .min(1, "Description is required")
     .max(5000, "Description is too long"),
   priority: ticketPrioritySchema.default("medium"),
+  attachments: z
+    .array(
+      z.object({
+        s3Key: z.string(),
+        filename: z.string(),
+        mimeType: z.string(),
+        sizeBytes: z.number(),
+      })
+    )
+    .optional(),
 });
 
 export const updateTicketSchema = z.object({
