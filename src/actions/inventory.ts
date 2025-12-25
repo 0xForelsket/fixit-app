@@ -6,11 +6,12 @@ import {
   inventoryTransactions,
   ticketParts,
 } from "@/db/schema";
+import { inventoryLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import {
   type ConsumePartInput,
-  consumePartSchema,
   type TransactionInput,
+  consumePartSchema,
   transactionSchema,
 } from "@/lib/validations/inventory";
 import { and, eq } from "drizzle-orm";
@@ -34,7 +35,7 @@ export async function createTransactionAction(input: TransactionInput) {
         ),
       });
 
-      let currentQty = sourceLevel?.quantity || 0;
+      const currentQty = sourceLevel?.quantity || 0;
       let newQty = currentQty;
 
       if (validated.type === "in") {
@@ -112,7 +113,7 @@ export async function createTransactionAction(input: TransactionInput) {
     revalidatePath("/admin/inventory/transactions");
     return { success: true };
   } catch (error) {
-    console.error("Transaction error:", error);
+    inventoryLogger.error({ error, input: validated }, "Transaction error");
     return {
       success: false,
       error: error instanceof Error ? error.message : "Internal Server Error",
@@ -178,10 +179,10 @@ export async function consumeTicketPartAction(input: ConsumePartInput) {
     revalidatePath(`/dashboard/tickets/${validated.ticketId}`);
     revalidatePath(`/admin/tickets/${validated.ticketId}`);
     revalidatePath("/admin/inventory");
-    
+
     return { success: true };
   } catch (error) {
-    console.error("Consume part error:", error);
+    inventoryLogger.error({ error, input: validated }, "Consume part error");
     return {
       success: false,
       error: error instanceof Error ? error.message : "Internal Server Error",

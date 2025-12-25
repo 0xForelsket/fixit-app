@@ -79,6 +79,8 @@ export function TicketPartsManager({
   const form = useForm<z.infer<typeof consumeSchema>>({
     resolver: zodResolver(consumeSchema),
     defaultValues: {
+      partId: "",
+      locationId: "",
       quantity: 1,
     },
   });

@@ -9,6 +9,7 @@ import {
   tickets,
   users,
 } from "@/db/schema";
+import { ticketLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
 import {
@@ -144,7 +145,7 @@ export async function createTicket(
 
     return { success: true, data: ticket };
   } catch (error) {
-    console.error("Failed to create ticket:", error);
+    ticketLogger.error({ error, userId: user.id }, "Failed to create ticket");
     return { error: "Failed to create ticket. Please try again." };
   }
 }

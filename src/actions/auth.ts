@@ -3,6 +3,7 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { verifyPin } from "@/lib/auth";
+import { authLogger } from "@/lib/logger";
 import { createSession, deleteSession } from "@/lib/session";
 import { loginSchema } from "@/lib/validations";
 import { eq } from "drizzle-orm";
@@ -49,6 +50,10 @@ export async function login(
     const minutesLeft = Math.ceil(
       (user.lockedUntil.getTime() - Date.now()) / 60000
     );
+    authLogger.warn(
+      { employeeId, minutesLeft },
+      "Login attempt on locked account"
+    );
     return {
       error: `Account is locked. Try again in ${minutesLeft} minute(s).`,
     };
@@ -72,11 +77,19 @@ export async function login(
       .where(eq(users.id, user.id));
 
     if (lockout) {
+      authLogger.warn(
+        { employeeId, attempts: newAttempts },
+        "Account locked due to failed attempts"
+      );
       return {
         error: "Too many failed attempts. Account locked for 15 minutes.",
       };
     }
 
+    authLogger.info(
+      { employeeId, attempts: newAttempts },
+      "Failed login attempt"
+    );
     return { error: "Invalid employee ID or PIN" };
   }
 
@@ -91,6 +104,7 @@ export async function login(
     .where(eq(users.id, user.id));
 
   // Create session
+  authLogger.info({ employeeId, role: user.role }, "Successful login");
   await createSession({
     id: user.id,
     employeeId: user.employeeId,
