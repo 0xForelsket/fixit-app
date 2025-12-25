@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // Enums as const objects for type safety
 export const userRoles = ["operator", "tech", "admin"] as const;
@@ -58,6 +58,26 @@ export const notificationTypes = [
 ] as const;
 export type NotificationType = (typeof notificationTypes)[number];
 
+// Phase 10: Checklist statuses
+export const checklistItemStatuses = ["pending", "completed", "skipped", "na"] as const;
+export type ChecklistItemStatus = (typeof checklistItemStatuses)[number];
+
+// Phase 12: Inventory enums
+export const partCategories = [
+  "electrical",
+  "mechanical",
+  "hydraulic",
+  "pneumatic",
+  "consumable",
+  "safety",
+  "tooling",
+  "other",
+] as const;
+export type PartCategory = (typeof partCategories)[number];
+
+export const transactionTypes = ["in", "out", "transfer", "adjustment"] as const;
+export type TransactionType = (typeof transactionTypes)[number];
+
 // ============ TABLES ============
 
 // Users table
@@ -69,6 +89,7 @@ export const users = sqliteTable("users", {
   pin: text("pin").notNull(), // Hashed PIN
   role: text("role", { enum: userRoles }).notNull().default("operator"),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  hourlyRate: real("hourly_rate"), // For labor cost tracking
   failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
   lockedUntil: integer("locked_until", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -226,6 +247,139 @@ export const machineStatusLogs = sqliteTable("machine_status_logs", {
     .default(sql`(unixepoch())`),
 });
 
+// ============ PHASE 10: MAINTENANCE CHECKLISTS ============
+
+// Checklist templates linked to maintenance schedules
+export const maintenanceChecklists = sqliteTable("maintenance_checklists", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  scheduleId: integer("schedule_id")
+    .references(() => maintenanceSchedules.id)
+    .notNull(),
+  stepNumber: integer("step_number").notNull(),
+  description: text("description").notNull(),
+  isRequired: integer("is_required", { mode: "boolean" }).notNull().default(true),
+  estimatedMinutes: integer("estimated_minutes"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Completed checklist items per ticket
+export const checklistCompletions = sqliteTable("checklist_completions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  checklistId: integer("checklist_id")
+    .references(() => maintenanceChecklists.id)
+    .notNull(),
+  ticketId: integer("ticket_id")
+    .references(() => tickets.id)
+    .notNull(),
+  status: text("status", { enum: checklistItemStatuses }).notNull().default("pending"),
+  completedById: integer("completed_by_id").references(() => users.id),
+  notes: text("notes"),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
+});
+
+// ============ PHASE 12: INVENTORY MANAGEMENT ============
+
+// Spare parts catalog
+export const spareParts = sqliteTable("spare_parts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  sku: text("sku").unique().notNull(),
+  barcode: text("barcode"),
+  description: text("description"),
+  category: text("category", { enum: partCategories }).notNull(),
+  unitCost: real("unit_cost"),
+  reorderPoint: integer("reorder_point").notNull().default(0),
+  leadTimeDays: integer("lead_time_days"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Stock levels per location
+export const inventoryLevels = sqliteTable("inventory_levels", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  partId: integer("part_id")
+    .references(() => spareParts.id)
+    .notNull(),
+  locationId: integer("location_id")
+    .references(() => locations.id)
+    .notNull(),
+  quantity: integer("quantity").notNull().default(0),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Inventory transactions (stock movements)
+export const inventoryTransactions = sqliteTable("inventory_transactions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  partId: integer("part_id")
+    .references(() => spareParts.id)
+    .notNull(),
+  locationId: integer("location_id")
+    .references(() => locations.id)
+    .notNull(),
+  ticketId: integer("ticket_id").references(() => tickets.id),
+  type: text("type", { enum: transactionTypes }).notNull(),
+  quantity: integer("quantity").notNull(),
+  toLocationId: integer("to_location_id").references(() => locations.id),
+  reference: text("reference"),
+  notes: text("notes"),
+  createdById: integer("created_by_id")
+    .references(() => users.id)
+    .notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Parts used on tickets
+export const ticketParts = sqliteTable("ticket_parts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  ticketId: integer("ticket_id")
+    .references(() => tickets.id)
+    .notNull(),
+  partId: integer("part_id")
+    .references(() => spareParts.id)
+    .notNull(),
+  quantity: integer("quantity").notNull(),
+  unitCost: real("unit_cost"),
+  addedById: integer("added_by_id")
+    .references(() => users.id)
+    .notNull(),
+  addedAt: integer("added_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// ============ PHASE 13: LABOR TRACKING ============
+
+// Labor/time logs
+export const laborLogs = sqliteTable("labor_logs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  ticketId: integer("ticket_id")
+    .references(() => tickets.id)
+    .notNull(),
+  userId: integer("user_id")
+    .references(() => users.id)
+    .notNull(),
+  startTime: integer("start_time", { mode: "timestamp" }).notNull(),
+  endTime: integer("end_time", { mode: "timestamp" }),
+  durationMinutes: integer("duration_minutes"),
+  hourlyRate: real("hourly_rate"),
+  isBillable: integer("is_billable", { mode: "boolean" }).notNull().default(true),
+  notes: text("notes"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // ============ RELATIONS ============
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -330,6 +484,110 @@ export const machineStatusLogsRelations = relations(
   })
 );
 
+// Phase 10: Checklist relations
+export const maintenanceChecklistsRelations = relations(
+  maintenanceChecklists,
+  ({ one, many }) => ({
+    schedule: one(maintenanceSchedules, {
+      fields: [maintenanceChecklists.scheduleId],
+      references: [maintenanceSchedules.id],
+    }),
+    completions: many(checklistCompletions),
+  })
+);
+
+export const checklistCompletionsRelations = relations(
+  checklistCompletions,
+  ({ one }) => ({
+    checklist: one(maintenanceChecklists, {
+      fields: [checklistCompletions.checklistId],
+      references: [maintenanceChecklists.id],
+    }),
+    ticket: one(tickets, {
+      fields: [checklistCompletions.ticketId],
+      references: [tickets.id],
+    }),
+    completedBy: one(users, {
+      fields: [checklistCompletions.completedById],
+      references: [users.id],
+    }),
+  })
+);
+
+// Phase 12: Inventory relations
+export const sparePartsRelations = relations(spareParts, ({ many }) => ({
+  inventoryLevels: many(inventoryLevels),
+  transactions: many(inventoryTransactions),
+  ticketParts: many(ticketParts),
+}));
+
+export const inventoryLevelsRelations = relations(
+  inventoryLevels,
+  ({ one }) => ({
+    part: one(spareParts, {
+      fields: [inventoryLevels.partId],
+      references: [spareParts.id],
+    }),
+    location: one(locations, {
+      fields: [inventoryLevels.locationId],
+      references: [locations.id],
+    }),
+  })
+);
+
+export const inventoryTransactionsRelations = relations(
+  inventoryTransactions,
+  ({ one }) => ({
+    part: one(spareParts, {
+      fields: [inventoryTransactions.partId],
+      references: [spareParts.id],
+    }),
+    location: one(locations, {
+      fields: [inventoryTransactions.locationId],
+      references: [locations.id],
+    }),
+    ticket: one(tickets, {
+      fields: [inventoryTransactions.ticketId],
+      references: [tickets.id],
+    }),
+    toLocation: one(locations, {
+      fields: [inventoryTransactions.toLocationId],
+      references: [locations.id],
+    }),
+    createdBy: one(users, {
+      fields: [inventoryTransactions.createdById],
+      references: [users.id],
+    }),
+  })
+);
+
+export const ticketPartsRelations = relations(ticketParts, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [ticketParts.ticketId],
+    references: [tickets.id],
+  }),
+  part: one(spareParts, {
+    fields: [ticketParts.partId],
+    references: [spareParts.id],
+  }),
+  addedBy: one(users, {
+    fields: [ticketParts.addedById],
+    references: [users.id],
+  }),
+}));
+
+// Phase 13: Labor relations
+export const laborLogsRelations = relations(laborLogs, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [laborLogs.ticketId],
+    references: [tickets.id],
+  }),
+  user: one(users, {
+    fields: [laborLogs.userId],
+    references: [users.id],
+  }),
+}));
+
 // ============ TYPE EXPORTS ============
 
 export type User = typeof users.$inferSelect;
@@ -358,3 +616,27 @@ export type NewNotification = typeof notifications.$inferInsert;
 
 export type MachineStatusLog = typeof machineStatusLogs.$inferSelect;
 export type NewMachineStatusLog = typeof machineStatusLogs.$inferInsert;
+
+// Phase 10: Checklist types
+export type MaintenanceChecklist = typeof maintenanceChecklists.$inferSelect;
+export type NewMaintenanceChecklist = typeof maintenanceChecklists.$inferInsert;
+
+export type ChecklistCompletion = typeof checklistCompletions.$inferSelect;
+export type NewChecklistCompletion = typeof checklistCompletions.$inferInsert;
+
+// Phase 12: Inventory types
+export type SparePart = typeof spareParts.$inferSelect;
+export type NewSparePart = typeof spareParts.$inferInsert;
+
+export type InventoryLevel = typeof inventoryLevels.$inferSelect;
+export type NewInventoryLevel = typeof inventoryLevels.$inferInsert;
+
+export type InventoryTransaction = typeof inventoryTransactions.$inferSelect;
+export type NewInventoryTransaction = typeof inventoryTransactions.$inferInsert;
+
+export type TicketPart = typeof ticketParts.$inferSelect;
+export type NewTicketPart = typeof ticketParts.$inferInsert;
+
+// Phase 13: Labor types
+export type LaborLog = typeof laborLogs.$inferSelect;
+export type NewLaborLog = typeof laborLogs.$inferInsert;
