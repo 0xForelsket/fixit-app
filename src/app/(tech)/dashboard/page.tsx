@@ -73,7 +73,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Open Tickets"
           value={stats.open}
@@ -271,23 +271,23 @@ function TicketListItem({
     <Link
       href={`/dashboard/tickets/${ticket.id}`}
       className={cn(
-        "group relative flex flex-col sm:flex-row sm:items-center gap-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-5 transition-all duration-200 hover:border-primary-400 hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1",
+        "group relative flex flex-col sm:flex-row sm:items-center gap-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-4 transition-all duration-200 hover:border-primary-400 hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1",
         staggerClass && `${staggerClass} animate-in`,
         ticket.priority === "critical" &&
-          "border-danger-200 shadow-danger-500/5"
+          "border-danger-200 shadow-danger-500/5 shadow-lg"
       )}
     >
       <div className="flex-1 space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="flex-none rounded bg-zinc-900 px-2 py-1 text-[10px] font-mono font-black text-white leading-none">
+        <div className="flex items-center gap-2">
+          <span className="flex-none rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-mono font-black text-white leading-none">
             #{String(ticket.id).padStart(3, "0")}
           </span>
-          <h3 className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors text-lg tracking-tight">
+          <h3 className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors text-base tracking-tight truncate flex-1">
             {ticket.title}
           </h3>
           <Badge
             className={cn(
-              "ml-auto sm:ml-0 font-black",
+              "font-black text-[10px] px-1.5 py-0",
               priorityConfig.bg,
               priorityConfig.text,
               "border-0"

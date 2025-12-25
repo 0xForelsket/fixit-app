@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import type { UserRole } from "@/db/schema";
 import { useState } from "react";
 
@@ -42,9 +43,10 @@ export function DashboardShell({
           userId={user.id}
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 animate-in relative z-10 transition-all duration-300">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 lg:pb-8 animate-in relative z-10 transition-all duration-300">
           {children}
         </main>
+        <BottomNav role={user.role} />
       </div>
     </div>
   );

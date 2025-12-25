@@ -16,8 +16,20 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "FixIt - CMMS Lite",
-  description:
-    "Lightweight maintenance management system for tracking equipment maintenance requests",
+  description: "Lightweight maintenance management system for tracking equipment maintenance requests",
+  manifest: "/manifest.json",
+  themeColor: "#2563eb",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "FixIt CMMS",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
