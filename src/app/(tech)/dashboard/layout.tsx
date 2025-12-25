@@ -25,7 +25,7 @@ export default async function DashboardLayout({
     <div className="flex h-screen bg-slate-50">
       <Sidebar user={user} avatarUrl={avatarUrl} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Header title="Dashboard" />
+        <Header title="Dashboard" userId={user.id} />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>

@@ -1,18 +1,16 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bell, Menu } from "lucide-react";
-import { useState } from "react";
+import { Menu } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 interface HeaderProps {
   title: string;
+  userId: number;
   onMenuClick?: () => void;
 }
 
-export function Header({ title, onMenuClick }: HeaderProps) {
-  const [notificationCount] = useState(2); // TODO: Fetch from API
-
+export function Header({ title, userId, onMenuClick }: HeaderProps) {
   return (
     <header className="flex h-16 items-center justify-between border-b bg-card px-6">
       <div className="flex items-center gap-4">
@@ -30,17 +28,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {notificationCount > 0 && (
-            <Badge
-              variant="danger"
-              className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center"
-            >
-              {notificationCount}
-            </Badge>
-          )}
-        </Button>
+        <NotificationBell userId={userId} />
       </div>
     </header>
   );
