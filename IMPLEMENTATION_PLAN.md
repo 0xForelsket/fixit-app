@@ -824,6 +824,22 @@ GET    /api/meters/[id]/trends      # Usage trend data
 
 ---
 
+### Phase 17: Machine Models & BOMs
+**Goal:** Standardize machine definitions and track Bill of Materials
+
+- [x] **Machine Models:**
+  - Define standard models (name, manufacturer, manual)
+  - Link machines to models
+- [x] **Bill of Materials (BOM):**
+  - Define spare parts per model
+  - Track required quantity and notes
+- [x] **Improved Machine Detail View:**
+  - Tabs for History, BOM, and Schedules
+  - Display maintenance history (tickets)
+  - Display BOM with stock levels
+
+---
+
 ### Verification Plan for New Phases
 
 | Phase | Verification Method |
