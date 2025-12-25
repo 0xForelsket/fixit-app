@@ -99,12 +99,11 @@ export async function login(
   });
 
   // Redirect based on role
-  if (user.role === "admin") {
-    redirect("/admin");
-  } else if (user.role === "tech") {
-    redirect("/dashboard");
-  } else {
+  if (user.role === "operator") {
     redirect("/");
+  } else {
+    // Tech and Admin both go to dashboard
+    redirect("/dashboard");
   }
 }
 
