@@ -8,6 +8,7 @@ import {
   Calendar,
   ClipboardList,
   Cog,
+  FileText,
   Home,
   LogOut,
   MapPin,
@@ -67,6 +68,12 @@ const navItems: NavItem[] = [
     label: "QR Codes",
     href: "/admin/qr-codes",
     icon: <QrCode className="h-5 w-5" />,
+    roles: ["admin"],
+  },
+  {
+    label: "Reports",
+    href: "/admin/reports",
+    icon: <FileText className="h-5 w-5" />,
     roles: ["admin"],
   },
   {
