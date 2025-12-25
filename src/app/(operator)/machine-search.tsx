@@ -75,6 +75,7 @@ export function MachineSearch({
         />
         {search && (
           <button
+            type="button"
             onClick={clearSearch}
             className="absolute right-12 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full text-muted-foreground transition-colors"
           >

@@ -39,7 +39,7 @@ function SkeletonTicketList({ count = 5 }: { count?: number }) {
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
         <div
-          key={i}
+          key={`ticket-skeleton-${i}`}
           className={cn(
             "flex items-center gap-4 rounded-xl border bg-card p-4",
             `animate-stagger-${Math.min(i + 1, 5)} animate-in`
@@ -68,7 +68,7 @@ function SkeletonStatsGrid() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
         <div
-          key={i}
+          key={`stats-skeleton-${i}`}
           className={cn(
             "flex items-center gap-4 rounded-xl border bg-card p-5",
             `animate-stagger-${i + 1} animate-in`
@@ -94,15 +94,18 @@ function SkeletonTable({
       <div className="bg-muted/50 p-4 border-b">
         <div className="flex gap-4">
           {Array.from({ length: cols }).map((_, i) => (
-            <Skeleton key={i} className="h-4 flex-1" />
+            <Skeleton key={`table-header-${i}`} className="h-4 flex-1" />
           ))}
         </div>
       </div>
       <div className="divide-y">
         {Array.from({ length: rows }).map((_, rowIdx) => (
-          <div key={rowIdx} className="p-4 flex gap-4">
+          <div key={`table-row-${rowIdx}`} className="p-4 flex gap-4">
             {Array.from({ length: cols }).map((_, colIdx) => (
-              <Skeleton key={colIdx} className="h-4 flex-1" />
+              <Skeleton
+                key={`table-cell-${rowIdx}-${colIdx}`}
+                className="h-4 flex-1"
+              />
             ))}
           </div>
         ))}

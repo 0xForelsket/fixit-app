@@ -79,11 +79,15 @@ export default function SettingsPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border p-4">
-            <label className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="session-timeout"
+              className="block text-sm font-medium mb-2"
+            >
               Session Timeout (Idle)
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="session-timeout"
                 type="number"
                 defaultValue={8}
                 className="w-24 rounded-lg border bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
@@ -95,11 +99,15 @@ export default function SettingsPage() {
             </p>
           </div>
           <div className="rounded-lg border p-4">
-            <label className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="max-session"
+              className="block text-sm font-medium mb-2"
+            >
               Max Session Duration
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="max-session"
                 type="number"
                 defaultValue={24}
                 className="w-24 rounded-lg border bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
@@ -177,7 +185,7 @@ function SLAInput({
   defaultValue,
   unit,
   color,
-  bg,
+  bg: _bg,
 }: {
   label: string;
   description: string;

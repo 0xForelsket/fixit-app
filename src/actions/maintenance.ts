@@ -19,7 +19,7 @@ export type ScheduleActionState = {
 
 export async function createSchedule(
   _prevState: ScheduleActionState,
-  formData: FormData
+  _formData: FormData
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
   if (!user || (user.role !== "admin" && user.role !== "tech")) {
@@ -50,7 +50,7 @@ export async function createScheduleAction(
 
   const validated = insertMaintenanceScheduleSchema.safeParse(data);
   if (!validated.success) {
-    return { error: "Invalid data: " + validated.error.message };
+    return { error: `Invalid data: ${validated.error.message}` };
   }
 
   const { title, machineId, type, frequencyDays, isActive, checklists } =
@@ -103,7 +103,7 @@ export async function updateScheduleAction(
 
   const validated = updateMaintenanceScheduleSchema.safeParse(data);
   if (!validated.success) {
-    return { error: "Invalid data: " + validated.error.message };
+    return { error: `Invalid data: ${validated.error.message}` };
   }
 
   const { title, machineId, type, frequencyDays, isActive, checklists } =

@@ -28,25 +28,25 @@ interface TicketActionsProps {
 export function TicketActions({
   ticket,
   currentUser,
-  allTechs,
+  allTechs: _allTechs,
 }: TicketActionsProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const [isResolving, setIsResolving] = useState(false);
 
   // Status/Assign actions
-  const [assignState, assignAction, isAssignPending] = useActionState(
+  const [_assignState, assignAction, isAssignPending] = useActionState(
     updateTicket.bind(null, ticket.id),
     {}
   );
 
   // Resolve action
-  const [resolveState, resolveAction, isResolvePending] = useActionState(
+  const [_resolveState, resolveAction, isResolvePending] = useActionState(
     resolveTicket.bind(null, ticket.id),
     {}
   );
 
   // Comment action
-  const [commentState, commentAction, isCommentPending] = useActionState(
+  const [_commentState, commentAction, isCommentPending] = useActionState(
     addTicketComment.bind(null, ticket.id),
     {}
   );

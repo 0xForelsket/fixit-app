@@ -1,5 +1,5 @@
 (async () => {
-  const BASE_URL = "http://localhost:3000";
+  const _BASE_URL = "http://localhost:3000";
   console.log("Verifying Analytics Endpoints...");
 
   // Helper to fetch with a cookie (mocking session - hard without actual cookie,

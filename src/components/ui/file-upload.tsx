@@ -111,10 +111,10 @@ export function FileUpload({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-foreground/80 uppercase tracking-wider">
+      <label className="flex flex-col gap-2 cursor-pointer">
+        <span className="text-sm font-semibold text-foreground/80 uppercase tracking-wider">
           {label}
-        </label>
+        </span>
 
         <div className="relative">
           <input
@@ -152,7 +152,7 @@ export function FileUpload({
             )}
           </div>
         </div>
-      </div>
+      </label>
 
       {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 

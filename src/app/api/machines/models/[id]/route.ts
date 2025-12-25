@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 // GET /api/machines/models/[id] - Get single model
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -81,7 +81,7 @@ export async function PATCH(
 
 // DELETE /api/machines/models/[id] - Delete model
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

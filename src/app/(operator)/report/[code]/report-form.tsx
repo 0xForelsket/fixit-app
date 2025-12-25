@@ -84,7 +84,10 @@ const priorityConfig: Record<
   },
 };
 
-export function ReportForm({ machineId, machineName }: ReportFormProps) {
+export function ReportForm({
+  machineId,
+  machineName: _machineName,
+}: ReportFormProps) {
   const router = useRouter();
   const [attachments, setAttachments] = useState<any[]>([]);
   const [state, formAction, isPending] = useActionState(createTicket, {});
@@ -196,7 +199,7 @@ export function ReportForm({ machineId, machineName }: ReportFormProps) {
         <Input
           id="title"
           name="title"
-          placeholder={`e.g., Leaking oil, Strange noise...`}
+          placeholder={"e.g., Leaking oil, Strange noise..."}
           required
           maxLength={200}
           className="h-14 text-lg px-4 rounded-xl border-muted-foreground/30 focus-visible:ring-primary-500"

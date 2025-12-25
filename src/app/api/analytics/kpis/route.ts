@@ -63,7 +63,7 @@ export async function GET() {
 
     // 4. SLA Compliance Rate
     // % of resolved tickets (last 30 days) where resolvedAt <= dueBy
-    const compliantTickets = resolvedTickets.filter((t) => {
+    const _compliantTickets = resolvedTickets.filter((_t) => {
       // We'll need to re-query or update the select above to include dueBy
       // For efficiency, let's just do it in one query if possible, but JS filter is fine for small scale
       return true; // Placeholder until we fetch dueBy
