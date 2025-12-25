@@ -1,6 +1,5 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
 import { tickets } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -71,6 +70,7 @@ export default async function DashboardPage() {
           color="text-primary-600"
           bg="bg-primary-50"
           border="border-primary-200"
+          delay={1}
         />
         <StatsCard
           title="In Progress"
@@ -79,6 +79,7 @@ export default async function DashboardPage() {
           color="text-amber-600"
           bg="bg-amber-50"
           border="border-amber-200"
+          delay={2}
         />
         <StatsCard
           title="Overdue"
@@ -87,6 +88,8 @@ export default async function DashboardPage() {
           color="text-rose-600"
           bg="bg-rose-50"
           border="border-rose-200"
+          pulse={stats.overdue > 0}
+          delay={3}
         />
         <StatsCard
           title="Critical"
@@ -95,6 +98,8 @@ export default async function DashboardPage() {
           color="text-rose-700"
           bg="bg-rose-100"
           border="border-rose-300"
+          pulse={stats.critical > 0}
+          delay={4}
         />
       </div>
 
@@ -112,19 +117,24 @@ export default async function DashboardPage() {
         </div>
 
         {recentTickets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <CheckCircle2 className="h-6 w-6 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-emerald-200 bg-gradient-to-b from-emerald-50/50 to-transparent p-12 text-center animate-in">
+            <div className="relative">
+              <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl animate-gentle-pulse" />
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 shadow-lg">
+                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+              </div>
             </div>
-            <h3 className="mt-4 text-lg font-semibold">All caught up!</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="mt-6 text-xl font-bold text-emerald-800">
+              All caught up! 🎉
+            </h3>
+            <p className="text-sm text-emerald-600/80 mt-1">
               No open tickets requiring attention.
             </p>
           </div>
         ) : (
           <div className="grid gap-3">
-            {recentTickets.map((ticket) => (
-              <TicketListItem key={ticket.id} ticket={ticket} />
+            {recentTickets.map((ticket, index) => (
+              <TicketListItem key={ticket.id} ticket={ticket} index={index} />
             ))}
           </div>
         )}
@@ -140,6 +150,8 @@ function StatsCard({
   color,
   bg,
   border,
+  pulse = false,
+  delay = 0,
 }: {
   title: string;
   value: number;
@@ -147,17 +159,21 @@ function StatsCard({
   color: string;
   bg: string;
   border: string;
+  pulse?: boolean;
+  delay?: number;
 }) {
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-xl border p-5 shadow-sm transition-all hover:shadow-md bg-white",
-        border
+        "flex items-center gap-4 rounded-xl border p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-white to-slate-50/50",
+        border,
+        pulse && value > 0 && "animate-glow-pulse",
+        delay && `animate-stagger-${delay} animate-in`
       )}
     >
       <div
         className={cn(
-          "flex h-12 w-12 items-center justify-center rounded-lg",
+          "flex h-12 w-12 items-center justify-center rounded-lg shadow-sm",
           bg
         )}
       >
@@ -165,13 +181,23 @@ function StatsCard({
       </div>
       <div>
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className={cn("text-3xl font-bold leading-none", color)}>{value}</p>
+        <p
+          className={cn(
+            "text-3xl font-bold leading-none tracking-tight",
+            color
+          )}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );
 }
 
-function TicketListItem({ ticket }: { ticket: any }) {
+function TicketListItem({
+  ticket,
+  index = 0,
+}: { ticket: any; index?: number }) {
   const priorityConfig = {
     low: { color: "bg-slate-500", label: "Low" },
     medium: { color: "bg-primary-500", label: "Medium" },
@@ -182,10 +208,16 @@ function TicketListItem({ ticket }: { ticket: any }) {
     label: ticket.priority,
   };
 
+  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "";
+
   return (
     <Link
       href={`/dashboard/tickets/${ticket.id}`}
-      className="group relative flex items-center gap-4 overflow-hidden rounded-xl border bg-white p-4 transition-all hover:border-primary-300 hover:shadow-md"
+      className={cn(
+        "group relative flex items-center gap-4 overflow-hidden rounded-xl border bg-gradient-to-r from-white to-slate-50/50 p-4 transition-all duration-200 hover:border-primary-300 hover:shadow-lg hover:-translate-y-0.5",
+        staggerClass && `${staggerClass} animate-in`,
+        ticket.priority === "critical" && "ring-1 ring-rose-200 border-rose-200"
+      )}
     >
       {/* Priority Strip */}
       <div

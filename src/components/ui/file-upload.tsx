@@ -1,8 +1,6 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FileIcon, ImageIcon, Loader2, Trash2, X } from "lucide-react";
+import { FileIcon, ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface FileUploadProps {

@@ -539,11 +539,36 @@ async function seed() {
   // Create machine BOMs (quantityRequired not quantity)
   console.log("Creating machine BOMs...");
   await db.insert(schema.machineBoms).values([
-    { modelId: model1.id, partId: part1.id, quantityRequired: 4, notes: "Main motor bearings" },
-    { modelId: model1.id, partId: part2.id, quantityRequired: 2, notes: "Hydraulic system filters" },
-    { modelId: model1.id, partId: part4.id, quantityRequired: 1, notes: "Lubrication points" },
-    { modelId: model2.id, partId: part3.id, quantityRequired: 3, notes: "Drive belts" },
-    { modelId: model2.id, partId: part1.id, quantityRequired: 8, notes: "Roller bearings" },
+    {
+      modelId: model1.id,
+      partId: part1.id,
+      quantityRequired: 4,
+      notes: "Main motor bearings",
+    },
+    {
+      modelId: model1.id,
+      partId: part2.id,
+      quantityRequired: 2,
+      notes: "Hydraulic system filters",
+    },
+    {
+      modelId: model1.id,
+      partId: part4.id,
+      quantityRequired: 1,
+      notes: "Lubrication points",
+    },
+    {
+      modelId: model2.id,
+      partId: part3.id,
+      quantityRequired: 3,
+      notes: "Drive belts",
+    },
+    {
+      modelId: model2.id,
+      partId: part1.id,
+      quantityRequired: 8,
+      notes: "Roller bearings",
+    },
   ]);
 
   console.log(`Created ${5} machine BOMs`);
@@ -597,9 +622,27 @@ async function seed() {
     .returning();
 
   await db.insert(schema.maintenanceChecklists).values([
-    { scheduleId: schedule1.id, stepNumber: 2, description: "Grease all bearing points", isRequired: true, estimatedMinutes: 10 },
-    { scheduleId: schedule1.id, stepNumber: 3, description: "Inspect for leaks", isRequired: true, estimatedMinutes: 5 },
-    { scheduleId: schedule1.id, stepNumber: 4, description: "Clean filters", isRequired: false, estimatedMinutes: 15 },
+    {
+      scheduleId: schedule1.id,
+      stepNumber: 2,
+      description: "Grease all bearing points",
+      isRequired: true,
+      estimatedMinutes: 10,
+    },
+    {
+      scheduleId: schedule1.id,
+      stepNumber: 3,
+      description: "Inspect for leaks",
+      isRequired: true,
+      estimatedMinutes: 5,
+    },
+    {
+      scheduleId: schedule1.id,
+      stepNumber: 4,
+      description: "Clean filters",
+      isRequired: false,
+      estimatedMinutes: 15,
+    },
   ]);
 
   console.log(`Created ${4} maintenance checklists`);

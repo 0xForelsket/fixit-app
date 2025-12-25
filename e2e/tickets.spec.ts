@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("Ticket Management", () => {
   test("Tech can access dashboard", async ({ page, loginAsTech }) => {

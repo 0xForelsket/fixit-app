@@ -6,14 +6,12 @@ import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import {
-  AlertTriangle,
   ArrowRight,
   CheckCircle2,
   Clock,
   History,
   Inbox,
   LayoutList,
-  MessageSquare,
   Timer,
   Wrench,
 } from "lucide-react";

@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("Admin - Machines", () => {
   test("Admin can access machines page", async ({ page, loginAsAdmin }) => {
@@ -12,8 +12,12 @@ test.describe("Admin - Machines", () => {
     await page.goto("/admin/machines");
 
     // Try to click on any machine link, skip test if none exist
-    const machineLink = page.locator('tr a, [data-testid="machine-link"]').first();
-    const isVisible = await machineLink.isVisible({ timeout: 3000 }).catch(() => false);
+    const machineLink = page
+      .locator('tr a, [data-testid="machine-link"]')
+      .first();
+    const isVisible = await machineLink
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (isVisible) {
       await machineLink.click();
       await expect(page).toHaveURL(/\/machines\/\d+/);

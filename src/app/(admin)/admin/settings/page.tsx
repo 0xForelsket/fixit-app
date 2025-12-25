@@ -1,14 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  AlertTriangle,
-  Bell,
-  Clock,
-  Cog,
-  Save,
-  Shield,
-  Timer,
-} from "lucide-react";
+import { AlertTriangle, Bell, Save, Shield, Timer } from "lucide-react";
 
 export default function SettingsPage() {
   return (

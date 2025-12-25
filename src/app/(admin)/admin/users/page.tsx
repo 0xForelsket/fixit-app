@@ -4,16 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc, eq } from "drizzle-orm";
-import {
-  Edit,
-  Plus,
-  Search,
-  Shield,
-  User,
-  UserCog,
-  Users,
-  Wrench,
-} from "lucide-react";
+import { Edit, Plus, Search, Shield, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {

@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("Operator", () => {
   test("Operator lands on home page", async ({ page, loginAsOperator }) => {

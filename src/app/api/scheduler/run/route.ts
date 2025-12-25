@@ -107,12 +107,14 @@ export async function POST(request: Request) {
           // D. Create Notifications (for all Techs and Admins)
           // TODO: Implement notification logic in future phase
           // Currently relying on dashboard "Active Tickets" for visibility
-          
+
           generatedCount++;
         });
       } catch (err) {
         console.error(`Failed to process schedule ${schedule.id}:`, err);
-        errors.push(`Schedule ${schedule.id}: ${err instanceof Error ? err.message : String(err)}`);
+        errors.push(
+          `Schedule ${schedule.id}: ${err instanceof Error ? err.message : String(err)}`
+        );
       }
     }
 

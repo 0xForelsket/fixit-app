@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { tickets, type TicketStatus, type TicketPriority } from "@/db/schema";
+import { type TicketPriority, type TicketStatus, tickets } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import {

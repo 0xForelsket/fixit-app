@@ -1,11 +1,14 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 /**
  * These tests verify that seeded data is visible in the UI.
  * They skip gracefully if elements aren't found.
  */
 test.describe("Inventory - Seeded Data", () => {
-  test("Admin sees spare parts list with data", async ({ page, loginAsAdmin }) => {
+  test("Admin sees spare parts list with data", async ({
+    page,
+    loginAsAdmin,
+  }) => {
     await loginAsAdmin();
     await page.goto("/admin/inventory/parts");
 
@@ -20,7 +23,10 @@ test.describe("Inventory - Seeded Data", () => {
     await expect(page).toHaveURL("/admin/inventory");
   });
 
-  test("Admin sees transaction history page", async ({ page, loginAsAdmin }) => {
+  test("Admin sees transaction history page", async ({
+    page,
+    loginAsAdmin,
+  }) => {
     await loginAsAdmin();
     await page.goto("/admin/inventory/transactions");
 
@@ -29,24 +35,34 @@ test.describe("Inventory - Seeded Data", () => {
 });
 
 test.describe("Ticket Details - Seeded Data", () => {
-  test("Tech can view ticket with time tracking", async ({ page, loginAsTech }) => {
+  test("Tech can view ticket with time tracking", async ({
+    page,
+    loginAsTech,
+  }) => {
     await loginAsTech();
     await page.goto("/dashboard/tickets");
 
     const ticketLink = page.locator('a[href*="/tickets/"]').first();
-    const isVisible = await ticketLink.isVisible({ timeout: 3000 }).catch(() => false);
+    const isVisible = await ticketLink
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (isVisible) {
       await ticketLink.click();
       await expect(page).toHaveURL(/\/tickets\/\d+/);
     }
   });
 
-  test("Tech ticket page shows activity section", async ({ page, loginAsTech }) => {
+  test("Tech ticket page shows activity section", async ({
+    page,
+    loginAsTech,
+  }) => {
     await loginAsTech();
     await page.goto("/dashboard/tickets");
 
     const ticketLink = page.locator('a[href*="/tickets/"]').first();
-    const isVisible = await ticketLink.isVisible({ timeout: 3000 }).catch(() => false);
+    const isVisible = await ticketLink
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (isVisible) {
       await ticketLink.click();
       await page.waitForURL(/\/tickets\/\d+/);
@@ -75,12 +91,17 @@ test.describe("Maintenance Schedules - Seeded Data", () => {
     await expect(page).toHaveURL(/schedules/);
   });
 
-  test("Tech can click into schedule details", async ({ page, loginAsTech }) => {
+  test("Tech can click into schedule details", async ({
+    page,
+    loginAsTech,
+  }) => {
     await loginAsTech();
     await page.goto("/dashboard/maintenance/schedules");
 
     const scheduleLink = page.locator('a[href*="/schedules/"]').first();
-    const isVisible = await scheduleLink.isVisible({ timeout: 3000 }).catch(() => false);
+    const isVisible = await scheduleLink
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (isVisible) {
       await scheduleLink.click();
       await expect(page).toHaveURL(/\/schedules\/\d+/);

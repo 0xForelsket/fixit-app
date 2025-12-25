@@ -1,9 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { attachments, users } from "@/db/schema";
+import { attachments } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function updateUserAvatar(rawData: {

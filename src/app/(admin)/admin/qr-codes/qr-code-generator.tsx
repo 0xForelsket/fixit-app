@@ -209,8 +209,7 @@ function QRCard({ machine, baseUrl }: { machine: Machine; baseUrl: string }) {
 
           {machine.owner && (
             <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
-              <span className="font-medium">Owner:</span>{" "}
-              {machine.owner.name}
+              <span className="font-medium">Owner:</span> {machine.owner.name}
               <br />
               <span className="font-mono text-xs">
                 {machine.owner.employeeId}

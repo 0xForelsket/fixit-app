@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("Admin - Inventory Management", () => {
   test("Admin can access inventory page", async ({ page, loginAsAdmin }) => {
@@ -22,10 +22,7 @@ test.describe("Admin - Inventory Management", () => {
     await expect(page).toHaveURL("/admin/inventory/receive");
   });
 
-  test("Admin can access transactions page", async ({
-    page,
-    loginAsAdmin,
-  }) => {
+  test("Admin can access transactions page", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
     await page.goto("/admin/inventory/transactions");
     await expect(page).toHaveURL("/admin/inventory/transactions");
@@ -36,7 +33,10 @@ test.describe("Admin - Inventory Management", () => {
     await page.goto("/admin/inventory/parts");
 
     // Check for seeded parts - Ball Bearing 6205
-    const hasPart = await page.locator("text=BRG-6205").isVisible({ timeout: 3000 }).catch(() => false);
+    const hasPart = await page
+      .locator("text=BRG-6205")
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (hasPart) {
       await expect(page.locator("text=BRG-6205")).toBeVisible();
     }
@@ -46,8 +46,12 @@ test.describe("Admin - Inventory Management", () => {
     await loginAsAdmin();
     await page.goto("/admin/inventory/parts");
 
-    const categoryFilter = page.locator('button:has-text("Category"), select[name="category"]');
-    const hasFilter = await categoryFilter.isVisible({ timeout: 3000 }).catch(() => false);
+    const categoryFilter = page.locator(
+      'button:has-text("Category"), select[name="category"]'
+    );
+    const hasFilter = await categoryFilter
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (hasFilter) {
       await categoryFilter.click();
       await page.click('text=mechanical, [value="mechanical"]');
@@ -90,10 +94,7 @@ test.describe("Tech - Parts on Ticket", () => {
     }
   });
 
-  test("Tech can see labor logs on ticket", async ({
-    page,
-    loginAsTech,
-  }) => {
+  test("Tech can see labor logs on ticket", async ({ page, loginAsTech }) => {
     await loginAsTech();
     await page.goto("/dashboard/tickets");
 

@@ -14,13 +14,13 @@ export async function GET() {
     // Technician Performance
     // List all techs with ticket counts
     // We want: Name, Resolved Count, active count
-    
+
     const result = await db
       .select({
-         id: users.id,
-         name: users.name,
-         resolvedCount: sql<number>`count(CASE WHEN ${tickets.status} = 'resolved' OR ${tickets.status} = 'closed' THEN 1 END)`,
-         activeCount: sql<number>`count(CASE WHEN ${tickets.status} = 'open' OR ${tickets.status} = 'in_progress' THEN 1 END)`,
+        id: users.id,
+        name: users.name,
+        resolvedCount: sql<number>`count(CASE WHEN ${tickets.status} = 'resolved' OR ${tickets.status} = 'closed' THEN 1 END)`,
+        activeCount: sql<number>`count(CASE WHEN ${tickets.status} = 'open' OR ${tickets.status} = 'in_progress' THEN 1 END)`,
       })
       .from(users)
       .leftJoin(tickets, eq(users.id, tickets.assignedToId))

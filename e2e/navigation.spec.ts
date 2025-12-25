@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("Navigation", () => {
   test("Admin sees dashboard after login", async ({ page, loginAsAdmin }) => {

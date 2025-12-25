@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import { attachments, type AttachmentType, type EntityType } from "@/db/schema";
+import { type AttachmentType, type EntityType, attachments } from "@/db/schema";
 import { generateS3Key, getPresignedUploadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
 // GET /api/attachments - List attachments for an entity

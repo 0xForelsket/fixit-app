@@ -22,9 +22,11 @@ export const insertMaintenanceScheduleSchema = z.object({
   checklists: z.array(checklistItemSchema).optional(),
 });
 
-export const updateMaintenanceScheduleSchema = insertMaintenanceScheduleSchema.partial().extend({
-  checklists: z.array(checklistItemSchema).optional(),
-});
+export const updateMaintenanceScheduleSchema = insertMaintenanceScheduleSchema
+  .partial()
+  .extend({
+    checklists: z.array(checklistItemSchema).optional(),
+  });
 
 export type InsertMaintenanceSchedule = z.infer<
   typeof insertMaintenanceScheduleSchema

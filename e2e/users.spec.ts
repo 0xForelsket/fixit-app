@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("Admin - User Management", () => {
   test("Admin can access users page", async ({ page, loginAsAdmin }) => {
@@ -13,7 +13,9 @@ test.describe("Admin - User Management", () => {
 
     // Try to click on any user link, skip test if none exist
     const userLink = page.locator('tr a, [data-testid="user-link"]').first();
-    const isVisible = await userLink.isVisible({ timeout: 3000 }).catch(() => false);
+    const isVisible = await userLink
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
     if (isVisible) {
       await userLink.click();
       await expect(page).toHaveURL(/\/users\/\d+/);

@@ -2,9 +2,9 @@
 
 import { createTicket } from "@/actions/tickets";
 import { Button } from "@/components/ui/button";
+import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileUpload } from "@/components/ui/file-upload";
 import { ticketPriorities, ticketTypes } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {

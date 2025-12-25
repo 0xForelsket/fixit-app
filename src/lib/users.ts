@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 /**
  * Fetches the latest avatar URL for a given user.

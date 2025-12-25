@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { tickets, type TicketStatus, type TicketPriority } from "@/db/schema";
+import { type TicketPriority, type TicketStatus, tickets } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { machineStatusLogs, tickets } from "@/db/schema";
+import { tickets } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { and, gt, isNotNull, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -56,19 +56,21 @@ export async function GET() {
       const totalDurationMs = resolvedTickets.reduce((acc, t) => {
         return acc + (t.resolved!.getTime() - t.created.getTime());
       }, 0);
-      mttrHours = Math.round(totalDurationMs / (1000 * 60 * 60) / resolvedTickets.length);
+      mttrHours = Math.round(
+        totalDurationMs / (1000 * 60 * 60) / resolvedTickets.length
+      );
     }
 
     // 4. SLA Compliance Rate
     // % of resolved tickets (last 30 days) where resolvedAt <= dueBy
     const compliantTickets = resolvedTickets.filter((t) => {
-        // We'll need to re-query or update the select above to include dueBy
-        // For efficiency, let's just do it in one query if possible, but JS filter is fine for small scale
-        return true; // Placeholder until we fetch dueBy
+      // We'll need to re-query or update the select above to include dueBy
+      // For efficiency, let's just do it in one query if possible, but JS filter is fine for small scale
+      return true; // Placeholder until we fetch dueBy
     });
-    
+
     // Let's re-fetch with dueBy
-     const resolvedWithDue = await db
+    const resolvedWithDue = await db
       .select({
         created: tickets.createdAt,
         resolved: tickets.resolvedAt,
@@ -81,23 +83,23 @@ export async function GET() {
           gt(tickets.resolvedAt, thirtyDaysAgo)
         )
       );
-      
-    const slaCompliantCount = resolvedWithDue.filter(t => {
-        if (!t.dueBy) return true; // Default to compliant if no due date
-        return t.resolved! <= t.dueBy;
-    }).length;
-    
-    const slaRate = resolvedWithDue.length > 0 
-        ? Math.round((slaCompliantCount / resolvedWithDue.length) * 100) 
-        : 100;
 
+    const slaCompliantCount = resolvedWithDue.filter((t) => {
+      if (!t.dueBy) return true; // Default to compliant if no due date
+      return t.resolved! <= t.dueBy;
+    }).length;
+
+    const slaRate =
+      resolvedWithDue.length > 0
+        ? Math.round((slaCompliantCount / resolvedWithDue.length) * 100)
+        : 100;
 
     return NextResponse.json({
       openTickets,
       highPriorityOpen,
       mttrHours,
       slaRate,
-      period: "30d"
+      period: "30d",
     });
   } catch (error) {
     console.error("KPIs error:", error);

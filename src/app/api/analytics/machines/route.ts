@@ -14,7 +14,7 @@ export async function GET() {
     // Machine Health Rankings
     // Top machines by Breakdown Count (last 90 days?)
     // Return: id, name, code, breakdowns, downtime (mocked for now as we don't have status logs fully populating yet)
-    
+
     // We'll count tickets of type 'breakdown'
     const result = await db
       .select({
@@ -29,11 +29,11 @@ export async function GET() {
       .groupBy(machines.id)
       .orderBy(sql`breakdowns DESC`)
       .limit(10);
-      
+
     // Mock downtime for now (random hours for demo/MVP)
-    const machinesWithMockDowntime = result.map(m => ({
-        ...m,
-        downtimeHours: m.breakdowns * 2 + Math.floor(Math.random() * 5) // Mock logic: ~2h per breakdown + noise
+    const machinesWithMockDowntime = result.map((m) => ({
+      ...m,
+      downtimeHours: m.breakdowns * 2 + Math.floor(Math.random() * 5), // Mock logic: ~2h per breakdown + noise
     }));
 
     return NextResponse.json(machinesWithMockDowntime);

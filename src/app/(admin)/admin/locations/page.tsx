@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { locations } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { desc, isNull } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import {
   Building,
   ChevronRight,

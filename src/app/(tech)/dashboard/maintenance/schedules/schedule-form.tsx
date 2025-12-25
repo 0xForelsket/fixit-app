@@ -95,7 +95,8 @@ export function ScheduleForm({
       // Filter out empty descriptions if that was the desired behavior
       const cleanedData = {
         ...data,
-        checklists: data.checklists?.filter((item) => item.description.trim()) || [],
+        checklists:
+          data.checklists?.filter((item) => item.description.trim()) || [],
       };
 
       // Manually re-index steps to ensure 1,2,3 order before save
@@ -111,7 +112,7 @@ export function ScheduleForm({
       if (result.error) {
         throw new Error(result.error);
       }
-      
+
       // Redirect is handled in Server Action, but we can prevent further interaction here
     } catch (err) {
       console.error(err);
@@ -135,7 +136,7 @@ export function ScheduleForm({
       if (result.error) {
         throw new Error(result.error);
       }
-      
+
       // Action handles revalidate, client router ensures we go back to list
       router.push("/dashboard/maintenance/schedules");
       router.refresh();
@@ -396,7 +397,8 @@ export function ScheduleForm({
                       <button
                         type="button"
                         onClick={() => {
-                          const current = watchedChecklists?.[index]?.isRequired ?? true;
+                          const current =
+                            watchedChecklists?.[index]?.isRequired ?? true;
                           update(index, {
                             ...watchedChecklists[index],
                             isRequired: !current,

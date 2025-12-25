@@ -1,12 +1,9 @@
-import { updateUserAvatar } from "@/actions/users";
 import { Button } from "@/components/ui/button";
-import { FileUpload } from "@/components/ui/file-upload";
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";

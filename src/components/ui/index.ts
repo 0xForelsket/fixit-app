@@ -10,3 +10,10 @@ export {
 } from "./card";
 export { Label } from "./label";
 export { Badge, badgeVariants } from "./badge";
+export {
+  Skeleton,
+  SkeletonCard,
+  SkeletonTicketList,
+  SkeletonStatsGrid,
+  SkeletonTable,
+} from "./skeleton";
