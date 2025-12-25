@@ -1,8 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  // Enable experimental features for Bun
+  experimental: {
+    // serverComponentsExternalPackages: ["@libsql/client"],
+  },
 };
 
 export default nextConfig;
