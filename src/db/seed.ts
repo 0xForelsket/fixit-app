@@ -248,8 +248,9 @@ async function seed() {
   const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
   const fourHoursFromNow = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 
-  await db.insert(schema.tickets).values([
-    {
+  const [ticket1] = await db
+    .insert(schema.tickets)
+    .values({
       machineId: machine5.id,
       type: "breakdown",
       reportedById: operator2.id,
@@ -262,8 +263,12 @@ async function seed() {
       dueBy: fourHoursFromNow,
       createdAt: twoHoursAgo,
       updatedAt: oneHourAgo,
-    },
-    {
+    })
+    .returning();
+
+  const [ticket2] = await db
+    .insert(schema.tickets)
+    .values({
       machineId: machine4.id,
       type: "maintenance",
       reportedById: operator2.id,
@@ -276,7 +281,10 @@ async function seed() {
       dueBy: new Date(now.getTime() + 24 * 60 * 60 * 1000),
       createdAt: twoHoursAgo,
       updatedAt: twoHoursAgo,
-    },
+    })
+    .returning();
+
+  await db.insert(schema.tickets).values([
     {
       machineId: machine1.id,
       type: "calibration",
@@ -314,15 +322,19 @@ async function seed() {
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
   const ninetyDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
-  await db.insert(schema.maintenanceSchedules).values([
-    {
+  const [schedule1] = await db
+    .insert(schema.maintenanceSchedules)
+    .values({
       machineId: machine1.id,
       title: "Monthly Lubrication",
       type: "maintenance",
       frequencyDays: 30,
       nextDue: thirtyDaysFromNow,
       isActive: true,
-    },
+    })
+    .returning();
+
+  await db.insert(schema.maintenanceSchedules).values([
     {
       machineId: machine1.id,
       title: "Quarterly Calibration",
@@ -403,6 +415,237 @@ async function seed() {
   ]);
 
   console.log(`Created ${2} machine status logs`);
+
+  // Create spare parts (using valid partCategories enum values)
+  console.log("Creating spare parts...");
+  const [part1] = await db
+    .insert(schema.spareParts)
+    .values({
+      sku: "BRG-6205",
+      name: "Ball Bearing 6205",
+      description: "Deep groove ball bearing for motors",
+      category: "mechanical",
+      unitCost: 12.5,
+      reorderPoint: 10,
+    })
+    .returning();
+
+  const [part2] = await db
+    .insert(schema.spareParts)
+    .values({
+      sku: "FLT-HYD-01",
+      name: "Hydraulic Filter",
+      description: "Replacement hydraulic filter for injection molders",
+      category: "hydraulic",
+      unitCost: 45.0,
+      reorderPoint: 5,
+    })
+    .returning();
+
+  const [part3] = await db
+    .insert(schema.spareParts)
+    .values({
+      sku: "BLT-V-38",
+      name: "V-Belt 38 inch",
+      description: "Industrial V-belt for conveyors",
+      category: "mechanical",
+      unitCost: 18.75,
+      reorderPoint: 8,
+    })
+    .returning();
+
+  const [part4] = await db
+    .insert(schema.spareParts)
+    .values({
+      sku: "GRS-LITH-01",
+      name: "Lithium Grease Tube",
+      description: "Multi-purpose lithium grease for lubrication",
+      category: "consumable",
+      unitCost: 8.99,
+      reorderPoint: 20,
+    })
+    .returning();
+
+  console.log(`Created ${4} spare parts`);
+
+  // Create inventory levels
+  console.log("Creating inventory levels...");
+  await db.insert(schema.inventoryLevels).values([
+    { partId: part1.id, locationId: hallB.id, quantity: 45 },
+    { partId: part1.id, locationId: hallA.id, quantity: 20 },
+    { partId: part2.id, locationId: hallB.id, quantity: 12 },
+    { partId: part3.id, locationId: hallA.id, quantity: 30 },
+    { partId: part4.id, locationId: building.id, quantity: 85 },
+  ]);
+
+  console.log(`Created ${5} inventory levels`);
+
+  // Create inventory transactions (createdById not performedById)
+  console.log("Creating inventory transactions...");
+  await db.insert(schema.inventoryTransactions).values([
+    {
+      partId: part1.id,
+      locationId: hallB.id,
+      type: "in",
+      quantity: 50,
+      reference: "PO-2024-001",
+      createdById: tech1.id,
+      createdAt: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      partId: part2.id,
+      locationId: hallB.id,
+      type: "in",
+      quantity: 20,
+      reference: "PO-2024-002",
+      createdById: tech1.id,
+      createdAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+    },
+    {
+      partId: part1.id,
+      locationId: hallB.id,
+      type: "out",
+      quantity: 5,
+      reference: "TKT-001",
+      createdById: tech1.id,
+      createdAt: oneHourAgo,
+    },
+  ]);
+
+  console.log(`Created ${3} inventory transactions`);
+
+  // Create machine models (no category field - use description)
+  console.log("Creating machine models...");
+  const [model1] = await db
+    .insert(schema.machineModels)
+    .values({
+      name: "Injection Molder IM-500",
+      manufacturer: "PlasticPro Industries",
+      description: "500-ton injection molding machine",
+    })
+    .returning();
+
+  const [model2] = await db
+    .insert(schema.machineModels)
+    .values({
+      name: "Conveyor CV-200",
+      manufacturer: "ConveyorTech",
+      description: "Medium-duty belt conveyor system",
+    })
+    .returning();
+
+  console.log(`Created ${2} machine models`);
+
+  // Create machine BOMs (quantityRequired not quantity)
+  console.log("Creating machine BOMs...");
+  await db.insert(schema.machineBoms).values([
+    { modelId: model1.id, partId: part1.id, quantityRequired: 4, notes: "Main motor bearings" },
+    { modelId: model1.id, partId: part2.id, quantityRequired: 2, notes: "Hydraulic system filters" },
+    { modelId: model1.id, partId: part4.id, quantityRequired: 1, notes: "Lubrication points" },
+    { modelId: model2.id, partId: part3.id, quantityRequired: 3, notes: "Drive belts" },
+    { modelId: model2.id, partId: part1.id, quantityRequired: 8, notes: "Roller bearings" },
+  ]);
+
+  console.log(`Created ${5} machine BOMs`);
+
+  // Create labor logs
+  console.log("Creating labor logs...");
+  await db.insert(schema.laborLogs).values([
+    {
+      ticketId: ticket1.id,
+      userId: tech1.id,
+      startTime: new Date(now.getTime() - 90 * 60 * 1000),
+      endTime: new Date(now.getTime() - 30 * 60 * 1000),
+      notes: "Diagnosed power supply issue",
+    },
+    {
+      ticketId: ticket2.id,
+      userId: tech2.id,
+      startTime: new Date(now.getTime() - 120 * 60 * 1000),
+      endTime: new Date(now.getTime() - 60 * 60 * 1000),
+      notes: "Removed old gripper assembly",
+    },
+  ]);
+
+  console.log(`Created ${2} labor logs`);
+
+  // Create ticket parts (addedById not consumedById, no locationId)
+  console.log("Creating ticket parts...");
+  await db.insert(schema.ticketParts).values([
+    {
+      ticketId: ticket1.id,
+      partId: part1.id,
+      quantity: 2,
+      unitCost: part1.unitCost,
+      addedById: tech1.id,
+    },
+  ]);
+
+  console.log(`Created ${1} ticket parts`);
+
+  // Create maintenance checklists (stepNumber + description, not name + items)
+  console.log("Creating maintenance checklists...");
+  const [checklist1] = await db
+    .insert(schema.maintenanceChecklists)
+    .values({
+      scheduleId: schedule1.id,
+      stepNumber: 1,
+      description: "Check oil levels and top up if needed",
+      isRequired: true,
+      estimatedMinutes: 5,
+    })
+    .returning();
+
+  await db.insert(schema.maintenanceChecklists).values([
+    { scheduleId: schedule1.id, stepNumber: 2, description: "Grease all bearing points", isRequired: true, estimatedMinutes: 10 },
+    { scheduleId: schedule1.id, stepNumber: 3, description: "Inspect for leaks", isRequired: true, estimatedMinutes: 5 },
+    { scheduleId: schedule1.id, stepNumber: 4, description: "Clean filters", isRequired: false, estimatedMinutes: 15 },
+  ]);
+
+  console.log(`Created ${4} maintenance checklists`);
+
+  // Create checklist completions (ticketId + checklistId, status, no responses)
+  console.log("Creating checklist completions...");
+  await db.insert(schema.checklistCompletions).values({
+    checklistId: checklist1.id,
+    ticketId: ticket2.id,
+    status: "completed",
+    completedById: tech1.id,
+    notes: "All steps completed successfully",
+    completedAt: new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000),
+  });
+
+  console.log(`Created ${1} checklist completions`);
+
+  // Create ticket logs (action enum: status_change/comment/assignment, newValue required, createdById)
+  console.log("Creating ticket logs...");
+  await db.insert(schema.ticketLogs).values([
+    {
+      ticketId: ticket1.id,
+      action: "status_change",
+      oldValue: "open",
+      newValue: "in_progress",
+      createdById: tech1.id,
+      createdAt: oneHourAgo,
+    },
+    {
+      ticketId: ticket2.id,
+      action: "assignment",
+      oldValue: null,
+      newValue: "Maria Garcia",
+      createdById: tech2.id,
+      createdAt: twoHoursAgo,
+    },
+    {
+      ticketId: ticket1.id,
+      action: "comment",
+      newValue: "Started diagnostics on power supply",
+      createdById: tech1.id,
+      createdAt: oneHourAgo,
+    },
+  ]);
+
+  console.log(`Created ${3} ticket logs`);
 
   console.log("\n✅ Database seeded successfully!");
   console.log("\n📋 Default credentials:");
