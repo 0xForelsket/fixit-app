@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { machines } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import {
   AlertCircle,
   CheckCircle2,
@@ -67,10 +67,28 @@ export default async function MachinesPage({
   const machinesList = await getMachines(params);
   const stats = await getMachineStats();
 
-  const statusConfigs: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
-    operational: { icon: CheckCircle2, color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200", label: "Operational" },
-    down: { icon: AlertCircle, color: "text-rose-700", bg: "bg-rose-50 border-rose-200", label: "Down" },
-    maintenance: { icon: Wrench, color: "text-amber-700", bg: "bg-amber-50 border-amber-200", label: "Maintenance" },
+  const statusConfigs: Record<
+    string,
+    { icon: React.ElementType; color: string; bg: string; label: string }
+  > = {
+    operational: {
+      icon: CheckCircle2,
+      color: "text-emerald-700",
+      bg: "bg-emerald-50 border-emerald-200",
+      label: "Operational",
+    },
+    down: {
+      icon: AlertCircle,
+      color: "text-rose-700",
+      bg: "bg-rose-50 border-rose-200",
+      label: "Down",
+    },
+    maintenance: {
+      icon: Wrench,
+      color: "text-amber-700",
+      bg: "bg-amber-50 border-amber-200",
+      label: "Maintenance",
+    },
   };
 
   return (
@@ -78,17 +96,24 @@ export default async function MachinesPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Machine Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Machine Management
+          </h1>
           <p className="text-muted-foreground">
             {stats.total} machines • {stats.operational} operational
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin/machines/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Machine
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/machines/models">Manage Models</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/machines/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Machine
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -143,7 +168,9 @@ export default async function MachinesPage({
               defaultValue={params.search}
               className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
-            {params.status && <input type="hidden" name="status" value={params.status} />}
+            {params.status && (
+              <input type="hidden" name="status" value={params.status} />
+            )}
           </div>
         </form>
       </div>
@@ -177,11 +204,15 @@ export default async function MachinesPage({
             </thead>
             <tbody className="divide-y">
               {machinesList.map((machine) => {
-                const statusConfig = statusConfigs[machine.status] || statusConfigs.operational;
+                const statusConfig =
+                  statusConfigs[machine.status] || statusConfigs.operational;
                 const StatusIcon = statusConfig.icon;
 
                 return (
-                  <tr key={machine.id} className="hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={machine.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
@@ -266,7 +297,12 @@ function StatsCard({
         active && "ring-2 ring-primary-500 border-primary-300"
       )}
     >
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-lg",
+          bg
+        )}
+      >
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>
