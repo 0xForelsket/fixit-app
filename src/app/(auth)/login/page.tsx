@@ -19,13 +19,16 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, initialState);
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary-600">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-100 p-4">
+      <Card className="w-full max-w-md shadow-xl border-t-4 border-t-primary-600">
+        <CardHeader className="text-center pb-2">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary-600 text-3xl font-bold text-white shadow-lg">
+            F
+          </div>
+          <CardTitle className="text-2xl font-bold text-primary-700">
             FixIt
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             Sign in with your Employee ID and PIN
           </CardDescription>
         </CardHeader>
