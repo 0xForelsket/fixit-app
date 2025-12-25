@@ -1,5 +1,6 @@
 "use client";
 
+import { type LoginState, login } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,47 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useActionState } from "react";
+
+const initialState: LoginState = {};
 
 export default function LoginPage() {
-  const [employeeId, setEmployeeId] = useState("");
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId, pin }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-        return;
-      }
-
-      // Redirect based on role
-      if (data.user.role === "admin") {
-        window.location.href = "/admin";
-      } else if (data.user.role === "tech") {
-        window.location.href = "/dashboard";
-      } else {
-        window.location.href = "/";
-      }
-    } catch {
-      setError("An error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const [state, formAction, isPending] = useActionState(login, initialState);
 
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
@@ -64,37 +30,39 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form action={formAction} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="employeeId">Employee ID</Label>
               <Input
                 id="employeeId"
+                name="employeeId"
                 placeholder="e.g., TECH-001"
-                value={employeeId}
-                onChange={(e) => setEmployeeId(e.target.value.toUpperCase())}
                 autoComplete="username"
-                disabled={isLoading}
+                disabled={isPending}
+                required
+                style={{ textTransform: "uppercase" }}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="pin">PIN</Label>
               <Input
                 id="pin"
+                name="pin"
                 type="password"
                 placeholder="Enter your PIN"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
                 autoComplete="current-password"
-                disabled={isLoading}
+                disabled={isPending}
+                required
+                minLength={4}
               />
             </div>
-            {error && (
+            {state.error && (
               <div className="rounded-md bg-danger-100 p-3 text-sm text-danger-700">
-                {error}
+                {state.error}
               </div>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Signing in..." : "Sign In"}
             </Button>
           </form>
         </CardContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { logout } from "@/actions/auth";
 import type { UserRole } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
@@ -84,11 +85,6 @@ export function Sidebar({ user }: SidebarProps) {
     item.roles.includes(user.role)
   );
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
-  }
-
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-card">
       {/* Logo */}
@@ -148,14 +144,15 @@ export function Sidebar({ user }: SidebarProps) {
             {user.employeeId} • {user.role}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-        >
-          <LogOut className="h-5 w-5" />
-          Sign Out
-        </button>
+        <form action={logout}>
+          <button
+            type="submit"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-5 w-5" />
+            Sign Out
+          </button>
+        </form>
       </div>
     </aside>
   );
