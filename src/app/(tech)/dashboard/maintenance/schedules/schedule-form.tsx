@@ -132,7 +132,7 @@ export function ScheduleForm({
         throw new Error(data.error || "Failed to save schedule");
       }
 
-      router.push("/admin/maintenance/schedules");
+      router.push("/dashboard/maintenance/schedules");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -154,7 +154,7 @@ export function ScheduleForm({
         throw new Error("Failed to delete schedule");
       }
 
-      router.push("/admin/maintenance/schedules");
+      router.push("/dashboard/maintenance/schedules");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -168,7 +168,7 @@ export function ScheduleForm({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button type="button" variant="ghost" size="icon" asChild>
-            <Link href="/admin/maintenance/schedules">
+            <Link href="/dashboard/maintenance/schedules">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -358,7 +358,7 @@ export function ScheduleForm({
                     className="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                   />
                   <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm">
                       <button
                         type="button"
                         onClick={() =>
@@ -376,7 +376,7 @@ export function ScheduleForm({
                         {item.isRequired && <Check className="h-3 w-3" />}
                       </button>
                       Required
-                    </label>
+                    </div>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"

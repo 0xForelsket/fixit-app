@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { desc, eq } from "drizzle-orm";
 import {
@@ -62,6 +63,7 @@ export default async function MaintenancePage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const user = await getCurrentUser();
   const params = await searchParams;
   const today = new Date();
   const currentYear = params.year
@@ -131,18 +133,22 @@ export default async function MaintenancePage({
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/admin/maintenance/schedules">
-              <Settings className="mr-2 h-4 w-4" />
-              Manage Schedules
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/admin/maintenance/schedules/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Schedule
-            </Link>
-          </Button>
+          {user?.role === "admin" && (
+            <>
+              <Button variant="outline" asChild>
+                <Link href="/dashboard/maintenance/schedules">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage Schedules
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/maintenance/schedules/new">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Schedule
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -177,7 +183,7 @@ export default async function MaintenancePage({
         <div className="flex items-center justify-between border-b p-4">
           <Button variant="ghost" size="sm" asChild>
             <Link
-              href={`/admin/maintenance?month=${prevMonth}&year=${prevYear}`}
+              href={`/dashboard/maintenance?month=${prevMonth}&year=${prevYear}`}
             >
               <ChevronLeft className="h-4 w-4" />
             </Link>
@@ -187,7 +193,7 @@ export default async function MaintenancePage({
           </h2>
           <Button variant="ghost" size="sm" asChild>
             <Link
-              href={`/admin/maintenance?month=${nextMonth}&year=${nextYear}`}
+              href={`/dashboard/maintenance?month=${nextMonth}&year=${nextYear}`}
             >
               <ChevronRight className="h-4 w-4" />
             </Link>
@@ -249,7 +255,7 @@ export default async function MaintenancePage({
                     return (
                       <Link
                         key={event.id}
-                        href={`/admin/maintenance/schedules/${event.id}`}
+                        href={`/dashboard/maintenance/schedules/${event.id}`}
                         className={cn(
                           "block truncate rounded px-1.5 py-0.5 text-xs font-medium transition-colors",
                           event.type === "maintenance"
@@ -305,7 +311,7 @@ export default async function MaintenancePage({
                 return (
                   <Link
                     key={schedule.id}
-                    href={`/admin/maintenance/schedules/${schedule.id}`}
+                    href={`/dashboard/maintenance/schedules/${schedule.id}`}
                     className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-slate-50"
                   >
                     <div className="flex items-center gap-3">

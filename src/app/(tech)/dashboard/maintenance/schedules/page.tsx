@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { desc } from "drizzle-orm";
 import {
@@ -56,6 +57,7 @@ export default async function SchedulesPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const user = await getCurrentUser();
   const params = await searchParams;
   const schedules = await getSchedules(params);
   const today = new Date();
@@ -79,7 +81,7 @@ export default async function SchedulesPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/admin/maintenance">
+            <Link href="/dashboard/maintenance">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -92,12 +94,14 @@ export default async function SchedulesPage({
             </p>
           </div>
         </div>
-        <Button asChild>
-          <Link href="/admin/maintenance/schedules/new">
-            <Plus className="mr-2 h-4 w-4" />
-            New Schedule
-          </Link>
-        </Button>
+        {user?.role === "admin" && (
+          <Button asChild>
+            <Link href="/dashboard/maintenance/schedules/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Schedule
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Stats */}
@@ -135,7 +139,7 @@ export default async function SchedulesPage({
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
         <form
-          action="/admin/maintenance/schedules"
+          action="/dashboard/maintenance/schedules"
           className="relative flex-1 md:max-w-sm"
         >
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -149,19 +153,19 @@ export default async function SchedulesPage({
         </form>
         <div className="flex gap-2">
           <FilterLink
-            href="/admin/maintenance/schedules"
+            href="/dashboard/maintenance/schedules"
             active={!params.type || params.type === "all"}
           >
             All
           </FilterLink>
           <FilterLink
-            href="/admin/maintenance/schedules?type=maintenance"
+            href="/dashboard/maintenance/schedules?type=maintenance"
             active={params.type === "maintenance"}
           >
             Maintenance
           </FilterLink>
           <FilterLink
-            href="/admin/maintenance/schedules?type=calibration"
+            href="/dashboard/maintenance/schedules?type=calibration"
             active={params.type === "calibration"}
           >
             Calibration
@@ -180,7 +184,7 @@ export default async function SchedulesPage({
             Create your first maintenance schedule to get started
           </p>
           <Button className="mt-4" asChild>
-            <Link href="/admin/maintenance/schedules/new">
+            <Link href="/dashboard/maintenance/schedules/new">
               <Plus className="mr-2 h-4 w-4" />
               New Schedule
             </Link>
@@ -282,7 +286,7 @@ export default async function SchedulesPage({
                     </td>
                     <td className="p-3">
                       <Link
-                        href={`/admin/maintenance/schedules/${schedule.id}`}
+                        href={`/dashboard/maintenance/schedules/${schedule.id}`}
                         className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-slate-100 hover:text-foreground"
                       >
                         <ChevronRight className="h-4 w-4" />

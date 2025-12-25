@@ -61,9 +61,9 @@ const navItems: NavItem[] = [
   },
   {
     label: "Maintenance",
-    href: "/admin/maintenance",
+    href: "/dashboard/maintenance",
     icon: <Wrench className="h-5 w-5" />,
-    roles: ["admin"],
+    roles: ["admin", "tech"],
   },
   {
     label: "Inventory",
