@@ -556,15 +556,15 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
 ### Phase 10: Preventive Maintenance UI & Automation
 **Goal:** Expose existing `maintenance_schedules` table with full UI and automation
 
-- [ ] **Calendar View:**
+- [x] **Calendar View:**
   - Monthly/weekly calendar showing scheduled maintenance
   - Color-coded by type (maintenance, calibration)
   - Overdue items highlighted
-- [ ] **Schedule Management UI:**
+- [x] **Schedule Management UI:**
   - Create/edit/delete maintenance schedules
   - Set frequency (days, weeks, months)
   - Assign default technician
-- [ ] **Checklist Templates:**
+- [x] **Checklist Templates:**
   - Add `maintenance_checklists` table for step-by-step procedures
   - Checklist completion tracking per ticket
   - Required vs optional steps
@@ -645,12 +645,12 @@ GET /api/analytics/export         # CSV/PDF export
 ### Phase 12: Inventory Management
 **Goal:** Track spare parts and consumables with work order integration
 
-- [ ] **Spare Parts Catalog:**
+- [x] **Spare Parts Catalog:**
   - Add/edit/delete parts with SKU, barcode, description
   - Unit cost tracking
   - Part categories (electrical, mechanical, consumables, etc.)
   - Part photos via attachments
-- [ ] **Stock Levels:**
+- [x] **Stock Levels:**
   - Track quantity per location
   - Low stock alerts (reorder point)
   - Lead time tracking
@@ -664,7 +664,7 @@ GET /api/analytics/export         # CSV/PDF export
   - Add parts used when resolving tickets
   - Auto-deduct from inventory
   - Parts cost tracking per ticket
-- [ ] **Reorder Alerts:**
+- [x] **Reorder Alerts:**
   - Notification when stock falls below reorder point
   - Generate purchase request list
 - [ ] **Barcode/QR Scanning:**
@@ -725,15 +725,15 @@ DELETE /api/tickets/[id]/parts/[partId] # Remove part from ticket
 ### Phase 13: Labor & Time Tracking
 **Goal:** Track time spent on maintenance work for cost analysis
 
-- [ ] **Time Logging:**
+- [x] **Time Logging:**
   - Start/stop timer on tickets
   - Manual time entry (start, end, duration)
   - Notes for each time entry
-- [ ] **Labor Costs:**
+- [x] **Labor Costs:**
   - Hourly rate per technician (configurable)
   - Calculate total labor cost per ticket
   - Billable vs non-billable hours
-- [ ] **Work Summary:**
+- [x] **Work Summary:**
   - Total hours per ticket
   - Labor cost breakdown
   - Time by technician
