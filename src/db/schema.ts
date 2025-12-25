@@ -59,7 +59,12 @@ export const notificationTypes = [
 export type NotificationType = (typeof notificationTypes)[number];
 
 // Phase 10: Checklist statuses
-export const checklistItemStatuses = ["pending", "completed", "skipped", "na"] as const;
+export const checklistItemStatuses = [
+  "pending",
+  "completed",
+  "skipped",
+  "na",
+] as const;
 export type ChecklistItemStatus = (typeof checklistItemStatuses)[number];
 
 // Phase 12: Inventory enums
@@ -75,7 +80,12 @@ export const partCategories = [
 ] as const;
 export type PartCategory = (typeof partCategories)[number];
 
-export const transactionTypes = ["in", "out", "transfer", "adjustment"] as const;
+export const transactionTypes = [
+  "in",
+  "out",
+  "transfer",
+  "adjustment",
+] as const;
 export type TransactionType = (typeof transactionTypes)[number];
 
 // ============ TABLES ============
@@ -116,11 +126,27 @@ export const locations = sqliteTable("locations", {
     .default(sql`(unixepoch())`),
 });
 
+// Machine Models table (Phase 15 - Maintenance History & BOM)
+export const machineModels = sqliteTable("machine_models", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  manufacturer: text("manufacturer"),
+  description: text("description"),
+  manualUrl: text("manual_url"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // Machines table
 export const machines = sqliteTable("machines", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   code: text("code").unique().notNull(), // For QR codes
+  modelId: integer("model_id").references(() => machineModels.id),
   locationId: integer("location_id")
     .references(() => locations.id)
     .notNull(),
@@ -247,6 +273,22 @@ export const machineStatusLogs = sqliteTable("machine_status_logs", {
     .default(sql`(unixepoch())`),
 });
 
+// Bill of Materials (BOM) linking models to parts
+export const machineBoms = sqliteTable("machine_boms", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  modelId: integer("model_id")
+    .references(() => machineModels.id)
+    .notNull(),
+  partId: integer("part_id")
+    .references(() => spareParts.id)
+    .notNull(),
+  quantityRequired: integer("quantity_required").notNull().default(1),
+  notes: text("notes"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // ============ PHASE 10: MAINTENANCE CHECKLISTS ============
 
 // Checklist templates linked to maintenance schedules
@@ -257,7 +299,9 @@ export const maintenanceChecklists = sqliteTable("maintenance_checklists", {
     .notNull(),
   stepNumber: integer("step_number").notNull(),
   description: text("description").notNull(),
-  isRequired: integer("is_required", { mode: "boolean" }).notNull().default(true),
+  isRequired: integer("is_required", { mode: "boolean" })
+    .notNull()
+    .default(true),
   estimatedMinutes: integer("estimated_minutes"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -273,7 +317,9 @@ export const checklistCompletions = sqliteTable("checklist_completions", {
   ticketId: integer("ticket_id")
     .references(() => tickets.id)
     .notNull(),
-  status: text("status", { enum: checklistItemStatuses }).notNull().default("pending"),
+  status: text("status", { enum: checklistItemStatuses })
+    .notNull()
+    .default("pending"),
   completedById: integer("completed_by_id").references(() => users.id),
   notes: text("notes"),
   completedAt: integer("completed_at", { mode: "timestamp" }),
@@ -373,7 +419,9 @@ export const laborLogs = sqliteTable("labor_logs", {
   endTime: integer("end_time", { mode: "timestamp" }),
   durationMinutes: integer("duration_minutes"),
   hourlyRate: real("hourly_rate"),
-  isBillable: integer("is_billable", { mode: "boolean" }).notNull().default(true),
+  isBillable: integer("is_billable", { mode: "boolean" })
+    .notNull()
+    .default(true),
   notes: text("notes"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -406,6 +454,10 @@ export const machinesRelations = relations(machines, ({ one, many }) => ({
   location: one(locations, {
     fields: [machines.locationId],
     references: [locations.id],
+  }),
+  model: one(machineModels, {
+    fields: [machines.modelId],
+    references: [machineModels.id],
   }),
   owner: one(users, {
     fields: [machines.ownerId],
@@ -484,6 +536,22 @@ export const machineStatusLogsRelations = relations(
   })
 );
 
+export const machineModelsRelations = relations(machineModels, ({ many }) => ({
+  machines: many(machines),
+  bom: many(machineBoms),
+}));
+
+export const machineBomsRelations = relations(machineBoms, ({ one }) => ({
+  model: one(machineModels, {
+    fields: [machineBoms.modelId],
+    references: [machineModels.id],
+  }),
+  part: one(spareParts, {
+    fields: [machineBoms.partId],
+    references: [spareParts.id],
+  }),
+}));
+
 // Phase 10: Checklist relations
 export const maintenanceChecklistsRelations = relations(
   maintenanceChecklists,
@@ -519,6 +587,7 @@ export const sparePartsRelations = relations(spareParts, ({ many }) => ({
   inventoryLevels: many(inventoryLevels),
   transactions: many(inventoryTransactions),
   ticketParts: many(ticketParts),
+  usedInModels: many(machineBoms),
 }));
 
 export const inventoryLevelsRelations = relations(
@@ -598,6 +667,12 @@ export type NewLocation = typeof locations.$inferInsert;
 
 export type Machine = typeof machines.$inferSelect;
 export type NewMachine = typeof machines.$inferInsert;
+
+export type MachineModel = typeof machineModels.$inferSelect;
+export type NewMachineModel = typeof machineModels.$inferInsert;
+
+export type MachineBom = typeof machineBoms.$inferSelect;
+export type NewMachineBom = typeof machineBoms.$inferInsert;
 
 export type Ticket = typeof tickets.$inferSelect;
 export type NewTicket = typeof tickets.$inferInsert;
