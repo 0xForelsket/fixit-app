@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { machineBoms } from "@/db/schema";
+import { equipmentBoms } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -17,8 +17,8 @@ export async function DELETE(
     const { bomId } = await params;
 
     await db
-      .delete(machineBoms)
-      .where(eq(machineBoms.id, Number.parseInt(bomId)));
+      .delete(equipmentBoms)
+      .where(eq(equipmentBoms.id, Number.parseInt(bomId)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

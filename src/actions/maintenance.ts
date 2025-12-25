@@ -53,7 +53,7 @@ export async function createScheduleAction(
     return { error: `Invalid data: ${validated.error.message}` };
   }
 
-  const { title, machineId, type, frequencyDays, isActive, checklists } =
+  const { title, equipmentId, type, frequencyDays, isActive, checklists } =
     validated.data;
 
   try {
@@ -64,7 +64,7 @@ export async function createScheduleAction(
       .insert(maintenanceSchedules)
       .values({
         title,
-        machineId,
+        equipmentId,
         type,
         frequencyDays,
         isActive: isActive ?? true,
@@ -106,7 +106,7 @@ export async function updateScheduleAction(
     return { error: `Invalid data: ${validated.error.message}` };
   }
 
-  const { title, machineId, type, frequencyDays, isActive, checklists } =
+  const { title, equipmentId, type, frequencyDays, isActive, checklists } =
     validated.data;
 
   try {
@@ -114,7 +114,7 @@ export async function updateScheduleAction(
       .update(maintenanceSchedules)
       .set({
         title,
-        machineId,
+        equipmentId,
         type,
         frequencyDays,
         isActive,

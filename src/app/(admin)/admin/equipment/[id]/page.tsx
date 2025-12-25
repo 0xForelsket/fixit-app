@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
-import { machines } from "@/db/schema";
+import { equipment as equipmentTable } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import {
@@ -20,21 +20,26 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function MachineDetailPage({
+export default async function EquipmentDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const machineId = Number.parseInt(id);
+  const equipmentId = Number.parseInt(id);
 
-  if (Number.isNaN(machineId)) {
+  if (Number.isNaN(equipmentId)) {
     notFound();
   }
 
-  const machine = await db.query.machines.findFirst({
-    where: eq(machines.id, machineId),
+  const equipmentItem = await db.query.equipment.findFirst({
+    where: eq(equipmentTable.id, equipmentId),
     with: {
+      type: {
+        with: {
+          category: true,
+        },
+      },
       location: true,
       owner: true,
       model: {
@@ -61,7 +66,7 @@ export default async function MachineDetailPage({
     },
   });
 
-  if (!machine) {
+  if (!equipmentItem) {
     notFound();
   }
 
@@ -90,7 +95,7 @@ export default async function MachineDetailPage({
   };
 
   const statusConfig =
-    statusConfigs[machine.status] || statusConfigs.operational;
+    statusConfigs[equipmentItem.status] || statusConfigs.operational;
   const StatusIcon = statusConfig.icon;
 
   return (
@@ -99,26 +104,32 @@ export default async function MachineDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/admin/machines">
+            <Link href="/admin/equipment">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {machine.name}
+              {equipmentItem.name}
             </h1>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Badge variant="outline" className="font-mono">
-                {machine.code}
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground mt-1">
+              <Badge variant="outline" className="font-mono bg-zinc-50">
+                {equipmentItem.code}
               </Badge>
-              {machine.model && (
-                <span className="text-sm">
+              {equipmentItem.type && (
+                <Badge variant="secondary" className="font-bold">
+                  {equipmentItem.type.category.label} /{" "}
+                  {equipmentItem.type.name}
+                </Badge>
+              )}
+              {equipmentItem.model && (
+                <span className="text-sm border-l pl-2 ml-1">
                   Model:{" "}
                   <Link
-                    href={`/admin/machines/models/${machine.model.id}`}
+                    href={`/admin/equipment/models/${equipmentItem.model.id}`}
                     className="font-medium hover:underline text-primary-600"
                   >
-                    {machine.model.name}
+                    {equipmentItem.model.name}
                   </Link>
                 </span>
               )}
@@ -126,9 +137,9 @@ export default async function MachineDetailPage({
           </div>
         </div>
         <Button variant="outline" asChild>
-          <Link href={`/admin/machines/${machine.id}/edit`}>
+          <Link href={`/admin/equipment/${equipmentItem.id}/edit`}>
             <Edit className="mr-2 h-4 w-4" />
-            Edit Machine
+            Edit Equipment
           </Link>
         </Button>
       </div>
@@ -159,23 +170,23 @@ export default async function MachineDetailPage({
                 <span className="text-sm text-muted-foreground">Location</span>
                 <span className="font-medium flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {machine.location.name}
+                  {equipmentItem.location.name}
                 </span>
               </div>
               <div className="flex justify-between border-b pb-2">
                 <span className="text-sm text-muted-foreground">Owner</span>
                 <span className="font-medium flex items-center gap-1">
                   <User className="h-3 w-3" />
-                  {machine.owner?.name || "Unassigned"}
+                  {equipmentItem.owner?.name || "Unassigned"}
                 </span>
               </div>
-              {machine.model?.manufacturer && (
+              {equipmentItem.model?.manufacturer && (
                 <div className="flex justify-between border-b pb-2">
                   <span className="text-sm text-muted-foreground">
                     Manufacturer
                   </span>
                   <span className="font-medium">
-                    {machine.model.manufacturer}
+                    {equipmentItem.model.manufacturer}
                   </span>
                 </div>
               )}
@@ -193,7 +204,7 @@ export default async function MachineDetailPage({
 
             <div className="space-y-4">
               {(() => {
-                const maintenanceTickets = machine.tickets.filter(
+                const maintenanceTickets = equipmentItem.tickets.filter(
                   (t) => t.type === "maintenance" || t.type === "calibration"
                 );
                 const resolved = maintenanceTickets.filter(
@@ -276,13 +287,13 @@ export default async function MachineDetailPage({
                     Recent Tickets
                   </h3>
                 </div>
-                {machine.tickets.length === 0 ? (
+                {equipmentItem.tickets.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
-                    No tickets found for this machine.
+                    No tickets found for this equipment.
                   </div>
                 ) : (
                   <div className="divide-y">
-                    {machine.tickets.map((ticket) => (
+                    {equipmentItem.tickets.map((ticket) => (
                       <Link
                         key={ticket.id}
                         href={`/dashboard/tickets/${ticket.id}`}
@@ -325,28 +336,30 @@ export default async function MachineDetailPage({
                     <Package className="h-4 w-4" />
                     Recommended Spares
                   </h3>
-                  {machine.model && (
+                  {equipmentItem.model && (
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/admin/machines/models/${machine.model.id}`}>
+                      <Link
+                        href={`/admin/equipment/models/${equipmentItem.model.id}`}
+                      >
                         Edit BOM
                       </Link>
                     </Button>
                   )}
                 </div>
-                {!machine.model ? (
+                {!equipmentItem.model ? (
                   <div className="p-8 text-center text-muted-foreground">
-                    This machine is not linked to a Model. <br />
+                    This equipment is not linked to a Model. <br />
                     <Link
-                      href={`/admin/machines/${machine.id}/edit`}
+                      href={`/admin/equipment/${equipmentItem.id}/edit`}
                       className="underline text-primary-600"
                     >
                       Assign a model
                     </Link>{" "}
                     to see recommended parts.
                   </div>
-                ) : machine.model.bom.length === 0 ? (
+                ) : equipmentItem.model.bom.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
-                    No parts defined in the BOM for {machine.model.name}.
+                    No parts defined in the BOM for {equipmentItem.model.name}.
                   </div>
                 ) : (
                   <table className="w-full text-sm">
@@ -360,7 +373,7 @@ export default async function MachineDetailPage({
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {machine.model.bom.map((item) => {
+                      {equipmentItem.model.bom.map((item) => {
                         const inStock = item.part.inventoryLevels.reduce(
                           (acc, level) => acc + level.quantity,
                           0
@@ -408,13 +421,13 @@ export default async function MachineDetailPage({
                     active Schedules
                   </h3>
                 </div>
-                {machine.maintenanceSchedules.length === 0 ? (
+                {equipmentItem.maintenanceSchedules.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
                     No maintenance schedules found.
                   </div>
                 ) : (
                   <div className="divide-y">
-                    {machine.maintenanceSchedules.map((schedule) => (
+                    {equipmentItem.maintenanceSchedules.map((schedule) => (
                       <div
                         key={schedule.id}
                         className="p-4 flex justify-between items-center"

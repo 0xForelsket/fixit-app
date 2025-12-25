@@ -48,7 +48,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
   const ticket = await db.query.tickets.findFirst({
     where: eq(tickets.id, ticketId),
     with: {
-      machine: {
+      equipment: {
         with: {
           location: true,
         },
@@ -383,11 +383,11 @@ export default async function TicketDetailPage({ params }: PageProps) {
             allTechs={techs}
           />
 
-          {/* Machine Info */}
+          {/* Equipment Info */}
           <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <div className="bg-slate-50 px-4 py-3 border-b">
               <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
-                Machine
+                Equipment
               </h3>
             </div>
             <div className="p-4 space-y-4">
@@ -397,18 +397,18 @@ export default async function TicketDetailPage({ params }: PageProps) {
                 </div>
                 <div>
                   <p className="font-bold text-foreground">
-                    {ticket.machine.name}
+                    {ticket.equipment.name}
                   </p>
                   <Badge variant="secondary" className="font-mono text-[10px]">
-                    {ticket.machine.code}
+                    {ticket.equipment.code}
                   </Badge>
                 </div>
               </div>
 
-              {ticket.machine.location && (
+              {ticket.equipment.location && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4" />
-                  {ticket.machine.location.name}
+                  {ticket.equipment.location.name}
                 </div>
               )}
             </div>

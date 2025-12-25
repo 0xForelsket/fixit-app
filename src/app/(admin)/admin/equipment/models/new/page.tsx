@@ -1,5 +1,5 @@
 import { ModelForm } from "../model-form";
 
-export default function NewMachineModelPage() {
+export default function NewEquipmentModelPage() {
   return <ModelForm isNew />;
 }

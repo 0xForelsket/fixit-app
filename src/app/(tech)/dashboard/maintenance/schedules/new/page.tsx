@@ -1,14 +1,14 @@
 import { db } from "@/db";
 import { ScheduleForm } from "../schedule-form";
 
-async function getMachines() {
-  return db.query.machines.findMany({
-    orderBy: (machines, { asc }) => [asc(machines.name)],
+async function getEquipment() {
+  return db.query.equipment.findMany({
+    orderBy: (equipment, { asc }) => [asc(equipment.name)],
   });
 }
 
 export default async function NewSchedulePage() {
-  const machines = await getMachines();
+  const equipment = await getEquipment();
 
-  return <ScheduleForm machines={machines} isNew />;
+  return <ScheduleForm equipment={equipment} isNew />;
 }

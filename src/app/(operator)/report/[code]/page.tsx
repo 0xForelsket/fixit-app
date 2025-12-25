@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { machines } from "@/db/schema";
+import { equipment as equipmentTable } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { eq } from "drizzle-orm";
@@ -29,9 +29,9 @@ export default async function ReportPage({ params }: PageProps) {
 
   const { code } = await params;
 
-  // Find machine by code
-  const machine = await db.query.machines.findFirst({
-    where: eq(machines.code, code.toUpperCase()),
+  // Find equipment by code
+  const equipmentItem = await db.query.equipment.findFirst({
+    where: eq(equipmentTable.code, code.toUpperCase()),
     with: {
       location: true,
       owner: {
@@ -44,7 +44,7 @@ export default async function ReportPage({ params }: PageProps) {
     },
   });
 
-  if (!machine) {
+  if (!equipmentItem) {
     notFound();
   }
 
@@ -56,18 +56,18 @@ export default async function ReportPage({ params }: PageProps) {
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary-600 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Machines
+        Back to Equipment
       </Link>
 
-      {/* Machine Header Card */}
+      {/* Equipment Header Card */}
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
         {/* Status Stripe */}
         <div
           className={cn(
             "h-2 w-full",
-            machine.status === "operational" && "bg-success-500",
-            machine.status === "down" && "bg-danger-500",
-            machine.status === "maintenance" && "bg-warning-500"
+            equipmentItem.status === "operational" && "bg-success-500",
+            equipmentItem.status === "down" && "bg-danger-500",
+            equipmentItem.status === "maintenance" && "bg-warning-500"
           )}
         />
 
@@ -81,45 +81,45 @@ export default async function ReportPage({ params }: PageProps) {
               <div className="space-y-2">
                 <div>
                   <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                    {machine.name}
+                    {equipmentItem.name}
                   </h1>
                   <p className="font-mono text-sm font-medium text-muted-foreground mt-1">
-                    #{machine.code}
+                    #{equipmentItem.code}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                  {machine.location && (
+                  {equipmentItem.location && (
                     <div className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4 shrink-0" />
-                      {machine.location.name}
+                      {equipmentItem.location.name}
                     </div>
                   )}
 
-                  {machine.owner && (
+                  {equipmentItem.owner && (
                     <div className="flex items-center gap-1.5">
                       <User className="h-4 w-4 shrink-0" />
-                      Owner: {machine.owner.name}
+                      Owner: {equipmentItem.owner.name}
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            <MachineStatusBadge status={machine.status} />
+            <EquipmentStatusBadge status={equipmentItem.status} />
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
         <h2 className="text-xl font-bold border-b pb-2">New Ticket Details</h2>
-        <ReportForm machineId={machine.id} machineName={machine.name} />
+        <ReportForm equipment={equipmentItem} />
       </div>
     </div>
   );
 }
 
-function MachineStatusBadge({
+function EquipmentStatusBadge({
   status,
 }: {
   status: "operational" | "down" | "maintenance";

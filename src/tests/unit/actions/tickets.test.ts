@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/db", () => ({
   db: {
     query: {
-      machines: {
+      equipment: {
         findFirst: vi.fn(),
       },
       users: {
@@ -50,7 +50,7 @@ describe("createTicket action", () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
     const formData = new FormData();
-    formData.set("machineId", "1");
+    formData.set("equipmentId", "1");
     formData.set("type", "breakdown");
     formData.set("title", "Test ticket");
     formData.set("description", "Test description");
@@ -69,7 +69,7 @@ describe("createTicket action", () => {
     });
 
     const formData = new FormData();
-    formData.set("machineId", "invalid"); // not a number
+    formData.set("equipmentId", "invalid"); // not a number
     formData.set("type", "breakdown");
     formData.set("title", "");
     formData.set("description", "Test");
@@ -89,10 +89,10 @@ describe("createTicket action", () => {
 
     const mockTicket = {
       id: 1,
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
-      title: "Machine stopped",
-      description: "Machine won't start",
+      title: "Equipment stopped",
+      description: "Equipment won't start",
       priority: "high",
       status: "open",
       reportedById: 1,
@@ -107,9 +107,9 @@ describe("createTicket action", () => {
       })),
     } as unknown);
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
-      name: "Test Machine",
+      name: "Test Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -121,10 +121,10 @@ describe("createTicket action", () => {
     vi.mocked(db.query.users.findMany).mockResolvedValue([]);
 
     const formData = new FormData();
-    formData.set("machineId", "1");
+    formData.set("equipmentId", "1");
     formData.set("type", "breakdown");
-    formData.set("title", "Machine stopped");
-    formData.set("description", "Machine won't start");
+    formData.set("title", "Equipment stopped");
+    formData.set("description", "Equipment won't start");
     formData.set("priority", "high");
 
     const result = await createTicket({}, formData);
@@ -143,7 +143,7 @@ describe("createTicket action", () => {
 
     const mockTicket = {
       id: 1,
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
       title: "Critical issue",
       description: "Urgent",
@@ -165,9 +165,9 @@ describe("createTicket action", () => {
       mockInsert
     );
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
-      name: "Test Machine",
+      name: "Test Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -193,7 +193,7 @@ describe("createTicket action", () => {
     ]);
 
     const formData = new FormData();
-    formData.set("machineId", "1");
+    formData.set("equipmentId", "1");
     formData.set("type", "breakdown");
     formData.set("title", "Critical issue");
     formData.set("description", "Urgent");
@@ -266,7 +266,7 @@ describe("updateTicket action", () => {
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue({
       id: 1,
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
       title: "Test",
       description: "Test",
@@ -309,7 +309,7 @@ describe("updateTicket action", () => {
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue({
       id: 1,
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
       title: "Test",
       description: "Test",
@@ -399,7 +399,7 @@ describe("resolveTicket action", () => {
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue({
       id: 1,
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
       title: "Test",
       description: "Test",

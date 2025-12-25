@@ -41,8 +41,8 @@ export function ModelForm({ model, isNew }: ModelFormProps) {
       };
 
       const url = isNew
-        ? "/api/machines/models"
-        : `/api/machines/models/${model?.id}`;
+        ? "/api/equipment/models"
+        : `/api/equipment/models/${model?.id}`;
 
       const res = await fetch(url, {
         method: isNew ? "POST" : "PATCH",
@@ -55,7 +55,7 @@ export function ModelForm({ model, isNew }: ModelFormProps) {
         throw new Error(data.error || "Failed to save model");
       }
 
-      router.push("/admin/machines/models");
+      router.push("/admin/equipment/models");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -69,7 +69,7 @@ export function ModelForm({ model, isNew }: ModelFormProps) {
 
     setSaving(true);
     try {
-      const res = await fetch(`/api/machines/models/${model?.id}`, {
+      const res = await fetch(`/api/equipment/models/${model?.id}`, {
         method: "DELETE",
       });
 
@@ -78,7 +78,7 @@ export function ModelForm({ model, isNew }: ModelFormProps) {
         throw new Error(data.error || "Failed to delete model");
       }
 
-      router.push("/admin/machines/models");
+      router.push("/admin/equipment/models");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -92,16 +92,16 @@ export function ModelForm({ model, isNew }: ModelFormProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button type="button" variant="ghost" size="icon" asChild>
-            <Link href="/admin/machines/models">
+            <Link href="/admin/equipment/models">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isNew ? "New Machine Model" : "Edit Model"}
+              {isNew ? "New Equipment Model" : "Edit Model"}
             </h1>
             <p className="text-muted-foreground">
-              {isNew ? "Define a new machine type" : model?.name}
+              {isNew ? "Define a new equipment type" : model?.name}
             </p>
           </div>
         </div>

@@ -49,8 +49,8 @@ const navItems: NavItem[] = [
     roles: ["tech", "admin"],
   },
   {
-    label: "Machines",
-    href: "/admin/machines",
+    label: "Equipment",
+    href: "/admin/equipment",
     icon: <MonitorCog className="h-5 w-5" />,
     roles: ["admin"],
   },
@@ -185,10 +185,14 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
-                    <span className={cn(
-                      "transition-colors",
-                      isActive ? "text-primary-600" : "group-hover:text-primary-500"
-                    )}>
+                    <span
+                      className={cn(
+                        "transition-colors",
+                        isActive
+                          ? "text-primary-600"
+                          : "group-hover:text-primary-500"
+                      )}
+                    >
                       {item.icon}
                     </span>
                     {item.label}
@@ -207,7 +211,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                 className="flex items-center gap-3 rounded-lg bg-orange-50 border border-orange-100 px-3 py-2.5 text-sm font-semibold text-primary-700 hover:bg-orange-100 transition-colors shadow-sm animate-pulse-subtle"
               >
                 <AlertTriangle className="h-5 w-5" />
-                Report Machine Issue
+                Report Equipment Issue
               </Link>
             </div>
           )}
@@ -234,7 +238,9 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
               )}
             </div>
             <div className="overflow-hidden">
-              <p className="truncate text-sm font-bold text-zinc-900 leading-tight">{user.name}</p>
+              <p className="truncate text-sm font-bold text-zinc-900 leading-tight">
+                {user.name}
+              </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="flex-none rounded bg-white px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-zinc-500 border border-zinc-200">
                   {user.role}

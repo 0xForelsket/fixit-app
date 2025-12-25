@@ -8,15 +8,15 @@ import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useTransition } from "react";
 
-interface MachineSearchProps {
+interface EquipmentSearchProps {
   locations: Location[];
   initialSearch: string;
 }
 
-export function MachineSearch({
+export function EquipmentSearch({
   locations,
   initialSearch,
-}: MachineSearchProps) {
+}: EquipmentSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -64,7 +64,7 @@ export function MachineSearch({
       <div className="relative">
         <Input
           type="search"
-          placeholder="Scan or type machine name/code..."
+          placeholder="Scan or type equipment name/code..."
           value={search}
           onChange={(e) => updateSearch(e.target.value)}
           className="pl-12 h-14 text-lg shadow-sm border-muted-foreground/30 focus-visible:ring-primary-500 transition-all rounded-xl"

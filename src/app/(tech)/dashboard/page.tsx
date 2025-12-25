@@ -49,7 +49,7 @@ async function getRecentTickets() {
     limit: 5,
     orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
     with: {
-      machine: true,
+      equipment: true,
       reportedBy: true,
     },
   });
@@ -64,9 +64,12 @@ export default async function DashboardPage() {
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-black tracking-tight text-zinc-900">
-          Technician <span className="text-primary-600 uppercase">Terminal</span>
+          Technician{" "}
+          <span className="text-primary-600 uppercase">Terminal</span>
         </h1>
-        <p className="text-zinc-500 font-medium">Control panel for maintenance operations</p>
+        <p className="text-zinc-500 font-medium">
+          Control panel for maintenance operations
+        </p>
       </div>
 
       {/* Stats Grid */}
@@ -120,7 +123,12 @@ export default async function DashboardPage() {
               Priority Queue
             </h2>
           </div>
-          <Button variant="ghost" size="sm" asChild className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
+          >
             <Link href="/dashboard/tickets" className="gap-2">
               ALL TICKETS <ArrowRight className="h-4 w-4" />
             </Link>
@@ -193,16 +201,18 @@ function StatsCard({
         </div>
         <div className="h-1 w-12 bg-zinc-100 rounded-full" />
       </div>
-      
+
       <div>
-        <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1.5">{title}</p>
+        <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1.5">
+          {title}
+        </p>
         <p
           className={cn(
             "text-4xl font-mono font-black leading-none tracking-tight",
             color
           )}
         >
-          {String(value).padStart(2, '0')}
+          {String(value).padStart(2, "0")}
         </p>
       </div>
     </div>
@@ -212,24 +222,47 @@ function StatsCard({
 function TicketListItem({
   ticket,
   index = 0,
-}: { ticket: {
-  id: number;
-  title: string;
-  priority: string;
-  createdAt: Date;
-  machine: { name: string };
-  reportedBy: { name: string };
-}; index?: number }) {
+}: {
+  ticket: {
+    id: number;
+    title: string;
+    priority: string;
+    createdAt: Date;
+    equipment: { name: string };
+    reportedBy: { name: string };
+  };
+  index?: number;
+}) {
   const priorityConfig = {
-    low: { color: "bg-success-500", label: "Low", text: "text-success-700", bg: "bg-success-50" },
-    medium: { color: "bg-primary-500", label: "Medium", text: "text-primary-700", bg: "bg-primary-50" },
-    high: { color: "bg-warning-500", label: "High", text: "text-warning-700", bg: "bg-warning-50" },
-    critical: { color: "bg-danger-600", label: "Critical", text: "text-danger-700", bg: "bg-danger-50" },
+    low: {
+      color: "bg-success-500",
+      label: "Low",
+      text: "text-success-700",
+      bg: "bg-success-50",
+    },
+    medium: {
+      color: "bg-primary-500",
+      label: "Medium",
+      text: "text-primary-700",
+      bg: "bg-primary-50",
+    },
+    high: {
+      color: "bg-warning-500",
+      label: "High",
+      text: "text-warning-700",
+      bg: "bg-warning-50",
+    },
+    critical: {
+      color: "bg-danger-600",
+      label: "Critical",
+      text: "text-danger-700",
+      bg: "bg-danger-50",
+    },
   }[ticket.priority as string] || {
     color: "bg-zinc-500",
     label: ticket.priority,
     text: "text-zinc-700",
-    bg: "bg-zinc-50"
+    bg: "bg-zinc-50",
   };
 
   const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "";
@@ -240,26 +273,34 @@ function TicketListItem({
       className={cn(
         "group relative flex flex-col sm:flex-row sm:items-center gap-4 overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-5 transition-all duration-200 hover:border-primary-400 hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1",
         staggerClass && `${staggerClass} animate-in`,
-        ticket.priority === "critical" && "border-danger-200 shadow-danger-500/5"
+        ticket.priority === "critical" &&
+          "border-danger-200 shadow-danger-500/5"
       )}
     >
       <div className="flex-1 space-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <span className="flex-none rounded bg-zinc-900 px-2 py-1 text-[10px] font-mono font-black text-white leading-none">
-            #{String(ticket.id).padStart(3, '0')}
+            #{String(ticket.id).padStart(3, "0")}
           </span>
           <h3 className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors text-lg tracking-tight">
             {ticket.title}
           </h3>
-          <Badge className={cn("ml-auto sm:ml-0 font-black", priorityConfig.bg, priorityConfig.text, "border-0")}>
+          <Badge
+            className={cn(
+              "ml-auto sm:ml-0 font-black",
+              priorityConfig.bg,
+              priorityConfig.text,
+              "border-0"
+            )}
+          >
             {priorityConfig.label.toUpperCase()}
           </Badge>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <div className="flex items-center gap-1.5 font-bold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-lg border border-zinc-200/50">
             <div className="w-2 h-2 rounded-full bg-zinc-400" />
-            {ticket.machine.name}
+            {ticket.equipment.name}
           </div>
           <div className="flex items-center gap-1.5 font-medium text-zinc-400">
             <Clock className="h-3.5 w-3.5" />
@@ -273,9 +314,9 @@ function TicketListItem({
       </div>
 
       <div className="flex items-center justify-end sm:justify-center w-full sm:w-auto mt-2 sm:mt-0">
-         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-100 group-hover:bg-primary-500 group-hover:text-white transition-all duration-300">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-100 group-hover:bg-primary-500 group-hover:text-white transition-all duration-300">
           <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-         </div>
+        </div>
       </div>
     </Link>
   );

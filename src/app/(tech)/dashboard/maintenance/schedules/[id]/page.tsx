@@ -8,7 +8,7 @@ async function getSchedule(id: number) {
   return db.query.maintenanceSchedules.findFirst({
     where: eq(maintenanceSchedules.id, id),
     with: {
-      machine: true,
+      equipment: true,
     },
   });
 }
@@ -20,9 +20,9 @@ async function getChecklists(scheduleId: number) {
   });
 }
 
-async function getMachines() {
-  return db.query.machines.findMany({
-    orderBy: (machines, { asc }) => [asc(machines.name)],
+async function getEquipment() {
+  return db.query.equipment.findMany({
+    orderBy: (equipment, { asc }) => [asc(equipment.name)],
   });
 }
 
@@ -38,10 +38,10 @@ export default async function EditSchedulePage({
     notFound();
   }
 
-  const [schedule, checklists, machines] = await Promise.all([
+  const [schedule, checklists, equipment] = await Promise.all([
     getSchedule(scheduleId),
     getChecklists(scheduleId),
-    getMachines(),
+    getEquipment(),
   ]);
 
   if (!schedule) {
@@ -52,7 +52,7 @@ export default async function EditSchedulePage({
     <ScheduleForm
       schedule={schedule}
       checklists={checklists}
-      machines={machines}
+      equipment={equipment}
     />
   );
 }

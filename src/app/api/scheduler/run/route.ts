@@ -65,7 +65,7 @@ export async function POST(request: Request) {
           const [newTicket] = await tx
             .insert(tickets)
             .values({
-              machineId: schedule.machineId,
+              equipmentId: schedule.equipmentId,
               title: `Scheduled: ${schedule.title}`,
               description: `Auto-generated maintenance ticket from schedule #${schedule.id}`,
               type: schedule.type,

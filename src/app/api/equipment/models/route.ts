@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { machineModels } from "@/db/schema";
+import { equipmentModels } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { NextResponse } from "next/server";
 
-// POST /api/machines/models - Create new model
+// POST /api/equipment/models - Create new model
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const [model] = await db
-      .insert(machineModels)
+      .insert(equipmentModels)
       .values({
         name,
         manufacturer,
@@ -33,15 +33,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json(model, { status: 201 });
   } catch (error) {
-    console.error("Error creating machine model:", error);
+    console.error("Error creating equipment model:", error);
     return NextResponse.json(
-      { error: "Failed to create machine model" },
+      { error: "Failed to create equipment model" },
       { status: 500 }
     );
   }
 }
 
-// GET /api/machines/models - List all models
+// GET /api/equipment/models - List all models
 export async function GET() {
   try {
     const user = await getCurrentUser();
@@ -49,9 +49,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const models = await db.query.machineModels.findMany({
+    const models = await db.query.equipmentModels.findMany({
       with: {
-        machines: true, // Include count or list of machines using this model
+        equipment: true, // Include count or list of equipment using this model
         bom: {
           with: {
             part: true,
@@ -62,9 +62,9 @@ export async function GET() {
 
     return NextResponse.json(models);
   } catch (error) {
-    console.error("Error fetching machine models:", error);
+    console.error("Error fetching equipment models:", error);
     return NextResponse.json(
-      { error: "Failed to fetch machine models" },
+      { error: "Failed to fetch equipment models" },
       { status: 500 }
     );
   }

@@ -1,14 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { MachineBom, SparePart } from "@/db/schema";
+import type { EquipmentBom, SparePart } from "@/db/schema";
 import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface BomEditorProps {
   modelId: number;
-  items: (MachineBom & { part: SparePart })[];
+  items: (EquipmentBom & { part: SparePart })[];
   parts: SparePart[]; // All available parts for selection
 }
 
@@ -28,7 +28,7 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/machines/models/${modelId}/bom`, {
+      const res = await fetch(`/api/equipment/models/${modelId}/bom`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -57,7 +57,7 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
     if (!confirm("Remove this part from BOM?")) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/machines/models/${modelId}/bom/${bomId}`, {
+      const res = await fetch(`/api/equipment/models/${modelId}/bom/${bomId}`, {
         method: "DELETE",
       });
 
@@ -76,7 +76,7 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
     <div className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
       <h2 className="font-semibold text-lg">Bill of Materials (BOM)</h2>
       <p className="text-sm text-muted-foreground">
-        Define spare parts recommended for this machine model.
+        Define spare parts recommended for this equipment model.
       </p>
 
       {/* Add Part Form */}

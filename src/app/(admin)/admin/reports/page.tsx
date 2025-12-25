@@ -59,7 +59,7 @@ async function getTickets(params: SearchParams) {
     offset,
     orderBy: [desc(tickets.createdAt)],
     with: {
-      machine: { with: { location: true } },
+      equipment: { with: { location: true } },
       reportedBy: true,
       assignedTo: true,
     },
@@ -327,7 +327,7 @@ export default async function ReportsPage({
               <tr className="text-left font-medium text-muted-foreground">
                 <th className="p-3">ID</th>
                 <th className="p-3">Title</th>
-                <th className="p-3 hidden md:table-cell">Machine</th>
+                <th className="p-3 hidden md:table-cell">Equipment</th>
                 <th className="p-3 hidden lg:table-cell">Location</th>
                 <th className="p-3">Status</th>
                 <th className="p-3 hidden sm:table-cell">Priority</th>
@@ -435,7 +435,7 @@ interface TicketWithRelations {
   priority: string;
   createdAt: Date;
   resolvedAt: Date | null;
-  machine?: { name: string; location?: { name: string } | null } | null;
+  equipment?: { name: string; location?: { name: string } | null } | null;
   reportedBy?: { name: string } | null;
   assignedTo?: { name: string } | null;
 }
@@ -486,10 +486,10 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
         <span className="line-clamp-1">{ticket.title}</span>
       </td>
       <td className="p-3 hidden md:table-cell text-muted-foreground">
-        {ticket.machine?.name || "—"}
+        {ticket.equipment?.name || "—"}
       </td>
       <td className="p-3 hidden lg:table-cell text-muted-foreground">
-        {ticket.machine?.location?.name || "—"}
+        {ticket.equipment?.location?.name || "—"}
       </td>
       <td className="p-3">
         <span

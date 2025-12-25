@@ -1,11 +1,11 @@
 import { db } from "@/db";
-import { machineModels, spareParts } from "@/db/schema";
+import { equipmentModels, spareParts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { BomEditor } from "../bom-editor";
 import { ModelForm } from "../model-form";
 
-export default async function EditMachineModelPage({
+export default async function EditEquipmentModelPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -17,8 +17,8 @@ export default async function EditMachineModelPage({
     notFound();
   }
 
-  const model = await db.query.machineModels.findFirst({
-    where: eq(machineModels.id, modelId),
+  const model = await db.query.equipmentModels.findFirst({
+    where: eq(equipmentModels.id, modelId),
     with: {
       bom: {
         with: {

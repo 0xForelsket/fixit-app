@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const entityTypeSchema = z.enum([
   "user",
-  "machine",
+  "equipment",
   "ticket",
   "location",
 ]);

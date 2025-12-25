@@ -22,7 +22,7 @@ export function OperatorNav({
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/", label: "Machines" },
+    { href: "/", label: "Equipment" },
     { href: "/my-tickets", label: "My Tickets" },
   ];
 

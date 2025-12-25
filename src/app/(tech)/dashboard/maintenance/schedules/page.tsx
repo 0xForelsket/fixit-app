@@ -25,7 +25,7 @@ type SearchParams = {
 async function getSchedules(params: SearchParams) {
   const allSchedules = await db.query.maintenanceSchedules.findMany({
     with: {
-      machine: {
+      equipment: {
         with: {
           location: true,
         },
@@ -41,7 +41,7 @@ async function getSchedules(params: SearchParams) {
     filtered = filtered.filter(
       (s) =>
         s.title.toLowerCase().includes(search) ||
-        s.machine?.name.toLowerCase().includes(search)
+        s.equipment?.name.toLowerCase().includes(search)
     );
   }
 
@@ -196,7 +196,7 @@ export default async function SchedulesPage({
             <thead className="border-b bg-slate-50">
               <tr className="text-left font-medium text-muted-foreground">
                 <th className="p-3">Schedule</th>
-                <th className="p-3 hidden md:table-cell">Machine</th>
+                <th className="p-3 hidden md:table-cell">Equipment</th>
                 <th className="p-3 hidden lg:table-cell">Frequency</th>
                 <th className="p-3">Next Due</th>
                 <th className="p-3 hidden sm:table-cell">Status</th>
@@ -246,9 +246,9 @@ export default async function SchedulesPage({
                       </div>
                     </td>
                     <td className="p-3 hidden md:table-cell">
-                      <p className="font-medium">{schedule.machine?.name}</p>
+                      <p className="font-medium">{schedule.equipment?.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {schedule.machine?.location?.name}
+                        {schedule.equipment?.location?.name}
                       </p>
                     </td>
                     <td className="p-3 hidden lg:table-cell text-muted-foreground">

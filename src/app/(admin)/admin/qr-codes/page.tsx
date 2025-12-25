@@ -1,12 +1,12 @@
 import { db } from "@/db";
-import { machines } from "@/db/schema";
+import { equipment } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { headers } from "next/headers";
 import { QRCodeGeneratorClient } from "./qr-code-generator";
 
-async function getMachines() {
-  return db.query.machines.findMany({
-    orderBy: [desc(machines.createdAt)],
+async function getEquipment() {
+  return db.query.equipment.findMany({
+    orderBy: [desc(equipment.createdAt)],
     with: {
       location: true,
       owner: true,
@@ -15,11 +15,11 @@ async function getMachines() {
 }
 
 export default async function QRCodesPage() {
-  const machinesList = await getMachines();
+  const equipmentList = await getEquipment();
   const headersList = await headers();
   const host = headersList.get("host") || "localhost:3000";
   const protocol = host.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  return <QRCodeGeneratorClient machines={machinesList} baseUrl={baseUrl} />;
+  return <QRCodeGeneratorClient equipment={equipmentList} baseUrl={baseUrl} />;
 }

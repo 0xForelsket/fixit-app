@@ -10,7 +10,7 @@ interface FileUploadProps {
     mimeType: string;
     sizeBytes: number;
   }) => void;
-  entityType: "user" | "machine" | "ticket" | "location";
+  entityType: "user" | "equipment" | "ticket" | "location";
   entityId: number;
   label?: string;
   accept?: string;

@@ -69,17 +69,25 @@ export default async function InventoryPage() {
           </h1>
           <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
             <Box className="h-3.5 w-3.5" />
-            {stats.totalParts} UNIQUE SKUS • STOCK VALUE: ${stats.totalValue.toLocaleString()}
+            {stats.totalParts} UNIQUE SKUS • STOCK VALUE: $
+            {stats.totalValue.toLocaleString()}
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild className="font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100">
+          <Button
+            variant="ghost"
+            asChild
+            className="font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
+          >
             <Link href="/admin/inventory/parts">
               <Package className="mr-2 h-4 w-4" />
               CATALOG
             </Link>
           </Button>
-          <Button asChild className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold shadow-lg shadow-primary-500/25">
+          <Button
+            asChild
+            className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold shadow-lg shadow-primary-500/25"
+          >
             <Link href="/admin/inventory/parts/new">
               <Plus className="mr-2 h-4 w-4" />
               ADD NEW PART
@@ -126,8 +134,12 @@ export default async function InventoryPage() {
               <AlertTriangle className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-black text-danger-900 tracking-tight uppercase leading-none">Critical Supply Shortage</h3>
-              <p className="text-danger-700/80 font-medium text-xs mt-1 lowercase">REORDER REQUIRED FOR THE FOLLOWING ASSETS</p>
+              <h3 className="text-lg font-black text-danger-900 tracking-tight uppercase leading-none">
+                Critical Supply Shortage
+              </h3>
+              <p className="text-danger-700/80 font-medium text-xs mt-1 lowercase">
+                REORDER REQUIRED FOR THE FOLLOWING ASSETS
+              </p>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -141,7 +153,9 @@ export default async function InventoryPage() {
                     #{item.id}
                   </div>
                   <div>
-                    <p className="font-black text-zinc-900">{item.part?.name}</p>
+                    <p className="font-black text-zinc-900">
+                      {item.part?.name}
+                    </p>
                     <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
                       LOC: {item.location?.name} • SKU: {item.part?.sku}
                     </p>
@@ -149,14 +163,22 @@ export default async function InventoryPage() {
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-6 mt-4 sm:mt-0">
                   <div className="text-right">
-                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">AVAILABLE / REORDER</p>
+                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">
+                      AVAILABLE / REORDER
+                    </p>
                     <div className="flex items-center gap-2">
-                       <span className="font-mono font-black text-danger-600 text-lg">{item.quantity}</span>
-                       <span className="text-zinc-300">/</span>
-                       <span className="font-mono font-bold text-zinc-500">{item.part?.reorderPoint}</span>
+                      <span className="font-mono font-black text-danger-600 text-lg">
+                        {item.quantity}
+                      </span>
+                      <span className="text-zinc-300">/</span>
+                      <span className="font-mono font-bold text-zinc-500">
+                        {item.part?.reorderPoint}
+                      </span>
                     </div>
                   </div>
-                  <Badge variant="danger" className="font-black px-3 py-1">CRITICAL</Badge>
+                  <Badge variant="danger" className="font-black px-3 py-1">
+                    CRITICAL
+                  </Badge>
                 </div>
               </div>
             ))}
@@ -205,8 +227,10 @@ export default async function InventoryPage() {
       <div className="rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-6 shadow-xl shadow-zinc-200/10">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <div className="h-2 w-8 bg-primary-500 rounded-full" />
-             <h3 className="text-lg font-black tracking-tight text-zinc-900 uppercase">Latest Registrations</h3>
+            <div className="h-2 w-8 bg-primary-500 rounded-full" />
+            <h3 className="text-lg font-black tracking-tight text-zinc-900 uppercase">
+              Latest Registrations
+            </h3>
           </div>
           <Link
             href="/admin/inventory/parts"
@@ -216,7 +240,9 @@ export default async function InventoryPage() {
           </Link>
         </div>
         {recentParts.length === 0 ? (
-          <p className="text-sm text-zinc-400 font-medium py-8 text-center italic">No new modules detected in database.</p>
+          <p className="text-sm text-zinc-400 font-medium py-8 text-center italic">
+            No new modules detected in database.
+          </p>
         ) : (
           <div className="grid gap-4">
             {recentParts.map((part) => (
@@ -230,16 +256,18 @@ export default async function InventoryPage() {
                     <Package className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="font-black text-zinc-900 group-hover:text-primary-700 transition-colors uppercase tracking-tight">{part.name}</p>
+                    <p className="font-black text-zinc-900 group-hover:text-primary-700 transition-colors uppercase tracking-tight">
+                      {part.name}
+                    </p>
                     <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-1">
                       SKU: {part.sku} • CAT: {part.category?.toUpperCase()}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-6 mt-4 sm:mt-0">
-                   <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-primary-500 group-hover:text-white group-hover:border-primary-500 transition-all">
-                      <ChevronRight className="h-5 w-5" />
-                   </div>
+                  <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-primary-500 group-hover:text-white group-hover:border-primary-500 transition-all">
+                    <ChevronRight className="h-5 w-5" />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -268,11 +296,13 @@ function StatCard({
   pulse?: boolean;
 }) {
   return (
-    <div className={cn(
-      "flex flex-col justify-between h-[120px] rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover-lift card-industrial shadow-sm",
-      pulse && "animate-glow-pulse border-danger-200"
-    )}>
-       <div className="flex items-center justify-between">
+    <div
+      className={cn(
+        "flex flex-col justify-between h-[120px] rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover-lift card-industrial shadow-sm",
+        pulse && "animate-glow-pulse border-danger-200"
+      )}
+    >
+      <div className="flex items-center justify-between">
         <div
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-xl shadow-inner border border-white/50",
@@ -283,8 +313,18 @@ function StatCard({
         </div>
       </div>
       <div>
-        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1.5">{title}</p>
-        <p className={cn("font-mono font-black tracking-tighter leading-none", isText ? "text-2xl" : "text-3xl", color === "text-zinc-600" ? "text-zinc-900" : color)}>{value}</p>
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1.5">
+          {title}
+        </p>
+        <p
+          className={cn(
+            "font-mono font-black tracking-tighter leading-none",
+            isText ? "text-2xl" : "text-3xl",
+            color === "text-zinc-600" ? "text-zinc-900" : color
+          )}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -310,7 +350,12 @@ function QuickAction({
       href={href}
       className="group relative flex items-center gap-5 rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover:border-primary-400 hover:shadow-xl hover:shadow-primary-500/5 hover-lift"
     >
-      <div className={cn("absolute top-0 right-0 w-1 h-full rounded-r-2xl transition-all group-hover:w-2", accent)} />
+      <div
+        className={cn(
+          "absolute top-0 right-0 w-1 h-full rounded-r-2xl transition-all group-hover:w-2",
+          accent
+        )}
+      />
       <div
         className={cn(
           "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border shadow-inner transition-transform group-hover:scale-110",
@@ -320,8 +365,12 @@ function QuickAction({
         <Icon className="h-7 w-7" />
       </div>
       <div>
-        <p className="font-black text-zinc-900 uppercase tracking-tight group-hover:text-primary-600 transition-colors">{title}</p>
-        <p className="text-xs font-medium text-zinc-500 mt-0.5 leading-snug">{description}</p>
+        <p className="font-black text-zinc-900 uppercase tracking-tight group-hover:text-primary-600 transition-colors">
+          {title}
+        </p>
+        <p className="text-xs font-medium text-zinc-500 mt-0.5 leading-snug">
+          {description}
+        </p>
       </div>
     </Link>
   );

@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { machineBoms } from "@/db/schema";
+import { equipmentBoms } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// POST /api/machines/models/[id]/bom - Add item to BOM
+// POST /api/equipment/models/[id]/bom - Add item to BOM
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -29,29 +29,29 @@ export async function POST(
     }
 
     // Check if exists
-    const existing = await db.query.machineBoms.findFirst({
+    const existing = await db.query.equipmentBoms.findFirst({
       where: and(
-        eq(machineBoms.modelId, modelId),
-        eq(machineBoms.partId, partId)
+        eq(equipmentBoms.modelId, modelId),
+        eq(equipmentBoms.partId, partId)
       ),
     });
 
     if (existing) {
       // Update
       const [updated] = await db
-        .update(machineBoms)
+        .update(equipmentBoms)
         .set({
           quantityRequired: quantityRequired ?? existing.quantityRequired,
           notes: notes ?? existing.notes,
         })
-        .where(eq(machineBoms.id, existing.id))
+        .where(eq(equipmentBoms.id, existing.id))
         .returning();
       return NextResponse.json(updated);
     }
 
     // Insert
     const [newItem] = await db
-      .insert(machineBoms)
+      .insert(equipmentBoms)
       .values({
         modelId,
         partId,

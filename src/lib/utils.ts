@@ -86,8 +86,8 @@ export function getStatusColor(status: string): string {
   }
 }
 
-// Get machine status color class (for badges)
-export function getMachineStatusColor(status: string): string {
+// Get equipment status color class (for badges)
+export function getEquipmentStatusColor(status: string): string {
   switch (status) {
     case "operational":
       return "bg-success-500";
@@ -100,8 +100,8 @@ export function getMachineStatusColor(status: string): string {
   }
 }
 
-// Get machine status badge color class (for larger badges with text)
-export function getMachineStatusBadgeColor(status: string): string {
+// Get equipment status badge color class (for larger badges with text)
+export function getEquipmentStatusBadgeColor(status: string): string {
   switch (status) {
     case "operational":
       return "bg-success-100 text-success-800 border-success-300";

@@ -4,7 +4,7 @@ import {
   formatDateTime,
   formatDuration,
   formatRelativeTime,
-  getMachineStatusColor,
+  getEquipmentStatusColor,
   getPriorityColor,
   getStatusColor,
   truncate,
@@ -129,17 +129,17 @@ describe("getStatusColor", () => {
   });
 });
 
-describe("getMachineStatusColor", () => {
+describe("getEquipmentStatusColor", () => {
   it("should return success color for operational", () => {
-    expect(getMachineStatusColor("operational")).toContain("success");
+    expect(getEquipmentStatusColor("operational")).toContain("success");
   });
 
   it("should return danger color for down", () => {
-    expect(getMachineStatusColor("down")).toContain("danger");
+    expect(getEquipmentStatusColor("down")).toContain("danger");
   });
 
   it("should return warning color for maintenance", () => {
-    expect(getMachineStatusColor("maintenance")).toContain("warning");
+    expect(getEquipmentStatusColor("maintenance")).toContain("warning");
   });
 });
 

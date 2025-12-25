@@ -53,8 +53,8 @@ export async function createAttachment(
     if (entityType === "ticket") {
       revalidatePath(`/dashboard/tickets/${entityId}`);
       revalidatePath(`/my-tickets/${entityId}`);
-    } else if (entityType === "machine") {
-      revalidatePath(`/admin/machines/${entityId}`);
+    } else if (entityType === "equipment") {
+      revalidatePath(`/admin/equipment/${entityId}`);
     }
 
     return { success: true, data: newAttachment };

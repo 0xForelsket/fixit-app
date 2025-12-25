@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { machineModels } from "@/db/schema";
+import { equipmentModels } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// GET /api/machines/models/[id] - Get single model
+// GET /api/equipment/models/[id] - Get single model
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -16,15 +16,15 @@ export async function GET(
     }
 
     const { id } = await params;
-    const model = await db.query.machineModels.findFirst({
-      where: eq(machineModels.id, Number.parseInt(id)),
+    const model = await db.query.equipmentModels.findFirst({
+      where: eq(equipmentModels.id, Number.parseInt(id)),
       with: {
         bom: {
           with: {
             part: true,
           },
         },
-        machines: true,
+        equipment: true,
       },
     });
 
@@ -42,7 +42,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/machines/models/[id] - Update model
+// PATCH /api/equipment/models/[id] - Update model
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -58,7 +58,7 @@ export async function PATCH(
     const { name, manufacturer, description, manualUrl } = body;
 
     const [updated] = await db
-      .update(machineModels)
+      .update(equipmentModels)
       .set({
         name,
         manufacturer,
@@ -66,7 +66,7 @@ export async function PATCH(
         manualUrl,
         updatedAt: new Date(),
       })
-      .where(eq(machineModels.id, Number.parseInt(id)))
+      .where(eq(equipmentModels.id, Number.parseInt(id)))
       .returning();
 
     return NextResponse.json(updated);
@@ -79,7 +79,7 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/machines/models/[id] - Delete model
+// DELETE /api/equipment/models/[id] - Delete model
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -92,26 +92,26 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Check if in use by machines?
+    // Check if in use by equipment?
     // Just delete. Foreign keys might restrict if set up that way?
     // Drizzle relations don't modify DB constraints automatically unless defined in migration.
     // SQLite usually needs PRAGMA foreign_keys = ON.
     // I should check manually to be safe.
 
-    const machinesUsing = await db.query.machines.findFirst({
-      where: (machines, { eq }) => eq(machines.modelId, Number.parseInt(id)),
+    const equipmentUsing = await db.query.equipment.findFirst({
+      where: (equipment, { eq }) => eq(equipment.modelId, Number.parseInt(id)),
     });
 
-    if (machinesUsing) {
+    if (equipmentUsing) {
       return NextResponse.json(
-        { error: "Cannot delete model: It is in use by one or more machines" },
+        { error: "Cannot delete model: It is in use by one or more equipment" },
         { status: 400 }
       );
     }
 
     await db
-      .delete(machineModels)
-      .where(eq(machineModels.id, Number.parseInt(id)));
+      .delete(equipmentModels)
+      .where(eq(equipmentModels.id, Number.parseInt(id)));
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -6,7 +6,7 @@ import { MapPin, Printer, QrCode } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useRef, useState } from "react";
 
-interface Machine {
+interface Equipment {
   id: number;
   name: string;
   code: string;
@@ -15,21 +15,21 @@ interface Machine {
 }
 
 interface QRCodeGeneratorClientProps {
-  machines: Machine[];
+  equipment: Equipment[];
   baseUrl: string;
 }
 
 export function QRCodeGeneratorClient({
-  machines,
+  equipment,
   baseUrl,
 }: QRCodeGeneratorClientProps) {
-  const [selectedMachines, setSelectedMachines] = useState<Set<number>>(
+  const [selectedEquipment, setSelectedEquipment] = useState<Set<number>>(
     new Set()
   );
   const printRef = useRef<HTMLDivElement>(null);
 
-  const toggleMachine = (id: number) => {
-    setSelectedMachines((prev) => {
+  const toggleEquipment = (id: number) => {
+    setSelectedEquipment((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
@@ -41,21 +41,21 @@ export function QRCodeGeneratorClient({
   };
 
   const selectAll = () => {
-    setSelectedMachines(new Set(machines.map((m) => m.id)));
+    setSelectedEquipment(new Set(equipment.map((m) => m.id)));
   };
 
   const selectNone = () => {
-    setSelectedMachines(new Set());
+    setSelectedEquipment(new Set());
   };
 
   const handlePrint = () => {
     window.print();
   };
 
-  const machinesToPrint =
-    selectedMachines.size > 0
-      ? machines.filter((m) => selectedMachines.has(m.id))
-      : machines;
+  const equipmentToPrint =
+    selectedEquipment.size > 0
+      ? equipment.filter((m) => selectedEquipment.has(m.id))
+      : equipment;
 
   return (
     <div className="space-y-6">
@@ -66,14 +66,14 @@ export function QRCodeGeneratorClient({
             QR Code Generator
           </h1>
           <p className="text-muted-foreground">
-            Generate printable QR codes for machine issue reporting
+            Generate printable QR codes for equipment issue reporting
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="mr-2 h-4 w-4" />
             Print{" "}
-            {selectedMachines.size > 0 ? `(${selectedMachines.size})` : "All"}
+            {selectedEquipment.size > 0 ? `(${selectedEquipment.size})` : "All"}
           </Button>
         </div>
       </div>
@@ -81,7 +81,7 @@ export function QRCodeGeneratorClient({
       {/* Selection Controls - Hidden when printing */}
       <div className="flex items-center gap-4 print:hidden">
         <span className="text-sm text-muted-foreground">
-          {selectedMachines.size} of {machines.length} selected
+          {selectedEquipment.size} of {equipment.length} selected
         </span>
         <Button variant="ghost" size="sm" onClick={selectAll}>
           Select All
@@ -91,27 +91,27 @@ export function QRCodeGeneratorClient({
         </Button>
       </div>
 
-      {/* Machine Selection Grid - Hidden when printing */}
+      {/* Equipment Selection Grid - Hidden when printing */}
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 print:hidden">
-        {machines.map((machine) => (
+        {equipment.map((equipment) => (
           <label
-            key={machine.id}
+            key={equipment.id}
             className={cn(
               "flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-all hover:shadow-md",
-              selectedMachines.has(machine.id)
+              selectedEquipment.has(equipment.id)
                 ? "border-primary-500 bg-primary-50 ring-2 ring-primary-500"
                 : "bg-white hover:border-primary-300"
             )}
           >
             <input
               type="checkbox"
-              checked={selectedMachines.has(machine.id)}
-              onChange={() => toggleMachine(machine.id)}
+              checked={selectedEquipment.has(equipment.id)}
+              onChange={() => toggleEquipment(equipment.id)}
               className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
             />
             <div className="flex-1 min-w-0">
-              <p className="font-medium truncate">{machine.name}</p>
-              <p className="text-xs text-muted-foreground">{machine.code}</p>
+              <p className="font-medium truncate">{equipment.name}</p>
+              <p className="text-xs text-muted-foreground">{equipment.code}</p>
             </div>
           </label>
         ))}
@@ -145,8 +145,12 @@ export function QRCodeGeneratorClient({
           }
         `}</style>
         <div className="print-area grid grid-cols-2 gap-4">
-          {machinesToPrint.map((machine) => (
-            <QRCard key={machine.id} machine={machine} baseUrl={baseUrl} />
+          {equipmentToPrint.map((equipment) => (
+            <QRCard
+              key={equipment.id}
+              equipment={equipment}
+              baseUrl={baseUrl}
+            />
           ))}
         </div>
       </div>
@@ -155,13 +159,17 @@ export function QRCodeGeneratorClient({
       <div className="print:hidden">
         <h2 className="text-lg font-semibold mb-4">Preview</h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {machinesToPrint.slice(0, 6).map((machine) => (
-            <QRCard key={machine.id} machine={machine} baseUrl={baseUrl} />
+          {equipmentToPrint.slice(0, 6).map((equipment) => (
+            <QRCard
+              key={equipment.id}
+              equipment={equipment}
+              baseUrl={baseUrl}
+            />
           ))}
-          {machinesToPrint.length > 6 && (
+          {equipmentToPrint.length > 6 && (
             <div className="flex items-center justify-center rounded-xl border border-dashed p-8 text-center">
               <p className="text-muted-foreground">
-                +{machinesToPrint.length - 6} more machines
+                +{equipmentToPrint.length - 6} more equipment
                 <br />
                 <span className="text-sm">Click Print to see all</span>
               </p>
@@ -173,8 +181,11 @@ export function QRCodeGeneratorClient({
   );
 }
 
-function QRCard({ machine, baseUrl }: { machine: Machine; baseUrl: string }) {
-  const reportUrl = `${baseUrl}/report/${machine.code}`;
+function QRCard({
+  equipment,
+  baseUrl,
+}: { equipment: Equipment; baseUrl: string }) {
+  const reportUrl = `${baseUrl}/report/${equipment.code}`;
 
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm print:shadow-none print:border-2 print:break-inside-avoid">
@@ -191,28 +202,30 @@ function QRCard({ machine, baseUrl }: { machine: Machine; baseUrl: string }) {
           </div>
         </div>
 
-        {/* Machine Info */}
+        {/* Equipment Info */}
         <div className="flex-1 min-w-0 space-y-2">
           <div>
-            <h3 className="font-bold text-lg leading-tight">{machine.name}</h3>
+            <h3 className="font-bold text-lg leading-tight">
+              {equipment.name}
+            </h3>
             <p className="text-sm font-mono text-primary-600 font-semibold">
-              {machine.code}
+              {equipment.code}
             </p>
           </div>
 
-          {machine.location && (
+          {equipment.location && (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPin className="h-3.5 w-3.5" />
-              {machine.location.name}
+              {equipment.location.name}
             </div>
           )}
 
-          {machine.owner && (
+          {equipment.owner && (
             <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
-              <span className="font-medium">Owner:</span> {machine.owner.name}
+              <span className="font-medium">Owner:</span> {equipment.owner.name}
               <br />
               <span className="font-mono text-xs">
-                {machine.owner.employeeId}
+                {equipment.owner.employeeId}
               </span>
             </div>
           )}

@@ -3,11 +3,11 @@
 import { db } from "@/db";
 import {
   attachments,
-  machines,
   notifications,
   ticketLogs,
   tickets,
   users,
+  equipment as equipmentTable,
 } from "@/db/schema";
 import { ticketLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
@@ -40,7 +40,7 @@ export async function createTicket(
   const parsedAttachments = attachmentsJson ? JSON.parse(attachmentsJson) : [];
 
   const rawData = {
-    machineId: Number(formData.get("machineId")),
+    equipmentId: Number(formData.get("equipmentId")),
     type: formData.get("type"),
     title: formData.get("title"),
     description: formData.get("description"),
@@ -56,7 +56,7 @@ export async function createTicket(
   }
 
   const {
-    machineId,
+    equipmentId,
     type,
     title,
     description,
@@ -73,7 +73,7 @@ export async function createTicket(
       const [newTicket] = await tx
         .insert(tickets)
         .values({
-          machineId,
+          equipmentId,
           type,
           title,
           description,
@@ -103,9 +103,9 @@ export async function createTicket(
       return newTicket;
     });
 
-    // Get machine details for notifications
-    const machine = await db.query.machines.findFirst({
-      where: eq(machines.id, machineId),
+    // Get equipment details for notifications
+    const equipmentItem = await db.query.equipment.findFirst({
+      where: eq(equipmentTable.id, equipmentId),
     });
 
     // Notify techs for critical/high priority tickets
@@ -120,20 +120,20 @@ export async function createTicket(
             userId: tech.id,
             type: "ticket_created" as const,
             title: `New ${priority} Priority Ticket`,
-            message: `${title} - ${machine?.name || "Unknown Machine"}`,
+            message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
             link: `/dashboard/tickets/${ticket.id}`,
           }))
         );
       }
     }
 
-    // Notify machine owner if exists
-    if (machine?.ownerId) {
+    // Notify equipment owner if exists
+    if (equipmentItem?.ownerId) {
       await db.insert(notifications).values({
-        userId: machine.ownerId,
-        type: "ticket_created",
-        title: "New Ticket for Your Machine",
-        message: `${title} - ${machine.name}`,
+        userId: equipmentItem.ownerId,
+        type: "ticket_created" as const,
+        title: "Ticket Opened on Your Equipment",
+        message: `${title} - ${equipmentItem.name}`,
         link: `/dashboard/tickets/${ticket.id}`,
       });
     }

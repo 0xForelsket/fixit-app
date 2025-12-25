@@ -19,7 +19,7 @@ async function getSchedules() {
   return db.query.maintenanceSchedules.findMany({
     orderBy: [desc(maintenanceSchedules.createdAt)],
     with: {
-      machine: true,
+      equipment: true,
     },
   });
 }
@@ -104,7 +104,7 @@ export default async function SchedulesPage() {
             <thead className="border-b bg-slate-50">
               <tr className="text-left text-sm font-medium text-muted-foreground">
                 <th className="p-4">Schedule</th>
-                <th className="p-4 hidden md:table-cell">Machine</th>
+                <th className="p-4 hidden md:table-cell">Equipment</th>
                 <th className="p-4 hidden lg:table-cell">Frequency</th>
                 <th className="p-4">Next Due</th>
                 <th className="p-4 hidden sm:table-cell">Status</th>
@@ -136,7 +136,7 @@ export default async function SchedulesPage() {
                     </td>
                     <td className="p-4 hidden md:table-cell">
                       <span className="text-sm">
-                        {schedule.machine?.name || "—"}
+                        {schedule.equipment?.name || "—"}
                       </span>
                     </td>
                     <td className="p-4 hidden lg:table-cell">

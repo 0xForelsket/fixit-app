@@ -38,7 +38,7 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
     where: eq(tickets.reportedById, user.id),
     orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
     with: {
-      machine: {
+      equipment: {
         columns: {
           id: true,
           name: true,
@@ -108,7 +108,7 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
             </div>
             <h3 className="mt-4 text-xl font-semibold">No tickets found</h3>
             <p className="mt-2 text-muted-foreground max-w-xs mx-auto">
-              You haven't reported any machine issues yet.
+              You haven't reported any equipment issues yet.
             </p>
             <Button asChild className="mt-6 rounded-xl">
               <Link href="/">Report an Issue</Link>
@@ -274,7 +274,7 @@ function TicketListItem({
           <div className="flex items-center gap-1.5">
             <Wrench className="h-3.5 w-3.5" />
             <span className="font-semibold text-slate-700">
-              {ticket.machine.name}
+              {ticket.equipment.name}
             </span>
           </div>
           <span>•</span>

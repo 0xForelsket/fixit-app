@@ -1,6 +1,6 @@
 import {
+  createEquipmentSchema,
   createLocationSchema,
-  createMachineSchema,
   createTicketSchema,
   createUserSchema,
   loginSchema,
@@ -162,9 +162,9 @@ describe("createLocationSchema", () => {
   });
 });
 
-describe("createMachineSchema", () => {
-  it("should validate correct machine data", () => {
-    const result = createMachineSchema.safeParse({
+describe("createEquipmentSchema", () => {
+  it("should validate correct equipment data", () => {
+    const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
       locationId: 1,
@@ -173,7 +173,7 @@ describe("createMachineSchema", () => {
   });
 
   it("should require location ID", () => {
-    const result = createMachineSchema.safeParse({
+    const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
     });
@@ -181,7 +181,7 @@ describe("createMachineSchema", () => {
   });
 
   it("should default status to operational", () => {
-    const result = createMachineSchema.safeParse({
+    const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
       locationId: 1,
@@ -194,8 +194,8 @@ describe("createMachineSchema", () => {
 
   it("should accept valid statuses", () => {
     for (const status of ["operational", "down", "maintenance"]) {
-      const result = createMachineSchema.safeParse({
-        name: "Machine",
+      const result = createEquipmentSchema.safeParse({
+        name: "Equipment",
         code: "M-001",
         locationId: 1,
         status,
@@ -205,8 +205,8 @@ describe("createMachineSchema", () => {
   });
 
   it("should allow optional owner ID", () => {
-    const result = createMachineSchema.safeParse({
-      name: "Machine",
+    const result = createEquipmentSchema.safeParse({
+      name: "Equipment",
       code: "M-001",
       locationId: 1,
       ownerId: 5,
@@ -218,19 +218,19 @@ describe("createMachineSchema", () => {
 describe("createTicketSchema", () => {
   it("should validate correct ticket data", () => {
     const result = createTicketSchema.safeParse({
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
-      title: "Machine not working",
-      description: "The machine stopped working after the power outage.",
+      title: "Equipment not working",
+      description: "The equipment stopped working after the power outage.",
     });
     expect(result.success).toBe(true);
   });
 
   it("should require all fields", () => {
     const result = createTicketSchema.safeParse({
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
-      title: "Machine not working",
+      title: "Equipment not working",
       // missing description
     });
     expect(result.success).toBe(false);
@@ -246,7 +246,7 @@ describe("createTicketSchema", () => {
     ];
     for (const type of types) {
       const result = createTicketSchema.safeParse({
-        machineId: 1,
+        equipmentId: 1,
         type,
         title: "Test ticket",
         description: "Test description",
@@ -257,7 +257,7 @@ describe("createTicketSchema", () => {
 
   it("should default priority to medium", () => {
     const result = createTicketSchema.safeParse({
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
       title: "Test",
       description: "Test",
@@ -272,7 +272,7 @@ describe("createTicketSchema", () => {
     const priorities = ["low", "medium", "high", "critical"];
     for (const priority of priorities) {
       const result = createTicketSchema.safeParse({
-        machineId: 1,
+        equipmentId: 1,
         type: "breakdown",
         title: "Test",
         description: "Test",
@@ -284,7 +284,7 @@ describe("createTicketSchema", () => {
 
   it("should reject title over 200 characters", () => {
     const result = createTicketSchema.safeParse({
-      machineId: 1,
+      equipmentId: 1,
       type: "breakdown",
       title: "A".repeat(201),
       description: "Test",

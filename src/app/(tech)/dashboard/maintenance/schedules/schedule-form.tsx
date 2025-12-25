@@ -7,7 +7,7 @@ import {
 } from "@/actions/maintenance";
 import { Button } from "@/components/ui/button";
 import type {
-  Machine,
+  Equipment,
   MaintenanceChecklist,
   MaintenanceSchedule,
 } from "@/db/schema";
@@ -33,17 +33,17 @@ type ScheduleFormValues = z.infer<typeof insertMaintenanceScheduleSchema>;
 
 interface ScheduleFormProps {
   schedule?: MaintenanceSchedule & {
-    machine?: Machine | null;
+    equipment?: Equipment | null;
   };
   checklists?: MaintenanceChecklist[];
-  machines: Machine[];
+  equipment: Equipment[];
   isNew?: boolean;
 }
 
 export function ScheduleForm({
   schedule,
   checklists = [],
-  machines,
+  equipment,
   isNew,
 }: ScheduleFormProps) {
   const router = useRouter();
@@ -54,7 +54,7 @@ export function ScheduleForm({
     resolver: zodResolver(insertMaintenanceScheduleSchema),
     defaultValues: {
       title: schedule?.title || "",
-      machineId: schedule?.machineId || undefined,
+      equipmentId: schedule?.equipmentId || undefined,
       type: (schedule?.type as "maintenance" | "calibration") || "maintenance",
       frequencyDays: schedule?.frequencyDays || 30,
       isActive: schedule?.isActive ?? true,
@@ -221,29 +221,32 @@ export function ScheduleForm({
           </div>
 
           <div>
-            <label htmlFor="machine" className="mb-1 block text-sm font-medium">
-              Machine
+            <label
+              htmlFor="equipment"
+              className="mb-1 block text-sm font-medium"
+            >
+              Equipment
             </label>
             <select
-              id="machine"
-              {...register("machineId")}
+              id="equipment"
+              {...register("equipmentId")}
               className={cn(
                 "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                errors.machineId
+                errors.equipmentId
                   ? "border-rose-500 focus:ring-rose-200"
                   : "focus:border-primary-500 focus:ring-primary-500/20"
               )}
             >
-              <option value="">Select machine...</option>
-              {machines.map((machine) => (
-                <option key={machine.id} value={machine.id}>
-                  {machine.name} ({machine.code})
+              <option value="">Select equipment...</option>
+              {equipment.map((equipment) => (
+                <option key={equipment.id} value={equipment.id}>
+                  {equipment.name} ({equipment.code})
                 </option>
               ))}
             </select>
-            {errors.machineId && (
+            {errors.equipmentId && (
               <p className="mt-1 text-xs text-rose-500">
-                {errors.machineId.message}
+                {errors.equipmentId.message}
               </p>
             )}
           </div>

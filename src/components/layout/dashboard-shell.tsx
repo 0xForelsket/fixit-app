@@ -36,7 +36,7 @@ export function DashboardShell({
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {/* Decorative glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 rounded-full blur-[100px] pointer-events-none" />
-        
+
         <Header
           title={title}
           userId={user.id}

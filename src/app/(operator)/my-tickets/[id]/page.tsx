@@ -31,7 +31,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
   const ticket = await db.query.tickets.findFirst({
     where: eq(tickets.id, ticketId),
     with: {
-      machine: {
+      equipment: {
         with: {
           location: true,
         },
@@ -137,10 +137,12 @@ export default async function TicketDetailPage({ params }: PageProps) {
           )}
       </div>
 
-      {/* Machine info */}
-      {ticket.machine && (
+      {/* Equipment info */}
+      {ticket.equipment && (
         <div className="rounded-lg border bg-card p-4">
-          <h2 className="text-sm font-medium text-muted-foreground">Machine</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">
+            Equipment
+          </h2>
           <div className="mt-2 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
               <svg
@@ -158,11 +160,11 @@ export default async function TicketDetailPage({ params }: PageProps) {
               </svg>
             </div>
             <div>
-              <p className="font-medium">{ticket.machine.name}</p>
+              <p className="font-medium">{ticket.equipment.name}</p>
               <p className="text-sm text-muted-foreground">
-                {ticket.machine.code}
-                {ticket.machine.location &&
-                  ` • ${ticket.machine.location.name}`}
+                {ticket.equipment.code}
+                {ticket.equipment.location &&
+                  ` • ${ticket.equipment.location.name}`}
               </p>
             </div>
           </div>

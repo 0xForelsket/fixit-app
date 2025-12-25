@@ -1,13 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import type { EquipmentCategory, EquipmentType } from "@/db/schema";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-interface MachineFormProps {
-  machine?: {
+interface EquipmentFormProps {
+  equipment?: {
     id: number;
     name: string;
     code: string;
@@ -15,32 +16,52 @@ interface MachineFormProps {
     locationId: number;
     ownerId: number | null;
     modelId: number | null;
+    typeId: number | null;
+    type?: {
+      categoryId: number;
+    } | null;
   };
   locations: { id: number; name: string }[];
   users: { id: number; name: string }[];
   models: { id: number; name: string }[];
+  categories: EquipmentCategory[];
+  types: EquipmentType[];
   isNew?: boolean;
 }
 
-export function MachineForm({
-  machine,
+export function EquipmentForm({
+  equipment,
   locations,
   users,
   models,
+  categories,
+  types,
   isNew,
-}: MachineFormProps) {
+}: EquipmentFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [name, setName] = useState(machine?.name || "");
-  const [code, setCode] = useState(machine?.code || "");
-  const [status, setStatus] = useState(machine?.status || "operational");
+  const [name, setName] = useState(equipment?.name || "");
+  const [code, setCode] = useState(equipment?.code || "");
+  const [status, setStatus] = useState(equipment?.status || "operational");
   const [locationId, setLocationId] = useState(
-    machine?.locationId?.toString() || ""
+    equipment?.locationId?.toString() || ""
   );
-  const [ownerId, setOwnerId] = useState(machine?.ownerId?.toString() || "");
-  const [modelId, setModelId] = useState(machine?.modelId?.toString() || "");
+  const [ownerId, setOwnerId] = useState(equipment?.ownerId?.toString() || "");
+  const [modelId, setModelId] = useState(equipment?.modelId?.toString() || "");
+
+  const [categoryId, setCategoryId] = useState(
+    equipment?.type?.categoryId?.toString() || ""
+  );
+  const [typeId, setTypeId] = useState(equipment?.typeId?.toString() || "");
+
+  const filteredTypes = useMemo(() => {
+    if (!categoryId) return [];
+    return types.filter(
+      (t: EquipmentType) => t.categoryId === Number.parseInt(categoryId)
+    );
+  }, [categoryId, types]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,9 +76,10 @@ export function MachineForm({
         locationId: Number.parseInt(locationId),
         ownerId: ownerId ? Number.parseInt(ownerId) : null,
         modelId: modelId ? Number.parseInt(modelId) : null,
+        typeId: typeId ? Number.parseInt(typeId) : null,
       };
 
-      const url = isNew ? "/api/machines" : `/api/machines/${machine?.id}`;
+      const url = isNew ? "/api/equipment" : `/api/equipment/${equipment?.id}`;
 
       const res = await fetch(url, {
         method: isNew ? "POST" : "PATCH",
@@ -67,10 +89,10 @@ export function MachineForm({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to save machine");
+        throw new Error(data.error || "Failed to save equipment");
       }
 
-      router.push("/admin/machines");
+      router.push("/admin/equipment");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -80,19 +102,19 @@ export function MachineForm({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this machine?")) return;
+    if (!confirm("Are you sure you want to delete this equipment?")) return;
 
     setSaving(true);
     try {
-      const res = await fetch(`/api/machines/${machine?.id}`, {
+      const res = await fetch(`/api/equipment/${equipment?.id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        throw new Error("Failed to delete machine");
+        throw new Error("Failed to delete equipment");
       }
 
-      router.push("/admin/machines");
+      router.push("/admin/equipment");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -105,16 +127,16 @@ export function MachineForm({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button type="button" variant="ghost" size="icon" asChild>
-            <Link href="/admin/machines">
+            <Link href="/admin/equipment">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isNew ? "New Machine" : "Edit Machine"}
+              {isNew ? "New Equipment" : "Edit Equipment"}
             </h1>
             <p className="text-muted-foreground">
-              {isNew ? "Add a new machine to the fleet" : machine?.name}
+              {isNew ? "Add a new equipment to the fleet" : equipment?.name}
             </p>
           </div>
         </div>
@@ -132,7 +154,7 @@ export function MachineForm({
           )}
           <Button type="submit" disabled={saving}>
             <Save className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save Machine"}
+            {saving ? "Saving..." : "Save Equipment"}
           </Button>
         </div>
       </div>
@@ -147,7 +169,7 @@ export function MachineForm({
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <label htmlFor="name" className="mb-1 block text-sm font-medium">
-              Machine Name
+              Equipment Name
             </label>
             <input
               id="name"
@@ -176,8 +198,61 @@ export function MachineForm({
           </div>
 
           <div>
+            <label
+              htmlFor="category"
+              className="mb-1 block text-sm font-medium text-primary-700 uppercase tracking-tight"
+            >
+              Equipment Category (SAP)
+            </label>
+            <select
+              id="category"
+              value={categoryId}
+              onChange={(e) => {
+                setCategoryId(e.target.value);
+                setTypeId(""); // Reset type when category changes
+              }}
+              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+            >
+              <option value="">Select Category...</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.label} ({cat.name})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="type"
+              className="mb-1 block text-sm font-medium text-primary-700 uppercase tracking-tight"
+            >
+              Equipment Type (Object Type)
+            </label>
+            <select
+              id="type"
+              value={typeId}
+              onChange={(e) => setTypeId(e.target.value)}
+              disabled={!categoryId}
+              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 disabled:bg-zinc-50 disabled:text-zinc-400"
+            >
+              <option value="">Select Type...</option>
+              {filteredTypes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.code})
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-[10px] text-zinc-400 font-medium">
+              {!categoryId
+                ? "Select a category first"
+                : "Precise classification for SAP PM alignment"}
+            </p>
+          </div>
+
+          <div>
             <label htmlFor="model" className="mb-1 block text-sm font-medium">
-              Model
+              Equipment Model
             </label>
             <select
               id="model"

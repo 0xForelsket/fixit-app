@@ -25,7 +25,7 @@ async function getSchedules() {
   return db.query.maintenanceSchedules.findMany({
     where: eq(maintenanceSchedules.isActive, true),
     with: {
-      machine: {
+      equipment: {
         with: {
           location: true,
         },
@@ -267,7 +267,7 @@ export default async function MaintenancePage({
                               : "bg-amber-100 text-amber-700 hover:bg-amber-200"
                         )}
                       >
-                        {event.machine?.name || event.title}
+                        {event.equipment?.name || event.title}
                       </Link>
                     );
                   })}
@@ -339,8 +339,8 @@ export default async function MaintenancePage({
                       <div>
                         <p className="font-medium">{schedule.title}</p>
                         <p className="text-sm text-muted-foreground">
-                          {schedule.machine?.name} •{" "}
-                          {schedule.machine?.location?.name}
+                          {schedule.equipment?.name} •{" "}
+                          {schedule.equipment?.location?.name}
                         </p>
                       </div>
                     </div>

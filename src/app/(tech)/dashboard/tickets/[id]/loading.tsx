@@ -63,7 +63,7 @@ export default function TicketDetailLoading() {
             <div className="h-10 w-full bg-slate-200 rounded" />
           </div>
 
-          {/* Machine info skeleton */}
+          {/* Equipment info skeleton */}
           <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
             <div className="bg-slate-100 px-4 py-3 border-b">
               <div className="h-4 w-20 bg-slate-200 rounded" />

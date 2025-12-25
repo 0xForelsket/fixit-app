@@ -148,10 +148,7 @@ body {
 
 /* Engineering grid pattern overlay */
 .industrial-grid {
-  background-image: linear-gradient(
-      rgba(0, 0, 0, 0.02) 1px,
-      transparent 1px
-    ),
+  background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
   background-size: 32px 32px;
 }
@@ -160,8 +157,7 @@ body {
   background-image: linear-gradient(
       rgba(255, 255, 255, 0.02) 1px,
       transparent 1px
-    ),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    ), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
 /* ============================================
@@ -217,8 +213,8 @@ body {
 }
 
 .card-shadow-lg {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08),
-    0 4px 6px -4px rgb(0 0 0 / 0.08);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px
+    rgb(0 0 0 / 0.08);
 }
 
 /* Industrial glass card */
@@ -370,8 +366,8 @@ body {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.12),
-    0 8px 10px -6px rgb(0 0 0 / 0.08);
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.12), 0 8px 10px -6px
+    rgb(0 0 0 / 0.08);
 }
 
 /* Orange accent on hover */
@@ -411,8 +407,8 @@ body {
 }
 
 .transition-colors-fast {
-  transition: color 0.15s ease, background-color 0.15s ease,
-    border-color 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s
+    ease;
 }
 
 /* ============================================
@@ -422,7 +418,7 @@ body {
   font-family: var(--font-mono);
 }
 
-.text-machine-id {
+.text-equipment-id {
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 0.02em;

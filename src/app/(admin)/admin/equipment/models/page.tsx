@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-export default async function MachineModelsPage() {
-  const models = await db.query.machineModels.findMany({
+export default async function EquipmentModelsPage() {
+  const models = await db.query.equipmentModels.findMany({
     with: {
-      machines: true,
+      equipment: true,
       bom: true,
     },
     orderBy: (models, { desc }) => [desc(models.id)],
@@ -17,13 +17,15 @@ export default async function MachineModelsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Machine Models</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Equipment Models
+          </h1>
           <p className="text-muted-foreground">
-            Define standard machine types and their spare parts (BOM).
+            Define standard equipment types and their spare parts (BOM).
           </p>
         </div>
         <Button asChild>
-          <Link href="/admin/machines/models/new">
+          <Link href="/admin/equipment/models/new">
             <Plus className="mr-2 h-4 w-4" />
             New Model
           </Link>
@@ -36,7 +38,7 @@ export default async function MachineModelsPage() {
             <tr className="text-left font-medium text-muted-foreground">
               <th className="p-3">Model Name</th>
               <th className="p-3">Manufacturer</th>
-              <th className="p-3">Machines</th>
+              <th className="p-3">Equipment</th>
               <th className="p-3">BOM Parts</th>
               <th className="p-3 w-20" />
             </tr>
@@ -48,7 +50,7 @@ export default async function MachineModelsPage() {
                   colSpan={5}
                   className="p-8 text-center text-muted-foreground"
                 >
-                  No machine models defined yet.
+                  No equipment models defined yet.
                 </td>
               </tr>
             ) : (
@@ -56,7 +58,7 @@ export default async function MachineModelsPage() {
                 <tr key={model.id} className="hover:bg-slate-50">
                   <td className="p-3 font-medium">
                     <Link
-                      href={`/admin/machines/models/${model.id}`}
+                      href={`/admin/equipment/models/${model.id}`}
                       className="hover:underline"
                     >
                       {model.name}
@@ -70,13 +72,13 @@ export default async function MachineModelsPage() {
                   <td className="p-3">{model.manufacturer || "-"}</td>
                   <td className="p-3">
                     <Badge variant="secondary">
-                      {model.machines.length} active
+                      {model.equipment.length} active
                     </Badge>
                   </td>
                   <td className="p-3">{model.bom.length} parts</td>
                   <td className="p-3 text-right">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/admin/machines/models/${model.id}`}>
+                      <Link href={`/admin/equipment/models/${model.id}`}>
                         Edit
                       </Link>
                     </Button>

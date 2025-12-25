@@ -14,7 +14,13 @@ interface StatusCardProps {
 
 const statusConfig: Record<
   StatusCardProps["status"],
-  { labelColor: string; iconColor: string; bg: string; dotClass: string; icon: LucideIcon }
+  {
+    labelColor: string;
+    iconColor: string;
+    bg: string;
+    dotClass: string;
+    icon: LucideIcon;
+  }
 > = {
   operational: {
     labelColor: "text-success-700",
@@ -62,7 +68,12 @@ export function StatusCard({ label, count, status }: StatusCardProps) {
         <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
           {label}
         </p>
-        <p className={cn("text-xl font-mono font-bold leading-none mt-0.5", config.labelColor)}>
+        <p
+          className={cn(
+            "text-xl font-mono font-bold leading-none mt-0.5",
+            config.labelColor
+          )}
+        >
           {count}
         </p>
       </div>

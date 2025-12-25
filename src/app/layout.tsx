@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "FixIt - CMMS Lite",
   description:
-    "Lightweight maintenance management system for tracking machine maintenance requests",
+    "Lightweight maintenance management system for tracking equipment maintenance requests",
 };
 
 export default function RootLayout({

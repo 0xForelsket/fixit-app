@@ -1,5 +1,5 @@
 "use client";
-import type { Location, Machine } from "@/db/schema";
+import type { Equipment, Location } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -11,26 +11,26 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-interface MachineWithLocation extends Machine {
+interface EquipmentWithLocation extends Equipment {
   location: Location | null;
 }
 
-interface MachineGridProps {
-  machines: MachineWithLocation[];
+interface EquipmentGridProps {
+  equipment: EquipmentWithLocation[];
 }
 
-export function MachineGrid({ machines }: MachineGridProps) {
-  if (machines.length === 0) {
+export function EquipmentGrid({ equipment }: EquipmentGridProps) {
+  if (equipment.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/30 rounded-lg border-2 border-dashed">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <Factory className="h-8 w-8 text-muted-foreground/60" />
         </div>
         <h3 className="mt-4 text-xl font-semibold text-foreground">
-          No machines found
+          No equipment found
         </h3>
         <p className="mt-2 text-muted-foreground max-w-sm mx-auto">
-          We couldn't find any machines matching your search. Try adjusting the
+          We couldn't find any equipment matching your search. Try adjusting the
           filters or search term.
         </p>
       </div>
@@ -39,14 +39,14 @@ export function MachineGrid({ machines }: MachineGridProps) {
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {machines.map((machine) => (
-        <MachineCard key={machine.id} machine={machine} />
+      {equipment.map((equipment) => (
+        <EquipmentCard key={equipment.id} equipment={equipment} />
       ))}
     </div>
   );
 }
 
-function MachineCard({ machine }: { machine: MachineWithLocation }) {
+function EquipmentCard({ equipment }: { equipment: EquipmentWithLocation }) {
   const statusConfig = {
     operational: {
       icon: CheckCircle2,
@@ -74,12 +74,12 @@ function MachineCard({ machine }: { machine: MachineWithLocation }) {
     },
   } as const;
 
-  const config = statusConfig[machine.status];
+  const config = statusConfig[equipment.status];
   const StatusIcon = config.icon;
 
   return (
     <Link
-      href={`/report/${machine.code}`}
+      href={`/report/${equipment.code}`}
       className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-md hover:border-primary-300"
     >
       {/* Color-Blocked Header */}
@@ -92,7 +92,7 @@ function MachineCard({ machine }: { machine: MachineWithLocation }) {
       >
         <div className="space-y-1">
           <h3 className={cn("font-bold text-lg leading-tight", config.text)}>
-            {machine.name}
+            {equipment.name}
           </h3>
           <p
             className={cn(
@@ -115,19 +115,19 @@ function MachineCard({ machine }: { machine: MachineWithLocation }) {
               Code
             </span>
             <span className="font-mono text-sm font-medium bg-secondary px-2 py-0.5 rounded text-secondary-foreground">
-              {machine.code}
+              {equipment.code}
             </span>
           </div>
 
           {/* Location */}
-          {machine.location && (
+          {equipment.location && (
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Loc
               </span>
               <div className="flex items-center gap-1 text-sm text-foreground/80">
                 <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                {machine.location.name}
+                {equipment.location.name}
               </div>
             </div>
           )}

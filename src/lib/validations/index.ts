@@ -2,7 +2,7 @@
 
 export * from "./users";
 export * from "./locations";
-export * from "./machines";
+export * from "./equipment";
 export * from "./tickets";
 export * from "./attachments";
 export * from "./schedules";

@@ -58,7 +58,7 @@ async function getTickets(params: SearchParams) {
     offset,
     orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
     with: {
-      machine: true,
+      equipment: true,
       reportedBy: true,
       assignedTo: true,
     },
@@ -264,7 +264,7 @@ export default async function TicketsPage({
               <tr className="text-left text-sm font-medium text-muted-foreground">
                 <th className="p-4">ID</th>
                 <th className="p-4">Ticket</th>
-                <th className="p-4 hidden md:table-cell">Machine</th>
+                <th className="p-4 hidden md:table-cell">Equipment</th>
                 <th className="p-4 hidden lg:table-cell">Status</th>
                 <th className="p-4 hidden lg:table-cell">Priority</th>
                 <th className="p-4 hidden xl:table-cell">Assigned To</th>
@@ -518,7 +518,7 @@ function TicketRow({ ticket }: { ticket: any }) {
         </div>
       </td>
       <td className="p-4 hidden md:table-cell">
-        <span className="text-sm">{ticket.machine?.name || "—"}</span>
+        <span className="text-sm">{ticket.equipment?.name || "—"}</span>
       </td>
       <td className="p-4 hidden lg:table-cell">
         <span

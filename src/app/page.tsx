@@ -1,13 +1,13 @@
 import { StatusCard } from "@/components/ui/status-card";
 import { db } from "@/db";
-import { machines, notifications } from "@/db/schema";
+import { equipment, notifications } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { MachineGrid } from "./(operator)/machine-grid";
-import { MachineSearch } from "./(operator)/machine-search";
+import { EquipmentGrid } from "./(operator)/equipment-grid";
+import { EquipmentSearch } from "./(operator)/equipment-search";
 import { OperatorNav } from "./(operator)/nav";
 
 interface PageProps {
@@ -33,13 +33,14 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
             </div>
           </div>
-          
+
           <h1 className="text-6xl font-black tracking-tight mb-4 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-700 bg-clip-text text-transparent">
             FixIt <span className="text-primary-600">CMMS</span>
           </h1>
-          
+
           <p className="text-xl text-zinc-500 font-medium mb-10 max-w-md mx-auto leading-relaxed">
-            High-precision maintenance management for modern industrial environments.
+            High-precision maintenance management for modern industrial
+            environments.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -58,7 +59,7 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary-500" />
-              Machine BOMs
+              Equipment BOMs
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-secondary-500" />
@@ -85,17 +86,17 @@ export default async function Home({ searchParams }: PageProps) {
   const search = params.search || "";
   const locationId = params.location ? Number(params.location) : undefined;
 
-  // Fetch machines with location info
+  // Fetch equipment with location info
   const conditions = [];
 
   if (search) {
     conditions.push(
-      sql`(${ilike(machines.name, `%${search}%`)} OR ${ilike(machines.code, `%${search}%`)})`
+      sql`(${ilike(equipment.name, `%${search}%`)} OR ${ilike(equipment.code, `%${search}%`)})`
     );
   }
 
   if (locationId) {
-    conditions.push(eq(machines.locationId, locationId));
+    conditions.push(eq(equipment.locationId, locationId));
   }
 
   const whereClause =
@@ -105,9 +106,9 @@ export default async function Home({ searchParams }: PageProps) {
         : conditions[0]
       : undefined;
 
-  const machineList = await db.query.machines.findMany({
+  const equipmentList = await db.query.equipment.findMany({
     where: whereClause,
-    orderBy: (machines, { asc }) => [asc(machines.name)],
+    orderBy: (equipment, { asc }) => [asc(equipment.name)],
     with: {
       location: true,
     },
@@ -118,11 +119,11 @@ export default async function Home({ searchParams }: PageProps) {
     orderBy: (locations, { asc }) => [asc(locations.name)],
   });
 
-  // Count tickets per machine status
+  // Count tickets per equipment status
   const statusCounts = {
-    operational: machineList.filter((m) => m.status === "operational").length,
-    down: machineList.filter((m) => m.status === "down").length,
-    maintenance: machineList.filter((m) => m.status === "maintenance").length,
+    operational: equipmentList.filter((m) => m.status === "operational").length,
+    down: equipmentList.filter((m) => m.status === "down").length,
+    maintenance: equipmentList.filter((m) => m.status === "maintenance").length,
   };
 
   // Get unread notification count
@@ -162,7 +163,7 @@ export default async function Home({ searchParams }: PageProps) {
         <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between border-b border-zinc-200 pb-8">
           <div>
             <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight">
-              Machine Status
+              Equipment Status
             </h1>
             <p className="text-zinc-500 mt-2 font-medium">
               Real-time monitoring and issue reporting station
@@ -186,12 +187,12 @@ export default async function Home({ searchParams }: PageProps) {
 
         {/* Search and filters */}
         <div className="bg-white/50 p-6 rounded-2xl border border-zinc-200 shadow-sm backdrop-blur-sm">
-          <MachineSearch locations={locationList} initialSearch={search} />
+          <EquipmentSearch locations={locationList} initialSearch={search} />
         </div>
 
-        {/* Machine grid */}
+        {/* Equipment grid */}
         <div className="relative">
-          <MachineGrid machines={machineList} />
+          <EquipmentGrid equipment={equipmentList} />
         </div>
       </main>
     </div>

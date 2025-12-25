@@ -19,8 +19,10 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 
 interface ReportFormProps {
-  machineId: number;
-  machineName: string;
+  equipment: {
+    id: number;
+    name: string;
+  };
 }
 
 const typeConfig: Record<
@@ -30,7 +32,7 @@ const typeConfig: Record<
   breakdown: {
     label: "Breakdown",
     icon: Zap,
-    description: "Machine is stopped",
+    description: "Equipment is stopped",
   },
   maintenance: {
     label: "Maintenance",
@@ -84,12 +86,9 @@ const priorityConfig: Record<
   },
 };
 
-export function ReportForm({
-  machineId,
-  machineName: _machineName,
-}: ReportFormProps) {
+export function ReportForm({ equipment }: ReportFormProps) {
   const router = useRouter();
-  const [attachments, setAttachments] = useState<any[]>([]);
+  const [attachments, setAttachments] = useState<{ filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]>([]);
   const [state, formAction, isPending] = useActionState(createTicket, {});
 
   useEffect(() => {
@@ -98,13 +97,13 @@ export function ReportForm({
     }
   }, [state.success, router]);
 
-  const handleUploadComplete = (attachment: any) => {
+  const handleUploadComplete = (attachment: { filename: string; s3Key: string; mimeType: string; sizeBytes: number }) => {
     setAttachments((prev) => [...prev, attachment]);
   };
 
   return (
     <form action={formAction} className="space-y-8">
-      <input type="hidden" name="machineId" value={machineId} />
+      <input type="hidden" name="equipmentId" value={equipment.id} />
       <input
         type="hidden"
         name="attachments"
@@ -227,7 +226,7 @@ export function ReportForm({
       {/* File Upload */}
       <FileUpload
         entityType="ticket"
-        entityId={machineId}
+        entityId={equipment.id}
         onUploadComplete={handleUploadComplete}
       />
 

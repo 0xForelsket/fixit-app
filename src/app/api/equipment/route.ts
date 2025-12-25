@@ -1,7 +1,7 @@
 import { db } from "@/db";
-import { machines } from "@/db/schema";
+import { equipment as equipmentTable } from "@/db/schema";
 import { requireAuth, requireCsrf, requireRole } from "@/lib/session";
-import { createMachineSchema, paginationSchema } from "@/lib/validations";
+import { createEquipmentSchema, paginationSchema } from "@/lib/validations";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -22,32 +22,32 @@ export async function GET(request: Request) {
     const conditions = [];
 
     if (locationId) {
-      conditions.push(eq(machines.locationId, Number(locationId)));
+      conditions.push(eq(equipmentTable.locationId, Number(locationId)));
     }
 
     if (status) {
       conditions.push(
         eq(
-          machines.status,
-          status as (typeof machines.status.enumValues)[number]
+          equipmentTable.status,
+          status as (typeof equipmentTable.status.enumValues)[number]
         )
       );
     }
 
     if (search) {
       conditions.push(
-        sql`(${ilike(machines.name, `%${search}%`)} OR ${ilike(machines.code, `%${search}%`)})`
+        sql`(${ilike(equipmentTable.name, `%${search}%`)} OR ${ilike(equipmentTable.code, `%${search}%`)})`
       );
     }
 
     const offset = (pagination.page - 1) * pagination.limit;
 
     const [results, totalResult] = await Promise.all([
-      db.query.machines.findMany({
+      db.query.equipment.findMany({
         where: conditions.length > 0 ? and(...conditions) : undefined,
         limit: pagination.limit,
         offset,
-        orderBy: (machines, { asc }) => [asc(machines.name)],
+        orderBy: (equipmentTab, { asc }) => [asc(equipmentTab.name)],
         with: {
           location: true,
           owner: {
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       }),
       db
         .select({ count: sql<number>`count(*)` })
-        .from(machines)
+        .from(equipmentTable)
         .where(conditions.length > 0 ? and(...conditions) : undefined),
     ]);
 
@@ -78,9 +78,9 @@ export async function GET(request: Request) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("Get machines error:", error);
+    console.error("Get equipment error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch machines" },
+      { error: "Failed to fetch equipment" },
       { status: 500 }
     );
   }
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     await requireRole("admin");
 
     const body = await request.json();
-    const result = createMachineSchema.safeParse(body);
+    const result = createEquipmentSchema.safeParse(body);
 
     if (!result.success) {
       return NextResponse.json(
@@ -101,9 +101,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const [machine] = await db.insert(machines).values(result.data).returning();
+    const [newItem] = await db
+      .insert(equipmentTable)
+      .values(result.data)
+      .returning();
 
-    return NextResponse.json(machine, { status: 201 });
+    return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {
@@ -117,9 +120,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    console.error("Create machine error:", error);
+    console.error("Create equipment error:", error);
     return NextResponse.json(
-      { error: "Failed to create machine" },
+      { error: "Failed to create equipment" },
       { status: 500 }
     );
   }

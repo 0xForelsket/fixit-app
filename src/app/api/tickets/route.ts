@@ -1,5 +1,10 @@
 import { db } from "@/db";
-import { machines, notifications, tickets, users } from "@/db/schema";
+import {
+  notifications,
+  tickets,
+  users,
+  equipment as equipmentTable,
+} from "@/db/schema";
 import { requireAuth, requireCsrf } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
 import { createTicketSchema, paginationSchema } from "@/lib/validations";
@@ -18,7 +23,7 @@ export async function GET(request: Request) {
 
     const status = searchParams.get("status");
     const priority = searchParams.get("priority");
-    const machineId = searchParams.get("machineId");
+    const equipmentId = searchParams.get("equipmentId");
     const assignedToId = searchParams.get("assignedToId");
 
     const conditions = [];
@@ -42,8 +47,8 @@ export async function GET(request: Request) {
       );
     }
 
-    if (machineId) {
-      conditions.push(eq(tickets.machineId, Number(machineId)));
+    if (equipmentId) {
+      conditions.push(eq(tickets.equipmentId, Number(equipmentId)));
     }
 
     if (assignedToId) {
@@ -64,7 +69,7 @@ export async function GET(request: Request) {
         offset,
         orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
         with: {
-          machine: true,
+          equipment: true,
           reportedBy: {
             columns: { id: true, name: true, employeeId: true },
           },
@@ -115,7 +120,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { machineId, type, title, description, priority } = result.data;
+    const { equipmentId, type, title, description, priority } = result.data;
 
     // Calculate SLA due date
     const dueBy = calculateDueBy(priority);
@@ -124,7 +129,7 @@ export async function POST(request: Request) {
     const [ticket] = await db
       .insert(tickets)
       .values({
-        machineId,
+        equipmentId,
         type,
         title,
         description,
@@ -135,9 +140,9 @@ export async function POST(request: Request) {
       })
       .returning();
 
-    // Get machine details for notifications
-    const machine = await db.query.machines.findFirst({
-      where: eq(machines.id, machineId),
+    // Get equipment details for notifications
+    const equipmentItem = await db.query.equipment.findFirst({
+      where: eq(equipmentTable.id, equipmentId),
     });
 
     // Notify techs for critical/high priority tickets
@@ -152,20 +157,20 @@ export async function POST(request: Request) {
             userId: tech.id,
             type: "ticket_created" as const,
             title: `New ${priority} Priority Ticket`,
-            message: `${title} - ${machine?.name || "Unknown Machine"}`,
+            message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
             link: `/dashboard/tickets/${ticket.id}`,
           }))
         );
       }
     }
 
-    // Notify machine owner if exists
-    if (machine?.ownerId) {
+    // Notify equipment owner if exists
+    if (equipmentItem?.ownerId) {
       await db.insert(notifications).values({
-        userId: machine.ownerId,
-        type: "ticket_created",
-        title: "New Ticket for Your Machine",
-        message: `${title} - ${machine.name}`,
+        userId: equipmentItem.ownerId,
+        type: "ticket_created" as const,
+        title: "Ticket Opened on Your Equipment",
+        message: `${title} - ${equipmentItem.name}`,
         link: `/dashboard/tickets/${ticket.id}`,
       });
     }

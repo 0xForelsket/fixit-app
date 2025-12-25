@@ -23,7 +23,7 @@ export const ticketStatusSchema = z.enum([
 ]);
 
 export const createTicketSchema = z.object({
-  machineId: z.number().int().positive("Machine is required"),
+  equipmentId: z.number().int().positive("Equipment is required"),
   type: ticketTypeSchema,
   title: z.string().min(1, "Title is required").max(200, "Title is too long"),
   description: z

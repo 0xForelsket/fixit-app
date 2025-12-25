@@ -12,7 +12,7 @@ export const checklistItemSchema = z.object({
 
 export const insertMaintenanceScheduleSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title is too long"),
-  machineId: z.coerce.number().min(1, "Machine is required"), // Coerce for form compatibility
+  equipmentId: z.coerce.number().min(1, "Equipment is required"), // Coerce for form compatibility
   type: scheduleTypeSchema,
   frequencyDays: z.coerce
     .number()
