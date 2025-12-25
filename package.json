@@ -11,6 +11,8 @@
     "format": "biome format --write .",
     "test": "vitest",
     "test:run": "vitest run",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -50,6 +52,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
