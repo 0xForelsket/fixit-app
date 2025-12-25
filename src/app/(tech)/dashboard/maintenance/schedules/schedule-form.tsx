@@ -7,6 +7,7 @@ import type {
   MaintenanceSchedule,
 } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   Check,
@@ -19,6 +20,28 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import { z } from "zod";
+
+// --- Zod Schema ---
+const scheduleSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  machineId: z.coerce.number().min(1, "Machine is required"),
+  type: z.enum(["maintenance", "calibration"]),
+  frequencyDays: z.coerce.number().min(1, "Frequency must be at least 1 day"),
+  isActive: z.boolean(),
+  checklists: z.array(
+    z.object({
+      id: z.number().optional(),
+      stepNumber: z.number(),
+      description: z.string(),
+      isRequired: z.boolean(),
+      estimatedMinutes: z.coerce.number().nullable(),
+    })
+  ),
+});
+
+type ScheduleFormValues = z.infer<typeof scheduleSchema>;
 
 interface ScheduleFormProps {
   schedule?: MaintenanceSchedule & {
@@ -37,85 +60,62 @@ export function ScheduleForm({
 }: ScheduleFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Form state
-  const [title, setTitle] = useState(schedule?.title || "");
-  const [machineId, setMachineId] = useState(
-    schedule?.machineId?.toString() || ""
-  );
-  const [type, setType] = useState<"maintenance" | "calibration">(
-    schedule?.type || "maintenance"
-  );
-  const [frequencyDays, setFrequencyDays] = useState(
-    schedule?.frequencyDays?.toString() || "30"
-  );
-  const [isActive, setIsActive] = useState(schedule?.isActive ?? true);
+  const form = useForm<ScheduleFormValues>({
+    resolver: zodResolver(scheduleSchema),
+    defaultValues: {
+      title: schedule?.title || "",
+      machineId: schedule?.machineId || undefined,
+      type: (schedule?.type as "maintenance" | "calibration") || "maintenance",
+      frequencyDays: schedule?.frequencyDays || 30,
+      isActive: schedule?.isActive ?? true,
+      checklists:
+        checklists.length > 0
+          ? checklists.map((c) => ({
+              id: c.id,
+              stepNumber: c.stepNumber,
+              description: c.description,
+              isRequired: c.isRequired,
+              estimatedMinutes: c.estimatedMinutes,
+            }))
+          : [],
+    },
+  });
 
-  // Checklist state
-  const [checklistItems, setChecklistItems] = useState<
-    Array<{
-      id?: number;
-      stepNumber: number;
-      description: string;
-      isRequired: boolean;
-      estimatedMinutes: number | null;
-    }>
-  >(
-    checklists.map((c) => ({
-      id: c.id,
-      stepNumber: c.stepNumber,
-      description: c.description,
-      isRequired: c.isRequired,
-      estimatedMinutes: c.estimatedMinutes,
-    }))
-  );
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = form;
 
-  const addChecklistItem = () => {
-    setChecklistItems([
-      ...checklistItems,
-      {
-        stepNumber: checklistItems.length + 1,
-        description: "",
-        isRequired: true,
-        estimatedMinutes: null,
-      },
-    ]);
-  };
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "checklists",
+  });
 
-  const removeChecklistItem = (index: number) => {
-    const newItems = checklistItems.filter((_, i) => i !== index);
-    // Renumber steps
-    setChecklistItems(
-      newItems.map((item, i) => ({ ...item, stepNumber: i + 1 }))
-    );
-  };
+  // Watch checklists to calculate total time
+  const watchedChecklists = watch("checklists");
 
-  const updateChecklistItem = (
-    index: number,
-    updates: Partial<(typeof checklistItems)[0]>
-  ) => {
-    setChecklistItems(
-      checklistItems.map((item, i) =>
-        i === index ? { ...item, ...updates } : item
-      )
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: ScheduleFormValues) => {
     setSaving(true);
-    setError(null);
+    // Clear any previous delete errors
+    setDeleteError(null);
 
     try {
-      const payload = {
-        title,
-        machineId: Number.parseInt(machineId),
-        type,
-        frequencyDays: Number.parseInt(frequencyDays),
-        isActive,
-        checklists: checklistItems.filter((item) => item.description.trim()),
+      // Filter out empty descriptions if that was the desired behavior
+      const cleanedData = {
+        ...data,
+        checklists: data.checklists.filter((item) => item.description.trim()),
       };
+
+      // Manually re-index steps to ensure 1,2,3 order before save
+      cleanedData.checklists = cleanedData.checklists.map((item, index) => ({
+        ...item,
+        stepNumber: index + 1,
+      }));
 
       const url = isNew
         ? "/api/maintenance/schedules"
@@ -124,18 +124,21 @@ export function ScheduleForm({
       const res = await fetch(url, {
         method: isNew ? "POST" : "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(cleanedData),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to save schedule");
+        const resData = await res.json();
+        throw new Error(resData.error || "Failed to save schedule");
       }
 
       router.push("/dashboard/maintenance/schedules");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      console.error(err);
+      form.setError("root", {
+        message: err instanceof Error ? err.message : "Something went wrong",
+      });
     } finally {
       setSaving(false);
     }
@@ -145,6 +148,7 @@ export function ScheduleForm({
     if (!confirm("Are you sure you want to delete this schedule?")) return;
 
     setSaving(true);
+    setDeleteError(null);
     try {
       const res = await fetch(`/api/maintenance/schedules/${schedule?.id}`, {
         method: "DELETE",
@@ -157,13 +161,13 @@ export function ScheduleForm({
       router.push("/dashboard/maintenance/schedules");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setDeleteError(err instanceof Error ? err.message : "Something went wrong");
       setSaving(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -200,9 +204,10 @@ export function ScheduleForm({
         </div>
       </div>
 
-      {error && (
+      {/* Global Error Banner (Root or Delete) */}
+      {(errors.root || deleteError) && (
         <div className="rounded-lg bg-rose-50 p-4 text-sm text-rose-600">
-          {error}
+          {errors.root?.message || deleteError}
         </div>
       )}
 
@@ -217,12 +222,20 @@ export function ScheduleForm({
             <input
               id="title"
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
+              {...register("title")}
               placeholder="e.g., Monthly Inspection"
-              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className={cn(
+                "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
+                errors.title
+                  ? "border-rose-500 focus:ring-rose-200"
+                  : "focus:border-primary-500 focus:ring-primary-500/20"
+              )}
             />
+            {errors.title && (
+              <p className="mt-1 text-xs text-rose-500">
+                {errors.title.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -231,10 +244,13 @@ export function ScheduleForm({
             </label>
             <select
               id="machine"
-              value={machineId}
-              onChange={(e) => setMachineId(e.target.value)}
-              required
-              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              {...register("machineId")}
+              className={cn(
+                "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
+                errors.machineId
+                  ? "border-rose-500 focus:ring-rose-200"
+                  : "focus:border-primary-500 focus:ring-primary-500/20"
+              )}
             >
               <option value="">Select machine...</option>
               {machines.map((machine) => (
@@ -243,6 +259,11 @@ export function ScheduleForm({
                 </option>
               ))}
             </select>
+            {errors.machineId && (
+              <p className="mt-1 text-xs text-rose-500">
+                {errors.machineId.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -251,15 +272,17 @@ export function ScheduleForm({
             </label>
             <select
               id="type"
-              value={type}
-              onChange={(e) =>
-                setType(e.target.value as "maintenance" | "calibration")
-              }
+              {...register("type")}
               className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             >
               <option value="maintenance">Maintenance</option>
               <option value="calibration">Calibration</option>
             </select>
+            {errors.type && (
+              <p className="mt-1 text-xs text-rose-500">
+                {errors.type.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -273,26 +296,37 @@ export function ScheduleForm({
               id="frequency"
               type="number"
               min="1"
-              value={frequencyDays}
-              onChange={(e) => setFrequencyDays(e.target.value)}
-              required
-              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              {...register("frequencyDays")}
+              className={cn(
+                "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
+                errors.frequencyDays
+                  ? "border-rose-500 focus:ring-rose-200"
+                  : "focus:border-primary-500 focus:ring-primary-500/20"
+              )}
             />
+            {errors.frequencyDays && (
+              <p className="mt-1 text-xs text-rose-500">
+                {errors.frequencyDays.message}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-3 md:col-span-2">
             <button
               type="button"
-              onClick={() => setIsActive(!isActive)}
+              onClick={() => {
+                const current = form.getValues("isActive");
+                form.setValue("isActive", !current, { shouldDirty: true });
+              }}
               className={cn(
                 "flex h-6 w-11 items-center rounded-full p-1 transition-colors",
-                isActive ? "bg-primary-600" : "bg-slate-200"
+                watch("isActive") ? "bg-primary-600" : "bg-slate-200"
               )}
             >
               <span
                 className={cn(
                   "h-4 w-4 rounded-full bg-white shadow transition-transform",
-                  isActive && "translate-x-5"
+                  watch("isActive") && "translate-x-5"
                 )}
               />
             </button>
@@ -309,14 +343,21 @@ export function ScheduleForm({
             type="button"
             variant="outline"
             size="sm"
-            onClick={addChecklistItem}
+            onClick={() =>
+              append({
+                stepNumber: fields.length + 1,
+                description: "",
+                isRequired: true,
+                estimatedMinutes: null,
+              })
+            }
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Step
           </Button>
         </div>
 
-        {checklistItems.length === 0 ? (
+        {fields.length === 0 ? (
           <div className="rounded-lg border border-dashed p-8 text-center">
             <p className="text-sm text-muted-foreground">
               No checklist steps yet. Add steps to create a maintenance
@@ -326,7 +367,14 @@ export function ScheduleForm({
               type="button"
               variant="outline"
               className="mt-4"
-              onClick={addChecklistItem}
+              onClick={() =>
+                append({
+                  stepNumber: 1,
+                  description: "",
+                  isRequired: true,
+                  estimatedMinutes: null,
+                })
+              }
             >
               <Plus className="mr-2 h-4 w-4" />
               Add First Step
@@ -334,46 +382,55 @@ export function ScheduleForm({
           </div>
         ) : (
           <div className="space-y-3">
-            {checklistItems.map((item, index) => (
+            {fields.map((field, index) => (
               <div
-                key={index}
+                key={field.id}
                 className="flex items-start gap-3 rounded-lg border bg-slate-50 p-3"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">
                   <GripVertical className="h-4 w-4" />
                 </div>
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-medium">
-                  {item.stepNumber}
+                  {index + 1}
                 </div>
                 <div className="flex-1 space-y-2">
                   <input
                     type="text"
-                    value={item.description}
-                    onChange={(e) =>
-                      updateChecklistItem(index, {
-                        description: e.target.value,
-                      })
-                    }
+                    {...register(`checklists.${index}.description`)}
                     placeholder="Step description..."
-                    className="w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                    className={cn(
+                      "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
+                      errors.checklists?.[index]?.description
+                        ? "border-rose-500 focus:ring-rose-200"
+                        : "focus:border-primary-500 bg-white focus:ring-primary-500/20"
+                    )}
                   />
+                  {errors.checklists?.[index]?.description && (
+                    <p className="text-xs text-rose-500">
+                      {errors.checklists[index]?.description?.message}
+                    </p>
+                  )}
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm">
                       <button
                         type="button"
-                        onClick={() =>
-                          updateChecklistItem(index, {
-                            isRequired: !item.isRequired,
-                          })
-                        }
+                        onClick={() => {
+                          const current = watchedChecklists[index].isRequired;
+                          update(index, {
+                            ...watchedChecklists[index],
+                            isRequired: !current,
+                          });
+                        }}
                         className={cn(
                           "flex h-5 w-5 items-center justify-center rounded border",
-                          item.isRequired
+                          watchedChecklists[index]?.isRequired
                             ? "border-primary-600 bg-primary-600 text-white"
                             : "border-slate-300 bg-white"
                         )}
                       >
-                        {item.isRequired && <Check className="h-3 w-3" />}
+                        {watchedChecklists[index]?.isRequired && (
+                          <Check className="h-3 w-3" />
+                        )}
                       </button>
                       Required
                     </div>
@@ -381,14 +438,9 @@ export function ScheduleForm({
                       <input
                         type="number"
                         min="0"
-                        value={item.estimatedMinutes || ""}
-                        onChange={(e) =>
-                          updateChecklistItem(index, {
-                            estimatedMinutes: e.target.value
-                              ? Number.parseInt(e.target.value)
-                              : null,
-                          })
-                        }
+                        {...register(`checklists.${index}.estimatedMinutes`, {
+                          valueAsNumber: true,
+                        })}
                         placeholder="Est. min"
                         className="w-20 rounded border bg-white px-2 py-1 text-sm"
                       />
@@ -403,7 +455,7 @@ export function ScheduleForm({
                   variant="ghost"
                   size="icon"
                   className="shrink-0 text-muted-foreground hover:text-rose-600"
-                  onClick={() => removeChecklistItem(index)}
+                  onClick={() => remove(index)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -412,12 +464,12 @@ export function ScheduleForm({
           </div>
         )}
 
-        {checklistItems.length > 0 && (
+        {fields.length > 0 && (
           <div className="mt-4 text-sm text-muted-foreground">
             Total estimated time:{" "}
             <span className="font-medium">
-              {checklistItems.reduce(
-                (sum, item) => sum + (item.estimatedMinutes || 0),
+              {watchedChecklists.reduce(
+                (sum, item) => sum + (Number(item.estimatedMinutes) || 0),
                 0
               )}{" "}
               minutes

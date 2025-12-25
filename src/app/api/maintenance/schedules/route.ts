@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (!user || (user.role !== "admin" && user.role !== "tech")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
