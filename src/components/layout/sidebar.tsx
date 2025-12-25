@@ -12,6 +12,7 @@ import {
   LogOut,
   MapPin,
   MonitorCog,
+  QrCode,
   Users,
   Wrench,
 } from "lucide-react";
@@ -60,6 +61,12 @@ const navItems: NavItem[] = [
     label: "Schedules",
     href: "/admin/schedules",
     icon: <Calendar className="h-5 w-5" />,
+    roles: ["admin"],
+  },
+  {
+    label: "QR Codes",
+    href: "/admin/qr-codes",
+    icon: <QrCode className="h-5 w-5" />,
     roles: ["admin"],
   },
   {
