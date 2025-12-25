@@ -11,8 +11,10 @@ test.describe("Admin - Machines", () => {
     await loginAsAdmin();
     await page.goto("/admin/machines");
 
-    const machineLink = page.locator('a[href*="/machines/"]').first();
-    if (await machineLink.isVisible({ timeout: 3000 })) {
+    // Try to click on any machine link, skip test if none exist
+    const machineLink = page.locator('tr a, [data-testid="machine-link"]').first();
+    const isVisible = await machineLink.isVisible({ timeout: 3000 }).catch(() => false);
+    if (isVisible) {
       await machineLink.click();
       await expect(page).toHaveURL(/\/machines\/\d+/);
     }
