@@ -138,12 +138,20 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* User Info & Logout */}
       <div className="border-t p-4">
-        <div className="mb-3 rounded-lg bg-muted p-3">
-          <p className="text-sm font-medium">{user.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {user.employeeId} • {user.role}
-          </p>
-        </div>
+        <Link
+          href="/profile"
+          className="mb-3 flex items-center gap-3 rounded-lg bg-muted p-3 transition-colors hover:bg-muted/80"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background text-muted-foreground">
+            <Users className="h-5 w-5" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user.employeeId} • {user.role}
+            </p>
+          </div>
+        </Link>
         <form action={logout}>
           <button
             type="submit"
