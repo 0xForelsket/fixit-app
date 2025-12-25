@@ -548,6 +548,299 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
 - [ ] Setup instructions for cron jobs (scheduler + backup)
 - [ ] Health check endpoint
 
+---
+
+## 🚀 CMMS Enhancement Phases (Cerev-Inspired Features)
+
+### Phase 10: Preventive Maintenance UI & Automation
+**Goal:** Expose existing `maintenance_schedules` table with full UI and automation
+
+- [ ] **Calendar View:**
+  - Monthly/weekly calendar showing scheduled maintenance
+  - Color-coded by type (maintenance, calibration)
+  - Overdue items highlighted
+- [ ] **Schedule Management UI:**
+  - Create/edit/delete maintenance schedules
+  - Set frequency (days, weeks, months)
+  - Assign default technician
+- [ ] **Checklist Templates:**
+  - Add `maintenance_checklists` table for step-by-step procedures
+  - Checklist completion tracking per ticket
+  - Required vs optional steps
+- [ ] **Auto-Generation Enhancement:**
+  - Improve scheduler to create tickets with checklist items
+  - Send notifications when maintenance is due
+  - Dashboard widget for upcoming maintenance
+- [ ] **Maintenance History:**
+  - View all completed maintenance per machine
+  - Track compliance rate (on-time vs overdue)
+
+**New Schema:**
+```sql
+-- Checklist templates linked to schedules
+maintenance_checklists (
+  id, schedule_id, step_number, description, is_required
+)
+
+-- Completed checklist items per ticket
+checklist_completions (
+  id, checklist_id, ticket_id, completed_by_id, is_completed, notes, completed_at
+)
+```
+
+**New API Routes:**
+```
+GET    /api/maintenance/calendar     # Calendar data for date range
+GET    /api/maintenance/upcoming     # Upcoming maintenance (next 7 days)
+POST   /api/checklists               # Create checklist template
+GET    /api/checklists/[scheduleId]  # Get checklist for schedule
+POST   /api/tickets/[id]/checklist   # Complete checklist items
+```
+
+---
+
+### Phase 11: Analytics Dashboard
+**Goal:** Real-time KPIs and actionable insights
+
+- [ ] **KPI Dashboard:**
+  - MTTR (Mean Time To Repair) - overall and per machine
+  - MTBF (Mean Time Between Failures) - per machine
+  - Uptime percentage per machine
+  - SLA compliance rate (% resolved within due time)
+  - Open ticket count by priority
+- [ ] **Trend Charts:**
+  - Tickets over time (daily/weekly/monthly)
+  - Breakdown by type, priority, machine
+  - Resolution time trends
+- [ ] **Technician Performance:**
+  - Tickets resolved per tech
+  - Average resolution time per tech
+  - Workload distribution
+- [ ] **Machine Health:**
+  - Top 10 machines with most breakdowns
+  - Downtime history per machine
+  - Maintenance compliance per machine
+- [ ] **Export & Reporting:**
+  - CSV/PDF export for all reports
+  - Scheduled email reports (optional)
+  - Custom date range filtering
+
+**Implementation:**
+- Use Recharts or Chart.js for visualizations
+- Aggregate queries with date grouping
+- Consider materialized views/caching for performance
+
+**New API Routes:**
+```
+GET /api/analytics/kpis           # Dashboard KPI summary
+GET /api/analytics/trends         # Time-series data with date range
+GET /api/analytics/technicians    # Tech performance metrics
+GET /api/analytics/machines       # Machine health rankings
+GET /api/analytics/export         # CSV/PDF export
+```
+
+---
+
+### Phase 12: Inventory Management
+**Goal:** Track spare parts and consumables with work order integration
+
+- [ ] **Spare Parts Catalog:**
+  - Add/edit/delete parts with SKU, barcode, description
+  - Unit cost tracking
+  - Part categories (electrical, mechanical, consumables, etc.)
+  - Part photos via attachments
+- [ ] **Stock Levels:**
+  - Track quantity per location
+  - Low stock alerts (reorder point)
+  - Lead time tracking
+- [ ] **Inventory Transactions:**
+  - Stock in (receiving)
+  - Stock out (usage on tickets)
+  - Transfers between locations
+  - Adjustments (inventory count)
+  - Full audit trail
+- [ ] **Work Order Integration:**
+  - Add parts used when resolving tickets
+  - Auto-deduct from inventory
+  - Parts cost tracking per ticket
+- [ ] **Reorder Alerts:**
+  - Notification when stock falls below reorder point
+  - Generate purchase request list
+- [ ] **Barcode/QR Scanning:**
+  - Scan parts for quick lookup
+  - Mobile-friendly stock adjustments
+
+**New Schema:**
+```sql
+spare_parts (
+  id, name, sku UNIQUE, barcode, description, category,
+  unit_cost, reorder_point, lead_time_days, is_active,
+  created_at, updated_at
+)
+
+inventory_levels (
+  id, part_id FK, location_id FK, quantity,
+  UNIQUE(part_id, location_id)
+)
+
+inventory_transactions (
+  id, part_id FK, location_id FK, ticket_id FK (nullable),
+  type ENUM('in', 'out', 'transfer', 'adjustment'),
+  quantity, reference, notes,
+  created_by_id FK, created_at
+)
+
+ticket_parts (
+  id, ticket_id FK, part_id FK, quantity, unit_cost,
+  added_by_id FK, added_at
+)
+```
+
+**New API Routes:**
+```
+# Parts catalog
+GET    /api/parts                    # List parts with filters
+POST   /api/parts                    # Create part
+GET    /api/parts/[id]               # Get part details
+PATCH  /api/parts/[id]               # Update part
+DELETE /api/parts/[id]               # Deactivate part
+
+# Inventory
+GET    /api/inventory                # Stock levels by location
+GET    /api/inventory/low-stock      # Parts below reorder point
+POST   /api/inventory/receive        # Stock in
+POST   /api/inventory/transfer       # Transfer between locations
+POST   /api/inventory/adjust         # Inventory adjustment
+GET    /api/inventory/transactions   # Transaction history
+
+# Ticket parts
+POST   /api/tickets/[id]/parts       # Add parts to ticket
+GET    /api/tickets/[id]/parts       # Get parts used on ticket
+DELETE /api/tickets/[id]/parts/[partId] # Remove part from ticket
+```
+
+---
+
+### Phase 13: Labor & Time Tracking
+**Goal:** Track time spent on maintenance work for cost analysis
+
+- [ ] **Time Logging:**
+  - Start/stop timer on tickets
+  - Manual time entry (start, end, duration)
+  - Notes for each time entry
+- [ ] **Labor Costs:**
+  - Hourly rate per technician (configurable)
+  - Calculate total labor cost per ticket
+  - Billable vs non-billable hours
+- [ ] **Work Summary:**
+  - Total hours per ticket
+  - Labor cost breakdown
+  - Time by technician
+- [ ] **Reports:**
+  - Labor hours by date range
+  - Cost analysis per machine/location
+  - Technician utilization reports
+
+**New Schema:**
+```sql
+labor_logs (
+  id, ticket_id FK, user_id FK,
+  start_time TIMESTAMP, end_time TIMESTAMP,
+  duration_minutes INTEGER,
+  notes TEXT,
+  hourly_rate INTEGER (cents),
+  is_billable BOOLEAN,
+  created_at TIMESTAMP
+)
+```
+
+**New API Routes:**
+```
+POST   /api/tickets/[id]/labor          # Log time entry
+GET    /api/tickets/[id]/labor          # Get time entries for ticket
+PATCH  /api/labor/[id]                  # Update time entry
+DELETE /api/labor/[id]                  # Delete time entry
+POST   /api/tickets/[id]/labor/start    # Start timer
+POST   /api/tickets/[id]/labor/stop     # Stop timer
+GET    /api/reports/labor               # Labor report with filters
+```
+
+---
+
+### Phase 14: Meter Readings
+**Goal:** Track equipment usage for condition-based maintenance
+
+- [ ] **Meter Setup:**
+  - Define meters per machine (hours, cycles, miles, units)
+  - Current reading display
+  - Target/threshold values for alerts
+- [ ] **Reading Entry:**
+  - Manual reading entry with date
+  - Reading validation (must be >= previous)
+  - Mobile-friendly quick entry
+- [ ] **Condition-Based Maintenance:**
+  - Trigger maintenance based on meter readings (e.g., every 1000 hours)
+  - Meter-based schedule type in `maintenance_schedules`
+- [ ] **Usage Analytics:**
+  - Usage trends over time
+  - Compare actual vs expected usage
+  - Predict maintenance needs
+
+**New Schema:**
+```sql
+meters (
+  id, machine_id FK,
+  name TEXT (e.g., "Operating Hours"),
+  type ENUM('hours', 'cycles', 'miles', 'units'),
+  current_reading INTEGER,
+  last_reading_date TIMESTAMP,
+  alert_threshold INTEGER (optional),
+  created_at TIMESTAMP
+)
+
+meter_readings (
+  id, meter_id FK,
+  reading INTEGER,
+  recorded_by_id FK,
+  recorded_at TIMESTAMP,
+  notes TEXT
+)
+```
+
+**New API Routes:**
+```
+# Meters
+GET    /api/machines/[id]/meters    # Get meters for machine
+POST   /api/machines/[id]/meters    # Add meter to machine
+PATCH  /api/meters/[id]             # Update meter
+DELETE /api/meters/[id]             # Delete meter
+
+# Readings
+POST   /api/meters/[id]/readings    # Record new reading
+GET    /api/meters/[id]/readings    # Get reading history
+GET    /api/meters/[id]/trends      # Usage trend data
+```
+
+---
+
+### Verification Plan for New Phases
+
+| Phase | Verification Method |
+|-------|---------------------|
+| **Phase 10** | Unit tests for scheduler auto-generation; Manual test: create schedule, verify ticket created on due date |
+| **Phase 11** | Unit tests for KPI calculations (MTTR, MTBF); Manual test: create/resolve tickets, verify dashboard updates |
+| **Phase 12** | Unit tests for inventory transactions; Integration test: add parts to ticket, verify stock deduction |
+| **Phase 13** | Unit tests for duration calculation; Manual test: start/stop timer, verify time logged |
+| **Phase 14** | Unit tests for reading validation; Manual test: add readings, verify trends chart |
+
+**Existing Test Commands:**
+```bash
+bun test                    # Run all unit tests
+bun test src/tests/unit     # Run unit tests only
+```
+
+---
+
 ## 15. Visual Style Guide
 - **Color Palette:**
   - **Primary:** Slate/Blue (Professional, Industrial)
