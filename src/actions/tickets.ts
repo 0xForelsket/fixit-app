@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import {
+  attachments,
   machines,
   notifications,
   ticketLogs,
@@ -33,12 +34,17 @@ export async function createTicket(
     return { error: "You must be logged in to create a ticket" };
   }
 
+  // Extract attachments from JSON if provided
+  const attachmentsJson = formData.get("attachments")?.toString();
+  const parsedAttachments = attachmentsJson ? JSON.parse(attachmentsJson) : [];
+
   const rawData = {
     machineId: Number(formData.get("machineId")),
     type: formData.get("type"),
     title: formData.get("title"),
     description: formData.get("description"),
     priority: formData.get("priority") || "medium",
+    attachments: parsedAttachments,
   };
 
   const result = createTicketSchema.safeParse(rawData);
@@ -48,65 +54,92 @@ export async function createTicket(
     return { error: firstError || "Invalid input" };
   }
 
-  const { machineId, type, title, description, priority } = result.data;
+  const { machineId, type, title, description, priority, attachments: ticketAttachments } = result.data;
 
   // Calculate SLA due date
   const dueBy = calculateDueBy(priority);
 
-  // Create the ticket
-  const [ticket] = await db
-    .insert(tickets)
-    .values({
-      machineId,
-      type,
-      title,
-      description,
-      priority,
-      reportedById: user.id,
-      status: "open",
-      dueBy,
-    })
-    .returning();
+  // Create the ticket within a transaction to ensure all or nothing
+  try {
+    const ticket = await db.transaction(async (tx) => {
+      const [newTicket] = await tx
+        .insert(tickets)
+        .values({
+          machineId,
+          type,
+          title,
+          description,
+          priority,
+          reportedById: user.id,
+          status: "open",
+          dueBy,
+        })
+        .returning();
 
-  // Get machine details for notifications
-  const machine = await db.query.machines.findFirst({
-    where: eq(machines.id, machineId),
-  });
+      // Insert attachments if any
+      if (ticketAttachments && ticketAttachments.length > 0) {
+        await tx.insert(attachments).values(
+          ticketAttachments.map((att) => ({
+            entityType: "ticket" as const,
+            entityId: newTicket.id,
+            type: "photo" as const, // Default to photo for ticket uploads
+            filename: att.filename,
+            s3Key: att.s3Key,
+            mimeType: att.mimeType,
+            sizeBytes: att.sizeBytes,
+            uploadedById: user.id,
+          }))
+        );
+      }
 
-  // Notify techs for critical/high priority tickets
-  if (priority === "critical" || priority === "high") {
-    const techs = await db.query.users.findMany({
-      where: and(eq(users.role, "tech"), eq(users.isActive, true)),
+      return newTicket;
     });
 
-    if (techs.length > 0) {
-      await db.insert(notifications).values(
-        techs.map((tech) => ({
-          userId: tech.id,
-          type: "ticket_created" as const,
-          title: `New ${priority} Priority Ticket`,
-          message: `${title} - ${machine?.name || "Unknown Machine"}`,
-          link: `/dashboard/tickets/${ticket.id}`,
-        }))
-      );
+    // Get machine details for notifications
+    const machine = await db.query.machines.findFirst({
+      where: eq(machines.id, machineId),
+    });
+
+    // Notify techs for critical/high priority tickets
+    if (priority === "critical" || priority === "high") {
+      const techs = await db.query.users.findMany({
+        where: and(eq(users.role, "tech"), eq(users.isActive, true)),
+      });
+
+      if (techs.length > 0) {
+        await db.insert(notifications).values(
+          techs.map((tech) => ({
+            userId: tech.id,
+            type: "ticket_created" as const,
+            title: `New ${priority} Priority Ticket`,
+            message: `${title} - ${machine?.name || "Unknown Machine"}`,
+            link: `/dashboard/tickets/${ticket.id}`,
+          }))
+        );
+      }
     }
+
+    // Notify machine owner if exists
+    if (machine?.ownerId) {
+      await db.insert(notifications).values({
+        userId: machine.ownerId,
+        type: "ticket_created",
+        title: "New Ticket for Your Machine",
+        message: `${title} - ${machine.name}`,
+        link: `/dashboard/tickets/${ticket.id}`,
+      });
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/tickets");
+    revalidatePath("/my-tickets");
+    revalidatePath("/");
+
+    return { success: true, data: ticket };
+  } catch (error) {
+    console.error("Failed to create ticket:", error);
+    return { error: "Failed to create ticket. Please try again." };
   }
-
-  // Notify machine owner if exists
-  if (machine?.ownerId) {
-    await db.insert(notifications).values({
-      userId: machine.ownerId,
-      type: "ticket_created",
-      title: "New Ticket for Your Machine",
-      message: `${title} - ${machine.name}`,
-      link: `/dashboard/tickets/${ticket.id}`,
-    });
-  }
-
-  revalidatePath("/dashboard");
-  revalidatePath("/dashboard/tickets");
-
-  return { success: true, data: ticket };
 }
 
 export async function updateTicket(
