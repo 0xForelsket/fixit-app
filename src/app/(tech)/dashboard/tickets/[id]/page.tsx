@@ -3,7 +3,15 @@ import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { attachments, laborLogs, locations, spareParts, ticketParts, tickets, users } from "@/db/schema";
+import {
+  attachments,
+  laborLogs,
+  locations,
+  spareParts,
+  ticketParts,
+  tickets,
+  users,
+} from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatDate, formatRelativeTime } from "@/lib/utils";
@@ -89,12 +97,11 @@ export default async function TicketDetailPage({ params }: PageProps) {
   });
 
   // Fetch ticket parts
-  // Fetch ticket parts
   const consumedParts = await db.query.ticketParts.findMany({
     where: eq(ticketParts.ticketId, ticketId),
     with: {
-        part: true,
-        addedBy: true,
+      part: true,
+      addedBy: true,
     },
     orderBy: (tp, { desc }) => [desc(tp.addedAt)],
   });

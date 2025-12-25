@@ -1,9 +1,9 @@
+import { StatusCard } from "@/components/ui/status-card";
 import { db } from "@/db";
 import { machines, notifications } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
-import { AlertTriangle, CheckCircle2, Info, Wrench } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MachineGrid } from "./(operator)/machine-grid";
@@ -167,59 +167,6 @@ export default async function Home({ searchParams }: PageProps) {
         {/* Machine grid */}
         <MachineGrid machines={machineList} />
       </main>
-    </div>
-  );
-}
-
-function StatusCard({
-  label,
-  count,
-  status,
-}: {
-  label: string;
-  count: number;
-  status: "operational" | "down" | "maintenance";
-}) {
-  const config = {
-    operational: {
-      color: "text-emerald-700",
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-      icon: CheckCircle2,
-    },
-    down: {
-      color: "text-rose-700",
-      bg: "bg-rose-50",
-      border: "border-rose-200",
-      icon: AlertTriangle,
-    },
-    maintenance: {
-      color: "text-amber-700",
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-      icon: Wrench,
-    },
-  }[status];
-
-  const Icon = config.icon;
-
-  return (
-    <div
-      className={`flex items-center gap-3 rounded-lg border px-4 py-2 bg-white shadow-sm transition-all ${config.border}`}
-    >
-      <div
-        className={`flex h-8 w-8 items-center justify-center rounded-md ${config.bg}`}
-      >
-        <Icon className={`h-4 w-4 ${config.color}`} />
-      </div>
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          {label}
-        </p>
-        <p className={`text-lg font-bold leading-none ${config.color}`}>
-          {count}
-        </p>
-      </div>
     </div>
   );
 }
