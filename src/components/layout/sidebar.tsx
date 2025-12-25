@@ -5,7 +5,6 @@ import type { UserRole } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
-  Calendar,
   ClipboardList,
   Cog,
   FileText,
@@ -60,9 +59,9 @@ const navItems: NavItem[] = [
     roles: ["admin"],
   },
   {
-    label: "Schedules",
-    href: "/admin/schedules",
-    icon: <Calendar className="h-5 w-5" />,
+    label: "Maintenance",
+    href: "/admin/maintenance",
+    icon: <Wrench className="h-5 w-5" />,
     roles: ["admin"],
   },
   {
