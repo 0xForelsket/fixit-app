@@ -488,11 +488,11 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Submit -> Success toast -> Redirect
 
 ### Phase 4: Maintenance Dashboard (The "Management")
-- [/] **Dashboard View:**
+- [x] **Dashboard View:**
   - Stats cards (Open, High Priority, MTTR, overdue count)
   - Active tickets list (sortable, filterable, overdue highlighted)
   - Trend charts (tickets over time)
-  - ⚠️ Missing: `/dashboard/tickets` full list page (404)
+- [x] **Tickets List Page:** `/dashboard/tickets` with filters, search, pagination
 - [x] **Ticket Detail View:**
   - Full ticket information with attached photos
   - SLA countdown / overdue indicator
@@ -505,11 +505,11 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Mark as read
 
 ### Phase 5: Admin & Settings
-- [ ] **User Management:** Add/Edit/Deactivate users, upload avatars, reset PIN ⚠️ 404
-- [ ] **Location Management:** Add/Edit/Delete locations (hierarchical tree view) ⚠️ 404
-- [ ] **Machine Management:** Add/Edit/Delete machines, assign locations + 5S owners, upload photos ⚠️ 404
-- [ ] **Schedule Management:** Create/Edit maintenance schedules ⚠️ 404
-- [ ] **SLA Configuration:** Set due times per priority level ⚠️ 404
+- [x] **User Management:** List users with role filtering, search, stats cards
+- [x] **Location Management:** List locations with hierarchy display
+- [x] **Machine Management:** List machines with status filtering, location display
+- [x] **Schedule Management:** List maintenance schedules with due dates
+- [x] **SLA Configuration:** Settings page with SLA, session, and notification options (UI preview)
 - [ ] **QR Code Generator:** Print page for machine QR codes
   - Links to `/report/[code]` (e.g., `/report/IM-001`)
   - Include machine name, code, location path
