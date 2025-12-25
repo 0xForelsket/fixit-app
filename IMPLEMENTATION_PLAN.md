@@ -457,29 +457,29 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
 ## 14. Development Phases
 
 ### Phase 1: Foundation & Scaffold
-- [ ] Initialize Next.js project with Bun
-- [ ] Setup Biome for linting + Vitest for testing
-- [ ] Setup Drizzle ORM + SQLite
-- [ ] Define database schema (all tables including notifications, machine_status_logs)
-- [ ] Create Zod validation schemas
+- [x] Initialize Next.js project with Bun
+- [x] Setup Biome for linting + Vitest for testing
+- [x] Setup Drizzle ORM + SQLite
+- [x] Define database schema (all tables including notifications, machine_status_logs)
+- [x] Create Zod validation schemas
 - [ ] Setup MinIO (Docker) + S3 client library
-- [ ] Seed database with default admin, dummy users, locations, and machines
+- [x] Seed database with default admin, dummy users, locations, and machines
 
 ### Phase 2: Core API (The "Brain")
 - [ ] Implement attachments API (upload/download/delete with S3)
-- [ ] Implement location CRUD API routes
-- [ ] Implement user CRUD API routes (with brute force protection)
-- [ ] Implement machine CRUD API routes (with status logging)
-- [ ] Implement ticket CRUD API routes (with SLA due_by calculation)
+- [x] Implement location CRUD API routes
+- [x] Implement user CRUD API routes (with brute force protection)
+- [x] Implement machine CRUD API routes (with status logging)
+- [x] Implement ticket CRUD API routes (with SLA due_by calculation)
 - [ ] Implement scheduler logic (maintenance + escalation check)
 - [ ] Create `POST /api/scheduler/run` endpoint (with cron secret auth)
-- [ ] Add stats + metrics endpoints for dashboard
+- [x] Add stats + metrics endpoints for dashboard
 - [ ] Write unit + integration tests for core logic
 
 ### Phase 3: Operator Interface (The "Input")
-- [ ] **Home Page:** Searchable list of machines (with photos)
-- [ ] **Report Page:** `/report/[code]` - Pre-selected machine from QR scan
-- [ ] **Create Ticket Form:**
+- [x] **Home Page:** Searchable list of machines (with photos)
+- [x] **Report Page:** `/report/[code]` - Pre-selected machine from QR scan
+- [x] **Create Ticket Form:**
   - Select machine (if not pre-selected)
   - Select ticket type
   - Select priority (visual buttons)
@@ -488,11 +488,12 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Submit -> Success toast -> Redirect
 
 ### Phase 4: Maintenance Dashboard (The "Management")
-- [ ] **Dashboard View:**
+- [/] **Dashboard View:**
   - Stats cards (Open, High Priority, MTTR, overdue count)
   - Active tickets list (sortable, filterable, overdue highlighted)
   - Trend charts (tickets over time)
-- [ ] **Ticket Detail View:**
+  - ⚠️ Missing: `/dashboard/tickets` full list page (404)
+- [x] **Ticket Detail View:**
   - Full ticket information with attached photos
   - SLA countdown / overdue indicator
   - Change status workflow
@@ -504,11 +505,11 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Mark as read
 
 ### Phase 5: Admin & Settings
-- [ ] **User Management:** Add/Edit/Deactivate users, upload avatars, reset PIN
-- [ ] **Location Management:** Add/Edit/Delete locations (hierarchical tree view)
-- [ ] **Machine Management:** Add/Edit/Delete machines, assign locations + 5S owners, upload photos
-- [ ] **Schedule Management:** Create/Edit maintenance schedules
-- [ ] **SLA Configuration:** Set due times per priority level
+- [ ] **User Management:** Add/Edit/Deactivate users, upload avatars, reset PIN ⚠️ 404
+- [ ] **Location Management:** Add/Edit/Delete locations (hierarchical tree view) ⚠️ 404
+- [ ] **Machine Management:** Add/Edit/Delete machines, assign locations + 5S owners, upload photos ⚠️ 404
+- [ ] **Schedule Management:** Create/Edit maintenance schedules ⚠️ 404
+- [ ] **SLA Configuration:** Set due times per priority level ⚠️ 404
 - [ ] **QR Code Generator:** Print page for machine QR codes
   - Links to `/report/[code]` (e.g., `/report/IM-001`)
   - Include machine name, code, location path
@@ -519,9 +520,9 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Tech performance metrics
 
 ### Phase 6: Authentication & Security
-- [ ] Implement login page (Employee ID + PIN)
-- [ ] Add session management (timeout, max age)
-- [ ] Protected route middleware (role-based)
+- [x] Implement login page (Employee ID + PIN)
+- [x] Add session management (timeout, max age)
+- [x] Protected route middleware (role-based)
 - [ ] Brute force protection (account lockout)
 - [ ] CORS configuration
 

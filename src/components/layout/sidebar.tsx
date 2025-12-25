@@ -76,9 +76,10 @@ interface SidebarProps {
     role: UserRole;
     employeeId: string;
   };
+  avatarUrl?: string | null;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, avatarUrl }: SidebarProps) {
   const pathname = usePathname();
 
   const filteredItems = navItems.filter((item) =>
@@ -142,8 +143,18 @@ export function Sidebar({ user }: SidebarProps) {
           href="/profile"
           className="mb-3 flex items-center gap-3 rounded-lg bg-muted p-3 transition-colors hover:bg-muted/80"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background text-muted-foreground">
-            <Users className="h-5 w-5" />
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-background bg-background shadow-sm">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={user.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                <Users className="h-5 w-5" />
+              </div>
+            )}
           </div>
           <div className="overflow-hidden">
             <p className="truncate text-sm font-medium">{user.name}</p>

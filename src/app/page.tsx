@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { machines, notifications } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { AlertTriangle, CheckCircle2, Info, Wrench } from "lucide-react";
 import Link from "next/link";
@@ -18,6 +19,7 @@ export default async function Home({ searchParams }: PageProps) {
 
   // Landing page for unauthenticated users
   if (!user) {
+    // ... same as before ...
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-8">
         <div className="text-center">
@@ -49,6 +51,9 @@ export default async function Home({ searchParams }: PageProps) {
   } else if (user.role === "tech") {
     redirect("/dashboard");
   }
+
+  // Get avatar URL
+  const avatarUrl = await getUserAvatarUrl(user.id);
 
   // Operator interface
   const params = await searchParams;
@@ -118,7 +123,11 @@ export default async function Home({ searchParams }: PageProps) {
             </span>
           </Link>
 
-          <OperatorNav user={user} unreadCount={unreadCount} />
+          <OperatorNav 
+            user={user} 
+            unreadCount={unreadCount} 
+            avatarUrl={avatarUrl}
+          />
         </div>
       </header>
 

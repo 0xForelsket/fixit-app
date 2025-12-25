@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -24,6 +25,8 @@ export default async function OperatorLayout({
     redirect("/dashboard");
   }
 
+  const avatarUrl = await getUserAvatarUrl(user.id);
+
   // Get unread notification count
   const unreadCount = await db
     .select({ count: notifications.id })
@@ -34,18 +37,24 @@ export default async function OperatorLayout({
     .then((rows) => rows.length);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-white shadow-sm">
+      <header className="sticky top-0 z-50 border-b bg-white shadow-sm/50 backdrop-blur-md">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white font-bold shadow-md">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white font-bold shadow-md">
               F
             </div>
-            <span className="text-xl font-bold text-primary-700">FixIt</span>
+            <span className="text-xl font-bold text-slate-900 tracking-tight">
+              FixIt
+            </span>
           </Link>
 
-          <OperatorNav user={user} unreadCount={unreadCount} />
+          <OperatorNav
+            user={user}
+            unreadCount={unreadCount}
+            avatarUrl={avatarUrl}
+          />
         </div>
       </header>
 
