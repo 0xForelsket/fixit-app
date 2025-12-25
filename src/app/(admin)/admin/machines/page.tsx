@@ -69,61 +69,65 @@ export default async function MachinesPage({
 
   const statusConfigs: Record<
     string,
-    { icon: React.ElementType; color: string; bg: string; label: string }
+    { icon: React.ElementType; color: string; bg: string; dotClass: string; label: string }
   > = {
     operational: {
       icon: CheckCircle2,
-      color: "text-emerald-700",
-      bg: "bg-emerald-50 border-emerald-200",
+      color: "text-success-700",
+      bg: "bg-success-50/50 border-success-100",
+      dotClass: "status-operational",
       label: "Operational",
     },
     down: {
       icon: AlertCircle,
-      color: "text-rose-700",
-      bg: "bg-rose-50 border-rose-200",
+      color: "text-danger-700",
+      bg: "bg-danger-50/50 border-danger-100",
+      dotClass: "status-down",
       label: "Down",
     },
     maintenance: {
       icon: Wrench,
-      color: "text-amber-700",
-      bg: "bg-amber-50 border-amber-200",
+      color: "text-warning-700",
+      bg: "bg-warning-50/50 border-warning-100",
+      dotClass: "status-maintenance",
       label: "Maintenance",
     },
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 animate-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Machine Management
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            Machine <span className="text-primary-600">Inventory</span>
           </h1>
-          <p className="text-muted-foreground">
-            {stats.total} machines • {stats.operational} operational
-          </p>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <MonitorCog className="h-3.5 w-3.5" />
+            {stats.total} REGISTERED UNITS • {stats.operational} ONLINE
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/admin/machines/models">Manage Models</Link>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" asChild className="font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100">
+            <Link href="/admin/machines/models">VIEW MODELS</Link>
           </Button>
-          <Button asChild>
+          <Button asChild className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold shadow-lg shadow-primary-500/25">
             <Link href="/admin/machines/new">
               <Plus className="mr-2 h-4 w-4" />
-              Add Machine
+              ADD MACHINE
             </Link>
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-4">
         <StatsCard
-          title="Total"
+          title="Total Units"
           value={stats.total}
           icon={MonitorCog}
-          color="text-primary-600"
-          bg="bg-primary-50"
+          color="text-zinc-600"
+          bg="bg-zinc-100"
           href="/admin/machines"
           active={!params.status || params.status === "all"}
         />
@@ -131,8 +135,8 @@ export default async function MachinesPage({
           title="Operational"
           value={stats.operational}
           icon={CheckCircle2}
-          color="text-emerald-600"
-          bg="bg-emerald-50"
+          color="text-success-600"
+          bg="bg-success-100"
           href="?status=operational"
           active={params.status === "operational"}
         />
@@ -140,8 +144,8 @@ export default async function MachinesPage({
           title="Down"
           value={stats.down}
           icon={AlertCircle}
-          color="text-rose-600"
-          bg="bg-rose-50"
+          color="text-danger-600"
+          bg="bg-danger-100"
           href="?status=down"
           active={params.status === "down"}
         />
@@ -149,24 +153,24 @@ export default async function MachinesPage({
           title="Maintenance"
           value={stats.maintenance}
           icon={Wrench}
-          color="text-amber-600"
-          bg="bg-amber-50"
+          color="text-warning-600"
+          bg="bg-warning-100"
           href="?status=maintenance"
           active={params.status === "maintenance"}
         />
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <form className="flex-1 max-w-md" action="/admin/machines" method="get">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 bg-white/50 p-4 rounded-xl border border-zinc-200 backdrop-blur-sm">
+        <form className="w-full sm:max-w-md" action="/admin/machines" method="get">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
               name="search"
-              placeholder="Search by name or code..."
+              placeholder="SEARCH BY NAME OR SERIAL..."
               defaultValue={params.search}
-              className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-zinc-200 bg-white py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-zinc-300 focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all uppercase"
             />
             {params.status && (
               <input type="hidden" name="status" value={params.status} />
@@ -177,85 +181,87 @@ export default async function MachinesPage({
 
       {/* Machines Table */}
       {machinesList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <MonitorCog className="h-6 w-6 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 p-20 text-center animate-in backdrop-blur-sm">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 shadow-inner">
+            <MonitorCog className="h-8 w-8 text-zinc-400" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">No machines found</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="mt-6 text-xl font-black text-zinc-900 tracking-tight uppercase">No assets identified</h3>
+          <p className="text-zinc-500 font-medium mt-1">
             {params.search || params.status
-              ? "Try adjusting your filters"
-              : "Add your first machine to get started."}
+              ? "Refine parameters to adjust scan results"
+              : "Register your first machine to begin monitoring."}
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-          <table className="w-full">
-            <thead className="border-b bg-slate-50">
-              <tr className="text-left text-sm font-medium text-muted-foreground">
-                <th className="p-4">Machine</th>
-                <th className="p-4 hidden md:table-cell">Code</th>
-                <th className="p-4 hidden lg:table-cell">Location</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 hidden xl:table-cell">Owner</th>
-                <th className="p-4 hidden sm:table-cell">Created</th>
-                <th className="p-4" />
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm shadow-xl shadow-zinc-200/20">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-200 bg-zinc-50/50">
+                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Machine / Asset</th>
+                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">Reg Code</th>
+                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden lg:table-cell">Location</th>
+                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Status</th>
+                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden xl:table-cell">Responsible</th>
+                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden sm:table-cell">Uptime Status</th>
+                <th className="p-5 w-20" />
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-zinc-100 px-2">
               {machinesList.map((machine) => {
                 const statusConfig =
                   statusConfigs[machine.status] || statusConfigs.operational;
-                const StatusIcon = statusConfig.icon;
 
                 return (
                   <tr
                     key={machine.id}
-                    className="hover:bg-slate-50 transition-colors"
+                    className="hover:bg-primary-50/30 transition-colors group cursor-pointer"
                   >
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-                          <MonitorCog className="h-5 w-5 text-primary-600" />
+                    <td className="p-5">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg transition-transform group-hover:scale-110">
+                          <MonitorCog className="h-6 w-6" />
                         </div>
-                        <p className="font-medium">{machine.name}</p>
+                        <div>
+                          <p className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">{machine.name}</p>
+                          <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Asset ID: {machine.id}</p>
+                        </div>
                       </div>
                     </td>
-                    <td className="p-4 hidden md:table-cell">
-                      <Badge variant="outline" className="font-mono text-xs">
+                    <td className="p-5 hidden md:table-cell">
+                      <Badge variant="outline" className="font-mono text-xs font-bold border-zinc-200 bg-zinc-50 tracking-wider">
                         {machine.code}
                       </Badge>
                     </td>
-                    <td className="p-4 hidden lg:table-cell">
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <td className="p-5 hidden lg:table-cell">
+                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/50 w-fit">
                         <MapPin className="h-3.5 w-3.5" />
-                        {machine.location?.name || "—"}
+                        {machine.location?.name || "UNASSIGNED"}
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-5">
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                          "inline-flex items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm",
                           statusConfig.bg,
                           statusConfig.color
                         )}
                       >
-                        <StatusIcon className="h-3.5 w-3.5" />
+                         <div className={cn("w-2 h-2 rounded-full", statusConfig.dotClass.replace('status-', 'bg-'))} />
                         {statusConfig.label}
                       </span>
                     </td>
-                    <td className="p-4 hidden xl:table-cell">
-                      <span className="text-sm text-muted-foreground">
-                        {machine.owner?.name || "—"}
+                    <td className="p-5 hidden xl:table-cell">
+                      <span className="text-sm font-bold text-zinc-900">
+                        {machine.owner?.name || "OFF-SYSTEM"}
                       </span>
                     </td>
-                    <td className="p-4 hidden sm:table-cell">
-                      <span className="text-sm text-muted-foreground">
-                        {formatRelativeTime(machine.createdAt)}
+                    <td className="p-5 hidden sm:table-cell">
+                      <span className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide">
+                        Updated {formatRelativeTime(machine.createdAt)}
                       </span>
                     </td>
-                    <td className="p-4">
-                      <Button variant="ghost" size="sm" asChild>
+                    <td className="p-5 text-right">
+                      <Button variant="ghost" size="icon" asChild className="rounded-xl hover:bg-primary-500 hover:text-white transition-all transform group-hover:rotate-12">
                         <Link href={`/admin/machines/${machine.id}`}>
                           <Edit className="h-4 w-4" />
                         </Link>
@@ -293,21 +299,24 @@ function StatsCard({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 rounded-xl border p-4 transition-all hover:shadow-md bg-white",
-        active && "ring-2 ring-primary-500 border-primary-300"
+        "flex flex-col justify-between h-[120px] rounded-2xl border bg-white p-5 transition-all duration-300 hover-lift card-industrial shadow-sm",
+        active ? "border-primary-400 ring-4 ring-primary-500/10 shadow-lg shadow-primary-500/5" : "border-zinc-200"
       )}
     >
-      <div
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-lg",
-          bg
-        )}
-      >
-        <Icon className={cn("h-5 w-5", color)} />
+      <div className="flex items-center justify-between">
+        <div
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-xl shadow-inner border border-white/50",
+            bg
+          )}
+        >
+          <Icon className={cn("h-5 w-5", color)} />
+        </div>
+        {active && <div className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />}
       </div>
       <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className={cn("text-2xl font-bold", color)}>{value}</p>
+        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1.5">{title}</p>
+        <p className={cn("text-3xl font-mono font-black tracking-tighter leading-none", color === "text-zinc-600" ? "text-zinc-900" : color)}>{value}</p>
       </div>
     </Link>
   );

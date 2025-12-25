@@ -137,25 +137,29 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none industrial-grid",
+          isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
         {/* Header with close button on mobile */}
-        <div className="flex h-16 items-center justify-between border-b px-6">
+        <div className="flex h-16 items-center justify-between border-b px-6 bg-white/50 backdrop-blur-md">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 group"
             onClick={handleNavClick}
           >
-            <Wrench className="h-6 w-6 text-primary-600" />
-            <span className="text-xl font-bold text-primary-600">FixIt</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
+              <Wrench className="h-5 w-5" />
+            </div>
+            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+              FixIt
+            </span>
           </Link>
           {/* Close button - mobile only */}
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground lg:hidden"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
           >
             <X className="h-5 w-5" />
           </button>
@@ -175,13 +179,18 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                     href={item.href}
                     onClick={handleNavClick}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
                       isActive
-                        ? "bg-primary-100 text-primary-700"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        ? "bg-primary-50 text-primary-600 shadow-sm shadow-primary-500/10 border-l-2 border-primary-500 rounded-l-none"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
-                    {item.icon}
+                    <span className={cn(
+                      "transition-colors",
+                      isActive ? "text-primary-600" : "group-hover:text-primary-500"
+                    )}>
+                      {item.icon}
+                    </span>
                     {item.label}
                   </Link>
                 </li>
@@ -195,23 +204,23 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
               <Link
                 href="/"
                 onClick={handleNavClick}
-                className="flex items-center gap-3 rounded-lg bg-warning-100 px-3 py-2 text-sm font-medium text-warning-700 hover:bg-warning-200"
+                className="flex items-center gap-3 rounded-lg bg-orange-50 border border-orange-100 px-3 py-2.5 text-sm font-semibold text-primary-700 hover:bg-orange-100 transition-colors shadow-sm animate-pulse-subtle"
               >
                 <AlertTriangle className="h-5 w-5" />
-                Report Issue
+                Report Machine Issue
               </Link>
             </div>
           )}
         </nav>
 
         {/* User Info & Logout */}
-        <div className="border-t p-4">
+        <div className="border-t p-4 bg-white/50 backdrop-blur-sm">
           <Link
             href="/profile"
             onClick={handleNavClick}
-            className="mb-3 flex items-center gap-3 rounded-lg bg-muted p-3 transition-colors hover:bg-muted/80"
+            className="mb-3 flex items-center gap-3 rounded-xl bg-secondary-50 p-3 transition-all hover:bg-secondary-100 border border-transparent hover:border-secondary-200 group"
           >
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-background bg-background shadow-sm">
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white bg-white shadow-sm ring-1 ring-zinc-200 group-hover:ring-primary-400/50 transition-all">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -219,24 +228,29 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                  <Users className="h-5 w-5" />
+                <div className="flex h-full w-full items-center justify-center text-zinc-400 bg-zinc-50 font-bold text-xs uppercase">
+                  {user.name.slice(0, 2)}
                 </div>
               )}
             </div>
             <div className="overflow-hidden">
-              <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate text-xs text-muted-foreground">
-                {user.employeeId} • {user.role}
-              </p>
+              <p className="truncate text-sm font-bold text-zinc-900 leading-tight">{user.name}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="flex-none rounded bg-white px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-zinc-500 border border-zinc-200">
+                  {user.role}
+                </span>
+                <p className="truncate text-[11px] font-mono text-zinc-400">
+                  {user.employeeId}
+                </p>
+              </div>
             </div>
           </Link>
           <form action={logout}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-danger-50 hover:text-danger-600 transition-colors group"
             >
-              <LogOut className="h-5 w-5" />
+              <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
               Sign Out
             </button>
           </form>

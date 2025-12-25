@@ -10,14 +10,18 @@ export default async function AnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">
-          Real-time metrics and performance insights.
+    <div className="space-y-8 animate-in">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900">
+          Analytics <span className="text-primary-600 uppercase">Engine</span>
+        </h1>
+        <p className="text-zinc-500 font-medium">
+          Real-time metrics and system performance insights
         </p>
       </div>
-      <AnalyticsDashboard />
+      <div className="relative">
+        <AnalyticsDashboard />
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, BarChart3, CheckCircle2, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -77,79 +78,71 @@ export function AnalyticsDashboard() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 text-center">Loading analytics...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center p-20 space-y-4">
+        <div className="h-10 w-10 border-4 border-zinc-200 border-t-primary-500 rounded-full animate-spin" />
+        <p className="text-zinc-500 font-mono text-xs font-bold uppercase tracking-widest">Initialising Analytics Engine...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Metric MTTR (30d)
-            </CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis?.mttrHours || 0}h</div>
-            <p className="text-xs text-muted-foreground">Mean Time To Repair</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              SLA Compliance
-            </CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis?.slaRate || 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              Resolved within deadline
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis?.openTickets || 0}</div>
-            <p className="text-xs text-muted-foreground">Total backlog</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">High Priority</CardTitle>
-            <AlertCircle className="h-4 w-4 text-rose-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-rose-600">
-              {kpis?.highPriorityOpen || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Critical or High (Open)
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="MTTR (30d)"
+          value={`${kpis?.mttrHours || 0}h`}
+          description="Mean Time To Repair"
+          icon={Clock}
+          color="text-secondary-600"
+          bg="bg-secondary-50"
+        />
+        <MetricCard
+          title="SLA Compliance"
+          value={`${kpis?.slaRate || 0}%`}
+          description="Resolved within deadline"
+          icon={CheckCircle2}
+          color="text-success-600"
+          bg="bg-success-50"
+        />
+        <MetricCard
+          title="Open Tickets"
+          value={kpis?.openTickets || 0}
+          description="Current system backlog"
+          icon={BarChart3}
+          color="text-primary-600"
+          bg="bg-primary-50"
+        />
+        <MetricCard
+          title="Critical Issues"
+          value={kpis?.highPriorityOpen || 0}
+          description="Open High/Critical"
+          icon={AlertCircle}
+          color="text-danger-600"
+          bg="bg-danger-50"
+          pulse={!!kpis?.highPriorityOpen}
+        />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         {/* Trend Chart */}
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Ticket Trends (30 Days)</CardTitle>
+        <Card className="col-span-4 card-industrial border-zinc-200 shadow-sm animate-in">
+          <CardHeader className="border-b border-zinc-100 bg-zinc-50/30">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-4 bg-primary-500 rounded-full" />
+              <CardTitle className="text-lg font-black tracking-tight">SYSTEM THROUGHPUT</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent className="pl-2">
+          <CardContent className="pt-6">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trends}>
                   <XAxis
                     dataKey="day"
-                    stroke="#888888"
-                    fontSize={12}
+                    stroke="#a1a1aa"
+                    fontSize={10}
+                    fontFamily="var(--font-mono)"
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={(value) => {
@@ -158,32 +151,34 @@ export function AnalyticsDashboard() {
                     }}
                   />
                   <YAxis
-                    stroke="#888888"
-                    fontSize={12}
+                    stroke="#a1a1aa"
+                    fontSize={10}
+                    fontFamily="var(--font-mono)"
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(value) => `${value}`}
                   />
                   <Tooltip
-                    contentStyle={{ borderRadius: "8px" }}
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString()
-                    }
+                    contentStyle={{ borderRadius: "12px", border: "1px solid #e4e4e7", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+                    labelFormatter={(value) => new Date(value).toLocaleDateString()}
                   />
-                  <Legend />
+                  <Legend iconType="circle" />
                   <Line
                     type="monotone"
                     dataKey="created_count"
-                    name="Created"
-                    stroke="#2563eb"
-                    strokeWidth={2}
+                    name="CREATED"
+                    stroke="#f97316"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#f97316", strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 6 }}
                   />
                   <Line
                     type="monotone"
                     dataKey="resolved_count"
-                    name="Resolved"
-                    stroke="#10b981"
-                    strokeWidth={2}
+                    name="RESOLVED"
+                    stroke="#22c55e"
+                    strokeWidth={3}
+                    dot={{ r: 4, fill: "#22c55e", strokeWidth: 2, stroke: "#fff" }}
+                    activeDot={{ r: 6 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -192,34 +187,43 @@ export function AnalyticsDashboard() {
         </Card>
 
         {/* Technician Stats */}
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Technician Performance</CardTitle>
+        <Card className="col-span-3 card-industrial border-zinc-200 shadow-sm animate-in animate-stagger-2">
+          <CardHeader className="border-b border-zinc-100 bg-zinc-50/30">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-4 bg-secondary-500 rounded-full" />
+              <CardTitle className="text-lg font-black tracking-tight">OPERATIONS CAPACITY</CardTitle>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={techStats} layout="vertical">
+                <BarChart data={techStats} layout="vertical" margin={{ left: 20 }}>
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={100}
-                    tick={{ fontSize: 12 }}
+                    width={80}
+                    stroke="#a1a1aa"
+                    fontSize={10}
+                    fontFamily="var(--font-mono)"
+                    tickLine={false}
+                    axisLine={false}
                   />
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} contentStyle={{ borderRadius: "12px" }} />
+                  <Legend iconType="circle" />
                   <Bar
                     dataKey="resolvedCount"
-                    name="Resolved"
-                    fill="#10b981"
-                    radius={[0, 4, 4, 0]}
+                    name="RESOLVED"
+                    fill="#22c55e"
+                    radius={[0, 6, 6, 0]}
+                    barSize={20}
                   />
                   <Bar
                     dataKey="activeCount"
-                    name="Active"
+                    name="ACTIVE"
                     fill="#f59e0b"
-                    radius={[0, 4, 4, 0]}
+                    radius={[0, 6, 6, 0]}
+                    barSize={20}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -229,45 +233,53 @@ export function AnalyticsDashboard() {
       </div>
 
       {/* Machine Health Rankings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Machines by Breakdowns</CardTitle>
+      <Card className="card-industrial border-zinc-200 shadow-sm animate-in animate-stagger-3">
+        <CardHeader className="border-b border-zinc-100 bg-zinc-50/30">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-4 bg-danger-500 rounded-full" />
+            <CardTitle className="text-lg font-black tracking-tight">MACHINE STRESS REPORT</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="pt-6">
+          <div className="grid gap-4">
             {machineStats.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">
-                No breakdown data available.
+              <p className="text-zinc-400 text-center py-8 font-medium italic">
+                No breakdown data detected in active window.
               </p>
             ) : (
-              machineStats.map((machine) => (
+              machineStats.map((machine, index) => (
                 <div
                   key={machine.id}
-                  className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                  className="group flex items-center justify-between p-4 rounded-xl border border-zinc-100 bg-zinc-50/30 hover:bg-white hover:border-zinc-200 transition-all hover-lift"
                 >
-                  <div>
-                    <p className="font-medium">
-                      {machine.name}{" "}
-                      <span className="text-xs text-muted-foreground">
-                        ({machine.code})
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-rose-600">
-                        {machine.breakdowns}
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-900 text-white font-mono text-xs font-black">
+                      #{index + 1}
+                    </div>
+                    <div>
+                      <p className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+                        {machine.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Breakdowns
+                      <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                        ID: {machine.code}
                       </p>
                     </div>
-                    <div className="text-right w-20">
-                      <p className="text-sm font-bold">
+                  </div>
+                  <div className="flex items-center gap-8">
+                    <div className="flex flex-col items-end">
+                      <p className="text-lg font-mono font-black text-danger-600 leading-none">
+                        {machine.breakdowns}
+                      </p>
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                        FAILURES
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end w-24">
+                      <p className="text-lg font-mono font-black text-zinc-900 leading-none">
                         {machine.downtimeHours}h
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Est. Downtime
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                        DOWNTIME
                       </p>
                     </div>
                   </div>
@@ -278,5 +290,45 @@ export function AnalyticsDashboard() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function MetricCard({ 
+  title, 
+  value, 
+  description, 
+  icon: Icon, 
+  color, 
+  bg, 
+  pulse = false 
+}: { 
+  title: string; 
+  value: string | number; 
+  description: string; 
+  icon: React.ElementType; 
+  color: string; 
+  bg: string; 
+  pulse?: boolean;
+}) {
+  return (
+    <Card className={cn(
+      "card-industrial border-zinc-200 shadow-sm hover-lift relative overflow-hidden",
+      pulse && "animate-glow-pulse border-danger-200"
+    )}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          {title}
+        </CardTitle>
+        <div className={cn("rounded-lg p-2", bg)}>
+          <Icon className={cn("h-4 w-4", color)} />
+        </div>
+      </CardHeader>
+      <CardContent className="pt-2">
+        <div className={cn("text-3xl font-mono font-black leading-tight", color === "text-zinc-600" ? "text-zinc-900" : color)}>
+          {value}
+        </div>
+        <p className="text-[11px] font-medium text-zinc-500 mt-1">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

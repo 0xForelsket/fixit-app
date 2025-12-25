@@ -14,24 +14,27 @@ interface StatusCardProps {
 
 const statusConfig: Record<
   StatusCardProps["status"],
-  { color: string; bg: string; border: string; icon: LucideIcon }
+  { labelColor: string; iconColor: string; bg: string; dotClass: string; icon: LucideIcon }
 > = {
   operational: {
-    color: "text-emerald-700",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
+    labelColor: "text-success-700",
+    iconColor: "text-success-500",
+    bg: "bg-success-50",
+    dotClass: "status-operational",
     icon: CheckCircle2,
   },
   down: {
-    color: "text-rose-700",
-    bg: "bg-rose-50",
-    border: "border-rose-200",
+    labelColor: "text-danger-700",
+    iconColor: "text-danger-500",
+    bg: "bg-danger-50",
+    dotClass: "status-down",
     icon: AlertTriangle,
   },
   maintenance: {
-    color: "text-amber-700",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
+    labelColor: "text-warning-700",
+    iconColor: "text-warning-500",
+    bg: "bg-warning-50",
+    dotClass: "status-maintenance",
     icon: Wrench,
   },
 };
@@ -43,23 +46,23 @@ export function StatusCard({ label, count, status }: StatusCardProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border px-4 py-2 bg-white shadow-sm transition-all",
-        config.border
+        "flex min-w-[120px] items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover-lift"
       )}
     >
       <div
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-md",
+          "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg relative overflow-hidden",
           config.bg
         )}
       >
-        <Icon className={cn("h-4 w-4", config.color)} />
+        <Icon className={cn("h-5 w-5 z-10", config.iconColor)} />
+        <div className={cn("absolute inset-0 opacity-10", config.dotClass)} />
       </div>
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="flex flex-col">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
           {label}
         </p>
-        <p className={cn("text-lg font-bold leading-none", config.color)}>
+        <p className={cn("text-xl font-mono font-bold leading-none mt-0.5", config.labelColor)}>
           {count}
         </p>
       </div>
