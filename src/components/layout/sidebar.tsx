@@ -124,7 +124,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-card transition-transform duration-300 lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
