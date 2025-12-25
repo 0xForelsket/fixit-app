@@ -514,8 +514,8 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Links to `/report/[code]` (e.g., `/report/IM-001`)
   - Include machine name, code, location path
   - Include 5S owner info: name, photo, employee ID
-- [ ] **Reports Page:**
-  - Ticket history with filters + CSV/PDF export
+- [x] **Reports Page:** at `/admin/reports`
+  - Ticket history with filters + CSV export
   - Machine reports (downtime, MTBF)
   - Tech performance metrics
 
