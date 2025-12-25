@@ -12,6 +12,7 @@ import {
   LogOut,
   MapPin,
   MonitorCog,
+  Package,
   QrCode,
   Users,
   Wrench,
@@ -62,6 +63,12 @@ const navItems: NavItem[] = [
     label: "Maintenance",
     href: "/admin/maintenance",
     icon: <Wrench className="h-5 w-5" />,
+    roles: ["admin"],
+  },
+  {
+    label: "Inventory",
+    href: "/admin/inventory",
+    icon: <Package className="h-5 w-5" />,
     roles: ["admin"],
   },
   {

@@ -7,6 +7,7 @@ export interface SessionUser {
   employeeId: string;
   name: string;
   role: UserRole;
+  hourlyRate?: number | null;
 }
 
 export interface SessionPayload {

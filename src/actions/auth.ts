@@ -96,6 +96,7 @@ export async function login(
     employeeId: user.employeeId,
     name: user.name,
     role: user.role,
+    hourlyRate: user.hourlyRate,
   });
 
   // Redirect based on role
