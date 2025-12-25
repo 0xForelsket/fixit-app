@@ -17,7 +17,11 @@ import { useEffect, useRef, useState } from "react";
 
 interface Notification {
   id: number;
-  type: "ticket_created" | "ticket_assigned" | "ticket_escalated" | "maintenance_due";
+  type:
+    | "ticket_created"
+    | "ticket_assigned"
+    | "ticket_escalated"
+    | "maintenance_due";
   title: string;
   message: string;
   link: string | null;
@@ -58,7 +62,10 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
@@ -155,7 +162,9 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Bell className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No notifications</p>
+                <p className="text-sm text-muted-foreground">
+                  No notifications
+                </p>
               </div>
             ) : (
               <div className="divide-y">

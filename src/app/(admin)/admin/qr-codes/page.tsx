@@ -21,10 +21,5 @@ export default async function QRCodesPage() {
   const protocol = host.includes("localhost") ? "http" : "https";
   const baseUrl = `${protocol}://${host}`;
 
-  return (
-    <QRCodeGeneratorClient
-      machines={machinesList}
-      baseUrl={baseUrl}
-    />
-  );
+  return <QRCodeGeneratorClient machines={machinesList} baseUrl={baseUrl} />;
 }

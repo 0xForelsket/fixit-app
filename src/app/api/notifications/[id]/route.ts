@@ -19,7 +19,10 @@ export async function PATCH(
     const notificationId = Number.parseInt(id, 10);
 
     if (Number.isNaN(notificationId)) {
-      return NextResponse.json({ error: "Invalid notification ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid notification ID" },
+        { status: 400 }
+      );
     }
 
     const body = await request.json();
@@ -30,7 +33,10 @@ export async function PATCH(
     });
 
     if (!notification) {
-      return NextResponse.json({ error: "Notification not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Notification not found" },
+        { status: 404 }
+      );
     }
 
     if (notification.userId !== user.id) {

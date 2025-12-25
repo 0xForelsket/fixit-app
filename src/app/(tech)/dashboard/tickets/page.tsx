@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-
 type SearchParams = {
   status?: string;
   priority?: string;
@@ -113,7 +112,12 @@ export default async function TicketsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const { tickets: ticketsList, total, page, totalPages } = await getTickets(params);
+  const {
+    tickets: ticketsList,
+    total,
+    page,
+    totalPages,
+  } = await getTickets(params);
   const stats = await getStats();
 
   const activeFilters =
@@ -181,7 +185,11 @@ export default async function TicketsPage({
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <form className="flex-1 min-w-[200px]" action="/dashboard/tickets" method="get">
+        <form
+          className="flex-1 min-w-[200px]"
+          action="/dashboard/tickets"
+          method="get"
+        >
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -191,8 +199,12 @@ export default async function TicketsPage({
               defaultValue={params.search}
               className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
-            {params.status && <input type="hidden" name="status" value={params.status} />}
-            {params.priority && <input type="hidden" name="priority" value={params.priority} />}
+            {params.status && (
+              <input type="hidden" name="status" value={params.status} />
+            )}
+            {params.priority && (
+              <input type="hidden" name="priority" value={params.priority} />
+            )}
           </div>
         </form>
 
@@ -359,7 +371,12 @@ function StatFilterCard({
         active && "ring-2 ring-primary-500 border-primary-300"
       )}
     >
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-lg",
+          bg
+        )}
+      >
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>
@@ -382,16 +399,17 @@ function FilterSelect({
   searchParams: SearchParams;
 }) {
   const buildUrl = (newValue: string) => {
-    const params: Record<string, string | undefined> = { 
-      ...searchParams, 
-      [name]: newValue === "all" ? undefined : newValue, 
-      page: undefined 
+    const params: Record<string, string | undefined> = {
+      ...searchParams,
+      [name]: newValue === "all" ? undefined : newValue,
+      page: undefined,
     };
     const queryString = buildSearchParams(params);
     return `/dashboard/tickets${queryString ? `?${queryString}` : ""}`;
   };
 
-  const currentOption = options.find(o => o.value === value)?.label || options[0].label;
+  const currentOption =
+    options.find((o) => o.value === value)?.label || options[0].label;
 
   return (
     <div className="relative group">
@@ -410,7 +428,8 @@ function FilterSelect({
             href={buildUrl(option.value)}
             className={cn(
               "block px-3 py-2 text-sm hover:bg-slate-50",
-              option.value === value && "bg-primary-50 text-primary-700 font-medium"
+              option.value === value &&
+                "bg-primary-50 text-primary-700 font-medium"
             )}
           >
             {option.label}
@@ -421,24 +440,62 @@ function FilterSelect({
   );
 }
 
-
 function TicketRow({ ticket }: { ticket: any }) {
-  const statusConfig: Record<string, { color: string; bg: string; label: string }> = {
-    open: { color: "text-primary-700", bg: "bg-primary-50 border-primary-200", label: "Open" },
-    in_progress: { color: "text-amber-700", bg: "bg-amber-50 border-amber-200", label: "In Progress" },
-    resolved: { color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200", label: "Resolved" },
-    closed: { color: "text-slate-700", bg: "bg-slate-50 border-slate-200", label: "Closed" },
+  const statusConfig: Record<
+    string,
+    { color: string; bg: string; label: string }
+  > = {
+    open: {
+      color: "text-primary-700",
+      bg: "bg-primary-50 border-primary-200",
+      label: "Open",
+    },
+    in_progress: {
+      color: "text-amber-700",
+      bg: "bg-amber-50 border-amber-200",
+      label: "In Progress",
+    },
+    resolved: {
+      color: "text-emerald-700",
+      bg: "bg-emerald-50 border-emerald-200",
+      label: "Resolved",
+    },
+    closed: {
+      color: "text-slate-700",
+      bg: "bg-slate-50 border-slate-200",
+      label: "Closed",
+    },
   };
 
-  const priorityConfig: Record<string, { color: string; bg: string; label: string }> = {
-    low: { color: "text-slate-700", bg: "bg-slate-50 border-slate-200", label: "Low" },
-    medium: { color: "text-primary-700", bg: "bg-primary-50 border-primary-200", label: "Medium" },
-    high: { color: "text-amber-700", bg: "bg-amber-50 border-amber-200", label: "High" },
-    critical: { color: "text-rose-700", bg: "bg-rose-50 border-rose-200", label: "Critical" },
+  const priorityConfig: Record<
+    string,
+    { color: string; bg: string; label: string }
+  > = {
+    low: {
+      color: "text-slate-700",
+      bg: "bg-slate-50 border-slate-200",
+      label: "Low",
+    },
+    medium: {
+      color: "text-primary-700",
+      bg: "bg-primary-50 border-primary-200",
+      label: "Medium",
+    },
+    high: {
+      color: "text-amber-700",
+      bg: "bg-amber-50 border-amber-200",
+      label: "High",
+    },
+    critical: {
+      color: "text-rose-700",
+      bg: "bg-rose-50 border-rose-200",
+      label: "Critical",
+    },
   };
 
   const status = statusConfig[ticket.status as string] || statusConfig.open;
-  const priority = priorityConfig[ticket.priority as string] || priorityConfig.medium;
+  const priority =
+    priorityConfig[ticket.priority as string] || priorityConfig.medium;
 
   return (
     <tr className="hover:bg-slate-50 transition-colors">
@@ -464,18 +521,32 @@ function TicketRow({ ticket }: { ticket: any }) {
         <span className="text-sm">{ticket.machine?.name || "—"}</span>
       </td>
       <td className="p-4 hidden lg:table-cell">
-        <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium", status.bg, status.color)}>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+            status.bg,
+            status.color
+          )}
+        >
           {status.label}
         </span>
       </td>
       <td className="p-4 hidden lg:table-cell">
-        <span className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium", priority.bg, priority.color)}>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+            priority.bg,
+            priority.color
+          )}
+        >
           {priority.label}
         </span>
       </td>
       <td className="p-4 hidden xl:table-cell">
         <span className="text-sm">
-          {ticket.assignedTo?.name || <span className="text-muted-foreground">Unassigned</span>}
+          {ticket.assignedTo?.name || (
+            <span className="text-muted-foreground">Unassigned</span>
+          )}
         </span>
       </td>
       <td className="p-4 hidden sm:table-cell">

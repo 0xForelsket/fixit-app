@@ -148,5 +148,3 @@ function MachineCard({ machine }: { machine: MachineWithLocation }) {
     </Link>
   );
 }
-
-

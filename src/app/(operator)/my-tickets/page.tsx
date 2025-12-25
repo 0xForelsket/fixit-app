@@ -89,7 +89,9 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
             />
             <StatCard
               label="Active"
-              count={openTickets.filter((t) => t.status === "in_progress").length}
+              count={
+                openTickets.filter((t) => t.status === "in_progress").length
+              }
               type="in_progress"
             />
             <StatCard
@@ -142,7 +144,11 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
                 </div>
                 <div className="grid gap-3 opacity-80 hover:opacity-100 transition-opacity">
                   {resolvedTickets.map((ticket) => (
-                    <TicketListItem key={ticket.id} ticket={ticket} isResolved />
+                    <TicketListItem
+                      key={ticket.id}
+                      ticket={ticket}
+                      isResolved
+                    />
                   ))}
                 </div>
               </div>
@@ -225,7 +231,10 @@ function TicketListItem({
     medium: { color: "bg-primary-500", label: "Medium" },
     high: { color: "bg-amber-500", label: "High" },
     critical: { color: "bg-rose-600", label: "Critical" },
-  }[ticket.priority as string] || { color: "bg-slate-400", label: ticket.priority };
+  }[ticket.priority as string] || {
+    color: "bg-slate-400",
+    label: ticket.priority,
+  };
 
   return (
     <Link
@@ -293,4 +302,3 @@ function TicketListItem({
     </Link>
   );
 }
-

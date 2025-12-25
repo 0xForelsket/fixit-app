@@ -64,7 +64,10 @@ export function TimeLogger({
     setStartTime(now);
     setIsRunning(true);
     setElapsed(0);
-    localStorage.setItem(`timer-${ticketId}`, JSON.stringify({ start: now.toISOString() }));
+    localStorage.setItem(
+      `timer-${ticketId}`,
+      JSON.stringify({ start: now.toISOString() })
+    );
   };
 
   const handleStop = async () => {
@@ -73,7 +76,9 @@ export function TimeLogger({
     setSaving(true);
     try {
       const endTime = new Date();
-      const durationMinutes = Math.ceil((endTime.getTime() - startTime.getTime()) / 60000);
+      const durationMinutes = Math.ceil(
+        (endTime.getTime() - startTime.getTime()) / 60000
+      );
 
       const res = await fetch("/api/labor", {
         method: "POST",
@@ -154,7 +159,10 @@ export function TimeLogger({
   };
 
   // Calculate totals
-  const totalMinutes = existingLogs.reduce((sum, log) => sum + (log.durationMinutes || 0), 0);
+  const totalMinutes = existingLogs.reduce(
+    (sum, log) => sum + (log.durationMinutes || 0),
+    0
+  );
   const totalCost = existingLogs.reduce((sum, log) => {
     if (!log.durationMinutes || !log.hourlyRate) return sum;
     return sum + (log.durationMinutes / 60) * log.hourlyRate;
@@ -171,10 +179,17 @@ export function TimeLogger({
               isRunning ? "bg-primary-100" : "bg-slate-200"
             )}
           >
-            <Clock className={cn("h-6 w-6", isRunning ? "text-primary-600" : "text-slate-500")} />
+            <Clock
+              className={cn(
+                "h-6 w-6",
+                isRunning ? "text-primary-600" : "text-slate-500"
+              )}
+            />
           </div>
           <div>
-            <p className="text-2xl font-mono font-bold">{formatTime(elapsed)}</p>
+            <p className="text-2xl font-mono font-bold">
+              {formatTime(elapsed)}
+            </p>
             <p className="text-sm text-muted-foreground">
               {isRunning ? "Timer running..." : "Timer stopped"}
             </p>
@@ -182,17 +197,27 @@ export function TimeLogger({
         </div>
         <div className="flex gap-2">
           {isRunning ? (
-            <Button onClick={handleStop} variant="destructive" disabled={saving}>
+            <Button
+              onClick={handleStop}
+              variant="destructive"
+              disabled={saving}
+            >
               <Pause className="mr-2 h-4 w-4" />
               {saving ? "Saving..." : "Stop"}
             </Button>
           ) : (
             <>
-              <Button onClick={handleStart} className="bg-primary-600 hover:bg-primary-700">
+              <Button
+                onClick={handleStart}
+                className="bg-primary-600 hover:bg-primary-700"
+              >
                 <Play className="mr-2 h-4 w-4" />
                 Start Timer
               </Button>
-              <Button variant="outline" onClick={() => setShowManualEntry(!showManualEntry)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowManualEntry(!showManualEntry)}
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Manual
               </Button>
@@ -232,7 +257,10 @@ export function TimeLogger({
               placeholder="Notes (optional)"
               className="flex-1 rounded-lg border px-3 py-2 text-sm"
             />
-            <Button onClick={handleManualEntry} disabled={!manualMinutes || saving}>
+            <Button
+              onClick={handleManualEntry}
+              disabled={!manualMinutes || saving}
+            >
               Add Entry
             </Button>
           </div>
@@ -260,7 +288,9 @@ export function TimeLogger({
       {/* Time Entries List */}
       {existingLogs.length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-medium text-sm text-muted-foreground">Time Entries</h4>
+          <h4 className="font-medium text-sm text-muted-foreground">
+            Time Entries
+          </h4>
           {existingLogs.map((log) => (
             <div
               key={log.id}
@@ -272,13 +302,19 @@ export function TimeLogger({
                   {log.hourlyRate && (
                     <span className="text-muted-foreground font-normal">
                       {" "}
-                      • ${((log.durationMinutes || 0) / 60 * log.hourlyRate).toFixed(2)}
+                      • $
+                      {(
+                        ((log.durationMinutes || 0) / 60) *
+                        log.hourlyRate
+                      ).toFixed(2)}
                     </span>
                   )}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {log.user?.name || "Unknown"} •{" "}
-                  {log.createdAt ? new Date(log.createdAt).toLocaleDateString() : ""}
+                  {log.createdAt
+                    ? new Date(log.createdAt).toLocaleDateString()
+                    : ""}
                   {log.notes && ` • ${log.notes}`}
                 </p>
               </div>

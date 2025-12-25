@@ -14,7 +14,11 @@ interface OperatorNavProps {
   avatarUrl?: string | null;
 }
 
-export function OperatorNav({ user, unreadCount, avatarUrl }: OperatorNavProps) {
+export function OperatorNav({
+  user,
+  unreadCount,
+  avatarUrl,
+}: OperatorNavProps) {
   const pathname = usePathname();
 
   const navItems = [
@@ -73,7 +77,12 @@ export function OperatorNav({ user, unreadCount, avatarUrl }: OperatorNavProps) 
           </div>
         </Link>
         <form action={logout}>
-          <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground hover:text-rose-600">
+          <Button
+            type="submit"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-rose-600"
+          >
             Logout
           </Button>
         </form>

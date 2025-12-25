@@ -85,8 +85,7 @@ export function TicketActions({
               variant={isResolving ? "secondary" : "default"}
               className={cn(
                 "w-full justify-start gap-2",
-                !isResolving &&
-                  "bg-emerald-600 hover:bg-emerald-700 text-white"
+                !isResolving && "bg-emerald-600 hover:bg-emerald-700 text-white"
               )}
               onClick={() => setIsResolving(!isResolving)}
             >
@@ -102,7 +101,10 @@ export function TicketActions({
               className="rounded-lg border bg-muted/50 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-200"
             >
               <div className="space-y-1.5">
-                <Label htmlFor="resolutionNotes" className="text-xs font-semibold">
+                <Label
+                  htmlFor="resolutionNotes"
+                  className="text-xs font-semibold"
+                >
                   Resolution Notes
                 </Label>
                 <textarea

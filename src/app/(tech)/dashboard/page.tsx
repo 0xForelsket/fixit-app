@@ -177,7 +177,10 @@ function TicketListItem({ ticket }: { ticket: any }) {
     medium: { color: "bg-primary-500", label: "Medium" },
     high: { color: "bg-amber-500", label: "High" },
     critical: { color: "bg-rose-600", label: "Critical" },
-  }[ticket.priority as string] || { color: "bg-slate-500", label: ticket.priority };
+  }[ticket.priority as string] || {
+    color: "bg-slate-500",
+    label: ticket.priority,
+  };
 
   return (
     <Link
@@ -223,4 +226,3 @@ function TicketListItem({ ticket }: { ticket: any }) {
     </Link>
   );
 }
-

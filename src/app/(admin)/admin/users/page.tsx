@@ -25,7 +25,9 @@ async function getUsers(params: SearchParams) {
   const conditions = [];
 
   if (params.role && params.role !== "all") {
-    conditions.push(eq(users.role, params.role as "operator" | "tech" | "admin"));
+    conditions.push(
+      eq(users.role, params.role as "operator" | "tech" | "admin")
+    );
   }
 
   const usersList = await db.query.users.findMany({
@@ -65,7 +67,10 @@ export default async function UsersPage({
   const usersList = await getUsers(params);
   const stats = await getUserStats();
 
-  const roleConfigs: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+  const roleConfigs: Record<
+    string,
+    { icon: React.ElementType; color: string; bg: string }
+  > = {
     operator: { icon: User, color: "text-slate-700", bg: "bg-slate-50" },
     tech: { icon: Wrench, color: "text-primary-700", bg: "bg-primary-50" },
     admin: { icon: Shield, color: "text-rose-700", bg: "bg-rose-50" },
@@ -141,7 +146,9 @@ export default async function UsersPage({
               defaultValue={params.search}
               className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
-            {params.role && <input type="hidden" name="role" value={params.role} />}
+            {params.role && (
+              <input type="hidden" name="role" value={params.role} />
+            )}
           </div>
         </form>
       </div>
@@ -175,11 +182,15 @@ export default async function UsersPage({
             </thead>
             <tbody className="divide-y">
               {usersList.map((user) => {
-                const roleConfig = roleConfigs[user.role] || roleConfigs.operator;
+                const roleConfig =
+                  roleConfigs[user.role] || roleConfigs.operator;
                 const RoleIcon = roleConfig.icon;
 
                 return (
-                  <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={user.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
@@ -271,7 +282,12 @@ function StatsCard({
         active && "ring-2 ring-primary-500 border-primary-300"
       )}
     >
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-lg",
+          bg
+        )}
+      >
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>

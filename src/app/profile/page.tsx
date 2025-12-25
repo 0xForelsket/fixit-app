@@ -37,7 +37,11 @@ export default async function ProfilePage() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
             <Link
-              href={user.role === "tech" || user.role === "admin" ? "/dashboard" : "/"}
+              href={
+                user.role === "tech" || user.role === "admin"
+                  ? "/dashboard"
+                  : "/"
+              }
               className="gap-2 text-muted-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -62,7 +66,9 @@ export default async function ProfilePage() {
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900">{user.name}</h1>
-          <p className="text-slate-500 font-mono text-sm mt-1">{user.employeeId}</p>
+          <p className="text-slate-500 font-mono text-sm mt-1">
+            {user.employeeId}
+          </p>
           <div className="mt-2 inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700 uppercase tracking-wide">
             {user.role}
           </div>

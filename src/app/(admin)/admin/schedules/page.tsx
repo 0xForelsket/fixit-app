@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { desc } from "drizzle-orm";
 import {
   Calendar,
@@ -47,7 +47,9 @@ export default async function SchedulesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Maintenance Schedules</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Maintenance Schedules
+          </h1>
           <p className="text-muted-foreground">
             {stats.total} schedules • {stats.active} active
           </p>
@@ -111,10 +113,14 @@ export default async function SchedulesPage() {
             </thead>
             <tbody className="divide-y">
               {schedules.map((schedule) => {
-                const isOverdue = schedule.nextDue && new Date(schedule.nextDue) < new Date();
-                
+                const isOverdue =
+                  schedule.nextDue && new Date(schedule.nextDue) < new Date();
+
                 return (
-                  <tr key={schedule.id} className="hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={schedule.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
@@ -129,7 +135,9 @@ export default async function SchedulesPage() {
                       </div>
                     </td>
                     <td className="p-4 hidden md:table-cell">
-                      <span className="text-sm">{schedule.machine?.name || "—"}</span>
+                      <span className="text-sm">
+                        {schedule.machine?.name || "—"}
+                      </span>
                     </td>
                     <td className="p-4 hidden lg:table-cell">
                       <Badge variant="outline" className="text-xs">
@@ -138,10 +146,14 @@ export default async function SchedulesPage() {
                     </td>
                     <td className="p-4">
                       {schedule.nextDue ? (
-                        <span className={cn(
-                          "text-sm",
-                          isOverdue ? "text-rose-600 font-medium" : "text-muted-foreground"
-                        )}>
+                        <span
+                          className={cn(
+                            "text-sm",
+                            isOverdue
+                              ? "text-rose-600 font-medium"
+                              : "text-muted-foreground"
+                          )}
+                        >
                           {isOverdue && "⚠️ "}
                           {new Date(schedule.nextDue).toLocaleDateString()}
                         </span>
@@ -195,7 +207,12 @@ function StatsCard({
 }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border p-4 bg-white">
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-lg",
+          bg
+        )}
+      >
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>

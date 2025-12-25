@@ -12,7 +12,10 @@ export async function POST(request: Request) {
     const { filename, mimeType, entityType, entityId } = await request.json();
 
     if (!filename || !mimeType || !entityType || !entityId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     // Generate a unique S3 key
@@ -25,6 +28,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ uploadUrl, s3Key });
   } catch (error) {
     console.error("Failed to generate presigned URL:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

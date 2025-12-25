@@ -162,7 +162,8 @@ export default function SettingsPage() {
             Settings persistence not yet implemented
           </p>
           <p className="text-sm text-amber-700 mt-1">
-            This page is a UI preview. Settings will be persisted in a future update.
+            This page is a UI preview. Settings will be persisted in a future
+            update.
           </p>
         </div>
       </div>

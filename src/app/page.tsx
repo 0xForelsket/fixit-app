@@ -123,9 +123,9 @@ export default async function Home({ searchParams }: PageProps) {
             </span>
           </Link>
 
-          <OperatorNav 
-            user={user} 
-            unreadCount={unreadCount} 
+          <OperatorNav
+            user={user}
+            unreadCount={unreadCount}
             avatarUrl={avatarUrl}
           />
         </div>
@@ -223,4 +223,3 @@ function StatusCard({
     </div>
   );
 }
-

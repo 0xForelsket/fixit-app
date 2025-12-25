@@ -19,8 +19,13 @@ interface QRCodeGeneratorClientProps {
   baseUrl: string;
 }
 
-export function QRCodeGeneratorClient({ machines, baseUrl }: QRCodeGeneratorClientProps) {
-  const [selectedMachines, setSelectedMachines] = useState<Set<number>>(new Set());
+export function QRCodeGeneratorClient({
+  machines,
+  baseUrl,
+}: QRCodeGeneratorClientProps) {
+  const [selectedMachines, setSelectedMachines] = useState<Set<number>>(
+    new Set()
+  );
   const printRef = useRef<HTMLDivElement>(null);
 
   const toggleMachine = (id: number) => {
@@ -47,16 +52,19 @@ export function QRCodeGeneratorClient({ machines, baseUrl }: QRCodeGeneratorClie
     window.print();
   };
 
-  const machinesToPrint = selectedMachines.size > 0
-    ? machines.filter((m) => selectedMachines.has(m.id))
-    : machines;
+  const machinesToPrint =
+    selectedMachines.size > 0
+      ? machines.filter((m) => selectedMachines.has(m.id))
+      : machines;
 
   return (
     <div className="space-y-6">
       {/* Header - Hidden when printing */}
       <div className="flex items-center justify-between print:hidden">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">QR Code Generator</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            QR Code Generator
+          </h1>
           <p className="text-muted-foreground">
             Generate printable QR codes for machine issue reporting
           </p>
@@ -64,7 +72,8 @@ export function QRCodeGeneratorClient({ machines, baseUrl }: QRCodeGeneratorClie
         <div className="flex gap-2">
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="mr-2 h-4 w-4" />
-            Print {selectedMachines.size > 0 ? `(${selectedMachines.size})` : "All"}
+            Print{" "}
+            {selectedMachines.size > 0 ? `(${selectedMachines.size})` : "All"}
           </Button>
         </div>
       </div>
@@ -200,9 +209,12 @@ function QRCard({ machine, baseUrl }: { machine: Machine; baseUrl: string }) {
 
           {machine.owner && (
             <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
-              <span className="font-medium">5S Owner:</span> {machine.owner.name}
+              <span className="font-medium">5S Owner:</span>{" "}
+              {machine.owner.name}
               <br />
-              <span className="font-mono text-xs">{machine.owner.employeeId}</span>
+              <span className="font-mono text-xs">
+                {machine.owner.employeeId}
+              </span>
             </div>
           )}
         </div>

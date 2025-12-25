@@ -28,7 +28,9 @@ export function FileUpload({
   maxSizeMB = 10,
 }: FileUploadProps) {
   const [isUploading, setIsPending] = useState(false);
-  const [previews, setPreviews] = useState<{ id: string; url: string; name: string; type: string }[]>([]);
+  const [previews, setPreviews] = useState<
+    { id: string; url: string; name: string; type: string }[]
+  >([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = useCallback(
@@ -72,7 +74,8 @@ export function FileUpload({
             },
           });
 
-          if (!uploadResponse.ok) throw new Error("Failed to upload to storage");
+          if (!uploadResponse.ok)
+            throw new Error("Failed to upload to storage");
 
           // 3. Notify parent
           onUploadComplete({
@@ -83,9 +86,13 @@ export function FileUpload({
           });
 
           // 4. Add to previews
-          const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : "";
-          setPreviews((prev) => [...prev, { id: s3Key, url, name: file.name, type: file.type }]);
-
+          const url = file.type.startsWith("image/")
+            ? URL.createObjectURL(file)
+            : "";
+          setPreviews((prev) => [
+            ...prev,
+            { id: s3Key, url, name: file.name, type: file.type },
+          ]);
         } catch (err) {
           console.error("Upload error:", err);
           setError("Failed to upload some files. Please try again.");
@@ -110,7 +117,7 @@ export function FileUpload({
         <label className="text-sm font-semibold text-foreground/80 uppercase tracking-wider">
           {label}
         </label>
-        
+
         <div className="relative">
           <input
             type="file"
@@ -123,7 +130,9 @@ export function FileUpload({
           <div
             className={cn(
               "flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all",
-              isUploading ? "bg-muted animate-pulse" : "hover:bg-primary-50/50 hover:border-primary-300 bg-white"
+              isUploading
+                ? "bg-muted animate-pulse"
+                : "hover:bg-primary-50/50 hover:border-primary-300 bg-white"
             )}
           >
             {isUploading ? (
@@ -134,8 +143,12 @@ export function FileUpload({
                   <ImageIcon className="h-6 w-6 text-primary-600" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900">Click to upload or drag and drop</p>
-                  <p className="text-xs text-slate-500">PNG, JPG or PDF up to {maxSizeMB}MB</p>
+                  <p className="font-bold text-slate-900">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    PNG, JPG or PDF up to {maxSizeMB}MB
+                  </p>
                 </div>
               </div>
             )}
@@ -143,9 +156,7 @@ export function FileUpload({
         </div>
       </div>
 
-      {error && (
-        <p className="text-sm font-medium text-destructive">{error}</p>
-      )}
+      {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
       {/* Previews Grid */}
       {previews.length > 0 && (
@@ -169,7 +180,7 @@ export function FileUpload({
                   </p>
                 </div>
               )}
-              
+
               <button
                 type="button"
                 onClick={() => removePreview(file.id)}

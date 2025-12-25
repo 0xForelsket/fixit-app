@@ -58,12 +58,29 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { entityType, entityId, attachmentType, filename, mimeType, sizeBytes } = body;
+    const {
+      entityType,
+      entityId,
+      attachmentType,
+      filename,
+      mimeType,
+      sizeBytes,
+    } = body;
 
     // Validate required fields
-    if (!entityType || !entityId || !attachmentType || !filename || !mimeType || !sizeBytes) {
+    if (
+      !entityType ||
+      !entityId ||
+      !attachmentType ||
+      !filename ||
+      !mimeType ||
+      !sizeBytes
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields: entityType, entityId, attachmentType, filename, mimeType, sizeBytes" },
+        {
+          error:
+            "Missing required fields: entityType, entityId, attachmentType, filename, mimeType, sizeBytes",
+        },
         { status: 400 }
       );
     }

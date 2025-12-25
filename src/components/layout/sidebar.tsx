@@ -136,7 +136,11 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
       >
         {/* Header with close button on mobile */}
         <div className="flex h-16 items-center justify-between border-b px-6">
-          <Link href="/dashboard" className="flex items-center gap-2" onClick={handleNavClick}>
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2"
+            onClick={handleNavClick}
+          >
             <Wrench className="h-6 w-6 text-primary-600" />
             <span className="text-xl font-bold text-primary-600">FixIt</span>
           </Link>

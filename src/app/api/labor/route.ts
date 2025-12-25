@@ -67,7 +67,8 @@ export async function GET(request: Request) {
 
     const logs = await db.query.laborLogs.findMany({
       where: ticketId
-        ? (laborLogs, { eq }) => eq(laborLogs.ticketId, Number.parseInt(ticketId))
+        ? (laborLogs, { eq }) =>
+            eq(laborLogs.ticketId, Number.parseInt(ticketId))
         : undefined,
       with: {
         user: true,

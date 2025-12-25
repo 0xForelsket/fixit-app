@@ -19,7 +19,10 @@ export async function GET(
     const { id } = await params;
     const attachmentId = Number.parseInt(id, 10);
     if (Number.isNaN(attachmentId)) {
-      return NextResponse.json({ error: "Invalid attachment ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid attachment ID" },
+        { status: 400 }
+      );
     }
 
     const attachment = await db.query.attachments.findFirst({
@@ -27,7 +30,10 @@ export async function GET(
     });
 
     if (!attachment) {
-      return NextResponse.json({ error: "Attachment not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Attachment not found" },
+        { status: 404 }
+      );
     }
 
     const downloadUrl = await getPresignedDownloadUrl(attachment.s3Key);
@@ -59,7 +65,10 @@ export async function DELETE(
     const { id } = await params;
     const attachmentId = Number.parseInt(id, 10);
     if (Number.isNaN(attachmentId)) {
-      return NextResponse.json({ error: "Invalid attachment ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid attachment ID" },
+        { status: 400 }
+      );
     }
 
     const attachment = await db.query.attachments.findFirst({
@@ -67,7 +76,10 @@ export async function DELETE(
     });
 
     if (!attachment) {
-      return NextResponse.json({ error: "Attachment not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Attachment not found" },
+        { status: 404 }
+      );
     }
 
     // Only allow uploader or admin to delete

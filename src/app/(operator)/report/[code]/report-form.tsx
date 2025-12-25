@@ -102,7 +102,11 @@ export function ReportForm({ machineId, machineName }: ReportFormProps) {
   return (
     <form action={formAction} className="space-y-8">
       <input type="hidden" name="machineId" value={machineId} />
-      <input type="hidden" name="attachments" value={JSON.stringify(attachments)} />
+      <input
+        type="hidden"
+        name="attachments"
+        value={JSON.stringify(attachments)}
+      />
 
       {/* Error display */}
       {state.error && (
@@ -171,10 +175,7 @@ export function ReportForm({ machineId, machineName }: ReportFormProps) {
                   className="sr-only"
                 />
                 <span
-                  className={cn(
-                    "font-bold text-lg capitalize",
-                    config.color
-                  )}
+                  className={cn("font-bold text-lg capitalize", config.color)}
                 >
                   {priority}
                 </span>
@@ -260,4 +261,3 @@ export function ReportForm({ machineId, machineName }: ReportFormProps) {
     </form>
   );
 }
-

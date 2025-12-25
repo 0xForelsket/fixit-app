@@ -54,7 +54,14 @@ export async function createTicket(
     return { error: firstError || "Invalid input" };
   }
 
-  const { machineId, type, title, description, priority, attachments: ticketAttachments } = result.data;
+  const {
+    machineId,
+    type,
+    title,
+    description,
+    priority,
+    attachments: ticketAttachments,
+  } = result.data;
 
   // Calculate SLA due date
   const dueBy = calculateDueBy(priority);

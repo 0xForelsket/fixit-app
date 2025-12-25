@@ -69,7 +69,9 @@ export default async function LocationsPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Location Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Location Management
+          </h1>
           <p className="text-muted-foreground">
             {stats.total} locations • {stats.roots} root areas
           </p>
@@ -109,7 +111,11 @@ export default async function LocationsPage({
 
       {/* Search */}
       <div className="flex items-center gap-3">
-        <form className="flex-1 max-w-md" action="/admin/locations" method="get">
+        <form
+          className="flex-1 max-w-md"
+          action="/admin/locations"
+          method="get"
+        >
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
@@ -151,7 +157,10 @@ export default async function LocationsPage({
             </thead>
             <tbody className="divide-y">
               {locationsList.map((location) => (
-                <tr key={location.id} className="hover:bg-slate-50 transition-colors">
+                <tr
+                  key={location.id}
+                  className="hover:bg-slate-50 transition-colors"
+                >
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
@@ -179,7 +188,9 @@ export default async function LocationsPage({
                         {location.parent.name}
                       </div>
                     ) : (
-                      <span className="text-sm text-muted-foreground">Root</span>
+                      <span className="text-sm text-muted-foreground">
+                        Root
+                      </span>
                     )}
                   </td>
                   <td className="p-4">
@@ -229,10 +240,13 @@ function StatsCard({
   bg: string;
 }) {
   return (
-    <div
-      className="flex items-center gap-3 rounded-xl border p-4 bg-white"
-    >
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+    <div className="flex items-center gap-3 rounded-xl border p-4 bg-white">
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-lg",
+          bg
+        )}
+      >
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>

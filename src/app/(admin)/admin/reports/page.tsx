@@ -98,15 +98,24 @@ async function getStats(params: SearchParams) {
     where: whereClause,
   });
 
-  const resolved = allTickets.filter((t) => t.status === "resolved" || t.status === "closed");
-  const avgResolutionTime = resolved.length > 0
-    ? resolved.reduce((sum, t) => {
-        if (t.resolvedAt && t.createdAt) {
-          return sum + (new Date(t.resolvedAt).getTime() - new Date(t.createdAt).getTime());
-        }
-        return sum;
-      }, 0) / resolved.length / (1000 * 60 * 60) // Convert to hours
-    : 0;
+  const resolved = allTickets.filter(
+    (t) => t.status === "resolved" || t.status === "closed"
+  );
+  const avgResolutionTime =
+    resolved.length > 0
+      ? resolved.reduce((sum, t) => {
+          if (t.resolvedAt && t.createdAt) {
+            return (
+              sum +
+              (new Date(t.resolvedAt).getTime() -
+                new Date(t.createdAt).getTime())
+            );
+          }
+          return sum;
+        }, 0) /
+        resolved.length /
+        (1000 * 60 * 60) // Convert to hours
+      : 0;
 
   return {
     total: allTickets.length,
@@ -133,15 +142,23 @@ export default async function ReportsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const { tickets: ticketsList, total, page, totalPages } = await getTickets(params);
+  const {
+    tickets: ticketsList,
+    total,
+    page,
+    totalPages,
+  } = await getTickets(params);
   const stats = await getStats(params);
 
-  const hasFilters = params.status || params.priority || params.from || params.to;
+  const hasFilters =
+    params.status || params.priority || params.from || params.to;
 
   // Build CSV export URL
   const csvParams = new URLSearchParams();
-  if (params.status && params.status !== "all") csvParams.set("status", params.status);
-  if (params.priority && params.priority !== "all") csvParams.set("priority", params.priority);
+  if (params.status && params.status !== "all")
+    csvParams.set("status", params.status);
+  if (params.priority && params.priority !== "all")
+    csvParams.set("priority", params.priority);
   if (params.from) csvParams.set("from", params.from);
   if (params.to) csvParams.set("to", params.to);
   const csvUrl = `/api/reports/export?${csvParams.toString()}`;
@@ -166,24 +183,57 @@ export default async function ReportsPage({
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-5">
-        <StatCard title="Total Tickets" value={stats.total} icon={FileText} color="text-primary-600" bg="bg-primary-50" />
-        <StatCard title="Open" value={stats.open} icon={Inbox} color="text-amber-600" bg="bg-amber-50" />
-        <StatCard title="Resolved" value={stats.resolved} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
-        <StatCard title="Critical" value={stats.critical} icon={AlertTriangle} color="text-rose-600" bg="bg-rose-50" />
-        <StatCard 
-          title="Avg Resolution" 
-          value={`${stats.avgResolutionHours}h`} 
-          icon={Timer} 
-          color="text-slate-600" 
-          bg="bg-slate-50" 
+        <StatCard
+          title="Total Tickets"
+          value={stats.total}
+          icon={FileText}
+          color="text-primary-600"
+          bg="bg-primary-50"
+        />
+        <StatCard
+          title="Open"
+          value={stats.open}
+          icon={Inbox}
+          color="text-amber-600"
+          bg="bg-amber-50"
+        />
+        <StatCard
+          title="Resolved"
+          value={stats.resolved}
+          icon={CheckCircle2}
+          color="text-emerald-600"
+          bg="bg-emerald-50"
+        />
+        <StatCard
+          title="Critical"
+          value={stats.critical}
+          icon={AlertTriangle}
+          color="text-rose-600"
+          bg="bg-rose-50"
+        />
+        <StatCard
+          title="Avg Resolution"
+          value={`${stats.avgResolutionHours}h`}
+          icon={Timer}
+          color="text-slate-600"
+          bg="bg-slate-50"
         />
       </div>
 
       {/* Filters */}
       <div className="rounded-xl border bg-white p-4">
-        <form action="/admin/reports" method="get" className="flex flex-wrap items-end gap-4">
+        <form
+          action="/admin/reports"
+          method="get"
+          className="flex flex-wrap items-end gap-4"
+        >
           <div className="space-y-1">
-            <label htmlFor="from-date" className="text-xs font-medium text-muted-foreground">From Date</label>
+            <label
+              htmlFor="from-date"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              From Date
+            </label>
             <input
               type="date"
               id="from-date"
@@ -193,7 +243,12 @@ export default async function ReportsPage({
             />
           </div>
           <div className="space-y-1">
-            <label htmlFor="to-date" className="text-xs font-medium text-muted-foreground">To Date</label>
+            <label
+              htmlFor="to-date"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              To Date
+            </label>
             <input
               type="date"
               id="to-date"
@@ -203,7 +258,12 @@ export default async function ReportsPage({
             />
           </div>
           <div className="space-y-1">
-            <label htmlFor="status-filter" className="text-xs font-medium text-muted-foreground">Status</label>
+            <label
+              htmlFor="status-filter"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              Status
+            </label>
             <select
               id="status-filter"
               name="status"
@@ -218,7 +278,12 @@ export default async function ReportsPage({
             </select>
           </div>
           <div className="space-y-1">
-            <label htmlFor="priority-filter" className="text-xs font-medium text-muted-foreground">Priority</label>
+            <label
+              htmlFor="priority-filter"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              Priority
+            </label>
             <select
               id="priority-filter"
               name="priority"
@@ -285,25 +350,44 @@ export default async function ReportsPage({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {(page - 1) * PAGE_SIZE + 1} to {Math.min(page * PAGE_SIZE, total)} of {total}
+            Showing {(page - 1) * PAGE_SIZE + 1} to{" "}
+            {Math.min(page * PAGE_SIZE, total)} of {total}
           </p>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} asChild={page > 1}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              asChild={page > 1}
+            >
               {page > 1 ? (
-                <Link href={`/admin/reports?${buildSearchParams({ ...params, page: String(page - 1) })}`}>
+                <Link
+                  href={`/admin/reports?${buildSearchParams({ ...params, page: String(page - 1) })}`}
+                >
                   <ArrowLeft className="mr-2 h-4 w-4" /> Previous
                 </Link>
               ) : (
-                <span><ArrowLeft className="mr-2 h-4 w-4" /> Previous</span>
+                <span>
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+                </span>
               )}
             </Button>
-            <Button variant="outline" size="sm" disabled={page >= totalPages} asChild={page < totalPages}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              asChild={page < totalPages}
+            >
               {page < totalPages ? (
-                <Link href={`/admin/reports?${buildSearchParams({ ...params, page: String(page + 1) })}`}>
+                <Link
+                  href={`/admin/reports?${buildSearchParams({ ...params, page: String(page + 1) })}`}
+                >
                   Next <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               ) : (
-                <span>Next <ArrowRight className="ml-2 h-4 w-4" /></span>
+                <span>
+                  Next <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
               )}
             </Button>
           </div>
@@ -328,7 +412,12 @@ function StatCard({
 }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border p-4 bg-white">
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", bg)}>
+      <div
+        className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-lg",
+          bg
+        )}
+      >
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>
@@ -352,14 +441,28 @@ interface TicketWithRelations {
 }
 
 function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
-  const statusConfig: Record<string, { color: string; bg: string; label: string }> = {
+  const statusConfig: Record<
+    string,
+    { color: string; bg: string; label: string }
+  > = {
     open: { color: "text-primary-700", bg: "bg-primary-50", label: "Open" },
-    in_progress: { color: "text-amber-700", bg: "bg-amber-50", label: "In Progress" },
-    resolved: { color: "text-emerald-700", bg: "bg-emerald-50", label: "Resolved" },
+    in_progress: {
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+      label: "In Progress",
+    },
+    resolved: {
+      color: "text-emerald-700",
+      bg: "bg-emerald-50",
+      label: "Resolved",
+    },
     closed: { color: "text-slate-700", bg: "bg-slate-50", label: "Closed" },
   };
 
-  const priorityConfig: Record<string, { color: string; bg: string; label: string }> = {
+  const priorityConfig: Record<
+    string,
+    { color: string; bg: string; label: string }
+  > = {
     low: { color: "text-slate-700", bg: "bg-slate-50", label: "Low" },
     medium: { color: "text-primary-700", bg: "bg-primary-50", label: "Medium" },
     high: { color: "text-amber-700", bg: "bg-amber-50", label: "High" },
@@ -372,7 +475,10 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
   return (
     <tr className="hover:bg-slate-50 transition-colors">
       <td className="p-3">
-        <Link href={`/dashboard/tickets/${ticket.id}`} className="font-mono text-xs text-primary-600 hover:underline">
+        <Link
+          href={`/dashboard/tickets/${ticket.id}`}
+          className="font-mono text-xs text-primary-600 hover:underline"
+        >
           #{ticket.id}
         </Link>
       </td>
@@ -386,12 +492,24 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
         {ticket.machine?.location?.name || "—"}
       </td>
       <td className="p-3">
-        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", status.bg, status.color)}>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+            status.bg,
+            status.color
+          )}
+        >
           {status.label}
         </span>
       </td>
       <td className="p-3 hidden sm:table-cell">
-        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", priority.bg, priority.color)}>
+        <span
+          className={cn(
+            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+            priority.bg,
+            priority.color
+          )}
+        >
           {priority.label}
         </span>
       </td>
@@ -405,7 +523,9 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
         {new Date(ticket.createdAt).toLocaleDateString()}
       </td>
       <td className="p-3 hidden lg:table-cell text-muted-foreground">
-        {ticket.resolvedAt ? new Date(ticket.resolvedAt).toLocaleDateString() : "—"}
+        {ticket.resolvedAt
+          ? new Date(ticket.resolvedAt).toLocaleDateString()
+          : "—"}
       </td>
     </tr>
   );
