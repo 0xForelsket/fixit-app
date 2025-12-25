@@ -26,17 +26,17 @@ async function seed() {
   // Phase 10-15 tables
   await db.delete(schema.checklistCompletions).catch(() => {});
   await db.delete(schema.maintenanceChecklists).catch(() => {});
-  await db.delete(schema.machineBoms).catch(() => {});
-  await db.delete(schema.machineModels).catch(() => {});
+  await db.delete(schema.equipmentBoms).catch(() => {});
+  await db.delete(schema.equipmentModels).catch(() => {});
   await db.delete(schema.spareParts).catch(() => {});
   // Core tables
-  await db.delete(schema.machineStatusLogs);
+  await db.delete(schema.equipmentStatusLogs);
   await db.delete(schema.notifications);
   await db.delete(schema.attachments);
   await db.delete(schema.ticketLogs);
   await db.delete(schema.maintenanceSchedules);
   await db.delete(schema.tickets);
-  await db.delete(schema.machines);
+  await db.delete(schema.equipment);
   await db.delete(schema.locations);
   await db.delete(schema.users);
 
@@ -166,7 +166,7 @@ async function seed() {
     .values({
       name: "Molding Area",
       code: "MOLD",
-      description: "Injection molding machines",
+      description: "Injection molding equipment",
       parentId: hallB.id,
       isActive: true,
     })
@@ -174,72 +174,160 @@ async function seed() {
 
   console.log(`Created ${6} locations`);
 
-  // Create machines
-  console.log("Creating machines...");
-  const [machine1] = await db
-    .insert(schema.machines)
+  // Create equipment categories
+  console.log("Creating equipment categories...");
+  const [catM] = await db
+    .insert(schema.equipmentCategories)
+    .values({
+      name: "M",
+      label: "Mechanical",
+      description: "Mechanical equipment and machinery",
+    })
+    .returning();
+
+  const [catE] = await db
+    .insert(schema.equipmentCategories)
+    .values({
+      name: "E",
+      label: "Electrical",
+      description: "Electrical panels, motors, and controls",
+    })
+    .returning();
+
+  const [catI] = await db
+    .insert(schema.equipmentCategories)
+    .values({
+      name: "I",
+      label: "Instrumentation",
+      description: "Sensors, gauges, and precision instruments",
+    })
+    .returning();
+
+  // Create equipment types (Object Types)
+  console.log("Creating equipment types...");
+  const [typeMolder] = await db
+    .insert(schema.equipmentTypes)
+    .values({
+      categoryId: catM.id,
+      name: "Injection Molder",
+      code: "MOLD",
+      description: "Industrial injection molding machine",
+    })
+    .returning();
+
+  const [typeConveyor] = await db
+    .insert(schema.equipmentTypes)
+    .values({
+      categoryId: catM.id,
+      name: "Conveyor",
+      code: "CONV",
+      description: "Belt or roller conveyor system",
+    })
+    .returning();
+
+  const [typeRobot] = await db
+    .insert(schema.equipmentTypes)
+    .values({
+      categoryId: catM.id,
+      name: "Robot",
+      code: "ROB",
+      description: "Articulated or packaging robot",
+    })
+    .returning();
+
+  const [typeMill] = await db
+    .insert(schema.equipmentTypes)
+    .values({
+      categoryId: catM.id,
+      name: "CNC Mill",
+      code: "CNC",
+      description: "Computer numerical control milling machine",
+    })
+    .returning();
+
+  const [typeScanner] = await db
+    .insert(schema.equipmentTypes)
+    .values({
+      categoryId: catI.id,
+      name: "Quality Scanner",
+      code: "SCAN",
+      description: "Optical or laser quality inspection scanner",
+    })
+    .returning();
+
+  // Create equipment
+  console.log("Creating equipment...");
+  const [equipment1] = await db
+    .insert(schema.equipment)
     .values({
       name: "Injection Molder A",
       code: "IM-001",
+      typeId: typeMolder.id,
       locationId: moldingArea.id,
       ownerId: operator1.id,
       status: "operational",
     })
     .returning();
 
-  const [machine2] = await db
-    .insert(schema.machines)
+  const [equipment2] = await db
+    .insert(schema.equipment)
     .values({
       name: "Injection Molder B",
       code: "IM-002",
+      typeId: typeMolder.id,
       locationId: moldingArea.id,
       ownerId: operator1.id,
       status: "operational",
     })
     .returning();
 
-  const [machine3] = await db
-    .insert(schema.machines)
+  const [equipment3] = await db
+    .insert(schema.equipment)
     .values({
       name: "Conveyor System 1",
       code: "CONV-001",
+      typeId: typeConveyor.id,
       locationId: lineA1.id,
       ownerId: operator2.id,
       status: "operational",
     })
     .returning();
 
-  const [machine4] = await db
-    .insert(schema.machines)
+  const [equipment4] = await db
+    .insert(schema.equipment)
     .values({
       name: "Packaging Robot",
       code: "PKG-001",
+      typeId: typeRobot.id,
       locationId: lineA1.id,
       ownerId: operator2.id,
       status: "maintenance",
     })
     .returning();
 
-  const [machine5] = await db
-    .insert(schema.machines)
+  const [equipment5] = await db
+    .insert(schema.equipment)
     .values({
       name: "CNC Mill",
       code: "CNC-001",
+      typeId: typeMill.id,
       locationId: lineA2.id,
       ownerId: null,
       status: "down",
     })
     .returning();
 
-  await db.insert(schema.machines).values({
+  await db.insert(schema.equipment).values({
     name: "Quality Scanner",
     code: "QS-001",
+    typeId: typeScanner.id,
     locationId: lineA2.id,
     ownerId: operator1.id,
     status: "operational",
   });
 
-  console.log(`Created ${6} machines`);
+  console.log(`Created ${6} equipment (using SAP Types: ${typeMolder.code}, ${typeConveyor.code}, ${typeRobot.code}, ${typeMill.code}, ${typeScanner.code})`);
+  console.log(`Categories initialized: ${catM.label}, ${catE.label}, ${catI.label}`);
 
   // Create some tickets
   console.log("Creating tickets...");
@@ -251,13 +339,13 @@ async function seed() {
   const [ticket1] = await db
     .insert(schema.tickets)
     .values({
-      machineId: machine5.id,
+      equipmentId: equipment5.id,
       type: "breakdown",
       reportedById: operator2.id,
       assignedToId: tech1.id,
       title: "CNC Mill not powering on",
       description:
-        "Machine fails to start. No response when power button is pressed. Checked power supply - appears connected.",
+        "Equipment fails to start. No response when power button is pressed. Checked power supply - appears connected.",
       priority: "critical",
       status: "in_progress",
       dueBy: fourHoursFromNow,
@@ -269,7 +357,7 @@ async function seed() {
   const [ticket2] = await db
     .insert(schema.tickets)
     .values({
-      machineId: machine4.id,
+      equipmentId: equipment4.id,
       type: "maintenance",
       reportedById: operator2.id,
       assignedToId: tech2.id,
@@ -286,7 +374,7 @@ async function seed() {
 
   await db.insert(schema.tickets).values([
     {
-      machineId: machine1.id,
+      equipmentId: equipment1.id,
       type: "calibration",
       reportedById: operator1.id,
       assignedToId: null,
@@ -300,7 +388,7 @@ async function seed() {
       updatedAt: oneHourAgo,
     },
     {
-      machineId: machine3.id,
+      equipmentId: equipment3.id,
       type: "safety",
       reportedById: operator2.id,
       assignedToId: tech1.id,
@@ -325,7 +413,7 @@ async function seed() {
   const [schedule1] = await db
     .insert(schema.maintenanceSchedules)
     .values({
-      machineId: machine1.id,
+      equipmentId: equipment1.id,
       title: "Monthly Lubrication",
       type: "maintenance",
       frequencyDays: 30,
@@ -336,7 +424,7 @@ async function seed() {
 
   await db.insert(schema.maintenanceSchedules).values([
     {
-      machineId: machine1.id,
+      equipmentId: equipment1.id,
       title: "Quarterly Calibration",
       type: "calibration",
       frequencyDays: 90,
@@ -344,7 +432,7 @@ async function seed() {
       isActive: true,
     },
     {
-      machineId: machine2.id,
+      equipmentId: equipment2.id,
       title: "Monthly Lubrication",
       type: "maintenance",
       frequencyDays: 30,
@@ -352,7 +440,7 @@ async function seed() {
       isActive: true,
     },
     {
-      machineId: machine5.id,
+      equipmentId: equipment5.id,
       title: "Annual Calibration",
       type: "calibration",
       frequencyDays: 365,
@@ -395,18 +483,18 @@ async function seed() {
 
   console.log(`Created ${3} notifications`);
 
-  // Log machine status changes for the down machine
-  console.log("Creating machine status logs...");
-  await db.insert(schema.machineStatusLogs).values([
+  // Log equipment status changes for the down equipment
+  console.log("Creating equipment status logs...");
+  await db.insert(schema.equipmentStatusLogs).values([
     {
-      machineId: machine5.id,
+      equipmentId: equipment5.id,
       oldStatus: "operational",
       newStatus: "down",
       changedById: operator2.id,
       changedAt: twoHoursAgo,
     },
     {
-      machineId: machine4.id,
+      equipmentId: equipment4.id,
       oldStatus: "operational",
       newStatus: "maintenance",
       changedById: tech2.id,
@@ -414,7 +502,7 @@ async function seed() {
     },
   ]);
 
-  console.log(`Created ${2} machine status logs`);
+  console.log(`Created ${2} equipment status logs`);
 
   // Create spare parts (using valid partCategories enum values)
   console.log("Creating spare parts...");
@@ -514,19 +602,19 @@ async function seed() {
 
   console.log(`Created ${3} inventory transactions`);
 
-  // Create machine models (no category field - use description)
-  console.log("Creating machine models...");
+  // Create equipment models (no category field - use description)
+  console.log("Creating equipment models...");
   const [model1] = await db
-    .insert(schema.machineModels)
+    .insert(schema.equipmentModels)
     .values({
       name: "Injection Molder IM-500",
       manufacturer: "PlasticPro Industries",
-      description: "500-ton injection molding machine",
+      description: "500-ton injection molding equipment",
     })
     .returning();
 
   const [model2] = await db
-    .insert(schema.machineModels)
+    .insert(schema.equipmentModels)
     .values({
       name: "Conveyor CV-200",
       manufacturer: "ConveyorTech",
@@ -534,11 +622,11 @@ async function seed() {
     })
     .returning();
 
-  console.log(`Created ${2} machine models`);
+  console.log(`Created ${2} equipment models`);
 
-  // Create machine BOMs (quantityRequired not quantity)
-  console.log("Creating machine BOMs...");
-  await db.insert(schema.machineBoms).values([
+  // Create equipment BOMs (quantityRequired not quantity)
+  console.log("Creating equipment BOMs...");
+  await db.insert(schema.equipmentBoms).values([
     {
       modelId: model1.id,
       partId: part1.id,
@@ -571,7 +659,7 @@ async function seed() {
     },
   ]);
 
-  console.log(`Created ${5} machine BOMs`);
+  console.log(`Created ${5} equipment BOMs`);
 
   // Create labor logs
   console.log("Creating labor logs...");

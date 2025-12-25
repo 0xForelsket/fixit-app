@@ -1,9 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { machineStatusLogs, machines } from "@/db/schema";
+import { equipmentStatusLogs, equipment as equipmentTable } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { createMachineSchema, updateMachineSchema } from "@/lib/validations";
+import {
+  createEquipmentSchema,
+  updateEquipmentSchema,
+} from "@/lib/validations";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -13,7 +16,7 @@ export type ActionState = {
   data?: unknown;
 };
 
-export async function createMachine(
+export async function createEquipment(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -23,7 +26,7 @@ export async function createMachine(
   }
 
   if (user.role !== "admin") {
-    return { error: "Only administrators can create machines" };
+    return { error: "Only administrators can create equipment" };
   }
 
   const rawData = {
@@ -31,10 +34,11 @@ export async function createMachine(
     code: formData.get("code")?.toString().toUpperCase(),
     locationId: Number(formData.get("locationId")),
     ownerId: formData.get("ownerId") ? Number(formData.get("ownerId")) : null,
+    typeId: formData.get("typeId") ? Number(formData.get("typeId")) : null,
     status: formData.get("status") || "operational",
   };
 
-  const result = createMachineSchema.safeParse(rawData);
+  const result = createEquipmentSchema.safeParse(rawData);
   if (!result.success) {
     const errors = result.error.flatten().fieldErrors;
     const firstError = Object.values(errors)[0]?.[0];
@@ -42,23 +46,26 @@ export async function createMachine(
   }
 
   try {
-    const [machine] = await db.insert(machines).values(result.data).returning();
+    const [newItem] = await db
+      .insert(equipmentTable)
+      .values(result.data)
+      .returning();
 
-    revalidatePath("/admin/machines");
-    return { success: true, data: machine };
+    revalidatePath("/admin/equipment");
+    return { success: true, data: newItem };
   } catch (error) {
     if (
       error instanceof Error &&
       error.message.includes("UNIQUE constraint failed")
     ) {
-      return { error: "A machine with this code already exists" };
+      return { error: "A equipment with this code already exists" };
     }
-    return { error: "Failed to create machine" };
+    return { error: "Failed to create equipment" };
   }
 }
 
-export async function updateMachine(
-  machineId: number,
+export async function updateEquipment(
+  equipmentId: number,
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -68,15 +75,15 @@ export async function updateMachine(
   }
 
   if (user.role !== "admin") {
-    return { error: "Only administrators can update machines" };
+    return { error: "Only administrators can update equipment" };
   }
 
-  const existingMachine = await db.query.machines.findFirst({
-    where: eq(machines.id, machineId),
+  const existingEquipment = await db.query.equipment.findFirst({
+    where: eq(equipmentTable.id, equipmentId),
   });
 
-  if (!existingMachine) {
-    return { error: "Machine not found" };
+  if (!existingEquipment) {
+    return { error: "Equipment not found" };
   }
 
   const rawData: Record<string, unknown> = {};
@@ -84,6 +91,7 @@ export async function updateMachine(
   const code = formData.get("code");
   const locationId = formData.get("locationId");
   const ownerId = formData.get("ownerId");
+  const typeId = formData.get("typeId");
   const status = formData.get("status");
 
   if (name) rawData.name = name;
@@ -92,18 +100,21 @@ export async function updateMachine(
   if (ownerId !== null) {
     rawData.ownerId = ownerId ? Number(ownerId) : null;
   }
+  if (typeId !== null) {
+    rawData.typeId = typeId ? Number(typeId) : null;
+  }
   if (status) rawData.status = status;
 
-  const result = updateMachineSchema.safeParse(rawData);
+  const result = updateEquipmentSchema.safeParse(rawData);
   if (!result.success) {
     return { error: "Invalid input" };
   }
 
   // Log status change if status is being updated
-  if (result.data.status && result.data.status !== existingMachine.status) {
-    await db.insert(machineStatusLogs).values({
-      machineId,
-      oldStatus: existingMachine.status,
+  if (result.data.status && result.data.status !== existingEquipment.status) {
+    await db.insert(equipmentStatusLogs).values({
+      equipmentId,
+      oldStatus: existingEquipment.status,
       newStatus: result.data.status,
       changedById: user.id,
     });
@@ -111,40 +122,42 @@ export async function updateMachine(
 
   try {
     await db
-      .update(machines)
+      .update(equipmentTable)
       .set({
         ...result.data,
         updatedAt: new Date(),
       })
-      .where(eq(machines.id, machineId));
+      .where(eq(equipmentTable.id, equipmentId));
 
-    revalidatePath("/admin/machines");
-    revalidatePath(`/admin/machines/${machineId}`);
+    revalidatePath("/admin/equipment");
+    revalidatePath(`/admin/equipment/${equipmentId}`);
     return { success: true };
   } catch (error) {
     if (
       error instanceof Error &&
       error.message.includes("UNIQUE constraint failed")
     ) {
-      return { error: "A machine with this code already exists" };
+      return { error: "A equipment with this code already exists" };
     }
-    return { error: "Failed to update machine" };
+    return { error: "Failed to update equipment" };
   }
 }
 
-export async function deleteMachine(machineId: number): Promise<ActionState> {
+export async function deleteEquipment(
+  equipmentId: number
+): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) {
     return { error: "You must be logged in" };
   }
 
   if (user.role !== "admin") {
-    return { error: "Only administrators can delete machines" };
+    return { error: "Only administrators can delete equipment" };
   }
 
-  // Check if machine has any tickets
-  const machineWithTickets = await db.query.machines.findFirst({
-    where: eq(machines.id, machineId),
+  // Check if equipment has any tickets
+  const equipmentWithTickets = await db.query.equipment.findFirst({
+    where: eq(equipmentTable.id, equipmentId),
     with: {
       tickets: {
         limit: 1,
@@ -152,16 +165,16 @@ export async function deleteMachine(machineId: number): Promise<ActionState> {
     },
   });
 
-  if (!machineWithTickets) {
-    return { error: "Machine not found" };
+  if (!equipmentWithTickets) {
+    return { error: "Equipment not found" };
   }
 
-  if (machineWithTickets.tickets.length > 0) {
-    return { error: "Cannot delete machine with existing tickets" };
+  if (equipmentWithTickets.tickets.length > 0) {
+    return { error: "Cannot delete equipment with existing tickets" };
   }
 
-  await db.delete(machines).where(eq(machines.id, machineId));
+  await db.delete(equipmentTable).where(eq(equipmentTable.id, equipmentId));
 
-  revalidatePath("/admin/machines");
+  revalidatePath("/admin/equipment");
   return { success: true };
 }

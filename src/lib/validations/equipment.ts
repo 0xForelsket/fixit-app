@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export const machineStatusSchema = z.enum([
+export const equipmentStatusSchema = z.enum([
   "operational",
   "down",
   "maintenance",
 ]);
 
-export const createMachineSchema = z.object({
+export const createEquipmentSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   code: z
     .string()
@@ -18,10 +18,11 @@ export const createMachineSchema = z.object({
     ),
   locationId: z.number().int().positive("Location is required"),
   ownerId: z.number().int().positive().optional().nullable(),
-  status: machineStatusSchema.default("operational"),
+  typeId: z.number().int().positive().optional().nullable(),
+  status: equipmentStatusSchema.default("operational"),
 });
 
-export const updateMachineSchema = z.object({
+export const updateEquipmentSchema = z.object({
   name: z
     .string()
     .min(1, "Name is required")
@@ -38,8 +39,9 @@ export const updateMachineSchema = z.object({
     .optional(),
   locationId: z.number().int().positive().optional(),
   ownerId: z.number().int().positive().optional().nullable(),
-  status: machineStatusSchema.optional(),
+  typeId: z.number().int().positive().optional().nullable(),
+  status: equipmentStatusSchema.optional(),
 });
 
-export type CreateMachineInput = z.infer<typeof createMachineSchema>;
-export type UpdateMachineInput = z.infer<typeof updateMachineSchema>;
+export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>;
+export type UpdateEquipmentInput = z.infer<typeof updateEquipmentSchema>;

@@ -5,8 +5,12 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const userRoles = ["operator", "tech", "admin"] as const;
 export type UserRole = (typeof userRoles)[number];
 
-export const machineStatuses = ["operational", "down", "maintenance"] as const;
-export type MachineStatus = (typeof machineStatuses)[number];
+export const equipmentStatuses = [
+  "operational",
+  "down",
+  "maintenance",
+] as const;
+export type EquipmentStatus = (typeof equipmentStatuses)[number];
 
 export const ticketTypes = [
   "breakdown",
@@ -38,7 +42,7 @@ export const ticketLogActions = [
 ] as const;
 export type TicketLogAction = (typeof ticketLogActions)[number];
 
-export const entityTypes = ["user", "machine", "ticket", "location"] as const;
+export const entityTypes = ["user", "equipment", "ticket", "location"] as const;
 export type EntityType = (typeof entityTypes)[number];
 
 export const attachmentTypes = [
@@ -126,8 +130,27 @@ export const locations = sqliteTable("locations", {
     .default(sql`(unixepoch())`),
 });
 
-// Machine Models table (Phase 15 - Maintenance History & BOM)
-export const machineModels = sqliteTable("machine_models", {
+// SAP-style Equipment Categories (e.g., Mechanical, Electrical)
+export const equipmentCategories = sqliteTable("equipment_categories", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(), // e.g., "M"
+  label: text("label").notNull(), // e.g., "Mechanical"
+  description: text("description"),
+});
+
+// SAP-style Object Types (e.g., Pump, Motor)
+export const equipmentTypes = sqliteTable("equipment_types", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  categoryId: integer("category_id")
+    .references(() => equipmentCategories.id)
+    .notNull(),
+  name: text("name").notNull(), // e.g., "Pump"
+  code: text("code").unique().notNull(), // e.g., "PMP"
+  description: text("description"),
+});
+
+// Equipment Models table
+export const equipmentModels = sqliteTable("equipment_models", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   manufacturer: text("manufacturer"),
@@ -141,17 +164,18 @@ export const machineModels = sqliteTable("machine_models", {
     .default(sql`(unixepoch())`),
 });
 
-// Machines table
-export const machines = sqliteTable("machines", {
+// Equipment table (formerly Equipment)
+export const equipment = sqliteTable("equipment", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   code: text("code").unique().notNull(), // For QR codes
-  modelId: integer("model_id").references(() => machineModels.id),
+  modelId: integer("model_id").references(() => equipmentModels.id),
+  typeId: integer("type_id").references(() => equipmentTypes.id),
   locationId: integer("location_id")
     .references(() => locations.id)
     .notNull(),
   ownerId: integer("owner_id").references(() => users.id), // Owner
-  status: text("status", { enum: machineStatuses })
+  status: text("status", { enum: equipmentStatuses })
     .notNull()
     .default("operational"),
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -165,8 +189,8 @@ export const machines = sqliteTable("machines", {
 // Tickets table
 export const tickets = sqliteTable("tickets", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  machineId: integer("machine_id")
-    .references(() => machines.id)
+  equipmentId: integer("equipment_id")
+    .references(() => equipment.id)
     .notNull(),
   type: text("type", { enum: ticketTypes }).notNull(),
   reportedById: integer("reported_by_id")
@@ -194,8 +218,8 @@ export const tickets = sqliteTable("tickets", {
 // Maintenance schedules table
 export const maintenanceSchedules = sqliteTable("maintenance_schedules", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  machineId: integer("machine_id")
-    .references(() => machines.id)
+  equipmentId: integer("equipment_id")
+    .references(() => equipment.id)
     .notNull(),
   title: text("title").notNull(),
   type: text("type", { enum: scheduleTypes }).notNull(),
@@ -259,14 +283,14 @@ export const notifications = sqliteTable("notifications", {
     .default(sql`(unixepoch())`),
 });
 
-// Machine status logs table (for downtime tracking)
-export const machineStatusLogs = sqliteTable("machine_status_logs", {
+// Equipment status logs table (for downtime tracking)
+export const equipmentStatusLogs = sqliteTable("equipment_status_logs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  machineId: integer("machine_id")
-    .references(() => machines.id)
+  equipmentId: integer("equipment_id")
+    .references(() => equipment.id)
     .notNull(),
-  oldStatus: text("old_status", { enum: machineStatuses }).notNull(),
-  newStatus: text("new_status", { enum: machineStatuses }).notNull(),
+  oldStatus: text("old_status", { enum: equipmentStatuses }).notNull(),
+  newStatus: text("new_status", { enum: equipmentStatuses }).notNull(),
   changedById: integer("changed_by_id").references(() => users.id),
   changedAt: integer("changed_at", { mode: "timestamp" })
     .notNull()
@@ -274,10 +298,10 @@ export const machineStatusLogs = sqliteTable("machine_status_logs", {
 });
 
 // Bill of Materials (BOM) linking models to parts
-export const machineBoms = sqliteTable("machine_boms", {
+export const equipmentBoms = sqliteTable("equipment_boms", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   modelId: integer("model_id")
-    .references(() => machineModels.id)
+    .references(() => equipmentModels.id)
     .notNull(),
   partId: integer("part_id")
     .references(() => spareParts.id)
@@ -431,13 +455,13 @@ export const laborLogs = sqliteTable("labor_logs", {
 // ============ RELATIONS ============
 
 export const usersRelations = relations(users, ({ many }) => ({
-  ownedMachines: many(machines, { relationName: "machineOwner" }),
+  ownedEquipment: many(equipment, { relationName: "equipmentOwner" }),
   reportedTickets: many(tickets, { relationName: "ticketReporter" }),
   assignedTickets: many(tickets, { relationName: "ticketAssignee" }),
   ticketLogs: many(ticketLogs),
   attachments: many(attachments),
   notifications: many(notifications),
-  machineStatusChanges: many(machineStatusLogs),
+  equipmentStatusChanges: many(equipmentStatusLogs),
 }));
 
 export const locationsRelations = relations(locations, ({ one, many }) => ({
@@ -447,32 +471,54 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
     relationName: "locationHierarchy",
   }),
   children: many(locations, { relationName: "locationHierarchy" }),
-  machines: many(machines),
+  equipment: many(equipment),
 }));
 
-export const machinesRelations = relations(machines, ({ one, many }) => ({
+export const equipmentCategoriesRelations = relations(
+  equipmentCategories,
+  ({ many }) => ({
+    types: many(equipmentTypes),
+  })
+);
+
+export const equipmentTypesRelations = relations(
+  equipmentTypes,
+  ({ one, many }) => ({
+    category: one(equipmentCategories, {
+      fields: [equipmentTypes.categoryId],
+      references: [equipmentCategories.id],
+    }),
+    equipment: many(equipment),
+  })
+);
+
+export const equipmentRelations = relations(equipment, ({ one, many }) => ({
   location: one(locations, {
-    fields: [machines.locationId],
+    fields: [equipment.locationId],
     references: [locations.id],
   }),
-  model: one(machineModels, {
-    fields: [machines.modelId],
-    references: [machineModels.id],
+  model: one(equipmentModels, {
+    fields: [equipment.modelId],
+    references: [equipmentModels.id],
+  }),
+  type: one(equipmentTypes, {
+    fields: [equipment.typeId],
+    references: [equipmentTypes.id],
   }),
   owner: one(users, {
-    fields: [machines.ownerId],
+    fields: [equipment.ownerId],
     references: [users.id],
-    relationName: "machineOwner",
+    relationName: "equipmentOwner",
   }),
   tickets: many(tickets),
   maintenanceSchedules: many(maintenanceSchedules),
-  statusLogs: many(machineStatusLogs),
+  statusLogs: many(equipmentStatusLogs),
 }));
 
 export const ticketsRelations = relations(tickets, ({ one, many }) => ({
-  machine: one(machines, {
-    fields: [tickets.machineId],
-    references: [machines.id],
+  equipment: one(equipment, {
+    fields: [tickets.equipmentId],
+    references: [equipment.id],
   }),
   reportedBy: one(users, {
     fields: [tickets.reportedById],
@@ -491,9 +537,9 @@ export const ticketsRelations = relations(tickets, ({ one, many }) => ({
 export const maintenanceSchedulesRelations = relations(
   maintenanceSchedules,
   ({ one }) => ({
-    machine: one(machines, {
-      fields: [maintenanceSchedules.machineId],
-      references: [machines.id],
+    equipment: one(equipment, {
+      fields: [maintenanceSchedules.equipmentId],
+      references: [equipment.id],
     }),
   })
 );
@@ -523,32 +569,35 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
-export const machineStatusLogsRelations = relations(
-  machineStatusLogs,
+export const equipmentStatusLogsRelations = relations(
+  equipmentStatusLogs,
   ({ one }) => ({
-    machine: one(machines, {
-      fields: [machineStatusLogs.machineId],
-      references: [machines.id],
+    equipment: one(equipment, {
+      fields: [equipmentStatusLogs.equipmentId],
+      references: [equipment.id],
     }),
     changedBy: one(users, {
-      fields: [machineStatusLogs.changedById],
+      fields: [equipmentStatusLogs.changedById],
       references: [users.id],
     }),
   })
 );
 
-export const machineModelsRelations = relations(machineModels, ({ many }) => ({
-  machines: many(machines),
-  bom: many(machineBoms),
-}));
+export const equipmentModelsRelations = relations(
+  equipmentModels,
+  ({ many }) => ({
+    equipment: many(equipment),
+    bom: many(equipmentBoms),
+  })
+);
 
-export const machineBomsRelations = relations(machineBoms, ({ one }) => ({
-  model: one(machineModels, {
-    fields: [machineBoms.modelId],
-    references: [machineModels.id],
+export const equipmentBomsRelations = relations(equipmentBoms, ({ one }) => ({
+  model: one(equipmentModels, {
+    fields: [equipmentBoms.modelId],
+    references: [equipmentModels.id],
   }),
   part: one(spareParts, {
-    fields: [machineBoms.partId],
+    fields: [equipmentBoms.partId],
     references: [spareParts.id],
   }),
 }));
@@ -588,7 +637,7 @@ export const sparePartsRelations = relations(spareParts, ({ many }) => ({
   inventoryLevels: many(inventoryLevels),
   transactions: many(inventoryTransactions),
   ticketParts: many(ticketParts),
-  usedInModels: many(machineBoms),
+  usedInModels: many(equipmentBoms),
 }));
 
 export const inventoryLevelsRelations = relations(
@@ -666,14 +715,20 @@ export type NewUser = typeof users.$inferInsert;
 export type Location = typeof locations.$inferSelect;
 export type NewLocation = typeof locations.$inferInsert;
 
-export type Machine = typeof machines.$inferSelect;
-export type NewMachine = typeof machines.$inferInsert;
+export type EquipmentCategory = typeof equipmentCategories.$inferSelect;
+export type NewEquipmentCategory = typeof equipmentCategories.$inferInsert;
 
-export type MachineModel = typeof machineModels.$inferSelect;
-export type NewMachineModel = typeof machineModels.$inferInsert;
+export type EquipmentType = typeof equipmentTypes.$inferSelect;
+export type NewEquipmentType = typeof equipmentTypes.$inferInsert;
 
-export type MachineBom = typeof machineBoms.$inferSelect;
-export type NewMachineBom = typeof machineBoms.$inferInsert;
+export type Equipment = typeof equipment.$inferSelect;
+export type NewEquipment = typeof equipment.$inferInsert;
+
+export type EquipmentModel = typeof equipmentModels.$inferSelect;
+export type NewEquipmentModel = typeof equipmentModels.$inferInsert;
+
+export type EquipmentBom = typeof equipmentBoms.$inferSelect;
+export type NewEquipmentBom = typeof equipmentBoms.$inferInsert;
 
 export type Ticket = typeof tickets.$inferSelect;
 export type NewTicket = typeof tickets.$inferInsert;
@@ -690,8 +745,8 @@ export type NewAttachment = typeof attachments.$inferInsert;
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
 
-export type MachineStatusLog = typeof machineStatusLogs.$inferSelect;
-export type NewMachineStatusLog = typeof machineStatusLogs.$inferInsert;
+export type EquipmentStatusLog = typeof equipmentStatusLogs.$inferSelect;
+export type NewEquipmentStatusLog = typeof equipmentStatusLogs.$inferInsert;
 
 // Phase 10: Checklist types
 export type MaintenanceChecklist = typeof maintenanceChecklists.$inferSelect;

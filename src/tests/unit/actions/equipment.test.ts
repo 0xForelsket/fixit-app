@@ -1,15 +1,15 @@
 import {
-  createMachine,
-  deleteMachine,
-  updateMachine,
-} from "@/actions/machines";
+  createEquipment,
+  deleteEquipment,
+  updateEquipment,
+} from "@/actions/equipment";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
 vi.mock("@/db", () => ({
   db: {
     query: {
-      machines: {
+      equipment: {
         findFirst: vi.fn(),
       },
     },
@@ -37,7 +37,7 @@ vi.mock("@/lib/session", () => ({
 import { db } from "@/db";
 import { getCurrentUser } from "@/lib/session";
 
-describe("createMachine action", () => {
+describe("createEquipment action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -46,11 +46,11 @@ describe("createMachine action", () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
     const formData = new FormData();
-    formData.set("name", "Test Machine");
+    formData.set("name", "Test Equipment");
     formData.set("code", "TM-001");
     formData.set("locationId", "1");
 
-    const result = await createMachine({}, formData);
+    const result = await createEquipment({}, formData);
 
     expect(result.error).toBe("You must be logged in");
   });
@@ -64,13 +64,13 @@ describe("createMachine action", () => {
     });
 
     const formData = new FormData();
-    formData.set("name", "Test Machine");
+    formData.set("name", "Test Equipment");
     formData.set("code", "TM-001");
     formData.set("locationId", "1");
 
-    const result = await createMachine({}, formData);
+    const result = await createEquipment({}, formData);
 
-    expect(result.error).toBe("Only administrators can create machines");
+    expect(result.error).toBe("Only administrators can create equipment");
   });
 
   it("should reject operator users", async () => {
@@ -82,13 +82,13 @@ describe("createMachine action", () => {
     });
 
     const formData = new FormData();
-    formData.set("name", "Test Machine");
+    formData.set("name", "Test Equipment");
     formData.set("code", "TM-001");
     formData.set("locationId", "1");
 
-    const result = await createMachine({}, formData);
+    const result = await createEquipment({}, formData);
 
-    expect(result.error).toBe("Only administrators can create machines");
+    expect(result.error).toBe("Only administrators can create equipment");
   });
 
   it("should return error for invalid input", async () => {
@@ -104,12 +104,12 @@ describe("createMachine action", () => {
     formData.set("code", "TM-001");
     formData.set("locationId", "1");
 
-    const result = await createMachine({}, formData);
+    const result = await createEquipment({}, formData);
 
     expect(result.error).toBeDefined();
   });
 
-  it("should create machine successfully", async () => {
+  it("should create equipment successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
@@ -117,9 +117,9 @@ describe("createMachine action", () => {
       role: "admin",
     });
 
-    const mockMachine = {
+    const mockEquipment = {
       id: 1,
-      name: "Test Machine",
+      name: "Test Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -130,19 +130,19 @@ describe("createMachine action", () => {
 
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
       values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockMachine]),
+        returning: vi.fn().mockResolvedValue([mockEquipment]),
       })),
     } as unknown);
 
     const formData = new FormData();
-    formData.set("name", "Test Machine");
+    formData.set("name", "Test Equipment");
     formData.set("code", "tm-001"); // Lowercase - should be uppercased
     formData.set("locationId", "1");
 
-    const result = await createMachine({}, formData);
+    const result = await createEquipment({}, formData);
 
     expect(result.success).toBe(true);
-    expect(result.data).toEqual(mockMachine);
+    expect(result.data).toEqual(mockEquipment);
   });
 
   it("should handle duplicate code error", async () => {
@@ -158,23 +158,23 @@ describe("createMachine action", () => {
         returning: vi
           .fn()
           .mockRejectedValue(
-            new Error("UNIQUE constraint failed: machines.code")
+            new Error("UNIQUE constraint failed: equipment.code")
           ),
       })),
     } as unknown);
 
     const formData = new FormData();
-    formData.set("name", "Test Machine");
+    formData.set("name", "Test Equipment");
     formData.set("code", "TM-001");
     formData.set("locationId", "1");
 
-    const result = await createMachine({}, formData);
+    const result = await createEquipment({}, formData);
 
-    expect(result.error).toBe("A machine with this code already exists");
+    expect(result.error).toBe("A equipment with this code already exists");
   });
 });
 
-describe("updateMachine action", () => {
+describe("updateEquipment action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -185,7 +185,7 @@ describe("updateMachine action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateMachine(1, {}, formData);
+    const result = await updateEquipment(1, {}, formData);
 
     expect(result.error).toBe("You must be logged in");
   });
@@ -201,12 +201,12 @@ describe("updateMachine action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateMachine(1, {}, formData);
+    const result = await updateEquipment(1, {}, formData);
 
-    expect(result.error).toBe("Only administrators can update machines");
+    expect(result.error).toBe("Only administrators can update equipment");
   });
 
-  it("should return error for non-existent machine", async () => {
+  it("should return error for non-existent equipment", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
@@ -214,17 +214,17 @@ describe("updateMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue(undefined);
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateMachine(999, {}, formData);
+    const result = await updateEquipment(999, {}, formData);
 
-    expect(result.error).toBe("Machine not found");
+    expect(result.error).toBe("Equipment not found");
   });
 
-  it("should update machine successfully", async () => {
+  it("should update equipment successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
@@ -232,7 +232,7 @@ describe("updateMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
       name: "Old Name",
       code: "TM-001",
@@ -250,7 +250,7 @@ describe("updateMachine action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateMachine(1, {}, formData);
+    const result = await updateEquipment(1, {}, formData);
 
     expect(result.success).toBe(true);
     expect(db.update).toHaveBeenCalled();
@@ -264,9 +264,9 @@ describe("updateMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
-      name: "Machine",
+      name: "Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -286,7 +286,7 @@ describe("updateMachine action", () => {
     const formData = new FormData();
     formData.set("status", "down");
 
-    const result = await updateMachine(1, {}, formData);
+    const result = await updateEquipment(1, {}, formData);
 
     expect(result.success).toBe(true);
     expect(db.insert).toHaveBeenCalled(); // For status change log
@@ -300,9 +300,9 @@ describe("updateMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
-      name: "Machine",
+      name: "Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -316,7 +316,7 @@ describe("updateMachine action", () => {
         where: vi
           .fn()
           .mockRejectedValue(
-            new Error("UNIQUE constraint failed: machines.code")
+            new Error("UNIQUE constraint failed: equipment.code")
           ),
       })),
     } as unknown);
@@ -324,13 +324,13 @@ describe("updateMachine action", () => {
     const formData = new FormData();
     formData.set("code", "EXISTING-CODE");
 
-    const result = await updateMachine(1, {}, formData);
+    const result = await updateEquipment(1, {}, formData);
 
-    expect(result.error).toBe("A machine with this code already exists");
+    expect(result.error).toBe("A equipment with this code already exists");
   });
 });
 
-describe("deleteMachine action", () => {
+describe("deleteEquipment action", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -338,7 +338,7 @@ describe("deleteMachine action", () => {
   it("should return error when not logged in", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
-    const result = await deleteMachine(1);
+    const result = await deleteEquipment(1);
 
     expect(result.error).toBe("You must be logged in");
   });
@@ -351,12 +351,12 @@ describe("deleteMachine action", () => {
       role: "tech",
     });
 
-    const result = await deleteMachine(1);
+    const result = await deleteEquipment(1);
 
-    expect(result.error).toBe("Only administrators can delete machines");
+    expect(result.error).toBe("Only administrators can delete equipment");
   });
 
-  it("should return error for non-existent machine", async () => {
+  it("should return error for non-existent equipment", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
@@ -364,14 +364,14 @@ describe("deleteMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue(undefined);
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
-    const result = await deleteMachine(999);
+    const result = await deleteEquipment(999);
 
-    expect(result.error).toBe("Machine not found");
+    expect(result.error).toBe("Equipment not found");
   });
 
-  it("should prevent deletion of machine with tickets", async () => {
+  it("should prevent deletion of equipment with tickets", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
@@ -379,9 +379,9 @@ describe("deleteMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
-      name: "Machine",
+      name: "Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -389,14 +389,14 @@ describe("deleteMachine action", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       tickets: [{ id: 1 }], // Has tickets
-    } as unknown as Awaited<ReturnType<typeof db.query.machines.findFirst>>);
+    } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
-    const result = await deleteMachine(1);
+    const result = await deleteEquipment(1);
 
-    expect(result.error).toBe("Cannot delete machine with existing tickets");
+    expect(result.error).toBe("Cannot delete equipment with existing tickets");
   });
 
-  it("should delete machine successfully", async () => {
+  it("should delete equipment successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
@@ -404,9 +404,9 @@ describe("deleteMachine action", () => {
       role: "admin",
     });
 
-    vi.mocked(db.query.machines.findFirst).mockResolvedValue({
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
-      name: "Machine",
+      name: "Equipment",
       code: "TM-001",
       locationId: 1,
       status: "operational",
@@ -414,13 +414,13 @@ describe("deleteMachine action", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       tickets: [], // No tickets
-    } as unknown as Awaited<ReturnType<typeof db.query.machines.findFirst>>);
+    } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
     vi.mocked(db.delete as unknown as () => unknown).mockReturnValue({
       where: vi.fn(),
     } as unknown);
 
-    const result = await deleteMachine(1);
+    const result = await deleteEquipment(1);
 
     expect(result.success).toBe(true);
     expect(db.delete).toHaveBeenCalled();
