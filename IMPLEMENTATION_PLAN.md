@@ -499,7 +499,7 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
   - Change status workflow
   - Assign technician
   - Add resolution notes + before/after photos when closing
-- [ ] **Notifications:**
+- [x] **Notifications:**
   - Bell icon with unread count
   - Notification dropdown/panel
   - Mark as read
@@ -510,7 +510,7 @@ mc mirror minio/fixit-attachments backup/fixit-attachments
 - [x] **Machine Management:** List machines with status filtering, location display
 - [x] **Schedule Management:** List maintenance schedules with due dates
 - [x] **SLA Configuration:** Settings page with SLA, session, and notification options (UI preview)
-- [ ] **QR Code Generator:** Print page for machine QR codes
+- [x] **QR Code Generator:** Print page for machine QR codes at `/admin/qr-codes`
   - Links to `/report/[code]` (e.g., `/report/IM-001`)
   - Include machine name, code, location path
   - Include 5S owner info: name, photo, employee ID
