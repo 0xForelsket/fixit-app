@@ -18,6 +18,18 @@ async function seed() {
 
   // Clear existing data (in reverse order of dependencies)
   console.log("Clearing existing data...");
+  // Phase 12-13 tables
+  await db.delete(schema.ticketParts).catch(() => {});
+  await db.delete(schema.laborLogs).catch(() => {});
+  await db.delete(schema.inventoryTransactions).catch(() => {});
+  await db.delete(schema.inventoryLevels).catch(() => {});
+  // Phase 10-15 tables
+  await db.delete(schema.checklistCompletions).catch(() => {});
+  await db.delete(schema.maintenanceChecklists).catch(() => {});
+  await db.delete(schema.machineBoms).catch(() => {});
+  await db.delete(schema.machineModels).catch(() => {});
+  await db.delete(schema.spareParts).catch(() => {});
+  // Core tables
   await db.delete(schema.machineStatusLogs);
   await db.delete(schema.notifications);
   await db.delete(schema.attachments);
