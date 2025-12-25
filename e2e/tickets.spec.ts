@@ -30,12 +30,12 @@ test.describe("Ticket Management", () => {
     }
   });
 
-  test("Operator can access machine list", async ({
+  test("Operator can access equipment list", async ({
     page,
     loginAsOperator,
   }) => {
     await loginAsOperator();
-    // Successfully logged in - operator goes to / with machines
+    // Successfully logged in - operator goes to / with equipment
     await expect(page).toHaveURL("/");
   });
 });

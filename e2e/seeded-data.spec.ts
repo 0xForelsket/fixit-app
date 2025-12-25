@@ -72,14 +72,14 @@ test.describe("Ticket Details - Seeded Data", () => {
   });
 });
 
-test.describe("Machine Models - Seeded Data", () => {
+test.describe("Equipment Models - Seeded Data", () => {
   test("Admin can access models page", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
-    await page.goto("/admin/models");
+    await page.goto("/admin/equipment/models");
 
     // If page exists, URL should match
     const currentUrl = page.url();
-    expect(currentUrl).toContain("/admin");
+    expect(currentUrl).toContain("/admin/equipment/models");
   });
 });
 

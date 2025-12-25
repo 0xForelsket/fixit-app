@@ -1,26 +1,26 @@
 import { expect, test } from "./fixtures";
 
-test.describe("Admin - Machines", () => {
-  test("Admin can access machines page", async ({ page, loginAsAdmin }) => {
+test.describe("Admin - Equipment", () => {
+  test("Admin can access equipment page", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
-    await page.goto("/admin/machines");
-    await expect(page).toHaveURL("/admin/machines");
+    await page.goto("/admin/equipment");
+    await expect(page).toHaveURL("/admin/equipment");
   });
 
-  test("Admin can view machine details", async ({ page, loginAsAdmin }) => {
+  test("Admin can view equipment details", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
-    await page.goto("/admin/machines");
+    await page.goto("/admin/equipment");
 
-    // Try to click on any machine link, skip test if none exist
-    const machineLink = page
-      .locator('tr a, [data-testid="machine-link"]')
+    // Try to click on any equipment link, skip test if none exist
+    const equipmentLink = page
+      .locator('tr a, [data-testid="equipment-link"]')
       .first();
-    const isVisible = await machineLink
+    const isVisible = await equipmentLink
       .isVisible({ timeout: 3000 })
       .catch(() => false);
     if (isVisible) {
-      await machineLink.click();
-      await expect(page).toHaveURL(/\/machines\/\d+/);
+      await equipmentLink.click();
+      await expect(page).toHaveURL(/\/equipment\/\d+/);
     }
   });
 });

@@ -6,10 +6,10 @@ test.describe("Navigation", () => {
     await expect(page).not.toHaveURL("/login");
   });
 
-  test("Admin can navigate to machines", async ({ page, loginAsAdmin }) => {
+  test("Admin can navigate to equipment", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
-    await page.goto("/admin/machines");
-    await expect(page).toHaveURL("/admin/machines");
+    await page.goto("/admin/equipment");
+    await expect(page).toHaveURL("/admin/equipment");
   });
 
   test("Admin can navigate to users", async ({ page, loginAsAdmin }) => {
