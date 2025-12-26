@@ -38,7 +38,11 @@ export function checkRateLimit(
   }
 
   entry.count++;
-  return { success: true, remaining: limit - entry.count, reset: entry.resetTime };
+  return {
+    success: true,
+    remaining: limit - entry.count,
+    reset: entry.resetTime,
+  };
 }
 
 export function getClientIp(request: Request): string {

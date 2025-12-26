@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { deleteObject, getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
@@ -82,8 +83,9 @@ export async function DELETE(
       );
     }
 
-    // Only allow uploader or admin to delete
-    if (attachment.uploadedById !== user.id && user.role !== "admin") {
+    const isOwner = attachment.uploadedById === user.id;
+    const canDeleteAny = userHasPermission(user, PERMISSIONS.ALL);
+    if (!isOwner && !canDeleteAny) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

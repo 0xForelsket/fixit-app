@@ -16,7 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "FixIt - CMMS Lite",
-  description: "Lightweight maintenance management system for tracking equipment maintenance requests",
+  description:
+    "Lightweight maintenance management system for tracking equipment maintenance requests",
   manifest: "/manifest.json",
   themeColor: "#2563eb",
   appleWebApp: {

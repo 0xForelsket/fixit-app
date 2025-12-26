@@ -139,13 +139,18 @@ export default async function PartsPage({
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-50 border shadow-inner">
             <Package className="h-6 w-6 text-zinc-400" />
           </div>
-          <h3 className="mt-4 text-lg font-black uppercase tracking-tight">No parts found</h3>
+          <h3 className="mt-4 text-lg font-black uppercase tracking-tight">
+            No parts found
+          </h3>
           <p className="text-sm text-zinc-500 font-medium font-mono">
             {params.search || params.category
               ? "ADJUST FILTERS AND RETRY"
               : "COMMENCE CATALOGING"}
           </p>
-          <Button className="mt-6 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95" asChild>
+          <Button
+            className="mt-6 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95"
+            asChild
+          >
             <Link href="/admin/inventory/parts/new">
               <Plus className="mr-2 h-4 w-4" />
               Initial Entry
@@ -180,7 +185,9 @@ export default async function PartsPage({
                           <Package className="h-5 w-5 text-zinc-600" />
                         </div>
                         <div>
-                          <p className="font-bold text-zinc-900 leading-tight uppercase tracking-tight">{part.name}</p>
+                          <p className="font-bold text-zinc-900 leading-tight uppercase tracking-tight">
+                            {part.name}
+                          </p>
                           {part.barcode && (
                             <p className="text-[10px] font-mono text-zinc-400">
                               SN: {part.barcode}
@@ -193,7 +200,10 @@ export default async function PartsPage({
                       {part.sku}
                     </td>
                     <td className="p-4 lg:table-cell">
-                      <Badge variant="secondary" className="capitalize font-mono text-[10px]">
+                      <Badge
+                        variant="secondary"
+                        className="capitalize font-mono text-[10px]"
+                      >
                         {part.category}
                       </Badge>
                     </td>
@@ -204,7 +214,10 @@ export default async function PartsPage({
                       {part.reorderPoint}
                     </td>
                     <td className="p-4">
-                      <Badge variant={part.isActive ? "success" : "secondary"} className="font-black uppercase tracking-tighter text-[10px]">
+                      <Badge
+                        variant={part.isActive ? "success" : "secondary"}
+                        className="font-black uppercase tracking-tighter text-[10px]"
+                      >
                         {part.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
@@ -224,46 +237,61 @@ export default async function PartsPage({
 
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-3">
-             {parts.map((part) => (
-               <Link
-                 key={part.id}
-                 href={`/admin/inventory/parts/${part.id}`}
-                 className="block rounded-2xl border-2 bg-white p-4 shadow-sm active:scale-[0.98] transition-all hover:border-primary-100"
-               >
-                 <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-zinc-50 border-2 flex items-center justify-center text-zinc-400">
-                            <Package className="h-5 w-5" />
-                        </div>
-                        <div>
-                            <p className="font-black text-sm uppercase tracking-tight text-zinc-900 leading-none mb-1">{part.name}</p>
-                            <p className="text-[10px] font-mono font-bold text-zinc-400">SKU: {part.sku}</p>
-                        </div>
+            {parts.map((part) => (
+              <Link
+                key={part.id}
+                href={`/admin/inventory/parts/${part.id}`}
+                className="block rounded-2xl border-2 bg-white p-4 shadow-sm active:scale-[0.98] transition-all hover:border-primary-100"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-zinc-50 border-2 flex items-center justify-center text-zinc-400">
+                      <Package className="h-5 w-5" />
                     </div>
-                    <Badge variant={part.isActive ? "success" : "secondary"} className="text-[9px] font-black uppercase px-2 py-0 border-2">
-                        {part.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                 </div>
+                    <div>
+                      <p className="font-black text-sm uppercase tracking-tight text-zinc-900 leading-none mb-1">
+                        {part.name}
+                      </p>
+                      <p className="text-[10px] font-mono font-bold text-zinc-400">
+                        SKU: {part.sku}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant={part.isActive ? "success" : "secondary"}
+                    className="text-[9px] font-black uppercase px-2 py-0 border-2"
+                  >
+                    {part.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
 
-                 <div className="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100">
-                    <div className="bg-zinc-50 rounded-lg p-2 text-center border">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">Category</p>
-                        <p className="text-xs font-bold uppercase text-zinc-700">{part.category}</p>
-                    </div>
-                    <div className="bg-zinc-50 rounded-lg p-2 text-center border text-zinc-700">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">Unit Cost</p>
-                        <p className="text-xs font-black">${part.unitCost?.toFixed(2) || '0.00'}</p>
-                    </div>
-                 </div>
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100">
+                  <div className="bg-zinc-50 rounded-lg p-2 text-center border">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">
+                      Category
+                    </p>
+                    <p className="text-xs font-bold uppercase text-zinc-700">
+                      {part.category}
+                    </p>
+                  </div>
+                  <div className="bg-zinc-50 rounded-lg p-2 text-center border text-zinc-700">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">
+                      Unit Cost
+                    </p>
+                    <p className="text-xs font-black">
+                      ${part.unitCost?.toFixed(2) || "0.00"}
+                    </p>
+                  </div>
+                </div>
 
-                 <div className="flex items-center justify-between mt-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                    <span>Barcode: {part.barcode || '—'}</span>
-                    <span className="flex items-center gap-1 text-primary-600 font-black">
-                        Details <ChevronRight className="h-3 w-3" />
-                    </span>
-                 </div>
-               </Link>
-             ))}
+                <div className="flex items-center justify-between mt-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                  <span>Barcode: {part.barcode || "—"}</span>
+                  <span className="flex items-center gap-1 text-primary-600 font-black">
+                    Details <ChevronRight className="h-3 w-3" />
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
         </>
       )}

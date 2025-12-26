@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// GET /api/inventory/parts/[id] - Get single part
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -40,14 +40,13 @@ export async function GET(
   }
 }
 
-// PATCH /api/inventory/parts/[id] - Update part
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_UPDATE)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -102,14 +101,13 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/inventory/parts/[id] - Delete part
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_DELETE)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

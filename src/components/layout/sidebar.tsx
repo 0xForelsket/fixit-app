@@ -2,6 +2,7 @@
 
 import { logout } from "@/actions/auth";
 import type { UserRole } from "@/db/schema";
+import { PERMISSIONS, type Permission, hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -26,7 +27,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  roles: UserRole[];
+  permission: Permission;
 }
 
 const navItems: NavItem[] = [
@@ -34,67 +35,67 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: <Home className="h-5 w-5" />,
-    roles: ["tech", "admin"],
+    permission: PERMISSIONS.TICKET_VIEW_ALL,
   },
   {
     label: "Analytics",
     href: "/admin/analytics",
     icon: <BarChart3 className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.ANALYTICS_VIEW,
   },
   {
     label: "Tickets",
     href: "/dashboard/tickets",
     icon: <ClipboardList className="h-5 w-5" />,
-    roles: ["tech", "admin"],
+    permission: PERMISSIONS.TICKET_VIEW_ALL,
   },
   {
     label: "Equipment",
     href: "/admin/equipment",
     icon: <MonitorCog className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.EQUIPMENT_CREATE,
   },
   {
     label: "Locations",
     href: "/admin/locations",
     icon: <MapPin className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.LOCATION_CREATE,
   },
   {
     label: "Users",
     href: "/admin/users",
     icon: <Users className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.USER_VIEW,
   },
   {
     label: "Maintenance",
     href: "/dashboard/maintenance",
     icon: <Wrench className="h-5 w-5" />,
-    roles: ["admin", "tech"],
+    permission: PERMISSIONS.MAINTENANCE_VIEW,
   },
   {
     label: "Inventory",
     href: "/admin/inventory",
     icon: <Package className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.INVENTORY_CREATE,
   },
   {
     label: "QR Codes",
     href: "/admin/qr-codes",
     icon: <QrCode className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.SYSTEM_QR_CODES,
   },
   {
     label: "Reports",
     href: "/admin/reports",
     icon: <FileText className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.REPORTS_VIEW,
   },
   {
     label: "Settings",
     href: "/admin/settings",
     icon: <Cog className="h-5 w-5" />,
-    roles: ["admin"],
+    permission: PERMISSIONS.SYSTEM_SETTINGS,
   },
 ];
 
@@ -103,6 +104,7 @@ interface SidebarProps {
     name: string;
     role: UserRole;
     employeeId: string;
+    permissions: string[];
   };
   avatarUrl?: string | null;
   isOpen?: boolean;
@@ -113,19 +115,22 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const filteredItems = navItems.filter((item) =>
-    item.roles.includes(user.role)
+    hasPermission(user.permissions, item.permission)
   );
 
   const handleNavClick = () => {
-    // Close sidebar on mobile when navigating
     if (onClose) {
       onClose();
     }
   };
 
+  const canCreateTicket = hasPermission(
+    user.permissions,
+    PERMISSIONS.TICKET_CREATE
+  );
+
   return (
     <>
-      {/* Mobile overlay backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -134,14 +139,12 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none industrial-grid",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        {/* Header with close button on mobile */}
         <div className="flex h-16 items-center justify-between border-b px-6 bg-white/50 backdrop-blur-md">
           <Link
             href="/dashboard"
@@ -155,7 +158,6 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
               FixIt
             </span>
           </Link>
-          {/* Close button - mobile only */}
           <button
             type="button"
             onClick={onClose}
@@ -165,7 +167,6 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
             {filteredItems.map((item) => {
@@ -202,8 +203,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
             })}
           </ul>
 
-          {/* Quick Report Link for Techs */}
-          {user.role === "tech" && (
+          {canCreateTicket && (
             <div className="mt-6 border-t pt-4">
               <Link
                 href="/"
@@ -217,7 +217,6 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           )}
         </nav>
 
-        {/* User Info & Logout */}
         <div className="border-t p-4 bg-white/50 backdrop-blur-sm">
           <Link
             href="/profile"

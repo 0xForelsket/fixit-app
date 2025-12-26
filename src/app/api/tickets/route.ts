@@ -1,10 +1,11 @@
 import { db } from "@/db";
 import {
+  equipment as equipmentTable,
   notifications,
   tickets,
   users,
-  equipment as equipmentTable,
 } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
@@ -56,8 +57,8 @@ export async function GET(request: Request) {
       conditions.push(eq(tickets.assignedToId, Number(assignedToId)));
     }
 
-    // Operators can only see their own tickets
-    if (user.role === "operator") {
+    // Users without TICKET_VIEW_ALL can only see their own tickets
+    if (!userHasPermission(user, PERMISSIONS.TICKET_VIEW_ALL)) {
       conditions.push(eq(tickets.reportedById, user.id));
     }
 
@@ -121,7 +122,9 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.ceil((rateLimit.reset - Date.now()) / 1000)),
+            "Retry-After": String(
+              Math.ceil((rateLimit.reset - Date.now()) / 1000)
+            ),
             "X-RateLimit-Remaining": "0",
           },
         }

@@ -6,6 +6,7 @@ import {
   tickets,
   users,
 } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq, lte } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -17,13 +18,11 @@ export async function POST(request: Request) {
     const cronSecret = process.env.CRON_SECRET;
     let isAuthorized = false;
 
-    // Check Cron Secret if it exists
     if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
       isAuthorized = true;
     } else {
-      // Fallback: Check if an Admin/Tech is logged in (triggered by dashboard)
       const user = await getCurrentUser();
-      if (user && (user.role === "admin" || user.role === "tech")) {
+      if (user && userHasPermission(user, PERMISSIONS.SYSTEM_SCHEDULER)) {
         isAuthorized = true;
       }
     }

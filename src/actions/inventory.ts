@@ -6,6 +6,7 @@ import {
   inventoryTransactions,
   ticketParts,
 } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { inventoryLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import {
@@ -19,7 +20,7 @@ import { revalidatePath } from "next/cache";
 
 export async function createTransactionAction(input: TransactionInput) {
   const user = await getCurrentUser();
-  if (!user || user.role !== "admin") {
+  if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_RECEIVE_STOCK)) {
     throw new Error("Unauthorized");
   }
 
@@ -123,7 +124,7 @@ export async function createTransactionAction(input: TransactionInput) {
 
 export async function consumeTicketPartAction(input: ConsumePartInput) {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "tech")) {
+  if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_USE_PARTS)) {
     throw new Error("Unauthorized");
   }
 

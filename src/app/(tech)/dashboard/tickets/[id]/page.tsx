@@ -29,8 +29,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TicketActions } from "./ticket-actions";
 import { MobileTicketView } from "./mobile-ticket-view";
+import { TicketActions } from "./ticket-actions";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -160,22 +160,53 @@ export default async function TicketDetailPage({ params }: PageProps) {
 
   const DetailHeader = (
     <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div className={cn("flex items-center justify-between border-b px-6 py-4", statusConfig.bg, statusConfig.border)}>
+      <div
+        className={cn(
+          "flex items-center justify-between border-b px-6 py-4",
+          statusConfig.bg,
+          statusConfig.border
+        )}
+      >
         <div className="flex items-center gap-3">
-          <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm", statusConfig.color)}>
+          <div
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm",
+              statusConfig.color
+            )}
+          >
             <StatusIcon className="h-5 w-5" />
           </div>
           <div>
-            <p className={cn("text-xs font-bold uppercase tracking-wider opacity-70", statusConfig.color)}>Status</p>
-            <p className={cn("text-lg font-bold leading-none", statusConfig.color)}>{statusConfig.label}</p>
+            <p
+              className={cn(
+                "text-xs font-bold uppercase tracking-wider opacity-70",
+                statusConfig.color
+              )}
+            >
+              Status
+            </p>
+            <p
+              className={cn(
+                "text-lg font-bold leading-none",
+                statusConfig.color
+              )}
+            >
+              {statusConfig.label}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Priority
+            </p>
             <div className="flex items-center gap-2 justify-end">
-              <span className={cn("h-2.5 w-2.5 rounded-full", priorityConfig.color)} />
-              <span className="font-bold text-foreground">{priorityConfig.label}</span>
+              <span
+                className={cn("h-2.5 w-2.5 rounded-full", priorityConfig.color)}
+              />
+              <span className="font-bold text-foreground">
+                {priorityConfig.label}
+              </span>
             </div>
           </div>
         </div>
@@ -183,10 +214,16 @@ export default async function TicketDetailPage({ params }: PageProps) {
       <div className="p-6">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="font-mono text-xs">#{ticket.id}</Badge>
-            <span className="text-sm text-muted-foreground">Reported {formatRelativeTime(ticket.createdAt)}</span>
+            <Badge variant="outline" className="font-mono text-xs">
+              #{ticket.id}
+            </Badge>
+            <span className="text-sm text-muted-foreground">
+              Reported {formatRelativeTime(ticket.createdAt)}
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{ticket.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            {ticket.title}
+          </h1>
         </div>
       </div>
     </div>
@@ -215,7 +252,11 @@ export default async function TicketDetailPage({ params }: PageProps) {
           >
             {file.mimeType.startsWith("image/") ? (
               <div className="aspect-video w-full overflow-hidden bg-slate-100">
-                <img src={file.url} alt={file.filename} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <img
+                  src={file.url}
+                  alt={file.filename}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
               </div>
             ) : (
               <div className="flex aspect-video w-full items-center justify-center bg-slate-100 text-slate-400">
@@ -224,8 +265,12 @@ export default async function TicketDetailPage({ params }: PageProps) {
             )}
             <div className="flex items-center justify-between p-3">
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-xs font-medium text-foreground">{file.filename}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">{(file.sizeBytes / 1024).toFixed(0)} KB</p>
+                <p className="truncate text-xs font-medium text-foreground">
+                  {file.filename}
+                </p>
+                <p className="text-[10px] text-muted-foreground uppercase">
+                  {(file.sizeBytes / 1024).toFixed(0)} KB
+                </p>
               </div>
               <Download className="h-4 w-4 text-muted-foreground group-hover:text-primary-600" />
             </div>
@@ -240,7 +285,9 @@ export default async function TicketDetailPage({ params }: PageProps) {
       <h2 className="text-lg font-bold px-1 lg:hidden">Activity Log</h2>
       <div className="rounded-xl border bg-card shadow-sm divide-y">
         {ticket.logs.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">No activity yet.</div>
+          <div className="p-8 text-center text-muted-foreground">
+            No activity yet.
+          </div>
         ) : (
           ticket.logs.map((log) => (
             <div key={log.id} className="p-4 flex gap-4">
@@ -258,13 +305,24 @@ export default async function TicketDetailPage({ params }: PageProps) {
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold">{log.createdBy.name}</p>
-                  <span className="text-xs text-muted-foreground">{formatRelativeTime(log.createdAt)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatRelativeTime(log.createdAt)}
+                  </span>
                 </div>
                 {log.action === "comment" ? (
-                  <p className="text-sm text-foreground bg-slate-50 p-3 rounded-lg border">{log.newValue}</p>
+                  <p className="text-sm text-foreground bg-slate-50 p-3 rounded-lg border">
+                    {log.newValue}
+                  </p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Changed <strong>{log.action.replace("_", " ")}</strong> from <span className="line-through opacity-70">{log.oldValue || "none"}</span> to <span className="font-medium text-foreground">{log.newValue}</span>
+                    Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
+                    <span className="line-through opacity-70">
+                      {log.oldValue || "none"}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-medium text-foreground">
+                      {log.newValue}
+                    </span>
                   </p>
                 )}
               </div>
@@ -278,7 +336,9 @@ export default async function TicketDetailPage({ params }: PageProps) {
   const EquipmentInfoSection = (
     <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
       <div className="bg-slate-50 px-4 py-3 border-b">
-        <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Equipment</h3>
+        <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+          Equipment
+        </h3>
       </div>
       <div className="p-4 space-y-4">
         <div className="flex items-center gap-3">
@@ -287,7 +347,9 @@ export default async function TicketDetailPage({ params }: PageProps) {
           </div>
           <div>
             <p className="font-bold text-foreground">{ticket.equipment.name}</p>
-            <Badge variant="secondary" className="font-mono text-[10px]">{ticket.equipment.code}</Badge>
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              {ticket.equipment.code}
+            </Badge>
           </div>
         </div>
         {ticket.equipment.location && (
@@ -325,16 +387,32 @@ export default async function TicketDetailPage({ params }: PageProps) {
                   <CheckCircle2 className="h-5 w-5" />
                   <h2 className="font-bold">Resolution Notes</h2>
                 </div>
-                <p className="text-emerald-900/80 whitespace-pre-wrap">{ticket.resolutionNotes}</p>
+                <p className="text-emerald-900/80 whitespace-pre-wrap">
+                  {ticket.resolutionNotes}
+                </p>
               </div>
             )}
             {ActivityLogSection}
           </div>
           <div className="space-y-6">
-            <TicketActions ticket={ticket} currentUser={{ id: user.id, name: user.name }} allTechs={techs} />
+            <TicketActions
+              ticket={ticket}
+              currentUser={{ id: user.id, name: user.name }}
+              allTechs={techs}
+            />
             {EquipmentInfoSection}
-            <TimeLogger ticketId={ticket.id} userId={user.id} userHourlyRate={user.hourlyRate} existingLogs={ticketLaborLogs} />
-            <TicketPartsManager ticketId={ticket.id} parts={consumedParts} allParts={allParts} locations={activeLocations} />
+            <TimeLogger
+              ticketId={ticket.id}
+              userId={user.id}
+              userHourlyRate={user.hourlyRate}
+              existingLogs={ticketLaborLogs}
+            />
+            <TicketPartsManager
+              ticketId={ticket.id}
+              parts={consumedParts}
+              allParts={allParts}
+              locations={activeLocations}
+            />
           </div>
         </div>
       </div>
@@ -352,12 +430,22 @@ export default async function TicketDetailPage({ params }: PageProps) {
         commentsTab={ActivityLogSection}
         inventoryTab={
           <div className="space-y-6">
-             <TicketPartsManager ticketId={ticket.id} parts={consumedParts} allParts={allParts} locations={activeLocations} />
+            <TicketPartsManager
+              ticketId={ticket.id}
+              parts={consumedParts}
+              allParts={allParts}
+              locations={activeLocations}
+            />
           </div>
         }
         logsTab={
           <div className="space-y-6">
-             <TimeLogger ticketId={ticket.id} userId={user.id} userHourlyRate={user.hourlyRate} existingLogs={ticketLaborLogs} />
+            <TimeLogger
+              ticketId={ticket.id}
+              userId={user.id}
+              userHourlyRate={user.hourlyRate}
+              existingLogs={ticketLaborLogs}
+            />
           </div>
         }
         actions={
@@ -366,7 +454,10 @@ export default async function TicketDetailPage({ params }: PageProps) {
               <CheckCircle2 className="mr-2 h-5 w-5" />
               Update Status
             </Button>
-            <Button variant="outline" className="flex-1 font-bold h-12 rounded-xl border-2">
+            <Button
+              variant="outline"
+              className="flex-1 font-bold h-12 rounded-xl border-2"
+            >
               <MessageSquare className="mr-2 h-5 w-5" />
               Add Comment
             </Button>

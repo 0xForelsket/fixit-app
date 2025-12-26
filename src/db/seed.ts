@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
 import { drizzle } from "drizzle-orm/libsql";
+import { DEFAULT_ROLE_PERMISSIONS } from "../lib/permissions";
 import * as schema from "./schema";
 
 const client = createClient({
@@ -39,6 +40,40 @@ async function seed() {
   await db.delete(schema.equipment);
   await db.delete(schema.locations);
   await db.delete(schema.users);
+  await db.delete(schema.roles).catch(() => {});
+
+  console.log("Creating roles...");
+  const [operatorRole] = await db
+    .insert(schema.roles)
+    .values({
+      name: "operator",
+      description: "Factory floor operators who report issues",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      isSystemRole: true,
+    })
+    .returning();
+
+  const [techRole] = await db
+    .insert(schema.roles)
+    .values({
+      name: "tech",
+      description: "Maintenance technicians who resolve tickets",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      isSystemRole: true,
+    })
+    .returning();
+
+  const [adminRole] = await db
+    .insert(schema.roles)
+    .values({
+      name: "admin",
+      description: "System administrators with full access",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      isSystemRole: true,
+    })
+    .returning();
+
+  console.log(`Created ${3} roles`);
 
   // Create users
   console.log("Creating users...");
@@ -52,6 +87,7 @@ async function seed() {
     email: "admin@fixit.local",
     pin: adminPin,
     role: "admin",
+    roleId: adminRole.id,
     isActive: true,
   });
 
@@ -63,6 +99,7 @@ async function seed() {
       email: "john.smith@fixit.local",
       pin: techPin,
       role: "tech",
+      roleId: techRole.id,
       isActive: true,
     })
     .returning();
@@ -75,6 +112,7 @@ async function seed() {
       email: "maria.garcia@fixit.local",
       pin: techPin,
       role: "tech",
+      roleId: techRole.id,
       isActive: true,
     })
     .returning();
@@ -87,6 +125,7 @@ async function seed() {
       email: null,
       pin: operatorPin,
       role: "operator",
+      roleId: operatorRole.id,
       isActive: true,
     })
     .returning();
@@ -99,6 +138,7 @@ async function seed() {
       email: null,
       pin: operatorPin,
       role: "operator",
+      roleId: operatorRole.id,
       isActive: true,
     })
     .returning();
@@ -326,8 +366,12 @@ async function seed() {
     status: "operational",
   });
 
-  console.log(`Created ${6} equipment (using SAP Types: ${typeMolder.code}, ${typeConveyor.code}, ${typeRobot.code}, ${typeMill.code}, ${typeScanner.code})`);
-  console.log(`Categories initialized: ${catM.label}, ${catE.label}, ${catI.label}`);
+  console.log(
+    `Created ${6} equipment (using SAP Types: ${typeMolder.code}, ${typeConveyor.code}, ${typeRobot.code}, ${typeMill.code}, ${typeScanner.code})`
+  );
+  console.log(
+    `Categories initialized: ${catM.label}, ${catE.label}, ${catI.label}`
+  );
 
   // Create some tickets
   console.log("Creating tickets...");

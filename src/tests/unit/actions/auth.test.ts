@@ -1,4 +1,5 @@
 import { login } from "@/actions/auth";
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/services/auth.service", () => ({
@@ -114,6 +115,7 @@ describe("login action", () => {
         employeeId: "TECH-001",
         name: "Test User",
         role: "tech",
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       },
       csrfToken: "csrf-token",
     });
@@ -137,6 +139,7 @@ describe("login action", () => {
         employeeId: "ADMIN-001",
         name: "Admin User",
         role: "admin",
+        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       },
       csrfToken: "csrf-token",
     });
@@ -160,6 +163,7 @@ describe("login action", () => {
         employeeId: "OP-001",
         name: "Operator User",
         role: "operator",
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
       },
       csrfToken: "csrf-token",
     });

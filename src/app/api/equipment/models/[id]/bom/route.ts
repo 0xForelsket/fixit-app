@@ -1,17 +1,20 @@
 import { db } from "@/db";
 import { equipmentBoms } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// POST /api/equipment/models/[id]/bom - Add item to BOM
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (
+      !user ||
+      !userHasPermission(user, PERMISSIONS.EQUIPMENT_MANAGE_MODELS)
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

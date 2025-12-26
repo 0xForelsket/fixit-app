@@ -3,6 +3,7 @@ import {
   deleteEquipment,
   updateEquipment,
 } from "@/actions/equipment";
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
@@ -61,6 +62,7 @@ describe("createEquipment action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     const formData = new FormData();
@@ -70,7 +72,7 @@ describe("createEquipment action", () => {
 
     const result = await createEquipment({}, formData);
 
-    expect(result.error).toBe("Only administrators can create equipment");
+    expect(result.error).toBe("You don't have permission to create equipment");
   });
 
   it("should reject operator users", async () => {
@@ -79,6 +81,7 @@ describe("createEquipment action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
@@ -88,7 +91,7 @@ describe("createEquipment action", () => {
 
     const result = await createEquipment({}, formData);
 
-    expect(result.error).toBe("Only administrators can create equipment");
+    expect(result.error).toBe("You don't have permission to create equipment");
   });
 
   it("should return error for invalid input", async () => {
@@ -97,6 +100,7 @@ describe("createEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     const formData = new FormData();
@@ -115,6 +119,7 @@ describe("createEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     const mockEquipment = {
@@ -151,6 +156,7 @@ describe("createEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
@@ -196,6 +202,7 @@ describe("updateEquipment action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     const formData = new FormData();
@@ -203,7 +210,7 @@ describe("updateEquipment action", () => {
 
     const result = await updateEquipment(1, {}, formData);
 
-    expect(result.error).toBe("Only administrators can update equipment");
+    expect(result.error).toBe("You don't have permission to update equipment");
   });
 
   it("should return error for non-existent equipment", async () => {
@@ -212,6 +219,7 @@ describe("updateEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
@@ -230,6 +238,7 @@ describe("updateEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -239,6 +248,8 @@ describe("updateEquipment action", () => {
       locationId: 1,
       status: "operational",
       ownerId: null,
+      typeId: null,
+      modelId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -262,6 +273,7 @@ describe("updateEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -271,6 +283,8 @@ describe("updateEquipment action", () => {
       locationId: 1,
       status: "operational",
       ownerId: null,
+      typeId: null,
+      modelId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -298,6 +312,7 @@ describe("updateEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -307,6 +322,8 @@ describe("updateEquipment action", () => {
       locationId: 1,
       status: "operational",
       ownerId: null,
+      typeId: null,
+      modelId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -349,11 +366,12 @@ describe("deleteEquipment action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     const result = await deleteEquipment(1);
 
-    expect(result.error).toBe("Only administrators can delete equipment");
+    expect(result.error).toBe("You don't have permission to delete equipment");
   });
 
   it("should return error for non-existent equipment", async () => {
@@ -362,6 +380,7 @@ describe("deleteEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
@@ -377,6 +396,7 @@ describe("deleteEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -402,6 +422,7 @@ describe("deleteEquipment action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({

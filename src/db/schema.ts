@@ -94,14 +94,34 @@ export type TransactionType = (typeof transactionTypes)[number];
 
 // ============ TABLES ============
 
+export const roles = sqliteTable("roles", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").unique().notNull(),
+  description: text("description"),
+  permissions: text("permissions", { mode: "json" })
+    .notNull()
+    .$type<string[]>()
+    .default([]),
+  isSystemRole: integer("is_system_role", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // Users table
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   employeeId: text("employee_id").unique().notNull(),
   name: text("name").notNull(),
   email: text("email").unique(),
-  pin: text("pin").notNull(), // Hashed PIN
+  pin: text("pin").notNull(),
   role: text("role", { enum: userRoles }).notNull().default("operator"),
+  roleId: integer("role_id").references(() => roles.id),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   hourlyRate: real("hourly_rate"), // For labor cost tracking
   failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
@@ -454,7 +474,15 @@ export const laborLogs = sqliteTable("labor_logs", {
 
 // ============ RELATIONS ============
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const rolesRelations = relations(roles, ({ many }) => ({
+  users: many(users),
+}));
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  role: one(roles, {
+    fields: [users.roleId],
+    references: [roles.id],
+  }),
   ownedEquipment: many(equipment, { relationName: "equipmentOwner" }),
   reportedTickets: many(tickets, { relationName: "ticketReporter" }),
   assignedTickets: many(tickets, { relationName: "ticketAssignee" }),
@@ -708,6 +736,9 @@ export const laborLogsRelations = relations(laborLogs, ({ one }) => ({
 }));
 
 // ============ TYPE EXPORTS ============
+
+export type Role = typeof roles.$inferSelect;
+export type NewRole = typeof roles.$inferInsert;
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

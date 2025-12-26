@@ -88,7 +88,9 @@ const priorityConfig: Record<
 
 export function ReportForm({ equipment }: ReportFormProps) {
   const router = useRouter();
-  const [attachments, setAttachments] = useState<{ filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]>([]);
+  const [attachments, setAttachments] = useState<
+    { filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]
+  >([]);
   const [state, formAction, isPending] = useActionState(createTicket, {});
 
   useEffect(() => {
@@ -97,7 +99,12 @@ export function ReportForm({ equipment }: ReportFormProps) {
     }
   }, [state.success, router]);
 
-  const handleUploadComplete = (attachment: { filename: string; s3Key: string; mimeType: string; sizeBytes: number }) => {
+  const handleUploadComplete = (attachment: {
+    filename: string;
+    s3Key: string;
+    mimeType: string;
+    sizeBytes: number;
+  }) => {
     setAttachments((prev) => [...prev, attachment]);
   };
 

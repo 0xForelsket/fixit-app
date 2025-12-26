@@ -3,12 +3,13 @@
 import { db } from "@/db";
 import {
   attachments,
+  equipment as equipmentTable,
   notifications,
   ticketLogs,
   tickets,
   users,
-  equipment as equipmentTable,
 } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { ticketLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
@@ -160,8 +161,7 @@ export async function updateTicket(
     return { error: "You must be logged in" };
   }
 
-  // Only techs and admins can update tickets
-  if (user.role === "operator") {
+  if (!userHasPermission(user, PERMISSIONS.TICKET_UPDATE)) {
     return { error: "You don't have permission to update tickets" };
   }
 
@@ -257,7 +257,7 @@ export async function resolveTicket(
     return { error: "You must be logged in" };
   }
 
-  if (user.role === "operator") {
+  if (!userHasPermission(user, PERMISSIONS.TICKET_RESOLVE)) {
     return { error: "You don't have permission to resolve tickets" };
   }
 

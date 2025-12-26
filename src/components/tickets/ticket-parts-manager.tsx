@@ -124,21 +124,27 @@ export function TicketPartsManager({
     <div className="rounded-2xl border-2 bg-white overflow-hidden shadow-sm">
       <div className="bg-zinc-50 px-4 py-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
-            <Package className="h-4 w-4 text-zinc-400" />
-            <h3 className="font-black text-xs uppercase tracking-widest text-zinc-900">
-              Parts & Materials
-            </h3>
+          <Package className="h-4 w-4 text-zinc-400" />
+          <h3 className="font-black text-xs uppercase tracking-widest text-zinc-900">
+            Parts & Materials
+          </h3>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline" className="h-9 px-3 rounded-lg border-2 font-black uppercase tracking-tighter text-[10px] gap-1.5 active:scale-95 transition-all">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 px-3 rounded-lg border-2 font-black uppercase tracking-tighter text-[10px] gap-1.5 active:scale-95 transition-all"
+            >
               <Plus className="h-4 w-4" />
               Log Part
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] rounded-3xl">
             <DialogHeader>
-              <DialogTitle className="text-xl font-black uppercase tracking-tight">Consume Part</DialogTitle>
+              <DialogTitle className="text-xl font-black uppercase tracking-tight">
+                Consume Part
+              </DialogTitle>
               <DialogDescription className="text-xs font-medium text-zinc-500">
                 Record parts used for this ticket. Stock will be deducted
                 automatically from the selected location.
@@ -155,7 +161,9 @@ export function TicketPartsManager({
                   name="partId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Part Selection</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+                        Part Selection
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -172,7 +180,10 @@ export function TicketPartsManager({
                               value={part.id.toString()}
                               className="py-3 font-medium"
                             >
-                              {part.name} <span className="text-[10px] font-mono opacity-50 ml-1">({part.sku})</span>
+                              {part.name}{" "}
+                              <span className="text-[10px] font-mono opacity-50 ml-1">
+                                ({part.sku})
+                              </span>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -187,7 +198,9 @@ export function TicketPartsManager({
                   name="locationId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Source Location</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+                        Source Location
+                      </FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -199,7 +212,11 @@ export function TicketPartsManager({
                         </FormControl>
                         <SelectContent className="rounded-xl border-2 shadow-xl">
                           {locations.map((loc) => (
-                            <SelectItem key={loc.id} value={loc.id.toString()} className="py-3 font-medium">
+                            <SelectItem
+                              key={loc.id}
+                              value={loc.id.toString()}
+                              className="py-3 font-medium"
+                            >
                               {loc.name}
                             </SelectItem>
                           ))}
@@ -215,11 +232,20 @@ export function TicketPartsManager({
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Quantity Used</FormLabel>
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+                        Quantity Used
+                      </FormLabel>
                       <FormControl>
                         <div className="relative">
-                            <Input type="number" min="1" {...field} className="h-12 rounded-xl border-2 bg-zinc-50 font-black text-lg focus:ring-primary-500/10 pl-4 pr-12" />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-zinc-400">UNITS</div>
+                          <Input
+                            type="number"
+                            min="1"
+                            {...field}
+                            className="h-12 rounded-xl border-2 bg-zinc-50 font-black text-lg focus:ring-primary-500/10 pl-4 pr-12"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-zinc-400">
+                            UNITS
+                          </div>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -228,7 +254,10 @@ export function TicketPartsManager({
                 />
 
                 <DialogFooter className="pt-4">
-                  <Button type="submit" className="w-full h-14 rounded-2xl bg-primary-600 text-lg font-black uppercase tracking-widest shadow-lg shadow-primary-600/20 active:scale-95 transition-all">
+                  <Button
+                    type="submit"
+                    className="w-full h-14 rounded-2xl bg-primary-600 text-lg font-black uppercase tracking-widest shadow-lg shadow-primary-600/20 active:scale-95 transition-all"
+                  >
                     Register usage
                   </Button>
                 </DialogFooter>
@@ -241,7 +270,9 @@ export function TicketPartsManager({
       <div className="p-4 space-y-4">
         {parts.length === 0 ? (
           <div className="py-8 text-center bg-zinc-50 rounded-xl border-2 border-dashed">
-            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">No parts registered</p>
+            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              No parts registered
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -255,10 +286,14 @@ export function TicketPartsManager({
                     <Package className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-black text-sm text-zinc-900 truncate uppercase mt-0.5">{p.part.name}</p>
+                    <p className="font-black text-sm text-zinc-900 truncate uppercase mt-0.5">
+                      {p.part.name}
+                    </p>
                     <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
-                        <span className="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-700">{p.quantity} UNITS</span>
-                        {p.unitCost && <span>• ${p.unitCost.toFixed(2)} ea</span>}
+                      <span className="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-700">
+                        {p.quantity} UNITS
+                      </span>
+                      {p.unitCost && <span>• ${p.unitCost.toFixed(2)} ea</span>}
                     </div>
                   </div>
                 </div>
@@ -271,13 +306,15 @@ export function TicketPartsManager({
                     )}
                   </p>
                   <p className="mt-1 text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">
-                    By {p.addedBy.name.split(' ')[0]}
+                    By {p.addedBy.name.split(" ")[0]}
                   </p>
                 </div>
               </div>
             ))}
             <div className="pt-4 mt-2 border-t-2 border-zinc-100 flex justify-between items-center">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Total Materials</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                Total Materials
+              </span>
               <span className="text-lg font-black text-zinc-900">
                 $
                 {totalCost.toLocaleString(undefined, {

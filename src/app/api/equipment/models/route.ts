@@ -1,13 +1,16 @@
 import { db } from "@/db";
 import { equipmentModels } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { NextResponse } from "next/server";
 
-// POST /api/equipment/models - Create new model
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (
+      !user ||
+      !userHasPermission(user, PERMISSIONS.EQUIPMENT_MANAGE_MODELS)
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -41,7 +44,6 @@ export async function POST(request: Request) {
   }
 }
 
-// GET /api/equipment/models - List all models
 export async function GET() {
   try {
     const user = await getCurrentUser();

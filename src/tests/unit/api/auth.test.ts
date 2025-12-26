@@ -1,3 +1,4 @@
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/services/auth.service", () => ({
@@ -109,6 +110,7 @@ describe("POST /api/auth/login", () => {
         employeeId: "TECH-001",
         name: "Test User",
         role: "tech",
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       },
       csrfToken: "csrf-token-123",
     });

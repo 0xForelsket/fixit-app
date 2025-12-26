@@ -7,6 +7,8 @@ export interface SessionUser {
   employeeId: string;
   name: string;
   role: UserRole;
+  roleId?: number | null;
+  permissions: string[];
   hourlyRate?: number | null;
 }
 

@@ -4,6 +4,7 @@ import {
   resolveTicket,
   updateTicket,
 } from "@/actions/tickets";
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
@@ -20,6 +21,17 @@ vi.mock("@/db", () => ({
         findFirst: vi.fn(),
       },
     },
+    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) => {
+      // Call the callback with a mock transaction object
+      const mockTx = {
+        insert: vi.fn(() => ({
+          values: vi.fn(() => ({
+            returning: vi.fn(),
+          })),
+        })),
+      };
+      return callback(mockTx);
+    }),
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
         returning: vi.fn(),
@@ -66,6 +78,7 @@ describe("createTicket action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
@@ -85,6 +98,7 @@ describe("createTicket action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const mockTicket = {
@@ -101,6 +115,19 @@ describe("createTicket action", () => {
       updatedAt: new Date(),
     };
 
+    vi.mocked(db.transaction as unknown as () => unknown).mockImplementation(
+      async (callback: (tx: unknown) => Promise<unknown>) => {
+        const mockTx = {
+          insert: vi.fn(() => ({
+            values: vi.fn(() => ({
+              returning: vi.fn().mockResolvedValue([mockTicket]),
+            })),
+          })),
+        };
+        return callback(mockTx);
+      }
+    );
+
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
       values: vi.fn(() => ({
         returning: vi.fn().mockResolvedValue([mockTicket]),
@@ -114,6 +141,8 @@ describe("createTicket action", () => {
       locationId: 1,
       status: "operational",
       ownerId: null,
+      typeId: null,
+      modelId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -139,6 +168,7 @@ describe("createTicket action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const mockTicket = {
@@ -154,6 +184,19 @@ describe("createTicket action", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
+    vi.mocked(db.transaction as unknown as () => unknown).mockImplementation(
+      async (callback: (tx: unknown) => Promise<unknown>) => {
+        const mockTx = {
+          insert: vi.fn(() => ({
+            values: vi.fn(() => ({
+              returning: vi.fn().mockResolvedValue([mockTicket]),
+            })),
+          })),
+        };
+        return callback(mockTx);
+      }
+    );
 
     const mockInsert = vi.fn(() => ({
       values: vi.fn(() => ({
@@ -172,6 +215,8 @@ describe("createTicket action", () => {
       locationId: 1,
       status: "operational",
       ownerId: null,
+      typeId: null,
+      modelId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -183,7 +228,9 @@ describe("createTicket action", () => {
         name: "Tech User",
         pin: "hashed",
         role: "tech",
+        roleId: null,
         isActive: true,
+        hourlyRate: null,
         failedLoginAttempts: 0,
         lockedUntil: null,
         email: null,
@@ -228,6 +275,7 @@ describe("updateTicket action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
@@ -244,6 +292,7 @@ describe("updateTicket action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue(undefined);
@@ -262,6 +311,7 @@ describe("updateTicket action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue({
@@ -277,6 +327,7 @@ describe("updateTicket action", () => {
       dueBy: new Date(),
       resolvedAt: null,
       resolutionNotes: null,
+      escalatedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -305,6 +356,7 @@ describe("updateTicket action", () => {
       employeeId: "ADMIN-001",
       name: "Admin",
       role: "admin",
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue({
@@ -320,6 +372,7 @@ describe("updateTicket action", () => {
       dueBy: new Date(),
       resolvedAt: null,
       resolutionNotes: null,
+      escalatedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -363,6 +416,7 @@ describe("resolveTicket action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
@@ -379,6 +433,7 @@ describe("resolveTicket action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     const formData = new FormData();
@@ -395,6 +450,7 @@ describe("resolveTicket action", () => {
       employeeId: "TECH-001",
       name: "Tech",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     vi.mocked(db.query.tickets.findFirst).mockResolvedValue({
@@ -410,6 +466,7 @@ describe("resolveTicket action", () => {
       dueBy: new Date(),
       resolvedAt: null,
       resolutionNotes: null,
+      escalatedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -455,6 +512,7 @@ describe("addTicketComment action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
@@ -471,6 +529,7 @@ describe("addTicketComment action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
@@ -492,6 +551,7 @@ describe("addTicketComment action", () => {
       employeeId: "OP-001",
       name: "Operator",
       role: "operator",
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     let capturedValues: unknown;

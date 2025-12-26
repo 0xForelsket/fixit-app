@@ -41,11 +41,21 @@ async function getTickets(params: SearchParams) {
   const conditions = [];
 
   if (params.status && params.status !== "all") {
-    conditions.push(eq(tickets.status, params.status as "open" | "in_progress" | "resolved" | "on_hold" | "cancelled"));
+    conditions.push(
+      eq(
+        tickets.status,
+        params.status as "open" | "in_progress" | "resolved" | "closed"
+      )
+    );
   }
 
   if (params.priority && params.priority !== "all") {
-    conditions.push(eq(tickets.priority, params.priority as "low" | "medium" | "high" | "critical"));
+    conditions.push(
+      eq(
+        tickets.priority,
+        params.priority as "low" | "medium" | "high" | "critical"
+      )
+    );
   }
 
   if (params.search) {
@@ -291,9 +301,9 @@ export default async function TicketsPage({
 
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-3">
-             {ticketsList.map((ticket) => (
-               <TicketCard key={ticket.id} ticket={ticket} />
-             ))}
+            {ticketsList.map((ticket) => (
+              <TicketCard key={ticket.id} ticket={ticket} />
+            ))}
           </div>
         </>
       )}
@@ -387,7 +397,9 @@ function StatFilterCard({
       href={active ? "/dashboard/tickets" : href}
       className={cn(
         "flex flex-1 items-center gap-3 rounded-xl border p-3 sm:p-4 transition-all hover:shadow-md bg-white",
-        active ? "ring-2 ring-primary-500 border-primary-300 shadow-inner" : "shadow-sm border-zinc-200"
+        active
+          ? "ring-2 ring-primary-500 border-primary-300 shadow-inner"
+          : "shadow-sm border-zinc-200"
       )}
     >
       <div
@@ -399,7 +411,9 @@ function StatFilterCard({
         <Icon className={cn("h-5 w-5", color)} />
       </div>
       <div>
-        <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">{title}</p>
+        <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
+          {title}
+        </p>
         <p className={cn("text-lg sm:text-2xl font-black", color)}>{value}</p>
       </div>
     </Link>
@@ -468,11 +482,16 @@ function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
       href={`/dashboard/tickets/${ticket.id}`}
       className={cn(
         "block rounded-2xl border-2 bg-white p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]",
-        ticket.priority === "critical" ? "border-rose-200 shadow-rose-100/50" : "border-zinc-200"
+        ticket.priority === "critical"
+          ? "border-rose-200 shadow-rose-100/50"
+          : "border-zinc-200"
       )}
     >
       <div className="flex justify-between items-start mb-3">
-        <Badge variant="outline" className="font-mono text-[10px] bg-zinc-50 border-zinc-300 px-1.5 py-0">
+        <Badge
+          variant="outline"
+          className="font-mono text-[10px] bg-zinc-50 border-zinc-300 px-1.5 py-0"
+        >
           #{ticket.id}
         </Badge>
         <span
@@ -491,27 +510,33 @@ function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
       </h3>
 
       <div className="flex items-center gap-2 mb-4">
-        <span className={cn("inline-flex items-center rounded-md border-2 px-1.5 py-0 text-[10px] font-black uppercase tracking-tighter", priorityConfig.bg, priorityConfig.color)}>
-            {priorityConfig.label}
+        <span
+          className={cn(
+            "inline-flex items-center rounded-md border-2 px-1.5 py-0 text-[10px] font-black uppercase tracking-tighter",
+            priorityConfig.bg,
+            priorityConfig.color
+          )}
+        >
+          {priorityConfig.label}
         </span>
         <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-            <Timer className="h-3 w-3" />
-            {formatRelativeTime(ticket.createdAt)}
+          <Timer className="h-3 w-3" />
+          {formatRelativeTime(ticket.createdAt)}
         </span>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
         <div className="flex items-center gap-2 overflow-hidden">
-            <div className="h-6 w-6 rounded-full bg-zinc-100 border flex items-center justify-center text-[10px] font-bold shrink-0">
-                {ticket.assignedTo?.name?.[0] || 'U'}
-            </div>
-            <span className="text-xs font-semibold truncate text-zinc-600">
-                {ticket.assignedTo?.name || "Unassigned"}
-            </span>
+          <div className="h-6 w-6 rounded-full bg-zinc-100 border flex items-center justify-center text-[10px] font-bold shrink-0">
+            {ticket.assignedTo?.name?.[0] || "U"}
+          </div>
+          <span className="text-xs font-semibold truncate text-zinc-600">
+            {ticket.assignedTo?.name || "Unassigned"}
+          </span>
         </div>
         <div className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">
-            Details
-            <ArrowRight className="inline-block ml-1 h-3 w-3" />
+          Details
+          <ArrowRight className="inline-block ml-1 h-3 w-3" />
         </div>
       </div>
     </Link>
@@ -519,23 +544,57 @@ function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
 }
 
 function getStatusConfig(status: string) {
-    const configs: Record<string, { color: string; bg: string; label: string }> = {
-        open: { color: "text-primary-700", bg: "bg-primary-50 border-primary-200", label: "Open" },
-        in_progress: { color: "text-amber-700", bg: "bg-amber-50 border-amber-200", label: "In Progress" },
-        resolved: { color: "text-emerald-700", bg: "bg-emerald-50 border-emerald-200", label: "Resolved" },
-        closed: { color: "text-slate-700", bg: "bg-slate-50 border-slate-200", label: "Closed" },
+  const configs: Record<string, { color: string; bg: string; label: string }> =
+    {
+      open: {
+        color: "text-primary-700",
+        bg: "bg-primary-50 border-primary-200",
+        label: "Open",
+      },
+      in_progress: {
+        color: "text-amber-700",
+        bg: "bg-amber-50 border-amber-200",
+        label: "In Progress",
+      },
+      resolved: {
+        color: "text-emerald-700",
+        bg: "bg-emerald-50 border-emerald-200",
+        label: "Resolved",
+      },
+      closed: {
+        color: "text-slate-700",
+        bg: "bg-slate-50 border-slate-200",
+        label: "Closed",
+      },
     };
-    return configs[status] || configs.open;
+  return configs[status] || configs.open;
 }
 
 function getPriorityConfig(priority: string) {
-    const configs: Record<string, { color: string; bg: string; label: string }> = {
-        low: { color: "text-slate-700", bg: "bg-slate-50 border-slate-200", label: "Low" },
-        medium: { color: "text-primary-700", bg: "bg-primary-50 border-primary-200", label: "Medium" },
-        high: { color: "text-amber-700", bg: "bg-amber-50 border-amber-200", label: "High" },
-        critical: { color: "text-rose-700", bg: "bg-rose-50 border-rose-200", label: "Critical" },
+  const configs: Record<string, { color: string; bg: string; label: string }> =
+    {
+      low: {
+        color: "text-slate-700",
+        bg: "bg-slate-50 border-slate-200",
+        label: "Low",
+      },
+      medium: {
+        color: "text-primary-700",
+        bg: "bg-primary-50 border-primary-200",
+        label: "Medium",
+      },
+      high: {
+        color: "text-amber-700",
+        bg: "bg-amber-50 border-amber-200",
+        label: "High",
+      },
+      critical: {
+        color: "text-rose-700",
+        bg: "bg-rose-50 border-rose-200",
+        label: "Critical",
+      },
     };
-    return configs[priority] || configs.medium;
+  return configs[priority] || configs.medium;
 }
 
 function TicketRow({ ticket }: { ticket: TicketWithRelations }) {

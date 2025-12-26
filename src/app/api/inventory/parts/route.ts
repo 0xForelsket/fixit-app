@@ -1,13 +1,13 @@
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { NextResponse } from "next/server";
 
-// POST /api/inventory/parts - Create new part
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_CREATE)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -56,7 +56,6 @@ export async function POST(request: Request) {
   }
 }
 
-// GET /api/inventory/parts - List all parts
 export async function GET() {
   try {
     const user = await getCurrentUser();

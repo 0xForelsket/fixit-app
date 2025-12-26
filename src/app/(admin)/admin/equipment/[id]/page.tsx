@@ -12,10 +12,10 @@ import {
   CheckCircle2,
   Edit,
   History,
+  Info,
   MapPin,
   Package,
   Wrench,
-  Info,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -111,7 +111,10 @@ export default async function EquipmentDetailPage({
             {equipmentItem.name}
           </h1>
           <div className="flex flex-wrap items-center gap-2 text-muted-foreground mt-1 text-xs sm:text-sm">
-            <Badge variant="outline" className="font-mono bg-zinc-50 px-1.5 py-0">
+            <Badge
+              variant="outline"
+              className="font-mono bg-zinc-50 px-1.5 py-0"
+            >
               {equipmentItem.code}
             </Badge>
             {equipmentItem.type && (
@@ -121,7 +124,13 @@ export default async function EquipmentDetailPage({
             )}
             {equipmentItem.model && (
               <span className="border-l pl-2 ml-1">
-                Model: <Link href={`/admin/equipment/models/${equipmentItem.model.id}`} className="font-medium hover:underline text-primary-600 truncate max-w-[150px] inline-block align-bottom">{equipmentItem.model.name}</Link>
+                Model:{" "}
+                <Link
+                  href={`/admin/equipment/models/${equipmentItem.model.id}`}
+                  className="font-medium hover:underline text-primary-600 truncate max-w-[150px] inline-block align-bottom"
+                >
+                  {equipmentItem.model.name}
+                </Link>
               </span>
             )}
           </div>
@@ -144,23 +153,42 @@ export default async function EquipmentDetailPage({
       </h3>
       <div className="space-y-4">
         {(() => {
-          const maintenanceTickets = equipmentItem.tickets.filter((t) => t.type === "maintenance" || t.type === "calibration");
-          const resolved = maintenanceTickets.filter((t) => t.status === "resolved" || t.status === "closed");
+          const maintenanceTickets = equipmentItem.tickets.filter(
+            (t) => t.type === "maintenance" || t.type === "calibration"
+          );
+          const resolved = maintenanceTickets.filter(
+            (t) => t.status === "resolved" || t.status === "closed"
+          );
           const totalResolved = resolved.length;
           const onTime = resolved.filter((t) => {
             if (!t.dueBy || !t.resolvedAt) return true;
             return t.resolvedAt <= t.dueBy;
           }).length;
-          const rate = totalResolved > 0 ? Math.round((onTime / totalResolved) * 100) : 100;
+          const rate =
+            totalResolved > 0
+              ? Math.round((onTime / totalResolved) * 100)
+              : 100;
 
           return (
             <>
               <div className="flex items-end justify-between">
                 <span className="text-3xl font-bold">{rate}%</span>
-                <span className="text-xs text-muted-foreground mb-1">On-Time Rate</span>
+                <span className="text-xs text-muted-foreground mb-1">
+                  On-Time Rate
+                </span>
               </div>
               <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className={cn("h-full rounded-full transition-all", rate >= 90 ? "bg-emerald-500" : rate >= 70 ? "bg-amber-500" : "bg-rose-500")} style={{ width: `${rate}%` }} />
+                <div
+                  className={cn(
+                    "h-full rounded-full transition-all",
+                    rate >= 90
+                      ? "bg-emerald-500"
+                      : rate >= 70
+                        ? "bg-amber-500"
+                        : "bg-rose-500"
+                  )}
+                  style={{ width: `${rate}%` }}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div>
@@ -169,7 +197,9 @@ export default async function EquipmentDetailPage({
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Total Tickets</p>
-                  <p className="font-medium text-lg">{maintenanceTickets.length}</p>
+                  <p className="font-medium text-lg">
+                    {maintenanceTickets.length}
+                  </p>
                 </div>
               </div>
             </>
@@ -182,14 +212,22 @@ export default async function EquipmentDetailPage({
   const StatusSection = (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
       <div className="mb-6 flex justify-center">
-        <div className={cn("inline-flex h-24 w-24 items-center justify-center rounded-full border-4", statusConfig.bg, statusConfig.color)}>
+        <div
+          className={cn(
+            "inline-flex h-24 w-24 items-center justify-center rounded-full border-4",
+            statusConfig.bg,
+            statusConfig.color
+          )}
+        >
           <StatusIcon className="h-10 w-10" />
         </div>
       </div>
       <div className="space-y-4">
         <div className="flex justify-between border-b pb-2 text-sm">
           <span className="text-muted-foreground">Status</span>
-          <span className={cn("font-medium", statusConfig.color)}>{statusConfig.label}</span>
+          <span className={cn("font-medium", statusConfig.color)}>
+            {statusConfig.label}
+          </span>
         </div>
         <div className="flex justify-between border-b pb-2 text-sm">
           <span className="text-muted-foreground">Location</span>
@@ -200,7 +238,9 @@ export default async function EquipmentDetailPage({
         </div>
         <div className="flex justify-between border-b pb-2 text-sm">
           <span className="text-muted-foreground">Owner</span>
-          <span className="font-medium">{equipmentItem.owner?.name || "Unassigned"}</span>
+          <span className="font-medium">
+            {equipmentItem.owner?.name || "Unassigned"}
+          </span>
         </div>
       </div>
     </div>
@@ -215,18 +255,39 @@ export default async function EquipmentDetailPage({
         </h3>
       </div>
       {equipmentItem.tickets.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground">No tickets found.</div>
+        <div className="p-8 text-center text-muted-foreground">
+          No tickets found.
+        </div>
       ) : (
         <div className="divide-y">
           {equipmentItem.tickets.slice(0, 10).map((ticket) => (
-            <Link key={ticket.id} href={`/dashboard/tickets/${ticket.id}`} className="block p-4 hover:bg-slate-50 transition-colors">
+            <Link
+              key={ticket.id}
+              href={`/dashboard/tickets/${ticket.id}`}
+              className="block p-4 hover:bg-slate-50 transition-colors"
+            >
               <div className="flex justify-between items-start mb-1">
-                <span className="font-semibold text-sm truncate pr-2">{ticket.title}</span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase shrink-0">{formatRelativeTime(ticket.createdAt)}</span>
+                <span className="font-semibold text-sm truncate pr-2">
+                  {ticket.title}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-medium uppercase shrink-0">
+                  {formatRelativeTime(ticket.createdAt)}
+                </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className={cn("font-bold px-2 py-0.5 rounded uppercase tracking-wider", ticket.status === "open" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600")}>{ticket.status}</span>
-                <span className="text-muted-foreground italic">{ticket.assignedTo?.name || "Unassigned"}</span>
+                <span
+                  className={cn(
+                    "font-bold px-2 py-0.5 rounded uppercase tracking-wider",
+                    ticket.status === "open"
+                      ? "bg-blue-50 text-blue-600"
+                      : "bg-emerald-50 text-emerald-600"
+                  )}
+                >
+                  {ticket.status}
+                </span>
+                <span className="text-muted-foreground italic">
+                  {ticket.assignedTo?.name || "Unassigned"}
+                </span>
               </div>
             </Link>
           ))}
@@ -250,10 +311,18 @@ export default async function EquipmentDetailPage({
         {OverviewHeader}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4 h-12">
-            <TabsTrigger value="overview"><Info className="h-4 w-4" /></TabsTrigger>
-            <TabsTrigger value="history"><History className="h-4 w-4" /></TabsTrigger>
-            <TabsTrigger value="bom"><Package className="h-4 w-4" /></TabsTrigger>
-            <TabsTrigger value="schedules"><Calendar className="h-4 w-4" /></TabsTrigger>
+            <TabsTrigger value="overview">
+              <Info className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <History className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="bom">
+              <Package className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="schedules">
+              <Calendar className="h-4 w-4" />
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
@@ -266,44 +335,80 @@ export default async function EquipmentDetailPage({
           </TabsContent>
 
           <TabsContent value="bom" className="mt-6">
-             <div className="rounded-xl border bg-white shadow-sm p-4">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Package className="h-4 w-4" />Recommended Spares
-                </h3>
-                {/* Simplified BOM for mobile */}
-                <div className="space-y-3">
-                  {equipmentItem.model?.bom.map(item => (
-                    <div key={item.id} className="p-3 bg-zinc-50 rounded-lg border">
-                      <div className="flex justify-between font-bold text-sm">
-                        <span>{item.part.name}</span>
-                        <span className="text-primary-600">{item.part.sku}</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>Need: {item.quantityRequired}</span>
-                        <span className={cn("font-bold", item.part.inventoryLevels.reduce((a,b)=>a+b.quantity, 0) < 1 ? "text-red-500" : "text-emerald-500")}>
-                          Stock: {item.part.inventoryLevels.reduce((a,b)=>a+b.quantity, 0)}
-                        </span>
-                      </div>
+            <div className="rounded-xl border bg-white shadow-sm p-4">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Recommended Spares
+              </h3>
+              {/* Simplified BOM for mobile */}
+              <div className="space-y-3">
+                {equipmentItem.model?.bom.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-3 bg-zinc-50 rounded-lg border"
+                  >
+                    <div className="flex justify-between font-bold text-sm">
+                      <span>{item.part.name}</span>
+                      <span className="text-primary-600">{item.part.sku}</span>
                     </div>
-                  ))}
-                  {(!equipmentItem.model || equipmentItem.model.bom.length === 0) && <p className="text-center text-muted-foreground text-sm">No BOM defined.</p>}
-                </div>
-             </div>
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>Need: {item.quantityRequired}</span>
+                      <span
+                        className={cn(
+                          "font-bold",
+                          item.part.inventoryLevels.reduce(
+                            (a, b) => a + b.quantity,
+                            0
+                          ) < 1
+                            ? "text-red-500"
+                            : "text-emerald-500"
+                        )}
+                      >
+                        Stock:{" "}
+                        {item.part.inventoryLevels.reduce(
+                          (a, b) => a + b.quantity,
+                          0
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {(!equipmentItem.model ||
+                  equipmentItem.model.bom.length === 0) && (
+                  <p className="text-center text-muted-foreground text-sm">
+                    No BOM defined.
+                  </p>
+                )}
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="schedules" className="mt-6">
-             <div className="rounded-xl border bg-white shadow-sm divide-y">
-                {equipmentItem.maintenanceSchedules.map(schedule => (
-                  <div key={schedule.id} className="p-4">
-                    <p className="font-bold text-sm">{schedule.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1 uppercase">{schedule.type} • Every {schedule.frequencyDays}d</p>
-                    <p className={cn("text-xs font-bold mt-2", schedule.nextDue < new Date() ? "text-red-600" : "text-emerald-600")}>
-                      Next: {formatRelativeTime(schedule.nextDue)}
-                    </p>
-                  </div>
-                ))}
-                {equipmentItem.maintenanceSchedules.length === 0 && <p className="p-8 text-center text-muted-foreground text-sm">No schedules.</p>}
-             </div>
+            <div className="rounded-xl border bg-white shadow-sm divide-y">
+              {equipmentItem.maintenanceSchedules.map((schedule) => (
+                <div key={schedule.id} className="p-4">
+                  <p className="font-bold text-sm">{schedule.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1 uppercase">
+                    {schedule.type} • Every {schedule.frequencyDays}d
+                  </p>
+                  <p
+                    className={cn(
+                      "text-xs font-bold mt-2",
+                      schedule.nextDue < new Date()
+                        ? "text-red-600"
+                        : "text-emerald-600"
+                    )}
+                  >
+                    Next: {formatRelativeTime(schedule.nextDue)}
+                  </p>
+                </div>
+              ))}
+              {equipmentItem.maintenanceSchedules.length === 0 && (
+                <p className="p-8 text-center text-muted-foreground text-sm">
+                  No schedules.
+                </p>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>
@@ -312,63 +417,87 @@ export default async function EquipmentDetailPage({
       <div className="hidden lg:grid grid-cols-12 gap-8">
         <div className="col-span-12">{OverviewHeader}</div>
         <div className="col-span-4 space-y-6">
-           {StatusSection}
-           {HealthSection}
+          {StatusSection}
+          {HealthSection}
         </div>
         <div className="col-span-8 space-y-6">
-           <Tabs defaultValue="history" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="bom">Parts (BOM)</TabsTrigger>
-                <TabsTrigger value="schedules">Schedules</TabsTrigger>
-              </TabsList>
-              <TabsContent value="history" className="mt-4">{HistorySection}</TabsContent>
-              <TabsContent value="bom" className="mt-4">
-                 {/* Full table for desktop */}
-                 <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead className="bg-slate-50 border-b">
-                        <tr className="text-left font-medium text-muted-foreground">
-                          <th className="p-3">Part</th>
-                          <th className="p-3">SKU</th>
-                          <th className="p-3 text-center">Required</th>
-                          <th className="p-3 text-center">In Stock</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y">
-                        {equipmentItem.model?.bom.map(item => (
-                          <tr key={item.id}>
-                            <td className="p-3 font-medium">{item.part.name}</td>
-                            <td className="p-3">{item.part.sku}</td>
-                            <td className="p-3 text-center">{item.quantityRequired}</td>
-                            <td className="p-3 text-center">
-                              <Badge variant={item.part.inventoryLevels.reduce((a,b)=>a+b.quantity, 0) > 0 ? "success" : "danger"}>
-                                {item.part.inventoryLevels.reduce((a,b)=>a+b.quantity, 0)}
-                              </Badge>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                 </div>
-              </TabsContent>
-              <TabsContent value="schedules" className="mt-4">
-                 <div className="rounded-xl border bg-white shadow-sm divide-y">
-                    {equipmentItem.maintenanceSchedules.map(schedule => (
-                      <div key={schedule.id} className="p-4 flex justify-between items-center text-sm">
-                        <span>{schedule.title}</span>
-                        <Badge variant="outline">{formatRelativeTime(schedule.nextDue)}</Badge>
-                      </div>
+          <Tabs defaultValue="history" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="bom">Parts (BOM)</TabsTrigger>
+              <TabsTrigger value="schedules">Schedules</TabsTrigger>
+            </TabsList>
+            <TabsContent value="history" className="mt-4">
+              {HistorySection}
+            </TabsContent>
+            <TabsContent value="bom" className="mt-4">
+              {/* Full table for desktop */}
+              <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b">
+                    <tr className="text-left font-medium text-muted-foreground">
+                      <th className="p-3">Part</th>
+                      <th className="p-3">SKU</th>
+                      <th className="p-3 text-center">Required</th>
+                      <th className="p-3 text-center">In Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {equipmentItem.model?.bom.map((item) => (
+                      <tr key={item.id}>
+                        <td className="p-3 font-medium">{item.part.name}</td>
+                        <td className="p-3">{item.part.sku}</td>
+                        <td className="p-3 text-center">
+                          {item.quantityRequired}
+                        </td>
+                        <td className="p-3 text-center">
+                          <Badge
+                            variant={
+                              item.part.inventoryLevels.reduce(
+                                (a, b) => a + b.quantity,
+                                0
+                              ) > 0
+                                ? "success"
+                                : "danger"
+                            }
+                          >
+                            {item.part.inventoryLevels.reduce(
+                              (a, b) => a + b.quantity,
+                              0
+                            )}
+                          </Badge>
+                        </td>
+                      </tr>
                     ))}
-                 </div>
-              </TabsContent>
-           </Tabs>
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+            <TabsContent value="schedules" className="mt-4">
+              <div className="rounded-xl border bg-white shadow-sm divide-y">
+                {equipmentItem.maintenanceSchedules.map((schedule) => (
+                  <div
+                    key={schedule.id}
+                    className="p-4 flex justify-between items-center text-sm"
+                  >
+                    <span>{schedule.title}</span>
+                    <Badge variant="outline">
+                      {formatRelativeTime(schedule.nextDue)}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
       {/* Fixed Mobile Bottom Action */}
       <div className="fixed bottom-16 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t lg:hidden z-30">
-        <Button asChild className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold h-12 rounded-xl">
+        <Button
+          asChild
+          className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold h-12 rounded-xl"
+        >
           <Link href={`/admin/equipment/${equipmentItem.id}/edit`}>
             <Edit className="mr-2 h-5 w-5" /> Edit Equipment
           </Link>

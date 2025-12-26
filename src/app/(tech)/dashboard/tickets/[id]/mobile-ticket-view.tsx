@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Info, Package, Clock } from "lucide-react";
+import { Clock, Info, MessageSquare, Package } from "lucide-react";
 import { useState } from "react";
 
 interface MobileTicketViewProps {
@@ -23,7 +23,11 @@ export function MobileTicketView({
 
   return (
     <div className="flex flex-col h-full lg:hidden">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex-1 flex flex-col"
+      >
         <div className="px-4 sticky top-0 z-20 bg-zinc-50/80 backdrop-blur-md pt-2">
           <TabsList className="grid w-full grid-cols-4 h-12 bg-white/50 border shadow-sm">
             <TabsTrigger value="info" className="gap-2">

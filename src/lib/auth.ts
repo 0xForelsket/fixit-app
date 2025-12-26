@@ -1,7 +1,13 @@
 import type { UserRole } from "@/db/schema";
 import bcrypt from "bcryptjs";
+import {
+  PERMISSIONS,
+  type Permission,
+  hasAnyPermission as checkAnyPermission,
+  hasPermission as checkPermission,
+} from "./permissions";
+import { type SessionUser, getCurrentUser } from "./session";
 
-// Password/PIN hashing
 const SALT_ROUNDS = 10;
 
 export async function hashPin(pin: string): Promise<string> {
@@ -60,7 +66,6 @@ export const ROUTE_PROTECTION: Record<string, UserRole> = {
   "/admin": "admin",
 };
 
-// Get required role for a path
 export function getRequiredRole(pathname: string): UserRole | null {
   for (const [route, role] of Object.entries(ROUTE_PROTECTION)) {
     if (pathname.startsWith(route)) {
@@ -69,3 +74,45 @@ export function getRequiredRole(pathname: string): UserRole | null {
   }
   return null;
 }
+
+export async function requirePermission(
+  permission: Permission
+): Promise<SessionUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  if (!checkPermission(user.permissions, permission)) {
+    throw new Error("Forbidden");
+  }
+  return user;
+}
+
+export async function requireAnyPermission(
+  permissions: Permission[]
+): Promise<SessionUser> {
+  const user = await getCurrentUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  if (!checkAnyPermission(user.permissions, permissions)) {
+    throw new Error("Forbidden");
+  }
+  return user;
+}
+
+export function userHasPermission(
+  user: SessionUser,
+  permission: Permission
+): boolean {
+  return checkPermission(user.permissions, permission);
+}
+
+export function userHasAnyPermission(
+  user: SessionUser,
+  permissions: Permission[]
+): boolean {
+  return checkAnyPermission(user.permissions, permissions);
+}
+
+export { PERMISSIONS, type Permission };

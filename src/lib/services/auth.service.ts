@@ -1,8 +1,9 @@
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { roles, users } from "@/db/schema";
 import { verifyPin } from "@/lib/auth";
 import { authLogger } from "@/lib/logger";
-import { createSession, type SessionUser } from "@/lib/session";
+import { type LegacyRole, getLegacyRolePermissions } from "@/lib/permissions";
+import { type SessionUser, createSession } from "@/lib/session";
 import { eq } from "drizzle-orm";
 
 export type AuthResult =
@@ -87,11 +88,28 @@ export async function authenticateUser(
     })
     .where(eq(users.id, user.id));
 
+  let permissions: string[] = [];
+
+  if (user.roleId) {
+    const role = await db.query.roles.findFirst({
+      where: eq(roles.id, user.roleId),
+    });
+    if (role?.permissions) {
+      permissions = role.permissions;
+    }
+  }
+
+  if (permissions.length === 0) {
+    permissions = getLegacyRolePermissions(user.role as LegacyRole);
+  }
+
   const sessionUser: SessionUser = {
     id: user.id,
     employeeId: user.employeeId,
     name: user.name,
     role: user.role,
+    roleId: user.roleId,
+    permissions,
     hourlyRate: user.hourlyRate,
   };
 

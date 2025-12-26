@@ -1,11 +1,12 @@
 import { db } from "@/db";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || user.role === "operator") {
+  if (!user || !userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

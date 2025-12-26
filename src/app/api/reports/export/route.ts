@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { type TicketPriority, type TicketStatus, tickets } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
 
-    if (!user || user.role !== "admin") {
+    if (!user || !userHasPermission(user, PERMISSIONS.REPORTS_EXPORT)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

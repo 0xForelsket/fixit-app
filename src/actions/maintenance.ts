@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import {
   insertMaintenanceScheduleSchema,
@@ -22,7 +23,7 @@ export async function createSchedule(
   _formData: FormData
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "tech")) {
+  if (!user || !userHasPermission(user, PERMISSIONS.MAINTENANCE_CREATE)) {
     return { error: "Unauthorized" };
   }
 
@@ -44,7 +45,7 @@ export async function createScheduleAction(
   data: z.infer<typeof insertMaintenanceScheduleSchema>
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "tech")) {
+  if (!user || !userHasPermission(user, PERMISSIONS.MAINTENANCE_CREATE)) {
     return { error: "Unauthorized" };
   }
 
@@ -97,7 +98,7 @@ export async function updateScheduleAction(
   data: z.infer<typeof updateMaintenanceScheduleSchema>
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "tech")) {
+  if (!user || !userHasPermission(user, PERMISSIONS.MAINTENANCE_UPDATE)) {
     return { error: "Unauthorized" };
   }
 
@@ -157,7 +158,7 @@ export async function deleteScheduleAction(
   id: number
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
-  if (!user || (user.role !== "admin" && user.role !== "tech")) {
+  if (!user || !userHasPermission(user, PERMISSIONS.MAINTENANCE_DELETE)) {
     return { error: "Unauthorized" };
   }
 

@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { equipmentStatusLogs, equipment as equipmentTable } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import {
   createEquipmentSchema,
@@ -25,8 +26,8 @@ export async function createEquipment(
     return { error: "You must be logged in" };
   }
 
-  if (user.role !== "admin") {
-    return { error: "Only administrators can create equipment" };
+  if (!userHasPermission(user, PERMISSIONS.EQUIPMENT_CREATE)) {
+    return { error: "You don't have permission to create equipment" };
   }
 
   const rawData = {
@@ -74,8 +75,8 @@ export async function updateEquipment(
     return { error: "You must be logged in" };
   }
 
-  if (user.role !== "admin") {
-    return { error: "Only administrators can update equipment" };
+  if (!userHasPermission(user, PERMISSIONS.EQUIPMENT_UPDATE)) {
+    return { error: "You don't have permission to update equipment" };
   }
 
   const existingEquipment = await db.query.equipment.findFirst({
@@ -151,8 +152,8 @@ export async function deleteEquipment(
     return { error: "You must be logged in" };
   }
 
-  if (user.role !== "admin") {
-    return { error: "Only administrators can delete equipment" };
+  if (!userHasPermission(user, PERMISSIONS.EQUIPMENT_DELETE)) {
+    return { error: "You don't have permission to delete equipment" };
   }
 
   // Check if equipment has any tickets

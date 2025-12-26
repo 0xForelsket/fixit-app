@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { equipmentModels } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// GET /api/equipment/models/[id] - Get single model
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -42,14 +42,16 @@ export async function GET(
   }
 }
 
-// PATCH /api/equipment/models/[id] - Update model
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (
+      !user ||
+      !userHasPermission(user, PERMISSIONS.EQUIPMENT_MANAGE_MODELS)
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -79,14 +81,16 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/equipment/models/[id] - Delete model
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
+    if (
+      !user ||
+      !userHasPermission(user, PERMISSIONS.EQUIPMENT_MANAGE_MODELS)
+    ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

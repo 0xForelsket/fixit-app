@@ -1,3 +1,4 @@
+import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
@@ -132,6 +133,7 @@ describe("POST /api/tickets", () => {
       employeeId: "TECH-001",
       name: "Test User",
       role: "tech",
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     const request = new Request("http://localhost/api/tickets", {
