@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { type AttachmentType, type EntityType, attachments } from "@/db/schema";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateS3Key, getPresignedUploadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
@@ -52,6 +53,26 @@ export async function GET(request: NextRequest) {
 // POST /api/attachments - Create attachment record and get upload URL
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `upload:${clientIp}`,
+      RATE_LIMITS.upload.limit,
+      RATE_LIMITS.upload.windowMs
+    );
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Upload limit exceeded. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimit.reset - Date.now()) / 1000)),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

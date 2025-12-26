@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { verifyPin } from "@/lib/auth";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createSession } from "@/lib/session";
 import { loginSchema } from "@/lib/validations";
 import { eq } from "drizzle-orm";
@@ -8,6 +9,26 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `login:${clientIp}`,
+      RATE_LIMITS.login.limit,
+      RATE_LIMITS.login.windowMs
+    );
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many login attempts. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimit.reset - Date.now()) / 1000)),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // Validate input

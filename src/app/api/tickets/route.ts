@@ -5,6 +5,7 @@ import {
   users,
   equipment as equipmentTable,
 } from "@/db/schema";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
 import { createTicketSchema, paginationSchema } from "@/lib/validations";
@@ -107,6 +108,26 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `tickets:${clientIp}`,
+      RATE_LIMITS.api.limit,
+      RATE_LIMITS.api.windowMs
+    );
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((rateLimit.reset - Date.now()) / 1000)),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
     await requireCsrf(request);
     const user = await requireAuth();
 
