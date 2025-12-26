@@ -1,19 +1,25 @@
 "use server";
 
 import { db } from "@/db";
+import type { Attachment } from "@/db/schema";
 import { attachments } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { uploadAttachmentSchema } from "@/lib/validations/attachments";
+import {
+  type UploadAttachmentInput,
+  uploadAttachmentSchema,
+} from "@/lib/validations/attachments";
 import { revalidatePath } from "next/cache";
+
+export type CreateAttachmentInput = UploadAttachmentInput & { s3Key: string };
 
 export type AttachmentActionState = {
   error?: string;
   success?: boolean;
-  data?: any;
+  data?: Attachment;
 };
 
 export async function createAttachment(
-  rawData: any
+  rawData: CreateAttachmentInput
 ): Promise<AttachmentActionState> {
   const user = await getCurrentUser();
   if (!user) {
@@ -28,8 +34,6 @@ export async function createAttachment(
   const { entityType, entityId, type, filename, mimeType, sizeBytes } =
     result.data;
 
-  // Note: s3Key is usually determined by the client during upload
-  // We expect rawData to include the s3Key generated during presigned upload
   if (!rawData.s3Key) {
     return { error: "S3 Key is required" };
   }

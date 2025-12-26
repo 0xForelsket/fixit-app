@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
+import type { Equipment, Ticket, User } from "@/db/schema";
 import { tickets } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { and, count, eq, ilike, or } from "drizzle-orm";
@@ -16,6 +17,12 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+
+type TicketWithRelations = Ticket & {
+  equipment: Equipment | null;
+  reportedBy: User | null;
+  assignedTo: User | null;
+};
 
 type SearchParams = {
   status?: string;
@@ -452,7 +459,7 @@ function FilterSelect({
   );
 }
 
-function TicketCard({ ticket }: { ticket: any }) {
+function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
   const statusConfig = getStatusConfig(ticket.status);
   const priorityConfig = getPriorityConfig(ticket.priority);
 
@@ -531,7 +538,7 @@ function getPriorityConfig(priority: string) {
     return configs[priority] || configs.medium;
 }
 
-function TicketRow({ ticket }: { ticket: any }) {
+function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
   const status = getStatusConfig(ticket.status);
   const priority = getPriorityConfig(ticket.priority);
 
