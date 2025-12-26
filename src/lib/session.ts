@@ -24,14 +24,9 @@ const SESSION_MAX_AGE = 24 * 60 * 60; // 24 hours in seconds
 function getSecretKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 32) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "SESSION_SECRET must be set and at least 32 characters in production"
-      );
-    }
-    // Development fallback - NOT SECURE
-    return new TextEncoder().encode(
-      "dev-secret-key-minimum-32-characters-long"
+    throw new Error(
+      "SESSION_SECRET environment variable must be set and at least 32 characters. " +
+        "Generate one with: openssl rand -base64 32"
     );
   }
   return new TextEncoder().encode(secret);
