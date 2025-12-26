@@ -1,12 +1,8 @@
 "use server";
 
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { verifyPin } from "@/lib/auth";
-import { authLogger } from "@/lib/logger";
-import { createSession, deleteSession } from "@/lib/session";
+import { authenticateUser } from "@/lib/services/auth.service";
+import { deleteSession } from "@/lib/session";
 import { loginSchema } from "@/lib/validations";
-import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 export type LoginState = {
@@ -23,7 +19,6 @@ export async function login(
     pin: formData.get("pin"),
   };
 
-  // Validate input
   const result = loginSchema.safeParse(rawData);
   if (!result.success) {
     return { error: "Invalid employee ID or PIN format" };
@@ -31,93 +26,15 @@ export async function login(
 
   const { employeeId, pin } = result.data;
 
-  // Find user
-  const user = await db.query.users.findFirst({
-    where: eq(users.employeeId, employeeId),
-  });
+  const authResult = await authenticateUser(employeeId, pin);
 
-  if (!user) {
-    return { error: "Invalid employee ID or PIN" };
+  if (!authResult.success) {
+    return { error: authResult.error };
   }
 
-  // Check if user is active
-  if (!user.isActive) {
-    return { error: "Account is disabled. Please contact an administrator." };
-  }
-
-  // Check if account is locked
-  if (user.lockedUntil && new Date() < user.lockedUntil) {
-    const minutesLeft = Math.ceil(
-      (user.lockedUntil.getTime() - Date.now()) / 60000
-    );
-    authLogger.warn(
-      { employeeId, minutesLeft },
-      "Login attempt on locked account"
-    );
-    return {
-      error: `Account is locked. Try again in ${minutesLeft} minute(s).`,
-    };
-  }
-
-  // Verify PIN
-  const isValid = await verifyPin(pin, user.pin);
-
-  if (!isValid) {
-    // Increment failed attempts
-    const newAttempts = user.failedLoginAttempts + 1;
-    const lockout = newAttempts >= 5 ? new Date(Date.now() + 15 * 60000) : null;
-
-    await db
-      .update(users)
-      .set({
-        failedLoginAttempts: newAttempts,
-        lockedUntil: lockout,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, user.id));
-
-    if (lockout) {
-      authLogger.warn(
-        { employeeId, attempts: newAttempts },
-        "Account locked due to failed attempts"
-      );
-      return {
-        error: "Too many failed attempts. Account locked for 15 minutes.",
-      };
-    }
-
-    authLogger.info(
-      { employeeId, attempts: newAttempts },
-      "Failed login attempt"
-    );
-    return { error: "Invalid employee ID or PIN" };
-  }
-
-  // Reset failed attempts on successful login
-  await db
-    .update(users)
-    .set({
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-      updatedAt: new Date(),
-    })
-    .where(eq(users.id, user.id));
-
-  // Create session
-  authLogger.info({ employeeId, role: user.role }, "Successful login");
-  await createSession({
-    id: user.id,
-    employeeId: user.employeeId,
-    name: user.name,
-    role: user.role,
-    hourlyRate: user.hourlyRate,
-  });
-
-  // Redirect based on role
-  if (user.role === "operator") {
+  if (authResult.user.role === "operator") {
     redirect("/");
   } else {
-    // Tech and Admin both go to dashboard
     redirect("/dashboard");
   }
 }

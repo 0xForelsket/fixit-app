@@ -1,10 +1,6 @@
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { verifyPin } from "@/lib/auth";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
-import { createSession } from "@/lib/session";
+import { authenticateUser } from "@/lib/services/auth.service";
 import { loginSchema } from "@/lib/validations";
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -22,7 +18,9 @@ export async function POST(request: Request) {
         {
           status: 429,
           headers: {
-            "Retry-After": String(Math.ceil((rateLimit.reset - Date.now()) / 1000)),
+            "Retry-After": String(
+              Math.ceil((rateLimit.reset - Date.now()) / 1000)
+            ),
             "X-RateLimit-Remaining": "0",
           },
         }
@@ -31,7 +29,6 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    // Validate input
     const result = loginSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
@@ -42,96 +39,23 @@ export async function POST(request: Request) {
 
     const { employeeId, pin } = result.data;
 
-    // Find user
-    const user = await db.query.users.findFirst({
-      where: eq(users.employeeId, employeeId),
-    });
+    const authResult = await authenticateUser(employeeId, pin);
 
-    if (!user) {
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: "Invalid employee ID or PIN" },
-        { status: 401 }
+        { error: authResult.error },
+        { status: authResult.status || 401 }
       );
     }
-
-    // Check if user is active
-    if (!user.isActive) {
-      return NextResponse.json(
-        { error: "Account is disabled. Please contact an administrator." },
-        { status: 403 }
-      );
-    }
-
-    // Check if account is locked
-    if (user.lockedUntil && new Date() < user.lockedUntil) {
-      const minutesLeft = Math.ceil(
-        (user.lockedUntil.getTime() - Date.now()) / 60000
-      );
-      return NextResponse.json(
-        {
-          error: `Account is locked. Try again in ${minutesLeft} minute(s).`,
-        },
-        { status: 403 }
-      );
-    }
-
-    // Verify PIN
-    const isValid = await verifyPin(pin, user.pin);
-
-    if (!isValid) {
-      // Increment failed attempts
-      const newAttempts = user.failedLoginAttempts + 1;
-      const lockout =
-        newAttempts >= 5 ? new Date(Date.now() + 15 * 60000) : null;
-
-      await db
-        .update(users)
-        .set({
-          failedLoginAttempts: newAttempts,
-          lockedUntil: lockout,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, user.id));
-
-      if (lockout) {
-        return NextResponse.json(
-          { error: "Too many failed attempts. Account locked for 15 minutes." },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json(
-        { error: "Invalid employee ID or PIN" },
-        { status: 401 }
-      );
-    }
-
-    // Reset failed attempts on successful login
-    await db
-      .update(users)
-      .set({
-        failedLoginAttempts: 0,
-        lockedUntil: null,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, user.id));
-
-    // Create session (returns CSRF token)
-    const csrfToken = await createSession({
-      id: user.id,
-      employeeId: user.employeeId,
-      name: user.name,
-      role: user.role,
-    });
 
     return NextResponse.json({
       success: true,
-      csrfToken,
+      csrfToken: authResult.csrfToken,
       user: {
-        id: user.id,
-        employeeId: user.employeeId,
-        name: user.name,
-        role: user.role,
+        id: authResult.user.id,
+        employeeId: authResult.user.employeeId,
+        name: authResult.user.name,
+        role: authResult.user.role,
       },
     });
   } catch (error) {
