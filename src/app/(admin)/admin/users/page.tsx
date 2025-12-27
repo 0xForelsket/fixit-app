@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { Edit, Plus, Search, Shield, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
@@ -13,40 +13,42 @@ type SearchParams = {
 };
 
 async function getUsers(params: SearchParams) {
-  const conditions = [];
-
-  if (params.role && params.role !== "all") {
-    conditions.push(
-      eq(users.role, params.role as "operator" | "tech" | "admin")
-    );
-  }
-
   const usersList = await db.query.users.findMany({
-    where: conditions.length > 0 ? conditions[0] : undefined,
     orderBy: [desc(users.createdAt)],
     with: {
       assignedRole: true,
     },
   });
 
-  const filtered = params.search
-    ? usersList.filter(
-        (u) =>
-          u.name.toLowerCase().includes(params.search!.toLowerCase()) ||
-          u.employeeId.toLowerCase().includes(params.search!.toLowerCase())
-      )
-    : usersList;
+  let filtered = usersList;
+  if (params.role && params.role !== "all") {
+    filtered = filtered.filter((u) => u.assignedRole?.name === params.role);
+  }
+
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    filtered = filtered.filter(
+      (u) =>
+        u.name.toLowerCase().includes(searchLower) ||
+        u.employeeId.toLowerCase().includes(searchLower)
+    );
+  }
 
   return filtered;
 }
 
 async function getUserStats() {
-  const allUsers = await db.query.users.findMany();
+  const allUsers = await db.query.users.findMany({
+    with: {
+      assignedRole: true,
+    },
+  });
   return {
     total: allUsers.length,
-    operators: allUsers.filter((u) => u.role === "operator").length,
-    techs: allUsers.filter((u) => u.role === "tech").length,
-    admins: allUsers.filter((u) => u.role === "admin").length,
+    operators: allUsers.filter((u) => u.assignedRole?.name === "operator")
+      .length,
+    techs: allUsers.filter((u) => u.assignedRole?.name === "tech").length,
+    admins: allUsers.filter((u) => u.assignedRole?.name === "admin").length,
     active: allUsers.filter((u) => u.isActive).length,
   };
 }
@@ -175,8 +177,9 @@ export default async function UsersPage({
             </thead>
             <tbody className="divide-y">
               {usersList.map((user) => {
+                const roleName = user.assignedRole?.name || "operator";
                 const roleConfig =
-                  roleConfigs[user.role] || roleConfigs.operator;
+                  roleConfigs[roleName] || roleConfigs.operator;
                 const RoleIcon = roleConfig.icon;
 
                 return (
@@ -214,9 +217,7 @@ export default async function UsersPage({
                           )}
                         >
                           <RoleIcon className="h-3.5 w-3.5" />
-                          {user.assignedRole?.name
-                            ? user.assignedRole.name.toUpperCase()
-                            : user.role.toUpperCase()}
+                          {roleName.toUpperCase()}
                         </span>
                       </div>
                     </td>

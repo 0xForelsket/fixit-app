@@ -121,22 +121,13 @@ export async function createUser(
     }
   }
 
-  let role = null;
-  let legacyRole: "operator" | "tech" | "admin" = "operator";
-
   if (parsed.data.roleId) {
-    role = await db.query.roles.findFirst({
+    const role = await db.query.roles.findFirst({
       where: eq(roles.id, parsed.data.roleId),
     });
 
     if (!role) {
       return { success: false, error: "Selected role does not exist" };
-    }
-
-    if (role.name.toLowerCase().includes("admin")) {
-      legacyRole = "admin";
-    } else if (role.name.toLowerCase().includes("tech")) {
-      legacyRole = "tech";
     }
   }
 
@@ -147,7 +138,6 @@ export async function createUser(
       name: parsed.data.name,
       email: parsed.data.email || null,
       pin: parsed.data.pin,
-      role: legacyRole,
       roleId: parsed.data.roleId ?? null,
       isActive: parsed.data.isActive,
       hourlyRate: parsed.data.hourlyRate ?? null,
