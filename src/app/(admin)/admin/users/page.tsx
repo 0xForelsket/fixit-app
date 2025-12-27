@@ -24,9 +24,11 @@ async function getUsers(params: SearchParams) {
   const usersList = await db.query.users.findMany({
     where: conditions.length > 0 ? conditions[0] : undefined,
     orderBy: [desc(users.createdAt)],
+    with: {
+      assignedRole: true,
+    },
   });
 
-  // Filter by search if provided (name or employeeId)
   const filtered = params.search
     ? usersList.filter(
         (u) =>
@@ -203,16 +205,20 @@ export default async function UsersPage({
                       </span>
                     </td>
                     <td className="p-4">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                          roleConfig.bg,
-                          roleConfig.color
-                        )}
-                      >
-                        <RoleIcon className="h-3.5 w-3.5" />
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium w-fit",
+                            roleConfig.bg,
+                            roleConfig.color
+                          )}
+                        >
+                          <RoleIcon className="h-3.5 w-3.5" />
+                          {user.assignedRole?.name
+                            ? user.assignedRole.name.toUpperCase()
+                            : user.role.toUpperCase()}
+                        </span>
+                      </div>
                     </td>
                     <td className="p-4 hidden sm:table-cell">
                       {user.isActive ? (

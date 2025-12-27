@@ -4,10 +4,12 @@ This file provides guidance for AI agents working with this codebase.
 
 ## Project Overview
 
-FixIt is a CMMS (Computerized Maintenance Management System) for tracking machine maintenance tickets. It serves three user roles:
+FixIt is a CMMS (Computerized Maintenance Management System) for tracking machine maintenance tickets. It uses permission-based access control with customizable roles:
 - **Operators**: Report machine issues via QR code scanning
 - **Technicians**: Manage and resolve tickets, track machine maintenance
-- **Administrators**: Manage users, machines, locations, and configuration
+- **Administrators**: Manage users, machines, locations, roles, and configuration
+
+Custom roles can be created with any combination of permissions via the Admin UI.
 
 ## Tech Stack
 
@@ -105,22 +107,51 @@ type ActionResult<T = void> =
 - Use `z.infer<typeof schema>` for TypeScript types
 - Validate at system boundaries (Server Actions, API routes)
 
-## Authentication
+## Authentication & Authorization
 
 - PIN-based login (not passwords)
 - JWT stored in httpOnly cookie (`fixit_session`)
 - CSRF token in separate cookie (`fixit_csrf`)
-- Role hierarchy: Operator < Tech < Admin
+- Permission-based access control (not role-based)
+
+### Permission System
+Permissions follow the pattern `resource:action` (e.g., `ticket:create`, `equipment:update`).
+Special permission `*` grants all permissions (superadmin).
+
+```typescript
+import { PERMISSIONS } from "@/lib/permissions";
+
+PERMISSIONS.TICKET_CREATE      // "ticket:create"
+PERMISSIONS.EQUIPMENT_UPDATE   // "equipment:update"
+PERMISSIONS.SYSTEM_SETTINGS    // "system:settings"
+PERMISSIONS.ALL                // "*" (superadmin)
+```
 
 ### Protected Actions
 ```typescript
-import { requireAuth, requireRole } from "@/lib/auth";
+import { requireAuth, requirePermission, requireAnyPermission } from "@/lib/auth";
 
 export async function someAction() {
   "use server";
   const user = await requireAuth();  // Throws if not logged in
-  // or
-  const admin = await requireRole("admin");  // Throws if not admin
+
+  // Require specific permission
+  await requirePermission(PERMISSIONS.TICKET_CREATE);
+
+  // Require any of multiple permissions
+  await requireAnyPermission([PERMISSIONS.TICKET_UPDATE, PERMISSIONS.TICKET_RESOLVE]);
+}
+```
+
+### Checking Permissions in Components
+```typescript
+import { hasPermission, hasAnyPermission } from "@/lib/permissions";
+
+// In server components, get user from session
+const user = await getCurrentUser();
+
+if (hasPermission(user.permissions, PERMISSIONS.ANALYTICS_VIEW)) {
+  // Show analytics
 }
 ```
 
@@ -169,6 +200,7 @@ const dueBy = calculateDueBy("high"); // 8 hours from now
 | `src/db/schema.ts` | Database schema, types, enums |
 | `src/lib/session.ts` | JWT session management |
 | `src/lib/auth.ts` | Auth utilities |
+| `src/lib/permissions.ts` | Permission constants and helpers |
 | `src/lib/validations/*.ts` | Zod validation schemas |
 | `src/actions/*.ts` | Server Actions for mutations |
 

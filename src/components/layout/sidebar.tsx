@@ -16,6 +16,7 @@ import {
   MonitorCog,
   Package,
   QrCode,
+  Shield,
   Users,
   Wrench,
   X,
@@ -66,6 +67,12 @@ const navItems: NavItem[] = [
     href: "/admin/users",
     icon: <Users className="h-5 w-5" />,
     permission: PERMISSIONS.USER_VIEW,
+  },
+  {
+    label: "Roles",
+    href: "/admin/roles",
+    icon: <Shield className="h-5 w-5" />,
+    permission: PERMISSIONS.SYSTEM_SETTINGS,
   },
   {
     label: "Maintenance",
