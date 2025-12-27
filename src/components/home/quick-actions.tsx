@@ -29,7 +29,7 @@ export function QuickActions() {
       label: "PM",
       icon: <Wrench />,
       color: "bg-green-50 text-green-600",
-      href: "/dashboard/maintenance",
+      href: "/maintenance/schedules",
     },
     {
       label: "Vendor",
@@ -41,19 +41,19 @@ export function QuickActions() {
       label: "Equipment",
       icon: <MonitorCog />,
       color: "bg-purple-50 text-purple-600",
-      href: "/admin/equipment",
+      href: "/assets/equipment",
     },
     {
       label: "Inventory",
       icon: <Package />,
       color: "bg-indigo-50 text-indigo-600",
-      href: "/admin/inventory",
+      href: "/assets/inventory",
     },
     {
       label: "Work Permit",
       icon: <FileText />,
       color: "bg-red-50 text-red-600",
-      href: "/admin/reports",
+      href: "/reports",
     },
     {
       label: "Legal",

@@ -88,8 +88,8 @@ export async function createScheduleAction(
     return { error: "Failed to create schedule" };
   }
 
-  revalidatePath("/dashboard/maintenance/schedules");
-  redirect("/dashboard/maintenance/schedules");
+  revalidatePath("/maintenance/schedules");
+  redirect("/maintenance/schedules");
 }
 
 export async function updateScheduleAction(
@@ -149,8 +149,8 @@ export async function updateScheduleAction(
     return { error: "Failed to update schedule" };
   }
 
-  revalidatePath("/dashboard/maintenance/schedules");
-  redirect("/dashboard/maintenance/schedules");
+  revalidatePath("/maintenance/schedules");
+  redirect("/maintenance/schedules");
 }
 
 export async function deleteScheduleAction(
@@ -179,6 +179,6 @@ export async function deleteScheduleAction(
     return { error: "Failed to delete schedule" };
   }
 
-  revalidatePath("/dashboard/maintenance/schedules");
+  revalidatePath("/maintenance/schedules");
   return { success: true };
 }

@@ -74,7 +74,7 @@ export function ReceiveStockForm({ parts, locations }: ReceiveStockFormProps) {
       // No need to manual push/refresh if action revalidates, but for client nav stick to it?
       // Action revalidates, but router.refresh ensures client cache is updated if needed.
       // Actually standard pattern is just router.push if redirecting.
-      router.push("/admin/inventory");
+      router.push("/assets/inventory");
     } catch (error) {
       toast({
         variant: "destructive",

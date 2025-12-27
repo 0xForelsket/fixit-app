@@ -26,9 +26,7 @@ export default async function Home({ searchParams }: PageProps) {
     return <LandingPage />;
   }
 
-  if (hasPermission(user.permissions, PERMISSIONS.ALL)) {
-    redirect("/admin");
-  } else if (hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
+  if (hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
     redirect("/dashboard");
   }
 

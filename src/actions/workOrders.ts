@@ -129,7 +129,7 @@ export async function createWorkOrder(
               type: "work_order_created" as const,
               title: `New ${priority} Priority Work Order`,
               message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
-              link: `/dashboard/work-orders/${workOrder.id}`,
+              link: `/maintenance/work-orders/${workOrder.id}`,
             }))
           );
         }
@@ -143,12 +143,12 @@ export async function createWorkOrder(
         type: "work_order_created" as const,
         title: "Work Order Opened on Your Equipment",
         message: `${title} - ${equipmentItem.name}`,
-        link: `/dashboard/work-orders/${workOrder.id}`,
+        link: `/maintenance/work-orders/${workOrder.id}`,
       });
     }
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/work-orders");
+    revalidatePath("/maintenance/work-orders");
     revalidatePath("/my-work-orders");
     revalidatePath("/");
 
@@ -255,13 +255,13 @@ export async function updateWorkOrder(
         type: "work_order_assigned",
         title: "Work Order Assigned to You",
         message: existingWorkOrder.title,
-        link: `/dashboard/work-orders/${workOrderId}`,
+        link: `/maintenance/work-orders/${workOrderId}`,
       });
     }
   }
 
-  revalidatePath(`/dashboard/work-orders/${workOrderId}`);
-  revalidatePath("/dashboard/work-orders");
+  revalidatePath(`/maintenance/work-orders/${workOrderId}`);
+  revalidatePath("/maintenance/work-orders");
   revalidatePath("/dashboard");
 
   return { success: true };
@@ -319,8 +319,8 @@ export async function resolveWorkOrder(
     createdById: user.id,
   });
 
-  revalidatePath(`/dashboard/work-orders/${workOrderId}`);
-  revalidatePath("/dashboard/work-orders");
+  revalidatePath(`/maintenance/work-orders/${workOrderId}`);
+  revalidatePath("/maintenance/work-orders");
   revalidatePath("/dashboard");
 
   return { success: true };
@@ -349,7 +349,7 @@ export async function addWorkOrderComment(
     createdById: user.id,
   });
 
-  revalidatePath(`/dashboard/work-orders/${workOrderId}`);
+  revalidatePath(`/maintenance/work-orders/${workOrderId}`);
 
   return { success: true };
 }
@@ -380,7 +380,7 @@ export async function updateChecklistItem(
       })
       .where(eq(checklistCompletions.id, completionId));
 
-    revalidatePath(`/dashboard/work-orders/${workOrderId}`);
+    revalidatePath(`/maintenance/work-orders/${workOrderId}`);
     return { success: true };
   } catch (error) {
     workOrderLogger.error(

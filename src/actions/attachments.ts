@@ -55,10 +55,10 @@ export async function createAttachment(
 
     // Revalidate paths based on entity
     if (entityType === "work_order") {
-      revalidatePath(`/dashboard/work-orders/${entityId}`);
+      revalidatePath(`/maintenance/work-orders/${entityId}`);
       revalidatePath(`/my-tickets/${entityId}`);
     } else if (entityType === "equipment") {
-      revalidatePath(`/admin/equipment/${entityId}`);
+      revalidatePath(`/assets/equipment/${entityId}`);
     }
 
     return { success: true, data: newAttachment };

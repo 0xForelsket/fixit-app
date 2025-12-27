@@ -121,7 +121,7 @@ function ScheduleCard({
 
         {schedule.workOrderId ? (
           <Button asChild variant="outline" className="rounded-xl font-bold">
-            <Link href={`/dashboard/work-orders/${schedule.workOrderId}`}>
+            <Link href={`/maintenance/work-orders/${schedule.workOrderId}`}>
               <CheckCircle2 className="h-4 w-4 mr-1" />
               View WO
             </Link>
@@ -135,7 +135,7 @@ function ScheduleCard({
                 : "bg-warning-600 hover:bg-warning-700"
             }`}
           >
-            <Link href={`/dashboard/maintenance/schedules/${schedule.id}`}>
+            <Link href={`/maintenance/schedules/${schedule.id}`}>
               Start PM
             </Link>
           </Button>

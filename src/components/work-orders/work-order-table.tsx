@@ -64,7 +64,7 @@ function WorkOrderRow({
   return (
     <tr
       className="group hover:bg-slate-50 transition-colors cursor-pointer"
-      onClick={() => router.push(`/dashboard/work-orders/${workOrder.id}`)}
+      onClick={() => router.push(`/maintenance/work-orders/${workOrder.id}`)}
     >
       <td className="p-4">
         <span className="font-mono text-xs font-bold text-zinc-500">
@@ -129,7 +129,7 @@ function WorkOrderRow({
           className="opacity-0 group-hover:opacity-100 transition-opacity"
           asChild
         >
-          <Link href={`/dashboard/work-orders/${workOrder.id}`}>
+          <Link href={`/maintenance/work-orders/${workOrder.id}`}>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>

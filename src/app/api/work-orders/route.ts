@@ -184,7 +184,7 @@ export async function POST(request: Request) {
             type: "work_order_created" as const,
             title: `New ${priority} Priority Work Order`,
             message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
-            link: `/dashboard/work-orders/${workOrder.id}`,
+            link: `/maintenance/work-orders/${workOrder.id}`,
           }))
         );
       }
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
         type: "work_order_created" as const,
         title: "Work Order Opened on Your Equipment",
         message: `${title} - ${equipmentItem.name}`,
-        link: `/dashboard/work-orders/${workOrder.id}`,
+        link: `/maintenance/work-orders/${workOrder.id}`,
       });
     }
 

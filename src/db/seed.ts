@@ -542,7 +542,7 @@ async function seed() {
       type: "work_order_assigned",
       title: "New Work Order Assigned",
       message: "You have been assigned to work order: CNC Mill not powering on",
-      link: "/dashboard/work-orders/1",
+      link: "/maintenance/work-orders/1",
       isRead: false,
     },
     {
@@ -550,7 +550,7 @@ async function seed() {
       type: "work_order_created",
       title: "Critical Work Order Created",
       message: "Emergency stop button sticking - Conveyor System 1",
-      link: "/dashboard/work-orders/4",
+      link: "/maintenance/work-orders/4",
       isRead: false,
     },
     {
@@ -559,7 +559,7 @@ async function seed() {
       title: "New Work Order Assigned",
       message:
         "You have been assigned to work order: Scheduled gripper replacement",
-      link: "/dashboard/work-orders/2",
+      link: "/maintenance/work-orders/2",
       isRead: true,
     },
   ]);

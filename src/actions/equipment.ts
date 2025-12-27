@@ -52,7 +52,7 @@ export async function createEquipment(
       .values(result.data)
       .returning();
 
-    revalidatePath("/admin/equipment");
+    revalidatePath("/assets/equipment");
     return { success: true, data: newItem };
   } catch (error) {
     if (
@@ -130,8 +130,8 @@ export async function updateEquipment(
       })
       .where(eq(equipmentTable.id, equipmentId));
 
-    revalidatePath("/admin/equipment");
-    revalidatePath(`/admin/equipment/${equipmentId}`);
+    revalidatePath("/assets/equipment");
+    revalidatePath(`/assets/equipment/${equipmentId}`);
     return { success: true };
   } catch (error) {
     if (
@@ -176,6 +176,6 @@ export async function deleteEquipment(
 
   await db.delete(equipmentTable).where(eq(equipmentTable.id, equipmentId));
 
-  revalidatePath("/admin/equipment");
+  revalidatePath("/assets/equipment");
   return { success: true };
 }

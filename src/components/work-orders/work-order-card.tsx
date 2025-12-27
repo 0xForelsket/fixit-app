@@ -36,7 +36,7 @@ export function WorkOrderCard({
 
     return (
       <Link
-        href={`/dashboard/work-orders/${workOrder.id}`}
+        href={`/maintenance/work-orders/${workOrder.id}`}
         className={cn(
           "block relative overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm active:scale-[0.99] transition-all",
           "border-l-[4px]", // Slightly thinner left border for density
@@ -120,7 +120,7 @@ export function WorkOrderCard({
 
   return (
     <Link
-      href={`/dashboard/work-orders/${workOrder.id}`}
+      href={`/maintenance/work-orders/${workOrder.id}`}
       className={cn(
         "block rounded-2xl border-2 bg-white p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]",
         workOrder.priority === "critical"

@@ -31,7 +31,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
     {
       label: "WOs",
       href: hasPermission(permissions, PERMISSIONS.TICKET_VIEW_ALL)
-        ? "/dashboard/work-orders"
+        ? "/maintenance/work-orders"
         : "/my-work-orders",
       icon: <ClipboardList className="h-6 w-6" />,
     },
@@ -45,7 +45,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
   }[] = [
     {
       label: "Services",
-      href: "/dashboard/maintenance",
+      href: "/maintenance/schedules",
       icon: <Wrench className="h-6 w-6" />,
       permission: PERMISSIONS.MAINTENANCE_VIEW,
     },

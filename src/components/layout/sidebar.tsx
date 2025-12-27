@@ -47,13 +47,13 @@ const navGroups: NavGroup[] = [
       },
       {
         label: "Analytics",
-        href: "/admin/analytics",
+        href: "/analytics",
         icon: <BarChart3 className="h-5 w-5" />,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {
         label: "Reports",
-        href: "/admin/reports",
+        href: "/reports",
         icon: <FileText className="h-5 w-5" />,
         permission: PERMISSIONS.REPORTS_VIEW,
       },
@@ -64,13 +64,13 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "Work Orders",
-        href: "/dashboard/work-orders",
+        href: "/maintenance/work-orders",
         icon: <ClipboardList className="h-5 w-5" />,
         permission: PERMISSIONS.TICKET_VIEW_ALL,
       },
       {
         label: "Schedules",
-        href: "/dashboard/maintenance",
+        href: "/maintenance/schedules",
         icon: <Wrench className="h-5 w-5" />,
         permission: PERMISSIONS.MAINTENANCE_VIEW,
       },
@@ -81,25 +81,25 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "Equipment",
-        href: "/admin/equipment",
+        href: "/assets/equipment",
         icon: <MonitorCog className="h-5 w-5" />,
         permission: PERMISSIONS.EQUIPMENT_VIEW,
       },
       {
         label: "Locations",
-        href: "/admin/locations",
+        href: "/assets/locations",
         icon: <MapPin className="h-5 w-5" />,
         permission: PERMISSIONS.LOCATION_VIEW,
       },
       {
         label: "Inventory",
-        href: "/admin/inventory",
+        href: "/assets/inventory",
         icon: <Package className="h-5 w-5" />,
         permission: PERMISSIONS.INVENTORY_VIEW,
       },
       {
         label: "QR Codes",
-        href: "/admin/qr-codes",
+        href: "/assets/qr-codes",
         icon: <QrCode className="h-5 w-5" />,
         permission: PERMISSIONS.SYSTEM_QR_CODES,
       },

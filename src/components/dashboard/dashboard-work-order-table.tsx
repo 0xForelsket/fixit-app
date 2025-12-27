@@ -41,11 +41,11 @@ export function DashboardWorkOrderTable({
                 key={workOrder.id}
                 className="group transition-colors hover:bg-zinc-50/80 cursor-pointer"
                 onClick={() =>
-                  router.push(`/dashboard/work-orders/${workOrder.id}`)
+                  router.push(`/maintenance/work-orders/${workOrder.id}`)
                 }
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    router.push(`/dashboard/work-orders/${workOrder.id}`);
+                    router.push(`/maintenance/work-orders/${workOrder.id}`);
                   }
                 }}
                 tabIndex={0}
@@ -129,7 +129,7 @@ export function DashboardWorkOrderTable({
                     asChild
                   >
                     <Link
-                      href={`/dashboard/work-orders/${workOrder.id}`}
+                      href={`/maintenance/work-orders/${workOrder.id}`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <ArrowRight className="h-4 w-4" />

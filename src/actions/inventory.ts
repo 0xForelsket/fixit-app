@@ -110,8 +110,8 @@ export async function createTransactionAction(input: TransactionInput) {
       });
     });
 
-    revalidatePath("/admin/inventory");
-    revalidatePath("/admin/inventory/transactions");
+    revalidatePath("/assets/inventory");
+    revalidatePath("/assets/inventory/transactions");
     return { success: true };
   } catch (error) {
     inventoryLogger.error({ error, input: validated }, "Transaction error");
@@ -177,9 +177,9 @@ export async function consumeWorkOrderPartAction(input: ConsumePartInput) {
       });
     });
 
-    revalidatePath(`/dashboard/work-orders/${validated.workOrderId}`);
+    revalidatePath(`/maintenance/work-orders/${validated.workOrderId}`);
     revalidatePath(`/admin/work-orders/${validated.workOrderId}`);
-    revalidatePath("/admin/inventory");
+    revalidatePath("/assets/inventory");
 
     return { success: true };
   } catch (error) {
