@@ -64,11 +64,6 @@ export async function GET() {
 
     // 4. SLA Compliance Rate
     // % of resolved work orders (last 30 days) where resolvedAt <= dueBy
-    const _compliantWorkOrders = resolvedWorkOrders.filter((_t) => {
-      // We'll need to re-query or update the select above to include dueBy
-      // For efficiency, let's just do it in one query if possible, but JS filter is fine for small scale
-      return true; // Placeholder until we fetch dueBy
-    });
 
     // Let's re-fetch with dueBy
     const resolvedWithDue = await db

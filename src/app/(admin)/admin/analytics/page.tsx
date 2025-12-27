@@ -1,11 +1,12 @@
 import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 export default async function AnalyticsPage() {
   const user = await getCurrentUser();
 
-  if (!user || user.role !== "admin") {
+  if (!user || !hasPermission(user.permissions, PERMISSIONS.ANALYTICS_VIEW)) {
     redirect("/dashboard");
   }
 
