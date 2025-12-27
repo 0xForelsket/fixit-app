@@ -176,7 +176,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       {/* Ticket Type */}
       <div className="space-y-4">
-        <Label className="text-lg font-semibold text-foreground">
+        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
           What type of issue is it?
         </Label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -186,7 +186,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
             return (
               <label
                 key={type}
-                className="group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 bg-card p-4 text-center transition-all hover:border-primary-300 hover:bg-primary-50/50 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50 has-[:checked]:shadow-sm"
+                className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 bg-white p-4 text-center transition-all hover:border-primary-300 hover:bg-primary-50/50 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50 has-[:checked]:shadow-sm active:scale-[0.98]"
               >
                 <input
                   type="radio"
@@ -195,11 +195,11 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   className="sr-only"
                   required
                 />
-                <Icon className="mb-3 h-8 w-8 text-muted-foreground transition-colors group-has-[:checked]:text-primary-600" />
+                <Icon className="mb-3 h-8 w-8 text-zinc-400 transition-colors group-has-[:checked]:text-primary-600" />
                 <span className="font-bold text-foreground group-has-[:checked]:text-primary-700">
                   {config.label}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1">
+                <span className="text-xs text-zinc-500 mt-1">
                   {config.description}
                 </span>
               </label>
@@ -210,7 +210,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       {/* Priority */}
       <div className="space-y-4">
-        <Label className="text-lg font-semibold text-foreground">
+        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
           How urgent is this?
         </Label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -247,7 +247,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
       <div className="space-y-3">
         <Label
           htmlFor="title"
-          className="text-lg font-semibold text-foreground"
+          className="text-sm font-black uppercase tracking-widest text-zinc-500"
         >
           Short description
         </Label>
@@ -257,7 +257,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
           placeholder={"e.g., Leaking oil, Strange noise..."}
           required
           maxLength={200}
-          className="h-14 text-lg px-4 rounded-xl border-muted-foreground/30 focus-visible:ring-primary-500"
+          className="h-14 text-lg px-4 rounded-xl border-2 bg-zinc-50 focus-visible:ring-primary-500"
         />
       </div>
 
@@ -265,7 +265,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
       <div className="space-y-3">
         <Label
           htmlFor="description"
-          className="text-lg font-semibold text-foreground"
+          className="text-sm font-black uppercase tracking-widest text-zinc-500"
         >
           Additional Details
         </Label>
@@ -275,13 +275,13 @@ export function ReportForm({ equipment }: ReportFormProps) {
           placeholder="Describe the issue in detail. What happened? Any error codes?"
           required
           rows={5}
-          className="w-full rounded-xl border border-muted-foreground/30 bg-background px-4 py-3 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 resize-none"
+          className="w-full rounded-xl border-2 bg-zinc-50 px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 resize-none"
         />
       </div>
 
       {/* Attachments Section */}
       <div className="space-y-4">
-        <Label className="text-lg font-semibold text-foreground">
+        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
           Attach Photos
         </Label>
 
@@ -327,7 +327,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
           type="button"
           variant="outline"
           size="lg"
-          className="flex-1 h-14 text-base font-semibold rounded-xl border-muted-foreground/30"
+          className="flex-1 h-14 text-base font-bold rounded-xl border-2 border-zinc-200"
           onClick={() => router.back()}
         >
           Cancel
@@ -335,7 +335,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
         <Button
           type="submit"
           size="lg"
-          className="flex-[2] h-14 text-base font-bold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+          className="flex-[2] h-14 text-base font-black uppercase tracking-widest rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
           disabled={isPending}
         >
           {isPending ? (

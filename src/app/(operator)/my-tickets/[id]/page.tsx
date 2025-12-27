@@ -76,22 +76,23 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   const urgency = getUrgencyLevel(workOrder.dueBy);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="min-h-screen bg-zinc-50/50 industrial-grid py-8 pb-24 lg:pb-8">
+      <div className="mx-auto max-w-3xl px-4 space-y-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/my-tickets" className="hover:text-foreground">
-          My Work Orders
+      <nav className="flex items-center gap-2 text-sm text-zinc-500 font-bold">
+        <Link href="/my-tickets" className="hover:text-primary-600 transition-colors">
+          My Tickets
         </Link>
-        <span>/</span>
-        <span className="text-foreground">#{workOrder.id}</span>
+        <span className="text-zinc-300">/</span>
+        <span className="text-zinc-900">#{workOrder.id}</span>
       </nav>
 
       {/* Work order header */}
-      <div className="rounded-lg border bg-card p-6">
+      <div className="rounded-2xl border-2 bg-white p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-xl font-semibold">{workOrder.title}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="text-xl font-black text-zinc-900">{workOrder.title}</h1>
+            <p className="mt-1 text-sm text-zinc-500 font-medium">
               Reported {formatRelativeTime(workOrder.createdAt)}
             </p>
           </div>
@@ -139,12 +140,12 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
 
       {/* Equipment info */}
       {workOrder.equipment && (
-        <div className="rounded-lg border bg-card p-4">
-          <h2 className="text-sm font-medium text-muted-foreground">
+        <div className="rounded-2xl border-2 bg-white p-4">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
             Equipment
           </h2>
           <div className="mt-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 border">
               <svg
                 className="h-5 w-5 text-muted-foreground"
                 fill="none"
@@ -160,8 +161,8 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
               </svg>
             </div>
             <div>
-              <p className="font-medium">{workOrder.equipment.name}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-bold text-zinc-900">{workOrder.equipment.name}</p>
+              <p className="text-sm text-zinc-500">
                 {workOrder.equipment.code}
                 {workOrder.equipment.location &&
                   ` • ${workOrder.equipment.location.name}`}
@@ -172,34 +173,34 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       )}
 
       {/* Description */}
-      <div className="rounded-lg border bg-card p-4">
-        <h2 className="text-sm font-medium text-muted-foreground">
+      <div className="rounded-2xl border-2 bg-white p-4">
+        <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
           Description
         </h2>
-        <p className="mt-2 whitespace-pre-wrap">{workOrder.description}</p>
+        <p className="mt-2 whitespace-pre-wrap text-zinc-700">{workOrder.description}</p>
       </div>
 
       {/* Assignment */}
       {workOrder.assignedTo ? (
-        <div className="rounded-lg border bg-card p-4">
-          <h2 className="text-sm font-medium text-muted-foreground">
+        <div className="rounded-2xl border-2 bg-white p-4">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
             Assigned Technician
           </h2>
           <div className="mt-2 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-black">
               {workOrder.assignedTo.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="font-medium">{workOrder.assignedTo.name}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-bold text-zinc-900">{workOrder.assignedTo.name}</p>
+              <p className="text-sm text-zinc-500">
                 {workOrder.assignedTo.employeeId}
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed bg-muted/50 p-4 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 p-4 text-center">
+          <p className="text-sm text-zinc-500 font-medium">
             Waiting for a technician to be assigned...
           </p>
         </div>
@@ -221,8 +222,8 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       )}
 
       {/* Activity log */}
-      <div className="rounded-lg border bg-card p-4">
-        <h2 className="text-sm font-medium text-muted-foreground">Activity</h2>
+      <div className="rounded-2xl border-2 bg-white p-4">
+        <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Activity</h2>
 
         {/* Add comment form */}
         {workOrder.status !== "resolved" && workOrder.status !== "closed" && (
@@ -264,6 +265,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

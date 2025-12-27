@@ -22,14 +22,14 @@ interface EquipmentGridProps {
 export function EquipmentGrid({ equipment }: EquipmentGridProps) {
   if (equipment.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/30 rounded-lg border-2 border-dashed">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <Factory className="h-8 w-8 text-muted-foreground/60" />
+      <div className="flex flex-col items-center justify-center py-16 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border">
+          <Factory className="h-8 w-8 text-zinc-400" />
         </div>
-        <h3 className="mt-4 text-xl font-semibold text-foreground">
+        <h3 className="mt-4 text-xl font-black text-zinc-900">
           No equipment found
         </h3>
-        <p className="mt-2 text-muted-foreground max-w-sm mx-auto">
+        <p className="mt-2 text-sm text-zinc-500 max-w-sm mx-auto">
           We couldn't find any equipment matching your search. Try adjusting the
           filters or search term.
         </p>
@@ -79,8 +79,8 @@ function EquipmentCard({ equipment }: { equipment: EquipmentWithLocation }) {
 
   return (
     <Link
-      href={`/report/${equipment.code}`}
-      className="group flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-md hover:border-primary-300"
+      href={`/equipment/${equipment.code}`}
+      className="group flex flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition-all hover:shadow-md hover:border-primary-300 active:scale-[0.98]"
     >
       {/* Color-Blocked Header */}
       <div
@@ -111,10 +111,10 @@ function EquipmentCard({ equipment }: { equipment: EquipmentWithLocation }) {
         <div className="space-y-3">
           {/* Code */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
               Code
             </span>
-            <span className="font-mono text-sm font-medium bg-secondary px-2 py-0.5 rounded text-secondary-foreground">
+            <span className="font-mono text-sm font-bold bg-zinc-100 px-2 py-0.5 rounded-lg text-zinc-700">
               {equipment.code}
             </span>
           </div>
@@ -122,11 +122,11 @@ function EquipmentCard({ equipment }: { equipment: EquipmentWithLocation }) {
           {/* Location */}
           {equipment.location && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                 Loc
               </span>
-              <div className="flex items-center gap-1 text-sm text-foreground/80">
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="flex items-center gap-1 text-sm text-zinc-600">
+                <MapPin className="h-3.5 w-3.5 text-zinc-400" />
                 {equipment.location.name}
               </div>
             </div>

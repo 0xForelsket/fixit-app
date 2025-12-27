@@ -33,10 +33,10 @@ export function OperatorNav({
           <Link
             key={item.href}
             href={item.href}
-            className={`px-4 py-3 text-sm font-medium rounded-md transition-colors min-h-[48px] flex items-center ${
+            className={`px-4 py-3 text-sm font-bold rounded-lg transition-colors min-h-[48px] flex items-center ${
               pathname === item.href
-                ? "bg-primary-500/10 text-primary-600 font-semibold"
-                : "text-muted-foreground hover:bg-primary-50 hover:text-primary-600"
+                ? "bg-primary-500/10 text-primary-600"
+                : "text-zinc-500 hover:bg-primary-50 hover:text-primary-600"
             }`}
           >
             {item.label}
@@ -49,20 +49,20 @@ export function OperatorNav({
         ))}
       </nav>
 
-      <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
+      <div className="flex items-center gap-3 border-l border-zinc-200 pl-4">
         <Link
           href="/profile"
           className="flex items-center gap-3 hover:bg-primary-50 p-2 rounded-lg transition-colors group min-h-[48px]"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">
+            <p className="text-sm font-bold text-zinc-900 group-hover:text-primary-600 transition-colors">
               {user.name}
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
               {user.role}
             </p>
           </div>
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-slate-100 bg-slate-50 shadow-sm group-hover:border-primary-300 group-hover:ring-2 group-hover:ring-primary-100 transition-all">
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-zinc-200 bg-zinc-50 shadow-sm group-hover:border-primary-300 group-hover:ring-2 group-hover:ring-primary-100 transition-all">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -70,7 +70,7 @@ export function OperatorNav({
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-slate-300">
+              <div className="flex h-full w-full items-center justify-center text-zinc-400">
                 <Users className="h-4 w-4" />
               </div>
             )}
@@ -81,7 +81,7 @@ export function OperatorNav({
             type="submit"
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-danger-600 hover:bg-danger-50"
+            className="text-zinc-500 hover:text-danger-600 hover:bg-danger-50 font-bold"
           >
             Logout
           </Button>
