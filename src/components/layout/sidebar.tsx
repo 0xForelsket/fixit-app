@@ -31,78 +31,103 @@ interface NavItem {
   permission: Permission;
 }
 
-const navItems: NavItem[] = [
+interface NavGroup {
+  label?: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: <Home className="h-5 w-5" />,
-    permission: PERMISSIONS.TICKET_VIEW_ALL,
-  },
-  {
-    label: "Analytics",
-    href: "/admin/analytics",
-    icon: <BarChart3 className="h-5 w-5" />,
-    permission: PERMISSIONS.ANALYTICS_VIEW,
-  },
-  {
-    label: "Work Orders",
-    href: "/dashboard/work-orders",
-    icon: <ClipboardList className="h-5 w-5" />,
-    permission: PERMISSIONS.TICKET_VIEW_ALL,
-  },
-  {
-    label: "Equipment",
-    href: "/admin/equipment",
-    icon: <MonitorCog className="h-5 w-5" />,
-    permission: PERMISSIONS.EQUIPMENT_CREATE,
-  },
-  {
-    label: "Locations",
-    href: "/admin/locations",
-    icon: <MapPin className="h-5 w-5" />,
-    permission: PERMISSIONS.LOCATION_CREATE,
-  },
-  {
-    label: "Users",
-    href: "/admin/users",
-    icon: <Users className="h-5 w-5" />,
-    permission: PERMISSIONS.USER_VIEW,
-  },
-  {
-    label: "Roles",
-    href: "/admin/roles",
-    icon: <Shield className="h-5 w-5" />,
-    permission: PERMISSIONS.SYSTEM_SETTINGS,
+    label: "Overview",
+    items: [
+      {
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: <Home className="h-5 w-5" />,
+        permission: PERMISSIONS.TICKET_VIEW_ALL,
+      },
+      {
+        label: "Analytics",
+        href: "/admin/analytics",
+        icon: <BarChart3 className="h-5 w-5" />,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+      {
+        label: "Reports",
+        href: "/admin/reports",
+        icon: <FileText className="h-5 w-5" />,
+        permission: PERMISSIONS.REPORTS_VIEW,
+      },
+    ],
   },
   {
     label: "Maintenance",
-    href: "/dashboard/maintenance",
-    icon: <Wrench className="h-5 w-5" />,
-    permission: PERMISSIONS.MAINTENANCE_VIEW,
+    items: [
+      {
+        label: "Work Orders",
+        href: "/dashboard/work-orders",
+        icon: <ClipboardList className="h-5 w-5" />,
+        permission: PERMISSIONS.TICKET_VIEW_ALL,
+      },
+      {
+        label: "Schedules",
+        href: "/dashboard/maintenance",
+        icon: <Wrench className="h-5 w-5" />,
+        permission: PERMISSIONS.MAINTENANCE_VIEW,
+      },
+    ],
   },
   {
-    label: "Inventory",
-    href: "/admin/inventory",
-    icon: <Package className="h-5 w-5" />,
-    permission: PERMISSIONS.INVENTORY_CREATE,
+    label: "Asset Management",
+    items: [
+      {
+        label: "Equipment",
+        href: "/admin/equipment",
+        icon: <MonitorCog className="h-5 w-5" />,
+        permission: PERMISSIONS.EQUIPMENT_CREATE,
+      },
+      {
+        label: "Locations",
+        href: "/admin/locations",
+        icon: <MapPin className="h-5 w-5" />,
+        permission: PERMISSIONS.LOCATION_CREATE,
+      },
+      {
+        label: "Inventory",
+        href: "/admin/inventory",
+        icon: <Package className="h-5 w-5" />,
+        permission: PERMISSIONS.INVENTORY_CREATE,
+      },
+      {
+        label: "QR Codes",
+        href: "/admin/qr-codes",
+        icon: <QrCode className="h-5 w-5" />,
+        permission: PERMISSIONS.SYSTEM_QR_CODES,
+      },
+    ],
   },
   {
-    label: "QR Codes",
-    href: "/admin/qr-codes",
-    icon: <QrCode className="h-5 w-5" />,
-    permission: PERMISSIONS.SYSTEM_QR_CODES,
-  },
-  {
-    label: "Reports",
-    href: "/admin/reports",
-    icon: <FileText className="h-5 w-5" />,
-    permission: PERMISSIONS.REPORTS_VIEW,
-  },
-  {
-    label: "Settings",
-    href: "/admin/settings",
-    icon: <Cog className="h-5 w-5" />,
-    permission: PERMISSIONS.SYSTEM_SETTINGS,
+    label: "Administration",
+    items: [
+      {
+        label: "Users",
+        href: "/admin/users",
+        icon: <Users className="h-5 w-5" />,
+        permission: PERMISSIONS.USER_VIEW,
+      },
+      {
+        label: "Roles",
+        href: "/admin/roles",
+        icon: <Shield className="h-5 w-5" />,
+        permission: PERMISSIONS.SYSTEM_SETTINGS,
+      },
+      {
+        label: "Settings",
+        href: "/admin/settings",
+        icon: <Cog className="h-5 w-5" />,
+        permission: PERMISSIONS.SYSTEM_SETTINGS,
+      },
+    ],
   },
 ];
 
@@ -121,9 +146,14 @@ interface SidebarProps {
 export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
 
-  const filteredItems = navItems.filter((item) =>
-    hasPermission(user.permissions, item.permission)
-  );
+  const filteredGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        hasPermission(user.permissions, item.permission)
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   const handleNavClick = () => {
     if (onClose) {
@@ -175,40 +205,52 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4">
-          <ul className="space-y-1">
-            {filteredItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/dashboard" && pathname.startsWith(item.href));
+          <div className="space-y-6">
+            {filteredGroups.map((group, groupIndex) => (
+              <div key={groupIndex}>
+                {group.label && (
+                  <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                    {group.label}
+                  </h3>
+                )}
+                <ul className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== "/dashboard" &&
+                        pathname.startsWith(item.href));
 
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={handleNavClick}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
-                      isActive
-                        ? "bg-primary-500/10 text-primary-500 border-l-2 border-primary-500 rounded-l-none"
-                        : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "transition-colors",
-                        isActive
-                          ? "text-primary-500"
-                          : "group-hover:text-primary-500"
-                      )}
-                    >
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          onClick={handleNavClick}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
+                            isActive
+                              ? "bg-primary-500/10 text-primary-500"
+                              : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "transition-colors",
+                              isActive
+                                ? "text-primary-500"
+                                : "group-hover:text-primary-500"
+                            )}
+                          >
+                            {item.icon}
+                          </span>
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
 
           {canCreateTicket && (
             <div className="mt-6 border-t border-zinc-800 pt-4">
