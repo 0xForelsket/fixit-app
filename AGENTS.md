@@ -21,6 +21,7 @@ Custom roles can be created with any combination of permissions via the Admin UI
 - **Auth**: JWT sessions with CSRF protection
 - **Testing**: Vitest + Testing Library
 - **Linting**: Biomejs
+- **PWA**: next-pwa for service worker generation
 
 ## Key Commands
 
