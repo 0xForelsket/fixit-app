@@ -83,19 +83,19 @@ const navGroups: NavGroup[] = [
         label: "Equipment",
         href: "/admin/equipment",
         icon: <MonitorCog className="h-5 w-5" />,
-        permission: PERMISSIONS.EQUIPMENT_CREATE,
+        permission: PERMISSIONS.EQUIPMENT_VIEW,
       },
       {
         label: "Locations",
         href: "/admin/locations",
         icon: <MapPin className="h-5 w-5" />,
-        permission: PERMISSIONS.LOCATION_CREATE,
+        permission: PERMISSIONS.LOCATION_VIEW,
       },
       {
         label: "Inventory",
         href: "/admin/inventory",
         icon: <Package className="h-5 w-5" />,
-        permission: PERMISSIONS.INVENTORY_CREATE,
+        permission: PERMISSIONS.INVENTORY_VIEW,
       },
       {
         label: "QR Codes",
