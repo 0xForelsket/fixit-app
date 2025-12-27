@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import type { Equipment, Ticket, User } from "@/db/schema";
 import { tickets } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { and, count, eq, ilike, or } from "drizzle-orm";
 import {
@@ -14,6 +15,7 @@ import {
   Inbox,
   Search,
   Timer,
+  User as UserIcon,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,15 +31,15 @@ type SearchParams = {
   priority?: string;
   search?: string;
   page?: string;
+  assigned?: string;
 };
 
 const PAGE_SIZE = 10;
 
-async function getTickets(params: SearchParams) {
+async function getTickets(params: SearchParams, userId?: number) {
   const page = Number.parseInt(params.page || "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
 
-  // Build where conditions
   const conditions = [];
 
   if (params.status && params.status !== "all") {
@@ -65,6 +67,10 @@ async function getTickets(params: SearchParams) {
         ilike(tickets.description, `%${params.search}%`)
       )
     );
+  }
+
+  if (params.assigned === "me" && userId) {
+    conditions.push(eq(tickets.assignedToId, userId));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -128,36 +134,67 @@ export default async function TicketsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const user = await getCurrentUser();
   const params = await searchParams;
   const {
     tickets: ticketsList,
     total,
     page,
     totalPages,
-  } = await getTickets(params);
+  } = await getTickets(params, user?.id);
   const stats = await getStats();
+  const isMyTicketsView = params.assigned === "me";
 
   const activeFilters =
     (params.status && params.status !== "all") ||
     (params.priority && params.priority !== "all") ||
-    params.search;
+    params.search ||
+    isMyTicketsView;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">All Tickets</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isMyTicketsView ? "My Tickets" : "All Tickets"}
+          </h1>
           <p className="text-muted-foreground">
             {total} total tickets • Page {page} of {totalPages || 1}
           </p>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg border-2 border-zinc-200 bg-white overflow-hidden">
+            <Link
+              href="/dashboard/tickets"
+              className={cn(
+                "px-3 py-1.5 text-sm font-bold transition-colors",
+                !isMyTicketsView
+                  ? "bg-primary-500 text-white"
+                  : "text-zinc-600 hover:bg-zinc-50"
+              )}
+            >
+              All
+            </Link>
+            <Link
+              href="/dashboard/tickets?assigned=me"
+              className={cn(
+                "px-3 py-1.5 text-sm font-bold transition-colors flex items-center gap-1.5",
+                isMyTicketsView
+                  ? "bg-primary-500 text-white"
+                  : "text-zinc-600 hover:bg-zinc-50"
+              )}
+            >
+              <UserIcon className="h-3.5 w-3.5" />
+              Mine
+            </Link>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -221,6 +258,9 @@ export default async function TicketsPage({
             )}
             {params.priority && (
               <input type="hidden" name="priority" value={params.priority} />
+            )}
+            {params.assigned && (
+              <input type="hidden" name="assigned" value={params.assigned} />
             )}
           </div>
         </form>

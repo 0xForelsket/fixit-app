@@ -2,45 +2,121 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { tickets } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { and, count, eq, lt } from "drizzle-orm";
+import { and, count, eq, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
   Clock,
   Inbox,
+  PartyPopper,
   Timer,
+  User,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 
-async function getStats() {
-  const [openTickets] = await db
+interface Stats {
+  open: number;
+  inProgress: number;
+  overdue: number;
+  critical: number;
+}
+
+async function getStats(
+  userId?: number
+): Promise<{ global: Stats; personal: Stats | null }> {
+  const globalOpen = await db
     .select({ count: count() })
     .from(tickets)
     .where(eq(tickets.status, "open"));
 
-  const [inProgressTickets] = await db
+  const globalInProgress = await db
     .select({ count: count() })
     .from(tickets)
     .where(eq(tickets.status, "in_progress"));
 
-  const [overdueTickets] = await db
+  const globalOverdue = await db
     .select({ count: count() })
     .from(tickets)
     .where(and(lt(tickets.dueBy, new Date()), eq(tickets.status, "open")));
 
-  const [criticalTickets] = await db
+  const globalCritical = await db
     .select({ count: count() })
     .from(tickets)
     .where(and(eq(tickets.priority, "critical"), eq(tickets.status, "open")));
 
-  return {
-    open: openTickets.count,
-    inProgress: inProgressTickets.count,
-    overdue: overdueTickets.count,
-    critical: criticalTickets.count,
+  const globalStats: Stats = {
+    open: globalOpen[0].count,
+    inProgress: globalInProgress[0].count,
+    overdue: globalOverdue[0].count,
+    critical: globalCritical[0].count,
   };
+
+  if (!userId) {
+    return { global: globalStats, personal: null };
+  }
+
+  const myOpen = await db
+    .select({ count: count() })
+    .from(tickets)
+    .where(and(eq(tickets.status, "open"), eq(tickets.assignedToId, userId)));
+
+  const myInProgress = await db
+    .select({ count: count() })
+    .from(tickets)
+    .where(
+      and(eq(tickets.status, "in_progress"), eq(tickets.assignedToId, userId))
+    );
+
+  const myOverdue = await db
+    .select({ count: count() })
+    .from(tickets)
+    .where(
+      and(
+        lt(tickets.dueBy, new Date()),
+        or(eq(tickets.status, "open"), eq(tickets.status, "in_progress")),
+        eq(tickets.assignedToId, userId)
+      )
+    );
+
+  const myCritical = await db
+    .select({ count: count() })
+    .from(tickets)
+    .where(
+      and(
+        eq(tickets.priority, "critical"),
+        or(eq(tickets.status, "open"), eq(tickets.status, "in_progress")),
+        eq(tickets.assignedToId, userId)
+      )
+    );
+
+  return {
+    global: globalStats,
+    personal: {
+      open: myOpen[0].count,
+      inProgress: myInProgress[0].count,
+      overdue: myOverdue[0].count,
+      critical: myCritical[0].count,
+    },
+  };
+}
+
+async function getMyTickets(userId: number) {
+  return db.query.tickets.findMany({
+    where: and(
+      or(eq(tickets.status, "open"), eq(tickets.status, "in_progress")),
+      eq(tickets.assignedToId, userId)
+    ),
+    limit: 5,
+    orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+    with: {
+      equipment: true,
+      reportedBy: true,
+    },
+  });
 }
 
 async function getRecentTickets() {
@@ -56,8 +132,13 @@ async function getRecentTickets() {
 }
 
 export default async function DashboardPage() {
-  const stats = await getStats();
+  const user = await getCurrentUser();
+  const { global: globalStats, personal: myStats } = await getStats(user?.id);
+  const myTickets = user ? await getMyTickets(user.id) : [];
   const recentTickets = await getRecentTickets();
+
+  const hasMyTickets = myTickets.length > 0;
+  const myTotalActive = myStats ? myStats.open + myStats.inProgress : 0;
 
   return (
     <div className="space-y-10 pb-8 industrial-grid min-h-full">
@@ -72,53 +153,163 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Open Tickets"
-          value={stats.open}
-          icon={Inbox}
-          color="text-secondary-600"
-          bg="bg-secondary-50"
-          border="border-secondary-100"
-          delay={1}
-        />
-        <StatsCard
-          title="In Progress"
-          value={stats.inProgress}
-          icon={Timer}
-          color="text-info-600"
-          bg="bg-info-50"
-          border="border-info-100"
-          delay={2}
-        />
-        <StatsCard
-          title="Overdue"
-          value={stats.overdue}
-          icon={Clock}
-          color="text-danger-600"
-          bg="bg-danger-50"
-          border="border-danger-100"
-          pulse={stats.overdue > 0}
-          delay={3}
-        />
-        <StatsCard
-          title="Critical"
-          value={stats.critical}
-          icon={AlertTriangle}
-          color="text-danger-700"
-          bg="bg-danger-100"
-          border="border-danger-200"
-          pulse={stats.critical > 0}
-          delay={4}
-        />
+      {/* My Tickets Stats - Personal */}
+      {myStats && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <User className="h-5 w-5 text-primary-600" />
+            <h2 className="text-lg font-bold tracking-tight text-zinc-800">
+              My Assigned Tickets
+            </h2>
+            <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
+              {myTotalActive} active
+            </span>
+          </div>
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="My Open"
+              value={myStats.open}
+              icon={Inbox}
+              color="text-primary-600"
+              bg="bg-primary-50"
+              border="border-primary-100"
+              delay={1}
+            />
+            <StatsCard
+              title="My In Progress"
+              value={myStats.inProgress}
+              icon={Timer}
+              color="text-info-600"
+              bg="bg-info-50"
+              border="border-info-100"
+              delay={2}
+            />
+            <StatsCard
+              title="My Overdue"
+              value={myStats.overdue}
+              icon={Clock}
+              color="text-danger-600"
+              bg="bg-danger-50"
+              border="border-danger-100"
+              pulse={myStats.overdue > 0}
+              delay={3}
+            />
+            <StatsCard
+              title="My Critical"
+              value={myStats.critical}
+              icon={AlertTriangle}
+              color="text-danger-700"
+              bg="bg-danger-100"
+              border="border-danger-200"
+              pulse={myStats.critical > 0}
+              delay={4}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* My Tickets Queue */}
+      {myStats && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-2 w-8 bg-primary-500 rounded-full" />
+              <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+                My Queue
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
+            >
+              <Link href="/dashboard/tickets?assigned=me" className="gap-2">
+                MY TICKETS <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          {hasMyTickets ? (
+            <div className="grid gap-4">
+              {myTickets.map((ticket, index) => (
+                <TicketListItem key={ticket.id} ticket={ticket} index={index} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-success-200 bg-success-50/30 p-12 text-center animate-in backdrop-blur-sm">
+              <div className="relative">
+                <div className="absolute inset-0 bg-success-400/20 rounded-full blur-[40px] animate-gentle-pulse" />
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-success-400/20 to-success-500/20 border border-success-200 shadow-inner">
+                  <PartyPopper className="h-8 w-8 text-success-600" />
+                </div>
+              </div>
+              <h3 className="mt-6 text-xl font-black text-success-900 tracking-tight">
+                All Caught Up!
+              </h3>
+              <p className="text-success-700 font-medium mt-1">
+                No tickets assigned to you. Great work!
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* System Stats - Global */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Users className="h-5 w-5 text-zinc-400" />
+          <h2 className="text-lg font-bold tracking-tight text-zinc-600">
+            System Overview
+          </h2>
+        </div>
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+          <StatsCard
+            title="Open Tickets"
+            value={globalStats.open}
+            icon={Inbox}
+            color="text-secondary-600"
+            bg="bg-secondary-50"
+            border="border-secondary-100"
+            delay={1}
+          />
+          <StatsCard
+            title="In Progress"
+            value={globalStats.inProgress}
+            icon={Timer}
+            color="text-info-600"
+            bg="bg-info-50"
+            border="border-info-100"
+            delay={2}
+          />
+          <StatsCard
+            title="Overdue"
+            value={globalStats.overdue}
+            icon={Clock}
+            color="text-danger-600"
+            bg="bg-danger-50"
+            border="border-danger-100"
+            pulse={globalStats.overdue > 0}
+            delay={3}
+          />
+          <StatsCard
+            title="Critical"
+            value={globalStats.critical}
+            icon={AlertTriangle}
+            color="text-danger-700"
+            bg="bg-danger-100"
+            border="border-danger-200"
+            pulse={globalStats.critical > 0}
+            delay={4}
+          />
+        </div>
       </div>
 
-      {/* Recent Tickets section */}
+      {/* Recent Tickets section - Global Queue */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-2 w-8 bg-primary-500 rounded-full" />
+            <div className="h-2 w-8 bg-zinc-400 rounded-full" />
             <h2 className="text-xl font-bold tracking-tight text-zinc-800">
               Priority Queue
             </h2>
@@ -321,5 +512,3 @@ function TicketListItem({
     </Link>
   );
 }
-
-import { Users } from "lucide-react";
