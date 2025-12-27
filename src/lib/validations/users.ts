@@ -34,7 +34,13 @@ export const createUserSchema = z.object({
     .min(4, "PIN must be at least 4 characters")
     .max(20, "PIN is too long"),
   role: userRoleSchema.default("operator"),
+  roleId: z.coerce.number().int().positive("Role is required"),
   isActive: z.boolean().default(true),
+  hourlyRate: z.coerce
+    .number()
+    .min(0, "Hourly rate must be positive")
+    .optional()
+    .nullable(),
 });
 
 export const updateUserSchema = z.object({
@@ -49,8 +55,20 @@ export const updateUserSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
+  pin: z
+    .string()
+    .min(4, "PIN must be at least 4 characters")
+    .max(20, "PIN is too long")
+    .optional()
+    .or(z.literal("")),
   role: userRoleSchema.optional(),
+  roleId: z.coerce.number().int().positive().optional(),
   isActive: z.boolean().optional(),
+  hourlyRate: z.coerce
+    .number()
+    .min(0, "Hourly rate must be positive")
+    .optional()
+    .nullable(),
 });
 
 export const updatePinSchema = z.object({
