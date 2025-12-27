@@ -18,7 +18,6 @@ import {
   ArrowLeft,
   Check,
   GripVertical,
-  Plus,
   Save,
   Trash2,
   X,
@@ -148,8 +147,9 @@ export function ScheduleForm({
     }
   };
 
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -324,22 +324,20 @@ export function ScheduleForm({
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold">Checklist Steps</h2>
-          <Button
+          <button
             type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
+            className="rounded-lg border border-primary-600 px-3 py-1 text-sm text-primary-600 hover:bg-primary-50"
+            onClick={() => {
               append({
                 stepNumber: fields.length + 1,
                 description: "",
                 isRequired: true,
                 estimatedMinutes: null,
-              })
-            }
+              });
+            }}
           >
-            <Plus className="mr-2 h-4 w-4" />
             Add Step
-          </Button>
+          </button>
         </div>
 
         {fields.length === 0 ? (
@@ -348,22 +346,20 @@ export function ScheduleForm({
               No checklist steps yet. Add steps to create a maintenance
               procedure.
             </p>
-            <Button
+            <button
               type="button"
-              variant="outline"
-              className="mt-4"
-              onClick={() =>
+              className="mt-4 rounded-lg border border-primary-600 px-4 py-2 text-primary-600 hover:bg-primary-50"
+              onClick={() => {
                 append({
                   stepNumber: 1,
                   description: "",
                   isRequired: true,
                   estimatedMinutes: null,
-                })
-              }
+                });
+              }}
             >
-              <Plus className="mr-2 h-4 w-4" />
               Add First Step
-            </Button>
+            </button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -397,7 +393,62 @@ export function ScheduleForm({
                   )}
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm">
-                      <button
+        {/* 
+              <FormField
+                control={form.control}
+                name="equipmentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Equipment</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select equipment..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {equipment.map((item) => (
+                          <SelectItem key={item.id} value={item.id.toString()}>
+                            {item.name} ({item.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="maintenance">Maintenance</SelectItem>
+                        <SelectItem value="calibration">Calibration</SelectItem>
+                        <SelectItem value="inspection">Inspection</SelectItem>
+                        <SelectItem value="repair">Repair</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+*/}                      <button
                         type="button"
                         onClick={() => {
                           const currentItem = watchedChecklists?.[index];

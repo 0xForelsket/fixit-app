@@ -78,7 +78,13 @@ export const addCommentSchema = z.object({
     .max(2000, "Comment is too long"),
 });
 
+export const updateChecklistItemSchema = z.object({
+  status: z.enum(["pending", "completed", "skipped", "na"]),
+  notes: z.string().max(1000, "Notes are too long").optional(),
+});
+
 export type CreateWorkOrderInput = z.infer<typeof createWorkOrderSchema>;
 export type UpdateWorkOrderInput = z.infer<typeof updateWorkOrderSchema>;
 export type ResolveWorkOrderInput = z.infer<typeof resolveWorkOrderSchema>;
 export type AddCommentInput = z.infer<typeof addCommentSchema>;
+export type UpdateChecklistItemInput = z.infer<typeof updateChecklistItemSchema>;

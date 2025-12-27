@@ -3,6 +3,7 @@
 import { db } from "@/db";
 import {
   attachments,
+  checklistCompletions,
   equipment as equipmentTable,
   notifications,
   roles,
@@ -17,10 +18,12 @@ import { calculateDueBy } from "@/lib/sla";
 import {
   createWorkOrderSchema,
   resolveWorkOrderSchema,
+  updateChecklistItemSchema,
   updateWorkOrderSchema,
 } from "@/lib/validations";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 export type ActionState = {
   error?: string;
@@ -336,4 +339,38 @@ export async function addWorkOrderComment(
   revalidatePath(`/dashboard/work-orders/${workOrderId}`);
 
   return { success: true };
+}
+
+export async function updateChecklistItem(
+  completionId: number,
+  workOrderId: number,
+  data: z.infer<typeof updateChecklistItemSchema>
+): Promise<ActionState> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { error: "You must be logged in" };
+  }
+
+  const result = updateChecklistItemSchema.safeParse(data);
+  if (!result.success) {
+    return { error: "Invalid input" };
+  }
+
+  try {
+    await db
+      .update(checklistCompletions)
+      .set({
+        status: result.data.status,
+        notes: result.data.notes,
+        completedById: user.id,
+        completedAt: result.data.status === "completed" ? new Date() : null,
+      })
+      .where(eq(checklistCompletions.id, completionId));
+
+    revalidatePath(`/dashboard/work-orders/${workOrderId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update checklist item:", error);
+    return { error: "Failed to update item" };
+  }
 }

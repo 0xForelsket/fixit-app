@@ -16,6 +16,7 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
+import { SchedulerButton } from "@/components/maintenance/scheduler-button";
 
 type SearchParams = {
   search?: string;
@@ -95,12 +96,15 @@ export default async function SchedulesPage({
           </div>
         </div>
         {user?.role === "admin" && (
-          <Button asChild>
-            <Link href="/dashboard/maintenance/schedules/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Schedule
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <SchedulerButton />
+            <Button asChild>
+              <Link href="/dashboard/maintenance/schedules/new">
+                <Plus className="mr-2 h-4 w-4" />
+                New Schedule
+              </Link>
+            </Button>
+          </div>
         )}
       </div>
 

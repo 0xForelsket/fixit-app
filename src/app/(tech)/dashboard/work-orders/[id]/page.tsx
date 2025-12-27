@@ -1,3 +1,4 @@
+import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import {
   attachments,
+  checklistCompletions,
   laborLogs,
   locations,
   spareParts,
@@ -20,6 +22,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  ClipboardCheck,
   Clock,
   Download,
   FileText,
@@ -65,6 +68,15 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   });
 
   if (!workOrder) notFound();
+
+  // Fetch checklist items
+  const checklistItems = await db.query.checklistCompletions.findMany({
+    where: eq(checklistCompletions.workOrderId, workOrderId),
+    with: {
+      checklist: true,
+    },
+    orderBy: (items, { asc }) => [asc(items.id)],
+  });
 
   // Fetch attachments
   const rawAttachments = await db.query.attachments.findMany({
@@ -284,9 +296,22 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     </div>
   );
 
+  const ProcedureSection = checklistItems.length > 0 && (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 px-1">
+        <ClipboardCheck className="h-5 w-5 text-primary-600" />
+        <h2 className="text-lg font-bold">Maintenance Procedure</h2>
+      </div>
+      <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
+    </div>
+  );
+
   const ActivityLogSection = (
     <div className="space-y-4">
-      <h2 className="text-lg font-bold px-1 lg:hidden">Activity Log</h2>
+      <div className="flex items-center gap-2 px-1">
+        <MessageSquare className="h-5 w-5 text-blue-600" />
+        <h2 className="text-lg font-bold">Activity Log</h2>
+      </div>
       <div className="rounded-xl border bg-card shadow-sm divide-y">
         {workOrder.logs.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
@@ -386,6 +411,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             {DescriptionSection}
+            {ProcedureSection}
             {AttachmentsSection}
             {workOrder.resolutionNotes && (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
@@ -431,6 +457,11 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
             {DescriptionSection}
             {EquipmentInfoSection}
             {AttachmentsSection}
+          </div>
+        }
+        checklistTab={
+          <div className="space-y-6 pt-2">
+            {ProcedureSection}
           </div>
         }
         commentsTab={ActivityLogSection}

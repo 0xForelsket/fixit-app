@@ -58,8 +58,7 @@ export async function createScheduleAction(
     validated.data;
 
   try {
-    const nextDue = new Date();
-    nextDue.setDate(nextDue.getDate() + frequencyDays);
+    const nextDue = new Date(); // Due immediately for first run
 
     const [schedule] = await db
       .insert(maintenanceSchedules)
