@@ -1,3 +1,4 @@
+import { StatsCard } from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { type WorkOrderPriority, type WorkOrderStatus, workOrders } from "@/db/schema";
@@ -186,35 +187,40 @@ export default async function ReportsPage({
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-5">
-        <StatCard
+        <StatsCard
+          variant="admin"
           title="Total Work Orders"
           value={stats.total}
           icon={FileText}
           color="text-primary-600"
           bg="bg-primary-50"
         />
-        <StatCard
+        <StatsCard
+          variant="admin"
           title="Open"
           value={stats.open}
           icon={Inbox}
           color="text-amber-600"
           bg="bg-amber-50"
         />
-        <StatCard
+        <StatsCard
+          variant="admin"
           title="Resolved"
           value={stats.resolved}
           icon={CheckCircle2}
           color="text-emerald-600"
           bg="bg-emerald-50"
         />
-        <StatCard
+        <StatsCard
+          variant="admin"
           title="Critical"
           value={stats.critical}
           icon={AlertTriangle}
           color="text-rose-600"
           bg="bg-rose-50"
         />
-        <StatCard
+        <StatsCard
+          variant="admin"
           title="Avg Resolution"
           value={`${stats.avgResolutionHours}h`}
           icon={Timer}
@@ -400,36 +406,7 @@ export default async function ReportsPage({
   );
 }
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-}: {
-  title: string;
-  value: number | string;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border p-4 bg-white">
-      <div
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-lg",
-          bg
-        )}
-      >
-        <Icon className={cn("h-5 w-5", color)} />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className={cn("text-2xl font-bold", color)}>{value}</p>
-      </div>
-    </div>
-  );
-}
+
 
 interface WorkOrderWithRelations {
   id: number;

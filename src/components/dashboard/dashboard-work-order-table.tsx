@@ -6,19 +6,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-interface WorkOrder {
-  id: number;
-  title: string;
-  priority: string;
-  status: string;
-  createdAt: Date;
-  equipment: { name: string; location?: { name: string } | null };
-  reportedBy: { name: string };
-  assignedTo?: { name: string } | null;
-}
+import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 
 interface DashboardWorkOrderTableProps {
-  workOrders: WorkOrder[];
+  workOrders: WorkOrderWithRelations[];
 }
 
 export function DashboardWorkOrderTable({ workOrders }: DashboardWorkOrderTableProps) {
@@ -60,16 +51,16 @@ export function DashboardWorkOrderTable({ workOrders }: DashboardWorkOrderTableP
                       {workOrder.title}
                     </span>
                     <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-400 mt-0.5">
-                      Reported by {workOrder.reportedBy.name}
+                      Reported by {workOrder.reportedBy?.name || "Unknown"}
                     </span>
                   </div>
                 </td>
                 <td className="p-4">
                   <div className="flex flex-col">
                     <span className="font-bold text-xs text-zinc-700">
-                      {workOrder.equipment.name}
+                      {workOrder.equipment?.name || "—"}
                     </span>
-                    {workOrder.equipment.location && (
+                    {workOrder.equipment?.location && (
                       <span className="text-[10px] text-zinc-400 font-medium truncate max-w-[120px]">
                         {workOrder.equipment.location.name}
                       </span>

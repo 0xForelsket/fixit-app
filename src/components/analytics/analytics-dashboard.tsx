@@ -1,5 +1,6 @@
 "use client";
 
+import { StatsCard } from "@/components/dashboard/stats-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AlertCircle, BarChart3, CheckCircle2, Clock } from "lucide-react";
@@ -92,7 +93,7 @@ export function AnalyticsDashboard() {
     <div className="space-y-8">
       {/* KPI Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
+        <StatsCard
           title="MTTR (30d)"
           value={`${kpis?.mttrHours || 0}h`}
           description="Mean Time To Repair"
@@ -100,7 +101,7 @@ export function AnalyticsDashboard() {
           color="text-secondary-600"
           bg="bg-secondary-50"
         />
-        <MetricCard
+        <StatsCard
           title="SLA Compliance"
           value={`${kpis?.slaRate || 0}%`}
           description="Resolved within deadline"
@@ -108,7 +109,7 @@ export function AnalyticsDashboard() {
           color="text-success-600"
           bg="bg-success-50"
         />
-        <MetricCard
+        <StatsCard
           title="Open Tickets"
           value={kpis?.openTickets || 0}
           description="Current system backlog"
@@ -116,7 +117,7 @@ export function AnalyticsDashboard() {
           color="text-primary-600"
           bg="bg-primary-50"
         />
-        <MetricCard
+        <StatsCard
           title="Critical Issues"
           value={kpis?.highPriorityOpen || 0}
           description="Open High/Critical"
@@ -321,54 +322,5 @@ export function AnalyticsDashboard() {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function MetricCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  color,
-  bg,
-  pulse = false,
-}: {
-  title: string;
-  value: string | number;
-  description: string;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  pulse?: boolean;
-}) {
-  return (
-    <Card
-      className={cn(
-        "card-industrial border-zinc-200 shadow-sm hover-lift relative overflow-hidden",
-        pulse && "animate-glow-pulse border-danger-200"
-      )}
-    >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-          {title}
-        </CardTitle>
-        <div className={cn("rounded-lg p-2", bg)}>
-          <Icon className={cn("h-4 w-4", color)} />
-        </div>
-      </CardHeader>
-      <CardContent className="pt-2">
-        <div
-          className={cn(
-            "text-3xl font-mono font-black leading-tight",
-            color === "text-zinc-600" ? "text-zinc-900" : color
-          )}
-        >
-          {value}
-        </div>
-        <p className="text-[11px] font-medium text-zinc-500 mt-1">
-          {description}
-        </p>
-      </CardContent>
-    </Card>
   );
 }

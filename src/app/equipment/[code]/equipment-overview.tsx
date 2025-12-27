@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -43,7 +45,7 @@ export function EquipmentOverview({
             asChild
             className="bg-warning-600 hover:bg-warning-700 rounded-xl font-bold"
           >
-            <Link href="#" onClick={() => {}}>
+            <Link href="#maintenance">
               Start PM
             </Link>
           </Button>
@@ -125,18 +127,27 @@ function QuickActionCard({
     primary: "text-primary-600",
   };
 
+  if (disabled) {
+    return (
+      <div
+        className="flex flex-col items-center justify-center rounded-2xl border-2 p-4 text-center opacity-50 cursor-not-allowed bg-zinc-50 border-zinc-200"
+      >
+        <Icon className="h-8 w-8 mb-2 text-zinc-400" />
+        <span className="font-bold text-zinc-900">{label}</span>
+        <span className="text-xs text-zinc-500">{description}</span>
+      </div>
+    );
+  }
+
   return (
     <Link
-      href={disabled ? "#" : href}
+      href={href}
       className={cn(
         "flex flex-col items-center justify-center rounded-2xl border-2 p-4 text-center transition-all active:scale-[0.98]",
-        disabled
-          ? "opacity-50 cursor-not-allowed bg-zinc-50 border-zinc-200"
-          : variantStyles[variant]
+        variantStyles[variant]
       )}
-      onClick={(e) => disabled && e.preventDefault()}
     >
-      <Icon className={cn("h-8 w-8 mb-2", disabled ? "text-zinc-400" : iconStyles[variant])} />
+      <Icon className={cn("h-8 w-8 mb-2", iconStyles[variant])} />
       <span className="font-bold text-zinc-900">{label}</span>
       <span className="text-xs text-zinc-500">{description}</span>
     </Link>
