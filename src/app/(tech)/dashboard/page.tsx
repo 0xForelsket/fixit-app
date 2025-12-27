@@ -9,13 +9,15 @@ import {
   ArrowRight,
   Clock,
   Inbox,
+  MapPin,
   MonitorCog,
   Timer,
   User,
   Users,
 } from "lucide-react";
+import { StatsCard } from "@/components/dashboard/stats-card";
 import Link from "next/link";
-import { DashboardWorkOrderList } from "@/components/dashboard/dashboard-work-order-list";
+import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
 
 interface Stats {
   open: number;
@@ -112,8 +114,13 @@ async function getMyWorkOrders(userId: number) {
     limit: 5,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
-      equipment: true,
+      equipment: {
+        with: {
+          location: true,
+        },
+      },
       reportedBy: true,
+      assignedTo: true,
     },
   });
 }
@@ -141,18 +148,18 @@ export default async function DashboardPage() {
   const myWorkOrders = user ? await getMyWorkOrders(user.id) : [];
   const recentWorkOrders = await getRecentWorkOrders();
 
-  const hasMyWorkOrders = myWorkOrders.length > 0;
+
   const myTotalActive = myStats ? myStats.open + myStats.inProgress : 0;
 
   return (
-    <div className="space-y-10 pb-8 industrial-grid min-h-full">
+    <div className="space-y-6 sm:space-y-10 pb-8 industrial-grid min-h-full">
       {/* Page Header */}
-      <div className="flex flex-col gap-1 border-b border-zinc-200 pb-8">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+      <div className="flex flex-col gap-1 border-b border-zinc-200 pb-4 sm:pb-8">
+        <h1 className="text-xl sm:text-3xl font-black tracking-tight text-zinc-900 uppercase">
           Technician <span className="text-primary-600">Terminal</span>
         </h1>
-        <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <MonitorCog className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <MonitorCog className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             Control panel for maintenance operations
         </div>
       </div>
@@ -169,7 +176,7 @@ export default async function DashboardPage() {
               {myTotalActive} active
             </span>
           </div>
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
             <StatsCard
               title="My Open"
               value={myStats.open}
@@ -238,7 +245,7 @@ export default async function DashboardPage() {
             </Button>
           </div>
 
-          <DashboardWorkOrderList workOrders={myWorkOrders} />
+          <DashboardWorkOrderFeed workOrders={myWorkOrders as any} />
         </div>
       )}
 
@@ -317,78 +324,10 @@ export default async function DashboardPage() {
           </Button>
         </div>
 
-        <DashboardWorkOrderList workOrders={recentWorkOrders} />
+        <DashboardWorkOrderFeed workOrders={recentWorkOrders as any} />
       </div>
     </div>
   );
 }
 
-function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-  border,
-  pulse = false,
-  delay = 0,
-  href,
-}: {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  border: string;
-  pulse?: boolean;
-  delay?: number;
-  href?: string;
-}) {
-  const content = (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div
-          className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-xl shadow-inner border border-white/50",
-            bg
-          )}
-        >
-          <Icon className={cn("h-6 w-6", color)} />
-        </div>
-        <div className="h-1 w-12 bg-zinc-100 rounded-full" />
-      </div>
 
-      <div>
-        <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1.5">
-          {title}
-        </p>
-        <p
-          className={cn(
-            "text-4xl font-mono font-black leading-none tracking-tight",
-            color
-          )}
-        >
-          {String(value).padStart(2, "0")}
-        </p>
-      </div>
-    </>
-  );
-
-  const className = cn(
-    "relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-white p-5 transition-all duration-300 card-industrial shadow-sm",
-    border,
-    pulse && value > 0 && "animate-glow-pulse border-danger-300",
-    delay && `animate-stagger-${delay} animate-in`,
-    href && "cursor-pointer hover:border-primary-300 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
-  );
-
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        {content}
-      </Link>
-    );
-  }
-
-  return <div className={className}>{content}</div>;
-}

@@ -19,12 +19,9 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { WorkOrderList } from "@/components/work-orders/work-order-list";
 
-type WorkOrderWithRelations = WorkOrder & {
-  equipment: Equipment | null;
-  reportedBy: User | null;
-  assignedTo: User | null;
-};
+
 
 type SearchParams = {
   status?: string;
@@ -92,7 +89,11 @@ async function getWorkOrders(params: SearchParams, userId?: number) {
     offset,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
-      equipment: true,
+      equipment: {
+        with: {
+          location: true,
+        },
+      },
       reportedBy: true,
       assignedTo: true,
     },
@@ -323,51 +324,10 @@ export default async function WorkOrdersPage({
       </div>
 
       {/* Work Orders List */}
-      {workOrdersList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center bg-white shadow-sm">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-50 border shadow-inner">
-            <Inbox className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold">No work orders found</h3>
-          <p className="text-sm text-muted-foreground">
-            {activeFilters
-              ? "Try adjusting your filters"
-              : "No work orders have been created yet."}
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Desktop Table View */}
-          <div className="hidden lg:block overflow-hidden rounded-xl border bg-white shadow-sm">
-            <table className="w-full">
-              <thead className="border-b bg-slate-50">
-                <tr className="text-left text-sm font-medium text-muted-foreground">
-                  <th className="p-4">ID</th>
-                  <th className="p-4">Work Order</th>
-                  <th className="p-4 hidden md:table-cell">Equipment</th>
-                  <th className="p-4 hidden lg:table-cell">Status</th>
-                  <th className="p-4 hidden lg:table-cell">Priority</th>
-                  <th className="p-4 hidden xl:table-cell">Assigned To</th>
-                  <th className="p-4 hidden sm:table-cell">Created</th>
-                  <th className="p-4" />
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {workOrdersList.map((workOrder) => (
-                  <WorkOrderRow key={workOrder.id} workOrder={workOrder} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Card View */}
-          <div className="lg:hidden space-y-3">
-            {workOrdersList.map((workOrder) => (
-              <WorkOrderCard key={workOrder.id} workOrder={workOrder} />
-            ))}
-          </div>
-        </>
-      )}
+      <WorkOrderList 
+        workOrders={workOrdersList} 
+        emptyMessage={activeFilters ? "Try adjusting your filters" : "No work orders have been created yet."} 
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -534,198 +494,3 @@ function FilterSelect({
   );
 }
 
-function WorkOrderCard({ workOrder }: { workOrder: WorkOrderWithRelations }) {
-  const statusConfig = getStatusConfig(workOrder.status);
-  const priorityConfig = getPriorityConfig(workOrder.priority);
-
-  return (
-    <Link
-      href={`/dashboard/work-orders/${workOrder.id}`}
-      className={cn(
-        "block rounded-2xl border-2 bg-white p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]",
-        workOrder.priority === "critical"
-          ? "border-rose-200 shadow-rose-100/50"
-          : "border-zinc-200"
-      )}
-    >
-      <div className="flex justify-between items-start mb-3">
-        <Badge
-          variant="outline"
-          className="font-mono text-[10px] bg-zinc-50 border-zinc-300 px-1.5 py-0"
-        >
-          #{workOrder.id}
-        </Badge>
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full border-2 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider",
-            statusConfig.bg,
-            statusConfig.color
-          )}
-        >
-          {statusConfig.label}
-        </span>
-      </div>
-
-      <h3 className="font-bold text-lg leading-tight mb-1 text-zinc-900 line-clamp-2">
-        {workOrder.title}
-      </h3>
-
-      <div className="flex items-center gap-2 mb-4">
-        <span
-          className={cn(
-            "inline-flex items-center rounded-md border-2 px-1.5 py-0 text-[10px] font-black uppercase tracking-tighter",
-            priorityConfig.bg,
-            priorityConfig.color
-          )}
-        >
-          {priorityConfig.label}
-        </span>
-        <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-          <Timer className="h-3 w-3" />
-          {formatRelativeTime(workOrder.createdAt)}
-        </span>
-      </div>
-
-      <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="h-6 w-6 rounded-full bg-zinc-100 border flex items-center justify-center text-[10px] font-bold shrink-0">
-            {workOrder.assignedTo?.name?.[0] || "U"}
-          </div>
-          <span className="text-xs font-semibold truncate text-zinc-600">
-            {workOrder.assignedTo?.name || "Unassigned"}
-          </span>
-        </div>
-        <div className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">
-          Details
-          <ArrowRight className="inline-block ml-1 h-3 w-3" />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function getStatusConfig(status: string) {
-  const configs: Record<string, { color: string; bg: string; label: string }> =
-    {
-      open: {
-        color: "text-primary-700",
-        bg: "bg-primary-50 border-primary-200",
-        label: "Open",
-      },
-      in_progress: {
-        color: "text-amber-700",
-        bg: "bg-amber-50 border-amber-200",
-        label: "In Progress",
-      },
-      resolved: {
-        color: "text-emerald-700",
-        bg: "bg-emerald-50 border-emerald-200",
-        label: "Resolved",
-      },
-      closed: {
-        color: "text-slate-700",
-        bg: "bg-slate-50 border-slate-200",
-        label: "Closed",
-      },
-    };
-  return configs[status] || configs.open;
-}
-
-function getPriorityConfig(priority: string) {
-  const configs: Record<string, { color: string; bg: string; label: string }> =
-    {
-      low: {
-        color: "text-slate-700",
-        bg: "bg-slate-50 border-slate-200",
-        label: "Low",
-      },
-      medium: {
-        color: "text-primary-700",
-        bg: "bg-primary-50 border-primary-200",
-        label: "Medium",
-      },
-      high: {
-        color: "text-amber-700",
-        bg: "bg-amber-50 border-amber-200",
-        label: "High",
-      },
-      critical: {
-        color: "text-rose-700",
-        bg: "bg-rose-50 border-rose-200",
-        label: "Critical",
-      },
-    };
-  return configs[priority] || configs.medium;
-}
-
-function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
-  const status = getStatusConfig(workOrder.status);
-  const priority = getPriorityConfig(workOrder.priority);
-
-  return (
-    <tr className="hover:bg-slate-50 transition-colors">
-      <td className="p-4">
-        <Badge variant="outline" className="font-mono text-xs">
-          #{workOrder.id}
-        </Badge>
-      </td>
-      <td className="p-4">
-        <div className="space-y-1">
-          <Link
-            href={`/dashboard/work-orders/${workOrder.id}`}
-            className="font-medium hover:text-primary-600 hover:underline"
-          >
-            {workOrder.title}
-          </Link>
-          <p className="text-sm text-muted-foreground line-clamp-1">
-            {workOrder.description}
-          </p>
-        </div>
-      </td>
-      <td className="p-4 hidden md:table-cell">
-        <span className="text-sm">{workOrder.equipment?.name || "—"}</span>
-      </td>
-      <td className="p-4 hidden lg:table-cell">
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
-            status.bg,
-            status.color
-          )}
-        >
-          {status.label}
-        </span>
-      </td>
-      <td className="p-4 hidden lg:table-cell">
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
-            priority.bg,
-            priority.color
-          )}
-        >
-          {priority.label}
-        </span>
-      </td>
-      <td className="p-4 hidden xl:table-cell">
-        <span className="text-sm">
-          {workOrder.assignedTo?.name || (
-            <span className="text-muted-foreground">Unassigned</span>
-          )}
-        </span>
-      </td>
-      <td className="p-4 hidden sm:table-cell">
-        <span className="text-sm text-muted-foreground">
-          {formatRelativeTime(workOrder.createdAt)}
-        </span>
-      </td>
-      <td className="p-4 text-right">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href={`/dashboard/work-orders/${workOrder.id}`}>
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </td>
-    </tr>
-  );
-}
