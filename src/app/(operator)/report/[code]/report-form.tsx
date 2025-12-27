@@ -2,6 +2,7 @@
 
 import { createTicket } from "@/actions/tickets";
 import { Button } from "@/components/ui/button";
+import { CameraCapture } from "@/components/ui/camera-capture";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,7 @@ import { ticketPriorities, ticketTypes } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   ArrowUpCircle,
+  Camera,
   CheckCircle2,
   Scale,
   ShieldAlert,
@@ -92,6 +94,8 @@ export function ReportForm({ equipment }: ReportFormProps) {
     { filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]
   >([]);
   const [state, formAction, isPending] = useActionState(createTicket, {});
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   useEffect(() => {
     if (state.success) {
@@ -106,6 +110,51 @@ export function ReportForm({ equipment }: ReportFormProps) {
     sizeBytes: number;
   }) => {
     setAttachments((prev) => [...prev, attachment]);
+  };
+
+  const handleCameraCapture = async (blob: Blob, filename: string) => {
+    setIsUploadingPhoto(true);
+    try {
+      // Get presigned URL
+      const response = await fetch("/api/attachments/presigned-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename,
+          mimeType: "image/jpeg",
+          entityType: "ticket",
+          entityId: equipment.id,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to get upload URL");
+
+      const { uploadUrl, s3Key } = await response.json();
+
+      // Upload to S3
+      const uploadResponse = await fetch(uploadUrl, {
+        method: "PUT",
+        body: blob,
+        headers: { "Content-Type": "image/jpeg" },
+      });
+
+      if (!uploadResponse.ok) throw new Error("Failed to upload photo");
+
+      // Add to attachments
+      setAttachments((prev) => [
+        ...prev,
+        {
+          s3Key,
+          filename,
+          mimeType: "image/jpeg",
+          sizeBytes: blob.size,
+        },
+      ]);
+    } catch (err) {
+      console.error("Photo upload error:", err);
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   return (
@@ -230,11 +279,46 @@ export function ReportForm({ equipment }: ReportFormProps) {
         />
       </div>
 
-      {/* File Upload */}
-      <FileUpload
-        entityType="ticket"
-        entityId={equipment.id}
-        onUploadComplete={handleUploadComplete}
+      {/* Attachments Section */}
+      <div className="space-y-4">
+        <Label className="text-lg font-semibold text-foreground">
+          Attach Photos
+        </Label>
+
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsCameraOpen(true)}
+            disabled={isUploadingPhoto}
+            className="flex-1 h-14 rounded-xl border-2 border-dashed border-primary-300 bg-primary-50/50 hover:bg-primary-100 hover:border-primary-400 text-primary-700 font-semibold"
+          >
+            {isUploadingPhoto ? (
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-300 border-t-primary-600" />
+                Uploading...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Take Photo
+              </div>
+            )}
+          </Button>
+        </div>
+
+        <FileUpload
+          entityType="ticket"
+          entityId={equipment.id}
+          onUploadComplete={handleUploadComplete}
+          label="Or upload from device"
+        />
+      </div>
+
+      <CameraCapture
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={handleCameraCapture}
       />
 
       {/* Actions */}

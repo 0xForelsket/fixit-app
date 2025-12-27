@@ -33,7 +33,7 @@ export function OperatorNav({
           <Link
             key={item.href}
             href={item.href}
-            className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            className={`px-4 py-3 text-sm font-medium rounded-md transition-colors min-h-[48px] flex items-center ${
               pathname === item.href
                 ? "bg-primary-100 text-primary-700"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -52,7 +52,7 @@ export function OperatorNav({
       <div className="flex items-center gap-3 border-l pl-4">
         <Link
           href="/profile"
-          className="flex items-center gap-3 hover:bg-muted/50 p-1.5 rounded-lg transition-colors group"
+          className="flex items-center gap-3 hover:bg-muted/50 p-2 rounded-lg transition-colors group min-h-[48px]"
         >
           <div className="text-right hidden sm:block">
             <p className="text-sm font-bold text-slate-900 group-hover:text-primary-700 transition-colors">
@@ -62,7 +62,7 @@ export function OperatorNav({
               {user.role}
             </p>
           </div>
-          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 border-slate-100 bg-slate-50 shadow-sm group-hover:border-primary-200">
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-slate-100 bg-slate-50 shadow-sm group-hover:border-primary-200">
             {avatarUrl ? (
               <img
                 src={avatarUrl}

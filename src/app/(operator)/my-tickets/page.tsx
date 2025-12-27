@@ -221,7 +221,15 @@ function TicketListItem({
   ticket,
   isResolved,
 }: {
-  ticket: any;
+  ticket: {
+    id: number;
+    title: string;
+    priority: string;
+    status: string;
+    createdAt: Date;
+    equipment: { id: number; name: string; code: string } | null;
+    assignedTo: { id: number; name: string } | null;
+  };
   isResolved?: boolean;
 }) {
   const priorityConfig = {
@@ -274,7 +282,7 @@ function TicketListItem({
           <div className="flex items-center gap-1.5">
             <Wrench className="h-3.5 w-3.5" />
             <span className="font-semibold text-slate-700">
-              {ticket.equipment.name}
+              {ticket.equipment?.name ?? "Unknown"}
             </span>
           </div>
           <span>•</span>
