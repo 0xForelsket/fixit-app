@@ -186,7 +186,7 @@ function QRCard({
   equipment,
   baseUrl,
 }: { equipment: Equipment; baseUrl: string }) {
-  const reportUrl = `${baseUrl}/report/${equipment.code}`;
+  const reportUrl = `${baseUrl}/equipment/${equipment.code}`;
 
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm print:shadow-none print:border-2 print:break-inside-avoid">
