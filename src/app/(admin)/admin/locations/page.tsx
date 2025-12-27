@@ -67,19 +67,21 @@ export default async function LocationsPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Location Management
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            Facility <span className="text-primary-600">Locations</span>
           </h1>
-          <p className="text-muted-foreground">
-            {stats.total} locations • {stats.roots} root areas
-          </p>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <MapPin className="h-3.5 w-3.5" />
+            {stats.total} ZONES • {stats.roots} ROOT AREAS
+          </div>
         </div>
-        <Button asChild>
+        <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
           <Link href="/admin/locations/new">
             <Plus className="mr-2 h-4 w-4" />
-            Add Location
+            ADD LOCATION
           </Link>
         </Button>
       </div>

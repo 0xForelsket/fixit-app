@@ -74,17 +74,21 @@ export default async function UsersPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
-          <p className="text-muted-foreground">
-            {stats.total} users • {stats.active} active
-          </p>
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            User <span className="text-primary-600">Directory</span>
+          </h1>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <Users className="h-3.5 w-3.5" />
+            {stats.total} ACCOUNTS • {stats.active} ACTIVE
+          </div>
         </div>
-        <Button asChild>
+        <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
           <Link href="/admin/users/new">
             <Plus className="mr-2 h-4 w-4" />
-            Add User
+            ADD USER
           </Link>
         </Button>
       </div>

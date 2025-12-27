@@ -166,17 +166,20 @@ export default async function ReportsPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">
-            {total} work orders {hasFilters && "matching filters"}
-          </p>
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            System <span className="text-primary-600">Reports</span>
+          </h1>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <FileText className="h-3.5 w-3.5" />
+            {total} WORK ORDERS PROCESSED {hasFilters && "• FILTERED RESULTS"}
+          </div>
         </div>
-        <Button asChild>
+        <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
           <a href={csvUrl} download="work-order-report.csv">
             <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            EXPORT CSV
           </a>
         </Button>
       </div>

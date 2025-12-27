@@ -60,20 +60,21 @@ export function QRCodeGeneratorClient({
   return (
     <div className="space-y-6">
       {/* Header - Hidden when printing */}
-      <div className="flex items-center justify-between print:hidden">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            QR Code Generator
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8 print:hidden">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            Asset <span className="text-primary-600">Tags</span>
           </h1>
-          <p className="text-muted-foreground">
-            Generate printable QR codes for equipment issue reporting
-          </p>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <QrCode className="h-3.5 w-3.5" />
+            GENERATE PRINTABLES FOR ISSUE REPORTING
+          </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePrint}>
+          <Button variant="outline" onClick={handlePrint} className="font-bold border-2">
             <Printer className="mr-2 h-4 w-4" />
-            Print{" "}
-            {selectedEquipment.size > 0 ? `(${selectedEquipment.size})` : "All"}
+            PRINT LABELS{" "}
+            {selectedEquipment.size > 0 ? `(${selectedEquipment.size})` : "ALL"}
           </Button>
         </div>
       </div>

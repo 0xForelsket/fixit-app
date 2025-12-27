@@ -147,17 +147,18 @@ body {
 }
 
 /* Engineering grid pattern overlay */
+/* Engineering grid pattern overlay */
 .industrial-grid {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .dark .industrial-grid {
   background-image: linear-gradient(
-      rgba(255, 255, 255, 0.02) 1px,
+      rgba(255, 255, 255, 0.015) 1px,
       transparent 1px
-    ), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    ), linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
 }
 
 /* ============================================

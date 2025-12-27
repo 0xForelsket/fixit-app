@@ -1,16 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Bell, Save, Shield, Timer } from "lucide-react";
+import { AlertTriangle, Bell, Save, Settings, Shield, Timer } from "lucide-react";
 
 export default function SettingsPage() {
   return (
     <div className="space-y-8 max-w-4xl">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Configure system-wide settings for FixIt
-        </p>
+      {/* Header */}
+      <div className="flex flex-col gap-1 border-b border-zinc-200 pb-8">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+          System <span className="text-primary-600">Settings</span>
+        </h1>
+        <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <Settings className="h-3.5 w-3.5" />
+            CONFIGURATION AND PREFERENCES
+        </div>
       </div>
 
       {/* SLA Configuration */}

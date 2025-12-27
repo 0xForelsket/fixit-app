@@ -165,28 +165,30 @@ export default async function WorkOrdersPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
             {params.overdue === "true"
-              ? "Overdue Work Orders"
+              ? "Overdue "
               : isMyWorkOrdersView
-                ? "My Work Orders"
-                : "All Work Orders"}
+                ? "My "
+                : "Work Order "}
+            <span className="text-primary-600">Queue</span>
           </h1>
-          <p className="text-muted-foreground">
-            {total} total work orders • Page {page} of {totalPages || 1}
-          </p>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <Inbox className="h-3.5 w-3.5" />
+            {total} TOTAL TICKETS • PAGE {page} OF {totalPages || 1}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border-2 border-zinc-200 bg-white overflow-hidden">
             <Link
               href="/dashboard/work-orders"
               className={cn(
-                "px-3 py-1.5 text-sm font-bold transition-colors",
+                "px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors",
                 !isMyWorkOrdersView
                   ? "bg-primary-500 text-white"
-                  : "text-zinc-600 hover:bg-zinc-50"
+                  : "text-zinc-500 hover:bg-zinc-50"
               )}
             >
               All
@@ -194,20 +196,20 @@ export default async function WorkOrdersPage({
             <Link
               href="/dashboard/work-orders?assigned=me"
               className={cn(
-                "px-3 py-1.5 text-sm font-bold transition-colors flex items-center gap-1.5",
+                "px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors flex items-center gap-1.5",
                 isMyWorkOrdersView
                   ? "bg-primary-500 text-white"
-                  : "text-zinc-600 hover:bg-zinc-50"
+                  : "text-zinc-500 hover:bg-zinc-50"
               )}
             >
-              <UserIcon className="h-3.5 w-3.5" />
+              <UserIcon className="h-3 w-3" />
               Mine
             </Link>
           </div>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" asChild className="font-bold border-2">
             <Link href="/dashboard">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              BACK
             </Link>
           </Button>
         </div>

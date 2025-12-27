@@ -123,28 +123,29 @@ export default async function MaintenancePage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Preventive Maintenance
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            Preventive <span className="text-primary-600">Maintenance</span>
           </h1>
-          <p className="text-muted-foreground">
-            Schedule and track maintenance tasks
-          </p>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <Calendar className="h-3.5 w-3.5" />
+            SCHEDULED TASKS AND OPERATIONS
+          </div>
         </div>
         <div className="flex gap-2">
           {user?.role === "admin" && (
             <>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="font-bold border-zinc-200 text-zinc-600 hover:text-zinc-900">
                 <Link href="/dashboard/maintenance/schedules">
                   <Settings className="mr-2 h-4 w-4" />
-                  Manage Schedules
+                  MANAGE SCHEDULES
                 </Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
                 <Link href="/dashboard/maintenance/schedules/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  New Schedule
+                  NEW SCHEDULE
                 </Link>
               </Button>
             </>

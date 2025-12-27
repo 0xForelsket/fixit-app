@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clock,
   Inbox,
+  MonitorCog,
   PartyPopper,
   Timer,
   User,
@@ -143,14 +144,14 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-10 pb-8 industrial-grid min-h-full">
       {/* Page Header */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black tracking-tight text-zinc-900">
-          Technician{" "}
-          <span className="text-primary-600 uppercase">Terminal</span>
+      <div className="flex flex-col gap-1 border-b border-zinc-200 pb-8">
+        <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+          Technician <span className="text-primary-600">Terminal</span>
         </h1>
-        <p className="text-zinc-500 font-medium">
-          Control panel for maintenance operations
-        </p>
+        <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <MonitorCog className="h-3.5 w-3.5" />
+            Control panel for maintenance operations
+        </div>
       </div>
 
       {/* My Work Orders Stats - Personal */}

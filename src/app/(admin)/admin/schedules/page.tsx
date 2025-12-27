@@ -13,6 +13,7 @@ import {
   Plus,
   Repeat,
 } from "lucide-react";
+import { SchedulerButton } from "@/components/maintenance/scheduler-button";
 import Link from "next/link";
 
 async function getSchedules() {
@@ -45,21 +46,25 @@ export default async function SchedulesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Maintenance Schedules
+      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
+            Maintenance <span className="text-primary-600">Schedules</span>
           </h1>
-          <p className="text-muted-foreground">
-            {stats.total} schedules • {stats.active} active
-          </p>
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+            <Calendar className="h-3.5 w-3.5" />
+            {stats.total} ROUTINES • {stats.active} ACTIVE
+          </div>
         </div>
-        <Button asChild>
-          <Link href="/admin/schedules/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Schedule
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <SchedulerButton />
+          <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
+            <Link href="/dashboard/maintenance/schedules/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD SCHEDULE
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
