@@ -39,10 +39,12 @@ export default async function OperatorLayout({
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-white shadow-sm/50 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b bg-white shadow-sm/50 backdrop-blur-md relative">
+        {/* Orange accent bar */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-600" />
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white font-bold shadow-md">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-500 text-white font-bold shadow-lg shadow-primary-500/20">
               F
             </div>
             <span className="text-xl font-bold text-slate-900 tracking-tight">

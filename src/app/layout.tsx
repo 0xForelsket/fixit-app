@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description:
     "Lightweight maintenance management system for tracking equipment maintenance requests",
   manifest: "/manifest.json",
-  themeColor: "#2563eb",
+  themeColor: "#f97316",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

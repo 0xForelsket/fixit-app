@@ -20,7 +20,7 @@ async function seed() {
   // Clear existing data (in reverse order of dependencies)
   console.log("Clearing existing data...");
   // Phase 12-13 tables
-  await db.delete(schema.ticketParts).catch(() => {});
+  await db.delete(schema.workOrderParts).catch(() => {});
   await db.delete(schema.laborLogs).catch(() => {});
   await db.delete(schema.inventoryTransactions).catch(() => {});
   await db.delete(schema.inventoryLevels).catch(() => {});
@@ -36,9 +36,9 @@ async function seed() {
   await db.delete(schema.equipmentStatusLogs);
   await db.delete(schema.notifications);
   await db.delete(schema.attachments);
-  await db.delete(schema.ticketLogs);
+  await db.delete(schema.workOrderLogs);
   await db.delete(schema.maintenanceSchedules);
-  await db.delete(schema.tickets);
+  await db.delete(schema.workOrders);
   await db.delete(schema.equipment);
   await db.delete(schema.locations);
   await db.delete(schema.users);
@@ -59,7 +59,7 @@ async function seed() {
     .insert(schema.roles)
     .values({
       name: "tech",
-      description: "Maintenance technicians who resolve tickets",
+      description: "Maintenance technicians who resolve work orders",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       isSystemRole: true,
     })
@@ -370,15 +370,15 @@ async function seed() {
     `Categories initialized: ${catM.label}, ${catE.label}, ${catI.label}`
   );
 
-  // Create some tickets
-  console.log("Creating tickets...");
+  // Create some work orders
+  console.log("Creating work orders...");
   const now = new Date();
   const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
   const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
   const fourHoursFromNow = new Date(now.getTime() + 4 * 60 * 60 * 1000);
 
-  const [ticket1] = await db
-    .insert(schema.tickets)
+  const [workOrder1] = await db
+    .insert(schema.workOrders)
     .values({
       equipmentId: equipment5.id,
       type: "breakdown",
@@ -395,8 +395,8 @@ async function seed() {
     })
     .returning();
 
-  const [ticket2] = await db
-    .insert(schema.tickets)
+  const [workOrder2] = await db
+    .insert(schema.workOrders)
     .values({
       equipmentId: equipment4.id,
       type: "maintenance",
@@ -413,7 +413,7 @@ async function seed() {
     })
     .returning();
 
-  await db.insert(schema.tickets).values([
+  await db.insert(schema.workOrders).values([
     {
       equipmentId: equipment1.id,
       type: "calibration",
@@ -444,7 +444,7 @@ async function seed() {
     },
   ]);
 
-  console.log(`Created ${4} tickets`);
+  console.log(`Created ${4} work orders`);
 
   // Create maintenance schedules
   console.log("Creating maintenance schedules...");
@@ -497,27 +497,27 @@ async function seed() {
   await db.insert(schema.notifications).values([
     {
       userId: tech1.id,
-      type: "ticket_assigned",
-      title: "New Ticket Assigned",
-      message: "You have been assigned to ticket: CNC Mill not powering on",
-      link: "/dashboard/tickets/1",
+      type: "work_order_assigned",
+      title: "New Work Order Assigned",
+      message: "You have been assigned to work order: CNC Mill not powering on",
+      link: "/dashboard/work-orders/1",
       isRead: false,
     },
     {
       userId: tech1.id,
-      type: "ticket_created",
-      title: "Critical Ticket Created",
+      type: "work_order_created",
+      title: "Critical Work Order Created",
       message: "Emergency stop button sticking - Conveyor System 1",
-      link: "/dashboard/tickets/4",
+      link: "/dashboard/work-orders/4",
       isRead: false,
     },
     {
       userId: tech2.id,
-      type: "ticket_assigned",
-      title: "New Ticket Assigned",
+      type: "work_order_assigned",
+      title: "New Work Order Assigned",
       message:
-        "You have been assigned to ticket: Scheduled gripper replacement",
-      link: "/dashboard/tickets/2",
+        "You have been assigned to work order: Scheduled gripper replacement",
+      link: "/dashboard/work-orders/2",
       isRead: true,
     },
   ]);
@@ -706,14 +706,14 @@ async function seed() {
   console.log("Creating labor logs...");
   await db.insert(schema.laborLogs).values([
     {
-      ticketId: ticket1.id,
+      workOrderId: workOrder1.id,
       userId: tech1.id,
       startTime: new Date(now.getTime() - 90 * 60 * 1000),
       endTime: new Date(now.getTime() - 30 * 60 * 1000),
       notes: "Diagnosed power supply issue",
     },
     {
-      ticketId: ticket2.id,
+      workOrderId: workOrder2.id,
       userId: tech2.id,
       startTime: new Date(now.getTime() - 120 * 60 * 1000),
       endTime: new Date(now.getTime() - 60 * 60 * 1000),
@@ -723,11 +723,11 @@ async function seed() {
 
   console.log(`Created ${2} labor logs`);
 
-  // Create ticket parts (addedById not consumedById, no locationId)
-  console.log("Creating ticket parts...");
-  await db.insert(schema.ticketParts).values([
+  // Create work order parts (addedById not consumedById, no locationId)
+  console.log("Creating work order parts...");
+  await db.insert(schema.workOrderParts).values([
     {
-      ticketId: ticket1.id,
+      workOrderId: workOrder1.id,
       partId: part1.id,
       quantity: 2,
       unitCost: part1.unitCost,
@@ -735,7 +735,7 @@ async function seed() {
     },
   ]);
 
-  console.log(`Created ${1} ticket parts`);
+  console.log(`Created ${1} work order parts`);
 
   // Create maintenance checklists (stepNumber + description, not name + items)
   console.log("Creating maintenance checklists...");
@@ -776,11 +776,11 @@ async function seed() {
 
   console.log(`Created ${4} maintenance checklists`);
 
-  // Create checklist completions (ticketId + checklistId, status, no responses)
+  // Create checklist completions (workOrderId + checklistId, status, no responses)
   console.log("Creating checklist completions...");
   await db.insert(schema.checklistCompletions).values({
     checklistId: checklist1.id,
-    ticketId: ticket2.id,
+    workOrderId: workOrder2.id,
     status: "completed",
     completedById: tech1.id,
     notes: "All steps completed successfully",
@@ -789,11 +789,11 @@ async function seed() {
 
   console.log(`Created ${1} checklist completions`);
 
-  // Create ticket logs (action enum: status_change/comment/assignment, newValue required, createdById)
-  console.log("Creating ticket logs...");
-  await db.insert(schema.ticketLogs).values([
+  // Create work order logs (action enum: status_change/comment/assignment, newValue required, createdById)
+  console.log("Creating work order logs...");
+  await db.insert(schema.workOrderLogs).values([
     {
-      ticketId: ticket1.id,
+      workOrderId: workOrder1.id,
       action: "status_change",
       oldValue: "open",
       newValue: "in_progress",
@@ -801,7 +801,7 @@ async function seed() {
       createdAt: oneHourAgo,
     },
     {
-      ticketId: ticket2.id,
+      workOrderId: workOrder2.id,
       action: "assignment",
       oldValue: null,
       newValue: "Maria Garcia",
@@ -809,7 +809,7 @@ async function seed() {
       createdAt: twoHoursAgo,
     },
     {
-      ticketId: ticket1.id,
+      workOrderId: workOrder1.id,
       action: "comment",
       newValue: "Started diagnostics on power supply",
       createdById: tech1.id,
@@ -817,7 +817,7 @@ async function seed() {
     },
   ]);
 
-  console.log(`Created ${3} ticket logs`);
+  console.log(`Created ${3} work order logs`);
 
   console.log("\n✅ Database seeded successfully!");
   console.log("\n📋 Default credentials:");

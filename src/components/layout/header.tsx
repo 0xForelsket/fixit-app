@@ -12,7 +12,9 @@ interface HeaderProps {
 
 export function Header({ title, userId, onMenuClick }: HeaderProps) {
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-white/70 backdrop-blur-md px-6 sticky top-0 z-40">
+    <header className="relative flex h-16 items-center justify-between border-b bg-white/70 backdrop-blur-md px-6 sticky top-0 z-40">
+      {/* Orange accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-600" />
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <Button

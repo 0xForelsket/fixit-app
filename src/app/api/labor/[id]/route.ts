@@ -26,7 +26,7 @@ export async function GET(
       where: eq(laborLogs.id, logId),
       with: {
         user: true,
-        ticket: true,
+        workOrder: true,
       },
     });
 

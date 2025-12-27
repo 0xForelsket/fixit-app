@@ -1,16 +1,16 @@
 "use client";
 
-import { addTicketComment } from "@/actions/tickets";
+import { addWorkOrderComment } from "@/actions/workOrders";
 import { Button } from "@/components/ui/button";
 import { useActionState, useRef } from "react";
 
 interface CommentFormProps {
-  ticketId: number;
+  workOrderId: number;
 }
 
-export function CommentForm({ ticketId }: CommentFormProps) {
+export function CommentForm({ workOrderId }: CommentFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
-  const boundAction = addTicketComment.bind(null, ticketId);
+  const boundAction = addWorkOrderComment.bind(null, workOrderId);
   const [state, formAction, isPending] = useActionState(boundAction, {});
 
   // Clear form on success

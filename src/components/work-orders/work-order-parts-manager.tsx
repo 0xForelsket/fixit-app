@@ -1,6 +1,6 @@
 "use client";
 
-import { consumeTicketPartAction } from "@/actions/inventory";
+import { consumeWorkOrderPartAction } from "@/actions/inventory";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -45,7 +45,7 @@ interface Location {
   name: string;
 }
 
-interface TicketPart {
+interface WorkOrderPart {
   id: number;
   part: Part;
   quantity: number;
@@ -54,9 +54,9 @@ interface TicketPart {
   addedAt: Date;
 }
 
-interface TicketPartsManagerProps {
-  ticketId: number;
-  parts: TicketPart[]; // Consumed parts
+interface WorkOrderPartsManagerProps {
+  workOrderId: number;
+  parts: WorkOrderPart[]; // Consumed parts
   allParts: Part[]; // Catalog
   locations: Location[];
 }
@@ -67,12 +67,12 @@ const consumeSchema = z.object({
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
 });
 
-export function TicketPartsManager({
-  ticketId,
+export function WorkOrderPartsManager({
+  workOrderId,
   parts,
   allParts,
   locations,
-}: TicketPartsManagerProps) {
+}: WorkOrderPartsManagerProps) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
@@ -87,8 +87,8 @@ export function TicketPartsManager({
 
   async function onSubmit(values: z.infer<typeof consumeSchema>) {
     try {
-      const result = await consumeTicketPartAction({
-        ticketId,
+      const result = await consumeWorkOrderPartAction({
+        workOrderId,
         partId: Number.parseInt(values.partId),
         locationId: Number.parseInt(values.locationId),
         quantity: values.quantity,
@@ -146,7 +146,7 @@ export function TicketPartsManager({
                 Consume Part
               </DialogTitle>
               <DialogDescription className="text-xs font-medium text-zinc-500">
-                Record parts used for this ticket. Stock will be deducted
+                Record parts used for this work order. Stock will be deducted
                 automatically from the selected location.
               </DialogDescription>
             </DialogHeader>

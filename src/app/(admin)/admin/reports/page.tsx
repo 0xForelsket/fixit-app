@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { type TicketPriority, type TicketStatus, tickets } from "@/db/schema";
+import { type WorkOrderPriority, type WorkOrderStatus, workOrders } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import {
@@ -26,38 +26,38 @@ type SearchParams = {
 
 const PAGE_SIZE = 25;
 
-async function getTickets(params: SearchParams) {
+async function getWorkOrders(params: SearchParams) {
   const page = Number.parseInt(params.page || "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
 
   const conditions = [];
 
   if (params.status && params.status !== "all") {
-    conditions.push(eq(tickets.status, params.status as TicketStatus));
+    conditions.push(eq(workOrders.status, params.status as WorkOrderStatus));
   }
 
   if (params.priority && params.priority !== "all") {
-    conditions.push(eq(tickets.priority, params.priority as TicketPriority));
+    conditions.push(eq(workOrders.priority, params.priority as WorkOrderPriority));
   }
 
   if (params.from) {
     const fromDate = new Date(params.from);
-    conditions.push(gte(tickets.createdAt, fromDate));
+    conditions.push(gte(workOrders.createdAt, fromDate));
   }
 
   if (params.to) {
     const toDate = new Date(params.to);
     toDate.setHours(23, 59, 59, 999);
-    conditions.push(lte(tickets.createdAt, toDate));
+    conditions.push(lte(workOrders.createdAt, toDate));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const ticketsList = await db.query.tickets.findMany({
+  const workOrdersList = await db.query.workOrders.findMany({
     where: whereClause,
     limit: PAGE_SIZE,
     offset,
-    orderBy: [desc(tickets.createdAt)],
+    orderBy: [desc(workOrders.createdAt)],
     with: {
       equipment: { with: { location: true } },
       reportedBy: true,
@@ -67,11 +67,11 @@ async function getTickets(params: SearchParams) {
 
   const [totalResult] = await db
     .select({ count: count() })
-    .from(tickets)
+    .from(workOrders)
     .where(whereClause);
 
   return {
-    tickets: ticketsList,
+    workOrders: workOrdersList,
     total: totalResult.count,
     page,
     totalPages: Math.ceil(totalResult.count / PAGE_SIZE),
@@ -83,22 +83,22 @@ async function getStats(params: SearchParams) {
 
   if (params.from) {
     const fromDate = new Date(params.from);
-    conditions.push(gte(tickets.createdAt, fromDate));
+    conditions.push(gte(workOrders.createdAt, fromDate));
   }
 
   if (params.to) {
     const toDate = new Date(params.to);
     toDate.setHours(23, 59, 59, 999);
-    conditions.push(lte(tickets.createdAt, toDate));
+    conditions.push(lte(workOrders.createdAt, toDate));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const allTickets = await db.query.tickets.findMany({
+  const allWorkOrders = await db.query.workOrders.findMany({
     where: whereClause,
   });
 
-  const resolved = allTickets.filter(
+  const resolved = allWorkOrders.filter(
     (t) => t.status === "resolved" || t.status === "closed"
   );
   const avgResolutionTime =
@@ -118,10 +118,10 @@ async function getStats(params: SearchParams) {
       : 0;
 
   return {
-    total: allTickets.length,
-    open: allTickets.filter((t) => t.status === "open").length,
+    total: allWorkOrders.length,
+    open: allWorkOrders.filter((t) => t.status === "open").length,
     resolved: resolved.length,
-    critical: allTickets.filter((t) => t.priority === "critical").length,
+    critical: allWorkOrders.filter((t) => t.priority === "critical").length,
     avgResolutionHours: Math.round(avgResolutionTime * 10) / 10,
   };
 }
@@ -143,11 +143,11 @@ export default async function ReportsPage({
 }) {
   const params = await searchParams;
   const {
-    tickets: ticketsList,
+    workOrders: workOrdersList,
     total,
     page,
     totalPages,
-  } = await getTickets(params);
+  } = await getWorkOrders(params);
   const stats = await getStats(params);
 
   const hasFilters =
@@ -170,11 +170,11 @@ export default async function ReportsPage({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
           <p className="text-muted-foreground">
-            {total} tickets {hasFilters && "matching filters"}
+            {total} work orders {hasFilters && "matching filters"}
           </p>
         </div>
         <Button asChild>
-          <a href={csvUrl} download="ticket-report.csv">
+          <a href={csvUrl} download="work-order-report.csv">
             <Download className="mr-2 h-4 w-4" />
             Export CSV
           </a>
@@ -184,7 +184,7 @@ export default async function ReportsPage({
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-5">
         <StatCard
-          title="Total Tickets"
+          title="Total Work Orders"
           value={stats.total}
           icon={FileText}
           color="text-primary-600"
@@ -309,13 +309,13 @@ export default async function ReportsPage({
         </form>
       </div>
 
-      {/* Tickets Table */}
-      {ticketsList.length === 0 ? (
+      {/* Work Orders Table */}
+      {workOrdersList.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             <FileText className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">No tickets found</h3>
+          <h3 className="mt-4 text-lg font-semibold">No work orders found</h3>
           <p className="text-sm text-muted-foreground">
             Try adjusting your date range or filters
           </p>
@@ -338,8 +338,8 @@ export default async function ReportsPage({
               </tr>
             </thead>
             <tbody className="divide-y">
-              {ticketsList.map((ticket) => (
-                <TicketRow key={ticket.id} ticket={ticket} />
+              {workOrdersList.map((workOrder) => (
+                <WorkOrderRow key={workOrder.id} workOrder={workOrder} />
               ))}
             </tbody>
           </table>
@@ -428,7 +428,7 @@ function StatCard({
   );
 }
 
-interface TicketWithRelations {
+interface WorkOrderWithRelations {
   id: number;
   title: string;
   status: string;
@@ -440,7 +440,7 @@ interface TicketWithRelations {
   assignedTo?: { name: string } | null;
 }
 
-function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
+function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
   const statusConfig: Record<
     string,
     { color: string; bg: string; label: string }
@@ -469,27 +469,27 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
     critical: { color: "text-rose-700", bg: "bg-rose-50", label: "Critical" },
   };
 
-  const status = statusConfig[ticket.status] || statusConfig.open;
-  const priority = priorityConfig[ticket.priority] || priorityConfig.medium;
+  const status = statusConfig[workOrder.status] || statusConfig.open;
+  const priority = priorityConfig[workOrder.priority] || priorityConfig.medium;
 
   return (
     <tr className="hover:bg-slate-50 transition-colors">
       <td className="p-3">
         <Link
-          href={`/dashboard/tickets/${ticket.id}`}
+          href={`/dashboard/work-orders/${workOrder.id}`}
           className="font-mono text-xs text-primary-600 hover:underline"
         >
-          #{ticket.id}
+          #{workOrder.id}
         </Link>
       </td>
       <td className="p-3">
-        <span className="line-clamp-1">{ticket.title}</span>
+        <span className="line-clamp-1">{workOrder.title}</span>
       </td>
       <td className="p-3 hidden md:table-cell text-muted-foreground">
-        {ticket.equipment?.name || "—"}
+        {workOrder.equipment?.name || "—"}
       </td>
       <td className="p-3 hidden lg:table-cell text-muted-foreground">
-        {ticket.equipment?.location?.name || "—"}
+        {workOrder.equipment?.location?.name || "—"}
       </td>
       <td className="p-3">
         <span
@@ -514,17 +514,17 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
         </span>
       </td>
       <td className="p-3 hidden xl:table-cell text-muted-foreground">
-        {ticket.reportedBy?.name || "—"}
+        {workOrder.reportedBy?.name || "—"}
       </td>
       <td className="p-3 hidden xl:table-cell text-muted-foreground">
-        {ticket.assignedTo?.name || "Unassigned"}
+        {workOrder.assignedTo?.name || "Unassigned"}
       </td>
       <td className="p-3 text-muted-foreground">
-        {new Date(ticket.createdAt).toLocaleDateString()}
+        {new Date(workOrder.createdAt).toLocaleDateString()}
       </td>
       <td className="p-3 hidden lg:table-cell text-muted-foreground">
-        {ticket.resolvedAt
-          ? new Date(ticket.resolvedAt).toLocaleDateString()
+        {workOrder.resolvedAt
+          ? new Date(workOrder.resolvedAt).toLocaleDateString()
           : "—"}
       </td>
     </tr>

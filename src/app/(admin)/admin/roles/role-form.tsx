@@ -63,8 +63,8 @@ const PERMISSION_GROUPS: Record<
   string,
   { label: string; permissions: Permission[] }
 > = {
-  tickets: {
-    label: "Tickets",
+  workOrders: {
+    label: "Work Orders",
     permissions: [
       PERMISSIONS.TICKET_CREATE,
       PERMISSIONS.TICKET_VIEW,

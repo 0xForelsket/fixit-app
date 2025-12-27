@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
-import { tickets } from "@/db/schema";
+import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { formatTimeRemaining, getUrgencyLevel } from "@/lib/sla";
 import { formatDateTime, formatRelativeTime } from "@/lib/utils";
@@ -13,7 +13,7 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function TicketDetailPage({ params }: PageProps) {
+export default async function WorkOrderDetailPage({ params }: PageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -21,15 +21,15 @@ export default async function TicketDetailPage({ params }: PageProps) {
   }
 
   const { id } = await params;
-  const ticketId = Number.parseInt(id, 10);
+  const workOrderId = Number.parseInt(id, 10);
 
-  if (Number.isNaN(ticketId)) {
+  if (Number.isNaN(workOrderId)) {
     notFound();
   }
 
-  // Fetch ticket with all related data
-  const ticket = await db.query.tickets.findFirst({
-    where: eq(tickets.id, ticketId),
+  // Fetch work order with all related data
+  const workOrder = await db.query.workOrders.findFirst({
+    where: eq(workOrders.id, workOrderId),
     with: {
       equipment: {
         with: {
@@ -64,48 +64,48 @@ export default async function TicketDetailPage({ params }: PageProps) {
     },
   });
 
-  if (!ticket) {
+  if (!workOrder) {
     notFound();
   }
 
-  // Check if user owns this ticket
-  if (ticket.reportedById !== user.id && user.role === "operator") {
+  // Check if user owns this work order
+  if (workOrder.reportedById !== user.id && user.role === "operator") {
     redirect("/my-tickets");
   }
 
-  const urgency = getUrgencyLevel(ticket.dueBy);
+  const urgency = getUrgencyLevel(workOrder.dueBy);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link href="/my-tickets" className="hover:text-foreground">
-          My Tickets
+          My Work Orders
         </Link>
         <span>/</span>
-        <span className="text-foreground">#{ticket.id}</span>
+        <span className="text-foreground">#{workOrder.id}</span>
       </nav>
 
-      {/* Ticket header */}
+      {/* Work order header */}
       <div className="rounded-lg border bg-card p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-xl font-semibold">{ticket.title}</h1>
+            <h1 className="text-xl font-semibold">{workOrder.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Reported {formatRelativeTime(ticket.createdAt)}
+              Reported {formatRelativeTime(workOrder.createdAt)}
             </p>
           </div>
 
           <div className="flex flex-col items-end gap-2">
-            <StatusBadge status={ticket.status} />
-            <PriorityBadge priority={ticket.priority} />
+            <StatusBadge status={workOrder.status} />
+            <PriorityBadge priority={workOrder.priority} />
           </div>
         </div>
 
         {/* SLA indicator */}
-        {ticket.status !== "resolved" &&
-          ticket.status !== "closed" &&
-          ticket.dueBy && (
+        {workOrder.status !== "resolved" &&
+          workOrder.status !== "closed" &&
+          workOrder.dueBy && (
             <div
               className={`mt-4 rounded-lg p-3 ${
                 urgency === "overdue"
@@ -130,7 +130,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
                   />
                 </svg>
                 <span className="text-sm font-medium">
-                  {formatTimeRemaining(ticket.dueBy)}
+                  {formatTimeRemaining(workOrder.dueBy)}
                 </span>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
       </div>
 
       {/* Equipment info */}
-      {ticket.equipment && (
+      {workOrder.equipment && (
         <div className="rounded-lg border bg-card p-4">
           <h2 className="text-sm font-medium text-muted-foreground">
             Equipment
@@ -160,11 +160,11 @@ export default async function TicketDetailPage({ params }: PageProps) {
               </svg>
             </div>
             <div>
-              <p className="font-medium">{ticket.equipment.name}</p>
+              <p className="font-medium">{workOrder.equipment.name}</p>
               <p className="text-sm text-muted-foreground">
-                {ticket.equipment.code}
-                {ticket.equipment.location &&
-                  ` • ${ticket.equipment.location.name}`}
+                {workOrder.equipment.code}
+                {workOrder.equipment.location &&
+                  ` • ${workOrder.equipment.location.name}`}
               </p>
             </div>
           </div>
@@ -176,23 +176,23 @@ export default async function TicketDetailPage({ params }: PageProps) {
         <h2 className="text-sm font-medium text-muted-foreground">
           Description
         </h2>
-        <p className="mt-2 whitespace-pre-wrap">{ticket.description}</p>
+        <p className="mt-2 whitespace-pre-wrap">{workOrder.description}</p>
       </div>
 
       {/* Assignment */}
-      {ticket.assignedTo ? (
+      {workOrder.assignedTo ? (
         <div className="rounded-lg border bg-card p-4">
           <h2 className="text-sm font-medium text-muted-foreground">
             Assigned Technician
           </h2>
           <div className="mt-2 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
-              {ticket.assignedTo.name.charAt(0).toUpperCase()}
+              {workOrder.assignedTo.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="font-medium">{ticket.assignedTo.name}</p>
+              <p className="font-medium">{workOrder.assignedTo.name}</p>
               <p className="text-sm text-muted-foreground">
-                {ticket.assignedTo.employeeId}
+                {workOrder.assignedTo.employeeId}
               </p>
             </div>
           </div>
@@ -206,15 +206,15 @@ export default async function TicketDetailPage({ params }: PageProps) {
       )}
 
       {/* Resolution notes */}
-      {ticket.resolutionNotes && (
+      {workOrder.resolutionNotes && (
         <div className="rounded-lg border border-success-200 bg-success-50 p-4">
           <h2 className="text-sm font-medium text-success-700">Resolution</h2>
           <p className="mt-2 whitespace-pre-wrap text-success-800">
-            {ticket.resolutionNotes}
+            {workOrder.resolutionNotes}
           </p>
-          {ticket.resolvedAt && (
+          {workOrder.resolvedAt && (
             <p className="mt-2 text-sm text-success-600">
-              Resolved {formatDateTime(ticket.resolvedAt)}
+              Resolved {formatDateTime(workOrder.resolvedAt)}
             </p>
           )}
         </div>
@@ -225,13 +225,13 @@ export default async function TicketDetailPage({ params }: PageProps) {
         <h2 className="text-sm font-medium text-muted-foreground">Activity</h2>
 
         {/* Add comment form */}
-        {ticket.status !== "resolved" && ticket.status !== "closed" && (
-          <CommentForm ticketId={ticket.id} />
+        {workOrder.status !== "resolved" && workOrder.status !== "closed" && (
+          <CommentForm workOrderId={workOrder.id} />
         )}
 
         {/* Activity timeline */}
         <div className="mt-4 space-y-4">
-          {ticket.logs.map((log) => (
+          {workOrder.logs.map((log) => (
             <ActivityItem key={log.id} log={log} />
           ))}
 
@@ -254,11 +254,11 @@ export default async function TicketDetailPage({ params }: PageProps) {
             </div>
             <div>
               <p>
-                <span className="font-medium">{ticket.reportedBy?.name}</span>{" "}
-                created this ticket
+                <span className="font-medium">{workOrder.reportedBy?.name}</span>{" "}
+                created this work order
               </p>
               <p className="text-muted-foreground">
-                {formatDateTime(ticket.createdAt)}
+                {formatDateTime(workOrder.createdAt)}
               </p>
             </div>
           </div>
@@ -375,7 +375,7 @@ function ActivityItem({ log }: { log: ActivityLog }) {
         );
       case "assignment":
         return log.newValue === "unassigned" ? (
-          <>unassigned the ticket</>
+          <>unassigned the work order</>
         ) : (
           <>assigned a technician</>
         );

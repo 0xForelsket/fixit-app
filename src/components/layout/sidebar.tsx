@@ -45,8 +45,8 @@ const navItems: NavItem[] = [
     permission: PERMISSIONS.ANALYTICS_VIEW,
   },
   {
-    label: "Tickets",
-    href: "/dashboard/tickets",
+    label: "Work Orders",
+    href: "/dashboard/work-orders",
     icon: <ClipboardList className="h-5 w-5" />,
     permission: PERMISSIONS.TICKET_VIEW_ALL,
   },
@@ -148,11 +148,11 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r bg-white transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none industrial-grid",
+          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-zinc-800 bg-zinc-950 transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b px-6 bg-white/50 backdrop-blur-md">
+        <div className="flex h-16 items-center justify-between border-b border-zinc-800 px-6">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 group"
@@ -161,14 +161,14 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
               <Wrench className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold tracking-tight text-white">
               FixIt
             </span>
           </Link>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+            className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white lg:hidden"
           >
             <X className="h-5 w-5" />
           </button>
@@ -189,15 +189,15 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
                       isActive
-                        ? "bg-primary-50 text-primary-600 shadow-sm shadow-primary-500/10 border-l-2 border-primary-500 rounded-l-none"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        ? "bg-primary-500/10 text-primary-500 border-l-2 border-primary-500 rounded-l-none"
+                        : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                     )}
                   >
                     <span
                       className={cn(
                         "transition-colors",
                         isActive
-                          ? "text-primary-600"
+                          ? "text-primary-500"
                           : "group-hover:text-primary-500"
                       )}
                     >
@@ -211,11 +211,11 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           </ul>
 
           {canCreateTicket && (
-            <div className="mt-6 border-t pt-4">
+            <div className="mt-6 border-t border-zinc-800 pt-4">
               <Link
                 href="/"
                 onClick={handleNavClick}
-                className="flex items-center gap-3 rounded-lg bg-orange-50 border border-orange-100 px-3 py-2.5 text-sm font-semibold text-primary-700 hover:bg-orange-100 transition-colors shadow-sm animate-pulse-subtle"
+                className="flex items-center gap-3 rounded-lg bg-primary-500/10 border border-primary-500/20 px-3 py-2.5 text-sm font-semibold text-primary-500 hover:bg-primary-500/20 transition-colors"
               >
                 <AlertTriangle className="h-5 w-5" />
                 Report Equipment Issue
@@ -224,13 +224,13 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           )}
         </nav>
 
-        <div className="border-t p-4 bg-white/50 backdrop-blur-sm">
+        <div className="border-t border-zinc-800 p-4">
           <Link
             href="/profile"
             onClick={handleNavClick}
-            className="mb-3 flex items-center gap-3 rounded-xl bg-secondary-50 p-3 transition-all hover:bg-secondary-100 border border-transparent hover:border-secondary-200 group"
+            className="mb-3 flex items-center gap-3 rounded-xl bg-zinc-900 p-3 transition-all hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 group"
           >
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-white bg-white shadow-sm ring-1 ring-zinc-200 group-hover:ring-primary-400/50 transition-all">
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-zinc-700 bg-zinc-800 shadow-sm ring-1 ring-zinc-700 group-hover:ring-primary-500/50 transition-all">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -238,20 +238,20 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-zinc-400 bg-zinc-50 font-bold text-xs uppercase">
+                <div className="flex h-full w-full items-center justify-center text-zinc-400 bg-zinc-800 font-bold text-xs uppercase">
                   {user.name.slice(0, 2)}
                 </div>
               )}
             </div>
             <div className="overflow-hidden">
-              <p className="truncate text-sm font-bold text-zinc-900 leading-tight">
+              <p className="truncate text-sm font-bold text-white leading-tight">
                 {user.name}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="flex-none rounded bg-white px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-zinc-500 border border-zinc-200">
+                <span className="flex-none rounded bg-zinc-800 px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-zinc-400 border border-zinc-700">
                   {user.role}
                 </span>
-                <p className="truncate text-[11px] font-mono text-zinc-400">
+                <p className="truncate text-[11px] font-mono text-zinc-500">
                   {user.employeeId}
                 </p>
               </div>
@@ -260,7 +260,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           <form action={logout}>
             <button
               type="submit"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-danger-50 hover:text-danger-600 transition-colors group"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-danger-500/10 hover:text-danger-500 transition-colors group"
             >
               <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
               Sign Out

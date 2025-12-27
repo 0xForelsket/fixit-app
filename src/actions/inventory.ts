@@ -4,7 +4,7 @@ import { db } from "@/db";
 import {
   inventoryLevels,
   inventoryTransactions,
-  ticketParts,
+  workOrderParts,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { inventoryLogger } from "@/lib/logger";
@@ -122,7 +122,7 @@ export async function createTransactionAction(input: TransactionInput) {
   }
 }
 
-export async function consumeTicketPartAction(input: ConsumePartInput) {
+export async function consumeWorkOrderPartAction(input: ConsumePartInput) {
   const user = await getCurrentUser();
   if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_USE_PARTS)) {
     throw new Error("Unauthorized");
@@ -156,9 +156,9 @@ export async function consumeTicketPartAction(input: ConsumePartInput) {
         .set({ quantity: newQty, updatedAt: new Date() })
         .where(eq(inventoryLevels.id, stock.id));
 
-      // 3. Record Ticket Part
-      await tx.insert(ticketParts).values({
-        ticketId: validated.ticketId,
+      // 3. Record Work Order Part
+      await tx.insert(workOrderParts).values({
+        workOrderId: validated.workOrderId,
         partId: validated.partId,
         quantity: validated.quantity,
         unitCost: stock.part.unitCost, // Capture cost at time of use
@@ -169,16 +169,16 @@ export async function consumeTicketPartAction(input: ConsumePartInput) {
       await tx.insert(inventoryTransactions).values({
         partId: validated.partId,
         locationId: validated.locationId,
-        ticketId: validated.ticketId,
+        workOrderId: validated.workOrderId,
         type: "out", // Consumed
         quantity: validated.quantity,
-        reference: `Ticket #${validated.ticketId}`,
+        reference: `WO #${validated.workOrderId}`,
         createdById: user.id,
       });
     });
 
-    revalidatePath(`/dashboard/tickets/${validated.ticketId}`);
-    revalidatePath(`/admin/tickets/${validated.ticketId}`);
+    revalidatePath(`/dashboard/work-orders/${validated.workOrderId}`);
+    revalidatePath(`/admin/work-orders/${validated.workOrderId}`);
     revalidatePath("/admin/inventory");
 
     return { success: true };

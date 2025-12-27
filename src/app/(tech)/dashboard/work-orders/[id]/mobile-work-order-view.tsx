@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, Info, MessageSquare, Package } from "lucide-react";
 import { useState } from "react";
 
-interface MobileTicketViewProps {
+interface MobileWorkOrderViewProps {
   infoTab: React.ReactNode;
   commentsTab: React.ReactNode;
   inventoryTab: React.ReactNode;
@@ -12,13 +12,13 @@ interface MobileTicketViewProps {
   actions: React.ReactNode;
 }
 
-export function MobileTicketView({
+export function MobileWorkOrderView({
   infoTab,
   commentsTab,
   inventoryTab,
   logsTab,
   actions,
-}: MobileTicketViewProps) {
+}: MobileWorkOrderViewProps) {
   const [activeTab, setActiveTab] = useState("info");
 
   return (

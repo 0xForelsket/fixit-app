@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const {
-      ticketId,
+      workOrderId,
       userId,
       startTime,
       endTime,
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       isBillable,
     } = body;
 
-    if (!ticketId || !userId || !durationMinutes) {
+    if (!workOrderId || !userId || !durationMinutes) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const [log] = await db
       .insert(laborLogs)
       .values({
-        ticketId,
+        workOrderId,
         userId,
         startTime: startTime ? new Date(startTime) : new Date(),
         endTime: endTime ? new Date(endTime) : null,
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   }
 }
 
-// GET /api/labor - List labor logs (with optional ticketId filter)
+// GET /api/labor - List labor logs (with optional workOrderId filter)
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -63,16 +63,16 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const ticketId = searchParams.get("ticketId");
+    const workOrderId = searchParams.get("workOrderId");
 
     const logs = await db.query.laborLogs.findMany({
-      where: ticketId
+      where: workOrderId
         ? (laborLogs, { eq }) =>
-            eq(laborLogs.ticketId, Number.parseInt(ticketId))
+            eq(laborLogs.workOrderId, Number.parseInt(workOrderId))
         : undefined,
       with: {
         user: true,
-        ticket: true,
+        workOrder: true,
       },
     });
 

@@ -1,4 +1,4 @@
-import { TicketPartsManager } from "@/components/tickets/ticket-parts-manager";
+import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,8 @@ import {
   laborLogs,
   locations,
   spareParts,
-  ticketParts,
-  tickets,
+  workOrderParts,
+  workOrders,
   users,
 } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
@@ -29,24 +29,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MobileTicketView } from "./mobile-ticket-view";
-import { TicketActions } from "./ticket-actions";
+import { MobileWorkOrderView } from "./mobile-work-order-view";
+import { WorkOrderActions } from "./work-order-actions";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function TicketDetailPage({ params }: PageProps) {
+export default async function WorkOrderDetailPage({ params }: PageProps) {
   const user = await getCurrentUser();
   if (!user) return null;
 
   const { id } = await params;
-  const ticketId = Number(id);
+  const workOrderId = Number(id);
 
-  if (Number.isNaN(ticketId)) notFound();
+  if (Number.isNaN(workOrderId)) notFound();
 
-  const ticket = await db.query.tickets.findFirst({
-    where: eq(tickets.id, ticketId),
+  const workOrder = await db.query.workOrders.findFirst({
+    where: eq(workOrders.id, workOrderId),
     with: {
       equipment: {
         with: {
@@ -64,18 +64,18 @@ export default async function TicketDetailPage({ params }: PageProps) {
     },
   });
 
-  if (!ticket) notFound();
+  if (!workOrder) notFound();
 
   // Fetch attachments
   const rawAttachments = await db.query.attachments.findMany({
     where: and(
-      eq(attachments.entityType, "ticket"),
-      eq(attachments.entityId, ticketId)
+      eq(attachments.entityType, "work_order"),
+      eq(attachments.entityId, workOrderId)
     ),
   });
 
   // Generate presigned URLs
-  const ticketAttachments = await Promise.all(
+  const workOrderAttachments = await Promise.all(
     rawAttachments.map(async (att) => ({
       ...att,
       url: await getPresignedDownloadUrl(att.s3Key),
@@ -83,22 +83,26 @@ export default async function TicketDetailPage({ params }: PageProps) {
   );
 
   // Fetch all techs for assignment dropdown
-  const techs = await db.query.users.findMany({
-    where: and(eq(users.role, "tech"), eq(users.isActive, true)),
+  const allUsers = await db.query.users.findMany({
+    where: eq(users.isActive, true),
+    with: {
+      assignedRole: true,
+    },
   });
+  const techs = allUsers.filter((u) => u.assignedRole?.name === "tech");
 
-  // Fetch labor logs for this ticket
-  const ticketLaborLogs = await db.query.laborLogs.findMany({
-    where: eq(laborLogs.ticketId, ticketId),
+  // Fetch labor logs for this work order
+  const workOrderLaborLogs = await db.query.laborLogs.findMany({
+    where: eq(laborLogs.workOrderId, workOrderId),
     with: {
       user: true,
     },
     orderBy: (logs, { desc }) => [desc(logs.createdAt)],
   });
 
-  // Fetch ticket parts
-  const consumedParts = await db.query.ticketParts.findMany({
-    where: eq(ticketParts.ticketId, ticketId),
+  // Fetch work order parts
+  const consumedParts = await db.query.workOrderParts.findMany({
+    where: eq(workOrderParts.workOrderId, workOrderId),
     with: {
       part: true,
       addedBy: true,
@@ -147,14 +151,14 @@ export default async function TicketDetailPage({ params }: PageProps) {
       bg: "bg-slate-50",
       border: "border-slate-200",
     },
-  }[ticket.status];
+  }[workOrder.status];
 
   const priorityConfig = {
     low: { color: "bg-slate-500", label: "Low" },
     medium: { color: "bg-primary-500", label: "Medium" },
     high: { color: "bg-amber-500", label: "High" },
     critical: { color: "bg-rose-600", label: "Critical" },
-  }[ticket.priority];
+  }[workOrder.priority];
 
   const StatusIcon = statusConfig.icon;
 
@@ -215,14 +219,14 @@ export default async function TicketDetailPage({ params }: PageProps) {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="outline" className="font-mono text-xs">
-              #{ticket.id}
+              #{workOrder.id}
             </Badge>
             <span className="text-sm text-muted-foreground">
-              Reported {formatRelativeTime(ticket.createdAt)}
+              Reported {formatRelativeTime(workOrder.createdAt)}
             </span>
           </div>
           <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-            {ticket.title}
+            {workOrder.title}
           </h1>
         </div>
       </div>
@@ -233,16 +237,16 @@ export default async function TicketDetailPage({ params }: PageProps) {
     <div className="rounded-xl border bg-card p-6 shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Description</h2>
       <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-        {ticket.description}
+        {workOrder.description}
       </p>
     </div>
   );
 
-  const AttachmentsSection = ticketAttachments.length > 0 && (
+  const AttachmentsSection = workOrderAttachments.length > 0 && (
     <div className="rounded-xl border bg-card p-6 shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Attachments</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {ticketAttachments.map((file) => (
+        {workOrderAttachments.map((file) => (
           <a
             key={file.id}
             href={file.url}
@@ -284,12 +288,12 @@ export default async function TicketDetailPage({ params }: PageProps) {
     <div className="space-y-4">
       <h2 className="text-lg font-bold px-1 lg:hidden">Activity Log</h2>
       <div className="rounded-xl border bg-card shadow-sm divide-y">
-        {ticket.logs.length === 0 ? (
+        {workOrder.logs.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
             No activity yet.
           </div>
         ) : (
-          ticket.logs.map((log) => (
+          workOrder.logs.map((log) => (
             <div key={log.id} className="p-4 flex gap-4">
               <div className="mt-1">
                 {log.action === "comment" ? (
@@ -346,16 +350,18 @@ export default async function TicketDetailPage({ params }: PageProps) {
             <Wrench className="h-5 w-5 text-slate-500" />
           </div>
           <div>
-            <p className="font-bold text-foreground">{ticket.equipment.name}</p>
+            <p className="font-bold text-foreground">
+              {workOrder.equipment.name}
+            </p>
             <Badge variant="secondary" className="font-mono text-[10px]">
-              {ticket.equipment.code}
+              {workOrder.equipment.code}
             </Badge>
           </div>
         </div>
-        {ticket.equipment.location && (
+        {workOrder.equipment.location && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" />
-            {ticket.equipment.location.name}
+            {workOrder.equipment.location.name}
           </div>
         )}
       </div>
@@ -381,34 +387,34 @@ export default async function TicketDetailPage({ params }: PageProps) {
           <div className="lg:col-span-2 space-y-6">
             {DescriptionSection}
             {AttachmentsSection}
-            {ticket.resolutionNotes && (
+            {workOrder.resolutionNotes && (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-2 text-emerald-800">
                   <CheckCircle2 className="h-5 w-5" />
                   <h2 className="font-bold">Resolution Notes</h2>
                 </div>
                 <p className="text-emerald-900/80 whitespace-pre-wrap">
-                  {ticket.resolutionNotes}
+                  {workOrder.resolutionNotes}
                 </p>
               </div>
             )}
             {ActivityLogSection}
           </div>
           <div className="space-y-6">
-            <TicketActions
-              ticket={ticket}
+            <WorkOrderActions
+              workOrder={workOrder}
               currentUser={{ id: user.id, name: user.name }}
               allTechs={techs}
             />
             {EquipmentInfoSection}
             <TimeLogger
-              ticketId={ticket.id}
+              workOrderId={workOrder.id}
               userId={user.id}
               userHourlyRate={user.hourlyRate}
-              existingLogs={ticketLaborLogs}
+              existingLogs={workOrderLaborLogs}
             />
-            <TicketPartsManager
-              ticketId={ticket.id}
+            <WorkOrderPartsManager
+              workOrderId={workOrder.id}
               parts={consumedParts}
               allParts={allParts}
               locations={activeLocations}
@@ -418,7 +424,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
       </div>
 
       {/* Mobile View */}
-      <MobileTicketView
+      <MobileWorkOrderView
         infoTab={
           <div className="space-y-6">
             {DetailHeader}
@@ -430,8 +436,8 @@ export default async function TicketDetailPage({ params }: PageProps) {
         commentsTab={ActivityLogSection}
         inventoryTab={
           <div className="space-y-6">
-            <TicketPartsManager
-              ticketId={ticket.id}
+            <WorkOrderPartsManager
+              workOrderId={workOrder.id}
               parts={consumedParts}
               allParts={allParts}
               locations={activeLocations}
@@ -441,10 +447,10 @@ export default async function TicketDetailPage({ params }: PageProps) {
         logsTab={
           <div className="space-y-6">
             <TimeLogger
-              ticketId={ticket.id}
+              workOrderId={workOrder.id}
               userId={user.id}
               userHourlyRate={user.hourlyRate}
-              existingLogs={ticketLaborLogs}
+              existingLogs={workOrderLaborLogs}
             />
           </div>
         }

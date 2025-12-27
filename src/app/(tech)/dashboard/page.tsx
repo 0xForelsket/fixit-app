@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { tickets } from "@/db/schema";
+import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { and, count, eq, lt, or } from "drizzle-orm";
@@ -30,23 +30,23 @@ async function getStats(
 ): Promise<{ global: Stats; personal: Stats | null }> {
   const globalOpen = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(eq(tickets.status, "open"));
+    .from(workOrders)
+    .where(eq(workOrders.status, "open"));
 
   const globalInProgress = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(eq(tickets.status, "in_progress"));
+    .from(workOrders)
+    .where(eq(workOrders.status, "in_progress"));
 
   const globalOverdue = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(and(lt(tickets.dueBy, new Date()), eq(tickets.status, "open")));
+    .from(workOrders)
+    .where(and(lt(workOrders.dueBy, new Date()), eq(workOrders.status, "open")));
 
   const globalCritical = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(and(eq(tickets.priority, "critical"), eq(tickets.status, "open")));
+    .from(workOrders)
+    .where(and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open")));
 
   const globalStats: Stats = {
     open: globalOpen[0].count,
@@ -61,35 +61,35 @@ async function getStats(
 
   const myOpen = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(and(eq(tickets.status, "open"), eq(tickets.assignedToId, userId)));
+    .from(workOrders)
+    .where(and(eq(workOrders.status, "open"), eq(workOrders.assignedToId, userId)));
 
   const myInProgress = await db
     .select({ count: count() })
-    .from(tickets)
+    .from(workOrders)
     .where(
-      and(eq(tickets.status, "in_progress"), eq(tickets.assignedToId, userId))
+      and(eq(workOrders.status, "in_progress"), eq(workOrders.assignedToId, userId))
     );
 
   const myOverdue = await db
     .select({ count: count() })
-    .from(tickets)
+    .from(workOrders)
     .where(
       and(
-        lt(tickets.dueBy, new Date()),
-        or(eq(tickets.status, "open"), eq(tickets.status, "in_progress")),
-        eq(tickets.assignedToId, userId)
+        lt(workOrders.dueBy, new Date()),
+        or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
+        eq(workOrders.assignedToId, userId)
       )
     );
 
   const myCritical = await db
     .select({ count: count() })
-    .from(tickets)
+    .from(workOrders)
     .where(
       and(
-        eq(tickets.priority, "critical"),
-        or(eq(tickets.status, "open"), eq(tickets.status, "in_progress")),
-        eq(tickets.assignedToId, userId)
+        eq(workOrders.priority, "critical"),
+        or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
+        eq(workOrders.assignedToId, userId)
       )
     );
 
@@ -104,14 +104,14 @@ async function getStats(
   };
 }
 
-async function getMyTickets(userId: number) {
-  return db.query.tickets.findMany({
+async function getMyWorkOrders(userId: number) {
+  return db.query.workOrders.findMany({
     where: and(
-      or(eq(tickets.status, "open"), eq(tickets.status, "in_progress")),
-      eq(tickets.assignedToId, userId)
+      or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
+      eq(workOrders.assignedToId, userId)
     ),
     limit: 5,
-    orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
       equipment: true,
       reportedBy: true,
@@ -119,11 +119,11 @@ async function getMyTickets(userId: number) {
   });
 }
 
-async function getRecentTickets() {
-  return db.query.tickets.findMany({
-    where: eq(tickets.status, "open"),
+async function getRecentWorkOrders() {
+  return db.query.workOrders.findMany({
+    where: eq(workOrders.status, "open"),
     limit: 5,
-    orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
       equipment: true,
       reportedBy: true,
@@ -134,10 +134,10 @@ async function getRecentTickets() {
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   const { global: globalStats, personal: myStats } = await getStats(user?.id);
-  const myTickets = user ? await getMyTickets(user.id) : [];
-  const recentTickets = await getRecentTickets();
+  const myWorkOrders = user ? await getMyWorkOrders(user.id) : [];
+  const recentWorkOrders = await getRecentWorkOrders();
 
-  const hasMyTickets = myTickets.length > 0;
+  const hasMyWorkOrders = myWorkOrders.length > 0;
   const myTotalActive = myStats ? myStats.open + myStats.inProgress : 0;
 
   return (
@@ -153,13 +153,13 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* My Tickets Stats - Personal */}
+      {/* My Work Orders Stats - Personal */}
       {myStats && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <User className="h-5 w-5 text-primary-600" />
             <h2 className="text-lg font-bold tracking-tight text-zinc-800">
-              My Assigned Tickets
+              My Assigned Work Orders
             </h2>
             <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
               {myTotalActive} active
@@ -174,6 +174,7 @@ export default async function DashboardPage() {
               bg="bg-primary-50"
               border="border-primary-100"
               delay={1}
+              href="/dashboard/work-orders?assigned=me&status=open"
             />
             <StatsCard
               title="My In Progress"
@@ -183,6 +184,7 @@ export default async function DashboardPage() {
               bg="bg-info-50"
               border="border-info-100"
               delay={2}
+              href="/dashboard/work-orders?assigned=me&status=in_progress"
             />
             <StatsCard
               title="My Overdue"
@@ -193,6 +195,7 @@ export default async function DashboardPage() {
               border="border-danger-100"
               pulse={myStats.overdue > 0}
               delay={3}
+              href="/dashboard/work-orders?assigned=me&overdue=true"
             />
             <StatsCard
               title="My Critical"
@@ -203,12 +206,13 @@ export default async function DashboardPage() {
               border="border-danger-200"
               pulse={myStats.critical > 0}
               delay={4}
+              href="/dashboard/work-orders?assigned=me&priority=critical"
             />
           </div>
         </div>
       )}
 
-      {/* My Tickets Queue */}
+      {/* My Work Orders Queue */}
       {myStats && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
@@ -224,16 +228,16 @@ export default async function DashboardPage() {
               asChild
               className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
             >
-              <Link href="/dashboard/tickets?assigned=me" className="gap-2">
-                MY TICKETS <ArrowRight className="h-4 w-4" />
+              <Link href="/dashboard/work-orders?assigned=me" className="gap-2">
+                MY WORK ORDERS <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
 
-          {hasMyTickets ? (
+          {hasMyWorkOrders ? (
             <div className="grid gap-4">
-              {myTickets.map((ticket, index) => (
-                <TicketListItem key={ticket.id} ticket={ticket} index={index} />
+              {myWorkOrders.map((workOrder, index) => (
+                <WorkOrderListItem key={workOrder.id} workOrder={workOrder} index={index} />
               ))}
             </div>
           ) : (
@@ -248,7 +252,7 @@ export default async function DashboardPage() {
                 All Caught Up!
               </h3>
               <p className="text-success-700 font-medium mt-1">
-                No tickets assigned to you. Great work!
+                No work orders assigned to you. Great work!
               </p>
             </div>
           )}
@@ -265,13 +269,14 @@ export default async function DashboardPage() {
         </div>
         <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="Open Tickets"
+            title="Open WOs"
             value={globalStats.open}
             icon={Inbox}
             color="text-secondary-600"
             bg="bg-secondary-50"
             border="border-secondary-100"
             delay={1}
+            href="/dashboard/work-orders?status=open"
           />
           <StatsCard
             title="In Progress"
@@ -281,6 +286,7 @@ export default async function DashboardPage() {
             bg="bg-info-50"
             border="border-info-100"
             delay={2}
+            href="/dashboard/work-orders?status=in_progress"
           />
           <StatsCard
             title="Overdue"
@@ -291,6 +297,7 @@ export default async function DashboardPage() {
             border="border-danger-100"
             pulse={globalStats.overdue > 0}
             delay={3}
+            href="/dashboard/work-orders?overdue=true"
           />
           <StatsCard
             title="Critical"
@@ -301,11 +308,12 @@ export default async function DashboardPage() {
             border="border-danger-200"
             pulse={globalStats.critical > 0}
             delay={4}
+            href="/dashboard/work-orders?priority=critical"
           />
         </div>
       </div>
 
-      {/* Recent Tickets section - Global Queue */}
+      {/* Recent Work Orders section - Global Queue */}
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -320,13 +328,13 @@ export default async function DashboardPage() {
             asChild
             className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
           >
-            <Link href="/dashboard/tickets" className="gap-2">
-              ALL TICKETS <ArrowRight className="h-4 w-4" />
+            <Link href="/dashboard/work-orders" className="gap-2">
+              ALL WORK ORDERS <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
 
-        {recentTickets.length === 0 ? (
+        {recentWorkOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-success-200 bg-success-50/30 p-16 text-center animate-in backdrop-blur-sm">
             <div className="relative">
               <div className="absolute inset-0 bg-success-400/20 rounded-full blur-[40px] animate-gentle-pulse" />
@@ -338,13 +346,13 @@ export default async function DashboardPage() {
               SYSTEM NOMINAL
             </h3>
             <p className="text-success-700 font-medium mt-1">
-              No open tickets requiring urgent attention.
+              No open work orders requiring urgent attention.
             </p>
           </div>
         ) : (
           <div className="grid gap-4">
-            {recentTickets.map((ticket, index) => (
-              <TicketListItem key={ticket.id} ticket={ticket} index={index} />
+            {recentWorkOrders.map((workOrder, index) => (
+              <WorkOrderListItem key={workOrder.id} workOrder={workOrder} index={index} />
             ))}
           </div>
         )}
@@ -362,6 +370,7 @@ function StatsCard({
   border,
   pulse = false,
   delay = 0,
+  href,
 }: {
   title: string;
   value: number;
@@ -371,16 +380,10 @@ function StatsCard({
   border: string;
   pulse?: boolean;
   delay?: number;
+  href?: string;
 }) {
-  return (
-    <div
-      className={cn(
-        "relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-white p-5 transition-all duration-300 hover-lift card-industrial shadow-sm",
-        border,
-        pulse && value > 0 && "animate-glow-pulse border-danger-300",
-        delay && `animate-stagger-${delay} animate-in`
-      )}
-    >
+  const content = (
+    <>
       <div className="flex items-center justify-between mb-4">
         <div
           className={cn(
@@ -406,15 +409,33 @@ function StatsCard({
           {String(value).padStart(2, "0")}
         </p>
       </div>
-    </div>
+    </>
   );
+
+  const className = cn(
+    "relative flex flex-col justify-between overflow-hidden rounded-2xl border bg-white p-5 transition-all duration-300 card-industrial shadow-sm",
+    border,
+    pulse && value > 0 && "animate-glow-pulse border-danger-300",
+    delay && `animate-stagger-${delay} animate-in`,
+    href && "cursor-pointer hover:border-primary-300 hover:shadow-lg hover:-translate-y-1 active:scale-[0.98]"
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }
 
-function TicketListItem({
-  ticket,
+function WorkOrderListItem({
+  workOrder,
   index = 0,
 }: {
-  ticket: {
+  workOrder: {
     id: number;
     title: string;
     priority: string;
@@ -449,9 +470,9 @@ function TicketListItem({
       text: "text-danger-700",
       bg: "bg-danger-50",
     },
-  }[ticket.priority as string] || {
+  }[workOrder.priority as string] || {
     color: "bg-zinc-500",
-    label: ticket.priority,
+    label: workOrder.priority,
     text: "text-zinc-700",
     bg: "bg-zinc-50",
   };
@@ -460,21 +481,21 @@ function TicketListItem({
 
   return (
     <Link
-      href={`/dashboard/tickets/${ticket.id}`}
+      href={`/dashboard/work-orders/${workOrder.id}`}
       className={cn(
         "group relative flex flex-col sm:flex-row sm:items-center gap-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-4 transition-all duration-200 hover:border-primary-400 hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1",
         staggerClass && `${staggerClass} animate-in`,
-        ticket.priority === "critical" &&
+        workOrder.priority === "critical" &&
           "border-danger-200 shadow-danger-500/5 shadow-lg"
       )}
     >
       <div className="flex-1 space-y-3">
         <div className="flex items-center gap-2">
           <span className="flex-none rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-mono font-black text-white leading-none">
-            #{String(ticket.id).padStart(3, "0")}
+            #{String(workOrder.id).padStart(3, "0")}
           </span>
           <h3 className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors text-base tracking-tight truncate flex-1">
-            {ticket.title}
+            {workOrder.title}
           </h3>
           <Badge
             className={cn(
@@ -491,15 +512,15 @@ function TicketListItem({
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <div className="flex items-center gap-1.5 font-bold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-lg border border-zinc-200/50">
             <div className="w-2 h-2 rounded-full bg-zinc-400" />
-            {ticket.equipment.name}
+            {workOrder.equipment.name}
           </div>
           <div className="flex items-center gap-1.5 font-medium text-zinc-400">
             <Clock className="h-3.5 w-3.5" />
-            {formatRelativeTime(ticket.createdAt)}
+            {formatRelativeTime(workOrder.createdAt)}
           </div>
           <div className="flex items-center gap-1.5 font-medium text-zinc-400">
             <Users className="h-3.5 w-3.5" />
-            Reported by {ticket.reportedBy.name}
+            Reported by {workOrder.reportedBy.name}
           </div>
         </div>
       </div>

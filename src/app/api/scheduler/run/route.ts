@@ -3,8 +3,7 @@ import {
   checklistCompletions,
   maintenanceChecklists,
   maintenanceSchedules,
-  tickets,
-  users,
+  workOrders,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
@@ -54,19 +53,22 @@ export async function POST(request: Request) {
     for (const schedule of pendingSchedules) {
       try {
         await db.transaction(async (tx) => {
-          // Find a system user to report tickets
-          const systemUser = await tx.query.users.findFirst({
-            where: eq(users.role, "admin"),
+          // Find a system user (admin) to report work orders
+          const allUsers = await tx.query.users.findMany({
+            with: { assignedRole: true },
           });
-          const reportedById = systemUser?.id || 1; // Fallback to 1 if no admin found (unlikely)
+          const systemUser = allUsers.find(
+            (u) => u.assignedRole?.name === "admin"
+          );
+          const reportedById = systemUser?.id || 1;
 
-          // A. Create Ticket
-          const [newTicket] = await tx
-            .insert(tickets)
+          // A. Create Work Order
+          const [newWorkOrder] = await tx
+            .insert(workOrders)
             .values({
               equipmentId: schedule.equipmentId,
               title: `Scheduled: ${schedule.title}`,
-              description: `Auto-generated maintenance ticket from schedule #${schedule.id}`,
+              description: `Auto-generated maintenance work order from schedule #${schedule.id}`,
               type: schedule.type,
               priority: "medium", // Default priority for scheduled tasks
               status: "open",
@@ -84,7 +86,7 @@ export async function POST(request: Request) {
             await tx.insert(checklistCompletions).values(
               checklists.map((item) => ({
                 checklistId: item.id,
-                ticketId: newTicket.id,
+                workOrderId: newWorkOrder.id,
                 status: "pending" as const,
               }))
             );

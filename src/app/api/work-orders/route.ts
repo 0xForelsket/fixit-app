@@ -2,14 +2,14 @@ import { db } from "@/db";
 import {
   equipment as equipmentTable,
   notifications,
-  tickets,
+  workOrders,
   users,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
-import { createTicketSchema, paginationSchema } from "@/lib/validations";
+import { createWorkOrderSchema, paginationSchema } from "@/lib/validations";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -34,8 +34,8 @@ export async function GET(request: Request) {
       const statuses = status.split(",");
       conditions.push(
         inArray(
-          tickets.status,
-          statuses as (typeof tickets.status.enumValues)[number][]
+          workOrders.status,
+          statuses as (typeof workOrders.status.enumValues)[number][]
         )
       );
     }
@@ -43,33 +43,33 @@ export async function GET(request: Request) {
     if (priority) {
       conditions.push(
         eq(
-          tickets.priority,
-          priority as (typeof tickets.priority.enumValues)[number]
+          workOrders.priority,
+          priority as (typeof workOrders.priority.enumValues)[number]
         )
       );
     }
 
     if (equipmentId) {
-      conditions.push(eq(tickets.equipmentId, Number(equipmentId)));
+      conditions.push(eq(workOrders.equipmentId, Number(equipmentId)));
     }
 
     if (assignedToId) {
-      conditions.push(eq(tickets.assignedToId, Number(assignedToId)));
+      conditions.push(eq(workOrders.assignedToId, Number(assignedToId)));
     }
 
-    // Users without TICKET_VIEW_ALL can only see their own tickets
+    // Users without TICKET_VIEW_ALL can only see their own work orders
     if (!userHasPermission(user, PERMISSIONS.TICKET_VIEW_ALL)) {
-      conditions.push(eq(tickets.reportedById, user.id));
+      conditions.push(eq(workOrders.reportedById, user.id));
     }
 
     const offset = (pagination.page - 1) * pagination.limit;
 
     const [results, totalResult] = await Promise.all([
-      db.query.tickets.findMany({
+      db.query.workOrders.findMany({
         where: conditions.length > 0 ? and(...conditions) : undefined,
         limit: pagination.limit,
         offset,
-        orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+        orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
         with: {
           equipment: true,
           reportedBy: {
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       }),
       db
         .select({ count: sql<number>`count(*)` })
-        .from(tickets)
+        .from(workOrders)
         .where(conditions.length > 0 ? and(...conditions) : undefined),
     ]);
 
@@ -99,9 +99,9 @@ export async function GET(request: Request) {
     if (error instanceof Error && error.message === "Unauthorized") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("Get tickets error:", error);
+    console.error("Get work orders error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch tickets" },
+      { error: "Failed to fetch work orders" },
       { status: 500 }
     );
   }
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
   try {
     const clientIp = getClientIp(request);
     const rateLimit = checkRateLimit(
-      `tickets:${clientIp}`,
+      `work-orders:${clientIp}`,
       RATE_LIMITS.api.limit,
       RATE_LIMITS.api.windowMs
     );
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
     const user = await requireAuth();
 
     const body = await request.json();
-    const result = createTicketSchema.safeParse(body);
+    const result = createWorkOrderSchema.safeParse(body);
 
     if (!result.success) {
       return NextResponse.json(
@@ -149,9 +149,9 @@ export async function POST(request: Request) {
     // Calculate SLA due date
     const dueBy = calculateDueBy(priority);
 
-    // Create the ticket
-    const [ticket] = await db
-      .insert(tickets)
+    // Create the work order
+    const [workOrder] = await db
+      .insert(workOrders)
       .values({
         equipmentId,
         type,
@@ -169,20 +169,22 @@ export async function POST(request: Request) {
       where: eq(equipmentTable.id, equipmentId),
     });
 
-    // Notify techs for critical/high priority tickets
+    // Notify techs for critical/high priority work orders
     if (priority === "critical" || priority === "high") {
-      const techs = await db.query.users.findMany({
-        where: and(eq(users.role, "tech"), eq(users.isActive, true)),
+      const allUsers = await db.query.users.findMany({
+        where: eq(users.isActive, true),
+        with: { assignedRole: true },
       });
+      const techs = allUsers.filter((u) => u.assignedRole?.name === "tech");
 
       if (techs.length > 0) {
         await db.insert(notifications).values(
           techs.map((tech) => ({
             userId: tech.id,
-            type: "ticket_created" as const,
-            title: `New ${priority} Priority Ticket`,
+            type: "work_order_created" as const,
+            title: `New ${priority} Priority Work Order`,
             message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
-            link: `/dashboard/tickets/${ticket.id}`,
+            link: `/dashboard/work-orders/${workOrder.id}`,
           }))
         );
       }
@@ -192,14 +194,14 @@ export async function POST(request: Request) {
     if (equipmentItem?.ownerId) {
       await db.insert(notifications).values({
         userId: equipmentItem.ownerId,
-        type: "ticket_created" as const,
-        title: "Ticket Opened on Your Equipment",
+        type: "work_order_created" as const,
+        title: "Work Order Opened on Your Equipment",
         message: `${title} - ${equipmentItem.name}`,
-        link: `/dashboard/tickets/${ticket.id}`,
+        link: `/dashboard/work-orders/${workOrder.id}`,
       });
     }
 
-    return NextResponse.json(ticket, { status: 201 });
+    return NextResponse.json(workOrder, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {
@@ -212,9 +214,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
     }
-    console.error("Create ticket error:", error);
+    console.error("Create work order error:", error);
     return NextResponse.json(
-      { error: "Failed to create ticket" },
+      { error: "Failed to create work order" },
       { status: 500 }
     );
   }

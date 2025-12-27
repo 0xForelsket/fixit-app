@@ -13,7 +13,7 @@ export const transactionSchema = z.object({
 export type TransactionInput = z.infer<typeof transactionSchema>;
 
 export const consumePartSchema = z.object({
-  ticketId: z.number(), // Added ticketId to schema for server action input
+  workOrderId: z.number(), // Work order to associate the part consumption with
   partId: z.number(),
   locationId: z.number(),
   quantity: z.number().min(1),

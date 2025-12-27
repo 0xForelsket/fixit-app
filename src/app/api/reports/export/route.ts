@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { type TicketPriority, type TicketStatus, tickets } from "@/db/schema";
+import { type WorkOrderPriority, type WorkOrderStatus, workOrders } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
@@ -22,29 +22,29 @@ export async function GET(request: NextRequest) {
     const conditions = [];
 
     if (status && status !== "all") {
-      conditions.push(eq(tickets.status, status as TicketStatus));
+      conditions.push(eq(workOrders.status, status as WorkOrderStatus));
     }
 
     if (priority && priority !== "all") {
-      conditions.push(eq(tickets.priority, priority as TicketPriority));
+      conditions.push(eq(workOrders.priority, priority as WorkOrderPriority));
     }
 
     if (from) {
       const fromDate = new Date(from);
-      conditions.push(gte(tickets.createdAt, fromDate));
+      conditions.push(gte(workOrders.createdAt, fromDate));
     }
 
     if (to) {
       const toDate = new Date(to);
       toDate.setHours(23, 59, 59, 999);
-      conditions.push(lte(tickets.createdAt, toDate));
+      conditions.push(lte(workOrders.createdAt, toDate));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const ticketsList = await db.query.tickets.findMany({
+    const workOrdersList = await db.query.workOrders.findMany({
       where: whereClause,
-      orderBy: [desc(tickets.createdAt)],
+      orderBy: [desc(workOrders.createdAt)],
       with: {
         equipment: { with: { location: true } },
         reportedBy: true,
@@ -69,20 +69,20 @@ export async function GET(request: NextRequest) {
       "Resolution Notes",
     ];
 
-    const rows = ticketsList.map((ticket) => [
-      ticket.id,
-      escapeCSV(ticket.title),
-      escapeCSV(ticket.description),
-      escapeCSV(ticket.equipment?.name || ""),
-      escapeCSV(ticket.equipment?.location?.name || ""),
-      ticket.type,
-      ticket.priority,
-      ticket.status,
-      escapeCSV(ticket.reportedBy?.name || ""),
-      escapeCSV(ticket.assignedTo?.name || ""),
-      formatDate(ticket.createdAt),
-      ticket.resolvedAt ? formatDate(ticket.resolvedAt) : "",
-      escapeCSV(ticket.resolutionNotes || ""),
+    const rows = workOrdersList.map((workOrder) => [
+      workOrder.id,
+      escapeCSV(workOrder.title),
+      escapeCSV(workOrder.description),
+      escapeCSV(workOrder.equipment?.name || ""),
+      escapeCSV(workOrder.equipment?.location?.name || ""),
+      workOrder.type,
+      workOrder.priority,
+      workOrder.status,
+      escapeCSV(workOrder.reportedBy?.name || ""),
+      escapeCSV(workOrder.assignedTo?.name || ""),
+      formatDate(workOrder.createdAt),
+      workOrder.resolvedAt ? formatDate(workOrder.resolvedAt) : "",
+      escapeCSV(workOrder.resolutionNotes || ""),
     ]);
 
     const csvContent = [
@@ -94,13 +94,13 @@ export async function GET(request: NextRequest) {
     return new NextResponse(csvContent, {
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="ticket-report-${new Date().toISOString().split("T")[0]}.csv"`,
+        "Content-Disposition": `attachment; filename="work-order-report-${new Date().toISOString().split("T")[0]}.csv"`,
       },
     });
   } catch (error) {
-    console.error("Failed to export tickets:", error);
+    console.error("Failed to export work orders:", error);
     return NextResponse.json(
-      { error: "Failed to export tickets" },
+      { error: "Failed to export work orders" },
       { status: 500 }
     );
   }

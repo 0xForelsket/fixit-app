@@ -8,14 +8,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface TimeLoggerProps {
-  ticketId: number;
+  workOrderId: number;
   userId: number;
   userHourlyRate?: number | null;
   existingLogs?: (LaborLog & { user?: User })[];
 }
 
 export function TimeLogger({
-  ticketId,
+  workOrderId,
   userId,
   userHourlyRate,
   existingLogs = [],
@@ -31,7 +31,7 @@ export function TimeLogger({
 
   // Check for active timer in localStorage
   useEffect(() => {
-    const savedTimer = localStorage.getItem(`timer-${ticketId}`);
+    const savedTimer = localStorage.getItem(`timer-${workOrderId}`);
     if (savedTimer) {
       const { start } = JSON.parse(savedTimer);
       const savedStart = new Date(start);
@@ -39,7 +39,7 @@ export function TimeLogger({
       setIsRunning(true);
       setElapsed(Math.floor((Date.now() - savedStart.getTime()) / 1000));
     }
-  }, [ticketId]);
+  }, [workOrderId]);
 
   // Timer tick
   useEffect(() => {
@@ -65,7 +65,7 @@ export function TimeLogger({
     setIsRunning(true);
     setElapsed(0);
     localStorage.setItem(
-      `timer-${ticketId}`,
+      `timer-${workOrderId}`,
       JSON.stringify({ start: now.toISOString() })
     );
   };
@@ -84,7 +84,7 @@ export function TimeLogger({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ticketId,
+          workOrderId,
           userId,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
@@ -97,7 +97,7 @@ export function TimeLogger({
 
       if (!res.ok) throw new Error("Failed to save time entry");
 
-      localStorage.removeItem(`timer-${ticketId}`);
+      localStorage.removeItem(`timer-${workOrderId}`);
       setIsRunning(false);
       setStartTime(null);
       setElapsed(0);
@@ -122,7 +122,7 @@ export function TimeLogger({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ticketId,
+          workOrderId,
           userId,
           startTime: now.toISOString(),
           endTime: now.toISOString(),

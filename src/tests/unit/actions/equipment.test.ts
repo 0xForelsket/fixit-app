@@ -408,12 +408,12 @@ describe("deleteEquipment action", () => {
       ownerId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      tickets: [{ id: 1 }], // Has tickets
+      workOrders: [{ id: 1 }], // Has work orders
     } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
     const result = await deleteEquipment(1);
 
-    expect(result.error).toBe("Cannot delete equipment with existing tickets");
+    expect(result.error).toBe("Cannot delete equipment with existing work orders");
   });
 
   it("should delete equipment successfully", async () => {
@@ -434,7 +434,7 @@ describe("deleteEquipment action", () => {
       ownerId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      tickets: [], // No tickets
+      workOrders: [], // No work orders
     } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
     vi.mocked(db.delete as unknown as () => unknown).mockReturnValue({

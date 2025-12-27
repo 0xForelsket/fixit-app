@@ -1,12 +1,12 @@
 "use client";
 
-import { createTicket } from "@/actions/tickets";
+import { createWorkOrder } from "@/actions/workOrders";
 import { Button } from "@/components/ui/button";
 import { CameraCapture } from "@/components/ui/camera-capture";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ticketPriorities, ticketTypes } from "@/db/schema";
+import { workOrderPriorities, workOrderTypes } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   ArrowUpCircle,
@@ -93,13 +93,13 @@ export function ReportForm({ equipment }: ReportFormProps) {
   const [attachments, setAttachments] = useState<
     { filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]
   >([]);
-  const [state, formAction, isPending] = useActionState(createTicket, {});
+  const [state, formAction, isPending] = useActionState(createWorkOrder, {});
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   useEffect(() => {
     if (state.success) {
-      router.push("/my-tickets?created=true");
+      router.push("/my-work-orders?created=true");
     }
   }, [state.success, router]);
 
@@ -122,7 +122,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
         body: JSON.stringify({
           filename,
           mimeType: "image/jpeg",
-          entityType: "ticket",
+          entityType: "work_order",
           entityId: equipment.id,
         }),
       });
@@ -180,7 +180,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
           What type of issue is it?
         </Label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {ticketTypes.map((type) => {
+          {workOrderTypes.map((type) => {
             const config = typeConfig[type];
             const Icon = config.icon;
             return (
@@ -214,7 +214,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
           How urgent is this?
         </Label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {ticketPriorities.map((priority) => {
+          {workOrderPriorities.map((priority) => {
             const config = priorityConfig[priority];
             return (
               <label
@@ -308,7 +308,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
         </div>
 
         <FileUpload
-          entityType="ticket"
+          entityType="work_order"
           entityId={equipment.id}
           onUploadComplete={handleUploadComplete}
           label="Or upload from device"

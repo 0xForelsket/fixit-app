@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  addTicketComment,
-  resolveTicket,
-  updateTicket,
-} from "@/actions/tickets";
+  addWorkOrderComment,
+  resolveWorkOrder,
+  updateWorkOrder,
+} from "@/actions/workOrders";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import type { Ticket, User } from "@/db/schema";
+import type { WorkOrder, User } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
@@ -19,39 +19,39 @@ import {
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 
-interface TicketActionsProps {
-  ticket: Ticket;
+interface WorkOrderActionsProps {
+  workOrder: WorkOrder;
   currentUser: { id: number; name: string };
   allTechs: User[];
 }
 
-export function TicketActions({
-  ticket,
+export function WorkOrderActions({
+  workOrder,
   currentUser,
   allTechs: _allTechs,
-}: TicketActionsProps) {
+}: WorkOrderActionsProps) {
   const _router = useRouter();
   const [isResolving, setIsResolving] = useState(false);
 
   // Status/Assign actions
   const [_assignState, assignAction, isAssignPending] = useActionState(
-    updateTicket.bind(null, ticket.id),
+    updateWorkOrder.bind(null, workOrder.id),
     {}
   );
 
   // Resolve action
   const [_resolveState, resolveAction, isResolvePending] = useActionState(
-    resolveTicket.bind(null, ticket.id),
+    resolveWorkOrder.bind(null, workOrder.id),
     {}
   );
 
   // Comment action
   const [_commentState, commentAction, isCommentPending] = useActionState(
-    addTicketComment.bind(null, ticket.id),
+    addWorkOrderComment.bind(null, workOrder.id),
     {}
   );
 
-  const isAssignedToMe = ticket.assignedToId === currentUser.id;
+  const isAssignedToMe = workOrder.assignedToId === currentUser.id;
 
   return (
     <div className="space-y-6">
@@ -64,7 +64,7 @@ export function TicketActions({
         </CardHeader>
         <CardContent className="space-y-3">
           {/* Assign to Me Button */}
-          {!isAssignedToMe && ticket.status !== "resolved" && (
+          {!isAssignedToMe && workOrder.status !== "resolved" && (
             <form action={assignAction}>
               <input type="hidden" name="assignedToId" value={currentUser.id} />
               <Button
@@ -79,7 +79,7 @@ export function TicketActions({
           )}
 
           {/* Resolve Button */}
-          {ticket.status !== "resolved" && (
+          {workOrder.status !== "resolved" && (
             <Button
               variant={isResolving ? "secondary" : "default"}
               className={cn(
@@ -89,7 +89,7 @@ export function TicketActions({
               onClick={() => setIsResolving(!isResolving)}
             >
               <CheckCircle2 className="h-4 w-4" />
-              {isResolving ? "Cancel Resolution" : "Resolve Ticket"}
+              {isResolving ? "Cancel Resolution" : "Resolve Work Order"}
             </Button>
           )}
 

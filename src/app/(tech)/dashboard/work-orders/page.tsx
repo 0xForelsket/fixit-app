@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import type { Equipment, Ticket, User } from "@/db/schema";
-import { tickets } from "@/db/schema";
+import type { Equipment, WorkOrder, User } from "@/db/schema";
+import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { and, count, eq, ilike, or } from "drizzle-orm";
+import { and, count, eq, ilike, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-type TicketWithRelations = Ticket & {
+type WorkOrderWithRelations = WorkOrder & {
   equipment: Equipment | null;
   reportedBy: User | null;
   assignedTo: User | null;
@@ -32,11 +32,12 @@ type SearchParams = {
   search?: string;
   page?: string;
   assigned?: string;
+  overdue?: string;
 };
 
 const PAGE_SIZE = 10;
 
-async function getTickets(params: SearchParams, userId?: number) {
+async function getWorkOrders(params: SearchParams, userId?: number) {
   const page = Number.parseInt(params.page || "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
 
@@ -45,7 +46,7 @@ async function getTickets(params: SearchParams, userId?: number) {
   if (params.status && params.status !== "all") {
     conditions.push(
       eq(
-        tickets.status,
+        workOrders.status,
         params.status as "open" | "in_progress" | "resolved" | "closed"
       )
     );
@@ -54,7 +55,7 @@ async function getTickets(params: SearchParams, userId?: number) {
   if (params.priority && params.priority !== "all") {
     conditions.push(
       eq(
-        tickets.priority,
+        workOrders.priority,
         params.priority as "low" | "medium" | "high" | "critical"
       )
     );
@@ -63,23 +64,33 @@ async function getTickets(params: SearchParams, userId?: number) {
   if (params.search) {
     conditions.push(
       or(
-        ilike(tickets.title, `%${params.search}%`),
-        ilike(tickets.description, `%${params.search}%`)
+        ilike(workOrders.title, `%${params.search}%`),
+        ilike(workOrders.description, `%${params.search}%`)
       )
     );
   }
 
   if (params.assigned === "me" && userId) {
-    conditions.push(eq(tickets.assignedToId, userId));
+    conditions.push(eq(workOrders.assignedToId, userId));
+  }
+
+  if (params.overdue === "true") {
+    conditions.push(lt(workOrders.dueBy, new Date()));
+    // Only show open or in_progress work orders when filtering by overdue
+    if (!params.status) {
+      conditions.push(
+        or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress"))
+      );
+    }
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-  const ticketsList = await db.query.tickets.findMany({
+  const workOrdersList = await db.query.workOrders.findMany({
     where: whereClause,
     limit: PAGE_SIZE,
     offset,
-    orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
       equipment: true,
       reportedBy: true,
@@ -89,11 +100,11 @@ async function getTickets(params: SearchParams, userId?: number) {
 
   const [totalResult] = await db
     .select({ count: count() })
-    .from(tickets)
+    .from(workOrders)
     .where(whereClause);
 
   return {
-    tickets: ticketsList,
+    workOrders: workOrdersList,
     total: totalResult.count,
     page,
     totalPages: Math.ceil(totalResult.count / PAGE_SIZE),
@@ -101,35 +112,35 @@ async function getTickets(params: SearchParams, userId?: number) {
 }
 
 async function getStats() {
-  const [openTickets] = await db
+  const [openWorkOrders] = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(eq(tickets.status, "open"));
+    .from(workOrders)
+    .where(eq(workOrders.status, "open"));
 
-  const [inProgressTickets] = await db
+  const [inProgressWorkOrders] = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(eq(tickets.status, "in_progress"));
+    .from(workOrders)
+    .where(eq(workOrders.status, "in_progress"));
 
-  const [resolvedTickets] = await db
+  const [resolvedWorkOrders] = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(eq(tickets.status, "resolved"));
+    .from(workOrders)
+    .where(eq(workOrders.status, "resolved"));
 
-  const [criticalTickets] = await db
+  const [criticalWorkOrders] = await db
     .select({ count: count() })
-    .from(tickets)
-    .where(and(eq(tickets.priority, "critical"), eq(tickets.status, "open")));
+    .from(workOrders)
+    .where(and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open")));
 
   return {
-    open: openTickets.count,
-    inProgress: inProgressTickets.count,
-    resolved: resolvedTickets.count,
-    critical: criticalTickets.count,
+    open: openWorkOrders.count,
+    inProgress: inProgressWorkOrders.count,
+    resolved: resolvedWorkOrders.count,
+    critical: criticalWorkOrders.count,
   };
 }
 
-export default async function TicketsPage({
+export default async function WorkOrdersPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
@@ -137,38 +148,43 @@ export default async function TicketsPage({
   const user = await getCurrentUser();
   const params = await searchParams;
   const {
-    tickets: ticketsList,
+    workOrders: workOrdersList,
     total,
     page,
     totalPages,
-  } = await getTickets(params, user?.id);
+  } = await getWorkOrders(params, user?.id);
   const stats = await getStats();
-  const isMyTicketsView = params.assigned === "me";
+  const isMyWorkOrdersView = params.assigned === "me";
 
   const activeFilters =
     (params.status && params.status !== "all") ||
     (params.priority && params.priority !== "all") ||
     params.search ||
-    isMyTicketsView;
+    isMyWorkOrdersView ||
+    params.overdue === "true";
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            {isMyTicketsView ? "My Tickets" : "All Tickets"}
+            {params.overdue === "true"
+              ? "Overdue Work Orders"
+              : isMyWorkOrdersView
+                ? "My Work Orders"
+                : "All Work Orders"}
           </h1>
           <p className="text-muted-foreground">
-            {total} total tickets • Page {page} of {totalPages || 1}
+            {total} total work orders • Page {page} of {totalPages || 1}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border-2 border-zinc-200 bg-white overflow-hidden">
             <Link
-              href="/dashboard/tickets"
+              href="/dashboard/work-orders"
               className={cn(
                 "px-3 py-1.5 text-sm font-bold transition-colors",
-                !isMyTicketsView
+                !isMyWorkOrdersView
                   ? "bg-primary-500 text-white"
                   : "text-zinc-600 hover:bg-zinc-50"
               )}
@@ -176,10 +192,10 @@ export default async function TicketsPage({
               All
             </Link>
             <Link
-              href="/dashboard/tickets?assigned=me"
+              href="/dashboard/work-orders?assigned=me"
               className={cn(
                 "px-3 py-1.5 text-sm font-bold transition-colors flex items-center gap-1.5",
-                isMyTicketsView
+                isMyWorkOrdersView
                   ? "bg-primary-500 text-white"
                   : "text-zinc-600 hover:bg-zinc-50"
               )}
@@ -241,7 +257,7 @@ export default async function TicketsPage({
       <div className="flex flex-wrap items-center gap-3">
         <form
           className="flex-1 min-w-[200px]"
-          action="/dashboard/tickets"
+          action="/dashboard/work-orders"
           method="get"
         >
           <div className="relative">
@@ -249,7 +265,7 @@ export default async function TicketsPage({
             <input
               type="text"
               name="search"
-              placeholder="Search tickets..."
+              placeholder="Search work orders..."
               defaultValue={params.search}
               className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -261,6 +277,9 @@ export default async function TicketsPage({
             )}
             {params.assigned && (
               <input type="hidden" name="assigned" value={params.assigned} />
+            )}
+            {params.overdue && (
+              <input type="hidden" name="overdue" value={params.overdue} />
             )}
           </div>
         </form>
@@ -293,7 +312,7 @@ export default async function TicketsPage({
 
         {activeFilters && (
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/dashboard/tickets">
+            <Link href="/dashboard/work-orders">
               <X className="mr-1 h-4 w-4" />
               Clear
             </Link>
@@ -301,17 +320,17 @@ export default async function TicketsPage({
         )}
       </div>
 
-      {/* Tickets List */}
-      {ticketsList.length === 0 ? (
+      {/* Work Orders List */}
+      {workOrdersList.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center bg-white shadow-sm">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-50 border shadow-inner">
             <Inbox className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-lg font-semibold">No tickets found</h3>
+          <h3 className="mt-4 text-lg font-semibold">No work orders found</h3>
           <p className="text-sm text-muted-foreground">
             {activeFilters
               ? "Try adjusting your filters"
-              : "No tickets have been created yet."}
+              : "No work orders have been created yet."}
           </p>
         </div>
       ) : (
@@ -322,7 +341,7 @@ export default async function TicketsPage({
               <thead className="border-b bg-slate-50">
                 <tr className="text-left text-sm font-medium text-muted-foreground">
                   <th className="p-4">ID</th>
-                  <th className="p-4">Ticket</th>
+                  <th className="p-4">Work Order</th>
                   <th className="p-4 hidden md:table-cell">Equipment</th>
                   <th className="p-4 hidden lg:table-cell">Status</th>
                   <th className="p-4 hidden lg:table-cell">Priority</th>
@@ -332,8 +351,8 @@ export default async function TicketsPage({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {ticketsList.map((ticket) => (
-                  <TicketRow key={ticket.id} ticket={ticket} />
+                {workOrdersList.map((workOrder) => (
+                  <WorkOrderRow key={workOrder.id} workOrder={workOrder} />
                 ))}
               </tbody>
             </table>
@@ -341,8 +360,8 @@ export default async function TicketsPage({
 
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-3">
-            {ticketsList.map((ticket) => (
-              <TicketCard key={ticket.id} ticket={ticket} />
+            {workOrdersList.map((workOrder) => (
+              <WorkOrderCard key={workOrder.id} workOrder={workOrder} />
             ))}
           </div>
         </>
@@ -365,7 +384,7 @@ export default async function TicketsPage({
             >
               {page > 1 ? (
                 <Link
-                  href={`/dashboard/tickets?${buildSearchParams({ ...params, page: String(page - 1) })}`}
+                  href={`/dashboard/work-orders?${buildSearchParams({ ...params, page: String(page - 1) })}`}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Prev
@@ -386,7 +405,7 @@ export default async function TicketsPage({
             >
               {page < totalPages ? (
                 <Link
-                  href={`/dashboard/tickets?${buildSearchParams({ ...params, page: String(page + 1) })}`}
+                  href={`/dashboard/work-orders?${buildSearchParams({ ...params, page: String(page + 1) })}`}
                 >
                   Next
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -434,7 +453,7 @@ function StatFilterCard({
 }) {
   return (
     <Link
-      href={active ? "/dashboard/tickets" : href}
+      href={active ? "/dashboard/work-orders" : href}
       className={cn(
         "flex flex-1 items-center gap-3 rounded-xl border p-3 sm:p-4 transition-all hover:shadow-md bg-white",
         active
@@ -478,7 +497,7 @@ function FilterSelect({
       page: undefined,
     };
     const queryString = buildSearchParams(params);
-    return `/dashboard/tickets${queryString ? `?${queryString}` : ""}`;
+    return `/dashboard/work-orders${queryString ? `?${queryString}` : ""}`;
   };
 
   const currentOption =
@@ -513,16 +532,16 @@ function FilterSelect({
   );
 }
 
-function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
-  const statusConfig = getStatusConfig(ticket.status);
-  const priorityConfig = getPriorityConfig(ticket.priority);
+function WorkOrderCard({ workOrder }: { workOrder: WorkOrderWithRelations }) {
+  const statusConfig = getStatusConfig(workOrder.status);
+  const priorityConfig = getPriorityConfig(workOrder.priority);
 
   return (
     <Link
-      href={`/dashboard/tickets/${ticket.id}`}
+      href={`/dashboard/work-orders/${workOrder.id}`}
       className={cn(
         "block rounded-2xl border-2 bg-white p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]",
-        ticket.priority === "critical"
+        workOrder.priority === "critical"
           ? "border-rose-200 shadow-rose-100/50"
           : "border-zinc-200"
       )}
@@ -532,7 +551,7 @@ function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
           variant="outline"
           className="font-mono text-[10px] bg-zinc-50 border-zinc-300 px-1.5 py-0"
         >
-          #{ticket.id}
+          #{workOrder.id}
         </Badge>
         <span
           className={cn(
@@ -546,7 +565,7 @@ function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
       </div>
 
       <h3 className="font-bold text-lg leading-tight mb-1 text-zinc-900 line-clamp-2">
-        {ticket.title}
+        {workOrder.title}
       </h3>
 
       <div className="flex items-center gap-2 mb-4">
@@ -561,17 +580,17 @@ function TicketCard({ ticket }: { ticket: TicketWithRelations }) {
         </span>
         <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
           <Timer className="h-3 w-3" />
-          {formatRelativeTime(ticket.createdAt)}
+          {formatRelativeTime(workOrder.createdAt)}
         </span>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
         <div className="flex items-center gap-2 overflow-hidden">
           <div className="h-6 w-6 rounded-full bg-zinc-100 border flex items-center justify-center text-[10px] font-bold shrink-0">
-            {ticket.assignedTo?.name?.[0] || "U"}
+            {workOrder.assignedTo?.name?.[0] || "U"}
           </div>
           <span className="text-xs font-semibold truncate text-zinc-600">
-            {ticket.assignedTo?.name || "Unassigned"}
+            {workOrder.assignedTo?.name || "Unassigned"}
           </span>
         </div>
         <div className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">
@@ -637,32 +656,32 @@ function getPriorityConfig(priority: string) {
   return configs[priority] || configs.medium;
 }
 
-function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
-  const status = getStatusConfig(ticket.status);
-  const priority = getPriorityConfig(ticket.priority);
+function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
+  const status = getStatusConfig(workOrder.status);
+  const priority = getPriorityConfig(workOrder.priority);
 
   return (
     <tr className="hover:bg-slate-50 transition-colors">
       <td className="p-4">
         <Badge variant="outline" className="font-mono text-xs">
-          #{ticket.id}
+          #{workOrder.id}
         </Badge>
       </td>
       <td className="p-4">
         <div className="space-y-1">
           <Link
-            href={`/dashboard/tickets/${ticket.id}`}
+            href={`/dashboard/work-orders/${workOrder.id}`}
             className="font-medium hover:text-primary-600 hover:underline"
           >
-            {ticket.title}
+            {workOrder.title}
           </Link>
           <p className="text-sm text-muted-foreground line-clamp-1">
-            {ticket.description}
+            {workOrder.description}
           </p>
         </div>
       </td>
       <td className="p-4 hidden md:table-cell">
-        <span className="text-sm">{ticket.equipment?.name || "—"}</span>
+        <span className="text-sm">{workOrder.equipment?.name || "—"}</span>
       </td>
       <td className="p-4 hidden lg:table-cell">
         <span
@@ -688,19 +707,19 @@ function TicketRow({ ticket }: { ticket: TicketWithRelations }) {
       </td>
       <td className="p-4 hidden xl:table-cell">
         <span className="text-sm">
-          {ticket.assignedTo?.name || (
+          {workOrder.assignedTo?.name || (
             <span className="text-muted-foreground">Unassigned</span>
           )}
         </span>
       </td>
       <td className="p-4 hidden sm:table-cell">
         <span className="text-sm text-muted-foreground">
-          {formatRelativeTime(ticket.createdAt)}
+          {formatRelativeTime(workOrder.createdAt)}
         </span>
       </td>
       <td className="p-4 text-right">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/dashboard/tickets/${ticket.id}`}>
+          <Link href={`/dashboard/work-orders/${workOrder.id}`}>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>

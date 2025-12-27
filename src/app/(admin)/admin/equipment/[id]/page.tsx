@@ -55,8 +55,8 @@ export default async function EquipmentDetailPage({
           },
         },
       },
-      tickets: {
-        orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+      workOrders: {
+        orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
         with: {
           assignedTo: true,
         },
@@ -153,16 +153,16 @@ export default async function EquipmentDetailPage({
       </h3>
       <div className="space-y-4">
         {(() => {
-          const maintenanceTickets = equipmentItem.tickets.filter(
-            (t) => t.type === "maintenance" || t.type === "calibration"
+          const maintenanceWorkOrders = equipmentItem.workOrders.filter(
+            (wo) => wo.type === "maintenance" || wo.type === "calibration"
           );
-          const resolved = maintenanceTickets.filter(
-            (t) => t.status === "resolved" || t.status === "closed"
+          const resolved = maintenanceWorkOrders.filter(
+            (wo) => wo.status === "resolved" || wo.status === "closed"
           );
           const totalResolved = resolved.length;
-          const onTime = resolved.filter((t) => {
-            if (!t.dueBy || !t.resolvedAt) return true;
-            return t.resolvedAt <= t.dueBy;
+          const onTime = resolved.filter((wo) => {
+            if (!wo.dueBy || !wo.resolvedAt) return true;
+            return wo.resolvedAt <= wo.dueBy;
           }).length;
           const rate =
             totalResolved > 0
@@ -196,9 +196,9 @@ export default async function EquipmentDetailPage({
                   <p className="font-medium text-lg">{totalResolved}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Tickets</p>
+                  <p className="text-xs text-muted-foreground">Total WOs</p>
                   <p className="font-medium text-lg">
-                    {maintenanceTickets.length}
+                    {maintenanceWorkOrders.length}
                   </p>
                 </div>
               </div>
@@ -251,42 +251,42 @@ export default async function EquipmentDetailPage({
       <div className="border-b p-4">
         <h3 className="font-semibold flex items-center gap-2">
           <History className="h-4 w-4" />
-          Recent Tickets
+          Recent Work Orders
         </h3>
       </div>
-      {equipmentItem.tickets.length === 0 ? (
+      {equipmentItem.workOrders.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">
-          No tickets found.
+          No work orders found.
         </div>
       ) : (
         <div className="divide-y">
-          {equipmentItem.tickets.slice(0, 10).map((ticket) => (
+          {equipmentItem.workOrders.slice(0, 10).map((workOrder) => (
             <Link
-              key={ticket.id}
-              href={`/dashboard/tickets/${ticket.id}`}
+              key={workOrder.id}
+              href={`/dashboard/work-orders/${workOrder.id}`}
               className="block p-4 hover:bg-slate-50 transition-colors"
             >
               <div className="flex justify-between items-start mb-1">
                 <span className="font-semibold text-sm truncate pr-2">
-                  {ticket.title}
+                  {workOrder.title}
                 </span>
                 <span className="text-[10px] text-muted-foreground font-medium uppercase shrink-0">
-                  {formatRelativeTime(ticket.createdAt)}
+                  {formatRelativeTime(workOrder.createdAt)}
                 </span>
               </div>
               <div className="flex justify-between text-xs">
                 <span
                   className={cn(
                     "font-bold px-2 py-0.5 rounded uppercase tracking-wider",
-                    ticket.status === "open"
+                    workOrder.status === "open"
                       ? "bg-blue-50 text-blue-600"
                       : "bg-emerald-50 text-emerald-600"
                   )}
                 >
-                  {ticket.status}
+                  {workOrder.status}
                 </span>
                 <span className="text-muted-foreground italic">
-                  {ticket.assignedTo?.name || "Unassigned"}
+                  {workOrder.assignedTo?.name || "Unassigned"}
                 </span>
               </div>
             </Link>

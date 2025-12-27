@@ -6,18 +6,18 @@ import {
   equipment as equipmentTable,
   notifications,
   roles,
-  ticketLogs,
-  tickets,
+  workOrderLogs,
+  workOrders,
   users,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
-import { ticketLogger } from "@/lib/logger";
+import { workOrderLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
 import {
-  createTicketSchema,
-  resolveTicketSchema,
-  updateTicketSchema,
+  createWorkOrderSchema,
+  resolveWorkOrderSchema,
+  updateWorkOrderSchema,
 } from "@/lib/validations";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -28,13 +28,13 @@ export type ActionState = {
   data?: unknown;
 };
 
-export async function createTicket(
+export async function createWorkOrder(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "You must be logged in to create a ticket" };
+    return { error: "You must be logged in to create a work order" };
   }
 
   // Extract attachments from JSON if provided
@@ -50,7 +50,7 @@ export async function createTicket(
     attachments: parsedAttachments,
   };
 
-  const result = createTicketSchema.safeParse(rawData);
+  const result = createWorkOrderSchema.safeParse(rawData);
   if (!result.success) {
     const errors = result.error.flatten().fieldErrors;
     const firstError = Object.values(errors)[0]?.[0];
@@ -63,17 +63,17 @@ export async function createTicket(
     title,
     description,
     priority,
-    attachments: ticketAttachments,
+    attachments: workOrderAttachments,
   } = result.data;
 
   // Calculate SLA due date
   const dueBy = calculateDueBy(priority);
 
-  // Create the ticket within a transaction to ensure all or nothing
+  // Create the work order within a transaction to ensure all or nothing
   try {
-    const ticket = await db.transaction(async (tx) => {
-      const [newTicket] = await tx
-        .insert(tickets)
+    const workOrder = await db.transaction(async (tx) => {
+      const [newWorkOrder] = await tx
+        .insert(workOrders)
         .values({
           equipmentId,
           type,
@@ -87,12 +87,12 @@ export async function createTicket(
         .returning();
 
       // Insert attachments if any
-      if (ticketAttachments && ticketAttachments.length > 0) {
+      if (workOrderAttachments && workOrderAttachments.length > 0) {
         await tx.insert(attachments).values(
-          ticketAttachments.map((att) => ({
-            entityType: "ticket" as const,
-            entityId: newTicket.id,
-            type: "photo" as const, // Default to photo for ticket uploads
+          workOrderAttachments.map((att) => ({
+            entityType: "work_order" as const,
+            entityId: newWorkOrder.id,
+            type: "photo" as const, // Default to photo for work order uploads
             filename: att.filename,
             s3Key: att.s3Key,
             mimeType: att.mimeType,
@@ -102,7 +102,7 @@ export async function createTicket(
         );
       }
 
-      return newTicket;
+      return newWorkOrder;
     });
 
     // Get equipment details for notifications
@@ -110,7 +110,7 @@ export async function createTicket(
       where: eq(equipmentTable.id, equipmentId),
     });
 
-    // Notify techs for critical/high priority tickets
+    // Notify techs for critical/high priority work orders
     if (priority === "critical" || priority === "high") {
       const techRole = await db.query.roles.findFirst({
         where: eq(roles.name, "tech"),
@@ -125,10 +125,10 @@ export async function createTicket(
           await db.insert(notifications).values(
             techs.map((tech) => ({
               userId: tech.id,
-              type: "ticket_created" as const,
-              title: `New ${priority} Priority Ticket`,
+              type: "work_order_created" as const,
+              title: `New ${priority} Priority Work Order`,
               message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
-              link: `/dashboard/tickets/${ticket.id}`,
+              link: `/dashboard/work-orders/${workOrder.id}`,
             }))
           );
         }
@@ -139,27 +139,27 @@ export async function createTicket(
     if (equipmentItem?.ownerId) {
       await db.insert(notifications).values({
         userId: equipmentItem.ownerId,
-        type: "ticket_created" as const,
-        title: "Ticket Opened on Your Equipment",
+        type: "work_order_created" as const,
+        title: "Work Order Opened on Your Equipment",
         message: `${title} - ${equipmentItem.name}`,
-        link: `/dashboard/tickets/${ticket.id}`,
+        link: `/dashboard/work-orders/${workOrder.id}`,
       });
     }
 
     revalidatePath("/dashboard");
-    revalidatePath("/dashboard/tickets");
-    revalidatePath("/my-tickets");
+    revalidatePath("/dashboard/work-orders");
+    revalidatePath("/my-work-orders");
     revalidatePath("/");
 
-    return { success: true, data: ticket };
+    return { success: true, data: workOrder };
   } catch (error) {
-    ticketLogger.error({ error, userId: user.id }, "Failed to create ticket");
-    return { error: "Failed to create ticket. Please try again." };
+    workOrderLogger.error({ error, userId: user.id }, "Failed to create work order");
+    return { error: "Failed to create work order. Please try again." };
   }
 }
 
-export async function updateTicket(
-  ticketId: number,
+export async function updateWorkOrder(
+  workOrderId: number,
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -169,7 +169,7 @@ export async function updateTicket(
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_UPDATE)) {
-    return { error: "You don't have permission to update tickets" };
+    return { error: "You don't have permission to update work orders" };
   }
 
   const rawData: Record<string, unknown> = {};
@@ -183,17 +183,17 @@ export async function updateTicket(
   if (assignedToId) rawData.assignedToId = Number(assignedToId) || null;
   if (resolutionNotes) rawData.resolutionNotes = resolutionNotes;
 
-  const result = updateTicketSchema.safeParse(rawData);
+  const result = updateWorkOrderSchema.safeParse(rawData);
   if (!result.success) {
     return { error: "Invalid input" };
   }
 
-  const existingTicket = await db.query.tickets.findFirst({
-    where: eq(tickets.id, ticketId),
+  const existingWorkOrder = await db.query.workOrders.findFirst({
+    where: eq(workOrders.id, workOrderId),
   });
 
-  if (!existingTicket) {
-    return { error: "Ticket not found" };
+  if (!existingWorkOrder) {
+    return { error: "Work order not found" };
   }
 
   const updateData: Record<string, unknown> = {
@@ -204,19 +204,19 @@ export async function updateTicket(
   // Set resolvedAt if status is being changed to resolved
   if (
     result.data.status === "resolved" &&
-    existingTicket.status !== "resolved"
+    existingWorkOrder.status !== "resolved"
   ) {
     updateData.resolvedAt = new Date();
   }
 
-  await db.update(tickets).set(updateData).where(eq(tickets.id, ticketId));
+  await db.update(workOrders).set(updateData).where(eq(workOrders.id, workOrderId));
 
   // Log status changes
-  if (result.data.status && result.data.status !== existingTicket.status) {
-    await db.insert(ticketLogs).values({
-      ticketId,
+  if (result.data.status && result.data.status !== existingWorkOrder.status) {
+    await db.insert(workOrderLogs).values({
+      workOrderId,
       action: "status_change",
-      oldValue: existingTicket.status,
+      oldValue: existingWorkOrder.status,
       newValue: result.data.status,
       createdById: user.id,
     });
@@ -225,12 +225,12 @@ export async function updateTicket(
   // Log assignment changes
   if (
     result.data.assignedToId !== undefined &&
-    result.data.assignedToId !== existingTicket.assignedToId
+    result.data.assignedToId !== existingWorkOrder.assignedToId
   ) {
-    await db.insert(ticketLogs).values({
-      ticketId,
+    await db.insert(workOrderLogs).values({
+      workOrderId,
       action: "assignment",
-      oldValue: existingTicket.assignedToId?.toString() || null,
+      oldValue: existingWorkOrder.assignedToId?.toString() || null,
       newValue: result.data.assignedToId?.toString() || "unassigned",
       createdById: user.id,
     });
@@ -239,23 +239,23 @@ export async function updateTicket(
     if (result.data.assignedToId) {
       await db.insert(notifications).values({
         userId: result.data.assignedToId,
-        type: "ticket_assigned",
-        title: "Ticket Assigned to You",
-        message: existingTicket.title,
-        link: `/dashboard/tickets/${ticketId}`,
+        type: "work_order_assigned",
+        title: "Work Order Assigned to You",
+        message: existingWorkOrder.title,
+        link: `/dashboard/work-orders/${workOrderId}`,
       });
     }
   }
 
-  revalidatePath(`/dashboard/tickets/${ticketId}`);
-  revalidatePath("/dashboard/tickets");
+  revalidatePath(`/dashboard/work-orders/${workOrderId}`);
+  revalidatePath("/dashboard/work-orders");
   revalidatePath("/dashboard");
 
   return { success: true };
 }
 
-export async function resolveTicket(
-  ticketId: number,
+export async function resolveWorkOrder(
+  workOrderId: number,
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -265,53 +265,53 @@ export async function resolveTicket(
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_RESOLVE)) {
-    return { error: "You don't have permission to resolve tickets" };
+    return { error: "You don't have permission to resolve work orders" };
   }
 
   const rawData = {
     resolutionNotes: formData.get("resolutionNotes"),
   };
 
-  const result = resolveTicketSchema.safeParse(rawData);
+  const result = resolveWorkOrderSchema.safeParse(rawData);
   if (!result.success) {
     return { error: "Resolution notes are required" };
   }
 
-  const existingTicket = await db.query.tickets.findFirst({
-    where: eq(tickets.id, ticketId),
+  const existingWorkOrder = await db.query.workOrders.findFirst({
+    where: eq(workOrders.id, workOrderId),
   });
 
-  if (!existingTicket) {
-    return { error: "Ticket not found" };
+  if (!existingWorkOrder) {
+    return { error: "Work order not found" };
   }
 
   await db
-    .update(tickets)
+    .update(workOrders)
     .set({
       status: "resolved",
       resolutionNotes: result.data.resolutionNotes,
       resolvedAt: new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(tickets.id, ticketId));
+    .where(eq(workOrders.id, workOrderId));
 
-  await db.insert(ticketLogs).values({
-    ticketId,
+  await db.insert(workOrderLogs).values({
+    workOrderId,
     action: "status_change",
-    oldValue: existingTicket.status,
+    oldValue: existingWorkOrder.status,
     newValue: "resolved",
     createdById: user.id,
   });
 
-  revalidatePath(`/dashboard/tickets/${ticketId}`);
-  revalidatePath("/dashboard/tickets");
+  revalidatePath(`/dashboard/work-orders/${workOrderId}`);
+  revalidatePath("/dashboard/work-orders");
   revalidatePath("/dashboard");
 
   return { success: true };
 }
 
-export async function addTicketComment(
-  ticketId: number,
+export async function addWorkOrderComment(
+  workOrderId: number,
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -325,15 +325,15 @@ export async function addTicketComment(
     return { error: "Comment is required" };
   }
 
-  await db.insert(ticketLogs).values({
-    ticketId,
+  await db.insert(workOrderLogs).values({
+    workOrderId,
     action: "comment",
     oldValue: null,
     newValue: comment.trim(),
     createdById: user.id,
   });
 
-  revalidatePath(`/dashboard/tickets/${ticketId}`);
+  revalidatePath(`/dashboard/work-orders/${workOrderId}`);
 
   return { success: true };
 }

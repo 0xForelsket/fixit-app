@@ -19,151 +19,195 @@ export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, initialState);
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4 bg-zinc-950 font-sans selection:bg-orange-500/30">
-      {/* Background Pattern: Adds texture to the background for visual interest */}
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#a1a1aa_1px,transparent_1px)] [background-size:16px_16px]" />
+    <main className="flex min-h-screen">
+      {/* Left Panel - Promotional/Info Section */}
+      <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 -left-20 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 -right-20 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
+        </div>
 
-      {/* Decorative Gradient Blob: Provides a subtle glow effect behind the card */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[100px] pointer-events-none" />
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-      <Card className="relative z-10 w-full max-w-sm bg-zinc-900/90 border-zinc-800 shadow-2xl backdrop-blur-xl ring-1 ring-white/5">
-        <CardHeader className="text-center pb-8 pt-10">
-          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/20 text-zinc-950">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-7 h-7"
-            >
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-            </svg>
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+          <div className="mb-8">
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-3xl font-bold shadow-lg shadow-primary-500/30 mb-6">
+              F
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-bold mb-4">
+              FixIt CMMS
+            </h1>
+            <p className="text-xl text-zinc-400 max-w-md">
+              Streamline your maintenance operations with our comprehensive management system.
+            </p>
           </div>
-          <CardTitle className="text-2xl font-bold text-zinc-100 tracking-tight">
-            FixIt CMMS
-          </CardTitle>
-          <CardDescription className="text-zinc-400 mt-2">
-            Secure Industrial Access
-          </CardDescription>
-        </CardHeader>
 
-        <CardContent>
-          <form action={formAction} className="space-y-5">
-            <div className="space-y-2">
-              <Label
-                htmlFor="employeeId"
-                className="text-xs uppercase tracking-wider text-zinc-500 font-semibold ml-1"
-              >
-                Employee ID
-              </Label>
-              <Input
-                id="employeeId"
-                name="employeeId"
-                placeholder="TECH-001"
-                autoComplete="username"
-                disabled={isPending}
-                required
-                className="bg-zinc-950/50 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 font-mono tracking-wide focus:border-orange-500/50 focus:ring-orange-500/20 h-11 uppercase"
-              />
+          <div className="space-y-6 mt-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-primary-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Work Order Management</h3>
+                <p className="text-zinc-400 text-sm">Track and manage maintenance tasks efficiently</p>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between ml-1">
-                <Label
-                  htmlFor="pin"
-                  className="text-xs uppercase tracking-wider text-zinc-500 font-semibold"
-                >
-                  PIN Code
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-primary-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Asset Tracking</h3>
+                <p className="text-zinc-400 text-sm">Monitor equipment health and maintenance history</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-primary-500">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">Analytics & Reports</h3>
+                <p className="text-zinc-400 text-sm">Data-driven insights for better decisions</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-zinc-800">
+            <p className="text-sm text-zinc-500">
+              Trusted by maintenance teams worldwide
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Panel - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-zinc-50 via-white to-orange-50">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none lg:left-1/2">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <Card className="relative w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          {/* Orange accent bar */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-primary-400 to-primary-600 rounded-t-lg" />
+
+          <CardHeader className="text-center pt-8 pb-2">
+            {/* Mobile Logo - only shows on smaller screens */}
+            <div className="lg:hidden mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-3xl font-bold text-white shadow-lg shadow-primary-500/30">
+              F
+            </div>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Sign in with your Employee ID and PIN
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="pt-4">
+            <form action={formAction} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="employeeId" className="text-sm font-medium">
+                  Employee ID
                 </Label>
+                <Input
+                  id="employeeId"
+                  name="employeeId"
+                  placeholder="e.g., TECH-001"
+                  autoComplete="username"
+                  disabled={isPending}
+                  required
+                  className="font-mono uppercase tracking-wider focus:border-primary-400 focus:ring-primary-400/20"
+                />
               </div>
-              <Input
-                id="pin"
-                name="pin"
-                type="password"
-                placeholder="••••"
-                autoComplete="current-password"
-                disabled={isPending}
-                required
-                minLength={4}
-                className="bg-zinc-950/50 border-zinc-800 text-zinc-200 placeholder:text-zinc-600 font-mono tracking-[0.5em] text-center focus:border-orange-500/50 focus:ring-orange-500/20 h-11"
-              />
-            </div>
 
-            {state.error && (
-              <div className="rounded-md bg-red-950/30 border border-red-900/50 p-3 flex items-center gap-3 animate-in fade-in slide-in-from-top-1">
-                <div className="h-2 w-2 rounded-full bg-red-500 flex-shrink-0 animate-pulse" />
-                <p className="text-xs font-medium text-red-200">
-                  {state.error}
-                </p>
+              <div className="space-y-2">
+                <Label htmlFor="pin" className="text-sm font-medium">
+                  PIN
+                </Label>
+                <Input
+                  id="pin"
+                  name="pin"
+                  type="password"
+                  placeholder="Enter your PIN"
+                  autoComplete="current-password"
+                  disabled={isPending}
+                  required
+                  minLength={4}
+                  className="font-mono tracking-widest focus:border-primary-400 focus:ring-primary-400/20"
+                />
               </div>
-            )}
 
-            <Button
-              type="submit"
-              className="w-full h-11 bg-orange-600 hover:bg-orange-500 text-white font-semibold shadow-lg shadow-orange-900/20 hover:shadow-orange-900/40 transition-all duration-300"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <span className="flex items-center gap-2 text-white/90">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
+              {state.error && (
+                <div className="rounded-lg bg-danger-50 border border-danger-200 p-3 text-sm text-danger-700 flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 flex-shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
                     />
                   </svg>
-                  Authenticating...
-                </span>
-              ) : (
-                "Access System"
+                  {state.error}
+                </div>
               )}
-            </Button>
-          </form>
 
-          {/* Helper for demo: Shows default credentials for easier testing */}
-          <div className="mt-8 pt-6 border-t border-zinc-800/50 text-center">
-            <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-3 font-semibold">
-              Development Access
-            </p>
-            <div className="grid grid-cols-3 gap-2 text-xs font-mono text-zinc-500">
-              <div
-                className="bg-zinc-950/30 rounded py-1 px-2 border border-zinc-800/50 hover:border-zinc-700 hover:text-zinc-400 transition-colors cursor-help"
-                title="PIN: 1234"
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold shadow-md shadow-primary-500/25 hover:shadow-lg hover:shadow-primary-500/30 transition-all duration-200"
+                disabled={isPending}
               >
-                ADMIN-001
-              </div>
-              <div
-                className="bg-zinc-950/30 rounded py-1 px-2 border border-zinc-800/50 hover:border-zinc-700 hover:text-zinc-400 transition-colors cursor-help"
-                title="PIN: 5678"
-              >
-                TECH-001
-              </div>
-              <div
-                className="bg-zinc-950/30 rounded py-1 px-2 border border-zinc-800/50 hover:border-zinc-700 hover:text-zinc-400 transition-colors cursor-help"
-                title="PIN: 0000"
-              >
-                OP-001
-              </div>
+                {isPending ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        fill="none"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Signing in...
+                  </span>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+
+            {/* Demo credentials hint */}
+            <div className="mt-6 pt-4 border-t border-zinc-100 text-center">
+              <p className="text-xs text-muted-foreground">
+                Demo:{" "}
+                <span className="font-mono text-primary-600">ADMIN-001</span> /{" "}
+                <span className="font-mono text-primary-600">1234</span>
+              </p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Footer: System status indicator */}
-      <div className="absolute bottom-6 text-zinc-700 text-xs font-mono">
-        v0.1.0 • SYSTEM OPERATIONAL
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

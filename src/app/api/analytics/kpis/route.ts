@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { tickets } from "@/db/schema";
+import { workOrders } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { and, gt, isNotNull, sql } from "drizzle-orm";
@@ -12,24 +12,24 @@ export async function GET() {
   }
 
   try {
-    // 1. Open Tickets (Backlog)
-    // Count tickets where status is 'open' or 'in_progress'
+    // 1. Open Work Orders (Backlog)
+    // Count work orders where status is 'open' or 'in_progress'
     const backlogResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(tickets)
+      .from(workOrders)
       .where(
-        sql`${tickets.status} = 'open' OR ${tickets.status} = 'in_progress'`
+        sql`${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress'`
       );
-    const openTickets = backlogResult[0].count;
+    const openWorkOrders = backlogResult[0].count;
 
     // 2. Critical/High Priority Open
     const priorityResult = await db
       .select({ count: sql<number>`count(*)` })
-      .from(tickets)
+      .from(workOrders)
       .where(
         and(
-          sql`${tickets.status} = 'open' OR ${tickets.status} = 'in_progress'`,
-          sql`${tickets.priority} = 'critical' OR ${tickets.priority} = 'high'`
+          sql`${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress'`,
+          sql`${workOrders.priority} = 'critical' OR ${workOrders.priority} = 'high'`
         )
       );
     const highPriorityOpen = priorityResult[0].count;
@@ -39,32 +39,32 @@ export async function GET() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const resolvedTickets = await db
+    const resolvedWorkOrders = await db
       .select({
-        created: tickets.createdAt,
-        resolved: tickets.resolvedAt,
+        created: workOrders.createdAt,
+        resolved: workOrders.resolvedAt,
       })
-      .from(tickets)
+      .from(workOrders)
       .where(
         and(
-          isNotNull(tickets.resolvedAt),
-          gt(tickets.resolvedAt, thirtyDaysAgo)
+          isNotNull(workOrders.resolvedAt),
+          gt(workOrders.resolvedAt, thirtyDaysAgo)
         )
       );
 
     let mttrHours = 0;
-    if (resolvedTickets.length > 0) {
-      const totalDurationMs = resolvedTickets.reduce((acc, t) => {
+    if (resolvedWorkOrders.length > 0) {
+      const totalDurationMs = resolvedWorkOrders.reduce((acc, t) => {
         return acc + (t.resolved!.getTime() - t.created.getTime());
       }, 0);
       mttrHours = Math.round(
-        totalDurationMs / (1000 * 60 * 60) / resolvedTickets.length
+        totalDurationMs / (1000 * 60 * 60) / resolvedWorkOrders.length
       );
     }
 
     // 4. SLA Compliance Rate
-    // % of resolved tickets (last 30 days) where resolvedAt <= dueBy
-    const _compliantTickets = resolvedTickets.filter((_t) => {
+    // % of resolved work orders (last 30 days) where resolvedAt <= dueBy
+    const _compliantWorkOrders = resolvedWorkOrders.filter((_t) => {
       // We'll need to re-query or update the select above to include dueBy
       // For efficiency, let's just do it in one query if possible, but JS filter is fine for small scale
       return true; // Placeholder until we fetch dueBy
@@ -73,15 +73,15 @@ export async function GET() {
     // Let's re-fetch with dueBy
     const resolvedWithDue = await db
       .select({
-        created: tickets.createdAt,
-        resolved: tickets.resolvedAt,
-        dueBy: tickets.dueBy,
+        created: workOrders.createdAt,
+        resolved: workOrders.resolvedAt,
+        dueBy: workOrders.dueBy,
       })
-      .from(tickets)
+      .from(workOrders)
       .where(
         and(
-          isNotNull(tickets.resolvedAt),
-          gt(tickets.resolvedAt, thirtyDaysAgo)
+          isNotNull(workOrders.resolvedAt),
+          gt(workOrders.resolvedAt, thirtyDaysAgo)
         )
       );
 
@@ -96,7 +96,7 @@ export async function GET() {
         : 100;
 
     return NextResponse.json({
-      openTickets,
+      openWorkOrders,
       highPriorityOpen,
       mttrHours,
       slaRate,

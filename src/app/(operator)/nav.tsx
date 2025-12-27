@@ -35,8 +35,8 @@ export function OperatorNav({
             href={item.href}
             className={`px-4 py-3 text-sm font-medium rounded-md transition-colors min-h-[48px] flex items-center ${
               pathname === item.href
-                ? "bg-primary-100 text-primary-700"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-primary-500/10 text-primary-600 font-semibold"
+                : "text-muted-foreground hover:bg-primary-50 hover:text-primary-600"
             }`}
           >
             {item.label}
@@ -49,20 +49,20 @@ export function OperatorNav({
         ))}
       </nav>
 
-      <div className="flex items-center gap-3 border-l pl-4">
+      <div className="flex items-center gap-3 border-l border-slate-200 pl-4">
         <Link
           href="/profile"
-          className="flex items-center gap-3 hover:bg-muted/50 p-2 rounded-lg transition-colors group min-h-[48px]"
+          className="flex items-center gap-3 hover:bg-primary-50 p-2 rounded-lg transition-colors group min-h-[48px]"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-bold text-slate-900 group-hover:text-primary-700 transition-colors">
+            <p className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">
               {user.name}
             </p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               {user.role}
             </p>
           </div>
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-slate-100 bg-slate-50 shadow-sm group-hover:border-primary-200">
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-slate-100 bg-slate-50 shadow-sm group-hover:border-primary-300 group-hover:ring-2 group-hover:ring-primary-100 transition-all">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -81,7 +81,7 @@ export function OperatorNav({
             type="submit"
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-rose-600"
+            className="text-muted-foreground hover:text-danger-600 hover:bg-danger-50"
           >
             Logout
           </Button>

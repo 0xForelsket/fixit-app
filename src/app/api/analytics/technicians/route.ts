@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { tickets, users } from "@/db/schema";
+import { roles, workOrders, users } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { eq, sql } from "drizzle-orm";
@@ -12,20 +12,17 @@ export async function GET() {
   }
 
   try {
-    // Technician Performance
-    // List all techs with ticket counts
-    // We want: Name, Resolved Count, active count
-
     const result = await db
       .select({
         id: users.id,
         name: users.name,
-        resolvedCount: sql<number>`count(CASE WHEN ${tickets.status} = 'resolved' OR ${tickets.status} = 'closed' THEN 1 END)`,
-        activeCount: sql<number>`count(CASE WHEN ${tickets.status} = 'open' OR ${tickets.status} = 'in_progress' THEN 1 END)`,
+        resolvedCount: sql<number>`count(CASE WHEN ${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed' THEN 1 END)`,
+        activeCount: sql<number>`count(CASE WHEN ${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress' THEN 1 END)`,
       })
       .from(users)
-      .leftJoin(tickets, eq(users.id, tickets.assignedToId))
-      .where(eq(users.role, "tech"))
+      .leftJoin(roles, eq(users.roleId, roles.id))
+      .leftJoin(workOrders, eq(users.id, workOrders.assignedToId))
+      .where(eq(roles.name, "tech"))
       .groupBy(users.id);
 
     return NextResponse.json(result);

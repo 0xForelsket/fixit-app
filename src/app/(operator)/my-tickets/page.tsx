@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { tickets } from "@/db/schema";
+import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
@@ -23,7 +23,7 @@ interface PageProps {
   searchParams: Promise<{ created?: string }>;
 }
 
-export default async function MyTicketsPage({ searchParams }: PageProps) {
+export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -33,10 +33,10 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const showSuccess = params.created === "true";
 
-  // Fetch user's tickets
-  const userTickets = await db.query.tickets.findMany({
-    where: eq(tickets.reportedById, user.id),
-    orderBy: (tickets, { desc }) => [desc(tickets.createdAt)],
+  // Fetch user's work orders
+  const userWorkOrders = await db.query.workOrders.findMany({
+    where: eq(workOrders.reportedById, user.id),
+    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
       equipment: {
         columns: {
@@ -55,10 +55,10 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
   });
 
   // Group by status
-  const openTickets = userTickets.filter(
+  const openWorkOrders = userWorkOrders.filter(
     (t) => t.status === "open" || t.status === "in_progress"
   );
-  const resolvedTickets = userTickets.filter(
+  const resolvedWorkOrders = userWorkOrders.filter(
     (t) => t.status === "resolved" || t.status === "closed"
   );
 
@@ -72,7 +72,7 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              My Tickets
+              My Work Orders
             </h1>
             <p className="text-slate-500 mt-1">
               Track the status of issues you've reported
@@ -82,31 +82,31 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
           <div className="flex gap-3 overflow-x-auto pb-1 sm:pb-0">
             <StatCard
               label="Open"
-              count={openTickets.filter((t) => t.status === "open").length}
+              count={openWorkOrders.filter((t) => t.status === "open").length}
               type="open"
             />
             <StatCard
               label="Active"
               count={
-                openTickets.filter((t) => t.status === "in_progress").length
+                openWorkOrders.filter((t) => t.status === "in_progress").length
               }
               type="in_progress"
             />
             <StatCard
               label="Resolved"
-              count={resolvedTickets.length}
+              count={resolvedWorkOrders.length}
               type="resolved"
             />
           </div>
         </div>
 
         {/* Empty state */}
-        {userTickets.length === 0 ? (
+        {userWorkOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed bg-white py-16 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
               <Inbox className="h-8 w-8 text-muted-foreground/60" />
             </div>
-            <h3 className="mt-4 text-xl font-semibold">No tickets found</h3>
+            <h3 className="mt-4 text-xl font-semibold">No work orders found</h3>
             <p className="mt-2 text-muted-foreground max-w-xs mx-auto">
               You haven't reported any equipment issues yet.
             </p>
@@ -116,23 +116,23 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Active tickets */}
-            {openTickets.length > 0 && (
+            {/* Active work orders */}
+            {openWorkOrders.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2 px-1">
                   <Timer className="h-5 w-5 text-primary-600" />
                   <h2 className="text-lg font-bold">Active Requests</h2>
                 </div>
                 <div className="grid gap-3">
-                  {openTickets.map((ticket) => (
-                    <TicketListItem key={ticket.id} ticket={ticket} />
+                  {openWorkOrders.map((workOrder) => (
+                    <WorkOrderListItem key={workOrder.id} workOrder={workOrder} />
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Resolved tickets */}
-            {resolvedTickets.length > 0 && (
+            {/* Resolved work orders */}
+            {resolvedWorkOrders.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2 px-1">
                   <History className="h-5 w-5 text-muted-foreground" />
@@ -141,10 +141,10 @@ export default async function MyTicketsPage({ searchParams }: PageProps) {
                   </h2>
                 </div>
                 <div className="grid gap-3 opacity-80 hover:opacity-100 transition-opacity">
-                  {resolvedTickets.map((ticket) => (
-                    <TicketListItem
-                      key={ticket.id}
-                      ticket={ticket}
+                  {resolvedWorkOrders.map((workOrder) => (
+                    <WorkOrderListItem
+                      key={workOrder.id}
+                      workOrder={workOrder}
                       isResolved
                     />
                   ))}
@@ -217,11 +217,11 @@ function StatCard({
   );
 }
 
-function TicketListItem({
-  ticket,
+function WorkOrderListItem({
+  workOrder,
   isResolved,
 }: {
-  ticket: {
+  workOrder: {
     id: number;
     title: string;
     priority: string;
@@ -237,14 +237,14 @@ function TicketListItem({
     medium: { color: "bg-primary-500", label: "Medium" },
     high: { color: "bg-amber-500", label: "High" },
     critical: { color: "bg-rose-600", label: "Critical" },
-  }[ticket.priority as string] || {
+  }[workOrder.priority as string] || {
     color: "bg-slate-400",
-    label: ticket.priority,
+    label: workOrder.priority,
   };
 
   return (
     <Link
-      href={`/my-tickets/${ticket.id}`}
+      href={`/my-tickets/${workOrder.id}`}
       className={cn(
         "group relative flex items-center gap-4 overflow-hidden rounded-xl border bg-white p-4 transition-all hover:border-primary-300 hover:shadow-md",
         isResolved && "grayscale-[0.5]"
@@ -261,17 +261,17 @@ function TicketListItem({
       <div className="ml-2 flex-1 space-y-1">
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs font-bold text-muted-foreground bg-slate-100 px-1.5 py-0.5 rounded">
-            #{ticket.id}
+            #{workOrder.id}
           </span>
           <span className="font-bold text-slate-900 group-hover:text-primary-700 transition-colors">
-            {ticket.title}
+            {workOrder.title}
           </span>
-          {ticket.status === "in_progress" && (
+          {workOrder.status === "in_progress" && (
             <Badge variant="warning" className="ml-auto sm:ml-2">
               IN PROGRESS
             </Badge>
           )}
-          {ticket.status === "resolved" && (
+          {workOrder.status === "resolved" && (
             <Badge variant="success" className="ml-auto sm:ml-2">
               RESOLVED
             </Badge>
@@ -282,20 +282,20 @@ function TicketListItem({
           <div className="flex items-center gap-1.5">
             <Wrench className="h-3.5 w-3.5" />
             <span className="font-semibold text-slate-700">
-              {ticket.equipment?.name ?? "Unknown"}
+              {workOrder.equipment?.name ?? "Unknown"}
             </span>
           </div>
           <span>•</span>
           <div className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
-            {formatRelativeTime(ticket.createdAt)}
+            {formatRelativeTime(workOrder.createdAt)}
           </div>
-          {ticket.assignedTo && (
+          {workOrder.assignedTo && (
             <>
               <span>•</span>
               <div className="flex items-center gap-1.5 text-primary-700 font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                {ticket.assignedTo.name} is working on it
+                {workOrder.assignedTo.name} is working on it
               </div>
             </>
           )}

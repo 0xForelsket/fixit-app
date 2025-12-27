@@ -21,7 +21,7 @@ async function getTransactions() {
       location: true,
       toLocation: true,
       createdBy: true,
-      ticket: true,
+      workOrder: true,
     },
     limit: 100,
   });
@@ -103,8 +103,8 @@ export default async function TransactionsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {tx.ticket ? (
-                      <Badge variant="outline">Ticket #{tx.ticket.id}</Badge>
+                    {tx.workOrder ? (
+                      <Badge variant="outline">WO #{tx.workOrder.id}</Badge>
                     ) : (
                       <span className="text-sm text-muted-foreground">
                         {tx.reference || "-"}

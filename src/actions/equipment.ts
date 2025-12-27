@@ -156,22 +156,22 @@ export async function deleteEquipment(
     return { error: "You don't have permission to delete equipment" };
   }
 
-  // Check if equipment has any tickets
-  const equipmentWithTickets = await db.query.equipment.findFirst({
+  // Check if equipment has any work orders
+  const equipmentWithWorkOrders = await db.query.equipment.findFirst({
     where: eq(equipmentTable.id, equipmentId),
     with: {
-      tickets: {
+      workOrders: {
         limit: 1,
       },
     },
   });
 
-  if (!equipmentWithTickets) {
+  if (!equipmentWithWorkOrders) {
     return { error: "Equipment not found" };
   }
 
-  if (equipmentWithTickets.tickets.length > 0) {
-    return { error: "Cannot delete equipment with existing tickets" };
+  if (equipmentWithWorkOrders.workOrders.length > 0) {
+    return { error: "Cannot delete equipment with existing work orders" };
   }
 
   await db.delete(equipmentTable).where(eq(equipmentTable.id, equipmentId));
