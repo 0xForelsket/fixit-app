@@ -12,37 +12,37 @@ export const equipmentStatuses = [
 ] as const;
 export type EquipmentStatus = (typeof equipmentStatuses)[number];
 
-export const ticketTypes = [
+export const workOrderTypes = [
   "breakdown",
   "maintenance",
   "calibration",
   "safety",
   "upgrade",
 ] as const;
-export type TicketType = (typeof ticketTypes)[number];
+export type WorkOrderType = (typeof workOrderTypes)[number];
 
-export const ticketPriorities = ["low", "medium", "high", "critical"] as const;
-export type TicketPriority = (typeof ticketPriorities)[number];
+export const workOrderPriorities = ["low", "medium", "high", "critical"] as const;
+export type WorkOrderPriority = (typeof workOrderPriorities)[number];
 
-export const ticketStatuses = [
+export const workOrderStatuses = [
   "open",
   "in_progress",
   "resolved",
   "closed",
 ] as const;
-export type TicketStatus = (typeof ticketStatuses)[number];
+export type WorkOrderStatus = (typeof workOrderStatuses)[number];
 
 export const scheduleTypes = ["maintenance", "calibration"] as const;
 export type ScheduleType = (typeof scheduleTypes)[number];
 
-export const ticketLogActions = [
+export const workOrderLogActions = [
   "status_change",
   "comment",
   "assignment",
 ] as const;
-export type TicketLogAction = (typeof ticketLogActions)[number];
+export type WorkOrderLogAction = (typeof workOrderLogActions)[number];
 
-export const entityTypes = ["user", "equipment", "ticket", "location"] as const;
+export const entityTypes = ["user", "equipment", "work_order", "location"] as const;
 export type EntityType = (typeof entityTypes)[number];
 
 export const attachmentTypes = [
@@ -55,9 +55,9 @@ export const attachmentTypes = [
 export type AttachmentType = (typeof attachmentTypes)[number];
 
 export const notificationTypes = [
-  "ticket_created",
-  "ticket_assigned",
-  "ticket_escalated",
+  "work_order_created",
+  "work_order_assigned",
+  "work_order_escalated",
   "maintenance_due",
 ] as const;
 export type NotificationType = (typeof notificationTypes)[number];
@@ -205,23 +205,23 @@ export const equipment = sqliteTable("equipment", {
     .default(sql`(unixepoch())`),
 });
 
-// Tickets table
-export const tickets = sqliteTable("tickets", {
+// Work Orders table
+export const workOrders = sqliteTable("work_orders", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   equipmentId: integer("equipment_id")
     .references(() => equipment.id)
     .notNull(),
-  type: text("type", { enum: ticketTypes }).notNull(),
+  type: text("type", { enum: workOrderTypes }).notNull(),
   reportedById: integer("reported_by_id")
     .references(() => users.id)
     .notNull(),
   assignedToId: integer("assigned_to_id").references(() => users.id),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  priority: text("priority", { enum: ticketPriorities })
+  priority: text("priority", { enum: workOrderPriorities })
     .notNull()
     .default("medium"),
-  status: text("status", { enum: ticketStatuses }).notNull().default("open"),
+  status: text("status", { enum: workOrderStatuses }).notNull().default("open"),
   resolutionNotes: text("resolution_notes"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
@@ -251,13 +251,13 @@ export const maintenanceSchedules = sqliteTable("maintenance_schedules", {
     .default(sql`(unixepoch())`),
 });
 
-// Ticket logs table (audit trail)
-export const ticketLogs = sqliteTable("ticket_logs", {
+// Work Order logs table (audit trail)
+export const workOrderLogs = sqliteTable("work_order_logs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  ticketId: integer("ticket_id")
-    .references(() => tickets.id)
+  workOrderId: integer("work_order_id")
+    .references(() => workOrders.id)
     .notNull(),
-  action: text("action", { enum: ticketLogActions }).notNull(),
+  action: text("action", { enum: workOrderLogActions }).notNull(),
   oldValue: text("old_value"),
   newValue: text("new_value").notNull(),
   createdById: integer("created_by_id")
@@ -351,14 +351,14 @@ export const maintenanceChecklists = sqliteTable("maintenance_checklists", {
     .default(sql`(unixepoch())`),
 });
 
-// Completed checklist items per ticket
+// Completed checklist items per work order
 export const checklistCompletions = sqliteTable("checklist_completions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   checklistId: integer("checklist_id")
     .references(() => maintenanceChecklists.id)
     .notNull(),
-  ticketId: integer("ticket_id")
-    .references(() => tickets.id)
+  workOrderId: integer("work_order_id")
+    .references(() => workOrders.id)
     .notNull(),
   status: text("status", { enum: checklistItemStatuses })
     .notNull()
@@ -414,7 +414,7 @@ export const inventoryTransactions = sqliteTable("inventory_transactions", {
   locationId: integer("location_id")
     .references(() => locations.id)
     .notNull(),
-  ticketId: integer("ticket_id").references(() => tickets.id),
+  workOrderId: integer("work_order_id").references(() => workOrders.id),
   type: text("type", { enum: transactionTypes }).notNull(),
   quantity: integer("quantity").notNull(),
   toLocationId: integer("to_location_id").references(() => locations.id),
@@ -428,11 +428,11 @@ export const inventoryTransactions = sqliteTable("inventory_transactions", {
     .default(sql`(unixepoch())`),
 });
 
-// Parts used on tickets
-export const ticketParts = sqliteTable("ticket_parts", {
+// Parts used on work orders
+export const workOrderParts = sqliteTable("work_order_parts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  ticketId: integer("ticket_id")
-    .references(() => tickets.id)
+  workOrderId: integer("work_order_id")
+    .references(() => workOrders.id)
     .notNull(),
   partId: integer("part_id")
     .references(() => spareParts.id)
@@ -452,8 +452,8 @@ export const ticketParts = sqliteTable("ticket_parts", {
 // Labor/time logs
 export const laborLogs = sqliteTable("labor_logs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  ticketId: integer("ticket_id")
-    .references(() => tickets.id)
+  workOrderId: integer("work_order_id")
+    .references(() => workOrders.id)
     .notNull(),
   userId: integer("user_id")
     .references(() => users.id)
@@ -483,9 +483,9 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [roles.id],
   }),
   ownedEquipment: many(equipment, { relationName: "equipmentOwner" }),
-  reportedTickets: many(tickets, { relationName: "ticketReporter" }),
-  assignedTickets: many(tickets, { relationName: "ticketAssignee" }),
-  ticketLogs: many(ticketLogs),
+  reportedWorkOrders: many(workOrders, { relationName: "workOrderReporter" }),
+  assignedWorkOrders: many(workOrders, { relationName: "workOrderAssignee" }),
+  workOrderLogs: many(workOrderLogs),
   attachments: many(attachments),
   notifications: many(notifications),
   equipmentStatusChanges: many(equipmentStatusLogs),
@@ -537,28 +537,28 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
     references: [users.id],
     relationName: "equipmentOwner",
   }),
-  tickets: many(tickets),
+  workOrders: many(workOrders),
   maintenanceSchedules: many(maintenanceSchedules),
   statusLogs: many(equipmentStatusLogs),
 }));
 
-export const ticketsRelations = relations(tickets, ({ one, many }) => ({
+export const workOrdersRelations = relations(workOrders, ({ one, many }) => ({
   equipment: one(equipment, {
-    fields: [tickets.equipmentId],
+    fields: [workOrders.equipmentId],
     references: [equipment.id],
   }),
   reportedBy: one(users, {
-    fields: [tickets.reportedById],
+    fields: [workOrders.reportedById],
     references: [users.id],
-    relationName: "ticketReporter",
+    relationName: "workOrderReporter",
   }),
   assignedTo: one(users, {
-    fields: [tickets.assignedToId],
+    fields: [workOrders.assignedToId],
     references: [users.id],
-    relationName: "ticketAssignee",
+    relationName: "workOrderAssignee",
   }),
-  logs: many(ticketLogs),
-  parts: many(ticketParts),
+  logs: many(workOrderLogs),
+  parts: many(workOrderParts),
 }));
 
 export const maintenanceSchedulesRelations = relations(
@@ -571,13 +571,13 @@ export const maintenanceSchedulesRelations = relations(
   })
 );
 
-export const ticketLogsRelations = relations(ticketLogs, ({ one }) => ({
-  ticket: one(tickets, {
-    fields: [ticketLogs.ticketId],
-    references: [tickets.id],
+export const workOrderLogsRelations = relations(workOrderLogs, ({ one }) => ({
+  workOrder: one(workOrders, {
+    fields: [workOrderLogs.workOrderId],
+    references: [workOrders.id],
   }),
   createdBy: one(users, {
-    fields: [ticketLogs.createdById],
+    fields: [workOrderLogs.createdById],
     references: [users.id],
   }),
 }));
@@ -648,9 +648,9 @@ export const checklistCompletionsRelations = relations(
       fields: [checklistCompletions.checklistId],
       references: [maintenanceChecklists.id],
     }),
-    ticket: one(tickets, {
-      fields: [checklistCompletions.ticketId],
-      references: [tickets.id],
+    workOrder: one(workOrders, {
+      fields: [checklistCompletions.workOrderId],
+      references: [workOrders.id],
     }),
     completedBy: one(users, {
       fields: [checklistCompletions.completedById],
@@ -663,7 +663,7 @@ export const checklistCompletionsRelations = relations(
 export const sparePartsRelations = relations(spareParts, ({ many }) => ({
   inventoryLevels: many(inventoryLevels),
   transactions: many(inventoryTransactions),
-  ticketParts: many(ticketParts),
+  workOrderParts: many(workOrderParts),
   usedInModels: many(equipmentBoms),
 }));
 
@@ -692,9 +692,9 @@ export const inventoryTransactionsRelations = relations(
       fields: [inventoryTransactions.locationId],
       references: [locations.id],
     }),
-    ticket: one(tickets, {
-      fields: [inventoryTransactions.ticketId],
-      references: [tickets.id],
+    workOrder: one(workOrders, {
+      fields: [inventoryTransactions.workOrderId],
+      references: [workOrders.id],
     }),
     toLocation: one(locations, {
       fields: [inventoryTransactions.toLocationId],
@@ -707,26 +707,26 @@ export const inventoryTransactionsRelations = relations(
   })
 );
 
-export const ticketPartsRelations = relations(ticketParts, ({ one }) => ({
-  ticket: one(tickets, {
-    fields: [ticketParts.ticketId],
-    references: [tickets.id],
+export const workOrderPartsRelations = relations(workOrderParts, ({ one }) => ({
+  workOrder: one(workOrders, {
+    fields: [workOrderParts.workOrderId],
+    references: [workOrders.id],
   }),
   part: one(spareParts, {
-    fields: [ticketParts.partId],
+    fields: [workOrderParts.partId],
     references: [spareParts.id],
   }),
   addedBy: one(users, {
-    fields: [ticketParts.addedById],
+    fields: [workOrderParts.addedById],
     references: [users.id],
   }),
 }));
 
 // Phase 13: Labor relations
 export const laborLogsRelations = relations(laborLogs, ({ one }) => ({
-  ticket: one(tickets, {
-    fields: [laborLogs.ticketId],
-    references: [tickets.id],
+  workOrder: one(workOrders, {
+    fields: [laborLogs.workOrderId],
+    references: [workOrders.id],
   }),
   user: one(users, {
     fields: [laborLogs.userId],
@@ -760,14 +760,14 @@ export type NewEquipmentModel = typeof equipmentModels.$inferInsert;
 export type EquipmentBom = typeof equipmentBoms.$inferSelect;
 export type NewEquipmentBom = typeof equipmentBoms.$inferInsert;
 
-export type Ticket = typeof tickets.$inferSelect;
-export type NewTicket = typeof tickets.$inferInsert;
+export type WorkOrder = typeof workOrders.$inferSelect;
+export type NewWorkOrder = typeof workOrders.$inferInsert;
 
 export type MaintenanceSchedule = typeof maintenanceSchedules.$inferSelect;
 export type NewMaintenanceSchedule = typeof maintenanceSchedules.$inferInsert;
 
-export type TicketLog = typeof ticketLogs.$inferSelect;
-export type NewTicketLog = typeof ticketLogs.$inferInsert;
+export type WorkOrderLog = typeof workOrderLogs.$inferSelect;
+export type NewWorkOrderLog = typeof workOrderLogs.$inferInsert;
 
 export type Attachment = typeof attachments.$inferSelect;
 export type NewAttachment = typeof attachments.$inferInsert;
@@ -795,8 +795,8 @@ export type NewInventoryLevel = typeof inventoryLevels.$inferInsert;
 export type InventoryTransaction = typeof inventoryTransactions.$inferSelect;
 export type NewInventoryTransaction = typeof inventoryTransactions.$inferInsert;
 
-export type TicketPart = typeof ticketParts.$inferSelect;
-export type NewTicketPart = typeof ticketParts.$inferInsert;
+export type WorkOrderPart = typeof workOrderParts.$inferSelect;
+export type NewWorkOrderPart = typeof workOrderParts.$inferInsert;
 
 // Phase 13: Labor types
 export type LaborLog = typeof laborLogs.$inferSelect;

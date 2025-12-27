@@ -1,7 +1,7 @@
-import type { TicketPriority } from "@/db/schema";
+import type { WorkOrderPriority } from "@/db/schema";
 
 // SLA configuration (in hours)
-export const DEFAULT_SLA_HOURS: Record<TicketPriority, number> = {
+export const DEFAULT_SLA_HOURS: Record<WorkOrderPriority, number> = {
   critical: 2,
   high: 8,
   medium: 24,
@@ -9,13 +9,13 @@ export const DEFAULT_SLA_HOURS: Record<TicketPriority, number> = {
 };
 
 // Get SLA hours for a priority
-export function getSlaHours(priority: TicketPriority): number {
+export function getSlaHours(priority: WorkOrderPriority): number {
   return DEFAULT_SLA_HOURS[priority];
 }
 
 // Calculate due date based on priority and creation time
 export function calculateDueBy(
-  priority: TicketPriority,
+  priority: WorkOrderPriority,
   createdAt: Date = new Date()
 ): Date {
   const hours = getSlaHours(priority);
@@ -24,7 +24,7 @@ export function calculateDueBy(
   return dueBy;
 }
 
-// Check if ticket is overdue
+// Check if work order is overdue
 export function isOverdue(dueBy: Date | null): boolean {
   if (!dueBy) return false;
   return new Date() > dueBy;
@@ -75,9 +75,9 @@ export function getUrgencyLevel(
   return "normal";
 }
 
-// Calculate escalation time (when ticket should be escalated if not resolved)
+// Calculate escalation time (when work order should be escalated if not resolved)
 export function calculateEscalationTime(
-  priority: TicketPriority,
+  priority: WorkOrderPriority,
   createdAt: Date = new Date()
 ): Date {
   const dueBy = calculateDueBy(priority, createdAt);
