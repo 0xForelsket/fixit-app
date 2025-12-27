@@ -17,11 +17,11 @@ interface WorkOrder {
   assignedTo?: { name: string } | null;
 }
 
-interface PriorityQueueTableProps {
+interface DashboardWorkOrderTableProps {
   workOrders: WorkOrder[];
 }
 
-export function PriorityQueueTable({ workOrders }: PriorityQueueTableProps) {
+export function DashboardWorkOrderTable({ workOrders }: DashboardWorkOrderTableProps) {
   const router = useRouter();
 
   return (

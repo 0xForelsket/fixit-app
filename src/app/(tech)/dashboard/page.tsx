@@ -1,9 +1,8 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { and, count, eq, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
@@ -11,13 +10,12 @@ import {
   Clock,
   Inbox,
   MonitorCog,
-  PartyPopper,
   Timer,
   User,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { PriorityQueue } from "@/components/dashboard/priority-queue";
+import { DashboardWorkOrderList } from "@/components/dashboard/dashboard-work-order-list";
 
 interface Stats {
   open: number;
@@ -240,28 +238,7 @@ export default async function DashboardPage() {
             </Button>
           </div>
 
-          {hasMyWorkOrders ? (
-            <div className="grid gap-4">
-              {myWorkOrders.map((workOrder, index) => (
-                <WorkOrderListItem key={workOrder.id} workOrder={workOrder} index={index} />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-success-200 bg-success-50/30 p-12 text-center animate-in backdrop-blur-sm">
-              <div className="relative">
-                <div className="absolute inset-0 bg-success-400/20 rounded-full blur-[40px] animate-gentle-pulse" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-success-400/20 to-success-500/20 border border-success-200 shadow-inner">
-                  <PartyPopper className="h-8 w-8 text-success-600" />
-                </div>
-              </div>
-              <h3 className="mt-6 text-xl font-black text-success-900 tracking-tight">
-                All Caught Up!
-              </h3>
-              <p className="text-success-700 font-medium mt-1">
-                No work orders assigned to you. Great work!
-              </p>
-            </div>
-          )}
+          <DashboardWorkOrderList workOrders={myWorkOrders} />
         </div>
       )}
 
@@ -340,7 +317,7 @@ export default async function DashboardPage() {
           </Button>
         </div>
 
-        <PriorityQueue workOrders={recentWorkOrders} />
+        <DashboardWorkOrderList workOrders={recentWorkOrders} />
       </div>
     </div>
   );
@@ -414,107 +391,4 @@ function StatsCard({
   }
 
   return <div className={className}>{content}</div>;
-}
-
-function WorkOrderListItem({
-  workOrder,
-  index = 0,
-}: {
-  workOrder: {
-    id: number;
-    title: string;
-    priority: string;
-    createdAt: Date;
-    equipment: { name: string };
-    reportedBy: { name: string };
-  };
-  index?: number;
-}) {
-  const priorityConfig = {
-    low: {
-      color: "bg-success-500",
-      label: "Low",
-      text: "text-success-700",
-      bg: "bg-success-50",
-    },
-    medium: {
-      color: "bg-primary-500",
-      label: "Medium",
-      text: "text-primary-700",
-      bg: "bg-primary-50",
-    },
-    high: {
-      color: "bg-warning-500",
-      label: "High",
-      text: "text-warning-700",
-      bg: "bg-warning-50",
-    },
-    critical: {
-      color: "bg-danger-600",
-      label: "Critical",
-      text: "text-danger-700",
-      bg: "bg-danger-50",
-    },
-  }[workOrder.priority as string] || {
-    color: "bg-zinc-500",
-    label: workOrder.priority,
-    text: "text-zinc-700",
-    bg: "bg-zinc-50",
-  };
-
-  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "";
-
-  return (
-    <Link
-      href={`/dashboard/work-orders/${workOrder.id}`}
-      className={cn(
-        "group relative flex flex-col sm:flex-row sm:items-center gap-3 overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm p-4 transition-all duration-200 hover:border-primary-400 hover:shadow-xl hover:shadow-primary-500/5 hover:-translate-y-1",
-        staggerClass && `${staggerClass} animate-in`,
-        workOrder.priority === "critical" &&
-          "border-danger-200 shadow-danger-500/5 shadow-lg"
-      )}
-    >
-      <div className="flex-1 space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="flex-none rounded bg-zinc-900 px-1.5 py-0.5 text-[10px] font-mono font-black text-white leading-none">
-            #{String(workOrder.id).padStart(3, "0")}
-          </span>
-          <h3 className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors text-base tracking-tight truncate flex-1">
-            {workOrder.title}
-          </h3>
-          <Badge
-            className={cn(
-              "font-black text-[10px] px-1.5 py-0",
-              priorityConfig.bg,
-              priorityConfig.text,
-              "border-0"
-            )}
-          >
-            {priorityConfig.label.toUpperCase()}
-          </Badge>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          <div className="flex items-center gap-1.5 font-bold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-lg border border-zinc-200/50">
-            <div className="w-2 h-2 rounded-full bg-zinc-400" />
-            {workOrder.equipment.name}
-          </div>
-          <div className="flex items-center gap-1.5 font-medium text-zinc-400">
-            <Clock className="h-3.5 w-3.5" />
-            {formatRelativeTime(workOrder.createdAt)}
-          </div>
-          <div className="flex items-center gap-1.5 font-medium text-zinc-400">
-            <Users className="h-3.5 w-3.5" />
-            Reported by {workOrder.reportedBy.name}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-end sm:justify-center w-full sm:w-auto mt-2 sm:mt-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-100 group-hover:bg-primary-500 group-hover:text-white transition-all duration-300">
-          <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-        </div>
-      </div>
-    </Link>
-  );
 }

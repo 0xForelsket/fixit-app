@@ -17,11 +17,11 @@ interface WorkOrder {
   assignedTo?: { name: string } | null;
 }
 
-interface PriorityQueueCardProps {
+interface DashboardWorkOrderCardProps {
   workOrders: WorkOrder[];
 }
 
-export function PriorityQueueCard({ workOrders }: PriorityQueueCardProps) {
+export function DashboardWorkOrderCard({ workOrders }: DashboardWorkOrderCardProps) {
   return (
     <div className="space-y-3">
       {workOrders.map((workOrder) => {

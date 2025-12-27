@@ -1,8 +1,8 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import { PriorityQueueTable } from "./priority-queue-table";
-import { PriorityQueueCard } from "./priority-queue-card";
+import { DashboardWorkOrderTable } from "./dashboard-work-order-table";
+import { DashboardWorkOrderCard } from "./dashboard-work-order-card";
 
 interface WorkOrder {
   id: number;
@@ -15,11 +15,11 @@ interface WorkOrder {
   assignedTo?: { name: string } | null;
 }
 
-interface PriorityQueueProps {
+interface DashboardWorkOrderListProps {
   workOrders: WorkOrder[];
 }
 
-export function PriorityQueue({ workOrders }: PriorityQueueProps) {
+export function DashboardWorkOrderList({ workOrders }: DashboardWorkOrderListProps) {
   if (workOrders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-success-200 bg-success-50/30 p-16 text-center animate-in backdrop-blur-sm">
@@ -43,12 +43,12 @@ export function PriorityQueue({ workOrders }: PriorityQueueProps) {
     <>
       {/* Desktop Table View */}
       <div className="hidden lg:block">
-        <PriorityQueueTable workOrders={workOrders} />
+        <DashboardWorkOrderTable workOrders={workOrders} />
       </div>
 
       {/* Mobile/Tablet Card Feed View */}
       <div className="lg:hidden">
-        <PriorityQueueCard workOrders={workOrders} />
+        <DashboardWorkOrderCard workOrders={workOrders} />
       </div>
     </>
   );
