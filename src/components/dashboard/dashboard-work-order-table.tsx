@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
-import { ArrowRight, Timer } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -43,6 +43,12 @@ export function DashboardWorkOrderTable({
                 onClick={() =>
                   router.push(`/dashboard/work-orders/${workOrder.id}`)
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    router.push(`/dashboard/work-orders/${workOrder.id}`);
+                  }
+                }}
+                tabIndex={0}
               >
                 <td className="p-4">
                   <span className="font-mono text-xs font-bold text-zinc-500 group-hover:text-zinc-900 transition-colors">
