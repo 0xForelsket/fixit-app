@@ -1,0 +1,133 @@
+src/components/work-orders/work-order-checklist.tsx:4:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × This import is unused.
+  
+    3 │ import { updateChecklistItem } from "@/actions/workOrders";
+  > 4 │ import { Button } from "@/components/ui/button";
+      │          ^^^^^^
+    5 │ import { Badge } from "@/components/ui/badge";
+    6 │ import { useToast } from "@/components/ui/use-toast";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+      2   2 │   
+      3   3 │   import { updateChecklistItem } from "@/actions/workOrders";
+      4     │ - import·{·Button·}·from·"@/components/ui/button";
+      5   4 │   import { Badge } from "@/components/ui/badge";
+      6   5 │   import { useToast } from "@/components/ui/use-toast";
+  
+
+src/components/work-orders/work-order-checklist.tsx:64:14 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  × This variable is unused.
+  
+    62 │         });
+    63 │       }
+  > 64 │     } catch (error) {
+       │              ^^^^^
+    65 │       toast({
+    66 │         title: "Error",
+  
+  i Unused variables usually are result of incomplete refactoring, typos and other source of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend error with an underscore.
+  
+     62  62 │           });
+     63  63 │         }
+     64     │ - ····}·catch·(error)·{
+         64 │ + ····}·catch·(_error)·{
+     65  65 │         toast({
+     66  66 │           title: "Error",
+  
+
+src/components/work-orders/work-order-checklist.tsx organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Import statements could be sorted:
+  
+      2   2 │   
+      3   3 │   import { updateChecklistItem } from "@/actions/workOrders";
+      4     │ - import·{·Button·}·from·"@/components/ui/button";
+      5     │ - import·{·Badge·}·from·"@/components/ui/badge";
+          4 │ + import·{·Badge·}·from·"@/components/ui/badge";
+          5 │ + import·{·Button·}·from·"@/components/ui/button";
+      6   6 │   import { useToast } from "@/components/ui/use-toast";
+      7     │ - import·{·cn·}·from·"@/lib/utils";
+          7 │ + import·type·{·ChecklistItemStatus·}·from·"@/db/schema";
+          8 │ + import·{·cn·}·from·"@/lib/utils";
+      8   9 │   import { CheckCircle2, Circle, Clock, Info } from "lucide-react";
+      9     │ - import·{·useState·}·from·"react";
+     10     │ - import·type·{·ChecklistItemStatus·}·from·"@/db/schema";
+         10 │ + import·{·useState·}·from·"react";
+     11  11 │   
+     12  12 │   interface ChecklistItem {
+  
+
+src/components/work-orders/work-order-checklist.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     42  42 │       const newStatus: ChecklistItemStatus =
+     43  43 │         item.status === "completed" ? "pending" : "completed";
+     44     │ - ····
+         44 │ + 
+     45  45 │       setUpdating(item.id);
+     46  46 │       try {
+    ······· │ 
+     51  51 │         if (result.success) {
+     52  52 │           setItems((prev) =>
+     53     │ - ··········prev.map((i)·=>
+     54     │ - ············i.id·===·item.id·?·{·...i,·status:·newStatus·}·:·i
+     55     │ - ··········)
+         53 │ + ··········prev.map((i)·=>·(i.id·===·item.id·?·{·...i,·status:·newStatus·}·:·i))
+     56  54 │           );
+     57  55 │         } else {
+    ······· │ 
+    112 110 │               className={cn(
+    113 111 │                 "flex items-start gap-4 p-4 transition-colors",
+    114     │ - ··············item.status·===·"completed"·?·"bg-slate-50/50"·:·"hover:bg-slate-50/30"
+        112 │ + ··············item.status·===·"completed"
+        113 │ + ················?·"bg-slate-50/50"
+        114 │ + ················:·"hover:bg-slate-50/30"
+    115 115 │               )}
+    116 116 │             >
+    ······· │ 
+    140 140 │                     className={cn(
+    141 141 │                       "font-medium leading-tight",
+    142     │ - ····················item.status·===·"completed"·&&·"text-muted-foreground·line-through"
+        142 │ + ····················item.status·===·"completed"·&&
+        143 │ + ······················"text-muted-foreground·line-through"
+    143 144 │                     )}
+    144 145 │                   >
+    ······· │ 
+    146 147 │                   </p>
+    147 148 │                   {item.checklist.isRequired && (
+    148     │ - ··················<Badge·variant="outline"·className="text-[10px]·uppercase·shrink-0">
+        149 │ + ··················<Badge
+        150 │ + ····················variant="outline"
+        151 │ + ····················className="text-[10px]·uppercase·shrink-0"
+        152 │ + ··················>
+    149 153 │                       Required
+    150 154 │                     </Badge>
+    ······· │ 
+    153 157 │                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
+    154 158 │                   <span className="flex items-center gap-1">
+    155     │ - ··················<span·className="font-bold">Step·{item.checklist.stepNumber}</span>
+        159 │ + ··················<span·className="font-bold">
+        160 │ + ····················Step·{item.checklist.stepNumber}
+        161 │ + ··················</span>
+    156 162 │                   </span>
+    157 163 │                   {item.checklist.estimatedMinutes && (
+  
+
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+
+Checked 1 file in 3ms. No fixes applied.
+Found 4 errors.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

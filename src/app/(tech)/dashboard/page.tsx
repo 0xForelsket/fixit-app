@@ -8,7 +8,6 @@ import { and, count, eq, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowRight,
-  CheckCircle2,
   Clock,
   Inbox,
   MonitorCog,
@@ -18,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { PriorityQueue } from "@/components/dashboard/priority-queue";
 
 interface Stats {
   open: number;
@@ -126,8 +126,13 @@ async function getRecentWorkOrders() {
     limit: 5,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
-      equipment: true,
+      equipment: {
+        with: {
+          location: true,
+        },
+      },
       reportedBy: true,
+      assignedTo: true,
     },
   });
 }
@@ -335,28 +340,7 @@ export default async function DashboardPage() {
           </Button>
         </div>
 
-        {recentWorkOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-success-200 bg-success-50/30 p-16 text-center animate-in backdrop-blur-sm">
-            <div className="relative">
-              <div className="absolute inset-0 bg-success-400/20 rounded-full blur-[40px] animate-gentle-pulse" />
-              <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-success-400/20 to-success-500/20 border border-success-200 shadow-inner">
-                <CheckCircle2 className="h-10 w-10 text-success-600" />
-              </div>
-            </div>
-            <h3 className="mt-8 text-2xl font-black text-success-900 tracking-tight">
-              SYSTEM NOMINAL
-            </h3>
-            <p className="text-success-700 font-medium mt-1">
-              No open work orders requiring urgent attention.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {recentWorkOrders.map((workOrder, index) => (
-              <WorkOrderListItem key={workOrder.id} workOrder={workOrder} index={index} />
-            ))}
-          </div>
-        )}
+        <PriorityQueue workOrders={recentWorkOrders} />
       </div>
     </div>
   );
