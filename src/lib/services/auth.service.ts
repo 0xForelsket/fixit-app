@@ -89,31 +89,36 @@ export async function authenticateUser(
     .where(eq(users.id, user.id));
 
   let permissions: string[] = [];
+  let roleName = "operator";
 
   if (user.roleId) {
     const role = await db.query.roles.findFirst({
       where: eq(roles.id, user.roleId),
     });
-    if (role?.permissions) {
-      permissions = role.permissions;
+    if (role) {
+      roleName = role.name;
+      if (role.permissions) {
+        permissions = role.permissions;
+      }
     }
   }
 
+  // Fallback for permissions if role has none
   if (permissions.length === 0) {
-    permissions = getLegacyRolePermissions(user.role as LegacyRole);
+    permissions = getLegacyRolePermissions(roleName as LegacyRole);
   }
 
   const sessionUser: SessionUser = {
     id: user.id,
     employeeId: user.employeeId,
     name: user.name,
-    role: user.role,
+    role: roleName as any, // Cast to any to satisfy UserRole enum temporarily
     roleId: user.roleId,
     permissions,
     hourlyRate: user.hourlyRate,
   };
 
-  authLogger.info({ employeeId, role: user.role }, "Successful login");
+  authLogger.info({ employeeId, role: roleName }, "Successful login");
   const csrfToken = await createSession(sessionUser);
 
   return { success: true, user: sessionUser, csrfToken };

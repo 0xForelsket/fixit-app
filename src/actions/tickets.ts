@@ -5,6 +5,7 @@ import {
   attachments,
   equipment as equipmentTable,
   notifications,
+  roles,
   ticketLogs,
   tickets,
   users,
@@ -111,20 +112,26 @@ export async function createTicket(
 
     // Notify techs for critical/high priority tickets
     if (priority === "critical" || priority === "high") {
-      const techs = await db.query.users.findMany({
-        where: and(eq(users.role, "tech"), eq(users.isActive, true)),
+      const techRole = await db.query.roles.findFirst({
+        where: eq(roles.name, "tech"),
       });
 
-      if (techs.length > 0) {
-        await db.insert(notifications).values(
-          techs.map((tech) => ({
-            userId: tech.id,
-            type: "ticket_created" as const,
-            title: `New ${priority} Priority Ticket`,
-            message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
-            link: `/dashboard/tickets/${ticket.id}`,
-          }))
-        );
+      if (techRole) {
+        const techs = await db.query.users.findMany({
+          where: and(eq(users.roleId, techRole.id), eq(users.isActive, true)),
+        });
+
+        if (techs.length > 0) {
+          await db.insert(notifications).values(
+            techs.map((tech) => ({
+              userId: tech.id,
+              type: "ticket_created" as const,
+              title: `New ${priority} Priority Ticket`,
+              message: `${title} - ${equipmentItem?.name || "Unknown Equipment"}`,
+              link: `/dashboard/tickets/${ticket.id}`,
+            }))
+          );
+        }
       }
     }
 

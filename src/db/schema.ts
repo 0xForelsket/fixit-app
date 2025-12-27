@@ -120,7 +120,6 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   email: text("email").unique(),
   pin: text("pin").notNull(),
-  role: text("role", { enum: userRoles }).notNull().default("operator"),
   roleId: integer("role_id").references(() => roles.id),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   hourlyRate: real("hourly_rate"), // For labor cost tracking

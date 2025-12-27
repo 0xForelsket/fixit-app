@@ -30,6 +30,8 @@ async function seed() {
   await db.delete(schema.equipmentBoms).catch(() => {});
   await db.delete(schema.equipmentModels).catch(() => {});
   await db.delete(schema.spareParts).catch(() => {});
+  await db.delete(schema.equipmentTypes).catch(() => {});
+  await db.delete(schema.equipmentCategories).catch(() => {});
   // Core tables
   await db.delete(schema.equipmentStatusLogs);
   await db.delete(schema.notifications);
@@ -86,7 +88,6 @@ async function seed() {
     name: "System Admin",
     email: "admin@fixit.local",
     pin: adminPin,
-    role: "admin",
     roleId: adminRole.id,
     isActive: true,
   });
@@ -98,7 +99,6 @@ async function seed() {
       name: "John Smith",
       email: "john.smith@fixit.local",
       pin: techPin,
-      role: "tech",
       roleId: techRole.id,
       isActive: true,
     })
@@ -111,7 +111,6 @@ async function seed() {
       name: "Maria Garcia",
       email: "maria.garcia@fixit.local",
       pin: techPin,
-      role: "tech",
       roleId: techRole.id,
       isActive: true,
     })
@@ -124,7 +123,6 @@ async function seed() {
       name: "Mike Johnson",
       email: null,
       pin: operatorPin,
-      role: "operator",
       roleId: operatorRole.id,
       isActive: true,
     })
@@ -137,7 +135,6 @@ async function seed() {
       name: "Sarah Wilson",
       email: null,
       pin: operatorPin,
-      role: "operator",
       roleId: operatorRole.id,
       isActive: true,
     })
