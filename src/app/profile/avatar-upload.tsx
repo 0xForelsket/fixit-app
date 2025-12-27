@@ -4,10 +4,17 @@ import { updateUserAvatar } from "@/actions/users";
 import { FileUpload } from "@/components/ui/file-upload";
 import { useRouter } from "next/navigation";
 
+interface UploadedFile {
+  s3Key: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
 export function AvatarUpload({ userId }: { userId: number }) {
   const router = useRouter();
 
-  const handleUpload = async (file: any) => {
+  const handleUpload = async (file: UploadedFile) => {
     await updateUserAvatar(file);
     router.refresh();
   };

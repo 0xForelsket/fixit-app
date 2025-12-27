@@ -7,6 +7,58 @@ import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+/**
+ * Human-readable descriptions for each permission.
+ * Displayed in the role form to help admins understand what each permission grants.
+ */
+const PERMISSION_DESCRIPTIONS: Record<string, string> = {
+  // Tickets
+  "ticket:create": "Create new maintenance tickets",
+  "ticket:view": "View own reported tickets",
+  "ticket:view_all": "View all tickets in the system",
+  "ticket:update": "Edit ticket details and status",
+  "ticket:resolve": "Mark tickets as resolved",
+  "ticket:close": "Close resolved tickets",
+  "ticket:assign": "Assign tickets to technicians",
+  // Equipment
+  "equipment:view": "View equipment list and details",
+  "equipment:create": "Add new equipment to the system",
+  "equipment:update": "Edit equipment details and status",
+  "equipment:delete": "Remove equipment from the system",
+  "equipment:manage_models": "Create and manage equipment models",
+  // Locations
+  "location:view": "View facility locations",
+  "location:create": "Add new locations",
+  "location:update": "Edit location details",
+  "location:delete": "Remove locations",
+  // Users
+  "user:view": "View user list and profiles",
+  "user:create": "Add new users",
+  "user:update": "Edit user details and roles",
+  "user:delete": "Deactivate users",
+  // Inventory
+  "inventory:view": "View spare parts and stock levels",
+  "inventory:create": "Add new spare parts",
+  "inventory:update": "Edit part details and reorder points",
+  "inventory:delete": "Remove spare parts",
+  "inventory:receive_stock": "Record incoming stock deliveries",
+  "inventory:use_parts": "Log parts used on tickets",
+  // Maintenance
+  "maintenance:view": "View maintenance schedules",
+  "maintenance:create": "Create preventive maintenance schedules",
+  "maintenance:update": "Edit maintenance schedules",
+  "maintenance:delete": "Remove maintenance schedules",
+  "maintenance:complete_checklist": "Complete maintenance checklists",
+  // Analytics & Reports
+  "analytics:view": "View dashboard analytics and KPIs",
+  "reports:view": "View system reports",
+  "reports:export": "Export reports to files",
+  // System
+  "system:settings": "Modify system settings",
+  "system:qr_codes": "Generate and manage QR codes",
+  "system:scheduler": "Manage scheduled tasks",
+};
+
 const PERMISSION_GROUPS: Record<
   string,
   { label: string; permissions: Permission[] }
@@ -90,9 +142,13 @@ const PERMISSION_GROUPS: Record<
   },
 };
 
-function formatPermissionLabel(permission: string): string {
+function getPermissionLabel(permission: string): string {
   const [, action] = permission.split(":");
-  return action.replace(/_/g, " ").toUpperCase();
+  return action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getPermissionDescription(permission: string): string | undefined {
+  return PERMISSION_DESCRIPTIONS[permission];
 }
 
 type SubmitResult =
@@ -344,7 +400,7 @@ export function RoleForm({ mode, initialData, onSubmit }: RoleFormProps) {
                         />
                         <div
                           className={cn(
-                            "flex h-4 w-4 items-center justify-center rounded border transition-colors",
+                            "flex h-4 w-4 items-center justify-center rounded border transition-colors shrink-0 mt-0.5",
                             selectedPermissions.has(permission)
                               ? "border-primary-500 bg-primary-500 text-white"
                               : "border-zinc-300"
@@ -354,16 +410,23 @@ export function RoleForm({ mode, initialData, onSubmit }: RoleFormProps) {
                             <Check className="h-2.5 w-2.5" />
                           )}
                         </div>
-                        <span
-                          className={cn(
-                            "text-xs font-medium",
-                            selectedPermissions.has(permission)
-                              ? "text-zinc-900"
-                              : "text-zinc-500"
+                        <div className="flex flex-col">
+                          <span
+                            className={cn(
+                              "text-xs font-semibold",
+                              selectedPermissions.has(permission)
+                                ? "text-zinc-900"
+                                : "text-zinc-600"
+                            )}
+                          >
+                            {getPermissionLabel(permission)}
+                          </span>
+                          {getPermissionDescription(permission) && (
+                            <span className="text-[10px] text-zinc-400 leading-tight">
+                              {getPermissionDescription(permission)}
+                            </span>
                           )}
-                        >
-                          {formatPermissionLabel(permission)}
-                        </span>
+                        </div>
                       </label>
                     ))}
                   </div>

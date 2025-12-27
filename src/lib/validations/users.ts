@@ -34,7 +34,7 @@ export const createUserSchema = z.object({
     .min(4, "PIN must be at least 4 characters")
     .max(20, "PIN is too long"),
   role: userRoleSchema.default("operator"),
-  roleId: z.coerce.number().int().positive("Role is required"),
+  roleId: z.coerce.number().int().positive("Role is required").optional(),
   isActive: z.boolean().default(true),
   hourlyRate: z.coerce
     .number()
