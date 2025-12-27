@@ -115,18 +115,16 @@ describe("createTicket action", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.transaction as unknown as () => unknown).mockImplementation(
-      async (callback: (tx: unknown) => Promise<unknown>) => {
-        const mockTx = {
-          insert: vi.fn(() => ({
-            values: vi.fn(() => ({
-              returning: vi.fn().mockResolvedValue([mockTicket]),
-            })),
+    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+      const mockTx = {
+        insert: vi.fn(() => ({
+          values: vi.fn(() => ({
+            returning: vi.fn().mockResolvedValue([mockTicket]),
           })),
-        };
-        return callback(mockTx);
-      }
-    );
+        })),
+      };
+      return callback(mockTx as unknown as Parameters<typeof callback>[0]);
+    });
 
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
       values: vi.fn(() => ({
@@ -185,18 +183,16 @@ describe("createTicket action", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.transaction as unknown as () => unknown).mockImplementation(
-      async (callback: (tx: unknown) => Promise<unknown>) => {
-        const mockTx = {
-          insert: vi.fn(() => ({
-            values: vi.fn(() => ({
-              returning: vi.fn().mockResolvedValue([mockTicket]),
-            })),
+    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+      const mockTx = {
+        insert: vi.fn(() => ({
+          values: vi.fn(() => ({
+            returning: vi.fn().mockResolvedValue([mockTicket]),
           })),
-        };
-        return callback(mockTx);
-      }
-    );
+        })),
+      };
+      return callback(mockTx as unknown as Parameters<typeof callback>[0]);
+    });
 
     const mockInsert = vi.fn(() => ({
       values: vi.fn(() => ({
