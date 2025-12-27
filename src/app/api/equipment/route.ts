@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
-import { requireAuth, requireCsrf, requireRole } from "@/lib/session";
+import { PERMISSIONS } from "@/lib/permissions";
+import { requireAuth, requireCsrf, requirePermission } from "@/lib/session";
 import { createEquipmentSchema, paginationSchema } from "@/lib/validations";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
@@ -89,7 +90,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await requireCsrf(request);
-    await requireRole("admin");
+    await requirePermission(PERMISSIONS.EQUIPMENT_CREATE);
 
     const body = await request.json();
     const result = createEquipmentSchema.safeParse(body);

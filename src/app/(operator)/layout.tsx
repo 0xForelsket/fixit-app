@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq } from "drizzle-orm";
@@ -18,10 +19,9 @@ export default async function OperatorLayout({
     redirect("/login");
   }
 
-  // Redirect based on role
-  if (user.role === "admin") {
+  if (hasPermission(user.permissions, PERMISSIONS.ALL)) {
     redirect("/admin");
-  } else if (user.role === "tech") {
+  } else if (hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
     redirect("/dashboard");
   }
 

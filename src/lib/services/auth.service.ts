@@ -112,7 +112,7 @@ export async function authenticateUser(
     id: user.id,
     employeeId: user.employeeId,
     name: user.name,
-    role: roleName as any, // Cast to any to satisfy UserRole enum temporarily
+    roleName: roleName,
     roleId: user.roleId,
     permissions,
     hourlyRate: user.hourlyRate,

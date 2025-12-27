@@ -109,7 +109,7 @@ describe("POST /api/auth/login", () => {
         id: 1,
         employeeId: "TECH-001",
         name: "Test User",
-        role: "tech",
+        roleName: "tech",
         permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       },
       csrfToken: "csrf-token-123",

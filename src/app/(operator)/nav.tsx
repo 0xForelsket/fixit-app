@@ -59,7 +59,7 @@ export function OperatorNav({
               {user.name}
             </p>
             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              {user.role}
+              {user.roleName}
             </p>
           </div>
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-zinc-200 bg-zinc-50 shadow-sm group-hover:border-primary-300 group-hover:ring-2 group-hover:ring-primary-100 transition-all">

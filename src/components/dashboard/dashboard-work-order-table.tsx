@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatRelativeTime } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
+import { cn, formatRelativeTime } from "@/lib/utils";
+import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
+import { ArrowRight, Timer } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
@@ -12,7 +12,9 @@ interface DashboardWorkOrderTableProps {
   workOrders: WorkOrderWithRelations[];
 }
 
-export function DashboardWorkOrderTable({ workOrders }: DashboardWorkOrderTableProps) {
+export function DashboardWorkOrderTable({
+  workOrders,
+}: DashboardWorkOrderTableProps) {
   const router = useRouter();
 
   return (
@@ -38,7 +40,9 @@ export function DashboardWorkOrderTable({ workOrders }: DashboardWorkOrderTableP
               <tr
                 key={workOrder.id}
                 className="group transition-colors hover:bg-zinc-50/80 cursor-pointer"
-                onClick={() => router.push(`/dashboard/work-orders/${workOrder.id}`)}
+                onClick={() =>
+                  router.push(`/dashboard/work-orders/${workOrder.id}`)
+                }
               >
                 <td className="p-4">
                   <span className="font-mono text-xs font-bold text-zinc-500 group-hover:text-zinc-900 transition-colors">
@@ -132,60 +136,5 @@ export function DashboardWorkOrderTable({ workOrders }: DashboardWorkOrderTableP
         </tbody>
       </table>
     </div>
-  );
-}
-
-function getPriorityConfig(priority: string) {
-  const configs: Record<
-    string,
-    { color: string; bg: string; border: string; label: string }
-  > = {
-    low: {
-      color: "text-slate-600",
-      bg: "bg-slate-50",
-      border: "border-slate-200",
-      label: "Low",
-    },
-    medium: {
-      color: "text-primary-600",
-      bg: "bg-primary-50",
-      border: "border-primary-200",
-      label: "Medium",
-    },
-    high: {
-      color: "text-amber-600",
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-      label: "High",
-    },
-    critical: {
-      color: "text-rose-600",
-      bg: "bg-rose-50",
-      border: "border-rose-200",
-      label: "Critical",
-    },
-  };
-  return (
-    configs[priority.toLowerCase()] || {
-      color: "text-zinc-600",
-      bg: "bg-zinc-50",
-      border: "border-zinc-200",
-      label: priority,
-    }
-  );
-}
-
-function getStatusConfig(status: string) {
-  const configs: Record<string, { border: string; label: string }> = {
-    open: { border: "border-zinc-200", label: "Open" },
-    in_progress: { border: "border-amber-200", label: "In Prog" },
-    resolved: { border: "border-emerald-200", label: "Done" },
-    closed: { border: "border-slate-200", label: "Closed" },
-  };
-  return (
-    configs[status.toLowerCase()] || {
-      border: "border-zinc-200",
-      label: status,
-    }
   );
 }

@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { equipment, notifications } from "@/db/schema";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
@@ -21,15 +22,13 @@ interface PageProps {
 export default async function Home({ searchParams }: PageProps) {
   const user = await getCurrentUser();
 
-  // Landing page for unauthenticated users
   if (!user) {
     return <LandingPage />;
   }
 
-  // Redirect based on role
-  if (user.role === "admin") {
+  if (hasPermission(user.permissions, PERMISSIONS.ALL)) {
     redirect("/admin");
-  } else if (user.role === "tech") {
+  } else if (hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
     redirect("/dashboard");
   }
 

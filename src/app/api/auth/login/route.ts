@@ -55,7 +55,8 @@ export async function POST(request: Request) {
         id: authResult.user.id,
         employeeId: authResult.user.employeeId,
         name: authResult.user.name,
-        role: authResult.user.role,
+        roleName: authResult.user.roleName,
+        permissions: authResult.user.permissions,
       },
     });
   } catch (error) {

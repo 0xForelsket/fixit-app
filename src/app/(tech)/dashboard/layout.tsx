@@ -1,5 +1,6 @@
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { MaintenanceTrigger } from "@/components/maintenance-trigger";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { redirect } from "next/navigation";
@@ -15,7 +16,7 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  if (user.role === "operator") {
+  if (!hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
     redirect("/");
   }
 

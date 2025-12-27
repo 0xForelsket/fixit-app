@@ -192,20 +192,12 @@ export async function updateUser(
     }
   }
 
-  let legacyRole: "operator" | "tech" | "admin" | undefined;
   if (parsed.data.roleId) {
     const role = await db.query.roles.findFirst({
       where: eq(roles.id, parsed.data.roleId),
     });
     if (!role) {
       return { success: false, error: "Selected role does not exist" };
-    }
-    if (role.name.toLowerCase().includes("admin")) {
-      legacyRole = "admin";
-    } else if (role.name.toLowerCase().includes("tech")) {
-      legacyRole = "tech";
-    } else {
-      legacyRole = "operator";
     }
   }
 
@@ -220,7 +212,6 @@ export async function updateUser(
     updateData.pin = parsed.data.pin;
   if (parsed.data.roleId !== undefined) {
     updateData.roleId = parsed.data.roleId;
-    if (legacyRole) updateData.role = legacyRole;
   }
   if (parsed.data.isActive !== undefined)
     updateData.isActive = parsed.data.isActive;

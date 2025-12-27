@@ -18,6 +18,7 @@ import {
 import { StatsCard } from "@/components/dashboard/stats-card";
 import Link from "next/link";
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
+import { type WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 
 interface Stats {
   open: number;
@@ -42,12 +43,16 @@ async function getStats(
   const globalOverdue = await db
     .select({ count: count() })
     .from(workOrders)
-    .where(and(lt(workOrders.dueBy, new Date()), eq(workOrders.status, "open")));
+    .where(
+      and(lt(workOrders.dueBy, new Date()), eq(workOrders.status, "open"))
+    );
 
   const globalCritical = await db
     .select({ count: count() })
     .from(workOrders)
-    .where(and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open")));
+    .where(
+      and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open"))
+    );
 
   const globalStats: Stats = {
     open: globalOpen[0].count,
@@ -63,13 +68,18 @@ async function getStats(
   const myOpen = await db
     .select({ count: count() })
     .from(workOrders)
-    .where(and(eq(workOrders.status, "open"), eq(workOrders.assignedToId, userId)));
+    .where(
+      and(eq(workOrders.status, "open"), eq(workOrders.assignedToId, userId))
+    );
 
   const myInProgress = await db
     .select({ count: count() })
     .from(workOrders)
     .where(
-      and(eq(workOrders.status, "in_progress"), eq(workOrders.assignedToId, userId))
+      and(
+        eq(workOrders.status, "in_progress"),
+        eq(workOrders.assignedToId, userId)
+      )
     );
 
   const myOverdue = await db
@@ -148,7 +158,6 @@ export default async function DashboardPage() {
   const myWorkOrders = user ? await getMyWorkOrders(user.id) : [];
   const recentWorkOrders = await getRecentWorkOrders();
 
-
   const myTotalActive = myStats ? myStats.open + myStats.inProgress : 0;
 
   return (
@@ -159,8 +168,8 @@ export default async function DashboardPage() {
           Technician <span className="text-primary-600">Terminal</span>
         </h1>
         <div className="flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <MonitorCog className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            Control panel for maintenance operations
+          <MonitorCog className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+          Control panel for maintenance operations
         </div>
       </div>
 
@@ -245,7 +254,9 @@ export default async function DashboardPage() {
             </Button>
           </div>
 
-          <DashboardWorkOrderFeed workOrders={myWorkOrders as any} />
+          <DashboardWorkOrderFeed
+            workOrders={myWorkOrders as unknown as WorkOrderWithRelations[]}
+          />
         </div>
       )}
 
@@ -324,10 +335,10 @@ export default async function DashboardPage() {
           </Button>
         </div>
 
-        <DashboardWorkOrderFeed workOrders={recentWorkOrders as any} />
+        <DashboardWorkOrderFeed
+          workOrders={recentWorkOrders as unknown as WorkOrderWithRelations[]}
+        />
       </div>
     </div>
   );
 }
-
-

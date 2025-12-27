@@ -10,7 +10,7 @@ interface DashboardShellProps {
   user: {
     id: number;
     name: string;
-    role: UserRole;
+    roleName: string;
     employeeId: string;
     permissions: string[];
   };

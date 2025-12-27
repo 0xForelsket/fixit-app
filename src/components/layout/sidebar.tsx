@@ -1,7 +1,6 @@
 "use client";
 
 import { logout } from "@/actions/auth";
-import type { UserRole } from "@/db/schema";
 import { PERMISSIONS, type Permission, hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
@@ -134,7 +133,7 @@ const navGroups: NavGroup[] = [
 interface SidebarProps {
   user: {
     name: string;
-    role: UserRole;
+    roleName: string;
     employeeId: string;
     permissions: string[];
   };
@@ -291,7 +290,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="flex-none rounded bg-zinc-800 px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-zinc-400 border border-zinc-700">
-                  {user.role}
+                  {user.roleName}
                 </span>
                 <p className="truncate text-[11px] font-mono text-zinc-500">
                   {user.employeeId}

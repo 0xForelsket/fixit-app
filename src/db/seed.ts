@@ -20,18 +20,58 @@ async function seed() {
   // Clear existing data (in reverse order of dependencies)
   console.log("Clearing existing data...");
   // Phase 12-13 tables
-  await db.delete(schema.workOrderParts).catch(() => {});
-  await db.delete(schema.laborLogs).catch(() => {});
-  await db.delete(schema.inventoryTransactions).catch(() => {});
-  await db.delete(schema.inventoryLevels).catch(() => {});
+  await db
+    .delete(schema.workOrderParts)
+    .catch(() =>
+      console.log("Cleanup: workOrderParts table empty or not found")
+    );
+  await db
+    .delete(schema.laborLogs)
+    .catch(() => console.log("Cleanup: laborLogs table empty or not found"));
+  await db
+    .delete(schema.inventoryTransactions)
+    .catch(() =>
+      console.log("Cleanup: inventoryTransactions table empty or not found")
+    );
+  await db
+    .delete(schema.inventoryLevels)
+    .catch(() =>
+      console.log("Cleanup: inventoryLevels table empty or not found")
+    );
   // Phase 10-15 tables
-  await db.delete(schema.checklistCompletions).catch(() => {});
-  await db.delete(schema.maintenanceChecklists).catch(() => {});
-  await db.delete(schema.equipmentBoms).catch(() => {});
-  await db.delete(schema.equipmentModels).catch(() => {});
-  await db.delete(schema.spareParts).catch(() => {});
-  await db.delete(schema.equipmentTypes).catch(() => {});
-  await db.delete(schema.equipmentCategories).catch(() => {});
+  await db
+    .delete(schema.checklistCompletions)
+    .catch(() =>
+      console.log("Cleanup: checklistCompletions table empty or not found")
+    );
+  await db
+    .delete(schema.maintenanceChecklists)
+    .catch(() =>
+      console.log("Cleanup: maintenanceChecklists table empty or not found")
+    );
+  await db
+    .delete(schema.equipmentBoms)
+    .catch(() =>
+      console.log("Cleanup: equipmentBoms table empty or not found")
+    );
+  await db
+    .delete(schema.equipmentModels)
+    .catch(() =>
+      console.log("Cleanup: equipmentModels table empty or not found")
+    );
+  await db
+    .delete(schema.spareParts)
+    .catch(() => console.log("Cleanup: spareParts table empty or not found"));
+  await db
+    .delete(schema.equipmentTypes)
+    .catch(() =>
+      console.log("Cleanup: equipmentTypes table empty or not found")
+    );
+  await db
+    .delete(schema.equipmentCategories)
+    .catch(() =>
+      console.log("Cleanup: equipmentCategories table empty or not found")
+    );
   // Core tables
   await db.delete(schema.equipmentStatusLogs);
   await db.delete(schema.notifications);
@@ -42,7 +82,9 @@ async function seed() {
   await db.delete(schema.equipment);
   await db.delete(schema.locations);
   await db.delete(schema.users);
-  await db.delete(schema.roles).catch(() => {});
+  await db
+    .delete(schema.roles)
+    .catch(() => console.log("Cleanup: roles table empty or not found"));
 
   console.log("Creating roles...");
   const [operatorRole] = await db

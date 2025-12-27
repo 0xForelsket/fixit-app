@@ -1,5 +1,11 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  real,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 // Enums as const objects for type safety
 export const userRoles = ["operator", "tech", "admin"] as const;
@@ -21,7 +27,12 @@ export const workOrderTypes = [
 ] as const;
 export type WorkOrderType = (typeof workOrderTypes)[number];
 
-export const workOrderPriorities = ["low", "medium", "high", "critical"] as const;
+export const workOrderPriorities = [
+  "low",
+  "medium",
+  "high",
+  "critical",
+] as const;
 export type WorkOrderPriority = (typeof workOrderPriorities)[number];
 
 export const workOrderStatuses = [
@@ -42,7 +53,12 @@ export const workOrderLogActions = [
 ] as const;
 export type WorkOrderLogAction = (typeof workOrderLogActions)[number];
 
-export const entityTypes = ["user", "equipment", "work_order", "location"] as const;
+export const entityTypes = [
+  "user",
+  "equipment",
+  "work_order",
+  "location",
+] as const;
 export type EntityType = (typeof entityTypes)[number];
 
 export const attachmentTypes = [
@@ -184,55 +200,73 @@ export const equipmentModels = sqliteTable("equipment_models", {
 });
 
 // Equipment table (formerly Equipment)
-export const equipment = sqliteTable("equipment", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  code: text("code").unique().notNull(), // For QR codes
-  modelId: integer("model_id").references(() => equipmentModels.id),
-  typeId: integer("type_id").references(() => equipmentTypes.id),
-  locationId: integer("location_id")
-    .references(() => locations.id)
-    .notNull(),
-  ownerId: integer("owner_id").references(() => users.id), // Owner
-  status: text("status", { enum: equipmentStatuses })
-    .notNull()
-    .default("operational"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+export const equipment = sqliteTable(
+  "equipment",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    code: text("code").unique().notNull(), // For QR codes
+    modelId: integer("model_id").references(() => equipmentModels.id),
+    typeId: integer("type_id").references(() => equipmentTypes.id),
+    locationId: integer("location_id")
+      .references(() => locations.id)
+      .notNull(),
+    ownerId: integer("owner_id").references(() => users.id), // Owner
+    status: text("status", { enum: equipmentStatuses })
+      .notNull()
+      .default("operational"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    codeIdx: index("eq_code_idx").on(table.code),
+    statusIdx: index("eq_status_idx").on(table.status),
+  })
+);
 
 // Work Orders table
-export const workOrders = sqliteTable("work_orders", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  equipmentId: integer("equipment_id")
-    .references(() => equipment.id)
-    .notNull(),
-  type: text("type", { enum: workOrderTypes }).notNull(),
-  reportedById: integer("reported_by_id")
-    .references(() => users.id)
-    .notNull(),
-  assignedToId: integer("assigned_to_id").references(() => users.id),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  priority: text("priority", { enum: workOrderPriorities })
-    .notNull()
-    .default("medium"),
-  status: text("status", { enum: workOrderStatuses }).notNull().default("open"),
-  resolutionNotes: text("resolution_notes"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  resolvedAt: integer("resolved_at", { mode: "timestamp" }),
-  escalatedAt: integer("escalated_at", { mode: "timestamp" }),
-  dueBy: integer("due_by", { mode: "timestamp" }),
-});
+export const workOrders = sqliteTable(
+  "work_orders",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    equipmentId: integer("equipment_id")
+      .references(() => equipment.id)
+      .notNull(),
+    type: text("type", { enum: workOrderTypes }).notNull(),
+    reportedById: integer("reported_by_id")
+      .references(() => users.id)
+      .notNull(),
+    assignedToId: integer("assigned_to_id").references(() => users.id),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    priority: text("priority", { enum: workOrderPriorities })
+      .notNull()
+      .default("medium"),
+    status: text("status", { enum: workOrderStatuses })
+      .notNull()
+      .default("open"),
+    resolutionNotes: text("resolution_notes"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    resolvedAt: integer("resolved_at", { mode: "timestamp" }),
+    escalatedAt: integer("escalated_at", { mode: "timestamp" }),
+    dueBy: integer("due_by", { mode: "timestamp" }),
+  },
+  (table) => ({
+    statusIdx: index("wo_status_idx").on(table.status),
+    priorityIdx: index("wo_priority_idx").on(table.priority),
+    dueByIdx: index("wo_due_by_idx").on(table.dueBy),
+    assignedToIdx: index("wo_assigned_to_idx").on(table.assignedToId),
+  })
+);
 
 // Maintenance schedules table
 export const maintenanceSchedules = sqliteTable("maintenance_schedules", {
@@ -287,20 +321,26 @@ export const attachments = sqliteTable("attachments", {
 });
 
 // Notifications table
-export const notifications = sqliteTable("notifications", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  userId: integer("user_id")
-    .references(() => users.id)
-    .notNull(),
-  type: text("type", { enum: notificationTypes }).notNull(),
-  title: text("title").notNull(),
-  message: text("message").notNull(),
-  link: text("link"),
-  isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .references(() => users.id)
+      .notNull(),
+    type: text("type", { enum: notificationTypes }).notNull(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    link: text("link"),
+    isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    userIdIdx: index("notif_user_idx").on(table.userId),
+  })
+);
 
 // Equipment status logs table (for downtime tracking)
 export const equipmentStatusLogs = sqliteTable("equipment_status_logs", {

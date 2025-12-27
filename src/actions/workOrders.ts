@@ -7,14 +7,15 @@ import {
   equipment as equipmentTable,
   notifications,
   roles,
+  users,
   workOrderLogs,
   workOrders,
-  users,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { workOrderLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
+import type { ActionResult } from "@/lib/types/actions";
 import {
   createWorkOrderSchema,
   resolveWorkOrderSchema,
@@ -23,21 +24,18 @@ import {
 } from "@/lib/validations";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-
-export type ActionState = {
-  error?: string;
-  success?: boolean;
-  data?: unknown;
-};
+import type { z } from "zod";
 
 export async function createWorkOrder(
-  _prevState: ActionState,
+  _prevState: ActionResult<unknown>,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResult<unknown>> {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "You must be logged in to create a work order" };
+    return {
+      success: false,
+      error: "You must be logged in to create a work order",
+    };
   }
 
   // Extract attachments from JSON if provided
@@ -57,7 +55,7 @@ export async function createWorkOrder(
   if (!result.success) {
     const errors = result.error.flatten().fieldErrors;
     const firstError = Object.values(errors)[0]?.[0];
-    return { error: firstError || "Invalid input" };
+    return { success: false, error: firstError || "Invalid input" };
   }
 
   const {
@@ -156,23 +154,32 @@ export async function createWorkOrder(
 
     return { success: true, data: workOrder };
   } catch (error) {
-    workOrderLogger.error({ error, userId: user.id }, "Failed to create work order");
-    return { error: "Failed to create work order. Please try again." };
+    workOrderLogger.error(
+      { error, userId: user.id },
+      "Failed to create work order"
+    );
+    return {
+      success: false,
+      error: "Failed to create work order. Please try again.",
+    };
   }
 }
 
 export async function updateWorkOrder(
   workOrderId: number,
-  _prevState: ActionState,
+  _prevState: ActionResult<void>,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "You must be logged in" };
+    return { success: false, error: "You must be logged in" };
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_UPDATE)) {
-    return { error: "You don't have permission to update work orders" };
+    return {
+      success: false,
+      error: "You don't have permission to update work orders",
+    };
   }
 
   const rawData: Record<string, unknown> = {};
@@ -188,7 +195,7 @@ export async function updateWorkOrder(
 
   const result = updateWorkOrderSchema.safeParse(rawData);
   if (!result.success) {
-    return { error: "Invalid input" };
+    return { success: false, error: "Invalid input" };
   }
 
   const existingWorkOrder = await db.query.workOrders.findFirst({
@@ -196,7 +203,7 @@ export async function updateWorkOrder(
   });
 
   if (!existingWorkOrder) {
-    return { error: "Work order not found" };
+    return { success: false, error: "Work order not found" };
   }
 
   const updateData: Record<string, unknown> = {
@@ -212,7 +219,10 @@ export async function updateWorkOrder(
     updateData.resolvedAt = new Date();
   }
 
-  await db.update(workOrders).set(updateData).where(eq(workOrders.id, workOrderId));
+  await db
+    .update(workOrders)
+    .set(updateData)
+    .where(eq(workOrders.id, workOrderId));
 
   // Log status changes
   if (result.data.status && result.data.status !== existingWorkOrder.status) {
@@ -259,16 +269,19 @@ export async function updateWorkOrder(
 
 export async function resolveWorkOrder(
   workOrderId: number,
-  _prevState: ActionState,
+  _prevState: ActionResult<void>,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "You must be logged in" };
+    return { success: false, error: "You must be logged in" };
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_RESOLVE)) {
-    return { error: "You don't have permission to resolve work orders" };
+    return {
+      success: false,
+      error: "You don't have permission to resolve work orders",
+    };
   }
 
   const rawData = {
@@ -277,7 +290,7 @@ export async function resolveWorkOrder(
 
   const result = resolveWorkOrderSchema.safeParse(rawData);
   if (!result.success) {
-    return { error: "Resolution notes are required" };
+    return { success: false, error: "Resolution notes are required" };
   }
 
   const existingWorkOrder = await db.query.workOrders.findFirst({
@@ -285,7 +298,7 @@ export async function resolveWorkOrder(
   });
 
   if (!existingWorkOrder) {
-    return { error: "Work order not found" };
+    return { success: false, error: "Work order not found" };
   }
 
   await db
@@ -315,17 +328,17 @@ export async function resolveWorkOrder(
 
 export async function addWorkOrderComment(
   workOrderId: number,
-  _prevState: ActionState,
+  _prevState: ActionResult<void>,
   formData: FormData
-): Promise<ActionState> {
+): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "You must be logged in" };
+    return { success: false, error: "You must be logged in" };
   }
 
   const comment = formData.get("comment")?.toString();
   if (!comment || comment.trim().length === 0) {
-    return { error: "Comment is required" };
+    return { success: false, error: "Comment is required" };
   }
 
   await db.insert(workOrderLogs).values({
@@ -345,15 +358,15 @@ export async function updateChecklistItem(
   completionId: number,
   workOrderId: number,
   data: z.infer<typeof updateChecklistItemSchema>
-): Promise<ActionState> {
+): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
   if (!user) {
-    return { error: "You must be logged in" };
+    return { success: false, error: "You must be logged in" };
   }
 
   const result = updateChecklistItemSchema.safeParse(data);
   if (!result.success) {
-    return { error: "Invalid input" };
+    return { success: false, error: "Invalid input" };
   }
 
   try {
@@ -370,7 +383,13 @@ export async function updateChecklistItem(
     revalidatePath(`/dashboard/work-orders/${workOrderId}`);
     return { success: true };
   } catch (error) {
-    console.error("Failed to update checklist item:", error);
-    return { error: "Failed to update item" };
+    workOrderLogger.error(
+      { error, userId: user.id },
+      "Failed to update checklist item"
+    );
+    return {
+      success: false,
+      error: "Failed to update item",
+    };
   }
 }

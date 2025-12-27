@@ -8,6 +8,7 @@ import { ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AvatarUpload } from "./avatar-upload";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -15,6 +16,10 @@ export default async function ProfilePage() {
   if (!user) {
     redirect("/login");
   }
+
+  const backLink = hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)
+    ? "/dashboard"
+    : "/";
 
   // Fetch current avatar
   const avatar = await db.query.attachments.findFirst({
@@ -33,14 +38,7 @@ export default async function ProfilePage() {
       <div className="mx-auto max-w-lg px-4 space-y-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" asChild>
-            <Link
-              href={
-                user.role === "tech" || user.role === "admin"
-                  ? "/dashboard"
-                  : "/"
-              }
-              className="gap-2 text-muted-foreground"
-            >
+            <Link href={backLink} className="gap-2 text-muted-foreground">
               <ArrowLeft className="h-4 w-4" />
               Back
             </Link>
@@ -67,7 +65,7 @@ export default async function ProfilePage() {
             {user.employeeId}
           </p>
           <div className="mt-2 inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700 uppercase tracking-wide">
-            {user.role}
+            {user.roleName}
           </div>
 
           <div className="mt-8 border-t pt-8 text-left">

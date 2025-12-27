@@ -1,12 +1,16 @@
-import type { UserRole } from "@/db/schema";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import {
+  type Permission,
+  hasPermission as checkPermission,
+  hasAnyPermission as checkAnyPermission,
+} from "./permissions";
 
 export interface SessionUser {
   id: number;
   employeeId: string;
   name: string;
-  role: UserRole;
+  roleName: string;
   roleId?: number | null;
   permissions: string[];
   hourlyRate?: number | null;
@@ -132,18 +136,23 @@ export async function requireAuth(): Promise<SessionUser> {
   return user;
 }
 
-export async function requireRole(minRole: UserRole): Promise<SessionUser> {
+export async function requirePermission(
+  permission: Permission
+): Promise<SessionUser> {
   const user = await requireAuth();
-  const roleHierarchy: Record<UserRole, number> = {
-    operator: 1,
-    tech: 2,
-    admin: 3,
-  };
-
-  if (roleHierarchy[user.role] < roleHierarchy[minRole]) {
+  if (!checkPermission(user.permissions, permission)) {
     throw new Error("Forbidden");
   }
+  return user;
+}
 
+export async function requireAnyPermission(
+  permissions: Permission[]
+): Promise<SessionUser> {
+  const user = await requireAuth();
+  if (!checkAnyPermission(user.permissions, permissions)) {
+    throw new Error("Forbidden");
+  }
   return user;
 }
 

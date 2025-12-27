@@ -1,14 +1,19 @@
 "use client";
 
 import { CheckCircle2 } from "lucide-react";
-import { WorkOrderCard, type WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
+import {
+  WorkOrderCard,
+  type WorkOrderWithRelations,
+} from "@/components/work-orders/work-order-card";
 import { DashboardWorkOrderTable } from "./dashboard-work-order-table";
 
 interface DashboardWorkOrderFeedProps {
   workOrders: WorkOrderWithRelations[];
 }
 
-export function DashboardWorkOrderFeed({ workOrders }: DashboardWorkOrderFeedProps) {
+export function DashboardWorkOrderFeed({
+  workOrders,
+}: DashboardWorkOrderFeedProps) {
   if (workOrders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-success-200 bg-success-50/30 p-16 text-center animate-in backdrop-blur-sm">
@@ -38,10 +43,10 @@ export function DashboardWorkOrderFeed({ workOrders }: DashboardWorkOrderFeedPro
       {/* Mobile/Tablet Card Feed View */}
       <div className="space-y-2.5 lg:hidden">
         {workOrders.map((workOrder) => (
-          <WorkOrderCard 
-            key={workOrder.id} 
-            workOrder={workOrder as any} 
-            variant="compact" 
+          <WorkOrderCard
+            key={workOrder.id}
+            workOrder={workOrder}
+            variant="compact"
           />
         ))}
       </div>

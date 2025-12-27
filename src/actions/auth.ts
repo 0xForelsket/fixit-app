@@ -1,6 +1,7 @@
 "use server";
 
 import { authenticateUser } from "@/lib/services/auth.service";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { deleteSession } from "@/lib/session";
 import { loginSchema } from "@/lib/validations";
 import { redirect } from "next/navigation";
@@ -32,10 +33,15 @@ export async function login(
     return { error: authResult.error };
   }
 
-  if (authResult.user.role === "operator") {
-    redirect("/");
-  } else {
+  const hasTechPermissions = hasPermission(
+    authResult.user.permissions,
+    PERMISSIONS.TICKET_VIEW_ALL
+  );
+
+  if (hasTechPermissions) {
     redirect("/dashboard");
+  } else {
+    redirect("/");
   }
 }
 

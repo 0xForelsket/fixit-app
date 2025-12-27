@@ -1,4 +1,3 @@
-import type { UserRole } from "@/db/schema";
 import bcrypt from "bcryptjs";
 import {
   PERMISSIONS,
@@ -18,61 +17,24 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
   return bcrypt.compare(pin, hash);
 }
 
-// Session configuration
 export const SESSION_CONFIG = {
-  maxAge: Number(process.env.SESSION_MAX_AGE) || 86400, // 24 hours
-  idleTimeout: 28800, // 8 hours
+  maxAge: Number(process.env.SESSION_MAX_AGE) || 86400,
+  idleTimeout: 28800,
   cookieName: "fixit_session",
 };
 
-// Brute force protection configuration
 export const BRUTE_FORCE_CONFIG = {
   maxAttempts: 5,
-  lockoutDuration: 15 * 60 * 1000, // 15 minutes in ms
+  lockoutDuration: 15 * 60 * 1000,
 };
 
-// Check if account is locked
 export function isAccountLocked(lockedUntil: Date | null): boolean {
   if (!lockedUntil) return false;
   return new Date() < lockedUntil;
 }
 
-// Calculate lockout end time
 export function calculateLockoutEnd(): Date {
   return new Date(Date.now() + BRUTE_FORCE_CONFIG.lockoutDuration);
-}
-
-// Role hierarchy for authorization
-const ROLE_HIERARCHY: Record<UserRole, number> = {
-  operator: 1,
-  tech: 2,
-  admin: 3,
-};
-
-// Check if user has required role level
-export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
-  return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
-}
-
-// Check if user can access based on minimum role
-export function canAccess(userRole: UserRole, minRole: UserRole): boolean {
-  return hasRole(userRole, minRole);
-}
-
-// Route protection levels
-export const ROUTE_PROTECTION: Record<string, UserRole> = {
-  "/report": "operator",
-  "/dashboard": "tech",
-  "/admin": "admin",
-};
-
-export function getRequiredRole(pathname: string): UserRole | null {
-  for (const [route, role] of Object.entries(ROUTE_PROTECTION)) {
-    if (pathname.startsWith(route)) {
-      return role;
-    }
-  }
-  return null;
 }
 
 export async function requirePermission(
