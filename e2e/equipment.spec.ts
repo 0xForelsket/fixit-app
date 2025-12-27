@@ -12,15 +12,14 @@ test.describe("Admin - Equipment", () => {
     await page.goto("/admin/equipment");
 
     // Try to click on any equipment link, skip test if none exist
-    const equipmentLink = page
-      .locator('tr a, [data-testid="equipment-link"]')
-      .first();
+    const equipmentLink = page.getByTestId("equipment-link").first();
     const isVisible = await equipmentLink
       .isVisible({ timeout: 3000 })
       .catch(() => false);
     if (isVisible) {
       await equipmentLink.click();
-      await expect(page).toHaveURL(/\/equipment\/\d+/);
+      await page.waitForURL(/\/admin\/equipment\/\d+/);
+      await expect(page).toHaveURL(/\/admin\/equipment\/\d+/);
     }
   });
 });

@@ -44,10 +44,10 @@ test.describe("Authentication", () => {
   test("should logout successfully", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
     // Find and click sign out
-    const signOut = page.locator("text=Sign Out").first();
-    if (await signOut.isVisible()) {
-      await signOut.click();
-      await expect(page).toHaveURL("/login");
-    }
+    const signOut = page.getByTestId("sign-out-button");
+    await expect(signOut).toBeVisible();
+    await signOut.click();
+    await page.waitForURL(/\/login/);
+    await expect(page).toHaveURL(/\/login/);
   });
 });

@@ -98,12 +98,13 @@ test.describe("Maintenance Schedules - Seeded Data", () => {
     await loginAsTech();
     await page.goto("/dashboard/maintenance/schedules");
 
-    const scheduleLink = page.locator('a[href*="/schedules/"]').first();
+    const scheduleLink = page.getByTestId("schedule-link").first();
     const isVisible = await scheduleLink
       .isVisible({ timeout: 3000 })
       .catch(() => false);
     if (isVisible) {
       await scheduleLink.click();
+      await page.waitForURL(/\/schedules\/\d+/);
       await expect(page).toHaveURL(/\/schedules\/\d+/);
     }
   });

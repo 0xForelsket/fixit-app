@@ -246,22 +246,26 @@ export default async function EquipmentPage({
                 return (
                   <tr
                     key={equipment.id}
-                    className="hover:bg-primary-50/30 transition-colors group cursor-pointer"
+                    className="hover:bg-primary-50/30 transition-colors group"
                   >
                     <td className="p-5">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg transition-transform group-hover:scale-110">
+                      <Link
+                        href={`/admin/equipment/${equipment.id}`}
+                        data-testid="equipment-link"
+                        className="flex items-center gap-4 group/item"
+                      >
+                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg transition-transform group-hover/item:scale-110">
                           <MonitorCog className="h-6 w-6" />
                         </div>
                         <div>
-                          <p className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+                          <p className="font-black text-zinc-900 group-hover/item:text-primary-600 transition-colors uppercase tracking-tight">
                             {equipment.name}
                           </p>
                           <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
                             Asset ID: {equipment.id}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="p-5 hidden lg:table-cell">
                       {equipment.type ? (

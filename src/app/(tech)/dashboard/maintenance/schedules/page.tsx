@@ -219,13 +219,17 @@ export default async function SchedulesPage({
                 return (
                   <tr
                     key={schedule.id}
-                    className="hover:bg-slate-50 transition-colors"
+                    className="hover:bg-slate-50 transition-colors group"
                   >
                     <td className="p-3">
-                      <div className="flex items-center gap-3">
+                      <Link
+                        href={`/dashboard/maintenance/schedules/${schedule.id}`}
+                        data-testid="schedule-link"
+                        className="flex items-center gap-3 group/item"
+                      >
                         <div
                           className={cn(
-                            "flex h-9 w-9 items-center justify-center rounded-lg",
+                            "flex h-9 w-9 items-center justify-center rounded-lg transition-transform group-hover/item:scale-110",
                             schedule.type === "maintenance"
                               ? "bg-primary-50"
                               : "bg-amber-50"
@@ -238,12 +242,14 @@ export default async function SchedulesPage({
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">{schedule.title}</p>
+                          <p className="font-medium group-hover/item:text-primary-600 transition-colors">
+                            {schedule.title}
+                          </p>
                           <p className="text-xs text-muted-foreground capitalize">
                             {schedule.type}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="p-3 hidden md:table-cell">
                       <p className="font-medium">{schedule.equipment?.name}</p>

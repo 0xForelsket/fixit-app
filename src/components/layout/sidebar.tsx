@@ -260,6 +260,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           <form action={logout}>
             <button
               type="submit"
+              data-testid="sign-out-button"
               className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-danger-500/10 hover:text-danger-500 transition-colors group"
             >
               <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
