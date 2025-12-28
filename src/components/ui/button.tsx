@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-md hover:bg-primary-600 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:shadow-sm",
+          "bg-zinc-900 text-white shadow-md hover:bg-zinc-800 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:shadow-sm",
         destructive:
           "bg-destructive text-destructive-foreground shadow-md hover:bg-danger-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:shadow-sm",
         outline:
@@ -21,10 +21,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-11 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest",
-        sm: "h-9 rounded-lg px-3 text-[10px] font-black uppercase tracking-wider",
-        lg: "h-14 rounded-2xl px-8 text-sm font-black uppercase tracking-widest",
-        icon: "h-10 w-10",
+        default: "h-11 px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest",
+        sm: "h-9 rounded-full px-4 text-[10px] font-black uppercase tracking-wider",
+        lg: "h-14 rounded-full px-8 text-sm font-black uppercase tracking-widest",
+        icon: "h-10 w-10 rounded-full",
       },
     },
     defaultVariants: {
