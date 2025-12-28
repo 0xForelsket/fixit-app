@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { laborLogs } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 // POST /api/labor - Create new labor log
@@ -43,6 +44,9 @@ export async function POST(request: Request) {
         isBillable: isBillable ?? true,
       })
       .returning();
+
+    revalidatePath(`/maintenance/work-orders/${workOrderId}`);
+    revalidatePath("/maintenance/work-orders");
 
     return NextResponse.json(log, { status: 201 });
   } catch (error) {

@@ -14,7 +14,6 @@ export function useTimeLogger({
   workOrderId,
   userId,
   userHourlyRate,
-  existingLogs = [],
 }: UseTimeLoggerProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -30,7 +29,7 @@ export function useTimeLogger({
       try {
         const { start } = JSON.parse(savedTimer);
         const savedStart = new Date(start);
-        if (!isNaN(savedStart.getTime())) {
+        if (!Number.isNaN(savedStart.getTime())) {
           setStartTime(savedStart);
           setIsRunning(true);
           setElapsed(Math.floor((Date.now() - savedStart.getTime()) / 1000));
@@ -70,8 +69,9 @@ export function useTimeLogger({
       setSaving(true);
       try {
         const endTime = new Date();
-        const durationMinutes = Math.ceil(
-          (endTime.getTime() - startTime.getTime()) / 60000
+        const durationMinutes = Math.max(
+          1,
+          Math.ceil((endTime.getTime() - startTime.getTime()) / 60000)
         );
 
         const res = await fetch("/api/labor", {
