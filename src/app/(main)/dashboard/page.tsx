@@ -1,5 +1,5 @@
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
-import { StatsCard } from "@/components/dashboard/stats-card";
+import { StatsCard } from "@/components/ui/stats-card";
 import { Button } from "@/components/ui/button";
 import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 import { db } from "@/db";
@@ -188,42 +188,30 @@ export default async function DashboardPage() {
               title="My Open"
               value={myStats.open}
               icon={Inbox}
-              color="text-primary-600"
-              bg="bg-primary-50"
-              border="border-primary-100"
-              delay={1}
+              variant="primary"
               href="/maintenance/work-orders?assigned=me&status=open"
             />
             <StatsCard
               title="My In Progress"
               value={myStats.inProgress}
               icon={Timer}
-              color="text-info-600"
-              bg="bg-info-50"
-              border="border-info-100"
-              delay={2}
+              variant="info"
               href="/maintenance/work-orders?assigned=me&status=in_progress"
             />
             <StatsCard
               title="My Overdue"
               value={myStats.overdue}
               icon={Clock}
-              color="text-danger-600"
-              bg="bg-danger-50"
-              border="border-danger-100"
-              pulse={myStats.overdue > 0}
-              delay={3}
+              variant="danger"
+              className={myStats.overdue > 0 ? "animate-pulse border-danger-300" : ""}
               href="/maintenance/work-orders?assigned=me&overdue=true"
             />
             <StatsCard
               title="My Critical"
               value={myStats.critical}
               icon={AlertTriangle}
-              color="text-danger-700"
-              bg="bg-danger-100"
-              border="border-danger-200"
-              pulse={myStats.critical > 0}
-              delay={4}
+              variant="danger"
+              className={myStats.critical > 0 ? "animate-pulse border-danger-300" : ""}
               href="/maintenance/work-orders?assigned=me&priority=critical"
             />
           </div>
@@ -274,42 +262,30 @@ export default async function DashboardPage() {
             title="Open WOs"
             value={globalStats.open}
             icon={Inbox}
-            color="text-secondary-600"
-            bg="bg-secondary-50"
-            border="border-secondary-100"
-            delay={1}
+            variant="secondary"
             href="/maintenance/work-orders?status=open"
           />
           <StatsCard
             title="In Progress"
             value={globalStats.inProgress}
             icon={Timer}
-            color="text-info-600"
-            bg="bg-info-50"
-            border="border-info-100"
-            delay={2}
+            variant="info"
             href="/maintenance/work-orders?status=in_progress"
           />
           <StatsCard
             title="Overdue"
             value={globalStats.overdue}
             icon={Clock}
-            color="text-danger-600"
-            bg="bg-danger-50"
-            border="border-danger-100"
-            pulse={globalStats.overdue > 0}
-            delay={3}
+            variant="danger"
+            className={globalStats.overdue > 0 ? "animate-pulse border-danger-300" : ""}
             href="/maintenance/work-orders?overdue=true"
           />
           <StatsCard
             title="Critical"
             value={globalStats.critical}
             icon={AlertTriangle}
-            color="text-danger-700"
-            bg="bg-danger-100"
-            border="border-danger-200"
-            pulse={globalStats.critical > 0}
-            delay={4}
+            variant="danger"
+            className={globalStats.critical > 0 ? "animate-pulse border-danger-300" : ""}
             href="/maintenance/work-orders?priority=critical"
           />
         </div>
