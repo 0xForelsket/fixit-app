@@ -1,4 +1,4 @@
-import { StatsCard } from "@/components/dashboard/stats-card";
+import { StatsCard } from "@/components/ui/stats-card";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -202,44 +202,34 @@ export default async function ReportsPage({
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-5">
         <StatsCard
-          variant="admin"
           title="Total Work Orders"
           value={stats.total}
           icon={FileText}
-          color="text-primary-600"
-          bg="bg-primary-50"
+          variant="primary"
         />
         <StatsCard
-          variant="admin"
           title="Open"
           value={stats.open}
           icon={Inbox}
-          color="text-amber-600"
-          bg="bg-amber-50"
+          variant="warning"
         />
         <StatsCard
-          variant="admin"
           title="Resolved"
           value={stats.resolved}
           icon={CheckCircle2}
-          color="text-emerald-600"
-          bg="bg-emerald-50"
+          variant="success"
         />
         <StatsCard
-          variant="admin"
           title="Critical"
           value={stats.critical}
           icon={AlertTriangle}
-          color="text-rose-600"
-          bg="bg-rose-50"
+          variant="danger"
         />
         <StatsCard
-          variant="admin"
           title="Avg Resolution"
           value={`${stats.avgResolutionHours}h`}
           icon={Timer}
-          color="text-slate-600"
-          bg="bg-slate-50"
+          variant="secondary"
         />
       </div>
 
