@@ -2,7 +2,6 @@ import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-or
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
-import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
@@ -251,9 +250,7 @@ export default async function DashboardPage() {
             </Button>
           </div>
 
-          <DashboardWorkOrderFeed
-            workOrders={myWorkOrders as unknown as WorkOrderWithRelations[]}
-          />
+          <DashboardWorkOrderFeed workOrders={myWorkOrders} />
         </div>
       )}
 
@@ -328,9 +325,7 @@ export default async function DashboardPage() {
           </Button>
         </div>
 
-        <DashboardWorkOrderFeed
-          workOrders={recentWorkOrders as unknown as WorkOrderWithRelations[]}
-        />
+        <DashboardWorkOrderFeed workOrders={recentWorkOrders} />
       </div>
     </div>
   );
