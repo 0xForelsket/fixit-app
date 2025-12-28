@@ -279,7 +279,9 @@ describe("updateWorkOrder action", () => {
 
     const result = await updateWorkOrder(1, {}, formData);
 
-    expect(result.error).toBe("You don't have permission to update work orders");
+    expect(result.error).toBe(
+      "You don't have permission to update work orders"
+    );
   });
 
   it("should return error for non-existent work order", async () => {
@@ -420,7 +422,9 @@ describe("resolveWorkOrder action", () => {
 
     const result = await resolveWorkOrder(1, {}, formData);
 
-    expect(result.error).toBe("You don't have permission to resolve work orders");
+    expect(result.error).toBe(
+      "You don't have permission to resolve work orders"
+    );
   });
 
   it("should require resolution notes", async () => {

@@ -413,7 +413,9 @@ describe("deleteEquipment action", () => {
 
     const result = await deleteEquipment(1);
 
-    expect(result.error).toBe("Cannot delete equipment with existing work orders");
+    expect(result.error).toBe(
+      "Cannot delete equipment with existing work orders"
+    );
   });
 
   it("should delete equipment successfully", async () => {
