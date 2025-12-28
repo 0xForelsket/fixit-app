@@ -1,12 +1,12 @@
 "use client";
 
+import type { LaborLog, User } from "@/db/schema";
 import { useTimeLogger } from "@/hooks/use-time-logger";
+import { useState } from "react";
 import { LaborHistory } from "./time-logger/labor-history";
 import { LaborSummary } from "./time-logger/labor-summary";
 import { ManualEntryForm } from "./time-logger/manual-entry-form";
 import { TimerDisplay } from "./time-logger/timer-display";
-import { useState } from "react";
-import type { LaborLog, User } from "@/db/schema";
 
 interface TimeLoggerProps {
   workOrderId: number;

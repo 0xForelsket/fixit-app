@@ -34,9 +34,10 @@ export function LaborHistory({ logs, onDelete }: LaborHistoryProps) {
                 {log.hourlyRate && (
                   <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
                     $
-                    {(((log.durationMinutes || 0) / 60) * log.hourlyRate).toFixed(
-                      2
-                    )}
+                    {(
+                      ((log.durationMinutes || 0) / 60) *
+                      log.hourlyRate
+                    ).toFixed(2)}
                   </span>
                 )}
               </div>

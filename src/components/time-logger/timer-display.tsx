@@ -54,10 +54,14 @@ export function TimerDisplay({
             <div
               className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-xl",
-                isRunning ? "bg-primary-500 text-white" : "bg-zinc-100 text-zinc-400"
+                isRunning
+                  ? "bg-primary-500 text-white"
+                  : "bg-zinc-100 text-zinc-400"
               )}
             >
-              <Clock className={cn("h-5 w-5", isRunning && "animate-spin-slow")} />
+              <Clock
+                className={cn("h-5 w-5", isRunning && "animate-spin-slow")}
+              />
             </div>
             <p
               className={cn(

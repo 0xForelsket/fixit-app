@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import type { LaborLog, User } from "@/db/schema";
 import { useToast } from "@/components/ui/use-toast";
+import type { LaborLog, User } from "@/db/schema";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseTimeLoggerProps {
   workOrderId: number;
@@ -97,16 +97,16 @@ export function useTimeLogger({
         setElapsed(0);
         router.refresh();
         toast({
-            title: "Time Logged",
-            description: `Logged ${durationMinutes} minutes.`,
-        })
+          title: "Time Logged",
+          description: `Logged ${durationMinutes} minutes.`,
+        });
       } catch (error) {
         console.error("Error saving time entry:", error);
         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to save time entry.",
-        })
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to save time entry.",
+        });
       } finally {
         setSaving(false);
       }
@@ -138,17 +138,17 @@ export function useTimeLogger({
 
         router.refresh();
         toast({
-            title: "Manual Entry Added",
-            description: `Logged ${minutes} minutes.`,
-        })
+          title: "Manual Entry Added",
+          description: `Logged ${minutes} minutes.`,
+        });
         return true;
       } catch (error) {
         console.error("Error saving time entry:", error);
         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to save time entry.",
-        })
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to save time entry.",
+        });
         return false;
       } finally {
         setSaving(false);
@@ -166,16 +166,16 @@ export function useTimeLogger({
         if (!res.ok) throw new Error("Failed to delete");
         router.refresh();
         toast({
-            title: "Entry Deleted",
-            description: "Labor log removed.",
-        })
+          title: "Entry Deleted",
+          description: "Labor log removed.",
+        });
       } catch (error) {
         console.error("Error deleting time entry:", error);
         toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to delete entry.",
-        })
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete entry.",
+        });
       }
     },
     [router, toast]
