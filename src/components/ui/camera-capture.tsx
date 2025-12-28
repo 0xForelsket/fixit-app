@@ -7,9 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useCamera } from "@/hooks/use-camera";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, Camera, Check, RotateCcw, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface CameraCaptureProps {
   isOpen: boolean;
@@ -22,53 +23,17 @@ export function CameraCapture({
   onClose,
   onCapture,
 }: CameraCaptureProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    videoRef,
+    startCamera,
+    stopCamera,
+    takePhoto,
+    error,
+    permissionDenied,
+  } = useCamera();
+
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isFlashing, setIsFlashing] = useState(false);
-  const [permissionDenied, setPermissionDenied] = useState(false);
-
-  const startCamera = useCallback(async () => {
-    try {
-      setError(null);
-      setPermissionDenied(false);
-
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-        audio: false,
-      });
-
-      setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err) {
-      console.error("Camera error:", err);
-      if (err instanceof DOMException && err.name === "NotAllowedError") {
-        setPermissionDenied(true);
-        setError(
-          "Camera access denied. Please allow camera access to use this feature."
-        );
-      } else {
-        setError("Could not access camera. Please check your device settings.");
-      }
-    }
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      for (const track of stream.getTracks()) {
-        track.stop();
-      }
-      setStream(null);
-    }
-  }, [stream]);
 
   useEffect(() => {
     if (isOpen && !capturedImage) {
@@ -76,51 +41,30 @@ export function CameraCapture({
     } else {
       stopCamera();
     }
-    return () => {
-      stopCamera();
-    };
   }, [isOpen, capturedImage, startCamera, stopCamera]);
 
-  const takePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-
-    if (!context) return;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    setIsFlashing(true);
-    setTimeout(() => setIsFlashing(false), 150);
-
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-    setCapturedImage(dataUrl);
-    stopCamera();
+  const handleTakePhoto = () => {
+    const dataUrl = takePhoto();
+    if (dataUrl) {
+      setIsFlashing(true);
+      setTimeout(() => setIsFlashing(false), 150);
+      setCapturedImage(dataUrl);
+      stopCamera();
+    }
   };
 
   const handleRetake = () => {
     setCapturedImage(null);
   };
 
-  const handleConfirm = () => {
-    if (!canvasRef.current) return;
-
-    canvasRef.current.toBlob(
-      (blob) => {
-        if (blob) {
-          const filename = `capture-${new Date().getTime()}.jpg`;
-          onCapture(blob, filename);
-          handleClose();
-        }
-      },
-      "image/jpeg",
-      0.9
-    );
+  const handleConfirm = async () => {
+    if (capturedImage) {
+      const res = await fetch(capturedImage);
+      const blob = await res.blob();
+      const filename = `capture-${new Date().getTime()}.jpg`;
+      onCapture(blob, filename);
+      handleClose();
+    }
   };
 
   const handleClose = () => {
@@ -212,8 +156,6 @@ export function CameraCapture({
                 />
               </div>
             )}
-
-            <canvas ref={canvasRef} className="hidden" />
           </div>
 
           <div className="bg-black p-6 sm:rounded-b-xl border-t border-slate-800">
@@ -240,7 +182,7 @@ export function CameraCapture({
                 {!error && (
                   <button
                     type="button"
-                    onClick={takePhoto}
+                    onClick={handleTakePhoto}
                     className="group relative flex h-20 w-20 items-center justify-center rounded-full bg-slate-800 transition-all active:scale-95"
                     aria-label="Take Photo"
                   >

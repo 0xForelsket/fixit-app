@@ -1,4 +1,5 @@
 "use client";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { cn } from "@/lib/utils";
 import { FileIcon, ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -25,83 +26,54 @@ export function FileUpload({
   accept = "image/*,application/pdf",
   maxSizeMB = 10,
 }: FileUploadProps) {
-  const [isUploading, setIsPending] = useState(false);
+  const { uploadFiles, isUploading, error: uploadError } = useFileUpload();
   const [previews, setPreviews] = useState<
     { id: string; url: string; name: string; type: string }[]
   >([]);
-  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
 
-      setError(null);
-      setIsPending(true);
+      const handleUploadSuccess = (attachment: {
+        s3Key: string;
+        filename: string;
+        mimeType: string;
+        sizeBytes: number;
+      }) => {
+        onUploadComplete(attachment);
 
-      for (const file of files) {
-        // Validate size
-        if (file.size > maxSizeMB * 1024 * 1024) {
-          setError(`File ${file.name} is too large (max ${maxSizeMB}MB)`);
-          continue;
-        }
-
-        try {
-          // 1. Get presigned URL
-          const response = await fetch("/api/attachments/presigned-url", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filename: file.name,
-              mimeType: file.type,
-              entityType,
-              entityId,
-            }),
-          });
-
-          if (!response.ok) throw new Error("Failed to get upload URL");
-
-          const { uploadUrl, s3Key } = await response.json();
-
-          // 2. Upload to S3
-          const uploadResponse = await fetch(uploadUrl, {
-            method: "PUT",
-            body: file,
-            headers: {
-              "Content-Type": file.type,
-            },
-          });
-
-          if (!uploadResponse.ok)
-            throw new Error("Failed to upload to storage");
-
-          // 3. Notify parent
-          onUploadComplete({
-            s3Key,
-            filename: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
-          });
-
-          // 4. Add to previews
-          const url = file.type.startsWith("image/")
+        // Add to previews
+        // We find the matching file object to create object URL
+        const file = files.find((f) => f.name === attachment.filename);
+        if (file) {
+          const url = attachment.mimeType.startsWith("image/")
             ? URL.createObjectURL(file)
             : "";
           setPreviews((prev) => [
             ...prev,
-            { id: s3Key, url, name: file.name, type: file.type },
+            {
+              id: attachment.s3Key,
+              url,
+              name: attachment.filename,
+              type: attachment.mimeType,
+            },
           ]);
-        } catch (err) {
-          console.error("Upload error:", err);
-          setError("Failed to upload some files. Please try again.");
         }
-      }
+      };
 
-      setIsPending(false);
+      await uploadFiles(files, {
+        entityType,
+        entityId,
+        maxSizeMB,
+        onUploadComplete: handleUploadSuccess,
+      });
+
       // Reset input
       e.target.value = "";
     },
-    [entityType, entityId, maxSizeMB, onUploadComplete]
+    [entityType, entityId, maxSizeMB, onUploadComplete, uploadFiles]
   );
 
   const removePreview = (id: string) => {
@@ -154,7 +126,9 @@ export function FileUpload({
         </div>
       </label>
 
-      {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+      {uploadError && (
+        <p className="text-sm font-medium text-destructive">{uploadError}</p>
+      )}
 
       {/* Previews Grid */}
       {previews.length > 0 && (
