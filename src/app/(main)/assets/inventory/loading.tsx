@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { SkeletonStatsGrid, SkeletonCard } from "@/components/ui/skeleton";
+import { SkeletonCard, SkeletonStatsGrid } from "@/components/ui/skeleton";
 import { Box } from "lucide-react";
 
 export default function InventoryLoading() {
@@ -15,12 +15,15 @@ export default function InventoryLoading() {
       <SkeletonStatsGrid />
 
       <div className="grid gap-6 md:grid-cols-2">
-         <div className="h-48 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200" />
-         <div className="grid gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-24 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200" />
-            ))}
-         </div>
+        <div className="h-48 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200" />
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-24 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200"
+            />
+          ))}
+        </div>
       </div>
 
       <div className="rounded-2xl border border-zinc-200 bg-white p-6">
@@ -31,9 +34,9 @@ export default function InventoryLoading() {
           </div>
         </div>
         <div className="grid gap-4">
-           {Array.from({ length: 4 }).map((_, i) => (
-             <SkeletonCard key={i} />
-           ))}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       </div>
     </div>

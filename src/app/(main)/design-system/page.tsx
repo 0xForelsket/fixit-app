@@ -8,7 +8,6 @@ import { StatsCard } from "@/components/ui/stats-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Activity,
-  AlertTriangle,
   CheckCircle2,
   Clock,
   LayoutTemplate,

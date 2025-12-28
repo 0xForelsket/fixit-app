@@ -1,7 +1,7 @@
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
-import { Button } from "@/components/ui/button";
 import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
@@ -161,7 +161,7 @@ export default async function DashboardPage() {
   const myTotalActive = myStats ? myStats.open + myStats.inProgress : 0;
 
   return (
-    <div className="space-y-6 sm:space-y-10 pb-8 industrial-grid min-h-full">
+    <div className="space-y-6 sm:space-y-10 pb-8 min-h-full">
       {/* Page Header */}
       <PageHeader
         title="Technician"
@@ -205,7 +205,10 @@ export default async function DashboardPage() {
               value={myStats.overdue}
               icon={Clock}
               variant="danger"
-              className={cn("animate-stagger-3 animate-in", myStats.overdue > 0 ? "animate-pulse border-danger-300" : "")}
+              className={cn(
+                "animate-stagger-3 animate-in",
+                myStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
+              )}
               href="/maintenance/work-orders?assigned=me&overdue=true"
             />
             <StatsCard
@@ -213,7 +216,10 @@ export default async function DashboardPage() {
               value={myStats.critical}
               icon={AlertTriangle}
               variant="danger"
-              className={cn("animate-stagger-4 animate-in", myStats.critical > 0 ? "animate-pulse border-danger-300" : "")}
+              className={cn(
+                "animate-stagger-4 animate-in",
+                myStats.critical > 0 ? "animate-pulse border-danger-300" : ""
+              )}
               href="/maintenance/work-orders?assigned=me&priority=critical"
             />
           </div>
@@ -281,7 +287,10 @@ export default async function DashboardPage() {
             value={globalStats.overdue}
             icon={Clock}
             variant="danger"
-            className={cn("animate-stagger-3 animate-in", globalStats.overdue > 0 ? "animate-pulse border-danger-300" : "")}
+            className={cn(
+              "animate-stagger-3 animate-in",
+              globalStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
+            )}
             href="/maintenance/work-orders?overdue=true"
           />
           <StatsCard
@@ -289,7 +298,10 @@ export default async function DashboardPage() {
             value={globalStats.critical}
             icon={AlertTriangle}
             variant="danger"
-            className={cn("animate-stagger-4 animate-in", globalStats.critical > 0 ? "animate-pulse border-danger-300" : "")}
+            className={cn(
+              "animate-stagger-4 animate-in",
+              globalStats.critical > 0 ? "animate-pulse border-danger-300" : ""
+            )}
             href="/maintenance/work-orders?priority=critical"
           />
         </div>

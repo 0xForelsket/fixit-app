@@ -16,12 +16,12 @@ const buttonVariants = cva(
           "border-2 border-zinc-200 bg-white shadow-sm hover:border-primary-500 hover:text-primary-600 hover:bg-primary-50/10 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200",
         secondary:
           "bg-zinc-100 text-zinc-900 shadow-sm hover:bg-zinc-200 hover:shadow-md active:scale-[0.98]",
-        ghost:
-          "hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98]",
+        ghost: "hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-11 px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest",
+        default:
+          "h-11 px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest",
         sm: "h-9 rounded-full px-4 text-[10px] font-black uppercase tracking-wider",
         lg: "h-14 rounded-full px-8 text-sm font-black uppercase tracking-widest",
         icon: "h-10 w-10 rounded-full",

@@ -426,7 +426,10 @@ export function ImportWizard() {
                         {idx + 2}
                       </TableCell>
                       {row.map((cell, cellIdx) => (
-                        <TableCell key={cellIdx} className="px-4 py-3 text-zinc-900">
+                        <TableCell
+                          key={cellIdx}
+                          className="px-4 py-3 text-zinc-900"
+                        >
                           {cell || <span className="text-zinc-300">—</span>}
                         </TableCell>
                       ))}

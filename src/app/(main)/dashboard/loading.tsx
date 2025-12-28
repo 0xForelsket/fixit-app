@@ -31,7 +31,10 @@ export default function DashboardLoading() {
         </div>
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-             <div key={i} className="h-24 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200" />
+            <div
+              key={i}
+              className="h-24 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200"
+            />
           ))}
         </div>
       </div>

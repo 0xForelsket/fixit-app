@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { SortHeader } from "@/components/ui/sort-header";
+import { StatsCard } from "@/components/ui/stats-card";
 import {
   Table,
   TableBody,
@@ -23,8 +25,6 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
-import { StatsCard } from "@/components/ui/stats-card";
-import { EmptyState } from "@/components/ui/empty-state";
 
 type SearchParams = {
   search?: string;
@@ -182,9 +182,11 @@ export default async function LocationsPage({
       {locationsList.length === 0 ? (
         <EmptyState
           title="No locations found"
-          description={params.search
-            ? "Try adjusting your search to find the zones you're looking for."
-            : "Define your first physical or virtual location to begin mapping assets."}
+          description={
+            params.search
+              ? "Try adjusting your search to find the zones you're looking for."
+              : "Define your first physical or virtual location to begin mapping assets."
+          }
           icon={MapPin}
         />
       ) : (
@@ -237,68 +239,74 @@ export default async function LocationsPage({
             </TableHeader>
             <TableBody className="divide-y">
               {locationsList.map((location, index) => {
-                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                const staggerClass =
+                  index < 5
+                    ? `animate-stagger-${index + 1}`
+                    : "animate-in fade-in duration-500";
                 return (
                   <TableRow
                     key={location.id}
-                    className={cn("hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                    className={cn(
+                      "hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+                      staggerClass
+                    )}
                   >
-                  <TableCell className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-                        <MapPin className="h-5 w-5 text-primary-600" />
+                    <TableCell className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
+                          <MapPin className="h-5 w-5 text-primary-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{location.name}</p>
+                          {location.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {location.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">{location.name}</p>
-                        {location.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1">
-                            {location.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-4 hidden md:table-cell">
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {location.code}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="p-4 hidden lg:table-cell">
-                    {location.parent ? (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <ChevronRight className="h-3.5 w-3.5" />
-                        {location.parent.name}
-                      </div>
-                    ) : (
+                    </TableCell>
+                    <TableCell className="p-4 hidden md:table-cell">
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {location.code}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="p-4 hidden lg:table-cell">
+                      {location.parent ? (
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <ChevronRight className="h-3.5 w-3.5" />
+                          {location.parent.name}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          Root
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="p-4">
+                      {location.isActive ? (
+                        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                          Inactive
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="p-4 hidden sm:table-cell">
                       <span className="text-sm text-muted-foreground">
-                        Root
+                        {formatRelativeTime(location.createdAt)}
                       </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="p-4">
-                    {location.isActive ? (
-                      <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                        Inactive
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="p-4 hidden sm:table-cell">
-                    <span className="text-sm text-muted-foreground">
-                      {formatRelativeTime(location.createdAt)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="p-4">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/assets/locations/${location.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell className="p-4">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/assets/locations/${location.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </TableBody>
@@ -308,4 +316,3 @@ export default async function LocationsPage({
     </div>
   );
 }
-

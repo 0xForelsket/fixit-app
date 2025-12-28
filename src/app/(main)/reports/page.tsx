@@ -1,8 +1,8 @@
-import { StatsCard } from "@/components/ui/stats-card";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/ui/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatsCard } from "@/components/ui/stats-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -17,8 +17,8 @@ import {
   type WorkOrderStatus,
   workOrders,
 } from "@/db/schema";
-import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { cn } from "@/lib/utils";
+import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -335,19 +335,35 @@ export default async function ReportsPage({
               <TableRow className="border-b text-left font-medium text-muted-foreground hover:bg-transparent">
                 <TableHead className="p-3">ID</TableHead>
                 <TableHead className="p-3">Title</TableHead>
-                <TableHead className="p-3 hidden md:table-cell">Equipment</TableHead>
-                <TableHead className="p-3 hidden lg:table-cell">Location</TableHead>
+                <TableHead className="p-3 hidden md:table-cell">
+                  Equipment
+                </TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">
+                  Location
+                </TableHead>
                 <TableHead className="p-3">Status</TableHead>
-                <TableHead className="p-3 hidden sm:table-cell">Priority</TableHead>
-                <TableHead className="p-3 hidden xl:table-cell">Reported By</TableHead>
-                <TableHead className="p-3 hidden xl:table-cell">Assigned To</TableHead>
+                <TableHead className="p-3 hidden sm:table-cell">
+                  Priority
+                </TableHead>
+                <TableHead className="p-3 hidden xl:table-cell">
+                  Reported By
+                </TableHead>
+                <TableHead className="p-3 hidden xl:table-cell">
+                  Assigned To
+                </TableHead>
                 <TableHead className="p-3">Created</TableHead>
-                <TableHead className="p-3 hidden lg:table-cell">Resolved</TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">
+                  Resolved
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y">
               {workOrdersList.map((workOrder, index) => (
-                <WorkOrderRow key={workOrder.id} workOrder={workOrder} index={index} />
+                <WorkOrderRow
+                  key={workOrder.id}
+                  workOrder={workOrder}
+                  index={index}
+                />
               ))}
             </TableBody>
           </Table>
@@ -417,18 +433,25 @@ interface WorkOrderWithRelations {
   assignedTo?: { name: string } | null;
 }
 
-
-function WorkOrderRow({ 
-  workOrder, 
-  index 
-}: { 
+function WorkOrderRow({
+  workOrder,
+  index,
+}: {
   workOrder: WorkOrderWithRelations;
   index: number;
 }) {
-  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
-  
+  const staggerClass =
+    index < 5
+      ? `animate-stagger-${index + 1}`
+      : "animate-in fade-in duration-500";
+
   return (
-    <TableRow className={cn("hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}>
+    <TableRow
+      className={cn(
+        "hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+        staggerClass
+      )}
+    >
       <TableCell className="p-3">
         <Link
           href={`/maintenance/work-orders/${workOrder.id}`}

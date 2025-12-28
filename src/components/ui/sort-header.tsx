@@ -26,7 +26,7 @@ export function SortHeader({
   const nextDir = isActive && currentDir === "asc" ? "desc" : "asc";
 
   const query = new URLSearchParams();
-  
+
   // Preserve all existing params
   for (const [key, value] of Object.entries(params)) {
     if (value && key !== "sort" && key !== "dir") {

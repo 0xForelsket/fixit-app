@@ -26,7 +26,10 @@ export function WorkOrderCard({
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
 
-  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+  const staggerClass =
+    index < 5
+      ? `animate-stagger-${index + 1}`
+      : "animate-in fade-in duration-500";
 
   if (variant === "compact") {
     // We use left border color to indicate priority strongly

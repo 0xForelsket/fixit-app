@@ -45,7 +45,9 @@ export function AnalyticsKPIs({ data }: AnalyticsKPIsProps) {
         description="Open High/Critical"
         icon={AlertCircle}
         variant="danger"
-        className={data?.highPriorityOpen ? "animate-pulse border-danger-300" : ""}
+        className={
+          data?.highPriorityOpen ? "animate-pulse border-danger-300" : ""
+        }
       />
     </div>
   );

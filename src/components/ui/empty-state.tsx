@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LucideIcon, Search } from "lucide-react";
+import { type LucideIcon, Search } from "lucide-react";
 import Link from "next/link";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -36,11 +36,11 @@ export function EmptyState({
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm border mb-4">
         <Icon className="h-8 w-8 text-primary-500" />
       </div>
-      
+
       <h3 className="text-xl font-bold tracking-tight text-foreground">
         {title}
       </h3>
-      
+
       {description && (
         <p className="mt-2 text-sm text-muted-foreground max-w-[300px] mx-auto leading-relaxed">
           {description}

@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { Equipment, Location } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
@@ -10,7 +11,6 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
 
 interface EquipmentWithLocation extends Equipment {
   location: Location | null;
@@ -47,7 +47,10 @@ function EquipmentCard({
   equipment: EquipmentWithLocation;
   index: number;
 }) {
-  const staggerClass = index < 8 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+  const staggerClass =
+    index < 8
+      ? `animate-stagger-${index + 1}`
+      : "animate-in fade-in duration-500";
   const statusConfig = {
     operational: {
       icon: CheckCircle2,

@@ -6,7 +6,14 @@ interface StatsCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  variant?: "default" | "success" | "warning" | "danger" | "info" | "primary" | "secondary";
+  variant?:
+    | "default"
+    | "success"
+    | "warning"
+    | "danger"
+    | "info"
+    | "primary"
+    | "secondary";
   description?: string;
   href?: string;
   active?: boolean;
@@ -105,7 +112,11 @@ export function StatsCard({
           >
             {trend.positive ? "+" : ""}
             {trend.value}%
-            {trend.label && <span className="hidden sm:inline opacity-70 ml-1">{trend.label}</span>}
+            {trend.label && (
+              <span className="hidden sm:inline opacity-70 ml-1">
+                {trend.label}
+              </span>
+            )}
           </div>
         )}
         {active && !trend && (
@@ -128,14 +139,14 @@ export function StatsCard({
           </span>
           {description && (
             <span className="text-xs font-bold text-zinc-400">
-             {description}
+              {description}
             </span>
           )}
         </div>
       </div>
-      
+
       {active && (
-           <div className="absolute inset-x-4 bottom-0 h-1 bg-primary-500 rounded-t-full" /> 
+        <div className="absolute inset-x-4 bottom-0 h-1 bg-primary-500 rounded-t-full" />
       )}
     </div>
   );

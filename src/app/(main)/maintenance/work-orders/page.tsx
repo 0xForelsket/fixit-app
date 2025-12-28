@@ -446,7 +446,8 @@ function StatFilterCard({
   active: boolean;
   index: number;
 }) {
-  const staggerClass = index < 4 ? `animate-stagger-${index + 1}` : "animate-in";
+  const staggerClass =
+    index < 4 ? `animate-stagger-${index + 1}` : "animate-in";
   return (
     <Link
       href={active ? "/maintenance/work-orders" : href}

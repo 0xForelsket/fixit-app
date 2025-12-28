@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import React from "react";
+import type React from "react";
 
 interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
@@ -29,7 +29,8 @@ export function PageHeader({
     >
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
-          {title} {highlight && <span className="text-primary-600">{highlight}</span>}
+          {title}{" "}
+          {highlight && <span className="text-primary-600">{highlight}</span>}
         </h1>
         {description && (
           <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest leading-none mt-1">
@@ -40,9 +41,7 @@ export function PageHeader({
       </div>
 
       {children && (
-        <div className="flex flex-wrap items-center gap-3">
-          {children}
-        </div>
+        <div className="flex flex-wrap items-center gap-3">{children}</div>
       )}
     </div>
   );

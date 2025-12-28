@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
@@ -16,7 +16,6 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
 import { redirect } from "next/navigation";
 import { SuccessToast } from "./success-toast";
 
@@ -239,7 +238,10 @@ function WorkOrderListItem({
   isResolved?: boolean;
   index: number;
 }) {
-  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+  const staggerClass =
+    index < 5
+      ? `animate-stagger-${index + 1}`
+      : "animate-in fade-in duration-500";
 
   const priorityConfig = {
     low: { color: "bg-slate-400", label: "Low" },

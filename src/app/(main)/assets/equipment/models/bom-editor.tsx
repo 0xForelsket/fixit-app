@@ -170,10 +170,14 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
             ) : (
               items.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell className="p-3 font-medium">{item.part.name}</TableCell>
+                  <TableCell className="p-3 font-medium">
+                    {item.part.name}
+                  </TableCell>
                   <TableCell className="p-3">{item.part.sku}</TableCell>
                   <TableCell className="p-3">{item.quantityRequired}</TableCell>
-                  <TableCell className="p-3 text-muted-foreground">{item.notes}</TableCell>
+                  <TableCell className="p-3 text-muted-foreground">
+                    {item.notes}
+                  </TableCell>
                   <TableCell className="p-3">
                     <Button
                       variant="ghost"

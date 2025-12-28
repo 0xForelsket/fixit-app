@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
@@ -15,7 +16,6 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { StatsCard } from "@/components/ui/stats-card";
 
 type SearchParams = {
   month?: string;
@@ -168,7 +168,10 @@ export default async function MaintenancePage({
           value={overdueCount}
           icon={AlertTriangle}
           variant={overdueCount > 0 ? "danger" : "secondary"}
-          className={cn("animate-stagger-1 animate-in", overdueCount > 0 && "animate-pulse")}
+          className={cn(
+            "animate-stagger-1 animate-in",
+            overdueCount > 0 && "animate-pulse"
+          )}
         />
         <StatsCard
           title="This Month"
@@ -402,7 +405,6 @@ export default async function MaintenancePage({
   );
 }
 
-
 function AgendaItem({
   schedule,
   today,
@@ -418,7 +420,10 @@ function AgendaItem({
   today: Date;
   index: number;
 }) {
-  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+  const staggerClass =
+    index < 5
+      ? `animate-stagger-${index + 1}`
+      : "animate-in fade-in duration-500";
   const dueDate = schedule.nextDue ? new Date(schedule.nextDue) : null;
   const isOverdue = dueDate && dueDate < today;
   const daysUntil = dueDate

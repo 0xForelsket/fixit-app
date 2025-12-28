@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { SortHeader } from "@/components/ui/sort-header";
+import { StatsCard } from "@/components/ui/stats-card";
 import {
   Table,
   TableBody,
@@ -15,8 +17,6 @@ import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc } from "drizzle-orm";
 import { Edit, Plus, Search, Shield, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
-import { StatsCard } from "@/components/ui/stats-card";
-import { EmptyState } from "@/components/ui/empty-state";
 
 type SearchParams = {
   role?: string;
@@ -207,9 +207,11 @@ export default async function UsersPage({
       {usersList.length === 0 ? (
         <EmptyState
           title="No users found"
-          description={params.search || params.role
-            ? "Try adjusting your filters to find what you're looking for."
-            : "Add your first user to build your team."}
+          description={
+            params.search || params.role
+              ? "Try adjusting your filters to find what you're looking for."
+              : "Add your first user to build your team."
+          }
           icon={Users}
         />
       ) : (
@@ -274,12 +276,18 @@ export default async function UsersPage({
                 const roleConfig =
                   roleConfigs[roleName] || roleConfigs.operator;
                 const RoleIcon = roleConfig.icon;
-                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                const staggerClass =
+                  index < 5
+                    ? `animate-stagger-${index + 1}`
+                    : "animate-in fade-in duration-500";
 
                 return (
                   <TableRow
                     key={user.id}
-                    className={cn("hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                    className={cn(
+                      "hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+                      staggerClass
+                    )}
                   >
                     <TableCell className="p-4">
                       <div className="flex items-center gap-3">
@@ -348,4 +356,3 @@ export default async function UsersPage({
     </div>
   );
 }
-

@@ -29,7 +29,10 @@ interface WorkOrderTableProps {
   searchParams?: Record<string, string | undefined>;
 }
 
-export function WorkOrderTable({ workOrders, searchParams }: WorkOrderTableProps) {
+export function WorkOrderTable({
+  workOrders,
+  searchParams,
+}: WorkOrderTableProps) {
   const router = useRouter();
   const params = searchParams || {};
 
@@ -54,7 +57,9 @@ export function WorkOrderTable({ workOrders, searchParams }: WorkOrderTableProps
               params={params}
               className="p-4"
             />
-            <TableHead className="p-4 hidden md:table-cell">Equipment</TableHead>
+            <TableHead className="p-4 hidden md:table-cell">
+              Equipment
+            </TableHead>
             <SortHeader
               label="Status"
               field="status"
@@ -71,7 +76,9 @@ export function WorkOrderTable({ workOrders, searchParams }: WorkOrderTableProps
               params={params}
               className="p-4 hidden lg:table-cell"
             />
-            <TableHead className="p-4 hidden xl:table-cell">Assigned To</TableHead>
+            <TableHead className="p-4 hidden xl:table-cell">
+              Assigned To
+            </TableHead>
             <SortHeader
               label="Created"
               field="createdAt"
@@ -110,11 +117,17 @@ function WorkOrderRow({
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
 
-  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+  const staggerClass =
+    index < 5
+      ? `animate-stagger-${index + 1}`
+      : "animate-in fade-in duration-500";
 
   return (
     <TableRow
-      className={cn("group hover:bg-slate-50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+      className={cn(
+        "group hover:bg-slate-50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1",
+        staggerClass
+      )}
       onClick={() => router.push(`/maintenance/work-orders/${workOrder.id}`)}
     >
       <TableCell className="p-4">

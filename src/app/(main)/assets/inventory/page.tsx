@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
@@ -16,7 +17,6 @@ import {
   TrendingDown,
 } from "lucide-react";
 import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
 
 async function getStats() {
   const allParts = await db.query.spareParts.findMany({
@@ -71,18 +71,13 @@ export default async function InventoryPage() {
         description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
         icon={Box}
       >
-        <Button
-          variant="ghost"
-          asChild
-        >
+        <Button variant="ghost" asChild>
           <Link href="/assets/inventory/parts">
             <Package className="mr-2 h-4 w-4" />
             CATALOG
           </Link>
         </Button>
-        <Button
-          asChild
-        >
+        <Button asChild>
           <Link href="/assets/inventory/parts/new">
             <Plus className="mr-2 h-4 w-4" />
             ADD NEW PART
@@ -103,7 +98,9 @@ export default async function InventoryPage() {
           value={stats.lowStockCount}
           icon={AlertTriangle}
           variant={stats.lowStockCount > 0 ? "danger" : "default"}
-          className={stats.lowStockCount > 0 ? "animate-pulse border-danger-300" : ""}
+          className={
+            stats.lowStockCount > 0 ? "animate-pulse border-danger-300" : ""
+          }
         />
         <StatsCard
           title="Inventory Assets"
@@ -239,7 +236,10 @@ export default async function InventoryPage() {
         ) : (
           <div className="grid gap-4">
             {recentParts.map((part, index) => {
-              const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+              const staggerClass =
+                index < 5
+                  ? `animate-stagger-${index + 1}`
+                  : "animate-in fade-in duration-500";
               return (
                 <Link
                   key={part.id}
@@ -249,24 +249,24 @@ export default async function InventoryPage() {
                     staggerClass
                   )}
                 >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg group-hover:scale-110 transition-transform">
-                    <Package className="h-6 w-6" />
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg group-hover:scale-110 transition-transform">
+                      <Package className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="font-black text-zinc-900 group-hover:text-primary-700 transition-colors uppercase tracking-tight">
+                        {part.name}
+                      </p>
+                      <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                        SKU: {part.sku} • CAT: {part.category?.toUpperCase()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-black text-zinc-900 group-hover:text-primary-700 transition-colors uppercase tracking-tight">
-                      {part.name}
-                    </p>
-                    <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-1">
-                      SKU: {part.sku} • CAT: {part.category?.toUpperCase()}
-                    </p>
+                  <div className="flex items-center justify-between sm:justify-end gap-6 mt-4 sm:mt-0">
+                    <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-primary-500 group-hover:text-white group-hover:border-primary-500 transition-all">
+                      <ChevronRight className="h-5 w-5" />
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between sm:justify-end gap-6 mt-4 sm:mt-0">
-                  <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-primary-500 group-hover:text-white group-hover:border-primary-500 transition-all">
-                    <ChevronRight className="h-5 w-5" />
-                  </div>
-                </div>
                 </Link>
               );
             })}
@@ -276,7 +276,6 @@ export default async function InventoryPage() {
     </div>
   );
 }
-
 
 function QuickAction({
   href,

@@ -242,7 +242,9 @@ export default async function PartsPage({
                     params={params}
                     className="p-4 sm:table-cell"
                   />
-                  <TableHead className="p-4 md:table-cell">Reorder Point</TableHead>
+                  <TableHead className="p-4 md:table-cell">
+                    Reorder Point
+                  </TableHead>
                   <SortHeader
                     label="Status"
                     field="status"

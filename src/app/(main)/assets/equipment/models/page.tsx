@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -9,10 +10,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/db";
-import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Package, Plus } from "lucide-react";
+import Link from "next/link";
 
 export default async function EquipmentModelsPage() {
   const models = await db.query.equipmentModels.findMany({
@@ -66,11 +66,17 @@ export default async function EquipmentModelsPage() {
               </TableRow>
             ) : (
               models.map((model, index) => {
-                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                const staggerClass =
+                  index < 5
+                    ? `animate-stagger-${index + 1}`
+                    : "animate-in fade-in duration-500";
                 return (
                   <TableRow
                     key={model.id}
-                    className={cn("hover:bg-slate-50 animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                    className={cn(
+                      "hover:bg-slate-50 animate-in fade-in slide-in-from-bottom-1",
+                      staggerClass
+                    )}
                   >
                     <TableCell className="p-3 font-medium">
                       <Link
@@ -85,7 +91,9 @@ export default async function EquipmentModelsPage() {
                         </p>
                       )}
                     </TableCell>
-                    <TableCell className="p-3 font-medium">{model.manufacturer || "-"}</TableCell>
+                    <TableCell className="p-3 font-medium">
+                      {model.manufacturer || "-"}
+                    </TableCell>
                     <TableCell className="p-3">
                       <Badge variant="secondary" className="font-bold">
                         {model.equipment.length} assets
@@ -98,7 +106,12 @@ export default async function EquipmentModelsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="p-3 text-right">
-                      <Button variant="ghost" size="sm" asChild className="font-bold text-primary-600">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="font-bold text-primary-600"
+                      >
                         <Link href={`/assets/equipment/models/${model.id}`}>
                           VIEW
                         </Link>

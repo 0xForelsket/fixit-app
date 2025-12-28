@@ -8,7 +8,22 @@ interface StatusBadgeProps {
   showIcon?: boolean;
 }
 
-const STATUS_MAP: Record<string, { variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "danger" | "critical"; label?: string; icon?: React.ElementType }> = {
+const STATUS_MAP: Record<
+  string,
+  {
+    variant:
+      | "default"
+      | "secondary"
+      | "destructive"
+      | "outline"
+      | "success"
+      | "warning"
+      | "danger"
+      | "critical";
+    label?: string;
+    icon?: React.ElementType;
+  }
+> = {
   // Work Order Status
   open: { variant: "default", label: "Open", icon: AlertTriangle },
   in_progress: { variant: "warning", label: "In Progress", icon: Clock },
@@ -31,17 +46,27 @@ const STATUS_MAP: Record<string, { variant: "default" | "secondary" | "destructi
   inactive: { variant: "secondary", label: "Inactive" },
 };
 
-export function StatusBadge({ status, className, showIcon = false }: StatusBadgeProps) {
+export function StatusBadge({
+  status,
+  className,
+  showIcon = false,
+}: StatusBadgeProps) {
   if (!status) {
     return (
-      <Badge variant="secondary" className={cn("capitalize whitespace-nowrap", className)}>
+      <Badge
+        variant="secondary"
+        className={cn("capitalize whitespace-nowrap", className)}
+      >
         Unknown
       </Badge>
     );
   }
 
   const normalizedStatus = status.toLowerCase();
-  const config = STATUS_MAP[normalizedStatus] || { variant: "secondary", label: status };
+  const config = STATUS_MAP[normalizedStatus] || {
+    variant: "secondary",
+    label: status,
+  };
   const Icon = config.icon;
 
   return (

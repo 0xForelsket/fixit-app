@@ -1,5 +1,6 @@
 import { getRoles } from "@/actions/roles";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { Edit, Plus, Shield, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 import { DeleteRoleButton } from "./delete-role-button";
-import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function RolesPage() {
   const roles = await getRoles();
@@ -68,85 +68,91 @@ export default async function RolesPage() {
             </TableHeader>
             <TableBody className="divide-y divide-zinc-100">
               {roles.map((role, index) => {
-                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                const staggerClass =
+                  index < 5
+                    ? `animate-stagger-${index + 1}`
+                    : "animate-in fade-in duration-500";
                 return (
                   <TableRow
                     key={role.id}
-                    className={cn("hover:bg-primary-50/30 transition-colors group animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                    className={cn(
+                      "hover:bg-primary-50/30 transition-colors group animate-in fade-in slide-in-from-bottom-1",
+                      staggerClass
+                    )}
                   >
-                  <TableCell className="p-5">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={cn(
-                          "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-110",
-                          role.isSystemRole
-                            ? "bg-gradient-to-br from-amber-500 to-orange-600 text-white"
-                            : "bg-zinc-900 text-white"
-                        )}
-                      >
-                        {role.isSystemRole ? (
-                          <ShieldCheck className="h-6 w-6" />
-                        ) : (
-                          <Shield className="h-6 w-6" />
-                        )}
+                    <TableCell className="p-5">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={cn(
+                            "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-110",
+                            role.isSystemRole
+                              ? "bg-gradient-to-br from-amber-500 to-orange-600 text-white"
+                              : "bg-zinc-900 text-white"
+                          )}
+                        >
+                          {role.isSystemRole ? (
+                            <ShieldCheck className="h-6 w-6" />
+                          ) : (
+                            <Shield className="h-6 w-6" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+                            {role.name}
+                          </p>
+                          {role.isSystemRole && (
+                            <span className="text-[10px] font-mono font-bold text-amber-600 uppercase tracking-widest">
+                              SYSTEM ROLE
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
-                          {role.name}
-                        </p>
-                        {role.isSystemRole && (
-                          <span className="text-[10px] font-mono font-bold text-amber-600 uppercase tracking-widest">
-                            SYSTEM ROLE
+                    </TableCell>
+                    <TableCell className="p-5 hidden md:table-cell">
+                      <span className="text-sm text-zinc-600">
+                        {role.description || "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="p-5 hidden lg:table-cell">
+                      <div className="flex items-center gap-2">
+                        {role.permissions.includes("*") ? (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-amber-700">
+                            ALL PERMISSIONS
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-zinc-600">
+                            {role.permissions.length} PERMISSIONS
                           </span>
                         )}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-5 hidden md:table-cell">
-                    <span className="text-sm text-zinc-600">
-                      {role.description || "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="p-5 hidden lg:table-cell">
-                    <div className="flex items-center gap-2">
-                      {role.permissions.includes("*") ? (
-                        <span className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-amber-700">
-                          ALL PERMISSIONS
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-zinc-600">
-                          {role.permissions.length} PERMISSIONS
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-5">
-                    <div className="flex items-center gap-2 text-sm font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/50 w-fit">
-                      <Users className="h-3.5 w-3.5" />
-                      {role.userCount}
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-5">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        asChild
-                        className="rounded-xl hover:bg-primary-500 hover:text-white transition-all"
-                      >
-                        <Link href={`/admin/roles/${role.id}`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      {!role.isSystemRole && (
-                        <DeleteRoleButton
-                          roleId={role.id}
-                          roleName={role.name}
-                          disabled={role.userCount > 0}
-                        />
-                      )}
-                    </div>
-                  </TableCell>
+                    </TableCell>
+                    <TableCell className="p-5">
+                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/50 w-fit">
+                        <Users className="h-3.5 w-3.5" />
+                        {role.userCount}
+                      </div>
+                    </TableCell>
+                    <TableCell className="p-5">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          asChild
+                          className="rounded-xl hover:bg-primary-500 hover:text-white transition-all"
+                        >
+                          <Link href={`/admin/roles/${role.id}`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        {!role.isSystemRole && (
+                          <DeleteRoleButton
+                            roleId={role.id}
+                            roleName={role.name}
+                            disabled={role.userCount > 0}
+                          />
+                        )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}

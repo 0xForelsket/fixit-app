@@ -1,8 +1,17 @@
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { SortHeader } from "@/components/ui/sort-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { EmptyState } from "@/components/ui/empty-state";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -22,21 +31,18 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { SortHeader } from "@/components/ui/sort-header";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 type SearchParams = {
   status?: string;
   location?: string;
   search?: string;
-  sort?: "name" | "code" | "status" | "location" | "classification" | "responsible";
+  sort?:
+    | "name"
+    | "code"
+    | "status"
+    | "location"
+    | "classification"
+    | "responsible";
   dir?: "asc" | "desc";
 };
 
@@ -150,9 +156,7 @@ export default async function EquipmentPage({
             VIEW MODELS
           </Link>
         </Button>
-        <Button
-          asChild
-        >
+        <Button asChild>
           <Link href="/assets/equipment/new">
             <Plus className="mr-2 h-4 w-4" />
             ADD EQUIPMENT
@@ -217,13 +221,13 @@ export default async function EquipmentPage({
           </div>
         </form>
         {params.status && params.status !== "all" && (
-           <Link
-             href="/assets/equipment"
-             className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 text-xs font-bold hover:bg-zinc-200 transition-colors"
-           >
-             Status: {params.status}
-             <X className="h-3 w-3" />
-           </Link>
+          <Link
+            href="/assets/equipment"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 text-xs font-bold hover:bg-zinc-200 transition-colors"
+          >
+            Status: {params.status}
+            <X className="h-3 w-3" />
+          </Link>
         )}
       </div>
 
@@ -231,9 +235,11 @@ export default async function EquipmentPage({
       {equipmentList.length === 0 ? (
         <EmptyState
           title="No assets identified"
-          description={params.search || params.status
-            ? "Refine parameters to adjust scan results"
-            : "Register your first equipment to begin monitoring."}
+          description={
+            params.search || params.status
+              ? "Refine parameters to adjust scan results"
+              : "Register your first equipment to begin monitoring."
+          }
           icon={MonitorCog}
         >
           {(params.search || params.status) && (
@@ -301,16 +307,22 @@ export default async function EquipmentPage({
             </TableHeader>
             <TableBody className="divide-y divide-zinc-100">
               {equipmentList.map((equipment, index) => {
-                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                const staggerClass =
+                  index < 5
+                    ? `animate-stagger-${index + 1}`
+                    : "animate-in fade-in duration-500";
                 return (
                   <TableRow
                     key={equipment.id}
-                    className={cn("hover:bg-zinc-50 transition-colors group animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                    className={cn(
+                      "hover:bg-zinc-50 transition-colors group animate-in fade-in slide-in-from-bottom-1",
+                      staggerClass
+                    )}
                   >
                     <TableCell className="p-5">
-                       <span className="font-mono font-bold text-zinc-500 uppercase tracking-widest text-xs">
+                      <span className="font-mono font-bold text-zinc-500 uppercase tracking-widest text-xs">
                         {equipment.code}
-                       </span>
+                      </span>
                     </TableCell>
                     <TableCell className="p-5">
                       <Link
@@ -326,7 +338,7 @@ export default async function EquipmentPage({
                             {equipment.name}
                           </p>
                           <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
-                             ID: {equipment.id}
+                            ID: {equipment.id}
                           </p>
                         </div>
                       </Link>
@@ -334,7 +346,7 @@ export default async function EquipmentPage({
                     <TableCell className="p-5 hidden lg:table-cell">
                       {equipment.type ? (
                         <div className="inline-flex flex-col bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                           <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
+                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
                             {equipment.type.category.label}
                           </span>
                           <span className="text-xs font-bold text-slate-700">
@@ -357,19 +369,28 @@ export default async function EquipmentPage({
                       <StatusBadge status={equipment.status} />
                     </TableCell>
                     <TableCell className="p-5 hidden xl:table-cell">
-                      <span className={cn("text-sm font-bold", equipment.owner?.name ? "text-zinc-900" : "text-zinc-400 italic")}>
+                      <span
+                        className={cn(
+                          "text-sm font-bold",
+                          equipment.owner?.name
+                            ? "text-zinc-900"
+                            : "text-zinc-400 italic"
+                        )}
+                      >
                         {equipment.owner?.name || "OFF-SYSTEM"}
                       </span>
                     </TableCell>
                     <TableCell className="p-5 text-right flex items-center justify-end gap-2">
-                       <Button
+                      <Button
                         variant="ghost"
                         size="icon"
                         asChild
                         className="rounded-xl hover:bg-amber-500 hover:text-white transition-all text-zinc-400"
                         title="Report Issue"
                       >
-                        <Link href={`/maintenance/work-orders/new?equipmentId=${equipment.id}`}>
+                        <Link
+                          href={`/maintenance/work-orders/new?equipmentId=${equipment.id}`}
+                        >
                           <Flag className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -394,5 +415,3 @@ export default async function EquipmentPage({
     </div>
   );
 }
-
-

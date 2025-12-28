@@ -110,7 +110,12 @@ export default async function EquipmentDetailPage({
   const OverviewHeader = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild className="lg:hidden text-white/80 hover:text-white hover:bg-white/10">
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="lg:hidden text-white/80 hover:text-white hover:bg-white/10"
+        >
           <Link href="/assets/equipment">
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -145,7 +150,11 @@ export default async function EquipmentDetailPage({
           </div>
         </div>
       </div>
-      <Button variant="outline" asChild className="hidden sm:flex border-white/20 bg-white/10 text-white hover:bg-white hover:text-primary-600 hover:border-white">
+      <Button
+        variant="outline"
+        asChild
+        className="hidden sm:flex border-white/20 bg-white/10 text-white hover:bg-white hover:text-primary-600 hover:border-white"
+      >
         <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Equipment
@@ -270,12 +279,18 @@ export default async function EquipmentDetailPage({
       ) : (
         <div className="divide-y">
           {equipmentItem.workOrders.slice(0, 10).map((workOrder, index) => {
-            const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+            const staggerClass =
+              index < 5
+                ? `animate-stagger-${index + 1}`
+                : "animate-in fade-in duration-500";
             return (
               <Link
                 key={workOrder.id}
                 href={`/maintenance/work-orders/${workOrder.id}`}
-                className={cn("block p-4 hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                className={cn(
+                  "block p-4 hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+                  staggerClass
+                )}
               >
                 <div className="flex justify-between items-start mb-1">
                   <span className="font-semibold text-sm truncate pr-2">
@@ -353,7 +368,9 @@ export default async function EquipmentDetailPage({
                     key={item.id}
                     className={cn(
                       "p-3 bg-zinc-50 rounded-lg border animate-in fade-in slide-in-from-bottom-1",
-                      index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                      index < 5
+                        ? `animate-stagger-${index + 1}`
+                        : "animate-in fade-in duration-500"
                     )}
                   >
                     <div className="flex justify-between font-bold text-sm">
@@ -399,7 +416,9 @@ export default async function EquipmentDetailPage({
                   key={schedule.id}
                   className={cn(
                     "p-4 animate-in fade-in slide-in-from-bottom-1",
-                    index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                    index < 5
+                      ? `animate-stagger-${index + 1}`
+                      : "animate-in fade-in duration-500"
                   )}
                 >
                   <p className="font-bold text-sm">{schedule.title}</p>
@@ -453,8 +472,12 @@ export default async function EquipmentDetailPage({
                     <TableRow className="text-left font-medium text-muted-foreground">
                       <TableHead className="p-3">Part</TableHead>
                       <TableHead className="p-3">SKU</TableHead>
-                      <TableHead className="p-3 text-center">Required</TableHead>
-                      <TableHead className="p-3 text-center">In Stock</TableHead>
+                      <TableHead className="p-3 text-center">
+                        Required
+                      </TableHead>
+                      <TableHead className="p-3 text-center">
+                        In Stock
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y">
@@ -463,10 +486,14 @@ export default async function EquipmentDetailPage({
                         key={item.id}
                         className={cn(
                           "animate-in fade-in slide-in-from-bottom-1",
-                          index < 8 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                          index < 8
+                            ? `animate-stagger-${index + 1}`
+                            : "animate-in fade-in duration-500"
                         )}
                       >
-                        <TableCell className="p-3 font-medium">{item.part.name}</TableCell>
+                        <TableCell className="p-3 font-medium">
+                          {item.part.name}
+                        </TableCell>
                         <TableCell className="p-3">{item.part.sku}</TableCell>
                         <TableCell className="p-3 text-center">
                           {item.quantityRequired}
@@ -501,7 +528,9 @@ export default async function EquipmentDetailPage({
                     key={schedule.id}
                     className={cn(
                       "p-4 flex justify-between items-center text-sm animate-in fade-in slide-in-from-bottom-1",
-                      index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                      index < 5
+                        ? `animate-stagger-${index + 1}`
+                        : "animate-in fade-in duration-500"
                     )}
                   >
                     <span>{schedule.title}</span>

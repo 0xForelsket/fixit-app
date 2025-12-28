@@ -1,9 +1,9 @@
 "use client";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { Inbox } from "lucide-react";
 import { WorkOrderCard } from "./work-order-card";
 import { WorkOrderTable } from "./work-order-table";
-import { EmptyState } from "@/components/ui/empty-state";
 
 import type { WorkOrderWithRelations } from "./work-order-card";
 
@@ -22,7 +22,10 @@ export function WorkOrderList({
     return (
       <EmptyState
         title="No work orders found"
-        description={emptyMessage || "Try adjusting your filters to find specific maintenance tasks."}
+        description={
+          emptyMessage ||
+          "Try adjusting your filters to find specific maintenance tasks."
+        }
         icon={Inbox}
       />
     );
@@ -36,7 +39,11 @@ export function WorkOrderList({
       {/* Mobile Feed */}
       <div className="lg:hidden space-y-3">
         {workOrders.map((workOrder, index) => (
-          <WorkOrderCard key={workOrder.id} workOrder={workOrder} index={index} />
+          <WorkOrderCard
+            key={workOrder.id}
+            workOrder={workOrder}
+            index={index}
+          />
         ))}
       </div>
     </>
