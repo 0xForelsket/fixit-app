@@ -123,7 +123,7 @@ export default async function LocationsPage({
             {stats.total} ZONES • {stats.roots} ROOT AREAS
           </div>
         </div>
-        <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
+        <Button asChild>
           <Link href="/assets/locations/new">
             <Plus className="mr-2 h-4 w-4" />
             ADD LOCATION

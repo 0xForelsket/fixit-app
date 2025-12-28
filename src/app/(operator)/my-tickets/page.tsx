@@ -112,7 +112,7 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
             <p className="mt-2 text-zinc-500 max-w-xs mx-auto text-sm">
               You haven't reported any equipment issues yet.
             </p>
-            <Button asChild className="mt-6 rounded-xl font-bold">
+            <Button asChild className="mt-6">
               <Link href="/">Report an Issue</Link>
             </Button>
           </div>

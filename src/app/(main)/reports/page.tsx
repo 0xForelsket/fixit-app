@@ -191,7 +191,7 @@ export default async function ReportsPage({
             {total} WORK ORDERS PROCESSED {hasFilters && "• FILTERED RESULTS"}
           </div>
         </div>
-        <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
+        <Button asChild>
           <a href={csvUrl} download="work-order-report.csv">
             <Download className="mr-2 h-4 w-4" />
             EXPORT CSV

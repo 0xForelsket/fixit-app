@@ -109,7 +109,7 @@ export default async function EquipmentDetailPage({
   const OverviewHeader = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild className="lg:hidden">
+        <Button variant="ghost" size="icon" asChild className="lg:hidden text-white/80 hover:text-white hover:bg-white/10">
           <Link href="/assets/equipment">
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -144,7 +144,7 @@ export default async function EquipmentDetailPage({
           </div>
         </div>
       </div>
-      <Button variant="outline" asChild className="hidden sm:flex">
+      <Button variant="outline" asChild className="hidden sm:flex border-white/20 bg-white/10 text-white hover:bg-white hover:text-primary-600 hover:border-white">
         <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
           <Edit className="mr-2 h-4 w-4" />
           Edit Equipment

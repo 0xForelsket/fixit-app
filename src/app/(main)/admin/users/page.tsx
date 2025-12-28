@@ -134,7 +134,7 @@ export default async function UsersPage({
             {stats.total} ACCOUNTS • {stats.active} ACTIVE
           </div>
         </div>
-        <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
+        <Button asChild>
           <Link href="/admin/users/new">
             <Plus className="mr-2 h-4 w-4" />
             ADD USER
