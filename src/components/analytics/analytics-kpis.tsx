@@ -1,6 +1,6 @@
 "use client";
 
-import { StatsCard } from "@/components/dashboard/stats-card";
+import { StatsCard } from "@/components/ui/stats-card";
 import { AlertCircle, BarChart3, CheckCircle2, Clock } from "lucide-react";
 
 interface KPIs {
@@ -23,33 +23,29 @@ export function AnalyticsKPIs({ data }: AnalyticsKPIsProps) {
         value={`${data?.mttrHours || 0}h`}
         description="Mean Time To Repair"
         icon={Clock}
-        color="text-secondary-600"
-        bg="bg-secondary-50"
+        variant="secondary"
       />
       <StatsCard
         title="SLA Compliance"
         value={`${data?.slaRate || 0}%`}
         description="Resolved within deadline"
         icon={CheckCircle2}
-        color="text-success-600"
-        bg="bg-success-50"
+        variant="success"
       />
       <StatsCard
         title="Open Tickets"
         value={data?.openTickets || 0}
         description="Current system backlog"
         icon={BarChart3}
-        color="text-primary-600"
-        bg="bg-primary-50"
+        variant="primary"
       />
       <StatsCard
         title="Critical Issues"
         value={data?.highPriorityOpen || 0}
         description="Open High/Critical"
         icon={AlertCircle}
-        color="text-danger-600"
-        bg="bg-danger-50"
-        pulse={!!data?.highPriorityOpen}
+        variant="danger"
+        className={data?.highPriorityOpen ? "animate-pulse border-danger-300" : ""}
       />
     </div>
   );
