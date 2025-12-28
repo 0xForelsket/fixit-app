@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { formatRelativeTime } from "@/lib/utils";
-import { AlertTriangle, Calendar, CheckCircle2, Clock } from "lucide-react";
+import { cn, formatRelativeTime } from "@/lib/utils";
+import { AlertTriangle, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 
 interface MaintenanceScheduleItem {
@@ -42,28 +41,28 @@ export function EquipmentMaintenance({ schedules }: EquipmentMaintenanceProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Overdue / Due Now */}
       {overdueSchedules.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-danger-500 flex items-center gap-2">
             <AlertTriangle className="h-3 w-3" />
-            Needs Attention
+            Priority Maintenance
           </h3>
           {overdueSchedules.map((schedule) => (
-            <ScheduleCard key={schedule.id} schedule={schedule} isOverdue />
+            <ScheduleCondensedCard key={schedule.id} schedule={schedule} isOverdue />
           ))}
         </div>
       )}
 
       {/* Upcoming */}
       {upcomingSchedules.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Upcoming
+            Scheduled PMs
           </h3>
           {upcomingSchedules.map((schedule) => (
-            <ScheduleCard key={schedule.id} schedule={schedule} />
+            <ScheduleCondensedCard key={schedule.id} schedule={schedule} />
           ))}
         </div>
       )}
@@ -71,7 +70,7 @@ export function EquipmentMaintenance({ schedules }: EquipmentMaintenanceProps) {
   );
 }
 
-function ScheduleCard({
+function ScheduleCondensedCard({
   schedule,
   isOverdue,
 }: {
@@ -84,62 +83,63 @@ function ScheduleCard({
 
   return (
     <div
-      className={`rounded-2xl border-2 p-4 ${
+      className={cn(
+        "rounded-xl border p-3 flex items-center justify-between gap-4 transition-all",
         isOverdue
-          ? "border-danger-300 bg-danger-50"
-          : "border-zinc-200 bg-white"
-      }`}
+          ? "border-danger-200 bg-danger-50/30"
+          : "border-zinc-200 bg-white shadow-sm"
+      )}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span
-              className={`font-black ${
-                isOverdue ? "text-danger-700" : "text-zinc-900"
-              }`}
-            >
-              {schedule.name}
-            </span>
-            <span className="text-xs font-bold uppercase text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded">
-              {schedule.type}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 mt-1 text-sm text-zinc-500">
-            <Clock className="h-3.5 w-3.5" />
-            {isOverdue ? (
-              <span className="text-danger-600 font-bold">
-                Overdue by {Math.abs(daysUntilDue)} days
-              </span>
-            ) : daysUntilDue <= 7 ? (
-              <span className="text-warning-600 font-bold">
-                Due in {daysUntilDue} days
-              </span>
-            ) : (
-              <span>Due {formatRelativeTime(schedule.nextDueDate)}</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <h4
+            className={cn(
+              "font-bold text-sm truncate",
+              isOverdue ? "text-danger-700" : "text-zinc-900"
             )}
-          </div>
-        </div>
-
-        {schedule.workOrderId ? (
-          <Button asChild variant="outline" className="rounded-xl font-bold">
-            <Link href={`/maintenance/work-orders/${schedule.workOrderId}`}>
-              <CheckCircle2 className="h-4 w-4 mr-1" />
-              View WO
-            </Link>
-          </Button>
-        ) : (
-          <Button
-            asChild
-            className={`rounded-xl font-bold ${
-              isOverdue
-                ? "bg-danger-600 hover:bg-danger-700"
-                : "bg-warning-600 hover:bg-warning-700"
-            }`}
           >
-            <Link href={`/maintenance/schedules/${schedule.id}`}>Start PM</Link>
-          </Button>
-        )}
+            {schedule.name}
+          </h4>
+          <span className="shrink-0 text-[9px] font-black uppercase tracking-widest text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded">
+            {schedule.type}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] font-bold">
+          <Clock className="h-3 w-3 text-zinc-300" />
+          {isOverdue ? (
+            <span className="text-danger-600 uppercase tracking-wider">
+              Overdue {Math.abs(daysUntilDue)}d
+            </span>
+          ) : daysUntilDue <= 7 ? (
+            <span className="text-warning-600 uppercase tracking-wider">
+              Due in {daysUntilDue}d
+            </span>
+          ) : (
+            <span className="text-zinc-400 uppercase tracking-wider">Due {formatRelativeTime(schedule.nextDueDate)}</span>
+          )}
+        </div>
       </div>
+
+      {schedule.workOrderId ? (
+        <Link
+          href={`/maintenance/work-orders/${schedule.workOrderId}`}
+          className="flex h-8 px-3 items-center justify-center rounded-lg border border-zinc-200 bg-white text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:bg-zinc-50 transition-all shadow-sm"
+        >
+          View WO
+        </Link>
+      ) : (
+        <Link
+          href={`/maintenance/schedules/${schedule.id}`}
+          className={cn(
+            "flex h-8 px-4 items-center justify-center rounded-lg text-[11px] font-black uppercase tracking-widest text-white transition-all shadow-sm active:scale-95",
+            isOverdue
+              ? "bg-danger-600 hover:bg-danger-700"
+              : "bg-warning-600 hover:bg-warning-700"
+          )}
+        >
+          Start
+        </Link>
+      )}
     </div>
   );
 }

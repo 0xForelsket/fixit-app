@@ -161,7 +161,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
   };
 
   return (
-    <form action={formAction} className="space-y-8">
+    <form action={formAction} className="space-y-6">
       <input type="hidden" name="equipmentId" value={equipment.id} />
       <input
         type="hidden"
@@ -171,25 +171,25 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       {/* Error display */}
       {state && !state.success && state.error && (
-        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-danger-700 font-medium flex items-center gap-3">
-          <ShieldAlert className="h-5 w-5" />
+        <div className="rounded-xl border border-danger-200 bg-danger-50 p-3 text-danger-700 text-xs font-bold flex items-center gap-2">
+          <ShieldAlert className="h-4 w-4" />
           {state.error}
         </div>
       )}
 
       {/* Ticket Type */}
-      <div className="space-y-4">
-        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
-          What type of issue is it?
+      <div className="space-y-3">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          Issue Type
         </Label>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
           {workOrderTypes.map((type) => {
             const config = typeConfig[type];
             const Icon = config.icon;
             return (
               <label
                 key={type}
-                className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 bg-white p-4 text-center transition-all hover:border-primary-300 hover:bg-primary-50/50 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50 has-[:checked]:shadow-sm active:scale-[0.98]"
+                className="group relative flex cursor-pointer flex-col items-center justify-center rounded-xl border border-zinc-200 bg-white p-3 text-center transition-all hover:bg-zinc-50 has-[:checked]:border-zinc-900 has-[:checked]:bg-zinc-900 active:scale-[0.98] shadow-sm"
               >
                 <input
                   type="radio"
@@ -198,12 +198,9 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   className="sr-only"
                   required
                 />
-                <Icon className="mb-3 h-8 w-8 text-zinc-400 transition-colors group-has-[:checked]:text-primary-600" />
-                <span className="font-bold text-foreground group-has-[:checked]:text-primary-700">
+                <Icon className="mb-2 h-5 w-5 text-zinc-400 transition-colors group-has-[:checked]:text-white" />
+                <span className="text-[10px] font-black uppercase tracking-wider text-zinc-600 group-has-[:checked]:text-white">
                   {config.label}
-                </span>
-                <span className="text-xs text-zinc-500 mt-1">
-                  {config.description}
                 </span>
               </label>
             );
@@ -212,18 +209,18 @@ export function ReportForm({ equipment }: ReportFormProps) {
       </div>
 
       {/* Priority */}
-      <div className="space-y-4">
-        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
-          How urgent is this?
+      <div className="space-y-3">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          Urgency
         </Label>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-4 gap-2">
           {workOrderPriorities.map((priority) => {
             const config = priorityConfig[priority];
             return (
               <label
                 key={priority}
                 className={cn(
-                  "relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 p-4 text-center transition-all hover:opacity-90 has-[:checked]:ring-2 has-[:checked]:ring-offset-2 has-[:checked]:ring-offset-background",
+                  "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border px-2 py-2 text-center transition-all hover:opacity-90 active:scale-[0.95]",
                   config.bg,
                   config.border
                 )}
@@ -236,7 +233,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   className="sr-only"
                 />
                 <span
-                  className={cn("font-bold text-lg capitalize", config.color)}
+                  className={cn("text-[10px] font-black uppercase tracking-widest", config.color.includes('text-white') ? 'text-white' : config.color)}
                 >
                   {priority}
                 </span>
@@ -246,76 +243,76 @@ export function ReportForm({ equipment }: ReportFormProps) {
         </div>
       </div>
 
-      {/* Title */}
-      <div className="space-y-3">
-        <Label
-          htmlFor="title"
-          className="text-sm font-black uppercase tracking-widest text-zinc-500"
-        >
-          Short description
-        </Label>
-        <Input
-          id="title"
-          name="title"
-          placeholder={"e.g., Leaking oil, Strange noise..."}
-          required
-          maxLength={200}
-          className="h-14 text-lg px-4 rounded-xl border-2 bg-zinc-50 focus-visible:ring-primary-500"
-        />
-      </div>
+      {/* Details */}
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label
+            htmlFor="title"
+            className="text-[10px] font-black uppercase tracking-widest text-zinc-400"
+          >
+            Short Description
+          </Label>
+          <Input
+            id="title"
+            name="title"
+            placeholder="e.g., Leaking oil, Strange noise..."
+            required
+            maxLength={200}
+            className="h-10 text-sm px-3 rounded-lg border-zinc-200 bg-zinc-50/50 focus-visible:ring-zinc-900"
+          />
+        </div>
 
-      {/* Description */}
-      <div className="space-y-3">
-        <Label
-          htmlFor="description"
-          className="text-sm font-black uppercase tracking-widest text-zinc-500"
-        >
-          Additional Details
-        </Label>
-        <textarea
-          id="description"
-          name="description"
-          placeholder="Describe the issue in detail. What happened? Any error codes?"
-          required
-          rows={5}
-          className="w-full rounded-xl border-2 bg-zinc-50 px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 resize-none"
-        />
+        <div className="space-y-2">
+          <Label
+            htmlFor="description"
+            className="text-[10px] font-black uppercase tracking-widest text-zinc-400"
+          >
+            Full Details
+          </Label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Describe the issue. What happened? Any error codes?"
+            required
+            rows={3}
+            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-900 resize-none"
+          />
+        </div>
       </div>
 
       {/* Attachments Section */}
-      <div className="space-y-4">
-        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
-          Attach Photos
+      <div className="space-y-3">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          Visual Evidence (Optional)
         </Label>
 
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={() => setIsCameraOpen(true)}
             disabled={isUploadingPhoto}
-            className="flex-1 h-14 rounded-xl border-2 border-dashed border-primary-300 bg-primary-50/50 hover:bg-primary-100 hover:border-primary-400 text-primary-700 font-semibold"
+            className="h-10 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 hover:bg-zinc-100 text-zinc-600 text-[11px] font-bold"
           >
             {isUploadingPhoto ? (
-              <div className="flex items-center gap-2">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-300 border-t-primary-600" />
-                Uploading...
+              <div className="flex items-center gap- gap-2">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
+                Working...
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                Take Photo
+                <Camera className="h-4 w-4" />
+                Camera
               </div>
             )}
           </Button>
+          <FileUpload
+            entityType="work_order"
+            entityId={equipment.id}
+            onUploadComplete={handleUploadComplete}
+            label="Upload"
+          />
         </div>
-
-        <FileUpload
-          entityType="work_order"
-          entityId={equipment.id}
-          onUploadComplete={handleUploadComplete}
-          label="Or upload from device"
-        />
       </div>
 
       <CameraCapture
@@ -325,30 +322,28 @@ export function ReportForm({ equipment }: ReportFormProps) {
       />
 
       {/* Actions */}
-      <div className="flex gap-4 pt-4">
+      <div className="flex gap-2 pt-2">
         <Button
           type="button"
           variant="outline"
-          size="lg"
-          className="flex-1 h-14 text-base font-bold rounded-xl border-2 border-zinc-200"
+          className="flex-1 h-10 text-[11px] font-black uppercase tracking-widest rounded-lg border-zinc-200 hover:bg-zinc-50 transition-all active:scale-95"
           onClick={() => router.back()}
         >
           Cancel
         </Button>
         <Button
           type="submit"
-          size="lg"
-          className="flex-[2] h-14 text-base font-black uppercase tracking-widest rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+          className="flex-[2] h-10 text-[11px] font-black uppercase tracking-widest rounded-lg bg-danger-600 hover:bg-danger-700 text-white shadow-sm transition-all active:scale-95"
           disabled={isPending}
         >
           {isPending ? (
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              Submitting...
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              Submitting
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5" />
+              <CheckCircle2 className="h-4 w-4" />
               Submit Report
             </div>
           )}
