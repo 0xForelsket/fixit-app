@@ -28,46 +28,47 @@ export function EquipmentOverview({
   openWorkOrderCount,
 }: EquipmentOverviewProps) {
   return (
-    <div className="space-y-6">
-      {/* PM Alert */}
+    <div className="space-y-4">
+      {/* PM Alert - Compact */}
       {hasDuePM && (
-        <div className="rounded-xl border border-warning-200 bg-white border-l-4 border-l-warning-500 p-4 flex items-center gap-4 shadow-sm">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-warning-50">
-            <Calendar className="h-6 w-6 text-warning-600" />
-          </div>
-          <div className="flex-1">
-            <p className="font-black text-zinc-900">Maintenance Due</p>
-            <p className="text-sm text-zinc-500">
-              This equipment has scheduled maintenance that needs attention.
-            </p>
+        <div className="rounded-xl border border-warning-200 bg-amber-50/50 p-3 flex items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white border border-warning-200 text-warning-600 shadow-sm">
+              <Calendar className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-zinc-900 leading-none">Maintenance Due</p>
+              <p className="text-[10px] font-bold text-zinc-500 mt-1">
+                Scheduled attention required
+              </p>
+            </div>
           </div>
           <Button
+            size="sm"
             asChild
-            className="bg-warning-600 hover:bg-warning-700 rounded-lg font-bold shadow-sm"
+            className="bg-warning-600 hover:bg-warning-700 h-8 rounded-lg font-bold shadow-sm"
           >
-            <Link href="#maintenance">Start PM</Link>
+            <Link href="#maintenance">Start</Link>
           </Button>
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="space-y-3">
+      {/* Quick Actions - Toolbar Style */}
+      <div className="space-y-2">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
           Quick Actions
         </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <QuickActionCard
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+          <QuickActionButton
             icon={AlertTriangle}
             label="Report Issue"
-            description="Something wrong?"
             variant="danger"
             href="#report"
           />
-          <QuickActionCard
+          <QuickActionButton
             icon={ClipboardCheck}
             label="Complete PM"
-            description="Run checklist"
-            variant="warning"
+            variant="primary"
             href="#maintenance"
             disabled={!hasDuePM}
           />
@@ -75,18 +76,18 @@ export function EquipmentOverview({
       </div>
 
       {/* Status Summary */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
           Current Status
         </h3>
-        <div className="grid grid-cols-2 gap-3">
-          <StatusCard
-            label="Equipment Status"
+        <div className="grid grid-cols-2 gap-2">
+          <StatusCondensedCard
+            label="Status"
             value={equipment.status}
             icon={equipment.status === "operational" ? CheckCircle2 : Wrench}
             variant={equipment.status === "operational" ? "success" : "warning"}
           />
-          <StatusCard
+          <StatusCondensedCard
             label="Open Tickets"
             value={openWorkOrderCount.toString()}
             icon={AlertTriangle}
@@ -98,39 +99,29 @@ export function EquipmentOverview({
   );
 }
 
-function QuickActionCard({
+function QuickActionButton({
   icon: Icon,
   label,
-  description,
   variant,
   href,
   disabled,
 }: {
   icon: React.ElementType;
   label: string;
-  description: string;
-  variant: "danger" | "warning" | "primary";
+  variant: "danger" | "primary";
   href: string;
   disabled?: boolean;
 }) {
-  const variantStyles = {
-    danger: "bg-white border-danger-200 hover:bg-danger-50/50 hover:border-danger-300",
-    warning: "bg-white border-warning-200 hover:bg-warning-50/50 hover:border-warning-300",
-    primary: "bg-white border-primary-200 hover:bg-primary-50/50 hover:border-primary-300",
-  };
-
-  const iconStyles = {
-    danger: "text-danger-600",
-    warning: "text-warning-600",
-    primary: "text-primary-600",
+  const styles = {
+    danger: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700",
+    primary: "bg-zinc-900 border-zinc-950 text-white hover:bg-black",
   };
 
   if (disabled) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 p-4 text-center bg-zinc-50/50 opacity-60 cursor-not-allowed">
-        <Icon className="h-8 w-8 mb-2 text-zinc-400" />
-        <span className="font-bold text-zinc-700">{label}</span>
-        <span className="text-xs text-zinc-500">{description}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-4 py-2 opacity-50 cursor-not-allowed whitespace-nowrap">
+        <Icon className="h-4 w-4 text-zinc-400" />
+        <span className="text-xs font-bold text-zinc-400">{label}</span>
       </div>
     );
   }
@@ -139,18 +130,17 @@ function QuickActionCard({
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border p-4 text-center transition-all duration-200 hover:shadow-md active:scale-[0.98]",
-        variantStyles[variant]
+        "flex items-center gap-2 rounded-lg border px-4 py-2 transition-all active:scale-95 whitespace-nowrap font-bold shadow-sm",
+        styles[variant]
       )}
     >
-      <Icon className={cn("h-8 w-8 mb-2", iconStyles[variant])} />
-      <span className="font-bold text-zinc-900">{label}</span>
-      <span className="text-xs text-zinc-500">{description}</span>
+      <Icon className="h-4 w-4" />
+      <span className="text-xs">{label}</span>
     </Link>
   );
 }
 
-function StatusCard({
+function StatusCondensedCard({
   label,
   value,
   icon: Icon,
@@ -161,34 +151,21 @@ function StatusCard({
   icon: React.ElementType;
   variant: "success" | "warning" | "danger";
 }) {
-  const variantStyles = {
-    success: "border-zinc-200 bg-white",
-    warning: "border-zinc-200 bg-white",
-    danger: "border-zinc-200 bg-white",
-  };
-
   const textStyles = {
-    success: "text-emerald-700",
-    warning: "text-amber-700",
-    danger: "text-rose-700",
+    success: "text-emerald-600",
+    warning: "text-amber-600",
+    danger: "text-rose-600",
   };
   
-  // Use left border accent for status cards
-  const accentBorder = {
-    success: "border-l-4 border-l-emerald-500",
-    warning: "border-l-4 border-l-amber-500",
-    danger: "border-l-4 border-l-rose-500",
-  };
-
   return (
-    <div className={cn("rounded-xl border p-4 shadow-sm", variantStyles[variant], accentBorder[variant])}>
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className={cn("h-4 w-4", textStyles[variant])} />
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+    <div className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm border-l-4 border-l-current overflow-hidden" style={{ color: variant === 'success' ? '#10b981' : variant === 'warning' ? '#f59e0b' : '#ef4444' }}>
+      <div className="flex items-center gap-1.5 mb-1 text-zinc-400">
+        <Icon className={cn("h-3 w-3", textStyles[variant])} />
+        <span className="text-[9px] font-black uppercase tracking-widest">
           {label}
         </span>
       </div>
-      <p className={cn("text-lg font-black capitalize text-zinc-900")}>
+      <p className="text-sm font-black capitalize text-zinc-900 truncate">
         {value.replace("_", " ")}
       </p>
     </div>

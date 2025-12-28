@@ -40,46 +40,48 @@ export function EquipmentTabs({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-4 h-auto p-1 bg-zinc-100 rounded-xl">
+      <TabsList className="flex w-full h-10 p-1 bg-zinc-100/80 rounded-lg gap-1">
         <TabsTrigger
           value="overview"
           onClick={() => {
             window.location.hash = "overview";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-lg"
+          className="flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-black uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-md transition-all"
         >
-          <ClipboardList className="h-4 w-4" />
-          <span>Overview</span>
+          <ClipboardList className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Overview</span>
         </TabsTrigger>
         <TabsTrigger
           value="history"
           onClick={() => {
             window.location.hash = "history";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-lg"
+          className="flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-black uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-md transition-all"
         >
-          <History className="h-4 w-4" />
-          <span>History</span>
+          <History className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">History</span>
         </TabsTrigger>
         <TabsTrigger
           value="maintenance"
           onClick={() => {
             window.location.hash = "maintenance";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-lg"
+          className="flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-black uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-md transition-all"
         >
-          <Calendar className="h-4 w-4" />
-          <span>PM</span>
+          <Calendar className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">PM</span>
+          <span className="sm:hidden">PM</span>
         </TabsTrigger>
         <TabsTrigger
           value="report"
           onClick={() => {
             window.location.hash = "report";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-danger-600 data-[state=active]:shadow-sm rounded-lg"
+          className="flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-black uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-danger-600 data-[state=active]:shadow-sm rounded-md transition-all"
         >
-          <AlertTriangle className="h-4 w-4" />
-          <span>Report</span>
+          <AlertTriangle className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Report</span>
+          <span className="sm:hidden">Alert</span>
         </TabsTrigger>
       </TabsList>
 
