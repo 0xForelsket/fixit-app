@@ -186,7 +186,6 @@ export default async function EquipmentPage({
           </Button>
           <Button
             asChild
-            className="bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/20"
           >
             <Link href="/assets/equipment/new">
               <Plus className="mr-2 h-4 w-4" />
