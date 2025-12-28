@@ -234,7 +234,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                           className={cn(
                             "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
                             isActive
-                              ? "bg-primary-500/10 text-primary-500"
+                              ? "bg-zinc-800 text-primary-500 shadow-sm ring-1 ring-white/5"
                               : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                           )}
                         >
