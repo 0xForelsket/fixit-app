@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -283,16 +284,7 @@ export default async function EquipmentDetailPage({
                 </span>
               </div>
               <div className="flex justify-between text-xs">
-                <span
-                  className={cn(
-                    "font-bold px-2 py-0.5 rounded uppercase tracking-wider",
-                    workOrder.status === "open"
-                      ? "bg-blue-50 text-blue-600"
-                      : "bg-emerald-50 text-emerald-600"
-                  )}
-                >
-                  {workOrder.status}
-                </span>
+                  <StatusBadge status={workOrder.status} className="text-xs" />
                 <span className="text-muted-foreground italic">
                   {workOrder.assignedTo?.name || "Unassigned"}
                 </span>
