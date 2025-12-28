@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { and, count, eq, lt, or } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowRight,
@@ -29,87 +29,47 @@ interface Stats {
 async function getStats(
   userId?: number
 ): Promise<{ global: Stats; personal: Stats | null }> {
-  const globalOpen = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(eq(workOrders.status, "open"));
+  const now = new Date();
 
-  const globalInProgress = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(eq(workOrders.status, "in_progress"));
-
-  const globalOverdue = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(
-      and(lt(workOrders.dueBy, new Date()), eq(workOrders.status, "open"))
-    );
-
-  const globalCritical = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(
-      and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open"))
-    );
+  // Optimized global stats query
+  const [globalResult] = await db
+    .select({
+      open: sql<number>`sum(case when ${workOrders.status} = 'open' then 1 else 0 end)`,
+      inProgress: sql<number>`sum(case when ${workOrders.status} = 'in_progress' then 1 else 0 end)`,
+      overdue: sql<number>`sum(case when ${workOrders.dueBy} < ${now} and ${workOrders.status} = 'open' then 1 else 0 end)`,
+      critical: sql<number>`sum(case when ${workOrders.priority} = 'critical' and ${workOrders.status} = 'open' then 1 else 0 end)`,
+    })
+    .from(workOrders);
 
   const globalStats: Stats = {
-    open: globalOpen[0].count,
-    inProgress: globalInProgress[0].count,
-    overdue: globalOverdue[0].count,
-    critical: globalCritical[0].count,
+    open: Number(globalResult?.open || 0),
+    inProgress: Number(globalResult?.inProgress || 0),
+    overdue: Number(globalResult?.overdue || 0),
+    critical: Number(globalResult?.critical || 0),
   };
 
   if (!userId) {
     return { global: globalStats, personal: null };
   }
 
-  const myOpen = await db
-    .select({ count: count() })
+  // Optimized personal stats query
+  const [personalResult] = await db
+    .select({
+      open: sql<number>`sum(case when ${workOrders.status} = 'open' then 1 else 0 end)`,
+      inProgress: sql<number>`sum(case when ${workOrders.status} = 'in_progress' then 1 else 0 end)`,
+      overdue: sql<number>`sum(case when ${workOrders.dueBy} < ${now} and ${workOrders.status} in ('open', 'in_progress') then 1 else 0 end)`,
+      critical: sql<number>`sum(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 else 0 end)`,
+    })
     .from(workOrders)
-    .where(
-      and(eq(workOrders.status, "open"), eq(workOrders.assignedToId, userId))
-    );
-
-  const myInProgress = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(
-      and(
-        eq(workOrders.status, "in_progress"),
-        eq(workOrders.assignedToId, userId)
-      )
-    );
-
-  const myOverdue = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(
-      and(
-        lt(workOrders.dueBy, new Date()),
-        or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
-        eq(workOrders.assignedToId, userId)
-      )
-    );
-
-  const myCritical = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(
-      and(
-        eq(workOrders.priority, "critical"),
-        or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
-        eq(workOrders.assignedToId, userId)
-      )
-    );
+    .where(eq(workOrders.assignedToId, userId));
 
   return {
     global: globalStats,
     personal: {
-      open: myOpen[0].count,
-      inProgress: myInProgress[0].count,
-      overdue: myOverdue[0].count,
-      critical: myCritical[0].count,
+      open: Number(personalResult?.open || 0),
+      inProgress: Number(personalResult?.inProgress || 0),
+      overdue: Number(personalResult?.overdue || 0),
+      critical: Number(personalResult?.critical || 0),
     },
   };
 }
