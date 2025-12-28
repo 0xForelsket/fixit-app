@@ -419,38 +419,8 @@ interface WorkOrderWithRelations {
   assignedTo?: { name: string } | null;
 }
 
+
 function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
-  const statusConfig: Record<
-    string,
-    { color: string; bg: string; label: string }
-  > = {
-    open: { color: "text-primary-700", bg: "bg-primary-50", label: "Open" },
-    in_progress: {
-      color: "text-amber-700",
-      bg: "bg-amber-50",
-      label: "In Progress",
-    },
-    resolved: {
-      color: "text-emerald-700",
-      bg: "bg-emerald-50",
-      label: "Resolved",
-    },
-    closed: { color: "text-slate-700", bg: "bg-slate-50", label: "Closed" },
-  };
-
-  const priorityConfig: Record<
-    string,
-    { color: string; bg: string; label: string }
-  > = {
-    low: { color: "text-slate-700", bg: "bg-slate-50", label: "Low" },
-    medium: { color: "text-primary-700", bg: "bg-primary-50", label: "Medium" },
-    high: { color: "text-amber-700", bg: "bg-amber-50", label: "High" },
-    critical: { color: "text-rose-700", bg: "bg-rose-50", label: "Critical" },
-  };
-
-  const status = statusConfig[workOrder.status] || statusConfig.open;
-  const priority = priorityConfig[workOrder.priority] || priorityConfig.medium;
-
   return (
     <TableRow className="hover:bg-slate-50 transition-colors">
       <TableCell className="p-3">
@@ -471,26 +441,10 @@ function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
         {workOrder.equipment?.location?.name || "—"}
       </TableCell>
       <TableCell className="p-3">
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-            status.bg,
-            status.color
-          )}
-        >
-          {status.label}
-        </span>
+        <StatusBadge status={workOrder.status} />
       </TableCell>
       <TableCell className="p-3 hidden sm:table-cell">
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-            priority.bg,
-            priority.color
-          )}
-        >
-          {priority.label}
-        </span>
+        <StatusBadge status={workOrder.priority} />
       </TableCell>
       <TableCell className="p-3 hidden xl:table-cell text-muted-foreground">
         {workOrder.reportedBy?.name || "—"}
