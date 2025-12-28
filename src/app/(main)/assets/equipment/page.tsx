@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -201,8 +202,6 @@ export default async function EquipmentPage({
           title="Total Units"
           value={stats.total}
           icon={MonitorCog}
-          color="text-zinc-600"
-          bg="bg-zinc-100"
           href="/assets/equipment"
           active={!params.status || params.status === "all"}
         />
@@ -210,8 +209,7 @@ export default async function EquipmentPage({
           title="Operational"
           value={stats.operational}
           icon={CheckCircle2}
-          color="text-success-600"
-          bg="bg-success-100"
+          variant="success"
           href="?status=operational"
           active={params.status === "operational"}
         />
@@ -219,8 +217,7 @@ export default async function EquipmentPage({
           title="Down"
           value={stats.down}
           icon={AlertCircle}
-          color="text-danger-600"
-          bg="bg-danger-100"
+          variant="danger"
           href="?status=down"
           active={params.status === "down"}
         />
@@ -228,8 +225,7 @@ export default async function EquipmentPage({
           title="Maintenance"
           value={stats.maintenance}
           icon={Wrench}
-          color="text-warning-600"
-          bg="bg-warning-100"
+          variant="warning"
           href="?status=maintenance"
           active={params.status === "maintenance"}
         />
@@ -456,60 +452,4 @@ export default async function EquipmentPage({
   );
 }
 
-function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-  href,
-  active,
-}: {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  href: string;
-  active: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "flex flex-col justify-between h-[120px] rounded-2xl border bg-white p-5 transition-all duration-300 hover-lift card-industrial shadow-sm",
-        active
-          ? "border-primary-400 ring-4 ring-primary-500/10 shadow-lg shadow-primary-500/5"
-          : "border-zinc-200"
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-xl shadow-inner border border-white/50",
-            bg
-          )}
-        >
-          <Icon className={cn("h-5 w-5", color)} />
-        </div>
-        {active && (
-          <div className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-        )}
-      </div>
-      <div>
-        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1.5">
-          {title}
-        </p>
-        <p
-          className={cn(
-            "text-3xl font-mono font-black tracking-tighter leading-none",
-            color === "text-zinc-600" ? "text-zinc-900" : color
-          )}
-        >
-          {value}
-        </p>
-      </div>
-    </Link>
-  );
-}
 
