@@ -3,10 +3,10 @@
 import { updateChecklistItem } from "@/actions/workOrders";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import type { ChecklistItemStatus } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Clock, Info } from "lucide-react";
 import { useState } from "react";
-import type { ChecklistItemStatus } from "@/db/schema";
 
 interface ChecklistItem {
   id: number;
@@ -40,7 +40,7 @@ export function WorkOrderChecklist({
   const toggleItem = async (item: ChecklistItem) => {
     const newStatus: ChecklistItemStatus =
       item.status === "completed" ? "pending" : "completed";
-    
+
     setUpdating(item.id);
     try {
       const result = await updateChecklistItem(item.id, workOrderId, {
@@ -49,9 +49,7 @@ export function WorkOrderChecklist({
 
       if (result.success) {
         setItems((prev) =>
-          prev.map((i) =>
-            i.id === item.id ? { ...i, status: newStatus } : i
-          )
+          prev.map((i) => (i.id === item.id ? { ...i, status: newStatus } : i))
         );
       } else {
         toast({
@@ -110,7 +108,9 @@ export function WorkOrderChecklist({
             key={item.id}
             className={cn(
               "flex items-start gap-4 p-4 transition-colors",
-              item.status === "completed" ? "bg-slate-50/50" : "hover:bg-slate-50/30"
+              item.status === "completed"
+                ? "bg-slate-50/50"
+                : "hover:bg-slate-50/30"
             )}
           >
             <div className="pt-1">
@@ -138,20 +138,26 @@ export function WorkOrderChecklist({
                 <p
                   className={cn(
                     "font-medium leading-tight",
-                    item.status === "completed" && "text-muted-foreground line-through"
+                    item.status === "completed" &&
+                      "text-muted-foreground line-through"
                   )}
                 >
                   {item.checklist.description}
                 </p>
                 {item.checklist.isRequired && (
-                  <Badge variant="outline" className="text-[10px] uppercase shrink-0">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] uppercase shrink-0"
+                  >
                     Required
                   </Badge>
                 )}
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <span className="font-bold">Step {item.checklist.stepNumber}</span>
+                  <span className="font-bold">
+                    Step {item.checklist.stepNumber}
+                  </span>
                 </span>
                 {item.checklist.estimatedMinutes && (
                   <span className="flex items-center gap-1">

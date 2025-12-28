@@ -1,7 +1,13 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Clock, Info, MessageSquare, Package, ClipboardCheck } from "lucide-react";
+import {
+  ClipboardCheck,
+  Clock,
+  Info,
+  MessageSquare,
+  Package,
+} from "lucide-react";
 import { useState } from "react";
 
 interface MobileWorkOrderViewProps {

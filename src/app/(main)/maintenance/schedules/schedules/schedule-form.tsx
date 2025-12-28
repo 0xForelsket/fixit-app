@@ -14,14 +14,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { insertMaintenanceScheduleSchema } from "@/lib/validations/schedules";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArrowLeft,
-  Check,
-  GripVertical,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Check, GripVertical, Save, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -146,7 +139,6 @@ export function ScheduleForm({
       setSaving(false);
     }
   };
-
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
@@ -393,7 +385,7 @@ export function ScheduleForm({
                   )}
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm">
-        {/* 
+                      {/* 
               <FormField
                 control={form.control}
                 name="equipmentId"
@@ -448,7 +440,8 @@ export function ScheduleForm({
                   </FormItem>
                 )}
               />
-*/}                      <button
+*/}{" "}
+                      <button
                         type="button"
                         onClick={() => {
                           const currentItem = watchedChecklists?.[index];

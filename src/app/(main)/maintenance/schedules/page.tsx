@@ -136,13 +136,20 @@ export default async function MaintenancePage({
         <div className="flex gap-2">
           {user?.role === "admin" && (
             <>
-              <Button variant="outline" asChild className="font-bold border-zinc-200 text-zinc-600 hover:text-zinc-900">
+              <Button
+                variant="outline"
+                asChild
+                className="font-bold border-zinc-200 text-zinc-600 hover:text-zinc-900"
+              >
                 <Link href="/maintenance/schedules">
                   <Settings className="mr-2 h-4 w-4" />
                   MANAGE SCHEDULES
                 </Link>
               </Button>
-              <Button asChild className="font-bold shadow-lg shadow-primary-500/20">
+              <Button
+                asChild
+                className="font-bold shadow-lg shadow-primary-500/20"
+              >
                 <Link href="/maintenance/schedules/new">
                   <Plus className="mr-2 h-4 w-4" />
                   NEW SCHEDULE

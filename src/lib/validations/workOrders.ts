@@ -87,4 +87,6 @@ export type CreateWorkOrderInput = z.infer<typeof createWorkOrderSchema>;
 export type UpdateWorkOrderInput = z.infer<typeof updateWorkOrderSchema>;
 export type ResolveWorkOrderInput = z.infer<typeof resolveWorkOrderSchema>;
 export type AddCommentInput = z.infer<typeof addCommentSchema>;
-export type UpdateChecklistItemInput = z.infer<typeof updateChecklistItemSchema>;
+export type UpdateChecklistItemInput = z.infer<
+  typeof updateChecklistItemSchema
+>;

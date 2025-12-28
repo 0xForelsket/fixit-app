@@ -1,10 +1,9 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { WorkOrderList } from "@/components/work-orders/work-order-list";
 import { db } from "@/db";
-import type { Equipment, WorkOrder, User } from "@/db/schema";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { and, count, eq, ilike, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
@@ -19,9 +18,6 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { WorkOrderList } from "@/components/work-orders/work-order-list";
-
-
 
 type SearchParams = {
   status?: string;
@@ -131,7 +127,9 @@ async function getStats() {
   const [criticalWorkOrders] = await db
     .select({ count: count() })
     .from(workOrders)
-    .where(and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open")));
+    .where(
+      and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open"))
+    );
 
   return {
     open: openWorkOrders.count,
@@ -207,7 +205,12 @@ export default async function WorkOrdersPage({
               Mine
             </Link>
           </div>
-          <Button variant="outline" size="sm" asChild className="font-bold border-2">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="font-bold border-2"
+          >
             <Link href="/dashboard">
               <ArrowLeft className="mr-2 h-4 w-4" />
               BACK
@@ -324,9 +327,13 @@ export default async function WorkOrdersPage({
       </div>
 
       {/* Work Orders List */}
-      <WorkOrderList 
-        workOrders={workOrdersList} 
-        emptyMessage={activeFilters ? "Try adjusting your filters" : "No work orders have been created yet."} 
+      <WorkOrderList
+        workOrders={workOrdersList}
+        emptyMessage={
+          activeFilters
+            ? "Try adjusting your filters"
+            : "No work orders have been created yet."
+        }
       />
 
       {/* Pagination */}
@@ -493,4 +500,3 @@ function FilterSelect({
     </div>
   );
 }
-

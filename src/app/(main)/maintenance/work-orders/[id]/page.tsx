@@ -1,8 +1,8 @@
-import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
-import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
+import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
 import { db } from "@/db";
 import {
   attachments,
@@ -10,9 +10,9 @@ import {
   laborLogs,
   locations,
   spareParts,
+  users,
   workOrderParts,
   workOrders,
-  users,
 } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
@@ -459,11 +459,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
             {AttachmentsSection}
           </div>
         }
-        checklistTab={
-          <div className="space-y-6 pt-2">
-            {ProcedureSection}
-          </div>
-        }
+        checklistTab={<div className="space-y-6 pt-2">{ProcedureSection}</div>}
         commentsTab={ActivityLogSection}
         inventoryTab={
           <div className="space-y-6">

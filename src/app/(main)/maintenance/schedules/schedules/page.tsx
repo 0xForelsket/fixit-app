@@ -1,3 +1,4 @@
+import { SchedulerButton } from "@/components/maintenance/scheduler-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
@@ -16,7 +17,6 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { SchedulerButton } from "@/components/maintenance/scheduler-button";
 
 type SearchParams = {
   search?: string;

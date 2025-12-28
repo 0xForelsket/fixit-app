@@ -2,8 +2,8 @@ import { db } from "@/db";
 import {
   equipment as equipmentTable,
   notifications,
-  workOrders,
   users,
+  workOrders,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";

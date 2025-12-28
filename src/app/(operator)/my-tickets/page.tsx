@@ -102,11 +102,13 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
 
         {/* Empty state */}
         {userWorkOrders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 text-center">
+          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border">
               <Inbox className="h-8 w-8 text-zinc-400" />
             </div>
-            <h3 className="mt-4 text-xl font-black text-zinc-900">No tickets found</h3>
+            <h3 className="mt-4 text-xl font-black text-zinc-900">
+              No tickets found
+            </h3>
             <p className="mt-2 text-zinc-500 max-w-xs mx-auto text-sm">
               You haven't reported any equipment issues yet.
             </p>
@@ -121,11 +123,16 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 px-1">
                   <Timer className="h-5 w-5 text-primary-600" />
-                  <h2 className="text-lg font-black uppercase tracking-tight">Active Requests</h2>
+                  <h2 className="text-lg font-black uppercase tracking-tight">
+                    Active Requests
+                  </h2>
                 </div>
                 <div className="grid gap-3">
                   {openWorkOrders.map((workOrder) => (
-                    <WorkOrderListItem key={workOrder.id} workOrder={workOrder} />
+                    <WorkOrderListItem
+                      key={workOrder.id}
+                      workOrder={workOrder}
+                    />
                   ))}
                 </div>
               </div>

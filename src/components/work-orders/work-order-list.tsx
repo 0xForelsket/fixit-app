@@ -1,9 +1,8 @@
 "use client";
 
 import { Inbox } from "lucide-react";
-import type { Equipment, User, WorkOrder } from "@/db/schema";
-import { WorkOrderTable } from "./work-order-table";
 import { WorkOrderCard } from "./work-order-card";
+import { WorkOrderTable } from "./work-order-table";
 
 import type { WorkOrderWithRelations } from "./work-order-card";
 
@@ -12,7 +11,10 @@ interface WorkOrderListProps {
   emptyMessage?: string;
 }
 
-export function WorkOrderList({ workOrders, emptyMessage }: WorkOrderListProps) {
+export function WorkOrderList({
+  workOrders,
+  emptyMessage,
+}: WorkOrderListProps) {
   if (workOrders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center bg-white shadow-sm">
