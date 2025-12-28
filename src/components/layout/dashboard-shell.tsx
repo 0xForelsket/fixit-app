@@ -3,7 +3,6 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
-import type { UserRole } from "@/db/schema";
 import { useState } from "react";
 
 interface DashboardShellProps {

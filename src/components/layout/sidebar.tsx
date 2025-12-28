@@ -16,6 +16,7 @@ import {
   Package,
   QrCode,
   Shield,
+  Upload,
   Users,
   Wrench,
   X,
@@ -119,6 +120,12 @@ const navGroups: NavGroup[] = [
         href: "/admin/roles",
         icon: <Shield className="h-5 w-5" />,
         permission: PERMISSIONS.SYSTEM_SETTINGS,
+      },
+      {
+        label: "Import",
+        href: "/admin/import",
+        icon: <Upload className="h-5 w-5" />,
+        permission: PERMISSIONS.EQUIPMENT_CREATE,
       },
       {
         label: "Settings",

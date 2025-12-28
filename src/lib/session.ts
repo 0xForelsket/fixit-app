@@ -2,8 +2,8 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import {
   type Permission,
-  hasPermission as checkPermission,
   hasAnyPermission as checkAnyPermission,
+  hasPermission as checkPermission,
 } from "./permissions";
 
 export interface SessionUser {

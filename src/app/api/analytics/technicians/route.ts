@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { roles, workOrders, users } from "@/db/schema";
+import { roles, users, workOrders } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { eq, sql } from "drizzle-orm";

@@ -1,3 +1,9 @@
+import { LandingPage } from "@/components/home/landing-page";
+import { PMStats } from "@/components/home/pm-stats";
+import { QuickActions } from "@/components/home/quick-actions";
+import { UserHeader } from "@/components/home/user-header";
+import { WorkOrderStats } from "@/components/home/work-order-stats";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { db } from "@/db";
 import { equipment, notifications } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
@@ -8,12 +14,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EquipmentGrid } from "./(operator)/equipment-grid";
 import { EquipmentSearch } from "./(operator)/equipment-search";
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { LandingPage } from "@/components/home/landing-page";
-import { PMStats } from "@/components/home/pm-stats";
-import { QuickActions } from "@/components/home/quick-actions";
-import { UserHeader } from "@/components/home/user-header";
-import { WorkOrderStats } from "@/components/home/work-order-stats";
 
 interface PageProps {
   searchParams: Promise<{ search?: string; location?: string }>;

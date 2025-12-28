@@ -1,7 +1,11 @@
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { type WorkOrderPriority, type WorkOrderStatus, workOrders } from "@/db/schema";
+import {
+  type WorkOrderPriority,
+  type WorkOrderStatus,
+  workOrders,
+} from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import {
@@ -38,7 +42,9 @@ async function getWorkOrders(params: SearchParams) {
   }
 
   if (params.priority && params.priority !== "all") {
-    conditions.push(eq(workOrders.priority, params.priority as WorkOrderPriority));
+    conditions.push(
+      eq(workOrders.priority, params.priority as WorkOrderPriority)
+    );
   }
 
   if (params.from) {
@@ -405,8 +411,6 @@ export default async function ReportsPage({
     </div>
   );
 }
-
-
 
 interface WorkOrderWithRelations {
   id: number;

@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
 import {
   WorkOrderCard,
   type WorkOrderWithRelations,
 } from "@/components/work-orders/work-order-card";
+import { CheckCircle2 } from "lucide-react";
 import { DashboardWorkOrderTable } from "./dashboard-work-order-table";
 
 interface DashboardWorkOrderFeedProps {

@@ -1,24 +1,22 @@
+import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
+import { StatsCard } from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
+import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import { and, count, eq, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowRight,
   Clock,
   Inbox,
-  MapPin,
   MonitorCog,
   Timer,
   User,
   Users,
 } from "lucide-react";
-import { StatsCard } from "@/components/dashboard/stats-card";
 import Link from "next/link";
-import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
-import { type WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 
 interface Stats {
   open: number;
@@ -248,7 +246,10 @@ export default async function DashboardPage() {
               asChild
               className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
             >
-              <Link href="/maintenance/work-orders?assigned=me" className="gap-2">
+              <Link
+                href="/maintenance/work-orders?assigned=me"
+                className="gap-2"
+              >
                 MY WORK ORDERS <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>

@@ -1,10 +1,12 @@
 "use client";
 
+import { QRScanner } from "@/components/ui/qr-scanner";
 import { PERMISSIONS, type Permission, hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, ClipboardList, Home, User, Wrench } from "lucide-react";
+import { ClipboardList, Home, ScanLine, User, Wrench } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface BottomNavProps {
   permissions: string[];
@@ -12,8 +14,15 @@ interface BottomNavProps {
 
 export function BottomNav({ permissions }: BottomNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const canCreateTicket = hasPermission(permissions, PERMISSIONS.TICKET_CREATE);
+
+  const handleScan = (code: string) => {
+    setIsScannerOpen(false);
+    router.push(`/equipment/${code}`);
+  };
 
   const leftNavItems: {
     label: string;
@@ -58,7 +67,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
     (item) => !item.permission || hasPermission(permissions, item.permission)
   );
 
-  const renderNavItem = (item: typeof leftNavItems[0]) => {
+  const renderNavItem = (item: (typeof leftNavItems)[0]) => {
     const isActive = pathname === item.href;
     return (
       <li key={item.href} className="flex-1">
@@ -66,9 +75,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
           href={item.href}
           className={cn(
             "flex flex-col items-center justify-center gap-1 py-2 transition-all min-h-[64px]",
-            isActive
-              ? "text-primary-500"
-              : "text-zinc-500 active:text-zinc-300"
+            isActive ? "text-primary-500" : "text-zinc-500 active:text-zinc-300"
           )}
         >
           <div
@@ -81,10 +88,12 @@ export function BottomNav({ permissions }: BottomNavProps) {
           >
             {item.icon}
           </div>
-          <span className={cn(
-            "text-[10px] font-bold uppercase tracking-wider",
-            isActive && "text-primary-400"
-          )}>
+          <span
+            className={cn(
+              "text-[10px] font-bold uppercase tracking-wider",
+              isActive && "text-primary-400"
+            )}
+          >
             {item.label}
           </span>
         </Link>
@@ -112,15 +121,22 @@ export function BottomNav({ permissions }: BottomNavProps) {
         </ul>
       </div>
 
-      {/* Floating Action Button for Report Issue */}
       {canCreateTicket && (
-        <Link
-          href="/"
-          className="absolute left-1/2 -translate-x-1/2 -top-6 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/40 active:scale-95 transition-transform"
+        <button
+          type="button"
+          onClick={() => setIsScannerOpen(true)}
+          className="absolute left-1/2 -translate-x-1/2 -top-6 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/40 active:scale-95 transition-transform cursor-pointer hover:shadow-primary-500/60 hover:-translate-y-[calc(50%+4px)]"
+          aria-label="Scan Equipment"
         >
-          <AlertTriangle className="h-6 w-6" />
-        </Link>
+          <ScanLine className="h-6 w-6" />
+        </button>
       )}
+
+      <QRScanner
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScan={handleScan}
+      />
     </nav>
   );
 }

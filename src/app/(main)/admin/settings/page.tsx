@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Bell, Save, Settings, Shield, Timer } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  Save,
+  Settings,
+  Shield,
+  Timer,
+} from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -12,8 +19,8 @@ export default function SettingsPage() {
           System <span className="text-primary-600">Settings</span>
         </h1>
         <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <Settings className="h-3.5 w-3.5" />
-            CONFIGURATION AND PREFERENCES
+          <Settings className="h-3.5 w-3.5" />
+          CONFIGURATION AND PREFERENCES
         </div>
       </div>
 

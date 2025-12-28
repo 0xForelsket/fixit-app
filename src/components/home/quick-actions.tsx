@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -10,6 +9,7 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
+import Link from "next/link";
 
 export function QuickActions() {
   const actions = [

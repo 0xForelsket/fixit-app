@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { OperatorNav } from "@/app/(operator)/nav";
 import type { SessionUser } from "@/lib/session";
+import Link from "next/link";
 
 interface UserHeaderProps {
   user: SessionUser;
@@ -41,7 +41,11 @@ export function UserHeader({ user, avatarUrl, unreadCount }: UserHeaderProps) {
         </div>
         <div className="relative z-10 h-12 w-12 rounded-full border-2 border-white/30 overflow-hidden bg-white/20 backdrop-blur-sm">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            <img
+              src={avatarUrl}
+              alt=""
+              className="w-full h-full object-cover"
+            />
           ) : null}
         </div>
         {/* Decorative glow */}

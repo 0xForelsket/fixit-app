@@ -17,9 +17,10 @@ export async function GET() {
         id: equipment.id,
         name: equipment.name,
         code: equipment.code,
-        breakdowns: sql<number>`count(CASE WHEN ${workOrders.type} = 'breakdown' THEN 1 END)`.as(
-          "breakdowns"
-        ),
+        breakdowns:
+          sql<number>`count(CASE WHEN ${workOrders.type} = 'breakdown' THEN 1 END)`.as(
+            "breakdowns"
+          ),
         totalWorkOrders: sql<number>`count(${workOrders.id})`,
       })
       .from(equipment)

@@ -1,7 +1,7 @@
 "use server";
 
-import { authenticateUser } from "@/lib/services/auth.service";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { authenticateUser } from "@/lib/services/auth.service";
 import { deleteSession } from "@/lib/session";
 import { loginSchema } from "@/lib/validations";
 import { redirect } from "next/navigation";

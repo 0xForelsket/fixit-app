@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
@@ -8,7 +9,6 @@ import { ArrowLeft, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AvatarUpload } from "./avatar-upload";
-import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
