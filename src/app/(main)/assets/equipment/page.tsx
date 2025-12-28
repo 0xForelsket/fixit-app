@@ -32,7 +32,7 @@ type SearchParams = {
   status?: string;
   location?: string;
   search?: string;
-  sort?: "name" | "status" | "location" | "classification" | "responsible";
+  sort?: "name" | "code" | "status" | "location" | "classification" | "responsible";
   dir?: "asc" | "desc";
 };
 
@@ -73,6 +73,10 @@ async function getEquipment(params: SearchParams) {
         case "name":
           valA = a.name.toLowerCase();
           valB = b.name.toLowerCase();
+          break;
+        case "code":
+          valA = a.code.toLowerCase();
+          valB = b.code.toLowerCase();
           break;
         case "status":
           valA = a.status;
@@ -292,6 +296,14 @@ export default async function EquipmentPage({
             <TableHeader className="bg-zinc-50/50">
               <TableRow className="hover:bg-transparent border-zinc-200">
                 <SortHeader
+                  label="Code"
+                  field="code"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="w-32"
+                />
+                <SortHeader
                   label="Equipment / Asset"
                   field="name"
                   currentSort={params.sort}
@@ -343,20 +355,25 @@ export default async function EquipmentPage({
                     className="hover:bg-zinc-50 transition-colors group"
                   >
                     <TableCell className="p-5">
+                       <span className="font-mono font-bold text-zinc-500 uppercase tracking-widest text-xs">
+                        {equipment.code}
+                       </span>
+                    </TableCell>
+                    <TableCell className="p-5">
                       <Link
                         href={`/assets/equipment/${equipment.id}`}
                         data-testid="equipment-link"
                         className="flex items-center gap-4 group/item"
                       >
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg transition-transform group-hover/item:scale-110">
-                          <MonitorCog className="h-6 w-6" />
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-white shadow-md transition-transform group-hover/item:scale-105">
+                          <MonitorCog className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-black text-zinc-900 group-hover/item:text-primary-600 transition-colors uppercase tracking-tight">
+                          <p className="font-black text-zinc-900 group-hover/item:text-primary-600 transition-colors uppercase tracking-tight text-sm">
                             {equipment.name}
                           </p>
-                          <p className="text-[11px] font-mono font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
-                             ID: {equipment.id} • CODE: {equipment.code}
+                          <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                             ID: {equipment.id}
                           </p>
                         </div>
                       </Link>
