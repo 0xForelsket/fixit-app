@@ -77,7 +77,6 @@ export default async function InventoryPage() {
           <Button
             variant="ghost"
             asChild
-            className="font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
           >
             <Link href="/assets/inventory/parts">
               <Package className="mr-2 h-4 w-4" />
@@ -86,7 +85,6 @@ export default async function InventoryPage() {
           </Button>
           <Button
             asChild
-            className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold shadow-lg shadow-primary-500/25"
           >
             <Link href="/assets/inventory/parts/new">
               <Plus className="mr-2 h-4 w-4" />
