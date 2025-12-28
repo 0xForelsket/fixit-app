@@ -54,3 +54,6 @@ data/
 
 # Bun
 bun.lockb
+
+# Playwright MCP Screenshots
+.playwright-mcp/
