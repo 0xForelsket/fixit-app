@@ -1,0 +1,52 @@
+### New console messages
+- [LOG] [Fast Refresh] rebuilding @ http://localhost:3003/_next/static/chunks/node_modules_next_dist_c...
+
+### Page state
+- Page URL: http://localhost:3003/login
+- Page Title: FixIt - CMMS Lite
+- Page Snapshot:
+```yaml
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: F
+        - heading "FixIt CMMS" [level=1] [ref=e8]
+        - paragraph [ref=e9]: Streamline your maintenance operations with our comprehensive management system.
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - img [ref=e13]
+          - generic [ref=e15]:
+            - heading "Work Order Management" [level=3] [ref=e16]
+            - paragraph [ref=e17]: Track and manage maintenance tasks efficiently
+        - generic [ref=e18]:
+          - img [ref=e20]
+          - generic [ref=e22]:
+            - heading "Asset Tracking" [level=3] [ref=e23]
+            - paragraph [ref=e24]: Monitor equipment health and maintenance history
+        - generic [ref=e25]:
+          - img [ref=e27]
+          - generic [ref=e29]:
+            - heading "Analytics & Reports" [level=3] [ref=e30]
+            - paragraph [ref=e31]: Data-driven insights for better decisions
+      - paragraph [ref=e33]: Trusted by maintenance teams worldwide
+    - generic [ref=e35]:
+      - generic [ref=e37]:
+        - heading "Welcome Back" [level=3] [ref=e38]
+        - paragraph [ref=e39]: Sign in with your Employee ID and PIN
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - text: Employee ID
+            - textbox "Employee ID" [ref=e43]:
+              - /placeholder: e.g., TECH-001
+          - generic [ref=e44]:
+            - text: PIN
+            - textbox "PIN" [ref=e45]:
+              - /placeholder: Enter your PIN
+          - button "Sign In" [ref=e46]
+        - paragraph [ref=e48]: "Demo: ADMIN-001 / 1234"
+  - button "Open Next.js Dev Tools" [ref=e54] [cursor=pointer]:
+    - img [ref=e55]
+  - alert [ref=e58]
+```

@@ -1,0 +1,324 @@
+### Page state
+- Page URL: http://localhost:3003/dashboard
+- Page Title: FixIt - CMMS Lite
+- Page Snapshot:
+```yaml
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e54] [cursor=pointer]:
+    - img [ref=e55]
+  - alert [ref=e58]
+  - generic [ref=e59]:
+    - complementary [ref=e60]:
+      - link "FixIt" [ref=e62] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e64]
+        - generic [ref=e66]: FixIt
+      - navigation [ref=e67]:
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - heading "Overview" [level=3] [ref=e70]
+            - list [ref=e71]:
+              - listitem [ref=e72]:
+                - link "Dashboard" [ref=e73] [cursor=pointer]:
+                  - /url: /dashboard
+                  - img [ref=e75]
+                  - text: Dashboard
+              - listitem [ref=e78]:
+                - link "Analytics" [ref=e79] [cursor=pointer]:
+                  - /url: /analytics
+                  - img [ref=e81]
+                  - text: Analytics
+              - listitem [ref=e83]:
+                - link "Reports" [ref=e84] [cursor=pointer]:
+                  - /url: /reports
+                  - img [ref=e86]
+                  - text: Reports
+          - generic [ref=e89]:
+            - heading "Maintenance" [level=3] [ref=e90]
+            - list [ref=e91]:
+              - listitem [ref=e92]:
+                - link "Work Orders" [ref=e93] [cursor=pointer]:
+                  - /url: /maintenance/work-orders
+                  - img [ref=e95]
+                  - text: Work Orders
+              - listitem [ref=e98]:
+                - link "Schedules" [ref=e99] [cursor=pointer]:
+                  - /url: /maintenance/schedules
+                  - img [ref=e101]
+                  - text: Schedules
+          - generic [ref=e103]:
+            - heading "Asset Management" [level=3] [ref=e104]
+            - list [ref=e105]:
+              - listitem [ref=e106]:
+                - link "Equipment" [ref=e107] [cursor=pointer]:
+                  - /url: /assets/equipment
+                  - img [ref=e109]
+                  - text: Equipment
+              - listitem [ref=e120]:
+                - link "Locations" [ref=e121] [cursor=pointer]:
+                  - /url: /assets/locations
+                  - img [ref=e123]
+                  - text: Locations
+              - listitem [ref=e126]:
+                - link "Inventory" [ref=e127] [cursor=pointer]:
+                  - /url: /assets/inventory
+                  - img [ref=e129]
+                  - text: Inventory
+              - listitem [ref=e133]:
+                - link "QR Codes" [ref=e134] [cursor=pointer]:
+                  - /url: /assets/qr-codes
+                  - img [ref=e136]
+                  - text: QR Codes
+          - generic [ref=e142]:
+            - heading "Administration" [level=3] [ref=e143]
+            - list [ref=e144]:
+              - listitem [ref=e145]:
+                - link "Users" [ref=e146] [cursor=pointer]:
+                  - /url: /admin/users
+                  - img [ref=e148]
+                  - text: Users
+              - listitem [ref=e153]:
+                - link "Roles" [ref=e154] [cursor=pointer]:
+                  - /url: /admin/roles
+                  - img [ref=e156]
+                  - text: Roles
+              - listitem [ref=e158]:
+                - link "Import" [ref=e159] [cursor=pointer]:
+                  - /url: /admin/import
+                  - img [ref=e161]
+                  - text: Import
+              - listitem [ref=e164]:
+                - link "Settings" [ref=e165] [cursor=pointer]:
+                  - /url: /admin/settings
+                  - img [ref=e167]
+                  - text: Settings
+        - link "Report Equipment Issue" [ref=e179] [cursor=pointer]:
+          - /url: /
+          - img [ref=e180]
+          - text: Report Equipment Issue
+      - generic [ref=e182]:
+        - link "Sy System Admin admin ADMIN-001" [ref=e183] [cursor=pointer]:
+          - /url: /profile
+          - generic [ref=e185]: Sy
+          - generic [ref=e186]:
+            - paragraph [ref=e187]: System Admin
+            - generic [ref=e188]:
+              - generic [ref=e189]: admin
+              - paragraph [ref=e190]: ADMIN-001
+        - button "Sign Out" [ref=e192]:
+          - img [ref=e193]
+          - text: Sign Out
+    - generic [ref=e196]:
+      - banner [ref=e197]:
+        - heading "Dashboard" [level=1] [ref=e200]
+        - button [ref=e203]:
+          - img
+      - main [ref=e204]:
+        - generic [ref=e205]:
+          - generic [ref=e207]:
+            - heading "Technician Terminal" [level=1] [ref=e208]
+            - generic [ref=e209]:
+              - img [ref=e210]
+              - text: Control panel for maintenance operations
+          - generic [ref=e221]:
+            - generic [ref=e222]:
+              - img [ref=e223]
+              - heading "My Assigned Work Orders" [level=2] [ref=e226]
+              - generic [ref=e227]: 0 active
+            - generic [ref=e228]:
+              - link "My Open 0" [ref=e229] [cursor=pointer]:
+                - /url: /maintenance/work-orders?assigned=me&status=open
+                - generic [ref=e230]:
+                  - img [ref=e233]
+                  - generic [ref=e236]:
+                    - generic [ref=e237]: My Open
+                    - generic [ref=e239]: "0"
+              - link "My In Progress 0" [ref=e240] [cursor=pointer]:
+                - /url: /maintenance/work-orders?assigned=me&status=in_progress
+                - generic [ref=e241]:
+                  - img [ref=e244]
+                  - generic [ref=e247]:
+                    - generic [ref=e248]: My In Progress
+                    - generic [ref=e250]: "0"
+              - link "My Overdue 0" [ref=e251] [cursor=pointer]:
+                - /url: /maintenance/work-orders?assigned=me&overdue=true
+                - generic [ref=e252]:
+                  - img [ref=e255]
+                  - generic [ref=e258]:
+                    - generic [ref=e259]: My Overdue
+                    - generic [ref=e261]: "0"
+              - link "My Critical 0" [ref=e262] [cursor=pointer]:
+                - /url: /maintenance/work-orders?assigned=me&priority=critical
+                - generic [ref=e263]:
+                  - img [ref=e266]
+                  - generic [ref=e268]:
+                    - generic [ref=e269]: My Critical
+                    - generic [ref=e271]: "0"
+          - generic [ref=e272]:
+            - generic [ref=e273]:
+              - heading "My Queue" [level=2] [ref=e276]
+              - link "MY WORK ORDERS" [ref=e277] [cursor=pointer]:
+                - /url: /maintenance/work-orders?assigned=me
+                - text: MY WORK ORDERS
+                - img
+            - generic [ref=e278]:
+              - img [ref=e282]
+              - heading "SYSTEM NOMINAL" [level=3] [ref=e285]
+              - paragraph [ref=e286]: No open work orders requiring urgent attention.
+          - generic [ref=e287]:
+            - generic [ref=e288]:
+              - img [ref=e289]
+              - heading "System Overview" [level=2] [ref=e294]
+            - generic [ref=e295]:
+              - link "Open WOs 8" [ref=e296] [cursor=pointer]:
+                - /url: /maintenance/work-orders?status=open
+                - generic [ref=e297]:
+                  - img [ref=e300]
+                  - generic [ref=e303]:
+                    - generic [ref=e304]: Open WOs
+                    - generic [ref=e306]: "8"
+              - link "In Progress 2" [ref=e307] [cursor=pointer]:
+                - /url: /maintenance/work-orders?status=in_progress
+                - generic [ref=e308]:
+                  - img [ref=e311]
+                  - generic [ref=e314]:
+                    - generic [ref=e315]: In Progress
+                    - generic [ref=e317]: "2"
+              - link "Overdue 0" [ref=e318] [cursor=pointer]:
+                - /url: /maintenance/work-orders?overdue=true
+                - generic [ref=e319]:
+                  - img [ref=e322]
+                  - generic [ref=e325]:
+                    - generic [ref=e326]: Overdue
+                    - generic [ref=e328]: "0"
+              - link "Critical 0" [ref=e329] [cursor=pointer]:
+                - /url: /maintenance/work-orders?priority=critical
+                - generic [ref=e330]:
+                  - img [ref=e333]
+                  - generic [ref=e335]:
+                    - generic [ref=e336]: Critical
+                    - generic [ref=e338]: "0"
+          - generic [ref=e339]:
+            - generic [ref=e340]:
+              - heading "Priority Queue" [level=2] [ref=e343]
+              - link "ALL WORK ORDERS" [ref=e344] [cursor=pointer]:
+                - /url: /maintenance/work-orders
+                - text: ALL WORK ORDERS
+                - img
+            - table [ref=e347]:
+              - rowgroup [ref=e348]:
+                - row "ID Ticket Equipment Priority Assigned To Age" [ref=e349]:
+                  - columnheader "ID" [ref=e350]
+                  - columnheader "Ticket" [ref=e351]
+                  - columnheader "Equipment" [ref=e352]
+                  - columnheader "Priority" [ref=e353]
+                  - columnheader "Assigned To" [ref=e354]
+                  - columnheader "Age" [ref=e355]
+                  - columnheader [ref=e356]
+              - rowgroup [ref=e357]:
+                - 'row "#024 Scheduled: Monthly Lubrication Reported by System Admin CNC Mill Assembly Line 2 Medium Open Unassigned 2h ago" [ref=e358] [cursor=pointer]':
+                  - cell "#024" [ref=e359]:
+                    - generic [ref=e360]: "#024"
+                  - 'cell "Scheduled: Monthly Lubrication Reported by System Admin" [ref=e361]':
+                    - generic [ref=e362]:
+                      - generic [ref=e363]: "Scheduled: Monthly Lubrication"
+                      - generic [ref=e364]: Reported by System Admin
+                  - cell "CNC Mill Assembly Line 2" [ref=e365]:
+                    - generic [ref=e366]:
+                      - generic [ref=e367]: CNC Mill
+                      - generic [ref=e368]: Assembly Line 2
+                  - cell "Medium Open" [ref=e369]:
+                    - generic [ref=e370]:
+                      - generic [ref=e371]: Medium
+                      - generic [ref=e372]: Open
+                  - cell "Unassigned" [ref=e373]
+                  - cell "2h ago" [ref=e374]
+                  - cell [ref=e375]:
+                    - link [ref=e376]:
+                      - /url: /maintenance/work-orders/24
+                      - img
+                - 'row "#025 Scheduled: Monthly Lubrication Reported by System Admin CNC Mill Assembly Line 2 Medium Open Unassigned 2h ago" [ref=e377] [cursor=pointer]':
+                  - cell "#025" [ref=e378]:
+                    - generic [ref=e379]: "#025"
+                  - 'cell "Scheduled: Monthly Lubrication Reported by System Admin" [ref=e380]':
+                    - generic [ref=e381]:
+                      - generic [ref=e382]: "Scheduled: Monthly Lubrication"
+                      - generic [ref=e383]: Reported by System Admin
+                  - cell "CNC Mill Assembly Line 2" [ref=e384]:
+                    - generic [ref=e385]:
+                      - generic [ref=e386]: CNC Mill
+                      - generic [ref=e387]: Assembly Line 2
+                  - cell "Medium Open" [ref=e388]:
+                    - generic [ref=e389]:
+                      - generic [ref=e390]: Medium
+                      - generic [ref=e391]: Open
+                  - cell "Unassigned" [ref=e392]
+                  - cell "2h ago" [ref=e393]
+                  - cell [ref=e394]:
+                    - link [ref=e395]:
+                      - /url: /maintenance/work-orders/25
+                      - img
+                - 'row "#026 Scheduled: Monthly Lubrication Reported by System Admin CNC Mill Assembly Line 2 Medium Open Unassigned 2h ago" [ref=e396] [cursor=pointer]':
+                  - cell "#026" [ref=e397]:
+                    - generic [ref=e398]: "#026"
+                  - 'cell "Scheduled: Monthly Lubrication Reported by System Admin" [ref=e399]':
+                    - generic [ref=e400]:
+                      - generic [ref=e401]: "Scheduled: Monthly Lubrication"
+                      - generic [ref=e402]: Reported by System Admin
+                  - cell "CNC Mill Assembly Line 2" [ref=e403]:
+                    - generic [ref=e404]:
+                      - generic [ref=e405]: CNC Mill
+                      - generic [ref=e406]: Assembly Line 2
+                  - cell "Medium Open" [ref=e407]:
+                    - generic [ref=e408]:
+                      - generic [ref=e409]: Medium
+                      - generic [ref=e410]: Open
+                  - cell "Unassigned" [ref=e411]
+                  - cell "2h ago" [ref=e412]
+                  - cell [ref=e413]:
+                    - link [ref=e414]:
+                      - /url: /maintenance/work-orders/26
+                      - img
+                - 'row "#027 Scheduled: Monthly Lubrication Reported by System Admin CNC Mill Assembly Line 2 Medium Open Unassigned 2h ago" [ref=e415] [cursor=pointer]':
+                  - cell "#027" [ref=e416]:
+                    - generic [ref=e417]: "#027"
+                  - 'cell "Scheduled: Monthly Lubrication Reported by System Admin" [ref=e418]':
+                    - generic [ref=e419]:
+                      - generic [ref=e420]: "Scheduled: Monthly Lubrication"
+                      - generic [ref=e421]: Reported by System Admin
+                  - cell "CNC Mill Assembly Line 2" [ref=e422]:
+                    - generic [ref=e423]:
+                      - generic [ref=e424]: CNC Mill
+                      - generic [ref=e425]: Assembly Line 2
+                  - cell "Medium Open" [ref=e426]:
+                    - generic [ref=e427]:
+                      - generic [ref=e428]: Medium
+                      - generic [ref=e429]: Open
+                  - cell "Unassigned" [ref=e430]
+                  - cell "2h ago" [ref=e431]
+                  - cell [ref=e432]:
+                    - link [ref=e433]:
+                      - /url: /maintenance/work-orders/27
+                      - img
+                - 'row "#020 Scheduled: Monthly Lubrication Reported by System Admin CNC Mill Assembly Line 2 Medium Open Unassigned 2h ago" [ref=e434] [cursor=pointer]':
+                  - cell "#020" [ref=e435]:
+                    - generic [ref=e436]: "#020"
+                  - 'cell "Scheduled: Monthly Lubrication Reported by System Admin" [ref=e437]':
+                    - generic [ref=e438]:
+                      - generic [ref=e439]: "Scheduled: Monthly Lubrication"
+                      - generic [ref=e440]: Reported by System Admin
+                  - cell "CNC Mill Assembly Line 2" [ref=e441]:
+                    - generic [ref=e442]:
+                      - generic [ref=e443]: CNC Mill
+                      - generic [ref=e444]: Assembly Line 2
+                  - cell "Medium Open" [ref=e445]:
+                    - generic [ref=e446]:
+                      - generic [ref=e447]: Medium
+                      - generic [ref=e448]: Open
+                  - cell "Unassigned" [ref=e449]
+                  - cell "2h ago" [ref=e450]
+                  - cell [ref=e451]:
+                    - link [ref=e452]:
+                      - /url: /maintenance/work-orders/20
+                      - img
+```
