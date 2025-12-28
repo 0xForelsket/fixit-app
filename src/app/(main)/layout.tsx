@@ -23,7 +23,7 @@ export default async function DashboardLayout({
   const avatarUrl = await getUserAvatarUrl(user.id);
 
   return (
-    <DashboardShell user={user} avatarUrl={avatarUrl} title="Dashboard">
+    <DashboardShell user={user} avatarUrl={avatarUrl}>
       <MaintenanceTrigger />
       {children}
     </DashboardShell>

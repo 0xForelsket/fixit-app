@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 interface DashboardShellProps {
   user: {
@@ -14,17 +15,41 @@ interface DashboardShellProps {
     permissions: string[];
   };
   avatarUrl?: string | null;
-  title: string;
+  // title prop removed
   children: React.ReactNode;
 }
+
+const getPageTitle = (pathname: string): string => {
+  if (pathname === "/dashboard") return "Dashboard";
+  if (pathname === "/analytics") return "Analytics";
+  
+  if (pathname.startsWith("/maintenance/work-orders")) {
+    if (pathname.split("/").length > 3) return "Work Order Details";
+    return "Work Orders";
+  }
+  if (pathname.startsWith("/maintenance/schedules")) return "Schedules";
+  
+  if (pathname.startsWith("/assets/equipment")) return "Equipment";
+  if (pathname.startsWith("/assets/locations")) return "Locations";
+  if (pathname.startsWith("/assets/inventory")) return "Inventory";
+  
+  if (pathname.startsWith("/admin/users")) return "User Management";
+  if (pathname.startsWith("/admin/roles")) return "Role Management";
+  if (pathname.startsWith("/admin/settings")) return "System Settings";
+  
+  if (pathname === "/design-system") return "Design System";
+  
+  return "FixIt CMMS";
+};
 
 export function DashboardShell({
   user,
   avatarUrl,
-  title,
   children,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const title = getPageTitle(pathname);
 
   return (
     <div className="flex h-screen bg-zinc-50/50 industrial-grid">
