@@ -9,16 +9,14 @@ import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { desc, eq } from "drizzle-orm";
 import {
-  AlertTriangle,
   ArrowLeft,
-  CheckCircle2,
   Factory,
   MapPin,
   User,
-  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { EquipmentHistory } from "./equipment-history";
 import { EquipmentMaintenance } from "./equipment-maintenance";
 import { EquipmentOverview } from "./equipment-overview";
@@ -147,7 +145,11 @@ export default async function EquipmentPage({ params }: PageProps) {
                 </div>
               </div>
 
-              <EquipmentStatusBadge status={equipmentItem.status} />
+              <StatusBadge
+                status={equipmentItem.status}
+                showIcon
+                className="px-4 py-2 text-sm font-bold rounded-xl border-2 border-transparent shadow-sm"
+              />
             </div>
           </div>
         </div>
@@ -182,53 +184,6 @@ export default async function EquipmentPage({ params }: PageProps) {
       </div>
 
       <BottomNav permissions={user.permissions} />
-    </div>
-  );
-}
-
-function EquipmentStatusBadge({
-  status,
-}: {
-  status: "operational" | "down" | "maintenance";
-}) {
-  const config = {
-    operational: {
-      bg: "bg-success-100",
-      text: "text-success-800",
-      border: "border-success-200",
-      icon: CheckCircle2,
-      label: "Operational",
-    },
-    down: {
-      bg: "bg-danger-100",
-      text: "text-danger-800",
-      border: "border-danger-200",
-      icon: AlertTriangle,
-      label: "Line Down",
-    },
-    maintenance: {
-      bg: "bg-warning-100",
-      text: "text-warning-800",
-      border: "border-warning-200",
-      icon: Wrench,
-      label: "Maintenance",
-    },
-  }[status];
-
-  const Icon = config.icon;
-
-  return (
-    <div
-      className={cn(
-        "inline-flex items-center gap-2 rounded-xl border-2 px-4 py-2 shadow-sm",
-        config.bg,
-        config.border
-      )}
-    >
-      <Icon className={cn("h-5 w-5", config.text)} />
-      <span className={cn("font-bold uppercase tracking-wide", config.text)}>
-        {config.label}
-      </span>
     </div>
   );
 }
