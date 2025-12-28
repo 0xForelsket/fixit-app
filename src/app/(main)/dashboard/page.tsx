@@ -1,4 +1,5 @@
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
+import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { Button } from "@/components/ui/button";
 import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
@@ -161,15 +162,13 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-10 pb-8 industrial-grid min-h-full">
       {/* Page Header */}
-      <div className="flex flex-col gap-1 border-b border-zinc-200 pb-4 sm:pb-8">
-        <h1 className="text-xl sm:text-3xl font-black tracking-tight text-zinc-900 uppercase">
-          Technician <span className="text-primary-600">Terminal</span>
-        </h1>
-        <div className="flex items-center gap-2 font-mono text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-          <MonitorCog className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-          Control panel for maintenance operations
-        </div>
-      </div>
+      <PageHeader
+        title="Technician"
+        highlight="Terminal"
+        description="Control panel for maintenance operations"
+        icon={MonitorCog}
+        className="pb-4"
+      />
 
       {/* My Work Orders Stats - Personal */}
       {myStats && (
