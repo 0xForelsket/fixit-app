@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Equipment, User, WorkOrder } from "@/db/schema";
-import { formatRelativeTime } from "@/lib/utils";
+import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
 import { ArrowRight, Timer } from "lucide-react";
 import Link from "next/link";
@@ -84,11 +84,12 @@ export function WorkOrderTable({ workOrders, searchParams }: WorkOrderTableProps
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y">
-          {workOrders.map((workOrder) => (
+          {workOrders.map((workOrder, index) => (
             <WorkOrderRow
               key={workOrder.id}
               workOrder={workOrder}
               router={router}
+              index={index}
             />
           ))}
         </TableBody>
@@ -100,16 +101,20 @@ export function WorkOrderTable({ workOrders, searchParams }: WorkOrderTableProps
 function WorkOrderRow({
   workOrder,
   router,
+  index,
 }: {
   workOrder: WorkOrderWithRelations;
   router: ReturnType<typeof useRouter>;
+  index: number;
 }) {
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
 
+  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+
   return (
     <TableRow
-      className="group hover:bg-slate-50 transition-colors cursor-pointer"
+      className={cn("group hover:bg-slate-50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1", staggerClass)}
       onClick={() => router.push(`/maintenance/work-orders/${workOrder.id}`)}
     >
       <TableCell className="p-4">

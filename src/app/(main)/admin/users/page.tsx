@@ -15,6 +15,8 @@ import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc } from "drizzle-orm";
 import { Edit, Plus, Search, Shield, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
+import { StatsCard } from "@/components/ui/stats-card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type SearchParams = {
   role?: string;
@@ -148,37 +150,37 @@ export default async function UsersPage({
           title="Operators"
           value={stats.operators}
           icon={User}
-          color="text-slate-600"
-          bg="bg-slate-50"
+          variant="secondary"
           href="?role=operator"
           active={params.role === "operator"}
+          className="animate-stagger-1 animate-in"
         />
         <StatsCard
           title="Technicians"
           value={stats.techs}
           icon={Wrench}
-          color="text-primary-600"
-          bg="bg-primary-50"
+          variant="primary"
           href="?role=tech"
           active={params.role === "tech"}
+          className="animate-stagger-2 animate-in"
         />
         <StatsCard
           title="Admins"
           value={stats.admins}
           icon={Shield}
-          color="text-rose-600"
-          bg="bg-rose-50"
+          variant="danger"
           href="?role=admin"
           active={params.role === "admin"}
+          className="animate-stagger-3 animate-in"
         />
         <StatsCard
           title="All Users"
           value={stats.total}
           icon={Users}
-          color="text-emerald-600"
-          bg="bg-emerald-50"
+          variant="success"
           href="/admin/users"
           active={!params.role || params.role === "all"}
+          className="animate-stagger-4 animate-in"
         />
       </div>
 
@@ -203,17 +205,13 @@ export default async function UsersPage({
 
       {/* Users Table */}
       {usersList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <Users className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold">No users found</h3>
-          <p className="text-sm text-muted-foreground">
-            {params.search || params.role
-              ? "Try adjusting your filters"
-              : "Add your first user to get started."}
-          </p>
-        </div>
+        <EmptyState
+          title="No users found"
+          description={params.search || params.role
+            ? "Try adjusting your filters to find what you're looking for."
+            : "Add your first user to build your team."}
+          icon={Users}
+        />
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
           <Table>
@@ -271,16 +269,17 @@ export default async function UsersPage({
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y">
-              {usersList.map((user) => {
+              {usersList.map((user, index) => {
                 const roleName = user.assignedRole?.name || "operator";
                 const roleConfig =
                   roleConfigs[roleName] || roleConfigs.operator;
                 const RoleIcon = roleConfig.icon;
+                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
 
                 return (
                   <TableRow
                     key={user.id}
-                    className="hover:bg-slate-50 transition-colors"
+                    className={cn("hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}
                   >
                     <TableCell className="p-4">
                       <div className="flex items-center gap-3">
@@ -350,43 +349,3 @@ export default async function UsersPage({
   );
 }
 
-function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-  href,
-  active,
-}: {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  href: string;
-  active: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "flex items-center gap-3 rounded-xl border p-4 transition-all hover:shadow-md bg-white",
-        active && "ring-2 ring-primary-500 border-primary-300"
-      )}
-    >
-      <div
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-lg",
-          bg
-        )}
-      >
-        <Icon className={cn("h-5 w-5", color)} />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className={cn("text-2xl font-bold", color)}>{value}</p>
-      </div>
-    </Link>
-  );
-}

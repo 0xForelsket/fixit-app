@@ -66,11 +66,14 @@ export function QuickActions() {
   return (
     <section>
       <div className="grid grid-cols-4 gap-4 sm:grid-cols-4 lg:grid-cols-8">
-        {actions.map((action) => (
+        {actions.map((action, index) => (
           <Link
             key={action.label}
             href={action.href}
-            className="flex flex-col items-center gap-2 group transition-transform active:scale-95"
+            className={cn(
+              "flex flex-col items-center gap-2 group transition-transform active:scale-95 animate-stagger-1 animate-in fade-in",
+              index < 8 ? `animate-stagger-${index + 1}` : "animate-in"
+            )}
           >
             <div
               className={cn(

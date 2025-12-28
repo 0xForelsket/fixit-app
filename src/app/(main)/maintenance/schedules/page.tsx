@@ -15,6 +15,7 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
+import { StatsCard } from "@/components/ui/stats-card";
 
 type SearchParams = {
   month?: string;
@@ -134,7 +135,7 @@ export default async function MaintenancePage({
           </div>
         </div>
         <div className="flex gap-2">
-          {user?.role === "admin" && (
+          {user?.roleName === "admin" && (
             <>
               <Button
                 variant="outline"
@@ -162,26 +163,26 @@ export default async function MaintenancePage({
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard
+        <StatsCard
           title="Overdue"
           value={overdueCount}
           icon={AlertTriangle}
-          color={overdueCount > 0 ? "text-rose-600" : "text-zinc-400"}
-          bg={overdueCount > 0 ? "bg-rose-50" : "bg-zinc-50"}
+          variant={overdueCount > 0 ? "danger" : "secondary"}
+          className={cn("animate-stagger-1 animate-in", overdueCount > 0 && "animate-pulse")}
         />
-        <StatCard
+        <StatsCard
           title="This Month"
           value={thisMonthCount}
           icon={Calendar}
-          color="text-primary-600"
-          bg="bg-primary-50"
+          variant="primary"
+          className="animate-stagger-2 animate-in"
         />
-        <StatCard
+        <StatsCard
           title="Next 7 Days"
           value={upcomingCount}
           icon={Wrench}
-          color="text-amber-600"
-          bg="bg-amber-50"
+          variant="warning"
+          className="animate-stagger-3 animate-in"
         />
       </div>
 
@@ -237,11 +238,12 @@ export default async function MaintenancePage({
                 </h3>
                 {schedules
                   .filter((s) => s.nextDue && new Date(s.nextDue) < today)
-                  .map((schedule) => (
+                  .map((schedule, index) => (
                     <AgendaItem
                       key={schedule.id}
                       schedule={schedule}
                       today={today}
+                      index={index}
                     />
                   ))}
               </div>
@@ -263,11 +265,12 @@ export default async function MaintenancePage({
                     due.getFullYear() === currentYear
                   );
                 })
-                .map((schedule) => (
+                .map((schedule, index) => (
                   <AgendaItem
                     key={schedule.id}
                     schedule={schedule}
                     today={today}
+                    index={index}
                   />
                 ))}
             </div>
@@ -344,9 +347,10 @@ export default async function MaintenancePage({
               <div
                 key={day}
                 className={cn(
-                  "min-h-32 bg-white p-2 transition-colors hover:bg-zinc-50 group relative",
+                  "min-h-32 bg-white p-2 transition-colors hover:bg-zinc-50 group relative animate-in fade-in duration-500",
                   isToday && "bg-primary-50/30"
                 )}
+                style={{ animationDelay: `${(i % 7) * 50}ms` }}
               >
                 <div
                   className={cn(
@@ -398,42 +402,11 @@ export default async function MaintenancePage({
   );
 }
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-}: {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-1 rounded-2xl border-2 bg-white p-3 shadow-sm">
-      <div
-        className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-lg mb-1",
-          bg
-        )}
-      >
-        <Icon className={cn("h-4 w-4", color)} />
-      </div>
-      <div className="text-center">
-        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-          {title}
-        </p>
-        <p className={cn("text-xl font-black", color)}>{value}</p>
-      </div>
-    </div>
-  );
-}
 
 function AgendaItem({
   schedule,
   today,
+  index,
 }: {
   schedule: {
     id: number;
@@ -443,7 +416,9 @@ function AgendaItem({
     equipment?: { name: string } | null;
   };
   today: Date;
+  index: number;
 }) {
+  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
   const dueDate = schedule.nextDue ? new Date(schedule.nextDue) : null;
   const isOverdue = dueDate && dueDate < today;
   const daysUntil = dueDate
@@ -454,8 +429,9 @@ function AgendaItem({
     <Link
       href={`/maintenance/schedules/${schedule.id}`}
       className={cn(
-        "block rounded-2xl border-2 bg-white p-4 shadow-sm active:scale-[0.98] transition-all",
-        isOverdue ? "border-rose-200 shadow-rose-50" : "border-zinc-200"
+        "block rounded-2xl border-2 bg-white p-4 shadow-sm active:scale-[0.98] transition-all animate-in fade-in slide-in-from-bottom-1",
+        isOverdue ? "border-rose-200 shadow-rose-50" : "border-zinc-200",
+        staggerClass
       )}
     >
       <div className="flex justify-between items-start mb-2">

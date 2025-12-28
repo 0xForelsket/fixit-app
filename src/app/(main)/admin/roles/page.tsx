@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Edit, Plus, Shield, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 import { DeleteRoleButton } from "./delete-role-button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function RolesPage() {
   const roles = await getRoles();
@@ -40,17 +41,11 @@ export default async function RolesPage() {
       </div>
 
       {roles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 p-20 text-center animate-in backdrop-blur-sm">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 shadow-inner">
-            <Shield className="h-8 w-8 text-zinc-400" />
-          </div>
-          <h3 className="mt-6 text-xl font-black text-zinc-900 tracking-tight uppercase">
-            No roles defined
-          </h3>
-          <p className="text-zinc-500 font-medium mt-1">
-            Create your first role to get started with permission management.
-          </p>
-        </div>
+        <EmptyState
+          title="No roles defined"
+          description="Create your first role to get started with permission management."
+          icon={Shield}
+        />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm shadow-xl shadow-zinc-200/20">
           <Table className="w-full text-left border-collapse">
@@ -72,11 +67,13 @@ export default async function RolesPage() {
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-zinc-100">
-              {roles.map((role) => (
-                <TableRow
-                  key={role.id}
-                  className="hover:bg-primary-50/30 transition-colors group"
-                >
+              {roles.map((role, index) => {
+                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                return (
+                  <TableRow
+                    key={role.id}
+                    className={cn("hover:bg-primary-50/30 transition-colors group animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                  >
                   <TableCell className="p-5">
                     <div className="flex items-center gap-4">
                       <div
@@ -150,8 +147,9 @@ export default async function RolesPage() {
                       )}
                     </div>
                   </TableCell>
-                </TableRow>
-              ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

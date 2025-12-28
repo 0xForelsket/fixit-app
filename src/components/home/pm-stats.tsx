@@ -8,7 +8,7 @@ export function PMStats() {
         Preventive Maintenance
       </h3>
       <div className="grid grid-cols-2 gap-4 mt-4">
-        <div className="bg-primary-50 p-4 rounded-2xl border border-primary-100">
+        <div className="bg-primary-50 p-4 rounded-2xl border border-primary-100 animate-stagger-4 animate-in slide-in-from-bottom-2 duration-500">
           <p className="text-primary-600 text-xs font-bold uppercase tracking-wider mb-1">
             Due soon
           </p>
@@ -17,7 +17,7 @@ export function PMStats() {
             nos.
           </span>
         </div>
-        <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-200">
+        <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-200 animate-stagger-5 animate-in slide-in-from-bottom-2 duration-500">
           <p className="text-zinc-600 text-xs font-bold uppercase tracking-wider mb-1">
             Closed
           </p>

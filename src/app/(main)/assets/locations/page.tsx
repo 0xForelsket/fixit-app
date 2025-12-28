@@ -23,6 +23,8 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
+import { StatsCard } from "@/components/ui/stats-card";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type SearchParams = {
   search?: string;
@@ -137,22 +139,22 @@ export default async function LocationsPage({
           title="Total Locations"
           value={stats.total}
           icon={MapPin}
-          color="text-primary-600"
-          bg="bg-primary-50"
+          variant="primary"
+          className="animate-stagger-1 animate-in"
         />
         <StatsCard
           title="Root Areas"
           value={stats.roots}
           icon={Building}
-          color="text-slate-600"
-          bg="bg-slate-50"
+          variant="secondary"
+          className="animate-stagger-2 animate-in"
         />
         <StatsCard
           title="Active"
           value={stats.active}
           icon={FolderTree}
-          color="text-emerald-600"
-          bg="bg-emerald-50"
+          variant="success"
+          className="animate-stagger-3 animate-in"
         />
       </div>
 
@@ -178,17 +180,13 @@ export default async function LocationsPage({
 
       {/* Locations Table */}
       {locationsList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <MapPin className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold">No locations found</h3>
-          <p className="text-sm text-muted-foreground">
-            {params.search
-              ? "Try adjusting your search"
-              : "Add your first location to get started."}
-          </p>
-        </div>
+        <EmptyState
+          title="No locations found"
+          description={params.search
+            ? "Try adjusting your search to find the zones you're looking for."
+            : "Define your first physical or virtual location to begin mapping assets."}
+          icon={MapPin}
+        />
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
           <Table>
@@ -238,11 +236,13 @@ export default async function LocationsPage({
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y">
-              {locationsList.map((location) => (
-                <TableRow
-                  key={location.id}
-                  className="hover:bg-slate-50 transition-colors"
-                >
+              {locationsList.map((location, index) => {
+                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+                return (
+                  <TableRow
+                    key={location.id}
+                    className={cn("hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+                  >
                   <TableCell className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
@@ -299,7 +299,8 @@ export default async function LocationsPage({
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -308,33 +309,3 @@ export default async function LocationsPage({
   );
 }
 
-function StatsCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-}: {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border p-4 bg-white">
-      <div
-        className={cn(
-          "flex h-10 w-10 items-center justify-center rounded-lg",
-          bg
-        )}
-      >
-        <Icon className={cn("h-5 w-5", color)} />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className={cn("text-2xl font-bold", color)}>{value}</p>
-      </div>
-    </div>
-  );
-}

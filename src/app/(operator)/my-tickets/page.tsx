@@ -16,6 +16,7 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 import { redirect } from "next/navigation";
 import { SuccessToast } from "./success-toast";
 
@@ -102,20 +103,15 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
 
         {/* Empty state */}
         {userWorkOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-white py-16 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border">
-              <Inbox className="h-8 w-8 text-zinc-400" />
-            </div>
-            <h3 className="mt-4 text-xl font-black text-zinc-900">
-              No tickets found
-            </h3>
-            <p className="mt-2 text-zinc-500 max-w-xs mx-auto text-sm">
-              You haven't reported any equipment issues yet.
-            </p>
-            <Button asChild className="mt-6">
-              <Link href="/">Report an Issue</Link>
-            </Button>
-          </div>
+          <EmptyState
+            title="No tickets found"
+            description="You haven't reported any equipment issues yet. Keep the floor running smoothly by reporting identified defects."
+            icon={Inbox}
+            action={{
+              label: "Report an Issue",
+              href: "/",
+            }}
+          />
         ) : (
           <div className="space-y-8">
             {/* Active work orders */}
@@ -128,10 +124,11 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
                   </h2>
                 </div>
                 <div className="grid gap-3">
-                  {openWorkOrders.map((workOrder) => (
+                  {openWorkOrders.map((workOrder, index) => (
                     <WorkOrderListItem
                       key={workOrder.id}
                       workOrder={workOrder}
+                      index={index}
                     />
                   ))}
                 </div>
@@ -148,11 +145,12 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
                   </h2>
                 </div>
                 <div className="grid gap-3 opacity-80 hover:opacity-100 transition-opacity">
-                  {resolvedWorkOrders.map((workOrder) => (
+                  {resolvedWorkOrders.map((workOrder, index) => (
                     <WorkOrderListItem
                       key={workOrder.id}
                       workOrder={workOrder}
                       isResolved
+                      index={index}
                     />
                   ))}
                 </div>
@@ -227,6 +225,7 @@ function StatCard({
 function WorkOrderListItem({
   workOrder,
   isResolved,
+  index,
 }: {
   workOrder: {
     id: number;
@@ -238,7 +237,10 @@ function WorkOrderListItem({
     assignedTo: { id: number; name: string } | null;
   };
   isResolved?: boolean;
+  index: number;
 }) {
+  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+
   const priorityConfig = {
     low: { color: "bg-slate-400", label: "Low" },
     medium: { color: "bg-primary-500", label: "Medium" },
@@ -253,8 +255,9 @@ function WorkOrderListItem({
     <Link
       href={`/my-tickets/${workOrder.id}`}
       className={cn(
-        "group relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 bg-white p-4 transition-all hover:border-primary-300 hover:shadow-md active:scale-[0.98]",
-        isResolved && "grayscale-[0.5]"
+        "group relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 bg-white p-4 transition-all hover:border-primary-300 hover:shadow-md active:scale-[0.98] animate-in fade-in slide-in-from-bottom-1",
+        isResolved && "grayscale-[0.5]",
+        staggerClass
       )}
     >
       {/* Priority Strip */}

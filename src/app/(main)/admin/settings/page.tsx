@@ -25,7 +25,7 @@ export default function SettingsPage() {
       </div>
 
       {/* SLA Configuration */}
-      <section className="rounded-xl border bg-white p-6">
+      <section className="rounded-xl border bg-white p-6 animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-1">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
             <Timer className="h-5 w-5 text-primary-600" />
@@ -75,7 +75,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Session Settings */}
-      <section className="rounded-xl border bg-white p-6">
+      <section className="rounded-xl border bg-white p-6 animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-2">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
             <Shield className="h-5 w-5 text-slate-600" />
@@ -133,7 +133,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Notification Settings */}
-      <section className="rounded-xl border bg-white p-6">
+      <section className="rounded-xl border bg-white p-6 animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-3">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
             <Bell className="h-5 w-5 text-amber-600" />

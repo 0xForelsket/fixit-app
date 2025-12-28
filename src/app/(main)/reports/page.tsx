@@ -2,6 +2,7 @@ import { StatsCard } from "@/components/ui/stats-card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Table,
   TableBody,
@@ -17,6 +18,7 @@ import {
   workOrders,
 } from "@/db/schema";
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
+import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -321,15 +323,11 @@ export default async function ReportsPage({
 
       {/* Work Orders Table */}
       {workOrdersList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed p-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <FileText className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold">No work orders found</h3>
-          <p className="text-sm text-muted-foreground">
-            Try adjusting your date range or filters
-          </p>
-        </div>
+        <EmptyState
+          title="No work orders found"
+          description="Try adjusting your date range or filters to find what you're looking for."
+          icon={FileText}
+        />
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
           <Table className="w-full text-sm">
@@ -348,8 +346,8 @@ export default async function ReportsPage({
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y">
-              {workOrdersList.map((workOrder) => (
-                <WorkOrderRow key={workOrder.id} workOrder={workOrder} />
+              {workOrdersList.map((workOrder, index) => (
+                <WorkOrderRow key={workOrder.id} workOrder={workOrder} index={index} />
               ))}
             </TableBody>
           </Table>
@@ -420,9 +418,17 @@ interface WorkOrderWithRelations {
 }
 
 
-function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
+function WorkOrderRow({ 
+  workOrder, 
+  index 
+}: { 
+  workOrder: WorkOrderWithRelations;
+  index: number;
+}) {
+  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+  
   return (
-    <TableRow className="hover:bg-slate-50 transition-colors">
+    <TableRow className={cn("hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}>
       <TableCell className="p-3">
         <Link
           href={`/maintenance/work-orders/${workOrder.id}`}

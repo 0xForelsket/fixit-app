@@ -16,6 +16,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 
 async function getStats() {
   const allParts = await db.query.spareParts.findMany({
@@ -67,7 +68,7 @@ export default async function InventoryPage() {
       <PageHeader
         title="Inventory"
         highlight="Control"
-        description={`${stats.totalParts} UNIQUE SKUS • STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
+        description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
         icon={Box}
       >
         <Button
@@ -146,7 +147,7 @@ export default async function InventoryPage() {
                       {item.part?.name}
                     </p>
                     <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
-                      LOC: {item.location?.name} • SKU: {item.part?.sku}
+                      LOC: {item.location?.name} | SKU: {item.part?.sku}
                     </p>
                   </div>
                 </div>
@@ -229,17 +230,25 @@ export default async function InventoryPage() {
           </Link>
         </div>
         {recentParts.length === 0 ? (
-          <p className="text-sm text-zinc-400 font-medium py-8 text-center italic">
-            No new modules detected in database.
-          </p>
+          <EmptyState
+            title="Catalog synchronization required"
+            description="No new modules detected in database. Register your first SKU to begin tracking assets."
+            icon={Package}
+            className="py-12 bg-transparent border-none"
+          />
         ) : (
           <div className="grid gap-4">
-            {recentParts.map((part) => (
-              <Link
-                key={part.id}
-                href={`/assets/inventory/parts/${part.id}`}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-zinc-100 p-4 transition-all hover:border-primary-400 hover:bg-primary-50/20 hover-lift"
-              >
+            {recentParts.map((part, index) => {
+              const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+              return (
+                <Link
+                  key={part.id}
+                  href={`/assets/inventory/parts/${part.id}`}
+                  className={cn(
+                    "group flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-zinc-100 p-4 transition-all hover:border-primary-400 hover:bg-primary-50/20 hover-lift animate-in fade-in slide-in-from-bottom-1",
+                    staggerClass
+                  )}
+                >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-lg group-hover:scale-110 transition-transform">
                     <Package className="h-6 w-6" />
@@ -258,8 +267,9 @@ export default async function InventoryPage() {
                     <ChevronRight className="h-5 w-5" />
                   </div>
                 </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

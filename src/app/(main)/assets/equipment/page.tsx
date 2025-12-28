@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -127,39 +128,6 @@ export default async function EquipmentPage({
   const equipmentList = await getEquipment(params);
   const stats = await getEquipmentStats();
 
-  const statusConfigs: Record<
-    string,
-    {
-      icon: React.ElementType;
-      color: string;
-      bg: string;
-      dotClass: string;
-      label: string;
-    }
-  > = {
-    operational: {
-      icon: CheckCircle2,
-      color: "text-success-700",
-      bg: "bg-success-50/50 border-success-100",
-      dotClass: "status-operational",
-      label: "Operational",
-    },
-    down: {
-      icon: AlertCircle,
-      color: "text-danger-700",
-      bg: "bg-danger-50/50 border-danger-100",
-      dotClass: "status-down",
-      label: "Down",
-    },
-    maintenance: {
-      icon: Wrench,
-      color: "text-warning-700",
-      bg: "bg-warning-50/50 border-warning-100",
-      dotClass: "status-maintenance",
-      label: "Maintenance",
-    },
-  };
-
   return (
     <div className="space-y-10 animate-in">
       {/* Header */}
@@ -167,7 +135,7 @@ export default async function EquipmentPage({
       <PageHeader
         title="Equipment"
         highlight="List"
-        description={`${stats.total} REGISTERED UNITS • ${stats.operational} ONLINE`}
+        description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
         icon={MonitorCog}
       >
         <Button variant="outline" asChild>
@@ -261,27 +229,22 @@ export default async function EquipmentPage({
 
       {/* Equipment Table */}
       {equipmentList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 p-20 text-center animate-in backdrop-blur-sm">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 shadow-inner">
-            <MonitorCog className="h-8 w-8 text-zinc-400" />
-          </div>
-          <h3 className="mt-6 text-xl font-black text-zinc-900 tracking-tight uppercase">
-            No assets identified
-          </h3>
-          <p className="text-zinc-500 font-medium mt-1">
-            {params.search || params.status
-              ? "Refine parameters to adjust scan results"
-              : "Register your first equipment to begin monitoring."}
-          </p>
+        <EmptyState
+          title="No assets identified"
+          description={params.search || params.status
+            ? "Refine parameters to adjust scan results"
+            : "Register your first equipment to begin monitoring."}
+          icon={MonitorCog}
+        >
           {(params.search || params.status) && (
-            <Button variant="outline" className="mt-6 font-bold" asChild>
+            <Button variant="outline" className="font-bold" asChild>
               <Link href="/assets/equipment">
                 <X className="mr-2 h-4 w-4" />
                 CLEAR FILTERS
               </Link>
             </Button>
           )}
-        </div>
+        </EmptyState>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm shadow-xl shadow-zinc-200/20">
           <Table>
@@ -337,11 +300,12 @@ export default async function EquipmentPage({
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-zinc-100">
-              {equipmentList.map((equipment) => {
+              {equipmentList.map((equipment, index) => {
+                const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
                 return (
                   <TableRow
                     key={equipment.id}
-                    className="hover:bg-zinc-50 transition-colors group"
+                    className={cn("hover:bg-zinc-50 transition-colors group animate-in fade-in slide-in-from-bottom-1", staggerClass)}
                   >
                     <TableCell className="p-5">
                        <span className="font-mono font-bold text-zinc-500 uppercase tracking-widest text-xs">

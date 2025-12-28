@@ -6,6 +6,7 @@ import type { WorkOrderWithRelations } from "@/components/work-orders/work-order
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
+import { cn } from "@/lib/utils";
 import { and, count, eq, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
@@ -189,6 +190,7 @@ export default async function DashboardPage() {
               icon={Inbox}
               variant="primary"
               href="/maintenance/work-orders?assigned=me&status=open"
+              className="animate-stagger-1 animate-in"
             />
             <StatsCard
               title="My In Progress"
@@ -196,13 +198,14 @@ export default async function DashboardPage() {
               icon={Timer}
               variant="info"
               href="/maintenance/work-orders?assigned=me&status=in_progress"
+              className="animate-stagger-2 animate-in"
             />
             <StatsCard
               title="My Overdue"
               value={myStats.overdue}
               icon={Clock}
               variant="danger"
-              className={myStats.overdue > 0 ? "animate-pulse border-danger-300" : ""}
+              className={cn("animate-stagger-3 animate-in", myStats.overdue > 0 ? "animate-pulse border-danger-300" : "")}
               href="/maintenance/work-orders?assigned=me&overdue=true"
             />
             <StatsCard
@@ -210,7 +213,7 @@ export default async function DashboardPage() {
               value={myStats.critical}
               icon={AlertTriangle}
               variant="danger"
-              className={myStats.critical > 0 ? "animate-pulse border-danger-300" : ""}
+              className={cn("animate-stagger-4 animate-in", myStats.critical > 0 ? "animate-pulse border-danger-300" : "")}
               href="/maintenance/work-orders?assigned=me&priority=critical"
             />
           </div>
@@ -263,6 +266,7 @@ export default async function DashboardPage() {
             icon={Inbox}
             variant="secondary"
             href="/maintenance/work-orders?status=open"
+            className="animate-stagger-1 animate-in"
           />
           <StatsCard
             title="In Progress"
@@ -270,13 +274,14 @@ export default async function DashboardPage() {
             icon={Timer}
             variant="info"
             href="/maintenance/work-orders?status=in_progress"
+            className="animate-stagger-2 animate-in"
           />
           <StatsCard
             title="Overdue"
             value={globalStats.overdue}
             icon={Clock}
             variant="danger"
-            className={globalStats.overdue > 0 ? "animate-pulse border-danger-300" : ""}
+            className={cn("animate-stagger-3 animate-in", globalStats.overdue > 0 ? "animate-pulse border-danger-300" : "")}
             href="/maintenance/work-orders?overdue=true"
           />
           <StatsCard
@@ -284,7 +289,7 @@ export default async function DashboardPage() {
             value={globalStats.critical}
             icon={AlertTriangle}
             variant="danger"
-            className={globalStats.critical > 0 ? "animate-pulse border-danger-300" : ""}
+            className={cn("animate-stagger-4 animate-in", globalStats.critical > 0 ? "animate-pulse border-danger-300" : "")}
             href="/maintenance/work-orders?priority=critical"
           />
         </div>

@@ -10,6 +10,7 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface EquipmentWithLocation extends Equipment {
   location: Location | null;
@@ -22,31 +23,31 @@ interface EquipmentGridProps {
 export function EquipmentGrid({ equipment }: EquipmentGridProps) {
   if (equipment.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border">
-          <Factory className="h-8 w-8 text-zinc-400" />
-        </div>
-        <h3 className="mt-4 text-xl font-black text-zinc-900">
-          No equipment found
-        </h3>
-        <p className="mt-2 text-sm text-zinc-500 max-w-sm mx-auto">
-          We couldn't find any equipment matching your search. Try adjusting the
-          filters or search term.
-        </p>
-      </div>
+      <EmptyState
+        title="No equipment found"
+        description="We couldn't find any equipment matching your current filters or search term."
+        icon={Factory}
+      />
     );
   }
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {equipment.map((equipment) => (
-        <EquipmentCard key={equipment.id} equipment={equipment} />
+      {equipment.map((item, index) => (
+        <EquipmentCard key={item.id} equipment={item} index={index} />
       ))}
     </div>
   );
 }
 
-function EquipmentCard({ equipment }: { equipment: EquipmentWithLocation }) {
+function EquipmentCard({
+  equipment,
+  index,
+}: {
+  equipment: EquipmentWithLocation;
+  index: number;
+}) {
+  const staggerClass = index < 8 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
   const statusConfig = {
     operational: {
       icon: CheckCircle2,
@@ -80,7 +81,10 @@ function EquipmentCard({ equipment }: { equipment: EquipmentWithLocation }) {
   return (
     <Link
       href={`/equipment/${equipment.code}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition-all hover:shadow-md hover:border-primary-300 active:scale-[0.98]"
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition-all hover:shadow-md hover:border-primary-300 active:scale-[0.98] animate-in fade-in slide-in-from-bottom-1",
+        staggerClass
+      )}
     >
       {/* Color-Blocked Header */}
       <div

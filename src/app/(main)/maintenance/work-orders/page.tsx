@@ -248,6 +248,7 @@ export default async function WorkOrdersPage({
           bg="bg-primary-50"
           href="?status=open"
           active={params.status === "open"}
+          index={0}
         />
         <StatFilterCard
           title="In Progress"
@@ -257,6 +258,7 @@ export default async function WorkOrdersPage({
           bg="bg-amber-50"
           href="?status=in_progress"
           active={params.status === "in_progress"}
+          index={1}
         />
         <StatFilterCard
           title="Resolved"
@@ -266,6 +268,7 @@ export default async function WorkOrdersPage({
           bg="bg-emerald-50"
           href="?status=resolved"
           active={params.status === "resolved"}
+          index={2}
         />
         <StatFilterCard
           title="Critical"
@@ -275,6 +278,7 @@ export default async function WorkOrdersPage({
           bg="bg-rose-50"
           href="?priority=critical"
           active={params.priority === "critical"}
+          index={3}
         />
       </div>
 
@@ -431,6 +435,7 @@ function StatFilterCard({
   bg,
   href,
   active,
+  index,
 }: {
   title: string;
   value: number;
@@ -439,15 +444,18 @@ function StatFilterCard({
   bg: string;
   href: string;
   active: boolean;
+  index: number;
 }) {
+  const staggerClass = index < 4 ? `animate-stagger-${index + 1}` : "animate-in";
   return (
     <Link
       href={active ? "/maintenance/work-orders" : href}
       className={cn(
-        "flex flex-1 items-center gap-3 rounded-xl border p-3 sm:p-4 transition-all hover:shadow-md bg-white",
+        "flex flex-1 items-center gap-3 rounded-xl border p-3 sm:p-4 transition-all hover:shadow-md bg-white animate-in fade-in slide-in-from-bottom-2 duration-500",
         active
           ? "ring-2 ring-primary-500 border-primary-300 shadow-inner"
-          : "shadow-sm border-zinc-200"
+          : "shadow-sm border-zinc-200",
+        staggerClass
       )}
     >
       <div

@@ -15,14 +15,18 @@ export type WorkOrderWithRelations = WorkOrder & {
 
 interface WorkOrderCardProps {
   workOrder: WorkOrderWithRelations;
+  index?: number;
 }
 
 export function WorkOrderCard({
   workOrder,
   variant = "default",
+  index = 0,
 }: WorkOrderCardProps & { variant?: "default" | "compact" }) {
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
+
+  const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
 
   if (variant === "compact") {
     // We use left border color to indicate priority strongly
@@ -38,9 +42,9 @@ export function WorkOrderCard({
       <Link
         href={`/maintenance/work-orders/${workOrder.id}`}
         className={cn(
-          "block relative overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm active:scale-[0.99] transition-all",
-          "border-l-[4px]", // Slightly thinner left border for density
-          borderColorClass
+          "block relative overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm active:scale-[0.99] transition-all animate-in fade-in slide-in-from-bottom-1",
+          borderColorClass,
+          staggerClass
         )}
       >
         {/* Header strip - More compact */}
@@ -122,10 +126,11 @@ export function WorkOrderCard({
     <Link
       href={`/maintenance/work-orders/${workOrder.id}`}
       className={cn(
-        "block rounded-2xl border-2 bg-white p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98]",
+        "block rounded-2xl border-2 bg-white p-4 shadow-sm hover:shadow-md transition-all active:scale-[0.98] animate-in fade-in slide-in-from-bottom-2",
         workOrder.priority === "critical"
           ? "border-rose-200 shadow-rose-100/50"
-          : "border-zinc-200"
+          : "border-zinc-200",
+        staggerClass
       )}
     >
       <div className="flex justify-between items-start mb-3">

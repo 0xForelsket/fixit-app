@@ -269,28 +269,31 @@ export default async function EquipmentDetailPage({
         </div>
       ) : (
         <div className="divide-y">
-          {equipmentItem.workOrders.slice(0, 10).map((workOrder) => (
-            <Link
-              key={workOrder.id}
-              href={`/maintenance/work-orders/${workOrder.id}`}
-              className="block p-4 hover:bg-slate-50 transition-colors"
-            >
-              <div className="flex justify-between items-start mb-1">
-                <span className="font-semibold text-sm truncate pr-2">
-                  {workOrder.title}
-                </span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase shrink-0">
-                  {formatRelativeTime(workOrder.createdAt)}
-                </span>
-              </div>
-              <div className="flex justify-between text-xs">
+          {equipmentItem.workOrders.slice(0, 10).map((workOrder, index) => {
+            const staggerClass = index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500";
+            return (
+              <Link
+                key={workOrder.id}
+                href={`/maintenance/work-orders/${workOrder.id}`}
+                className={cn("block p-4 hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1", staggerClass)}
+              >
+                <div className="flex justify-between items-start mb-1">
+                  <span className="font-semibold text-sm truncate pr-2">
+                    {workOrder.title}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-medium uppercase shrink-0">
+                    {formatRelativeTime(workOrder.createdAt)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs">
                   <StatusBadge status={workOrder.status} className="text-xs" />
-                <span className="text-muted-foreground italic">
-                  {workOrder.assignedTo?.name || "Unassigned"}
-                </span>
-              </div>
-            </Link>
-          ))}
+                  <span className="text-muted-foreground italic">
+                    {workOrder.assignedTo?.name || "Unassigned"}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
@@ -345,10 +348,13 @@ export default async function EquipmentDetailPage({
               </h3>
               {/* Simplified BOM for mobile */}
               <div className="space-y-3">
-                {equipmentItem.model?.bom.map((item) => (
+                {equipmentItem.model?.bom.map((item, index) => (
                   <div
                     key={item.id}
-                    className="p-3 bg-zinc-50 rounded-lg border"
+                    className={cn(
+                      "p-3 bg-zinc-50 rounded-lg border animate-in fade-in slide-in-from-bottom-1",
+                      index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                    )}
                   >
                     <div className="flex justify-between font-bold text-sm">
                       <span>{item.part.name}</span>
@@ -388,8 +394,14 @@ export default async function EquipmentDetailPage({
 
           <TabsContent value="schedules" className="mt-6">
             <div className="rounded-xl border bg-white shadow-sm divide-y">
-              {equipmentItem.maintenanceSchedules.map((schedule) => (
-                <div key={schedule.id} className="p-4">
+              {equipmentItem.maintenanceSchedules.map((schedule, index) => (
+                <div
+                  key={schedule.id}
+                  className={cn(
+                    "p-4 animate-in fade-in slide-in-from-bottom-1",
+                    index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                  )}
+                >
                   <p className="font-bold text-sm">{schedule.title}</p>
                   <p className="text-xs text-muted-foreground mt-1 uppercase">
                     {schedule.type} • Every {schedule.frequencyDays}d
@@ -446,8 +458,14 @@ export default async function EquipmentDetailPage({
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y">
-                    {equipmentItem.model?.bom.map((item) => (
-                      <TableRow key={item.id}>
+                    {equipmentItem.model?.bom.map((item, index) => (
+                      <TableRow
+                        key={item.id}
+                        className={cn(
+                          "animate-in fade-in slide-in-from-bottom-1",
+                          index < 8 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                        )}
+                      >
                         <TableCell className="p-3 font-medium">{item.part.name}</TableCell>
                         <TableCell className="p-3">{item.part.sku}</TableCell>
                         <TableCell className="p-3 text-center">
@@ -478,10 +496,13 @@ export default async function EquipmentDetailPage({
             </TabsContent>
             <TabsContent value="schedules" className="mt-4">
               <div className="rounded-xl border bg-white shadow-sm divide-y">
-                {equipmentItem.maintenanceSchedules.map((schedule) => (
+                {equipmentItem.maintenanceSchedules.map((schedule, index) => (
                   <div
                     key={schedule.id}
-                    className="p-4 flex justify-between items-center text-sm"
+                    className={cn(
+                      "p-4 flex justify-between items-center text-sm animate-in fade-in slide-in-from-bottom-1",
+                      index < 5 ? `animate-stagger-${index + 1}` : "animate-in fade-in duration-500"
+                    )}
                   >
                     <span>{schedule.title}</span>
                     <Badge variant="outline">
