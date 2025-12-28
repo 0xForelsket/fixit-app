@@ -1,9 +1,6 @@
 import { LandingPage } from "@/components/home/landing-page";
-import { PMStats } from "@/components/home/pm-stats";
 import { QuickActions } from "@/components/home/quick-actions";
 import { UserHeader } from "@/components/home/user-header";
-import { WorkOrderStats } from "@/components/home/work-order-stats";
-import { WelcomeBanner } from "@/components/home/welcome-banner";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { db } from "@/db";
 import { equipment, notifications } from "@/db/schema";
@@ -11,6 +8,7 @@ import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EquipmentGrid } from "./(operator)/equipment-grid";
@@ -72,12 +70,7 @@ export default async function Home({ searchParams }: PageProps) {
     orderBy: (locations, { asc }) => [asc(locations.name)],
   });
 
-  // Count tickets per equipment status
-  const statusCounts = {
-    operational: equipmentList.filter((m) => m.status === "operational").length,
-    down: equipmentList.filter((m) => m.status === "down").length,
-    maintenance: equipmentList.filter((m) => m.status === "maintenance").length,
-  };
+
 
   // Get unread notification count
   const unreadCount = await db
@@ -93,32 +86,23 @@ export default async function Home({ searchParams }: PageProps) {
       <UserHeader user={user} avatarUrl={avatarUrl} unreadCount={unreadCount} />
 
       {/* Main content */}
-      <main className="container mx-auto px-4 py-8 max-w-5xl space-y-10 animate-in">
-        <WelcomeBanner user={user} avatarUrl={avatarUrl} />
+      <main className="container mx-auto px-4 pt-4 pb-20 max-w-5xl space-y-4 animate-in">
         <QuickActions />
 
-        {/* Status Summaries */}
-        <section className="space-y-6">
-          <WorkOrderStats statusCounts={statusCounts} />
-          <PMStats />
-        </section>
-
-        {/* Equipment Search Section (Keep but optimize) */}
-        <section className="pt-10 border-t">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">
+        {/* Equipment Search Section */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-black text-zinc-400 uppercase tracking-widest">
               Monitor Assets
             </h2>
             <Link
               href="/"
-              className="text-sm font-bold text-primary-600 hover:text-primary-700 uppercase tracking-wider"
+              className="text-[10px] font-bold text-zinc-400 hover:text-primary-600 uppercase tracking-widest transition-colors"
             >
               See All
             </Link>
           </div>
-          <div className="bg-white/50 p-4 rounded-2xl border border-zinc-200 shadow-sm backdrop-blur-sm mb-6">
-            <EquipmentSearch locations={locationList} initialSearch={search} />
-          </div>
+          <EquipmentSearch locations={locationList} initialSearch={search} />
           <EquipmentGrid equipment={equipmentList} />
         </section>
       </main>

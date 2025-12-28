@@ -11,29 +11,29 @@ export function QuickActions() {
   const actions = [
     {
       label: "Report Issue",
-      icon: <AlertTriangle className="h-8 w-8" />,
-      color: "text-danger-600 bg-danger-50 border-danger-100",
+      icon: <AlertTriangle className="h-4 w-4" />,
+      color: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700",
       href: "/report",
       description: "Submit new request",
     },
     {
       label: "My Tasks",
-      icon: <ClipboardList className="h-8 w-8" />,
-      color: "text-primary-600 bg-primary-50 border-primary-100",
+      icon: <ClipboardList className="h-4 w-4" />,
+      color: "bg-zinc-900 border-zinc-950 text-white hover:bg-black",
       href: "/my-tickets",
       description: "View assigned jobs",
     },
     {
       label: "PM Checks",
-      icon: <Wrench className="h-8 w-8" />,
-      color: "text-blue-600 bg-blue-50 border-blue-100",
+      icon: <Wrench className="h-4 w-4" />,
+      color: "bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50",
       href: "/maintenance/schedules",
       description: "Scheduled maintenance",
     },
     {
       label: "Equipment",
-      icon: <MonitorCog className="h-8 w-8" />,
-      color: "text-zinc-600 bg-zinc-50 border-zinc-200",
+      icon: <MonitorCog className="h-4 w-4" />,
+      color: "bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50",
       href: "/",
       description: "Browse assets",
     },
@@ -41,33 +41,23 @@ export function QuickActions() {
 
   return (
     <section>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="flex items-center gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
         {actions.map((action, index) => (
           <Link
             key={action.label}
             href={action.href}
             className={cn(
-              "relative flex flex-col items-center justify-center gap-3 rounded-2xl border p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 group",
-              "bg-white border-zinc-200", // Default bg
-              index < 4 ? `animate-stagger-${index + 1} animate-in fade-in` : ""
+              "flex items-center gap-2 rounded-lg border px-4 py-2.5 transition-all active:scale-95 whitespace-nowrap",
+              action.color, // Apply the color styles (bg/border/text) directly to the button
+              "font-bold",
+              index < 4 ? `animate-in animate-stagger-${index + 1}` : ""
             )}
           >
-            <div
-              className={cn(
-                "flex h-16 w-16 items-center justify-center rounded-xl transition-colors",
-                action.color
-              )}
-            >
-              {action.icon}
-            </div>
-            <div className="text-center space-y-0.5">
-              <span className="block text-sm font-bold text-zinc-900 group-hover:text-primary-600 transition-colors">
-                {action.label}
-              </span>
-              <span className="block text-[10px] uppercase tracking-wider font-semibold text-zinc-400">
-                {action.description}
-              </span>
-            </div>
+            {/* Remove inner container styles to simply show the icon */}
+            {action.icon}
+            <span className="text-sm">
+              {action.label}
+            </span>
           </Link>
         ))}
       </div>

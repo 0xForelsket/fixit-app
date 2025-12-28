@@ -19,7 +19,7 @@ export function EquipmentSearch({
 }: EquipmentSearchProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [search, setSearch] = useState(initialSearch);
 
   // Get current location from URL or default to empty (All)
@@ -59,51 +59,45 @@ export function EquipmentSearch({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Search Bar - Large & High Vis */}
-      <div className="relative">
+    <div className="space-y-3">
+      {/* Search Bar - Industrial */}
+      <div className="relative group">
         <Input
           type="search"
-          placeholder="Scan or type equipment name/code..."
+          placeholder="Scan or type equipment..."
           value={search}
           onChange={(e) => updateSearch(e.target.value)}
-          className="pl-12 h-14 text-lg shadow-sm border-muted-foreground/30 focus-visible:ring-primary-500 transition-all rounded-xl"
+          className="pl-10 h-10 border-zinc-200 focus-visible:ring-primary-500 rounded-lg bg-zinc-50/50 group-focus-within:bg-white group-focus-within:shadow-sm transition-all"
         />
         <Search
-          className="absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-muted-foreground"
+          className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 group-focus-within:text-primary-500 transition-colors"
           aria-hidden="true"
         />
         {search && (
           <button
             type="button"
             onClick={clearSearch}
-            className="absolute right-12 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full text-muted-foreground transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-zinc-200 rounded-full text-zinc-400 transition-colors"
           >
-            <X className="h-5 w-5" />
-            <span className="sr-only">Clear search</span>
+            <X className="h-4 w-4" />
           </button>
-        )}
-        {isPending && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2">
-            <div className="h-5 w-5 animate-spin rounded-full border-[3px] border-primary-600 border-t-transparent" />
-          </div>
         )}
       </div>
 
       {/* Location Filter Chips - Scrollable */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
+      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
         <Button
           variant={currentLocation === "" ? "default" : "outline"}
           size="sm"
           onClick={() => handleLocationClick("")}
           className={cn(
-            "rounded-full whitespace-nowrap h-9 px-4 font-medium transition-all",
+            "h-7 px-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0 rounded-full transition-all",
             currentLocation === ""
-              ? "shadow-md scale-105"
-              : "text-muted-foreground bg-background hover:text-foreground hover:bg-muted hover:border-muted-foreground/50"
+              ? "bg-zinc-900 border-zinc-900 text-white shadow-sm"
+              : "text-zinc-500 border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900"
           )}
         >
-          All Locations
+          All
         </Button>
         {locations.map((location) => (
           <Button
@@ -114,10 +108,10 @@ export function EquipmentSearch({
             size="sm"
             onClick={() => handleLocationClick(location.id.toString())}
             className={cn(
-              "rounded-full whitespace-nowrap h-9 px-4 font-medium transition-all",
+              "h-7 px-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0 rounded-full transition-all",
               currentLocation === location.id.toString()
-                ? "shadow-md scale-105"
-                : "text-muted-foreground bg-background hover:text-foreground hover:bg-muted hover:border-muted-foreground/50"
+                ? "bg-zinc-900 border-zinc-900 text-white shadow-sm"
+                : "text-zinc-500 border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900"
             )}
           >
             {location.name}
