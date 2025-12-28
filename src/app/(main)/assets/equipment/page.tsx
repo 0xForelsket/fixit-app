@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
@@ -162,39 +163,33 @@ export default async function EquipmentPage({
     <div className="space-y-10 animate-in">
       {/* Header */}
       {/* Header */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-zinc-200 pb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
-            Equipment <span className="text-primary-600">List</span>
-          </h1>
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <MonitorCog className="h-3.5 w-3.5" />
-            {stats.total} REGISTERED UNITS • {stats.operational} ONLINE
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" asChild>
-            <Link href="/admin/import">
-              <Upload className="mr-2 h-4 w-4" />
-              BULK IMPORT
-            </Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/assets/equipment/models">
-              <Cuboid className="mr-2 h-4 w-4" />
-              VIEW MODELS
-            </Link>
-          </Button>
-          <Button
-            asChild
-          >
-            <Link href="/assets/equipment/new">
-              <Plus className="mr-2 h-4 w-4" />
-              ADD EQUIPMENT
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Equipment"
+        highlight="List"
+        description={`${stats.total} REGISTERED UNITS • ${stats.operational} ONLINE`}
+        icon={MonitorCog}
+      >
+        <Button variant="outline" asChild>
+          <Link href="/admin/import">
+            <Upload className="mr-2 h-4 w-4" />
+            BULK IMPORT
+          </Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/assets/equipment/models">
+            <Cuboid className="mr-2 h-4 w-4" />
+            VIEW MODELS
+          </Link>
+        </Button>
+        <Button
+          asChild
+        >
+          <Link href="/assets/equipment/new">
+            <Plus className="mr-2 h-4 w-4" />
+            ADD EQUIPMENT
+          </Link>
+        </Button>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-4 mb-6">
