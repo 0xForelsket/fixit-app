@@ -1,6 +1,7 @@
 import { StatsCard } from "@/components/ui/stats-card";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
