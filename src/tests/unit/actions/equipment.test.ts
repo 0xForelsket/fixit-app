@@ -61,7 +61,8 @@ describe("createEquipment action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
@@ -80,7 +81,8 @@ describe("createEquipment action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
@@ -99,7 +101,8 @@ describe("createEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -118,7 +121,8 @@ describe("createEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -155,7 +159,8 @@ describe("createEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -201,7 +206,8 @@ describe("updateEquipment action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
@@ -218,7 +224,8 @@ describe("updateEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -237,7 +244,8 @@ describe("updateEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -272,7 +280,8 @@ describe("updateEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -311,7 +320,8 @@ describe("updateEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -365,7 +375,8 @@ describe("deleteEquipment action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
@@ -379,7 +390,8 @@ describe("deleteEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -395,7 +407,8 @@ describe("deleteEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -423,7 +436,8 @@ describe("deleteEquipment action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 

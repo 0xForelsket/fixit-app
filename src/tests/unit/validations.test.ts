@@ -1,10 +1,10 @@
 import {
   createEquipmentSchema,
   createLocationSchema,
-  createTicketSchema,
   createUserSchema,
+  createWorkOrderSchema,
   loginSchema,
-  updateTicketSchema,
+  updateWorkOrderSchema,
 } from "@/lib/validations";
 import { describe, expect, it } from "vitest";
 
@@ -215,9 +215,9 @@ describe("createEquipmentSchema", () => {
   });
 });
 
-describe("createTicketSchema", () => {
-  it("should validate correct ticket data", () => {
-    const result = createTicketSchema.safeParse({
+describe("createWorkOrderSchema", () => {
+  it("should validate correct work order data", () => {
+    const result = createWorkOrderSchema.safeParse({
       equipmentId: 1,
       type: "breakdown",
       title: "Equipment not working",
@@ -227,7 +227,7 @@ describe("createTicketSchema", () => {
   });
 
   it("should require all fields", () => {
-    const result = createTicketSchema.safeParse({
+    const result = createWorkOrderSchema.safeParse({
       equipmentId: 1,
       type: "breakdown",
       title: "Equipment not working",
@@ -236,7 +236,7 @@ describe("createTicketSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("should accept valid ticket types", () => {
+  it("should accept valid work order types", () => {
     const types = [
       "breakdown",
       "maintenance",
@@ -245,10 +245,10 @@ describe("createTicketSchema", () => {
       "upgrade",
     ];
     for (const type of types) {
-      const result = createTicketSchema.safeParse({
+      const result = createWorkOrderSchema.safeParse({
         equipmentId: 1,
         type,
-        title: "Test ticket",
+        title: "Test work order",
         description: "Test description",
       });
       expect(result.success).toBe(true);
@@ -256,7 +256,7 @@ describe("createTicketSchema", () => {
   });
 
   it("should default priority to medium", () => {
-    const result = createTicketSchema.safeParse({
+    const result = createWorkOrderSchema.safeParse({
       equipmentId: 1,
       type: "breakdown",
       title: "Test",
@@ -271,7 +271,7 @@ describe("createTicketSchema", () => {
   it("should accept valid priorities", () => {
     const priorities = ["low", "medium", "high", "critical"];
     for (const priority of priorities) {
-      const result = createTicketSchema.safeParse({
+      const result = createWorkOrderSchema.safeParse({
         equipmentId: 1,
         type: "breakdown",
         title: "Test",
@@ -283,7 +283,7 @@ describe("createTicketSchema", () => {
   });
 
   it("should reject title over 200 characters", () => {
-    const result = createTicketSchema.safeParse({
+    const result = createWorkOrderSchema.safeParse({
       equipmentId: 1,
       type: "breakdown",
       title: "A".repeat(201),
@@ -293,30 +293,30 @@ describe("createTicketSchema", () => {
   });
 });
 
-describe("updateTicketSchema", () => {
+describe("updateWorkOrderSchema", () => {
   it("should allow partial updates", () => {
-    const result = updateTicketSchema.safeParse({
+    const result = updateWorkOrderSchema.safeParse({
       status: "in_progress",
     });
     expect(result.success).toBe(true);
   });
 
   it("should validate status values", () => {
-    const result = updateTicketSchema.safeParse({
+    const result = updateWorkOrderSchema.safeParse({
       status: "invalid_status",
     });
     expect(result.success).toBe(false);
   });
 
   it("should allow null assignedToId for unassignment", () => {
-    const result = updateTicketSchema.safeParse({
+    const result = updateWorkOrderSchema.safeParse({
       assignedToId: null,
     });
     expect(result.success).toBe(true);
   });
 
   it("should accept resolution notes", () => {
-    const result = updateTicketSchema.safeParse({
+    const result = updateWorkOrderSchema.safeParse({
       status: "resolved",
       resolutionNotes: "Fixed by replacing the motor.",
     });

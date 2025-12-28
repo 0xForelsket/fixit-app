@@ -132,7 +132,8 @@ describe("POST /api/work-orders", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Test User",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 

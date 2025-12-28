@@ -1,7 +1,5 @@
 import {
   calculateLockoutEnd,
-  canAccess,
-  hasRole,
   hashPin,
   isAccountLocked,
   verifyPin,
@@ -80,45 +78,5 @@ describe("calculateLockoutEnd", () => {
       before + fifteenMinutes
     );
     expect(lockoutEnd.getTime()).toBeLessThanOrEqual(after + fifteenMinutes);
-  });
-});
-
-describe("hasRole", () => {
-  it("should return true when user has exact role", () => {
-    expect(hasRole("operator", "operator")).toBe(true);
-    expect(hasRole("tech", "tech")).toBe(true);
-    expect(hasRole("admin", "admin")).toBe(true);
-  });
-
-  it("should return true when user has higher role", () => {
-    expect(hasRole("admin", "operator")).toBe(true);
-    expect(hasRole("admin", "tech")).toBe(true);
-    expect(hasRole("tech", "operator")).toBe(true);
-  });
-
-  it("should return false when user has lower role", () => {
-    expect(hasRole("operator", "tech")).toBe(false);
-    expect(hasRole("operator", "admin")).toBe(false);
-    expect(hasRole("tech", "admin")).toBe(false);
-  });
-});
-
-describe("canAccess", () => {
-  it("should allow admin to access all routes", () => {
-    expect(canAccess("admin", "operator")).toBe(true);
-    expect(canAccess("admin", "tech")).toBe(true);
-    expect(canAccess("admin", "admin")).toBe(true);
-  });
-
-  it("should allow tech to access operator and tech routes", () => {
-    expect(canAccess("tech", "operator")).toBe(true);
-    expect(canAccess("tech", "tech")).toBe(true);
-    expect(canAccess("tech", "admin")).toBe(false);
-  });
-
-  it("should only allow operator to access operator routes", () => {
-    expect(canAccess("operator", "operator")).toBe(true);
-    expect(canAccess("operator", "tech")).toBe(false);
-    expect(canAccess("operator", "admin")).toBe(false);
   });
 });

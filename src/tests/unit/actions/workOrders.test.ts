@@ -67,9 +67,12 @@ describe("createWorkOrder action", () => {
     formData.set("title", "Test work order");
     formData.set("description", "Test description");
 
-    const result = await createWorkOrder({}, formData);
+    const result = await createWorkOrder(undefined, formData);
 
-    expect(result.error).toBe("You must be logged in to create a work order");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("You must be logged in to create a work order");
+    }
   });
 
   it("should return error for invalid input", async () => {
@@ -77,7 +80,8 @@ describe("createWorkOrder action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
@@ -87,9 +91,12 @@ describe("createWorkOrder action", () => {
     formData.set("title", "");
     formData.set("description", "Test");
 
-    const result = await createWorkOrder({}, formData);
+    const result = await createWorkOrder(undefined, formData);
 
-    expect(result.error).toBeDefined();
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBeDefined();
+    }
   });
 
   it("should create work order successfully", async () => {
@@ -97,7 +104,8 @@ describe("createWorkOrder action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
@@ -154,10 +162,12 @@ describe("createWorkOrder action", () => {
     formData.set("description", "Equipment won't start");
     formData.set("priority", "high");
 
-    const result = await createWorkOrder({}, formData);
+    const result = await createWorkOrder(undefined, formData);
 
     expect(result.success).toBe(true);
-    expect(result.data).toEqual(mockWorkOrder);
+    if (result.success) {
+      expect(result.data).toEqual(mockWorkOrder);
+    }
   });
 
   it("should notify techs for critical priority work orders", async () => {
@@ -165,7 +175,8 @@ describe("createWorkOrder action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
@@ -223,8 +234,7 @@ describe("createWorkOrder action", () => {
         employeeId: "TECH-001",
         name: "Tech User",
         pin: "hashed",
-        role: "tech",
-        roleId: null,
+        roleId: 2,
         isActive: true,
         hourlyRate: null,
         failedLoginAttempts: 0,
@@ -242,7 +252,7 @@ describe("createWorkOrder action", () => {
     formData.set("description", "Urgent");
     formData.set("priority", "critical");
 
-    await createWorkOrder({}, formData);
+    await createWorkOrder(undefined, formData);
 
     // Should have called insert for work order and notifications
     expect(db.insert).toHaveBeenCalled();
@@ -260,9 +270,12 @@ describe("updateWorkOrder action", () => {
     const formData = new FormData();
     formData.set("status", "in_progress");
 
-    const result = await updateWorkOrder(1, {}, formData);
+    const result = await updateWorkOrder(1, undefined, formData);
 
-    expect(result.error).toBe("You must be logged in");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("You must be logged in");
+    }
   });
 
   it("should reject updates from operators", async () => {
@@ -270,18 +283,22 @@ describe("updateWorkOrder action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
     formData.set("status", "in_progress");
 
-    const result = await updateWorkOrder(1, {}, formData);
+    const result = await updateWorkOrder(1, undefined, formData);
 
-    expect(result.error).toBe(
-      "You don't have permission to update work orders"
-    );
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe(
+        "You don't have permission to update work orders"
+      );
+    }
   });
 
   it("should return error for non-existent work order", async () => {
@@ -289,7 +306,8 @@ describe("updateWorkOrder action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
@@ -298,9 +316,12 @@ describe("updateWorkOrder action", () => {
     const formData = new FormData();
     formData.set("status", "in_progress");
 
-    const result = await updateWorkOrder(999, {}, formData);
+    const result = await updateWorkOrder(999, undefined, formData);
 
-    expect(result.error).toBe("Work order not found");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Work order not found");
+    }
   });
 
   it("should update work order status successfully", async () => {
@@ -308,7 +329,8 @@ describe("updateWorkOrder action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
@@ -341,7 +363,7 @@ describe("updateWorkOrder action", () => {
     const formData = new FormData();
     formData.set("status", "in_progress");
 
-    const result = await updateWorkOrder(1, {}, formData);
+    const result = await updateWorkOrder(1, undefined, formData);
 
     expect(result.success).toBe(true);
     expect(db.update).toHaveBeenCalled();
@@ -353,7 +375,8 @@ describe("updateWorkOrder action", () => {
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
-      role: "admin",
+      roleName: "admin",
+      roleId: 3,
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
     });
 
@@ -386,7 +409,7 @@ describe("updateWorkOrder action", () => {
     const formData = new FormData();
     formData.set("priority", "high");
 
-    const result = await updateWorkOrder(1, {}, formData);
+    const result = await updateWorkOrder(1, undefined, formData);
 
     expect(result.success).toBe(true);
   });
@@ -403,9 +426,12 @@ describe("resolveWorkOrder action", () => {
     const formData = new FormData();
     formData.set("resolutionNotes", "Fixed it");
 
-    const result = await resolveWorkOrder(1, {}, formData);
+    const result = await resolveWorkOrder(1, undefined, formData);
 
-    expect(result.error).toBe("You must be logged in");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("You must be logged in");
+    }
   });
 
   it("should reject resolution from operators", async () => {
@@ -413,18 +439,22 @@ describe("resolveWorkOrder action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
     formData.set("resolutionNotes", "Fixed it");
 
-    const result = await resolveWorkOrder(1, {}, formData);
+    const result = await resolveWorkOrder(1, undefined, formData);
 
-    expect(result.error).toBe(
-      "You don't have permission to resolve work orders"
-    );
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe(
+        "You don't have permission to resolve work orders"
+      );
+    }
   });
 
   it("should require resolution notes", async () => {
@@ -432,16 +462,20 @@ describe("resolveWorkOrder action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
     const formData = new FormData();
     // No resolution notes
 
-    const result = await resolveWorkOrder(1, {}, formData);
+    const result = await resolveWorkOrder(1, undefined, formData);
 
-    expect(result.error).toBe("Resolution notes are required");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Resolution notes are required");
+    }
   });
 
   it("should resolve work order successfully", async () => {
@@ -449,7 +483,8 @@ describe("resolveWorkOrder action", () => {
       id: 1,
       employeeId: "TECH-001",
       name: "Tech",
-      role: "tech",
+      roleName: "tech",
+      roleId: 2,
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
@@ -482,7 +517,7 @@ describe("resolveWorkOrder action", () => {
     const formData = new FormData();
     formData.set("resolutionNotes", "Replaced the faulty component.");
 
-    const result = await resolveWorkOrder(1, {}, formData);
+    const result = await resolveWorkOrder(1, undefined, formData);
 
     expect(result.success).toBe(true);
     expect(db.update).toHaveBeenCalled();
@@ -501,9 +536,12 @@ describe("addWorkOrderComment action", () => {
     const formData = new FormData();
     formData.set("comment", "Test comment");
 
-    const result = await addWorkOrderComment(1, {}, formData);
+    const result = await addWorkOrderComment(1, undefined, formData);
 
-    expect(result.error).toBe("You must be logged in");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("You must be logged in");
+    }
   });
 
   it("should require comment content", async () => {
@@ -511,16 +549,20 @@ describe("addWorkOrderComment action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
     const formData = new FormData();
     formData.set("comment", "   "); // Only whitespace
 
-    const result = await addWorkOrderComment(1, {}, formData);
+    const result = await addWorkOrderComment(1, undefined, formData);
 
-    expect(result.error).toBe("Comment is required");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe("Comment is required");
+    }
   });
 
   it("should add comment successfully", async () => {
@@ -528,7 +570,8 @@ describe("addWorkOrderComment action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
@@ -539,7 +582,7 @@ describe("addWorkOrderComment action", () => {
     const formData = new FormData();
     formData.set("comment", "Additional details about the issue");
 
-    const result = await addWorkOrderComment(1, {}, formData);
+    const result = await addWorkOrderComment(1, undefined, formData);
 
     expect(result.success).toBe(true);
     expect(db.insert).toHaveBeenCalled();
@@ -550,7 +593,8 @@ describe("addWorkOrderComment action", () => {
       id: 1,
       employeeId: "OP-001",
       name: "Operator",
-      role: "operator",
+      roleName: "operator",
+      roleId: 1,
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
     });
 
@@ -564,7 +608,7 @@ describe("addWorkOrderComment action", () => {
     const formData = new FormData();
     formData.set("comment", "  Trimmed comment  ");
 
-    await addWorkOrderComment(1, {}, formData);
+    await addWorkOrderComment(1, undefined, formData);
 
     expect((capturedValues as Record<string, unknown>).newValue).toBe(
       "Trimmed comment"
