@@ -69,7 +69,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   }
 
   // Check if user owns this work order
-  if (workOrder.reportedById !== user.id && user.role === "operator") {
+  if (workOrder.reportedById !== user.id && user.roleName === "Operator") {
     redirect("/my-tickets");
   }
 

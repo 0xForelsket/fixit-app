@@ -11,16 +11,18 @@ interface CommentFormProps {
 export function CommentForm({ workOrderId }: CommentFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const boundAction = addWorkOrderComment.bind(null, workOrderId);
-  const [state, formAction, isPending] = useActionState(boundAction, {});
+  const [state, formAction, isPending] = useActionState(boundAction, undefined);
 
   // Clear form on success
-  if (state.success && formRef.current) {
+  if (state?.success && formRef.current) {
     formRef.current.reset();
   }
 
   return (
     <form ref={formRef} action={formAction} className="mt-4 space-y-3">
-      {state.error && <p className="text-sm text-danger-600">{state.error}</p>}
+      {state && !state.success && state.error && (
+        <p className="text-sm text-danger-600">{state.error}</p>
+      )}
       <textarea
         name="comment"
         placeholder="Add a comment or update..."

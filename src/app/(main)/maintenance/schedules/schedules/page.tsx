@@ -103,7 +103,7 @@ export default async function SchedulesPage({
             </p>
           </div>
         </div>
-        {user?.role === "admin" && (
+        {user?.roleName === "admin" && (
           <div className="flex gap-2">
             <SchedulerButton />
             <Button asChild>
@@ -208,10 +208,16 @@ export default async function SchedulesPage({
             <TableHeader className="bg-slate-50">
               <TableRow className="border-b text-left font-medium text-muted-foreground hover:bg-transparent">
                 <TableHead className="p-3">Schedule</TableHead>
-                <TableHead className="p-3 hidden md:table-cell">Equipment</TableHead>
-                <TableHead className="p-3 hidden lg:table-cell">Frequency</TableHead>
+                <TableHead className="p-3 hidden md:table-cell">
+                  Equipment
+                </TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">
+                  Frequency
+                </TableHead>
                 <TableHead className="p-3">Next Due</TableHead>
-                <TableHead className="p-3 hidden sm:table-cell">Status</TableHead>
+                <TableHead className="p-3 hidden sm:table-cell">
+                  Status
+                </TableHead>
                 <TableHead className="p-3 w-10" />
               </TableRow>
             </TableHeader>

@@ -27,7 +27,7 @@ import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 
 export async function createWorkOrder(
-  _prevState: ActionResult<unknown>,
+  _prevState: ActionResult<unknown> | undefined,
   formData: FormData
 ): Promise<ActionResult<unknown>> {
   const user = await getCurrentUser();
@@ -167,7 +167,7 @@ export async function createWorkOrder(
 
 export async function updateWorkOrder(
   workOrderId: number,
-  _prevState: ActionResult<void>,
+  _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
@@ -269,7 +269,7 @@ export async function updateWorkOrder(
 
 export async function resolveWorkOrder(
   workOrderId: number,
-  _prevState: ActionResult<void>,
+  _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
@@ -328,7 +328,7 @@ export async function resolveWorkOrder(
 
 export async function addWorkOrderComment(
   workOrderId: number,
-  _prevState: ActionResult<void>,
+  _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
   const user = await getCurrentUser();

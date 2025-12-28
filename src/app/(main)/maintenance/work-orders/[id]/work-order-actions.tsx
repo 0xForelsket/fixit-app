@@ -36,19 +36,19 @@ export function WorkOrderActions({
   // Status/Assign actions
   const [_assignState, assignAction, isAssignPending] = useActionState(
     updateWorkOrder.bind(null, workOrder.id),
-    {}
+    undefined
   );
 
   // Resolve action
   const [_resolveState, resolveAction, isResolvePending] = useActionState(
     resolveWorkOrder.bind(null, workOrder.id),
-    {}
+    undefined
   );
 
   // Comment action
   const [_commentState, commentAction, isCommentPending] = useActionState(
     addWorkOrderComment.bind(null, workOrder.id),
-    {}
+    undefined
   );
 
   const isAssignedToMe = workOrder.assignedToId === currentUser.id;

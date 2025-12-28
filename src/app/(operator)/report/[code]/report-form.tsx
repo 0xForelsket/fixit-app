@@ -93,15 +93,18 @@ export function ReportForm({ equipment }: ReportFormProps) {
   const [attachments, setAttachments] = useState<
     { filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]
   >([]);
-  const [state, formAction, isPending] = useActionState(createWorkOrder, {});
+  const [state, formAction, isPending] = useActionState(
+    createWorkOrder,
+    undefined
+  );
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   useEffect(() => {
-    if (state.success) {
+    if (state?.success) {
       router.push("/my-work-orders?created=true");
     }
-  }, [state.success, router]);
+  }, [state?.success, router]);
 
   const handleUploadComplete = (attachment: {
     filename: string;
@@ -167,7 +170,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
       />
 
       {/* Error display */}
-      {state.error && (
+      {state && !state.success && state.error && (
         <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-danger-700 font-medium flex items-center gap-3">
           <ShieldAlert className="h-5 w-5" />
           {state.error}
