@@ -301,7 +301,10 @@ export default async function EquipmentDetailPage({
       {/* Desktop Header Navigation */}
       <div className="hidden lg:flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/assets/equipment" className="gap-2 text-muted-foreground">
+          <Link
+            href="/assets/equipment"
+            className="gap-2 text-muted-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to List
           </Link>
         </Button>

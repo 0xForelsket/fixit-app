@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { formatRelativeTime } from "@/lib/utils";
-import { Calendar, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 
 interface MaintenanceScheduleItem {
@@ -34,7 +34,8 @@ export function EquipmentMaintenance({ schedules }: EquipmentMaintenanceProps) {
         </div>
         <h3 className="mt-4 text-lg font-black text-zinc-900">No Schedules</h3>
         <p className="mt-1 text-sm text-zinc-500 max-w-xs">
-          No preventive maintenance schedules have been set up for this equipment.
+          No preventive maintenance schedules have been set up for this
+          equipment.
         </p>
       </div>
     );
@@ -135,9 +136,7 @@ function ScheduleCard({
                 : "bg-warning-600 hover:bg-warning-700"
             }`}
           >
-            <Link href={`/maintenance/schedules/${schedule.id}`}>
-              Start PM
-            </Link>
+            <Link href={`/maintenance/schedules/${schedule.id}`}>Start PM</Link>
           </Button>
         )}
       </div>

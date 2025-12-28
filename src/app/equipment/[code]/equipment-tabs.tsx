@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, ClipboardList, History, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Calendar, ClipboardList, History } from "lucide-react";
 
 interface EquipmentTabsProps {
   equipmentId: number;

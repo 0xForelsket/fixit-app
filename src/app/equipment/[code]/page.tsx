@@ -1,8 +1,13 @@
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { db } from "@/db";
-import { equipment as equipmentTable, workOrders, maintenanceSchedules } from "@/db/schema";
+import {
+  equipment as equipmentTable,
+  maintenanceSchedules,
+  workOrders,
+} from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { eq, desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -14,12 +19,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { EquipmentTabs } from "./equipment-tabs";
-import { EquipmentOverview } from "./equipment-overview";
 import { EquipmentHistory } from "./equipment-history";
 import { EquipmentMaintenance } from "./equipment-maintenance";
+import { EquipmentOverview } from "./equipment-overview";
+import { EquipmentTabs } from "./equipment-tabs";
 import { ReportForm } from "./report-form";
-import { BottomNav } from "@/components/layout/bottom-nav";
 
 interface PageProps {
   params: Promise<{ code: string }>;
@@ -82,9 +86,7 @@ export default async function EquipmentPage({ params }: PageProps) {
   // Check if any PM is due (within 7 days or overdue)
   const now = new Date();
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const hasDuePM = schedules.some(
-    (s) => s.nextDue <= sevenDaysFromNow
-  );
+  const hasDuePM = schedules.some((s) => s.nextDue <= sevenDaysFromNow);
 
   return (
     <div className="min-h-screen bg-zinc-50/50 industrial-grid pb-24 lg:pb-8">

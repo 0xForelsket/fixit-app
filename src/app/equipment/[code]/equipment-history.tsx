@@ -62,7 +62,10 @@ export function EquipmentHistory({ workOrders }: EquipmentHistoryProps) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; variant: "default" | "warning" | "success" | "secondary" }> = {
+  const config: Record<
+    string,
+    { label: string; variant: "default" | "warning" | "success" | "secondary" }
+  > = {
     open: { label: "Open", variant: "default" },
     in_progress: { label: "In Progress", variant: "warning" },
     resolved: { label: "Resolved", variant: "success" },

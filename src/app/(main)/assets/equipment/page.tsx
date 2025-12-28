@@ -11,6 +11,7 @@ import {
   MonitorCog,
   Plus,
   Search,
+  Upload,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
@@ -118,6 +119,12 @@ export default async function EquipmentPage({
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <Button variant="outline" asChild className="font-bold border-2">
+            <Link href="/admin/import">
+              <Upload className="mr-2 h-4 w-4" />
+              BULK IMPORT
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             asChild

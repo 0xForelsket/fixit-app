@@ -71,7 +71,11 @@ export function QRCodeGeneratorClient({
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handlePrint} className="font-bold border-2">
+          <Button
+            variant="outline"
+            onClick={handlePrint}
+            className="font-bold border-2"
+          >
             <Printer className="mr-2 h-4 w-4" />
             PRINT LABELS{" "}
             {selectedEquipment.size > 0 ? `(${selectedEquipment.size})` : "ALL"}

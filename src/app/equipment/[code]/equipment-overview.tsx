@@ -45,9 +45,7 @@ export function EquipmentOverview({
             asChild
             className="bg-warning-600 hover:bg-warning-700 rounded-xl font-bold"
           >
-            <Link href="#maintenance">
-              Start PM
-            </Link>
+            <Link href="#maintenance">Start PM</Link>
           </Button>
         </div>
       )}
@@ -129,9 +127,7 @@ function QuickActionCard({
 
   if (disabled) {
     return (
-      <div
-        className="flex flex-col items-center justify-center rounded-2xl border-2 p-4 text-center opacity-50 cursor-not-allowed bg-zinc-50 border-zinc-200"
-      >
+      <div className="flex flex-col items-center justify-center rounded-2xl border-2 p-4 text-center opacity-50 cursor-not-allowed bg-zinc-50 border-zinc-200">
         <Icon className="h-8 w-8 mb-2 text-zinc-400" />
         <span className="font-bold text-zinc-900">{label}</span>
         <span className="text-xs text-zinc-500">{description}</span>
@@ -178,12 +174,7 @@ function StatusCard({
   };
 
   return (
-    <div
-      className={cn(
-        "rounded-2xl border-2 p-4",
-        variantStyles[variant]
-      )}
-    >
+    <div className={cn("rounded-2xl border-2 p-4", variantStyles[variant])}>
       <div className="flex items-center gap-2 mb-1">
         <Icon className={cn("h-4 w-4", textStyles[variant])} />
         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
