@@ -9,22 +9,22 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-md hover:bg-primary-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:shadow-sm",
+          "bg-primary text-primary-foreground shadow-md hover:bg-primary-600 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:shadow-sm",
         destructive:
           "bg-destructive text-destructive-foreground shadow-md hover:bg-danger-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] active:shadow-sm",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:shadow-md hover:border-slate-400 active:scale-[0.98]",
+          "border-2 border-zinc-200 bg-white shadow-sm hover:border-primary-500 hover:text-primary-600 hover:bg-primary-50/10 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 hover:shadow-md active:scale-[0.98]",
+          "bg-zinc-100 text-zinc-900 shadow-sm hover:bg-zinc-200 hover:shadow-md active:scale-[0.98]",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
+          "hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-12 px-4 py-2",
-        sm: "h-10 rounded-md px-3",
-        lg: "h-14 rounded-md px-8",
-        icon: "h-12 w-12",
+        default: "h-11 px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest",
+        sm: "h-9 rounded-lg px-3 text-[10px] font-black uppercase tracking-wider",
+        lg: "h-14 rounded-2xl px-8 text-sm font-black uppercase tracking-widest",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {
