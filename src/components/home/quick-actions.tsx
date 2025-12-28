@@ -34,7 +34,7 @@ export function QuickActions() {
       label: "Equipment",
       icon: <MonitorCog className="h-8 w-8" />,
       color: "text-zinc-600 bg-zinc-50 border-zinc-200",
-      href: "/assets/equipment",
+      href: "/",
       description: "Browse assets",
     },
   ];
