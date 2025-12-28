@@ -92,7 +92,7 @@ function EquipmentCard({
       {/* Color-Blocked Header */}
       <div
         className={cn(
-          "flex items-start justify-between px-5 py-4 border-b",
+          "flex items-start justify-between px-4 py-3 border-b",
           config.headerBg,
           config.headerBorder
         )}
@@ -114,7 +114,7 @@ function EquipmentCard({
       </div>
 
       {/* Body */}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4">
         <div className="space-y-3">
           {/* Code */}
           <div className="flex items-center gap-2">
@@ -141,7 +141,7 @@ function EquipmentCard({
         </div>
 
         {/* Action Footer */}
-        <div className="mt-6 flex items-center justify-between border-t pt-4">
+        <div className="mt-4 flex items-center justify-between border-t pt-3">
           <span className="text-sm font-medium text-primary-600 group-hover:underline decoration-2 underline-offset-4">
             Report Issue
           </span>

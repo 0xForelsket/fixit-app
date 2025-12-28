@@ -13,7 +13,7 @@ export function WelcomeBanner({ user, avatarUrl }: WelcomeBannerProps) {
   });
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-zinc-900 p-6 sm:p-8 text-white shadow-xl shadow-zinc-900/10 mb-8 ring-1 ring-white/10">
+    <section className="relative overflow-hidden rounded-3xl bg-zinc-900 p-4 sm:p-8 text-white shadow-xl shadow-zinc-900/10 mb-8 ring-1 ring-white/10">
       <div className="relative z-10 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">

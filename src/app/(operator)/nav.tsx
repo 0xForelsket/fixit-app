@@ -35,7 +35,7 @@ export function OperatorNav({
 
   return (
     <div className="flex items-center gap-4">
-      <nav className="flex items-center gap-1">
+      <nav className="hidden md:flex items-center gap-1">
         {navItems.map((item) => (
           <Link
             key={item.href}
