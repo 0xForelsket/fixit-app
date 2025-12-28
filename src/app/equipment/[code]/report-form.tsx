@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Scale,
   ShieldAlert,
+  Trash2,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -286,32 +287,57 @@ export function ReportForm({ equipment }: ReportFormProps) {
           Visual Evidence (Optional)
         </Label>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setIsCameraOpen(true)}
-            disabled={isUploadingPhoto}
-            className="h-10 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 hover:bg-zinc-100 text-zinc-600 text-[11px] font-bold"
-          >
-            {isUploadingPhoto ? (
-              <div className="flex items-center gap- gap-2">
-                <div className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
-                Working...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Camera className="h-4 w-4" />
-                Camera
-              </div>
-            )}
-          </Button>
-          <FileUpload
-            entityType="work_order"
-            entityId={equipment.id}
-            onUploadComplete={handleUploadComplete}
-            label="Upload"
-          />
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsCameraOpen(true)}
+              disabled={isUploadingPhoto}
+              className="h-10 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 hover:bg-zinc-100 text-zinc-600 text-[11px] font-bold shadow-sm active:scale-95 transition-all"
+            >
+              {isUploadingPhoto ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
+                  Working...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  Camera
+                </div>
+              )}
+            </Button>
+            <FileUpload
+              entityType="work_order"
+              entityId={equipment.id}
+              onUploadComplete={handleUploadComplete}
+              label="Upload File"
+              variant="compact"
+            />
+          </div>
+          
+          {/* Photos from camera (since FileUpload only shows its own previews) */}
+          {attachments.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 mt-2">
+              {attachments.map((file, idx) => (
+                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 shadow-sm group">
+                  <img
+                    src="https://placehold.co/200x200?text=Attachment" // In a real app we'd show the actual image
+                    alt={file.filename}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))}
+                    className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

@@ -16,15 +16,19 @@ interface FileUploadProps {
   label?: string;
   accept?: string;
   maxSizeMB?: number;
+  variant?: "default" | "compact";
+  hidePreviews?: boolean;
 }
 
 export function FileUpload({
   onUploadComplete,
   entityType,
   entityId,
-  label = "Attach Files (Images or PDF)",
+  label,
   accept = "image/*,application/pdf",
   maxSizeMB = 10,
+  variant = "default",
+  hidePreviews = false,
 }: FileUploadProps) {
   const { uploadFiles, isUploading, error: uploadError } = useFileUpload();
   const [previews, setPreviews] = useState<
@@ -44,8 +48,6 @@ export function FileUpload({
       }) => {
         onUploadComplete(attachment);
 
-        // Add to previews
-        // We find the matching file object to create object URL
         const file = files.find((f) => f.name === attachment.filename);
         if (file) {
           const url = attachment.mimeType.startsWith("image/")
@@ -70,7 +72,6 @@ export function FileUpload({
         onUploadComplete: handleUploadSuccess,
       });
 
-      // Reset input
       e.target.value = "";
     },
     [entityType, entityId, maxSizeMB, onUploadComplete, uploadFiles]
@@ -78,15 +79,43 @@ export function FileUpload({
 
   const removePreview = (id: string) => {
     setPreviews((prev) => prev.filter((p) => p.id !== id));
-    // Note: We don't delete from S3 here for simplicity in the prototype
   };
+
+  if (variant === "compact") {
+    return (
+      <div className="flex flex-col gap-2 w-full">
+        <label className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 text-[11px] font-bold text-zinc-600 transition-all hover:bg-zinc-100 active:scale-95">
+          <input
+            type="file"
+            multiple
+            accept={accept}
+            onChange={handleFileChange}
+            className="absolute inset-0 z-10 cursor-pointer opacity-0"
+            disabled={isUploading}
+          />
+          {isUploading ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <ImageIcon className="h-4 w-4" />
+          )}
+          {isUploading ? "Uploading..." : label || "Upload File"}
+        </label>
+        {uploadError && (
+          <p className="text-[10px] font-bold text-danger-600">{uploadError}</p>
+        )}
+        {!hidePreviews && <PreviewList previews={previews} onRemove={removePreview} />}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <label className="flex flex-col gap-2 cursor-pointer">
-        <span className="text-sm font-semibold text-foreground/80 uppercase tracking-wider">
-          {label}
-        </span>
+        {label && (
+          <span className="text-sm font-semibold text-foreground/80 uppercase tracking-wider">
+            {label}
+          </span>
+        )}
 
         <div className="relative">
           <input
@@ -130,40 +159,50 @@ export function FileUpload({
         <p className="text-sm font-medium text-destructive">{uploadError}</p>
       )}
 
-      {/* Previews Grid */}
-      {previews.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {previews.map((file) => (
-            <div
-              key={file.id}
-              className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md"
-            >
-              {file.type.startsWith("image/") ? (
-                <img
-                  src={file.url}
-                  alt={file.name}
-                  className="h-32 w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-32 flex-col items-center justify-center bg-slate-50">
-                  <FileIcon className="h-10 w-10 text-slate-400" />
-                  <p className="mt-2 px-2 text-center text-[10px] font-medium text-slate-600 truncate w-full">
-                    {file.name}
-                  </p>
-                </div>
-              )}
+      {!hidePreviews && <PreviewList previews={previews} onRemove={removePreview} />}
+    </div>
+  );
+}
 
-              <button
-                type="button"
-                onClick={() => removePreview(file.id)}
-                className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 text-rose-600 opacity-0 shadow-sm transition-all hover:bg-white group-hover:opacity-100"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+function PreviewList({
+  previews,
+  onRemove,
+}: {
+  previews: { id: string; url: string; name: string; type: string }[];
+  onRemove: (id: string) => void;
+}) {
+  if (previews.length === 0) return null;
+  return (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      {previews.map((file) => (
+        <div
+          key={file.id}
+          className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md"
+        >
+          {file.type.startsWith("image/") ? (
+            <img
+              src={file.url}
+              alt={file.name}
+              className="h-32 w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-32 flex-col items-center justify-center bg-slate-50">
+              <FileIcon className="h-10 w-10 text-slate-400" />
+              <p className="mt-2 px-2 text-center text-[10px] font-medium text-slate-600 truncate w-full">
+                {file.name}
+              </p>
             </div>
-          ))}
+          )}
+
+          <button
+            type="button"
+            onClick={() => onRemove(file.id)}
+            className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 text-rose-600 opacity-0 shadow-sm transition-all hover:bg-white group-hover:opacity-100"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
-      )}
+      ))}
     </div>
   );
 }

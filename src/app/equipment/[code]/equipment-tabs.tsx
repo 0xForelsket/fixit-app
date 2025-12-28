@@ -81,7 +81,7 @@ export function EquipmentTabs({
         >
           <AlertTriangle className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Report</span>
-          <span className="sm:hidden">Alert</span>
+          <span className="sm:hidden">Report</span>
         </TabsTrigger>
       </TabsList>
 
