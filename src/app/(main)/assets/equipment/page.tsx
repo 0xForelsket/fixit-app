@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -337,9 +338,6 @@ export default async function EquipmentPage({
             </TableHeader>
             <TableBody className="divide-y divide-zinc-100">
               {equipmentList.map((equipment) => {
-                const statusConfig =
-                  statusConfigs[equipment.status] || statusConfigs.operational;
-
                 return (
                   <TableRow
                     key={equipment.id}
@@ -392,21 +390,7 @@ export default async function EquipmentPage({
                       </div>
                     </TableCell>
                     <TableCell className="p-5">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-2 rounded-lg border px-3 py-1 text-[11px] font-black uppercase tracking-wider shadow-sm",
-                          statusConfig.bg,
-                          statusConfig.color
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "w-2 h-2 rounded-full",
-                            statusConfig.dotClass.replace("status-", "bg-")
-                          )}
-                        />
-                        {statusConfig.label}
-                      </span>
+                      <StatusBadge status={equipment.status} />
                     </TableCell>
                     <TableCell className="p-5 hidden xl:table-cell">
                       <span className={cn("text-sm font-bold", equipment.owner?.name ? "text-zinc-900" : "text-zinc-400 italic")}>
