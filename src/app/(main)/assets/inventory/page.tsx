@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -96,28 +97,24 @@ export default async function InventoryPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <StatCard
+        <StatsCard
           title="Total Parts"
           value={stats.totalParts}
           icon={Box}
-          color="text-secondary-600"
-          bg="bg-secondary-50"
+          variant="secondary"
         />
-        <StatCard
+        <StatsCard
           title="Low Stock Warning"
           value={stats.lowStockCount}
           icon={AlertTriangle}
-          color={stats.lowStockCount > 0 ? "text-danger-600" : "text-zinc-400"}
-          bg={stats.lowStockCount > 0 ? "bg-danger-50" : "bg-zinc-50"}
-          pulse={stats.lowStockCount > 0}
+          variant={stats.lowStockCount > 0 ? "danger" : "default"}
+          className={stats.lowStockCount > 0 ? "animate-pulse border-danger-300" : ""}
         />
-        <StatCard
+        <StatsCard
           title="Inventory Assets"
           value={`$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}`}
           icon={TrendingDown}
-          color="text-success-600"
-          bg="bg-success-50"
-          isText
+          variant="success"
         />
       </div>
 
@@ -276,57 +273,6 @@ export default async function InventoryPage() {
   );
 }
 
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-  isText,
-  pulse = false,
-}: {
-  title: string;
-  value: number | string;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  isText?: boolean;
-  pulse?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col justify-between h-[120px] rounded-2xl border border-zinc-200 bg-white p-5 transition-all duration-300 hover-lift card-industrial shadow-sm",
-        pulse && "animate-glow-pulse border-danger-200"
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div
-          className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-xl shadow-inner border border-white/50",
-            bg
-          )}
-        >
-          <Icon className={cn("h-5 w-5", color)} />
-        </div>
-      </div>
-      <div>
-        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1.5">
-          {title}
-        </p>
-        <p
-          className={cn(
-            "font-mono font-black tracking-tighter leading-none",
-            isText ? "text-2xl" : "text-3xl",
-            color === "text-zinc-600" ? "text-zinc-900" : color
-          )}
-        >
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 function QuickAction({
   href,
