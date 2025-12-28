@@ -46,7 +46,7 @@ export function EquipmentTabs({
           onClick={() => {
             window.location.hash = "overview";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-600 data-[state=active]:shadow-sm rounded-lg"
+          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-lg"
         >
           <ClipboardList className="h-4 w-4" />
           <span>Overview</span>
@@ -56,7 +56,7 @@ export function EquipmentTabs({
           onClick={() => {
             window.location.hash = "history";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-600 data-[state=active]:shadow-sm rounded-lg"
+          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-lg"
         >
           <History className="h-4 w-4" />
           <span>History</span>
@@ -66,7 +66,7 @@ export function EquipmentTabs({
           onClick={() => {
             window.location.hash = "maintenance";
           }}
-          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-600 data-[state=active]:shadow-sm rounded-lg"
+          className="flex flex-col items-center gap-1 py-3 px-2 text-xs font-bold data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm rounded-lg"
         >
           <Calendar className="h-4 w-4" />
           <span>PM</span>
