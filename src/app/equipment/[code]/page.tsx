@@ -100,15 +100,15 @@ export default async function EquipmentPage({ params }: PageProps) {
 
       {/* Equipment Header Card */}
       <div className="mx-auto max-w-3xl px-4">
-        <div className="overflow-hidden rounded-2xl border-2 bg-white shadow-sm">
-          <div
-            className={cn(
-              "h-2 w-full",
-              equipmentItem.status === "operational" && "bg-success-500",
-              equipmentItem.status === "down" && "bg-danger-500",
-              equipmentItem.status === "maintenance" && "bg-warning-500"
-            )}
-          />
+        <div 
+          className={cn(
+            "overflow-hidden rounded-2xl bg-white shadow-sm border border-zinc-200",
+            equipmentItem.status === "down" && "border-t-4 border-t-danger-500",
+            equipmentItem.status === "maintenance" && "border-t-4 border-t-warning-500",
+            equipmentItem.status === "operational" && "border-t-4 border-t-success-500"
+          )}
+        >
+          {/* Top strip removed, using border-t-4 instead */}
 
           <div className="p-4 md:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

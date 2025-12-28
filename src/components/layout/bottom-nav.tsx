@@ -104,7 +104,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden safe-area-bottom">
       {/* Dark nav bar */}
-      <div className="bg-zinc-950 border-t border-zinc-800 px-2">
+      <div className="bg-zinc-900 border-t border-zinc-800 px-2">
         <ul className="flex h-[72px] items-center justify-around">
           {/* Left nav items */}
           {leftNavItems.map(renderNavItem)}
@@ -125,7 +125,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
         <button
           type="button"
           onClick={() => setIsScannerOpen(true)}
-          className="absolute left-1/2 -translate-x-1/2 -top-6 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/40 active:scale-95 transition-transform cursor-pointer hover:shadow-primary-500/60 hover:-translate-y-[calc(50%+4px)]"
+          className="absolute left-1/2 -translate-x-1/2 -top-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-md active:scale-95 transition-transform cursor-pointer hover:bg-primary-500 hover:-translate-y-[calc(50%+4px)] border-4 border-zinc-100 dark:border-zinc-950"
           aria-label="Scan Equipment"
         >
           <ScanLine className="h-6 w-6" />

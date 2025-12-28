@@ -31,19 +31,19 @@ export function EquipmentOverview({
     <div className="space-y-6">
       {/* PM Alert */}
       {hasDuePM && (
-        <div className="rounded-2xl border-2 border-warning-300 bg-warning-50 p-4 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning-100">
+        <div className="rounded-xl border border-warning-200 bg-white border-l-4 border-l-warning-500 p-4 flex items-center gap-4 shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-warning-50">
             <Calendar className="h-6 w-6 text-warning-600" />
           </div>
           <div className="flex-1">
-            <p className="font-black text-warning-800">Maintenance Due</p>
-            <p className="text-sm text-warning-700">
+            <p className="font-black text-zinc-900">Maintenance Due</p>
+            <p className="text-sm text-zinc-500">
               This equipment has scheduled maintenance that needs attention.
             </p>
           </div>
           <Button
             asChild
-            className="bg-warning-600 hover:bg-warning-700 rounded-xl font-bold"
+            className="bg-warning-600 hover:bg-warning-700 rounded-lg font-bold shadow-sm"
           >
             <Link href="#maintenance">Start PM</Link>
           </Button>
@@ -114,9 +114,9 @@ function QuickActionCard({
   disabled?: boolean;
 }) {
   const variantStyles = {
-    danger: "border-danger-200 bg-danger-50 hover:bg-danger-100",
-    warning: "border-warning-200 bg-warning-50 hover:bg-warning-100",
-    primary: "border-primary-200 bg-primary-50 hover:bg-primary-100",
+    danger: "bg-white border-danger-200 hover:bg-danger-50/50 hover:border-danger-300",
+    warning: "bg-white border-warning-200 hover:bg-warning-50/50 hover:border-warning-300",
+    primary: "bg-white border-primary-200 hover:bg-primary-50/50 hover:border-primary-300",
   };
 
   const iconStyles = {
@@ -127,9 +127,9 @@ function QuickActionCard({
 
   if (disabled) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border-2 p-4 text-center opacity-50 cursor-not-allowed bg-zinc-50 border-zinc-200">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-300 p-4 text-center bg-zinc-50/50 opacity-60 cursor-not-allowed">
         <Icon className="h-8 w-8 mb-2 text-zinc-400" />
-        <span className="font-bold text-zinc-900">{label}</span>
+        <span className="font-bold text-zinc-700">{label}</span>
         <span className="text-xs text-zinc-500">{description}</span>
       </div>
     );
@@ -139,7 +139,7 @@ function QuickActionCard({
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center justify-center rounded-2xl border-2 p-4 text-center transition-all active:scale-[0.98]",
+        "flex flex-col items-center justify-center rounded-xl border p-4 text-center transition-all duration-200 hover:shadow-md active:scale-[0.98]",
         variantStyles[variant]
       )}
     >
@@ -162,26 +162,33 @@ function StatusCard({
   variant: "success" | "warning" | "danger";
 }) {
   const variantStyles = {
-    success: "border-success-200 bg-success-50",
-    warning: "border-warning-200 bg-warning-50",
-    danger: "border-danger-200 bg-danger-50",
+    success: "border-zinc-200 bg-white",
+    warning: "border-zinc-200 bg-white",
+    danger: "border-zinc-200 bg-white",
   };
 
   const textStyles = {
-    success: "text-success-700",
-    warning: "text-warning-700",
-    danger: "text-danger-700",
+    success: "text-emerald-700",
+    warning: "text-amber-700",
+    danger: "text-rose-700",
+  };
+  
+  // Use left border accent for status cards
+  const accentBorder = {
+    success: "border-l-4 border-l-emerald-500",
+    warning: "border-l-4 border-l-amber-500",
+    danger: "border-l-4 border-l-rose-500",
   };
 
   return (
-    <div className={cn("rounded-2xl border-2 p-4", variantStyles[variant])}>
+    <div className={cn("rounded-xl border p-4 shadow-sm", variantStyles[variant], accentBorder[variant])}>
       <div className="flex items-center gap-2 mb-1">
         <Icon className={cn("h-4 w-4", textStyles[variant])} />
-        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
           {label}
         </span>
       </div>
-      <p className={cn("text-lg font-black capitalize", textStyles[variant])}>
+      <p className={cn("text-lg font-black capitalize text-zinc-900")}>
         {value.replace("_", " ")}
       </p>
     </div>
