@@ -1,657 +1,299 @@
 # FixIt CMMS - Improvement Plan
 
-> Generated: December 26, 2025
-> Overall Codebase Score: **8/10** - Production-ready with recommended enhancements
-
-This document outlines prioritized improvements identified during a comprehensive codebase review covering architecture, code quality, testing, security, and UI/frontend.
-
----
-
-## Executive Summary
-
-| Area | Score | Priority Issues |
-|------|-------|-----------------|
-| Architecture | 9/10 | Minor code duplication |
-| Code Quality | 8/10 | Few `any` types, missing API route tests |
-| Security | 8/10 | Dev secret fallback, no rate limiting |
-| UI/Frontend | 7.5/10 | No error boundaries, oversized components |
-| Testing | 7/10 | Good unit tests, missing API/integration tests |
+> **Generated:** December 28, 2025  
+> **Overall Score:** 7.5/10 - Solid foundation with technical debt to address  
+> **Status:** 🔴 Build failing due to test type errors
 
 ---
 
-## Phase 1: Critical (Do This Week)
+## Quick Reference
 
-### 1.1 Security: Remove Development Secret Fallback
+| Area | Score | Status |
+|------|-------|--------|
+| Architecture | 8.5/10 | ✅ Good |
+| Code Quality | 7/10 | ⚠️ Type issues |
+| Security | 8/10 | ✅ Good foundation |
+| Testing | 6/10 | 🔴 Tests broken |
+| UX/Design | 8.5/10 | ✅ Polished |
+| DX | 7.5/10 | ⚠️ CI blocked |
 
-**Priority:** HIGH | **Effort:** 15 min | **Risk:** Security vulnerability
+---
 
-The session module has a fallback secret that could leak into production.
+## 🔴 Priority 1: Critical (Fix Immediately)
 
-**File:** `src/lib/session.ts:24-38`
+### 1.1 Broken TypeScript Build - Tests Out of Sync
 
+**Status:** ✅ Complete (Dec 28, 2025)  
+**Severity:** CRITICAL | **Effort:** 2-3 hours  
+**Blocking:** CI/CD, new development
+
+The `bun run build:check` fails with **42+ TypeScript errors** in test files.
+
+#### Root Causes:
+1. Tests reference deleted functions (`canAccess`, `hasRole` from `@/lib/auth`)
+2. Tests reference renamed schemas (`createTicketSchema`, `updateTicketSchema`)
+3. Tests use old `SessionUser` shape (`role` instead of `roleName`, missing `permissions`)
+4. Tests pass wrong `ActionResult` arguments (`{}` instead of `undefined`)
+
+#### Affected Files:
+| File | Errors | Issue |
+|------|--------|-------|
+| `src/tests/unit/auth.test.ts` | 2 | References removed `canAccess`, `hasRole` |
+| `src/tests/unit/validations.test.ts` | 2 | References removed ticket schemas |
+| `src/tests/unit/actions/workOrders.test.ts` | 35+ | `SessionUser` shape, `ActionResult` usage |
+| `src/tests/unit/api/workOrders.test.ts` | 1 | `SessionUser` shape |
+
+#### Tasks:
+- [ ] **1.1.1** Delete or update `src/tests/unit/auth.test.ts` - remove tests for `canAccess`, `hasRole`
+- [ ] **1.1.2** Update `src/tests/unit/validations.test.ts` - fix/remove ticket schema tests
+- [ ] **1.1.3** Update `src/tests/unit/actions/workOrders.test.ts`:
+  - [ ] Change `role` to `roleName` in all `SessionUser` mocks
+  - [ ] Add `permissions` array to all `SessionUser` mocks
+  - [ ] Change `{}` to `undefined` for `ActionResult` initial state
+  - [ ] Fix `.error` access to check `!result.success` first
+- [ ] **1.1.4** Update `src/tests/unit/api/workOrders.test.ts` - same `SessionUser` fixes
+- [ ] **1.1.5** Run `bun run build:check` - verify 0 errors
+
+#### Correct SessionUser Shape:
 ```typescript
-// BEFORE (unsafe)
-function getSecretKey(): Uint8Array {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 32) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("SESSION_SECRET must be set...");
-    }
-    // Development fallback - NOT SECURE
-    return new TextEncoder().encode("dev-secret-key-minimum-32-characters-long");
-  }
-  return new TextEncoder().encode(secret);
-}
-
-// AFTER (safe)
-function getSecretKey(): Uint8Array {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error(
-      "SESSION_SECRET environment variable must be set and at least 32 characters. " +
-      "Generate one with: openssl rand -base64 32"
-    );
-  }
-  return new TextEncoder().encode(secret);
+{
+  id: 1,
+  employeeId: "TECH-001",
+  name: "Test User",
+  roleName: "tech",           // NOT 'role'
+  roleId: 2,                  // optional
+  permissions: ["ticket:create", "ticket:view"],  // REQUIRED
+  hourlyRate: null            // optional
 }
 ```
 
-**Action Items:**
-- [ ] Update `src/lib/session.ts` to throw in all environments
-- [ ] Update `.env.example` with generation instructions
-- [ ] Add `SESSION_SECRET` to CI/CD environment checks
+#### Correct ActionResult Usage:
+```typescript
+// ❌ Wrong
+const result = await createWorkOrder({}, formData);  
+if (result.error) { ... }
+
+// ✅ Correct  
+const result = await createWorkOrder(undefined, formData);
+if (!result.success) {
+  console.log(result.error);  // Now TypeScript knows error exists
+}
+```
 
 ---
 
-### 1.2 Type Safety: Fix `any` Types
+### 1.2 Linting Errors in E2E Tests
 
-**Priority:** HIGH | **Effort:** 30 min | **Risk:** Runtime errors
+**Status:** ✅ Complete (Dec 28, 2025)  
+**Severity:** HIGH | **Effort:** 10 minutes
 
-**Files with `any` types:**
+E2E tests have formatting and import ordering issues.
 
+#### Tasks:
+- [ ] **1.2.1** Run `bun run lint:fix`
+- [ ] **1.2.2** Verify no remaining errors with `bun run lint`
+
+---
+
+## 🟠 Priority 2: High (This Week)
+
+### 2.1 Unsafe Type Assertions
+
+**Status:** ⬜ Not Started  
+**Severity:** HIGH | **Effort:** 1 hour
+
+Several places use `as unknown as` to bypass TypeScript, masking potential bugs.
+
+#### Affected Files:
 | File | Line | Issue |
 |------|------|-------|
-| `src/actions/attachments.ts` | 12, 16 | `data?: any`, `rawData: any` |
-| `src/app/(tech)/dashboard/tickets/page.tsx` | 455, 534 | `ticket: any` |
+| `src/app/(main)/dashboard/page.tsx` | 249 | `as unknown as WorkOrderWithRelations[]` |
+| `src/app/(main)/dashboard/page.tsx` | 320 | `as unknown as WorkOrderWithRelations[]` |
 
-**Fix for attachments.ts:**
+#### Tasks:
+- [ ] **2.1.1** Create proper type inference from `db.query.workOrders.findMany()` result
+- [ ] **2.1.2** Update `WorkOrderWithRelations` type to match actual query output
+- [ ] **2.1.3** Remove `as unknown as` assertions
+
+---
+
+### 2.2 Dashboard Query Performance
+
+**Status:** ⬜ Not Started  
+**Severity:** MEDIUM-HIGH | **Effort:** 2-3 hours
+
+The dashboard makes **8 separate database queries** that could be consolidated.
+
+#### Current State:
 ```typescript
-// BEFORE
-export type AttachmentActionState = {
-  error?: string;
-  success?: boolean;
-  data?: any;
-};
-
-export async function createAttachment(rawData: any): Promise<AttachmentActionState>
-
-// AFTER
-import type { Attachment } from "@/db/schema";
-import type { z } from "zod";
-import { uploadAttachmentSchema } from "@/lib/validations/attachments";
-
-type CreateAttachmentInput = z.infer<typeof uploadAttachmentSchema> & { s3Key: string };
-
-export type AttachmentActionState = {
-  error?: string;
-  success?: boolean;
-  data?: Attachment;
-};
-
-export async function createAttachment(
-  rawData: CreateAttachmentInput
-): Promise<AttachmentActionState>
+// 8 queries in getStats():
+const globalOpen = await db.select({...}).where(eq(status, "open"));
+const globalInProgress = await db.select({...}).where(eq(status, "in_progress"));
+const globalOverdue = await db.select({...});
+const globalCritical = await db.select({...});
+const myOpen = await db.select({...});
+const myInProgress = await db.select({...});
+const myOverdue = await db.select({...});
+const myCritical = await db.select({...});
 ```
 
-**Fix for tickets/page.tsx:**
-```typescript
-// Create a type for ticket with relations
-type TicketWithRelations = Awaited<ReturnType<typeof getTickets>>["tickets"][number];
+#### Tasks:
+- [ ] **2.2.1** Create a single aggregated query with CASE/WHEN or subqueries
+- [ ] **2.2.2** Consider creating a stats service (`src/lib/services/stats.ts`)
+- [ ] **2.2.3** Benchmark before/after query times
 
-function TicketCard({ ticket }: { ticket: TicketWithRelations }) { ... }
-function TicketRow({ ticket }: { ticket: TicketWithRelations }) { ... }
+---
+
+### 2.3 Verify Rate Limiting Coverage
+
+**Status:** ⬜ Not Started  
+**Severity:** HIGH | **Effort:** 2 hours
+
+Rate limiting utility exists but needs verification of application.
+
+#### Tasks:
+- [ ] **2.3.1** Verify `/api/auth/login` uses rate limiting
+- [ ] **2.3.2** Add rate limiting to `/api/attachments` (file upload abuse)
+- [ ] **2.3.3** Add rate limiting to `/api/work-orders` POST
+- [ ] **2.3.4** Add rate limiting to `/api/equipment` POST
+- [ ] **2.3.5** Document rate limits in `AGENTS.md`
+
+---
+
+## 🟡 Priority 3: Medium (This Sprint)
+
+### 3.1 Add Route-Group Error Boundaries
+
+**Status:** ⬜ Not Started  
+**Severity:** MEDIUM | **Effort:** 1 hour
+
+Only root `error.tsx` exists. Route groups need their own.
+
+#### Tasks:
+- [ ] **3.1.1** Create `src/app/(main)/error.tsx`
+- [ ] **3.1.2** Create `src/app/(operator)/error.tsx`
+- [ ] **3.1.3** Create `src/app/(auth)/error.tsx`
+- [ ] **3.1.4** Test error boundaries catch component crashes
+
+---
+
+### 3.2 Split Large Components
+
+**Status:** ⬜ Not Started  
+**Severity:** MEDIUM | **Effort:** 3-4 hours
+
+Several components exceed 300 lines.
+
+#### Candidates:
+| File | Lines | Action |
+|------|-------|--------|
+| `src/components/ui/camera-capture.tsx` | ~300 | Extract hooks, split UI |
+| `src/components/ui/file-upload.tsx` | ~200 | Extract validation logic |
+
+#### Tasks:
+- [ ] **3.2.1** Extract `useCameraCapture` hook from camera-capture.tsx
+- [ ] **3.2.2** Extract `useFileUpload` hook from file-upload.tsx
+- [ ] **3.2.3** Verify no regression in functionality
+
+---
+
+### 3.3 Accessibility Audit
+
+**Status:** ⬜ Not Started  
+**Severity:** MEDIUM | **Effort:** 2-3 hours
+
+#### Tasks:
+- [ ] **3.3.1** Add skip-to-content links in main layout
+- [ ] **3.3.2** Verify focus trap in Dialog component (Radix should handle)
+- [ ] **3.3.3** Check color contrast ratios for status badges
+- [ ] **3.3.4** Test keyboard navigation through main flows
+
+---
+
+## 🟢 Priority 4: Low (Backlog)
+
+### 4.1 Extract Stats Service
+- [ ] Create `src/lib/services/stats.service.ts`
+- [ ] Consolidate dashboard stats queries
+- [ ] Add caching if needed
+
+### 4.2 Centralize Magic Numbers
+- [ ] Create config for pagination limits
+- [ ] Document all hardcoded limits
+
+### 4.3 API Documentation
+- [ ] Add OpenAPI/Swagger documentation
+- [ ] Document all API endpoints in README
+
+### 4.4 Enhance Test Coverage
+- [ ] Add integration tests for API routes
+- [ ] Maintain E2E tests (14 spec files)
+- [ ] Add visual regression tests
+
+### 4.5 PWA Offline Enhancement
+- [ ] Implement service worker caching for work order data
+- [ ] Add offline queue for ticket submission
+- [ ] Show offline indicator in UI
+
+### 4.6 Documentation Updates
+- [ ] Update `improvement_plan.md` as items complete
+- [ ] Document design system CSS classes
+- [ ] Add component storybook (optional)
+
+---
+
+## ✅ Completed Items
+
+_Move items here as they are completed with date._
+
+| Task | Completed | Notes |
+|------|-----------|-------|
+| **1.1 TypeScript Build Fixes** | Dec 28, 2025 | Fixed all 45+ type errors in tests and components |
+| **1.2 Linting Fixes** | Dec 28, 2025 | Fixed formatting in src and e2e files |
+| Security headers in next.config.ts | Pre-existing | CSP, X-Frame-Options, etc. |
+| Rate limiting utility | Pre-existing | `src/lib/rate-limit.ts` |
+| Permission system | Pre-existing | `resource:action` pattern |
+| AGENTS.md documentation | Dec 28, 2025 | Updated with current patterns |
+
+---
+
+## 📊 Progress Tracking
+
+### Week of Dec 28, 2025
+- [x] Complete Priority 1.1 (TypeScript build)
+- [x] Complete Priority 1.2 (Linting)
+- [x] Update AGENTS.md documentation
+- [x] Update README.md documentation
+
+### Week of Jan 4, 2026
+- [ ] Complete Priority 2.1-2.3
+
+### Week of Jan 11, 2026
+- [ ] Complete Priority 3.1-3.3
+
+---
+
+## Commands Reference
+
+```bash
+# Check for issues
+bun run build:check      # TypeScript compilation
+bun run lint             # Biome linting
+bun run test:run         # Unit tests
+
+# Fix issues
+bun run lint:fix         # Auto-fix lint issues
+
+# Development
+bun run dev              # Start dev server
+bun run db:studio        # Open Drizzle Studio
 ```
-
-**Action Items:**
-- [ ] Fix `attachments.ts` types
-- [ ] Create `TicketWithRelations` type
-- [ ] Update `TicketCard` and `TicketRow` components
-
----
-
-### 1.3 Stability: Add Error Boundaries
-
-**Priority:** HIGH | **Effort:** 1 hour | **Risk:** App crashes without recovery
-
-No error boundaries exist - component errors crash the entire app.
-
-**Create error.tsx files:**
-
-```typescript
-// src/app/(admin)/admin/error.tsx
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
-import { useEffect } from "react";
-
-export default function AdminError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
-  useEffect(() => {
-    // Log to error reporting service
-    console.error("Admin error:", error);
-  }, [error]);
-
-  return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-danger-100">
-        <AlertTriangle className="h-8 w-8 text-danger-600" />
-      </div>
-      <h2 className="text-xl font-bold">Something went wrong</h2>
-      <p className="text-muted-foreground text-center max-w-md">
-        An error occurred while loading this page. Please try again.
-      </p>
-      <Button onClick={reset} variant="outline">
-        <RefreshCw className="mr-2 h-4 w-4" />
-        Try Again
-      </Button>
-      {error.digest && (
-        <p className="text-xs text-muted-foreground font-mono">
-          Error ID: {error.digest}
-        </p>
-      )}
-    </div>
-  );
-}
-```
-
-**Action Items:**
-- [ ] Create `src/app/(admin)/admin/error.tsx`
-- [ ] Create `src/app/(tech)/dashboard/error.tsx`
-- [ ] Create `src/app/(operator)/error.tsx`
-- [ ] Create `src/app/error.tsx` (root fallback)
-
----
-
-### 1.4 DX: Add Missing Script
-
-**Priority:** LOW | **Effort:** 5 min | **Risk:** Documentation mismatch
-
-AGENTS.md references `bun run build:check` which doesn't exist.
-
-**Update package.json:**
-```json
-{
-  "scripts": {
-    "build:check": "tsc --noEmit",
-    // ... existing scripts
-  }
-}
-```
-
-**Action Items:**
-- [ ] Add `build:check` script to package.json
-
----
-
-## Phase 2: High Priority (This Sprint)
-
-### 2.1 Security: Add Rate Limiting
-
-**Priority:** HIGH | **Effort:** 2 hours | **Risk:** DoS vulnerability
-
-No rate limiting on API endpoints or login attempts.
-
-**Implementation approach:**
-
-```typescript
-// src/lib/rate-limit.ts
-import { LRUCache } from "lru-cache";
-
-type RateLimitOptions = {
-  interval: number; // ms
-  uniqueTokenPerInterval: number;
-};
-
-export function rateLimit(options: RateLimitOptions) {
-  const tokenCache = new LRUCache({
-    max: options.uniqueTokenPerInterval,
-    ttl: options.interval,
-  });
-
-  return {
-    check: (limit: number, token: string): Promise<void> =>
-      new Promise((resolve, reject) => {
-        const tokenCount = (tokenCache.get(token) as number[]) || [0];
-        if (tokenCount[0] === 0) {
-          tokenCache.set(token, [1]);
-        }
-        tokenCount[0] += 1;
-
-        const currentUsage = tokenCount[0];
-        const isRateLimited = currentUsage >= limit;
-
-        if (isRateLimited) {
-          reject(new Error("Rate limit exceeded"));
-        } else {
-          resolve();
-        }
-      }),
-  };
-}
-
-// Usage in API routes
-const limiter = rateLimit({
-  interval: 60 * 1000, // 1 minute
-  uniqueTokenPerInterval: 500,
-});
-
-export async function POST(request: Request) {
-  const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  try {
-    await limiter.check(10, ip); // 10 requests per minute
-  } catch {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
-  // ... rest of handler
-}
-```
-
-**Action Items:**
-- [ ] Install `lru-cache` package
-- [ ] Create `src/lib/rate-limit.ts`
-- [ ] Add rate limiting to `/api/auth/login` (strict: 5/min)
-- [ ] Add rate limiting to `/api/tickets` POST (moderate: 20/min)
-- [ ] Add rate limiting to `/api/attachments` (moderate: 10/min)
-
----
-
-### 2.2 Architecture: Extract Shared Auth Logic
-
-**Priority:** MEDIUM | **Effort:** 2 hours | **Risk:** Code duplication bugs
-
-Login logic is duplicated between `actions/auth.ts` and `api/auth/login/route.ts`.
-
-**Create shared service:**
-
-```typescript
-// src/lib/services/auth.service.ts
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { verifyPin, isAccountLocked, calculateLockoutEnd, BRUTE_FORCE_CONFIG } from "@/lib/auth";
-import { authLogger } from "@/lib/logger";
-import { eq } from "drizzle-orm";
-
-export type AuthResult =
-  | { success: true; user: typeof users.$inferSelect }
-  | { success: false; error: string; locked?: boolean };
-
-export async function authenticateUser(
-  employeeId: string,
-  pin: string
-): Promise<AuthResult> {
-  const user = await db.query.users.findFirst({
-    where: eq(users.employeeId, employeeId),
-  });
-
-  if (!user) {
-    return { success: false, error: "Invalid employee ID or PIN" };
-  }
-
-  if (!user.isActive) {
-    return { success: false, error: "Account is disabled" };
-  }
-
-  if (isAccountLocked(user.lockedUntil)) {
-    const minutesLeft = Math.ceil(
-      (user.lockedUntil!.getTime() - Date.now()) / 60000
-    );
-    return {
-      success: false,
-      error: `Account locked. Try again in ${minutesLeft} minute(s).`,
-      locked: true,
-    };
-  }
-
-  const isValid = await verifyPin(pin, user.pin);
-
-  if (!isValid) {
-    const newAttempts = user.failedLoginAttempts + 1;
-    const lockout = newAttempts >= BRUTE_FORCE_CONFIG.maxAttempts
-      ? calculateLockoutEnd()
-      : null;
-
-    await db.update(users).set({
-      failedLoginAttempts: newAttempts,
-      lockedUntil: lockout,
-      updatedAt: new Date(),
-    }).where(eq(users.id, user.id));
-
-    if (lockout) {
-      authLogger.warn({ employeeId, attempts: newAttempts }, "Account locked");
-      return {
-        success: false,
-        error: "Too many failed attempts. Account locked for 15 minutes.",
-        locked: true,
-      };
-    }
-
-    return { success: false, error: "Invalid employee ID or PIN" };
-  }
-
-  // Reset failed attempts
-  await db.update(users).set({
-    failedLoginAttempts: 0,
-    lockedUntil: null,
-    updatedAt: new Date(),
-  }).where(eq(users.id, user.id));
-
-  authLogger.info({ employeeId, role: user.role }, "Successful login");
-  return { success: true, user };
-}
-```
-
-**Action Items:**
-- [ ] Create `src/lib/services/auth.service.ts`
-- [ ] Refactor `src/actions/auth.ts` to use service
-- [ ] Refactor `src/app/api/auth/login/route.ts` to use service
-- [ ] Add unit tests for auth service
-
----
-
-### 2.3 Testing: Add API Route Tests
-
-**Priority:** MEDIUM | **Effort:** 4 hours | **Risk:** Untested code paths
-
-API routes have no test coverage.
-
-**Example test structure:**
-
-```typescript
-// src/tests/unit/api/tickets.test.ts
-import { describe, expect, it, vi, beforeEach } from "vitest";
-
-// Mock dependencies
-vi.mock("@/db", () => ({ db: { query: {}, insert: vi.fn(), select: vi.fn() } }));
-vi.mock("@/lib/session", () => ({
-  requireAuth: vi.fn(),
-  requireCsrf: vi.fn(),
-}));
-
-import { GET, POST } from "@/app/api/tickets/route";
-import { requireAuth, requireCsrf } from "@/lib/session";
-
-describe("GET /api/tickets", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("returns 401 when not authenticated", async () => {
-    vi.mocked(requireAuth).mockRejectedValue(new Error("Unauthorized"));
-
-    const request = new Request("http://localhost/api/tickets");
-    const response = await GET(request);
-
-    expect(response.status).toBe(401);
-  });
-
-  it("returns paginated tickets for authenticated user", async () => {
-    vi.mocked(requireAuth).mockResolvedValue({
-      id: 1,
-      role: "tech",
-      name: "Test",
-      employeeId: "TECH-001",
-    });
-
-    // ... mock db queries and test response
-  });
-});
-
-describe("POST /api/tickets", () => {
-  it("returns 403 when CSRF token missing", async () => {
-    vi.mocked(requireCsrf).mockRejectedValue(new Error("CSRF token missing"));
-
-    const request = new Request("http://localhost/api/tickets", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-    const response = await POST(request);
-
-    expect(response.status).toBe(403);
-  });
-});
-```
-
-**Action Items:**
-- [ ] Create `src/tests/unit/api/tickets.test.ts`
-- [ ] Create `src/tests/unit/api/equipment.test.ts`
-- [ ] Create `src/tests/unit/api/auth.test.ts`
-- [ ] Create `src/tests/unit/api/attachments.test.ts`
-- [ ] Add API tests to CI pipeline
-
----
-
-### 2.4 Consistency: Standardize ActionResult Types
-
-**Priority:** MEDIUM | **Effort:** 1 hour | **Risk:** Inconsistent error handling
-
-Different actions use different result types.
-
-**Create unified type:**
-
-```typescript
-// src/lib/types/actions.ts
-export type ActionResult<T = void> =
-  | { success: true; data?: T }
-  | { success: false; error: string; fieldErrors?: Record<string, string[]> };
-
-// Usage
-export async function createTicket(
-  _prevState: ActionResult<Ticket>,
-  formData: FormData
-): Promise<ActionResult<Ticket>> {
-  // ...
-  if (!result.success) {
-    return {
-      success: false,
-      error: "Validation failed",
-      fieldErrors: result.error.flatten().fieldErrors,
-    };
-  }
-  // ...
-  return { success: true, data: ticket };
-}
-```
-
-**Action Items:**
-- [ ] Create `src/lib/types/actions.ts`
-- [ ] Update all server actions to use unified type
-- [ ] Update form handling to use fieldErrors when available
-
----
-
-## Phase 3: Medium Priority (Next Sprint)
-
-### 3.1 UI: Split Large Components
-
-**Priority:** MEDIUM | **Effort:** 2 hours | **Risk:** Maintainability
-
-`TicketPartsManager` is 294 lines with mixed concerns.
-
-**Proposed split:**
-
-```
-src/components/tickets/
-├── ticket-parts-manager.tsx      # Orchestrator (50 lines)
-├── parts/
-│   ├── part-selector.tsx         # Part search/selection
-│   ├── location-selector.tsx     # Location dropdown
-│   ├── quantity-input.tsx        # Quantity with validation
-│   └── parts-list.tsx            # Display added parts
-└── hooks/
-    └── use-ticket-parts.ts       # State management hook
-```
-
-**Action Items:**
-- [ ] Create `src/components/tickets/hooks/use-ticket-parts.ts`
-- [ ] Extract `PartSelector` component
-- [ ] Extract `LocationSelector` component
-- [ ] Extract `PartsList` component
-- [ ] Refactor `TicketPartsManager` to compose sub-components
-
----
-
-### 3.2 Security: Add Security Headers
-
-**Priority:** MEDIUM | **Effort:** 2 hours | **Risk:** XSS, clickjacking
-
-No security headers configured.
-
-**Add middleware or next.config.ts headers:**
-
-```typescript
-// next.config.ts
-const nextConfig = {
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-          {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' http://localhost:9000;",
-          },
-        ],
-      },
-    ];
-  },
-};
-```
-
-**Action Items:**
-- [ ] Add security headers to `next.config.ts`
-- [ ] Test CSP doesn't break functionality
-- [ ] Add Strict-Transport-Security for production
-
----
-
-### 3.3 Accessibility: Focus Management
-
-**Priority:** MEDIUM | **Effort:** 2 hours | **Risk:** Accessibility compliance
-
-Dialogs don't trap focus or return focus on close.
-
-**Implementation:**
-
-```typescript
-// src/components/ui/dialog.tsx - Add focus trap
-import { useFocusTrap } from "@/hooks/use-focus-trap";
-
-const DialogContent = React.forwardRef<...>(({ ... }, ref) => {
-  const containerRef = useFocusTrap();
-
-  return (
-    <DialogPrimitive.Content
-      ref={mergeRefs([ref, containerRef])}
-      // ...
-    >
-      {children}
-    </DialogPrimitive.Content>
-  );
-});
-```
-
-**Action Items:**
-- [ ] Create `src/hooks/use-focus-trap.ts`
-- [ ] Update `Dialog` component with focus trap
-- [ ] Add skip-to-content link in layouts
-- [ ] Test with keyboard navigation
-
----
-
-### 3.4 Observability: Add Request Logging
-
-**Priority:** MEDIUM | **Effort:** 2 hours | **Risk:** Debugging difficulty
-
-No request/response logging middleware.
-
-**Action Items:**
-- [ ] Create logging middleware for API routes
-- [ ] Add correlation IDs to requests
-- [ ] Log request duration, status codes
-- [ ] Integrate with existing Pino logger
-
----
-
-## Phase 4: Nice to Have (Backlog)
-
-| Task | Effort | Impact | Notes |
-|------|--------|--------|-------|
-| Add virtualization for long lists | 3h | Performance | Use `@tanstack/react-virtual` |
-| Server-side file content validation | 4h | Security | Verify file magic bytes |
-| Add concurrent session limits | 3h | Security | Max 3 sessions per user |
-| Document design system | 2h | DX | Custom CSS classes guide |
-| Add performance monitoring | 4h | Observability | Consider Sentry or similar |
-| Optimize backdrop-blur for mobile | 1h | Performance | Reduce blur on low-end devices |
-| Add PWA offline support | 4h | UX | Service worker for offline mode |
-| E2E test type safety | 2h | DX | Fix implicit any in Playwright tests |
-
----
-
-## Implementation Checklist
-
-### Week 1
-- [ ] 1.1 - Remove dev secret fallback
-- [ ] 1.2 - Fix `any` types
-- [ ] 1.3 - Add error boundaries
-- [ ] 1.4 - Add missing script
-
-### Week 2
-- [ ] 2.1 - Add rate limiting
-- [ ] 2.2 - Extract shared auth logic
-- [ ] 2.3 - Add API route tests (start)
-
-### Week 3
-- [ ] 2.3 - Complete API route tests
-- [ ] 2.4 - Standardize ActionResult types
-- [ ] 3.1 - Split TicketPartsManager
-
-### Week 4
-- [ ] 3.2 - Add security headers
-- [ ] 3.3 - Focus management
-- [ ] 3.4 - Request logging
-
----
-
-## Success Metrics
-
-After implementing Phase 1-2:
-- [ ] Zero `any` types in production code
-- [ ] All API routes have test coverage
-- [ ] Error boundaries catch component crashes
-- [ ] Rate limiting prevents abuse
-- [ ] TypeScript strict mode passes
-
-After implementing Phase 3:
-- [ ] No component over 200 lines
-- [ ] WCAG 2.1 AA compliance for focus management
-- [ ] Security headers score A+ on securityheaders.com
-- [ ] Request logs available for debugging
 
 ---
 
 ## Notes
 
-- All changes should follow existing code patterns
+- All changes should preserve existing code patterns
 - Run `bun run lint:fix` before committing
-- Run `bun run test:run` to verify no regressions
-- Update AGENTS.md if patterns change significantly
+- Run `bun run build:check` to verify TypeScript
+- Update this document as items are completed
