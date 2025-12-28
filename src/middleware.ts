@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   "/api/auth/logout",
   "/api/auth/me",
   "/api/health",
+  "/design-system",
 ];
 
 // Note: Fine-grained role checks are done in page/API handlers
