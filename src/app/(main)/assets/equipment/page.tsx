@@ -332,7 +332,7 @@ export default async function EquipmentPage({
                 <TableHead className="w-24" />
               </TableRow>
             </TableHeader>
-            <TableBody className="px-2">
+            <TableBody className="divide-y divide-zinc-100">
               {equipmentList.map((equipment) => {
                 const statusConfig =
                   statusConfigs[equipment.status] || statusConfigs.operational;
@@ -404,9 +404,6 @@ export default async function EquipmentPage({
                       <span className={cn("text-sm font-bold", equipment.owner?.name ? "text-zinc-900" : "text-zinc-400 italic")}>
                         {equipment.owner?.name || "OFF-SYSTEM"}
                       </span>
-                    </TableCell>
-                    <TableCell className="p-5 hidden sm:table-cell">
-                      {/* Removed column */}
                     </TableCell>
                     <TableCell className="p-5 text-right flex items-center justify-end gap-2">
                        <Button
