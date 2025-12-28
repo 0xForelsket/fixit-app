@@ -31,26 +31,6 @@ export function UserHeader({ user, avatarUrl, unreadCount }: UserHeaderProps) {
         </div>
       </header>
 
-      {/* User Greeting Area */}
-      <div className="flex items-center justify-between bg-primary-600 p-6 rounded-3xl text-white shadow-xl shadow-primary-500/20 relative overflow-hidden">
-        <div className="relative z-10">
-          <h2 className="text-2xl font-bold">{user.name}</h2>
-          <p className="text-primary-100 text-sm font-medium mt-1">
-            Carey Manufacturing Sdn Bhd
-          </p>
-        </div>
-        <div className="relative z-10 h-12 w-12 rounded-full border-2 border-white/30 overflow-hidden bg-white/20 backdrop-blur-sm">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          ) : null}
-        </div>
-        {/* Decorative glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-      </div>
     </>
   );
 }

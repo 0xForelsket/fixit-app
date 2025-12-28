@@ -3,6 +3,7 @@ import { PMStats } from "@/components/home/pm-stats";
 import { QuickActions } from "@/components/home/quick-actions";
 import { UserHeader } from "@/components/home/user-header";
 import { WorkOrderStats } from "@/components/home/work-order-stats";
+import { WelcomeBanner } from "@/components/home/welcome-banner";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { db } from "@/db";
 import { equipment, notifications } from "@/db/schema";
@@ -93,6 +94,7 @@ export default async function Home({ searchParams }: PageProps) {
 
       {/* Main content */}
       <main className="container mx-auto px-4 py-8 max-w-5xl space-y-10 animate-in">
+        <WelcomeBanner user={user} avatarUrl={avatarUrl} />
         <QuickActions />
 
         {/* Status Summaries */}
