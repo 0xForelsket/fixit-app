@@ -163,7 +163,7 @@ export default async function EquipmentPage({
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-zinc-200 pb-8">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
-            Equipment <span className="text-primary-600">Inventory</span>
+            Equipment <span className="text-primary-600">Master List</span>
           </h1>
           <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
             <MonitorCog className="h-3.5 w-3.5" />
