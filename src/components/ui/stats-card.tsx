@@ -99,7 +99,7 @@ export function StatsCard({
             currentStyle.iconBg
           )}
         >
-          <Icon className={cn("h-5 w-5", currentStyle.iconColor)} />
+          <Icon className={cn("h-5 w-5", currentStyle.iconColor)} aria-hidden="true" />
         </div>
         {trend && (
           <div

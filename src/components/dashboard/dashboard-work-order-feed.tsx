@@ -20,7 +20,7 @@ export function DashboardWorkOrderFeed({
         <div className="relative">
           <div className="absolute inset-0 bg-success-400/20 rounded-full blur-[40px] animate-gentle-pulse" />
           <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-success-400/20 to-success-500/20 border border-success-200 shadow-inner">
-            <CheckCircle2 className="h-10 w-10 text-success-600" />
+            <CheckCircle2 className="h-10 w-10 text-success-600" aria-hidden="true" />
           </div>
         </div>
         <h3 className="mt-8 text-2xl font-black text-success-900 tracking-tight">
