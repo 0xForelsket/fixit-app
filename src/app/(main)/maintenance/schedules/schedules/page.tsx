@@ -1,6 +1,14 @@
 import { SchedulerButton } from "@/components/maintenance/scheduler-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
@@ -196,18 +204,18 @@ export default async function SchedulesPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="border-b bg-slate-50">
-              <tr className="text-left font-medium text-muted-foreground">
-                <th className="p-3">Schedule</th>
-                <th className="p-3 hidden md:table-cell">Equipment</th>
-                <th className="p-3 hidden lg:table-cell">Frequency</th>
-                <th className="p-3">Next Due</th>
-                <th className="p-3 hidden sm:table-cell">Status</th>
-                <th className="p-3 w-10" />
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <Table className="w-full text-sm">
+            <TableHeader className="bg-slate-50">
+              <TableRow className="border-b text-left font-medium text-muted-foreground hover:bg-transparent">
+                <TableHead className="p-3">Schedule</TableHead>
+                <TableHead className="p-3 hidden md:table-cell">Equipment</TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">Frequency</TableHead>
+                <TableHead className="p-3">Next Due</TableHead>
+                <TableHead className="p-3 hidden sm:table-cell">Status</TableHead>
+                <TableHead className="p-3 w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
               {schedules.map((schedule) => {
                 const dueDate = schedule.nextDue
                   ? new Date(schedule.nextDue)
@@ -221,11 +229,11 @@ export default async function SchedulesPage({
                   : null;
 
                 return (
-                  <tr
+                  <TableRow
                     key={schedule.id}
                     className="hover:bg-slate-50 transition-colors group"
                   >
-                    <td className="p-3">
+                    <TableCell className="p-3">
                       <Link
                         href={`/maintenance/schedules/${schedule.id}`}
                         data-testid="schedule-link"
@@ -254,17 +262,17 @@ export default async function SchedulesPage({
                           </p>
                         </div>
                       </Link>
-                    </td>
-                    <td className="p-3 hidden md:table-cell">
+                    </TableCell>
+                    <TableCell className="p-3 hidden md:table-cell">
                       <p className="font-medium">{schedule.equipment?.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {schedule.equipment?.location?.name}
                       </p>
-                    </td>
-                    <td className="p-3 hidden lg:table-cell text-muted-foreground">
+                    </TableCell>
+                    <TableCell className="p-3 hidden lg:table-cell text-muted-foreground">
                       Every {schedule.frequencyDays} days
-                    </td>
-                    <td className="p-3">
+                    </TableCell>
+                    <TableCell className="p-3">
                       {dueDate ? (
                         <div>
                           <p
@@ -286,27 +294,27 @@ export default async function SchedulesPage({
                       ) : (
                         <span className="text-muted-foreground">Not set</span>
                       )}
-                    </td>
-                    <td className="p-3 hidden sm:table-cell">
+                    </TableCell>
+                    <TableCell className="p-3 hidden sm:table-cell">
                       <Badge
                         variant={schedule.isActive ? "success" : "secondary"}
                       >
                         {schedule.isActive ? "Active" : "Inactive"}
                       </Badge>
-                    </td>
-                    <td className="p-3">
+                    </TableCell>
+                    <TableCell className="p-3">
                       <Link
                         href={`/maintenance/schedules/${schedule.id}`}
                         className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-slate-100 hover:text-foreground"
                       >
                         <ChevronRight className="h-4 w-4" />
                       </Link>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

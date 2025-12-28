@@ -1,5 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SortHeader } from "@/components/ui/sort-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -11,6 +20,8 @@ type SearchParams = {
   search?: string;
   category?: string;
   filter?: string;
+  sort?: "name" | "sku" | "category" | "unitCost" | "status";
+  dir?: "asc" | "desc";
 };
 
 async function getParts(params: SearchParams) {
@@ -39,6 +50,40 @@ async function getParts(params: SearchParams) {
     allParts = allParts.filter((p) => p.category === params.category);
   }
 
+  if (params.sort) {
+    allParts.sort((a, b) => {
+      let valA: string | number | boolean = "";
+      let valB: string | number | boolean = "";
+
+      switch (params.sort) {
+        case "name":
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+          break;
+        case "sku":
+          valA = a.sku.toLowerCase();
+          valB = b.sku.toLowerCase();
+          break;
+        case "category":
+          valA = a.category.toLowerCase();
+          valB = b.category.toLowerCase();
+          break;
+        case "unitCost":
+          valA = a.unitCost || 0;
+          valB = b.unitCost || 0;
+          break;
+        case "status":
+          valA = a.isActive ? 1 : 0;
+          valB = b.isActive ? 1 : 0;
+          break;
+      }
+
+      if (valA < valB) return params.dir === "desc" ? 1 : -1;
+      if (valA > valB) return params.dir === "desc" ? -1 : 1;
+      return 0;
+    });
+  }
+
   return allParts;
 }
 
@@ -51,6 +96,7 @@ const categories = [
   "safety",
   "tooling",
   "other",
+  "cleaning",
 ];
 
 export default async function PartsPage({
@@ -161,25 +207,60 @@ export default async function PartsPage({
         <>
           {/* Desktop Table View */}
           <div className="hidden lg:block overflow-hidden rounded-xl border-2 bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="border-b bg-zinc-50">
-                <tr className="text-left font-black uppercase tracking-widest text-[10px] text-zinc-500">
-                  <th className="p-4">Part</th>
-                  <th className="p-4 md:table-cell">SKU</th>
-                  <th className="p-4 lg:table-cell">Category</th>
-                  <th className="p-4 sm:table-cell">Unit Cost</th>
-                  <th className="p-4 md:table-cell">Reorder Point</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 w-10" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
+            <Table className="w-full text-sm">
+              <TableHeader className="bg-zinc-50">
+                <TableRow className="border-b text-left font-black uppercase tracking-widest text-[10px] text-zinc-500 hover:bg-transparent">
+                  <SortHeader
+                    label="Part"
+                    field="name"
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    params={params}
+                    className="p-4"
+                  />
+                  <SortHeader
+                    label="SKU"
+                    field="sku"
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    params={params}
+                    className="p-4 md:table-cell"
+                  />
+                  <SortHeader
+                    label="Category"
+                    field="category"
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    params={params}
+                    className="p-4 lg:table-cell"
+                  />
+                  <SortHeader
+                    label="Unit Cost"
+                    field="unitCost"
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    params={params}
+                    className="p-4 sm:table-cell"
+                  />
+                  <TableHead className="p-4 md:table-cell">Reorder Point</TableHead>
+                  <SortHeader
+                    label="Status"
+                    field="status"
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    params={params}
+                    className="p-4"
+                  />
+                  <TableHead className="p-4 w-10" />
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-zinc-100">
                 {parts.map((part) => (
-                  <tr
+                  <TableRow
                     key={part.id}
                     className="hover:bg-zinc-50 transition-colors group"
                   >
-                    <td className="p-4">
+                    <TableCell className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 border-2 border-transparent group-hover:border-primary-200 transition-all">
                           <Package className="h-5 w-5 text-zinc-600" />
@@ -195,44 +276,44 @@ export default async function PartsPage({
                           )}
                         </div>
                       </div>
-                    </td>
-                    <td className="p-4 md:table-cell font-mono text-xs font-bold text-zinc-500">
+                    </TableCell>
+                    <TableCell className="p-4 md:table-cell font-mono text-xs font-bold text-zinc-500">
                       {part.sku}
-                    </td>
-                    <td className="p-4 lg:table-cell">
+                    </TableCell>
+                    <TableCell className="p-4 lg:table-cell">
                       <Badge
                         variant="secondary"
                         className="capitalize font-mono text-[10px]"
                       >
                         {part.category}
                       </Badge>
-                    </td>
-                    <td className="p-4 sm:table-cell font-bold text-zinc-700">
+                    </TableCell>
+                    <TableCell className="p-4 sm:table-cell font-bold text-zinc-700">
                       {part.unitCost ? `$${part.unitCost.toFixed(2)}` : "-"}
-                    </td>
-                    <td className="p-4 md:table-cell text-zinc-500 font-mono text-xs font-bold">
+                    </TableCell>
+                    <TableCell className="p-4 md:table-cell text-zinc-500 font-mono text-xs font-bold">
                       {part.reorderPoint}
-                    </td>
-                    <td className="p-4">
+                    </TableCell>
+                    <TableCell className="p-4">
                       <Badge
                         variant={part.isActive ? "success" : "secondary"}
                         className="font-black uppercase tracking-tighter text-[10px]"
                       >
                         {part.isActive ? "Active" : "Inactive"}
                       </Badge>
-                    </td>
-                    <td className="p-4">
+                    </TableCell>
+                    <TableCell className="p-4">
                       <Link
                         href={`/assets/inventory/parts/${part.id}`}
                         className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-100 hover:text-primary-600 transition-all"
                       >
                         <ChevronRight className="h-5 w-5" />
                       </Link>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {/* Mobile Card View */}

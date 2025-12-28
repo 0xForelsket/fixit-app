@@ -1,5 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SortHeader } from "@/components/ui/sort-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -10,6 +19,8 @@ import Link from "next/link";
 type SearchParams = {
   role?: string;
   search?: string;
+  sort?: "name" | "employeeId" | "email" | "role" | "status" | "createdAt";
+  dir?: "asc" | "desc";
 };
 
 async function getUsers(params: SearchParams) {
@@ -32,6 +43,44 @@ async function getUsers(params: SearchParams) {
         u.name.toLowerCase().includes(searchLower) ||
         u.employeeId.toLowerCase().includes(searchLower)
     );
+  }
+
+  if (params.sort) {
+    filtered.sort((a, b) => {
+      let valA: string | number | boolean = "";
+      let valB: string | number | boolean = "";
+
+      switch (params.sort) {
+        case "name":
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+          break;
+        case "employeeId":
+          valA = a.employeeId.toLowerCase();
+          valB = b.employeeId.toLowerCase();
+          break;
+        case "email":
+          valA = (a.email || "").toLowerCase();
+          valB = (b.email || "").toLowerCase();
+          break;
+        case "role":
+          valA = a.assignedRole?.name || "";
+          valB = b.assignedRole?.name || "";
+          break;
+        case "status":
+          valA = a.isActive ? 1 : 0;
+          valB = b.isActive ? 1 : 0;
+          break;
+        case "createdAt":
+          valA = new Date(a.createdAt).getTime();
+          valB = new Date(b.createdAt).getTime();
+          break;
+      }
+
+      if (valA < valB) return params.dir === "desc" ? 1 : -1;
+      if (valA > valB) return params.dir === "desc" ? -1 : 1;
+      return 0;
+    });
   }
 
   return filtered;
@@ -167,19 +216,61 @@ export default async function UsersPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-          <table className="w-full">
-            <thead className="border-b bg-slate-50">
-              <tr className="text-left text-sm font-medium text-muted-foreground">
-                <th className="p-4">User</th>
-                <th className="p-4 hidden md:table-cell">Employee ID</th>
-                <th className="p-4 hidden lg:table-cell">Email</th>
-                <th className="p-4">Role</th>
-                <th className="p-4 hidden sm:table-cell">Status</th>
-                <th className="p-4 hidden xl:table-cell">Created</th>
-                <th className="p-4" />
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow className="border-b text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+                <SortHeader
+                  label="User"
+                  field="name"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4"
+                />
+                <SortHeader
+                  label="Employee ID"
+                  field="employeeId"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden md:table-cell"
+                />
+                <SortHeader
+                  label="Email"
+                  field="email"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden lg:table-cell"
+                />
+                <SortHeader
+                  label="Role"
+                  field="role"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4"
+                />
+                <SortHeader
+                  label="Status"
+                  field="status"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Created"
+                  field="createdAt"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden xl:table-cell"
+                />
+                <TableHead className="p-4" />
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
               {usersList.map((user) => {
                 const roleName = user.assignedRole?.name || "operator";
                 const roleConfig =
@@ -187,11 +278,11 @@ export default async function UsersPage({
                 const RoleIcon = roleConfig.icon;
 
                 return (
-                  <tr
+                  <TableRow
                     key={user.id}
                     className="hover:bg-slate-50 transition-colors"
                   >
-                    <td className="p-4">
+                    <TableCell className="p-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                           <User className="h-5 w-5 text-muted-foreground" />
@@ -200,18 +291,18 @@ export default async function UsersPage({
                           <p className="font-medium">{user.name}</p>
                         </div>
                       </div>
-                    </td>
-                    <td className="p-4 hidden md:table-cell">
+                    </TableCell>
+                    <TableCell className="p-4 hidden md:table-cell">
                       <Badge variant="outline" className="font-mono text-xs">
                         {user.employeeId}
                       </Badge>
-                    </td>
-                    <td className="p-4 hidden lg:table-cell">
+                    </TableCell>
+                    <TableCell className="p-4 hidden lg:table-cell">
                       <span className="text-sm text-muted-foreground">
                         {user.email || "—"}
                       </span>
-                    </td>
-                    <td className="p-4">
+                    </TableCell>
+                    <TableCell className="p-4">
                       <div className="flex flex-col gap-1">
                         <span
                           className={cn(
@@ -224,8 +315,8 @@ export default async function UsersPage({
                           {roleName.toUpperCase()}
                         </span>
                       </div>
-                    </td>
-                    <td className="p-4 hidden sm:table-cell">
+                    </TableCell>
+                    <TableCell className="p-4 hidden sm:table-cell">
                       {user.isActive ? (
                         <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
                           Active
@@ -235,24 +326,24 @@ export default async function UsersPage({
                           Inactive
                         </span>
                       )}
-                    </td>
-                    <td className="p-4 hidden xl:table-cell">
+                    </TableCell>
+                    <TableCell className="p-4 hidden xl:table-cell">
                       <span className="text-sm text-muted-foreground">
                         {formatRelativeTime(user.createdAt)}
                       </span>
-                    </td>
-                    <td className="p-4">
+                    </TableCell>
+                    <TableCell className="p-4">
                       <Button variant="ghost" size="sm" asChild>
                         <Link href={`/admin/users/${user.id}`}>
                           <Edit className="h-4 w-4" />
                         </Link>
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

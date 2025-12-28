@@ -9,11 +9,13 @@ import type { WorkOrderWithRelations } from "./work-order-card";
 interface WorkOrderListProps {
   workOrders: WorkOrderWithRelations[];
   emptyMessage?: string;
+  searchParams?: Record<string, string | undefined>;
 }
 
 export function WorkOrderList({
   workOrders,
   emptyMessage,
+  searchParams,
 }: WorkOrderListProps) {
   if (workOrders.length === 0) {
     return (
@@ -32,7 +34,7 @@ export function WorkOrderList({
   return (
     <>
       {/* Desktop Table */}
-      <WorkOrderTable workOrders={workOrders} />
+      <WorkOrderTable workOrders={workOrders} searchParams={searchParams} />
 
       {/* Mobile Feed */}
       <div className="lg:hidden space-y-3">

@@ -1,5 +1,13 @@
 import { getRoles } from "@/actions/roles";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Edit, Plus, Shield, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
@@ -45,31 +53,31 @@ export default async function RolesPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm shadow-xl shadow-zinc-200/20">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/50">
-                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          <Table className="w-full text-left border-collapse">
+            <TableHeader>
+              <TableRow className="border-b border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/50">
+                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
                   Role
-                </th>
-                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">
+                </TableHead>
+                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">
                   Description
-                </th>
-                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden lg:table-cell">
+                </TableHead>
+                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden lg:table-cell">
                   Permissions
-                </th>
-                <th className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                </TableHead>
+                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
                   Users
-                </th>
-                <th className="p-5 w-28" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
+                </TableHead>
+                <TableHead className="p-5 w-28" />
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-zinc-100">
               {roles.map((role) => (
-                <tr
+                <TableRow
                   key={role.id}
                   className="hover:bg-primary-50/30 transition-colors group"
                 >
-                  <td className="p-5">
+                  <TableCell className="p-5">
                     <div className="flex items-center gap-4">
                       <div
                         className={cn(
@@ -96,13 +104,13 @@ export default async function RolesPage() {
                         )}
                       </div>
                     </div>
-                  </td>
-                  <td className="p-5 hidden md:table-cell">
+                  </TableCell>
+                  <TableCell className="p-5 hidden md:table-cell">
                     <span className="text-sm text-zinc-600">
                       {role.description || "—"}
                     </span>
-                  </td>
-                  <td className="p-5 hidden lg:table-cell">
+                  </TableCell>
+                  <TableCell className="p-5 hidden lg:table-cell">
                     <div className="flex items-center gap-2">
                       {role.permissions.includes("*") ? (
                         <span className="inline-flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-amber-700">
@@ -114,14 +122,14 @@ export default async function RolesPage() {
                         </span>
                       )}
                     </div>
-                  </td>
-                  <td className="p-5">
+                  </TableCell>
+                  <TableCell className="p-5">
                     <div className="flex items-center gap-2 text-sm font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/50 w-fit">
                       <Users className="h-3.5 w-3.5" />
                       {role.userCount}
                     </div>
-                  </td>
-                  <td className="p-5">
+                  </TableCell>
+                  <TableCell className="p-5">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="ghost"
@@ -141,11 +149,11 @@ export default async function RolesPage() {
                         />
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

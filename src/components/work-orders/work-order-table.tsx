@@ -2,6 +2,15 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SortHeader } from "@/components/ui/sort-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { Equipment, User, WorkOrder } from "@/db/schema";
 import { formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
@@ -17,27 +26,64 @@ type WorkOrderWithRelations = WorkOrder & {
 
 interface WorkOrderTableProps {
   workOrders: WorkOrderWithRelations[];
+  searchParams?: Record<string, string | undefined>;
 }
 
-export function WorkOrderTable({ workOrders }: WorkOrderTableProps) {
+export function WorkOrderTable({ workOrders, searchParams }: WorkOrderTableProps) {
   const router = useRouter();
+  const params = searchParams || {};
 
   return (
     <div className="hidden lg:block overflow-hidden rounded-xl border bg-white shadow-sm">
-      <table className="w-full">
-        <thead className="border-b bg-slate-50">
-          <tr className="text-left text-sm font-medium text-muted-foreground">
-            <th className="p-4">ID</th>
-            <th className="p-4">Work Order</th>
-            <th className="p-4 hidden md:table-cell">Equipment</th>
-            <th className="p-4 hidden lg:table-cell">Status</th>
-            <th className="p-4 hidden lg:table-cell">Priority</th>
-            <th className="p-4 hidden xl:table-cell">Assigned To</th>
-            <th className="p-4 hidden sm:table-cell">Created</th>
-            <th className="p-4" />
-          </tr>
-        </thead>
-        <tbody className="divide-y">
+      <Table>
+        <TableHeader className="bg-slate-50">
+          <TableRow className="border-b text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+            <SortHeader
+              label="ID"
+              field="id"
+              currentSort={params.sort}
+              currentDir={params.dir}
+              params={params}
+              className="p-4"
+            />
+            <SortHeader
+              label="Work Order"
+              field="title"
+              currentSort={params.sort}
+              currentDir={params.dir}
+              params={params}
+              className="p-4"
+            />
+            <TableHead className="p-4 hidden md:table-cell">Equipment</TableHead>
+            <SortHeader
+              label="Status"
+              field="status"
+              currentSort={params.sort}
+              currentDir={params.dir}
+              params={params}
+              className="p-4 hidden lg:table-cell"
+            />
+            <SortHeader
+              label="Priority"
+              field="priority"
+              currentSort={params.sort}
+              currentDir={params.dir}
+              params={params}
+              className="p-4 hidden lg:table-cell"
+            />
+            <TableHead className="p-4 hidden xl:table-cell">Assigned To</TableHead>
+            <SortHeader
+              label="Created"
+              field="createdAt"
+              currentSort={params.sort}
+              currentDir={params.dir}
+              params={params}
+              className="p-4 hidden sm:table-cell"
+            />
+            <TableHead className="p-4" />
+          </TableRow>
+        </TableHeader>
+        <TableBody className="divide-y">
           {workOrders.map((workOrder) => (
             <WorkOrderRow
               key={workOrder.id}
@@ -45,8 +91,8 @@ export function WorkOrderTable({ workOrders }: WorkOrderTableProps) {
               router={router}
             />
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -62,16 +108,16 @@ function WorkOrderRow({
   const priorityConfig = getPriorityConfig(workOrder.priority);
 
   return (
-    <tr
+    <TableRow
       className="group hover:bg-slate-50 transition-colors cursor-pointer"
       onClick={() => router.push(`/maintenance/work-orders/${workOrder.id}`)}
     >
-      <td className="p-4">
+      <TableCell className="p-4">
         <span className="font-mono text-xs font-bold text-zinc-500">
           #{String(workOrder.id).padStart(3, "0")}
         </span>
-      </td>
-      <td className="p-4">
+      </TableCell>
+      <TableCell className="p-4">
         <div className="flex flex-col">
           <span className="font-bold text-sm text-zinc-900 leading-tight group-hover:text-primary-600 transition-colors">
             {workOrder.title}
@@ -80,27 +126,27 @@ function WorkOrderRow({
             {workOrder.description}
           </span>
         </div>
-      </td>
-      <td className="p-4 hidden md:table-cell">
+      </TableCell>
+      <TableCell className="p-4 hidden md:table-cell">
         <span className="text-sm font-medium text-zinc-700">
           {workOrder.equipment?.name || "—"}
         </span>
-      </td>
-      <td className="p-4 hidden lg:table-cell">
+      </TableCell>
+      <TableCell className="p-4 hidden lg:table-cell">
         <Badge
           className={`${statusConfig.bg} ${statusConfig.color} border-transparent font-bold uppercase text-[10px] tracking-wider hover:bg-opacity-80`}
         >
           {statusConfig.label}
         </Badge>
-      </td>
-      <td className="p-4 hidden lg:table-cell">
+      </TableCell>
+      <TableCell className="p-4 hidden lg:table-cell">
         <Badge
           className={`${priorityConfig.bg} ${priorityConfig.color} border-transparent font-bold uppercase text-[10px] tracking-wider hover:bg-opacity-80`}
         >
           {priorityConfig.label}
         </Badge>
-      </td>
-      <td className="p-4 hidden xl:table-cell">
+      </TableCell>
+      <TableCell className="p-4 hidden xl:table-cell">
         <div className="flex items-center gap-2">
           {workOrder.assignedTo ? (
             <>
@@ -115,14 +161,14 @@ function WorkOrderRow({
             <span className="text-sm text-zinc-400 italic">Unassigned</span>
           )}
         </div>
-      </td>
-      <td className="p-4 hidden sm:table-cell">
+      </TableCell>
+      <TableCell className="p-4 hidden sm:table-cell">
         <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
           <Timer className="h-3.5 w-3.5" />
           {formatRelativeTime(workOrder.createdAt)}
         </div>
-      </td>
-      <td className="p-4 text-right">
+      </TableCell>
+      <TableCell className="p-4 text-right">
         <Button
           variant="ghost"
           size="sm"
@@ -133,7 +179,7 @@ function WorkOrderRow({
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

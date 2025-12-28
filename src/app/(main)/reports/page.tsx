@@ -1,5 +1,13 @@
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import {
   type WorkOrderPriority,
@@ -337,27 +345,27 @@ export default async function ReportsPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead className="border-b bg-slate-50">
-              <tr className="text-left font-medium text-muted-foreground">
-                <th className="p-3">ID</th>
-                <th className="p-3">Title</th>
-                <th className="p-3 hidden md:table-cell">Equipment</th>
-                <th className="p-3 hidden lg:table-cell">Location</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 hidden sm:table-cell">Priority</th>
-                <th className="p-3 hidden xl:table-cell">Reported By</th>
-                <th className="p-3 hidden xl:table-cell">Assigned To</th>
-                <th className="p-3">Created</th>
-                <th className="p-3 hidden lg:table-cell">Resolved</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <Table className="w-full text-sm">
+            <TableHeader className="bg-slate-50">
+              <TableRow className="border-b text-left font-medium text-muted-foreground hover:bg-transparent">
+                <TableHead className="p-3">ID</TableHead>
+                <TableHead className="p-3">Title</TableHead>
+                <TableHead className="p-3 hidden md:table-cell">Equipment</TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">Location</TableHead>
+                <TableHead className="p-3">Status</TableHead>
+                <TableHead className="p-3 hidden sm:table-cell">Priority</TableHead>
+                <TableHead className="p-3 hidden xl:table-cell">Reported By</TableHead>
+                <TableHead className="p-3 hidden xl:table-cell">Assigned To</TableHead>
+                <TableHead className="p-3">Created</TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">Resolved</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
               {workOrdersList.map((workOrder) => (
                 <WorkOrderRow key={workOrder.id} workOrder={workOrder} />
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -457,25 +465,25 @@ function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
   const priority = priorityConfig[workOrder.priority] || priorityConfig.medium;
 
   return (
-    <tr className="hover:bg-slate-50 transition-colors">
-      <td className="p-3">
+    <TableRow className="hover:bg-slate-50 transition-colors">
+      <TableCell className="p-3">
         <Link
           href={`/maintenance/work-orders/${workOrder.id}`}
           className="font-mono text-xs text-primary-600 hover:underline"
         >
           #{workOrder.id}
         </Link>
-      </td>
-      <td className="p-3">
+      </TableCell>
+      <TableCell className="p-3">
         <span className="line-clamp-1">{workOrder.title}</span>
-      </td>
-      <td className="p-3 hidden md:table-cell text-muted-foreground">
+      </TableCell>
+      <TableCell className="p-3 hidden md:table-cell text-muted-foreground">
         {workOrder.equipment?.name || "—"}
-      </td>
-      <td className="p-3 hidden lg:table-cell text-muted-foreground">
+      </TableCell>
+      <TableCell className="p-3 hidden lg:table-cell text-muted-foreground">
         {workOrder.equipment?.location?.name || "—"}
-      </td>
-      <td className="p-3">
+      </TableCell>
+      <TableCell className="p-3">
         <span
           className={cn(
             "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
@@ -485,8 +493,8 @@ function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
         >
           {status.label}
         </span>
-      </td>
-      <td className="p-3 hidden sm:table-cell">
+      </TableCell>
+      <TableCell className="p-3 hidden sm:table-cell">
         <span
           className={cn(
             "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
@@ -496,21 +504,21 @@ function WorkOrderRow({ workOrder }: { workOrder: WorkOrderWithRelations }) {
         >
           {priority.label}
         </span>
-      </td>
-      <td className="p-3 hidden xl:table-cell text-muted-foreground">
+      </TableCell>
+      <TableCell className="p-3 hidden xl:table-cell text-muted-foreground">
         {workOrder.reportedBy?.name || "—"}
-      </td>
-      <td className="p-3 hidden xl:table-cell text-muted-foreground">
+      </TableCell>
+      <TableCell className="p-3 hidden xl:table-cell text-muted-foreground">
         {workOrder.assignedTo?.name || "Unassigned"}
-      </td>
-      <td className="p-3 text-muted-foreground">
+      </TableCell>
+      <TableCell className="p-3 text-muted-foreground">
         {new Date(workOrder.createdAt).toLocaleDateString()}
-      </td>
-      <td className="p-3 hidden lg:table-cell text-muted-foreground">
+      </TableCell>
+      <TableCell className="p-3 hidden lg:table-cell text-muted-foreground">
         {workOrder.resolvedAt
           ? new Date(workOrder.resolvedAt).toLocaleDateString()
           : "—"}
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }

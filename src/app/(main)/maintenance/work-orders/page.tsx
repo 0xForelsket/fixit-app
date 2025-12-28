@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { and, count, eq, ilike, lt, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -26,6 +26,8 @@ type SearchParams = {
   page?: string;
   assigned?: string;
   overdue?: string;
+  sort?: "id" | "title" | "priority" | "status" | "createdAt" | "dueBy";
+  dir?: "asc" | "desc";
 };
 
 const PAGE_SIZE = 10;
@@ -79,11 +81,28 @@ async function getWorkOrders(params: SearchParams, userId?: number) {
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
+  // Determine sort order
+  let orderBy = [desc(workOrders.createdAt)]; // Default
+  if (params.sort) {
+    const sortField = {
+      id: workOrders.id,
+      title: workOrders.title,
+      priority: workOrders.priority,
+      status: workOrders.status,
+      createdAt: workOrders.createdAt,
+      dueBy: workOrders.dueBy,
+    }[params.sort];
+
+    if (sortField) {
+      orderBy = [params.dir === "asc" ? asc(sortField) : desc(sortField)];
+    }
+  }
+
   const workOrdersList = await db.query.workOrders.findMany({
     where: whereClause,
     limit: PAGE_SIZE,
     offset,
-    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
+    orderBy: orderBy,
     with: {
       equipment: {
         with: {
@@ -334,6 +353,7 @@ export default async function WorkOrdersPage({
             ? "Try adjusting your filters"
             : "No work orders have been created yet."
         }
+        searchParams={params}
       />
 
       {/* Pagination */}

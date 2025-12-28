@@ -1,6 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { EquipmentBom, SparePart } from "@/db/schema";
 import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -139,34 +147,34 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
 
       {/* BOM List */}
       <div className="rounded-lg border">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-slate-50">
-            <tr className="text-left font-medium text-muted-foreground">
-              <th className="p-3">Part Name</th>
-              <th className="p-3">SKU</th>
-              <th className="p-3">Required Qty</th>
-              <th className="p-3">Notes</th>
-              <th className="p-3 w-10" />
-            </tr>
-          </thead>
-          <tbody className="divide-y">
+        <Table className="w-full text-sm">
+          <TableHeader className="bg-slate-50">
+            <TableRow className="text-left font-medium text-muted-foreground">
+              <TableHead className="p-3">Part Name</TableHead>
+              <TableHead className="p-3">SKU</TableHead>
+              <TableHead className="p-3">Required Qty</TableHead>
+              <TableHead className="p-3">Notes</TableHead>
+              <TableHead className="p-3 w-10" />
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y">
             {items.length === 0 ? (
-              <tr>
-                <td
+              <TableRow>
+                <TableCell
                   colSpan={5}
                   className="p-8 text-center text-muted-foreground"
                 >
                   No parts defined in BOM yet.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               items.map((item) => (
-                <tr key={item.id}>
-                  <td className="p-3 font-medium">{item.part.name}</td>
-                  <td className="p-3">{item.part.sku}</td>
-                  <td className="p-3">{item.quantityRequired}</td>
-                  <td className="p-3 text-muted-foreground">{item.notes}</td>
-                  <td className="p-3">
+                <TableRow key={item.id}>
+                  <TableCell className="p-3 font-medium">{item.part.name}</TableCell>
+                  <TableCell className="p-3">{item.part.sku}</TableCell>
+                  <TableCell className="p-3">{item.quantityRequired}</TableCell>
+                  <TableCell className="p-3 text-muted-foreground">{item.notes}</TableCell>
+                  <TableCell className="p-3">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -176,12 +184,12 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

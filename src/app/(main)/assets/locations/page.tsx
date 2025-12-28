@@ -1,5 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SortHeader } from "@/components/ui/sort-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { locations } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -17,6 +26,8 @@ import Link from "next/link";
 
 type SearchParams = {
   search?: string;
+  sort?: "name" | "code" | "parent" | "status" | "createdAt";
+  dir?: "asc" | "desc";
 };
 
 async function getLocations(params: SearchParams) {
@@ -35,6 +46,40 @@ async function getLocations(params: SearchParams) {
         l.name.toLowerCase().includes(params.search!.toLowerCase()) ||
         l.code.toLowerCase().includes(params.search!.toLowerCase())
     );
+  }
+
+  if (params.sort) {
+    filtered.sort((a, b) => {
+      let valA: string | number | boolean = "";
+      let valB: string | number | boolean = "";
+
+      switch (params.sort) {
+        case "name":
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+          break;
+        case "code":
+          valA = a.code.toLowerCase();
+          valB = b.code.toLowerCase();
+          break;
+        case "parent":
+          valA = a.parent?.name.toLowerCase() || "";
+          valB = b.parent?.name.toLowerCase() || "";
+          break;
+        case "status":
+          valA = a.isActive ? 1 : 0;
+          valB = b.isActive ? 1 : 0;
+          break;
+        case "createdAt":
+          valA = new Date(a.createdAt).getTime();
+          valB = new Date(b.createdAt).getTime();
+          break;
+      }
+
+      if (valA < valB) return params.dir === "desc" ? 1 : -1;
+      if (valA > valB) return params.dir === "desc" ? -1 : 1;
+      return 0;
+    });
   }
 
   // Separate root locations and children
@@ -146,24 +191,59 @@ export default async function LocationsPage({
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
-          <table className="w-full">
-            <thead className="border-b bg-slate-50">
-              <tr className="text-left text-sm font-medium text-muted-foreground">
-                <th className="p-4">Location</th>
-                <th className="p-4 hidden md:table-cell">Code</th>
-                <th className="p-4 hidden lg:table-cell">Parent</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 hidden sm:table-cell">Created</th>
-                <th className="p-4" />
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow className="border-b text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+                <SortHeader
+                  label="Location"
+                  field="name"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4"
+                />
+                <SortHeader
+                  label="Code"
+                  field="code"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden md:table-cell"
+                />
+                <SortHeader
+                  label="Parent"
+                  field="parent"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden lg:table-cell"
+                />
+                <SortHeader
+                  label="Status"
+                  field="status"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4"
+                />
+                <SortHeader
+                  label="Created"
+                  field="createdAt"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-4 hidden sm:table-cell"
+                />
+                <TableHead className="p-4" />
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y">
               {locationsList.map((location) => (
-                <tr
+                <TableRow
                   key={location.id}
                   className="hover:bg-slate-50 transition-colors"
                 >
-                  <td className="p-4">
+                  <TableCell className="p-4">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
                         <MapPin className="h-5 w-5 text-primary-600" />
@@ -177,13 +257,13 @@ export default async function LocationsPage({
                         )}
                       </div>
                     </div>
-                  </td>
-                  <td className="p-4 hidden md:table-cell">
+                  </TableCell>
+                  <TableCell className="p-4 hidden md:table-cell">
                     <Badge variant="outline" className="font-mono text-xs">
                       {location.code}
                     </Badge>
-                  </td>
-                  <td className="p-4 hidden lg:table-cell">
+                  </TableCell>
+                  <TableCell className="p-4 hidden lg:table-cell">
                     {location.parent ? (
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -194,8 +274,8 @@ export default async function LocationsPage({
                         Root
                       </span>
                     )}
-                  </td>
-                  <td className="p-4">
+                  </TableCell>
+                  <TableCell className="p-4">
                     {location.isActive ? (
                       <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
                         Active
@@ -205,23 +285,23 @@ export default async function LocationsPage({
                         Inactive
                       </span>
                     )}
-                  </td>
-                  <td className="p-4 hidden sm:table-cell">
+                  </TableCell>
+                  <TableCell className="p-4 hidden sm:table-cell">
                     <span className="text-sm text-muted-foreground">
                       {formatRelativeTime(location.createdAt)}
                     </span>
-                  </td>
-                  <td className="p-4">
+                  </TableCell>
+                  <TableCell className="p-4">
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/assets/locations/${location.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

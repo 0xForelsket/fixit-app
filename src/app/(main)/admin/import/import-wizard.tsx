@@ -1,6 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { parseCSV, validateCSVFile } from "@/lib/csv";
 import {
   AlertTriangle,
@@ -395,37 +403,37 @@ export function ImportWizard() {
 
           <div className="rounded-xl border-2 bg-white overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-zinc-100 border-b">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-bold text-zinc-600 uppercase text-xs tracking-wider">
+              <Table className="w-full text-sm">
+                <TableHeader className="bg-zinc-100 border-b">
+                  <TableRow>
+                    <TableHead className="px-4 py-3 text-left font-bold text-zinc-600 uppercase text-xs tracking-wider">
                       Row
-                    </th>
+                    </TableHead>
                     {headers.map((header) => (
-                      <th
+                      <TableHead
                         key={header}
                         className="px-4 py-3 text-left font-bold text-zinc-600 uppercase text-xs tracking-wider"
                       >
                         {header}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y">
                   {previewRows.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-zinc-50">
-                      <td className="px-4 py-3 text-zinc-400 font-mono">
+                    <TableRow key={idx} className="hover:bg-zinc-50">
+                      <TableCell className="px-4 py-3 text-zinc-400 font-mono">
                         {idx + 2}
-                      </td>
+                      </TableCell>
                       {row.map((cell, cellIdx) => (
-                        <td key={cellIdx} className="px-4 py-3 text-zinc-900">
+                        <TableCell key={cellIdx} className="px-4 py-3 text-zinc-900">
                           {cell || <span className="text-zinc-300">—</span>}
-                        </td>
+                        </TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
 
@@ -517,36 +525,36 @@ export function ImportWizard() {
                     Errors ({result.errors.length})
                   </h4>
                   <div className="max-h-48 overflow-y-auto rounded-lg border border-danger-200 bg-danger-50">
-                    <table className="w-full text-sm">
-                      <thead className="bg-danger-100 sticky top-0">
-                        <tr>
-                          <th className="px-3 py-2 text-left text-danger-800">
+                    <Table className="w-full text-sm">
+                      <TableHeader className="bg-danger-100 sticky top-0">
+                        <TableRow>
+                          <TableHead className="px-3 py-2 text-left text-danger-800">
                             Row
-                          </th>
-                          <th className="px-3 py-2 text-left text-danger-800">
+                          </TableHead>
+                          <TableHead className="px-3 py-2 text-left text-danger-800">
                             Field
-                          </th>
-                          <th className="px-3 py-2 text-left text-danger-800">
+                          </TableHead>
+                          <TableHead className="px-3 py-2 text-left text-danger-800">
                             Error
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-danger-200">
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody className="divide-y divide-danger-200">
                         {result.errors.map((err, idx) => (
-                          <tr key={idx}>
-                            <td className="px-3 py-2 font-mono text-danger-700">
+                          <TableRow key={idx}>
+                            <TableCell className="px-3 py-2 font-mono text-danger-700">
                               {err.row}
-                            </td>
-                            <td className="px-3 py-2 text-danger-700">
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-danger-700">
                               {err.field || "—"}
-                            </td>
-                            <td className="px-3 py-2 text-danger-800">
+                            </TableCell>
+                            <TableCell className="px-3 py-2 text-danger-800">
                               {err.message}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               )}
@@ -616,36 +624,36 @@ export function ImportWizard() {
                   Failed Rows ({result.errors.length})
                 </h4>
                 <div className="max-h-48 overflow-y-auto rounded-lg border border-danger-200 bg-danger-50">
-                  <table className="w-full text-sm">
-                    <thead className="bg-danger-100 sticky top-0">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-danger-800">
+                  <Table className="w-full text-sm">
+                    <TableHeader className="bg-danger-100 sticky top-0">
+                      <TableRow>
+                        <TableHead className="px-3 py-2 text-left text-danger-800">
                           Row
-                        </th>
-                        <th className="px-3 py-2 text-left text-danger-800">
+                        </TableHead>
+                        <TableHead className="px-3 py-2 text-left text-danger-800">
                           Field
-                        </th>
-                        <th className="px-3 py-2 text-left text-danger-800">
+                        </TableHead>
+                        <TableHead className="px-3 py-2 text-left text-danger-800">
                           Error
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-danger-200">
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="divide-y divide-danger-200">
                       {result.errors.map((err, idx) => (
-                        <tr key={idx}>
-                          <td className="px-3 py-2 font-mono text-danger-700">
+                        <TableRow key={idx}>
+                          <TableCell className="px-3 py-2 font-mono text-danger-700">
                             {err.row}
-                          </td>
-                          <td className="px-3 py-2 text-danger-700">
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-danger-700">
                             {err.field || "—"}
-                          </td>
-                          <td className="px-3 py-2 text-danger-800">
+                          </TableCell>
+                          <TableCell className="px-3 py-2 text-danger-800">
                             {err.message}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             )}

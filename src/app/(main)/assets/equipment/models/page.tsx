@@ -1,5 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { db } from "@/db";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -33,30 +41,30 @@ export default async function EquipmentModelsPage() {
       </div>
 
       <div className="rounded-xl border bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="border-b bg-slate-50">
-            <tr className="text-left font-medium text-muted-foreground">
-              <th className="p-3">Model Name</th>
-              <th className="p-3">Manufacturer</th>
-              <th className="p-3">Equipment</th>
-              <th className="p-3">BOM Parts</th>
-              <th className="p-3 w-20" />
-            </tr>
-          </thead>
-          <tbody className="divide-y">
+        <Table className="w-full text-sm">
+          <TableHeader className="bg-slate-50">
+            <TableRow className="text-left font-medium text-muted-foreground">
+              <TableHead className="p-3">Model Name</TableHead>
+              <TableHead className="p-3">Manufacturer</TableHead>
+              <TableHead className="p-3">Equipment</TableHead>
+              <TableHead className="p-3">BOM Parts</TableHead>
+              <TableHead className="p-3 w-20" />
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y">
             {models.length === 0 ? (
-              <tr>
-                <td
+              <TableRow>
+                <TableCell
                   colSpan={5}
                   className="p-8 text-center text-muted-foreground"
                 >
                   No equipment models defined yet.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               models.map((model) => (
-                <tr key={model.id} className="hover:bg-slate-50">
-                  <td className="p-3 font-medium">
+                <TableRow key={model.id} className="hover:bg-slate-50">
+                  <TableCell className="p-3 font-medium">
                     <Link
                       href={`/assets/equipment/models/${model.id}`}
                       className="hover:underline"
@@ -68,26 +76,26 @@ export default async function EquipmentModelsPage() {
                         {model.description}
                       </p>
                     )}
-                  </td>
-                  <td className="p-3">{model.manufacturer || "-"}</td>
-                  <td className="p-3">
+                  </TableCell>
+                  <TableCell className="p-3">{model.manufacturer || "-"}</TableCell>
+                  <TableCell className="p-3">
                     <Badge variant="secondary">
                       {model.equipment.length} active
                     </Badge>
-                  </td>
-                  <td className="p-3">{model.bom.length} parts</td>
-                  <td className="p-3 text-right">
+                  </TableCell>
+                  <TableCell className="p-3">{model.bom.length} parts</TableCell>
+                  <TableCell className="p-3 text-right">
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/assets/equipment/models/${model.id}`}>
                         Edit
                       </Link>
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

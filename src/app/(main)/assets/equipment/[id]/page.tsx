@@ -1,5 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
@@ -436,24 +444,24 @@ export default async function EquipmentDetailPage({
             <TabsContent value="bom" className="mt-4">
               {/* Full table for desktop */}
               <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-slate-50 border-b">
-                    <tr className="text-left font-medium text-muted-foreground">
-                      <th className="p-3">Part</th>
-                      <th className="p-3">SKU</th>
-                      <th className="p-3 text-center">Required</th>
-                      <th className="p-3 text-center">In Stock</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
+                <Table className="w-full text-sm">
+                  <TableHeader className="bg-slate-50 border-b">
+                    <TableRow className="text-left font-medium text-muted-foreground">
+                      <TableHead className="p-3">Part</TableHead>
+                      <TableHead className="p-3">SKU</TableHead>
+                      <TableHead className="p-3 text-center">Required</TableHead>
+                      <TableHead className="p-3 text-center">In Stock</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y">
                     {equipmentItem.model?.bom.map((item) => (
-                      <tr key={item.id}>
-                        <td className="p-3 font-medium">{item.part.name}</td>
-                        <td className="p-3">{item.part.sku}</td>
-                        <td className="p-3 text-center">
+                      <TableRow key={item.id}>
+                        <TableCell className="p-3 font-medium">{item.part.name}</TableCell>
+                        <TableCell className="p-3">{item.part.sku}</TableCell>
+                        <TableCell className="p-3 text-center">
                           {item.quantityRequired}
-                        </td>
-                        <td className="p-3 text-center">
+                        </TableCell>
+                        <TableCell className="p-3 text-center">
                           <Badge
                             variant={
                               item.part.inventoryLevels.reduce(
@@ -469,11 +477,11 @@ export default async function EquipmentDetailPage({
                               0
                             )}
                           </Badge>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </TabsContent>
             <TabsContent value="schedules" className="mt-4">
