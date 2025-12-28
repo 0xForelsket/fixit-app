@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { PERMISSIONS } from "@/lib/permissions";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf, requirePermission } from "@/lib/session";
 import { createEquipmentSchema, paginationSchema } from "@/lib/validations";
 import { and, eq, ilike, sql } from "drizzle-orm";
@@ -89,6 +90,27 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting check
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `equipment:${clientIp}`,
+      RATE_LIMITS.api.limit,
+      RATE_LIMITS.api.windowMs
+    );
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Remaining": rateLimit.remaining.toString(),
+            "X-RateLimit-Reset": rateLimit.reset.toString(),
+          },
+        }
+      );
+    }
+
     await requireCsrf(request);
     await requirePermission(PERMISSIONS.EQUIPMENT_CREATE);
 
