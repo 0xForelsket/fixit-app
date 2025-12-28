@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
@@ -63,37 +64,30 @@ export default async function InventoryPage() {
   return (
     <div className="space-y-10 animate-in">
       {/* Header */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-zinc-200 pb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
-            Inventory <span className="text-primary-600">Control</span>
-          </h1>
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <Box className="h-3.5 w-3.5" />
-            {stats.totalParts} UNIQUE SKUS • STOCK VALUE: $
-            {stats.totalValue.toLocaleString()}
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            asChild
-          >
-            <Link href="/assets/inventory/parts">
-              <Package className="mr-2 h-4 w-4" />
-              CATALOG
-            </Link>
-          </Button>
-          <Button
-            asChild
-          >
-            <Link href="/assets/inventory/parts/new">
-              <Plus className="mr-2 h-4 w-4" />
-              ADD NEW PART
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Inventory"
+        highlight="Control"
+        description={`${stats.totalParts} UNIQUE SKUS • STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
+        icon={Box}
+      >
+        <Button
+          variant="ghost"
+          asChild
+        >
+          <Link href="/assets/inventory/parts">
+            <Package className="mr-2 h-4 w-4" />
+            CATALOG
+          </Link>
+        </Button>
+        <Button
+          asChild
+        >
+          <Link href="/assets/inventory/parts/new">
+            <Plus className="mr-2 h-4 w-4" />
+            ADD NEW PART
+          </Link>
+        </Button>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">
