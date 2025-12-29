@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Clock, ShieldCheck, Wrench } from "lucide-react";
+import { ArrowRight, BarChart3, Clock, Code2, Github, Laptop, Server, ShieldCheck, Wrench } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -13,24 +13,23 @@ export default function MarketingPage() {
           <span className="text-xl font-bold tracking-tight font-serif">FIXIT</span>
         </div>
         <div className="flex items-center gap-6 text-sm font-medium">
-          <div className="flex items-center gap-6 text-sm font-medium">
-            <Link href="https://github.com/0xForelsket/fixit-app" className="hidden md:block hover:opacity-70 transition-opacity">
-              GitHub
+          <Link href="https://github.com/0xForelsket/fixit-app" className="hidden md:block hover:opacity-70 transition-opacity">
+            GitHub
+          </Link>
+          <Link href="/docs" className="hidden md:block hover:opacity-70 transition-opacity">
+            Documentation
+          </Link>
+          <div className="h-4 w-[1px] bg-black/10 hidden md:block" />
+          <Link href="http://app.localhost:3000/login" className="hover:opacity-70 transition-opacity">
+            Live Demo
+          </Link>
+          <Button asChild className="bg-black text-[#F3F1E7] hover:bg-black/80 rounded-lg px-5 h-9 font-medium">
+            <Link href="https://github.com/0xForelsket/fixit-app">
+               <Github className="mr-2 h-4 w-4" /> Star on GitHub
             </Link>
-            <Link href="/docs" className="hidden md:block hover:opacity-70 transition-opacity">
-              Documentation
-            </Link>
-            <div className="h-4 w-[1px] bg-black/10 hidden md:block" />
-            <Link href="http://app.localhost:3000/login" className="hover:opacity-70 transition-opacity">
-              Live Demo
-            </Link>
-            <Button asChild className="bg-black text-[#F3F1E7] hover:bg-black/80 rounded-lg px-5 h-9 font-medium">
-              <Link href="https://github.com/0xForelsket/fixit-app">
-                 <Github className="mr-2 h-4 w-4" /> Star on GitHub
-              </Link>
-            </Button>
-          </div>
-        </nav>
+          </Button>
+        </div>
+      </nav>
 
         <main className="px-6 md:px-12 max-w-7xl mx-auto pt-16 md:pt-24 pb-20">
           {/* Hero Section */}
