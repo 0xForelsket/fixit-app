@@ -338,9 +338,10 @@ FixIt works offline for basic browsing:
 4. Sync happens automatically when connected
 
 ### Getting Help
+- Use the **[GitHub Discussions](https://github.com/0xForelsket/fixit-app/discussions)** for general questions
+- Report bugs via **[GitHub Issues](https://github.com/0xForelsket/fixit-app/issues)**
 - Contact your system administrator for access issues
-- Use the in-app feedback option for suggestions
-- Check the FAQ section for common questions
+- Check the internal FAQ if available
 
 ---
 

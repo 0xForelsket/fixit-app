@@ -747,5 +747,6 @@ bun run db:push
 For issues:
 1. Check application logs
 2. Review this troubleshooting guide
-3. Check GitHub issues for known problems
-4. Open a new issue with logs and environment details
+3. **[Search existing GitHub Issues](https://github.com/0xForelsket/fixit-app/issues)**
+4. **[Open a new Issue](https://github.com/0xForelsket/fixit-app/issues/new)** if you've found a bug
+5. Join the **[GitHub Discussions](https://github.com/0xForelsket/fixit-app/discussions)** for help

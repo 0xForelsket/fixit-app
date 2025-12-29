@@ -284,7 +284,7 @@ See [AGENTS.md](./AGENTS.md) for detailed coding conventions, patterns, and guid
 
 ### Current Status
 
-See [improvement_plan.md](./improvement_plan.md) for known issues and prioritized improvements.
+We are currently in active development. Check out our [Roadmap](./ROADMAP.md) and [Issues](https://github.com/0xForelsket/fixit-app/issues) to see what we're working on.
 
 ## Contributing
 
@@ -298,4 +298,4 @@ See [improvement_plan.md](./improvement_plan.md) for known issues and prioritize
 
 ## License
 
-MIT
+MIT License. Copyright (c) 2025 0xForelsket.
