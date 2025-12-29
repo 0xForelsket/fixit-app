@@ -55,6 +55,21 @@ export default async function EquipmentPage({ params }: PageProps) {
           employeeId: true,
         },
       },
+      parent: {
+        columns: {
+          id: true,
+          name: true,
+          code: true,
+        },
+      },
+      children: {
+        columns: {
+          id: true,
+          name: true,
+          code: true,
+          status: true,
+        },
+      },
     },
   });
 

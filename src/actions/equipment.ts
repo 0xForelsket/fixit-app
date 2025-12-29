@@ -36,6 +36,7 @@ export async function createEquipment(
     locationId: Number(formData.get("locationId")),
     ownerId: formData.get("ownerId") ? Number(formData.get("ownerId")) : null,
     typeId: formData.get("typeId") ? Number(formData.get("typeId")) : null,
+    parentId: formData.get("parentId") ? Number(formData.get("parentId")) : null,
     status: formData.get("status") || "operational",
   };
 
@@ -103,6 +104,9 @@ export async function updateEquipment(
   }
   if (typeId !== null) {
     rawData.typeId = typeId ? Number(typeId) : null;
+  }
+  if (formData.get("parentId") !== null) {
+    rawData.parentId = formData.get("parentId") ? Number(formData.get("parentId")) : null;
   }
   if (status) rawData.status = status;
 

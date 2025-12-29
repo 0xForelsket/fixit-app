@@ -19,6 +19,7 @@ export const createEquipmentSchema = z.object({
   locationId: z.number().int().positive("Location is required"),
   ownerId: z.number().int().positive().optional().nullable(),
   typeId: z.number().int().positive().optional().nullable(),
+  parentId: z.number().int().positive().optional().nullable(),
   status: equipmentStatusSchema.default("operational"),
 });
 
@@ -40,6 +41,7 @@ export const updateEquipmentSchema = z.object({
   locationId: z.number().int().positive().optional(),
   ownerId: z.number().int().positive().optional().nullable(),
   typeId: z.number().int().positive().optional().nullable(),
+  parentId: z.number().int().positive().optional().nullable(),
   status: equipmentStatusSchema.optional(),
 });
 

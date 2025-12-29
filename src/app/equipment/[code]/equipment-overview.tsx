@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
+  ArrowRight,
   Calendar,
   CheckCircle2,
   ClipboardCheck,
@@ -17,6 +18,17 @@ interface EquipmentOverviewProps {
     name: string;
     code: string;
     status: "operational" | "down" | "maintenance";
+    parent?: {
+      id: number;
+      name: string;
+      code: string;
+    } | null;
+    children?: {
+      id: number;
+      name: string;
+      code: string;
+      status: "operational" | "down" | "maintenance";
+    }[] | null;
   };
   hasDuePM: boolean;
   openWorkOrderCount: number;
@@ -28,7 +40,7 @@ export function EquipmentOverview({
   openWorkOrderCount,
 }: EquipmentOverviewProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* PM Alert - Compact */}
       {hasDuePM && (
         <div className="rounded-xl border border-warning-200 bg-amber-50/50 p-3 flex items-center justify-between gap-4 shadow-sm">
@@ -50,6 +62,60 @@ export function EquipmentOverview({
           >
             <Link href="#maintenance">Start</Link>
           </Button>
+        </div>
+      )}
+
+      {/* Hierarchy Section */}
+      {(equipment.parent || (equipment.children && equipment.children.length > 0)) && (
+        <div className="space-y-2">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+            Asset Hierarchy
+          </h3>
+          <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
+            {/* Parent Asset */}
+            {equipment.parent && (
+              <div className="p-3 bg-zinc-50/50 border-b border-zinc-100 flex items-center justify-between group">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-200 text-zinc-500">
+                    <Wrench className="h-3 w-3" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-tighter">Parent Asset</p>
+                    <p className="text-xs font-bold text-zinc-900 truncate tracking-tight">{equipment.parent.name}</p>
+                  </div>
+                </div>
+                <Link href={`/equipment/${equipment.parent.code}`} className="text-[10px] font-black text-primary-600 hover:text-primary-700 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  VIEW PARENT
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            )}
+
+            {/* Sub-assets */}
+            {equipment.children && equipment.children.length > 0 && (
+              <div className="divide-y divide-zinc-50">
+                {equipment.children.map((child) => (
+                  <Link
+                    key={child.id}
+                    href={`/equipment/${child.code}`}
+                    className="flex items-center justify-between p-3 hover:bg-zinc-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "h-2 w-2 rounded-full",
+                        child.status === 'operational' ? 'bg-emerald-500' : 'bg-rose-500'
+                      )} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-zinc-900 truncate leading-none mb-1">{child.name}</p>
+                        <p className="text-[9px] font-mono font-bold text-zinc-400 uppercase">{child.code}</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-zinc-200 group-hover:text-zinc-400 transition-colors" />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

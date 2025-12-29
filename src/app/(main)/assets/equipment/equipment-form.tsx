@@ -20,12 +20,14 @@ interface EquipmentFormProps {
     type?: {
       categoryId: number;
     } | null;
+    parentId: number | null;
   };
   locations: { id: number; name: string }[];
   users: { id: number; name: string }[];
   models: { id: number; name: string }[];
   categories: EquipmentCategory[];
   types: EquipmentType[];
+  equipmentList?: { id: number; name: string; code: string }[];
   isNew?: boolean;
 }
 
@@ -36,6 +38,7 @@ export function EquipmentForm({
   models,
   categories,
   types,
+  equipmentList = [],
   isNew,
 }: EquipmentFormProps) {
   const router = useRouter();
@@ -55,6 +58,7 @@ export function EquipmentForm({
     equipment?.type?.categoryId?.toString() || ""
   );
   const [typeId, setTypeId] = useState(equipment?.typeId?.toString() || "");
+  const [parentId, setParentId] = useState(equipment?.parentId?.toString() || "");
 
   const filteredTypes = useMemo(() => {
     if (!categoryId) return [];
@@ -77,6 +81,7 @@ export function EquipmentForm({
         ownerId: ownerId ? Number.parseInt(ownerId) : null,
         modelId: modelId ? Number.parseInt(modelId) : null,
         typeId: typeId ? Number.parseInt(typeId) : null,
+        parentId: parentId ? Number.parseInt(parentId) : null,
       };
 
       const url = isNew ? "/api/equipment" : `/api/equipment/${equipment?.id}`;
@@ -310,7 +315,6 @@ export function EquipmentForm({
               ))}
             </select>
           </div>
-
           <div>
             <label htmlFor="owner" className="mb-1 block text-sm font-medium">
               Owner
@@ -328,6 +332,30 @@ export function EquipmentForm({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label htmlFor="parent" className="mb-1 block text-sm font-medium">
+              Parent Asset
+            </label>
+            <select
+              id="parent"
+              value={parentId}
+              onChange={(e) => setParentId(e.target.value)}
+              className="w-full rounded-lg border px-3 py-2 text-sm"
+            >
+              <option value="">No Parent (Top Level)</option>
+              {equipmentList
+                .filter((e) => e.id !== equipment?.id)
+                .map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.name} ({e.code})
+                  </option>
+                ))}
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Define where this asset belongs (e.g. Machine belongs to Production Line).
+            </p>
           </div>
         </div>
       </div>

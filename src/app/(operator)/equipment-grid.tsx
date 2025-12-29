@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Factory,
   MapPin,
+  Layers,
 } from "lucide-react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -14,6 +15,7 @@ import { saveToRecent } from "@/components/home/recent-equipment";
 
 interface EquipmentWithLocation extends Equipment {
   location: Location | null;
+  children?: { id: number }[];
 }
 
 interface EquipmentGridProps {
@@ -82,6 +84,14 @@ function EquipmentCard({
           <span className="inline-flex shrink-0 items-center rounded bg-zinc-100 px-1 py-0.5 text-[9px] font-mono font-bold text-zinc-500 uppercase">
             {equipment.code}
           </span>
+          {equipment.parentId && (
+            <span className="inline-flex shrink-0 items-center rounded bg-zinc-50 border border-zinc-200 px-1 py-0.5 text-[8px] font-black text-zinc-400 uppercase tracking-tighter">
+              Sub-asset
+            </span>
+          )}
+          {equipment.children && equipment.children.length > 0 && (
+            <Layers className="h-3 w-3 text-primary-500/50" />
+          )}
         </div>
         
         {equipment.location && (

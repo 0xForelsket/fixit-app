@@ -212,6 +212,7 @@ export const equipment = sqliteTable(
       .references(() => locations.id)
       .notNull(),
     ownerId: integer("owner_id").references(() => users.id), // Owner
+    parentId: integer("parent_id"), // Self-reference for hierarchy (Station -> Machine -> Component)
     status: text("status", { enum: equipmentStatuses })
       .notNull()
       .default("operational"),
@@ -588,6 +589,14 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
     fields: [equipment.ownerId],
     references: [users.id],
     relationName: "equipmentOwner",
+  }),
+  parent: one(equipment, {
+    fields: [equipment.parentId],
+    references: [equipment.id],
+    relationName: "equipmentHierarchy",
+  }),
+  children: many(equipment, {
+    relationName: "equipmentHierarchy",
   }),
   workOrders: many(workOrders),
   maintenanceSchedules: many(maintenanceSchedules),

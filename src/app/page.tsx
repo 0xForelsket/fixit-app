@@ -63,6 +63,9 @@ export default async function Home({ searchParams }: PageProps) {
     orderBy: (equipment, { asc }) => [asc(equipment.name)],
     with: {
       location: true,
+      children: {
+        columns: { id: true }
+      }
     },
   });
 
