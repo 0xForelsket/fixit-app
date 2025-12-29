@@ -5,7 +5,9 @@ import {
   users,
   workOrders,
 } from "@/db/schema";
+import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
@@ -14,6 +16,8 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     const user = await requireAuth();
 
@@ -97,17 +101,16 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
-    console.error("Get work orders error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch work orders" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to fetch work orders");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     const clientIp = getClientIp(request);
     const rateLimit = checkRateLimit(
@@ -117,18 +120,8 @@ export async function POST(request: Request) {
     );
 
     if (!rateLimit.success) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(
-              Math.ceil((rateLimit.reset - Date.now()) / 1000)
-            ),
-            "X-RateLimit-Remaining": "0",
-          },
-        }
-      );
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
     }
 
     await requireCsrf(request);
@@ -138,10 +131,7 @@ export async function POST(request: Request) {
     const result = createWorkOrderSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: result.error.flatten() },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Invalid input data", requestId);
     }
 
     const { equipmentId, type, title, description, priority } = result.data;
@@ -201,23 +191,25 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json(workOrder, { status: 201 });
+    apiLogger.info(
+      { requestId, workOrderId: workOrder.id, userId: user.id },
+      "Work order created"
+    );
+
+    return apiSuccess(workOrder, HttpStatus.CREATED, requestId);
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return ApiErrors.unauthorized(requestId);
       }
       if (
         error.message === "CSRF token missing" ||
         error.message === "CSRF token invalid"
       ) {
-        return NextResponse.json({ error: error.message }, { status: 403 });
+        return ApiErrors.forbidden(requestId);
       }
     }
-    console.error("Create work order error:", error);
-    return NextResponse.json(
-      { error: "Failed to create work order" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to create work order");
+    return ApiErrors.internal(error, requestId);
   }
 }
