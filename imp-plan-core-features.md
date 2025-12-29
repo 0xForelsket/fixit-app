@@ -50,10 +50,10 @@ This plan outlines the steps to implement the missing "basic" features identifie
 - [x] **Schema**: Create a `vendors` table.
   - Fields: `name`, `contactPerson`, `email`, `phone`, `website`, `address`.
 - [x] **Relation**: Add `vendorId` to `spare_parts` table.
-- [ ] **UI**:
-  - Add "Vendors" tab under "Assets".
-  - CRUD pages for Vendors.
-  - Dropdown on Spare Part form to select Vendor.
+- [x] **UI**:
+  - [x] Add "Vendors" tab under "Assets".
+  - [x] CRUD pages for Vendors.
+  - [ ] Dropdown on Spare Part form to select Vendor.
 
 ## 5. Audit Logs (System-Wide)
 **Goal:** Track who did what to critical assets.
