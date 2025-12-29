@@ -85,31 +85,26 @@ export function middleware(request: NextRequest) {
 
   // Handle subdomain routing
   if (isAppSubdomain) {
-    // If on app subdomain, rewriting to (app) path
-    // But first, check auth for app routes
-    if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
-       // Allow public paths on app subdomain (like /login)
-       // We rewrite them to (app) group if they exist there, or let them pass if they are shared
-       // For now, let's assume /login is shared or in (app)
-       return NextResponse.rewrite(new URL(`/(app)${pathname}`, request.url));
-    }
-
     if (!isSessionValid(request)) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      const response = NextResponse.redirect(loginUrl);
-      response.cookies.delete(SESSION_COOKIE);
-      response.cookies.delete(SESSION_EXPIRY_COOKIE);
-      return response;
+       // If trying to access a protected route without session
+       // Redirect to login (on the same subdomain)
+       if (!PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
+           const loginUrl = new URL("/login", request.url);
+           loginUrl.searchParams.set("redirect", pathname);
+           const response = NextResponse.redirect(loginUrl);
+           response.cookies.delete(SESSION_COOKIE);
+           response.cookies.delete(SESSION_EXPIRY_COOKIE);
+           return response;
+       }
     }
     
-    // Valid session on app subdomain
-    return NextResponse.rewrite(new URL(`/(app)${pathname}`, request.url));
+    // Valid session or public path on app subdomain
+    // We do NOT rewrite to /(app) because route groups are transparent.
+    // The file at src/app/(app)/page.tsx serves /.
+    return NextResponse.next();
   } 
 
   // Root domain (Marketing)
-  // If user visits root domain, show marketing page
-  // We rewrite to (marketing) group
   
   // Specific redirects from root to app
   if (pathname === "/login" || pathname === "/dashboard") {
@@ -118,7 +113,16 @@ export function middleware(request: NextRequest) {
        return NextResponse.redirect(url);
   }
 
-  return NextResponse.rewrite(new URL(`/(marketing)${pathname}`, request.url));
+  // Rewrite root / to /home to serve the marketing page (src/app/(marketing)/home/page.tsx)
+  if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/home", request.url));
+  }
+
+  // Allow other paths on root domain to pass through (e.g. /about, if it existed)
+  // But strictly, we might want to block app routes from appearing on root domain?
+  // For now, let's just let them pass or rewrite to /home if not found?
+  // A simple strategy is to let Next.js handle 404s for others, or just next()
+  return NextResponse.next();
 }
 
 export const config = {
