@@ -12,13 +12,13 @@ export function UserHeader({ user, avatarUrl, unreadCount }: UserHeaderProps) {
   return (
     <>
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-md shadow-sm">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md shadow-sm transition-colors duration-300">
         <div className="container mx-auto flex h-16 items-center justify-between px-4 max-w-7xl">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 text-white font-bold shadow-md shadow-primary-500/20 group-hover:scale-105 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
               F
             </div>
-            <span className="text-xl font-black tracking-tight bg-gradient-to-r from-zinc-900 to-zinc-700 bg-clip-text text-transparent">
+            <span className="text-xl font-bold tracking-tight text-foreground font-serif-brand">
               FixIt
             </span>
           </Link>
@@ -30,7 +30,6 @@ export function UserHeader({ user, avatarUrl, unreadCount }: UserHeaderProps) {
           />
         </div>
       </header>
-
     </>
   );
 }

@@ -15,12 +15,13 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
         success:
-          "border-success-300 bg-success-100 text-success-800 font-semibold",
+          "border-success-500/30 bg-success-500/15 text-success-700 font-bold uppercase tracking-wider text-[10px]",
         warning:
-          "border-warning-300 bg-warning-100 text-warning-800 font-semibold",
-        danger: "border-danger-300 bg-danger-100 text-danger-800 font-semibold",
+          "border-warning-500/30 bg-warning-500/15 text-warning-700 font-bold uppercase tracking-wider text-[10px]",
+        danger:
+          "border-danger-500/30 bg-danger-500/15 text-danger-700 font-bold uppercase tracking-wider text-[10px]",
         critical:
-          "border-rose-400 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-bold shadow-md shadow-rose-500/25 animate-gentle-pulse",
+          "border-danger-600 bg-gradient-to-r from-danger-500 to-danger-600 text-white font-black shadow-md shadow-danger-500/25 animate-gentle-pulse uppercase tracking-widest text-[10px]",
       },
     },
     defaultVariants: {

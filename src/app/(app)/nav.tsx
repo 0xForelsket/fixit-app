@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { SessionUser } from "@/lib/session";
+import { cn } from "@/lib/utils";
 import { LogOut, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -40,11 +41,12 @@ export function OperatorNav({
           <Link
             key={item.href}
             href={item.href}
-            className={`px-4 py-3 text-sm font-bold rounded-lg transition-colors min-h-[48px] flex items-center ${
+            className={cn(
+              "px-4 py-3 text-sm font-bold rounded-lg transition-colors min-h-[48px] flex items-center",
               pathname === item.href
-                ? "bg-primary-500/10 text-primary-600"
-                : "text-zinc-500 hover:bg-primary-50 hover:text-primary-600"
-            }`}
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-primary"
+            )}
           >
             {item.label}
             {item.href === "/my-tickets" && unreadCount > 0 && (
@@ -56,22 +58,22 @@ export function OperatorNav({
         ))}
       </nav>
 
-      <div className="flex items-center gap-3 border-l border-zinc-200 pl-4">
+      <div className="flex items-center gap-3 border-l border-border pl-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-3 hover:bg-zinc-100 p-2 rounded-lg transition-colors group outline-none"
+              className="flex items-center gap-3 hover:bg-muted p-2 rounded-lg transition-colors group outline-none"
             >
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-zinc-900 group-hover:text-primary-600 transition-colors">
+                <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                   {user.name}
                 </p>
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                   {user.roleName}
                 </p>
               </div>
-              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-zinc-200 bg-zinc-50 shadow-sm group-hover:border-primary-300 group-hover:ring-2 group-hover:ring-primary-100 transition-all">
+              <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow-sm group-hover:border-primary/50 group-hover:ring-2 group-hover:ring-primary/10 transition-all">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -79,7 +81,7 @@ export function OperatorNav({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-zinc-400">
+                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                     <Users className="h-4 w-4" />
                   </div>
                 )}
@@ -100,7 +102,7 @@ export function OperatorNav({
               onSelect={async () => {
                 await logout();
               }}
-              className="w-full cursor-pointer text-danger-600 focus:text-danger-600 focus:bg-danger-50 font-medium"
+              className="w-full cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 font-medium"
             >
               <LogOut className="mr-2 h-4 w-4" />
               Log out

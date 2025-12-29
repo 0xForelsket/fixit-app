@@ -38,53 +38,53 @@ export function StatsCard({
 }: StatsCardProps) {
   const styles = {
     default: {
-      border: "border-zinc-200",
-      bg: "bg-white",
-      iconBg: "bg-zinc-100",
-      iconColor: "text-zinc-600",
-      textColor: "text-zinc-900",
+      border: "border-border",
+      bg: "bg-card",
+      iconBg: "bg-muted",
+      iconColor: "text-muted-foreground",
+      textColor: "text-foreground",
     },
     primary: {
-      border: "border-primary-200",
-      bg: "bg-primary-50/50",
-      iconBg: "bg-primary-100",
-      iconColor: "text-primary-600",
-      textColor: "text-primary-900",
+      border: "border-primary/30",
+      bg: "bg-primary/10",
+      iconBg: "bg-primary/20",
+      iconColor: "text-primary",
+      textColor: "text-primary",
     },
     secondary: {
-      border: "border-zinc-200",
-      bg: "bg-zinc-50/50",
-      iconBg: "bg-white",
-      iconColor: "text-zinc-500",
-      textColor: "text-zinc-700",
+      border: "border-border",
+      bg: "bg-muted/60",
+      iconBg: "bg-card",
+      iconColor: "text-muted-foreground",
+      textColor: "text-foreground/80",
     },
     success: {
-      border: "border-success-200",
-      bg: "bg-success-50/50",
-      iconBg: "bg-success-100",
+      border: "border-success-500/30",
+      bg: "bg-success-500/15",
+      iconBg: "bg-success-500/20",
       iconColor: "text-success-600",
       textColor: "text-success-700",
     },
     warning: {
-      border: "border-warning-200",
-      bg: "bg-warning-50/50",
-      iconBg: "bg-warning-100",
+      border: "border-warning-500/30",
+      bg: "bg-warning-500/15",
+      iconBg: "bg-warning-500/20",
       iconColor: "text-warning-600",
       textColor: "text-warning-700",
     },
     danger: {
-      border: "border-danger-200",
-      bg: "bg-danger-50/50",
-      iconBg: "bg-danger-100",
+      border: "border-danger-500/30",
+      bg: "bg-danger-500/15",
+      iconBg: "bg-danger-500/20",
       iconColor: "text-danger-600",
       textColor: "text-danger-700",
     },
     info: {
-      border: "border-indigo-200",
-      bg: "bg-indigo-50/50",
-      iconBg: "bg-indigo-100",
-      iconColor: "text-indigo-600",
-      textColor: "text-indigo-900",
+      border: "border-accent/30",
+      bg: "bg-accent/15",
+      iconBg: "bg-accent/20",
+      iconColor: "text-accent",
+      textColor: "text-accent",
     },
   };
 
@@ -106,8 +106,8 @@ export function StatsCard({
             className={cn(
               "flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider border",
               trend.positive
-                ? "bg-success-100 text-success-700 border-success-200"
-                : "bg-danger-100 text-danger-700 border-danger-200"
+                ? "bg-success-500/10 text-success-700 border-success-500/20"
+                : "bg-destructive/10 text-destructive border-destructive/20"
             )}
           >
             {trend.positive ? "+" : ""}
@@ -120,12 +120,12 @@ export function StatsCard({
           </div>
         )}
         {active && !trend && (
-          <div className="h-2 w-2 rounded-full bg-primary-500 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
+          <div className="h-2 w-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 leading-none">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 leading-none">
           {title}
         </span>
         <div className="flex items-baseline gap-2">
@@ -138,7 +138,7 @@ export function StatsCard({
             {typeof value === "number" ? value.toLocaleString() : value}
           </span>
           {description && (
-            <span className="text-xs font-bold text-zinc-400">
+            <span className="text-xs font-bold text-muted-foreground/60">
               {description}
             </span>
           )}
@@ -146,7 +146,7 @@ export function StatsCard({
       </div>
 
       {active && (
-        <div className="absolute inset-x-4 bottom-0 h-1 bg-primary-500 rounded-t-full" />
+        <div className="absolute inset-x-4 bottom-0 h-1 bg-primary rounded-t-full" />
       )}
     </div>
   );
@@ -156,8 +156,8 @@ export function StatsCard({
     currentStyle.bg,
     currentStyle.border,
     active
-      ? "border-primary-400 ring-4 ring-primary-500/10 shadow-xl shadow-primary-500/5 z-10 scale-[1.02]"
-      : "hover:border-primary-300/50 hover:shadow-md",
+      ? "border-primary/40 ring-4 ring-primary/10 shadow-xl shadow-primary/5 z-10 scale-[1.02]"
+      : "hover:border-primary/30 hover:shadow-md",
     href && "hover-lift cursor-pointer",
     className
   );

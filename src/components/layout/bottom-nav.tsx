@@ -75,20 +75,20 @@ export function BottomNav({ permissions }: BottomNavProps) {
           href={item.href}
           className={cn(
             "flex flex-col items-center justify-center gap-1 transition-all h-full min-h-[64px] relative group",
-            isActive ? "text-primary-500" : "text-zinc-500 active:text-zinc-300"
+            isActive ? "text-primary" : "text-muted-foreground active:text-foreground/70"
           )}
         >
           {/* Active background indicator for the whole area */}
           <div className={cn(
             "absolute inset-x-1 inset-y-1 rounded-xl transition-colors",
-            isActive ? "bg-primary-500/10" : "group-active:bg-zinc-800/50"
+            isActive ? "bg-primary/10" : "group-active:bg-muted/50"
           )} />
           
           <div
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-xl transition-all relative z-10",
               isActive
-                ? "bg-primary-500/20 shadow-lg shadow-primary-500/20 text-primary-500"
+                ? "bg-primary/20 shadow-lg shadow-primary/20 text-primary"
                 : ""
             )}
           >
@@ -97,7 +97,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
           <span
             className={cn(
               "text-[10px] font-bold uppercase tracking-wider relative z-10",
-              isActive && "text-primary-400"
+              isActive && "text-primary"
             )}
           >
             {item.label}
@@ -109,8 +109,8 @@ export function BottomNav({ permissions }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
-      {/* Dark nav bar with safe area padding */}
-      <div className="bg-zinc-900 border-t border-zinc-800 px-2 pb-[env(safe-area-inset-bottom)]">
+      {/* Dynamic nav bar with safe area padding */}
+      <div className="bg-card border-t border-border px-2 pb-[env(safe-area-inset-bottom)] transition-colors duration-300">
         <ul className="flex h-[72px] items-center justify-around">
           {/* Left nav items */}
           {leftNavItems.map(renderNavItem)}
@@ -131,7 +131,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
         <button
           type="button"
           onClick={() => setIsScannerOpen(true)}
-          className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-600 text-white shadow-md active:scale-95 transition-all cursor-pointer hover:bg-primary-500 border-4 border-zinc-100 dark:border-zinc-950 z-[60]"
+          className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md active:scale-95 transition-all cursor-pointer border-4 border-background z-[60]"
           aria-label="Scan Equipment"
         >
           <ScanLine className="h-6 w-6" />

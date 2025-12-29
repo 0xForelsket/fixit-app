@@ -164,13 +164,14 @@ export default async function EquipmentPage({
   return (
     <div className="space-y-10 animate-in">
       {/* Header */}
-      {/* Header */}
       <PageHeader
         title="Equipment"
         highlight="List"
         description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
         icon={MonitorCog}
       >
+        <ViewToggle />
+        <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
         <Button variant="outline" asChild>
           <Link href="/admin/import">
             <Upload className="mr-2 h-4 w-4" />
@@ -183,8 +184,6 @@ export default async function EquipmentPage({
             VIEW MODELS
           </Link>
         </Button>
-        <div className="w-px h-8 bg-zinc-200 mx-2 hidden lg:block" />
-        <ViewToggle />
         <Button asChild>
           <Link href="/assets/equipment/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -229,20 +228,20 @@ export default async function EquipmentPage({
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 bg-white/50 p-4 rounded-xl border border-zinc-200 backdrop-blur-sm mb-6">
+      <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm mb-6">
         <form
           className="w-full sm:max-w-md"
           action="/assets/equipment"
           method="get"
         >
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               name="search"
               placeholder="SEARCH BY NAME OR SERIAL..."
               defaultValue={params.search}
-              className="w-full rounded-lg border border-zinc-200 bg-white py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-zinc-500 focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all uppercase"
+              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
             />
             {params.status && (
               <input type="hidden" name="status" value={params.status} />
@@ -252,7 +251,7 @@ export default async function EquipmentPage({
         {params.status && params.status !== "all" && (
           <Link
             href="/assets/equipment"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-100 text-xs font-bold hover:bg-zinc-200 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs font-bold hover:bg-muted-foreground/10 transition-colors text-muted-foreground"
           >
             Status: {params.status}
             <X className="h-3 w-3" />
@@ -261,8 +260,8 @@ export default async function EquipmentPage({
       </div>
 
       {params.view === "tree" ? (
-        <div className="rounded-2xl border border-zinc-200 bg-white/50 backdrop-blur-sm shadow-xl shadow-zinc-200/20 overflow-hidden">
-          <Suspense fallback={<div className="h-96 animate-pulse bg-white rounded-2xl" />}>
+        <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-border/20 overflow-hidden">
+          <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded-2xl" />}>
             <AssetTree initialEquipment={equipmentList} />
           </Suspense>
         </div>
@@ -289,10 +288,10 @@ export default async function EquipmentPage({
           )}
         </EmptyState>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm shadow-xl shadow-zinc-200/20">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
           <Table>
-            <TableHeader className="bg-zinc-50/50">
-              <TableRow className="hover:bg-transparent border-zinc-200">
+            <TableHeader className="bg-muted/50">
+              <TableRow className="hover:bg-transparent border-border">
                 <SortHeader
                   label="Code"
                   field="code"
@@ -342,7 +341,7 @@ export default async function EquipmentPage({
                 <TableHead className="w-24" />
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-zinc-100">
+            <TableBody className="divide-y divide-border">
               {equipmentList.map((equipment, index) => {
                 const staggerClass =
                   index < 5
@@ -352,12 +351,12 @@ export default async function EquipmentPage({
                   <TableRow
                     key={equipment.id}
                     className={cn(
-                      "hover:bg-zinc-50 transition-colors group animate-in fade-in slide-in-from-bottom-1",
+                      "hover:bg-muted/50 transition-colors group animate-in fade-in slide-in-from-bottom-1",
                       staggerClass
                     )}
                   >
                     <TableCell className="p-5">
-                      <span className="font-mono font-bold text-zinc-500 uppercase tracking-widest text-xs">
+                      <span className="font-mono font-bold text-muted-foreground uppercase tracking-widest text-xs">
                         {equipment.code}
                       </span>
                     </TableCell>
@@ -367,14 +366,14 @@ export default async function EquipmentPage({
                         data-testid="equipment-link"
                         className="flex items-center gap-4 group/item"
                       >
-                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-white shadow-md transition-transform group-hover/item:scale-105">
+                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md transition-transform group-hover/item:scale-105">
                           <MonitorCog className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-black text-zinc-900 group-hover/item:text-primary-600 transition-colors uppercase tracking-tight text-sm">
+                          <p className="font-black text-foreground group-hover/item:text-primary transition-colors uppercase tracking-tight text-sm font-serif-brand">
                             {equipment.name}
                           </p>
-                          <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
                             ID: {equipment.id}
                           </p>
                         </div>
@@ -382,22 +381,22 @@ export default async function EquipmentPage({
                     </TableCell>
                     <TableCell className="p-5 hidden lg:table-cell">
                       {equipment.type ? (
-                        <div className="inline-flex flex-col bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-                          <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider">
+                        <div className="inline-flex flex-col bg-muted px-2.5 py-1 rounded-md border border-border">
+                          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">
                             {equipment.type.category.label}
                           </span>
-                          <span className="text-xs font-bold text-slate-700">
+                          <span className="text-xs font-bold text-foreground/80">
                             {equipment.type.name}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-xs font-bold text-zinc-400 tracking-widest bg-zinc-50 px-2 py-1 rounded-md border border-zinc-100">
+                        <span className="text-xs font-bold text-muted-foreground tracking-widest bg-muted/50 px-2 py-1 rounded-md border border-border">
                           UNCLASSIFIED
                         </span>
                       )}
                     </TableCell>
                     <TableCell className="p-5 hidden lg:table-cell">
-                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/50 w-fit">
+                      <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border w-fit">
                         <MapPin className="h-3.5 w-3.5" />
                         {equipment.location?.name || "UNASSIGNED"}
                       </div>
@@ -410,8 +409,8 @@ export default async function EquipmentPage({
                         className={cn(
                           "text-sm font-bold",
                           equipment.owner?.name
-                            ? "text-zinc-900"
-                            : "text-zinc-400 italic"
+                            ? "text-foreground/80"
+                            : "text-muted-foreground italic"
                         )}
                       >
                         {equipment.owner?.name || "OFF-SYSTEM"}
@@ -422,7 +421,7 @@ export default async function EquipmentPage({
                         variant="ghost"
                         size="icon"
                         asChild
-                        className="rounded-xl hover:bg-amber-500 hover:text-white transition-all text-zinc-400"
+                        className="rounded-xl hover:bg-warning-500 hover:text-white transition-all text-muted-foreground"
                         title="Report Issue"
                       >
                         <Link
@@ -435,7 +434,7 @@ export default async function EquipmentPage({
                         variant="ghost"
                         size="icon"
                         asChild
-                        className="rounded-xl hover:bg-primary-500 hover:text-white transition-all transform group-hover:rotate-12 text-zinc-400"
+                        className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all transform group-hover:rotate-12 text-muted-foreground"
                       >
                         <Link href={`/assets/equipment/${equipment.id}/edit`}>
                           <Edit className="h-4 w-4" />

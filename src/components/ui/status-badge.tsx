@@ -113,11 +113,11 @@ export function StatusBadge({
   // Determine Dot Color based on variant (Tailwind classes)
   const getDotColor = (variant: string) => {
     switch (variant) {
-      case "success": return "bg-emerald-500";
-      case "warning": return "bg-amber-500";
-      case "danger":  return "bg-rose-500"; // Dot on white/outline
-      case "critical": return "bg-white";   // Dot on red background
-      default: return "bg-slate-500";
+      case "success": return "bg-success-500";
+      case "warning": return "bg-warning-500";
+      case "danger":  return "bg-danger-500"; 
+      case "critical": return "bg-white";
+      default: return "bg-muted-foreground";
     }
   };
   

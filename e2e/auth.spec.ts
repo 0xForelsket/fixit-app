@@ -55,7 +55,7 @@ test.describe("Authentication", () => {
     const isVisible = await signOutBtn.isVisible({ timeout: 5000 }).catch(() => false);
     
     if (isVisible) {
-      await signOutBtn.click();
+      await signOutBtn.click({ force: true });
       await page.waitForURL(/\/login/, { timeout: 10000 });
       await expect(page).toHaveURL(/\/login/);
     } else {

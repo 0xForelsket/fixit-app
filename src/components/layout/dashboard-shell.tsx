@@ -52,7 +52,7 @@ export function DashboardShell({
   const title = getPageTitle(pathname);
 
   return (
-    <div className="flex h-screen bg-zinc-50/50 industrial-grid">
+    <div className="flex h-screen bg-background/50 industrial-grid transition-colors duration-500">
       <Sidebar
         user={user}
         avatarUrl={avatarUrl}
@@ -60,8 +60,8 @@ export function DashboardShell({
         onClose={() => setSidebarOpen(false)}
       />
       <div className="flex flex-1 flex-col overflow-hidden relative">
-        {/* Decorative glow */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-500/5 rounded-full blur-[100px] pointer-events-none" />
+        {/* Decorative glow - adjusted to use theme primary */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none transition-all duration-700" />
 
         <Header
           title={title}

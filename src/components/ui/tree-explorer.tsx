@@ -104,34 +104,34 @@ export function TreeExplorer<T extends BaseTreeItem>({
   };
 
   return (
-    <div className={cn("flex flex-col h-[600px] bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden", className)}>
+    <div className={cn("flex flex-col h-[600px] bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-colors", className)}>
       {/* Toolbar */}
-      <div className="p-4 border-b border-zinc-200 bg-zinc-50/50 flex flex-col sm:flex-row items-center gap-4">
+      <div className="p-4 border-b border-border bg-muted/30 flex flex-col sm:flex-row items-center gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="FILTER BY SEARCH TERMS..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 bg-white py-2.5 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-zinc-500 focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all uppercase"
+            className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
           />
           {search && (
             <button 
               type="button"
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" onClick={expandAll} className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 px-3">
+          <Button variant="ghost" size="sm" onClick={expandAll} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3">
             EXPAND ALL
           </Button>
-          <div className="w-px h-4 bg-zinc-200" />
-          <Button variant="ghost" size="sm" onClick={collapseAll} className="text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-900 px-3">
+          <div className="w-px h-4 bg-border" />
+          <Button variant="ghost" size="sm" onClick={collapseAll} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3">
             COLLAPSE
           </Button>
         </div>
@@ -141,9 +141,9 @@ export function TreeExplorer<T extends BaseTreeItem>({
       <div className="flex-1 overflow-auto p-4 custom-scrollbar">
         {tree.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Layers className="h-12 w-12 text-zinc-200 mb-4" />
-            <h3 className="text-sm font-black text-zinc-900 uppercase">Registry Empty</h3>
-            <p className="text-xs text-zinc-400 max-w-[200px] mt-2">
+            <Layers className="h-12 w-12 text-muted-foreground/30 mb-4" />
+            <h3 className="text-sm font-black text-foreground uppercase">Registry Empty</h3>
+            <p className="text-xs text-muted-foreground max-w-[200px] mt-2">
               {emptyMessage}
             </p>
           </div>
@@ -213,9 +213,9 @@ function TreeExplorerItem<T extends BaseTreeItem>({
     <div className="space-y-1.5">
       <div 
         className={cn(
-          "group flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-zinc-300 hover:bg-white active:scale-[0.995]",
-          level === 0 ? "bg-zinc-50/50 border-zinc-200" : "bg-transparent border-transparent",
-          isDirectMatch ? "ring-2 ring-primary-500/20 bg-primary-50/10 border-primary-200" : ""
+          "group flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-border hover:bg-muted/50 active:scale-[0.995]",
+          level === 0 ? "bg-muted/30 border-border" : "bg-transparent border-transparent",
+          isDirectMatch ? "ring-2 ring-primary/20 bg-primary/5 border-primary/30" : ""
         )}
         style={{ marginLeft: `${level * 32}px` }}
       >
@@ -224,7 +224,7 @@ function TreeExplorerItem<T extends BaseTreeItem>({
             <button 
               type="button"
               onClick={() => onToggle(node.id)}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors"
             >
               {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
             </button>
@@ -233,19 +233,19 @@ function TreeExplorerItem<T extends BaseTreeItem>({
           )}
 
           {renderIcon && (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-white shadow-md">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md">
               {renderIcon(node.data, hasChildren)}
             </div>
           )}
 
           <div className="min-w-0 pl-1 py-1">
             <div className="flex items-center gap-3">
-              <div className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate leading-none">
+              <div className="text-sm font-black text-foreground uppercase tracking-tight truncate leading-none">
                 {renderTitle(node.data)}
               </div>
             </div>
             {renderSubtitle && (
-              <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1.5 block">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1.5 block">
                 {renderSubtitle(node.data)}
               </div>
             )}
@@ -271,7 +271,7 @@ function TreeExplorerItem<T extends BaseTreeItem>({
         <div className="relative">
           {/* Vertical line indicator */}
           <div 
-            className="absolute left-0 top-0 bottom-0 w-px bg-zinc-100" 
+            className="absolute left-0 top-0 bottom-0 w-px bg-border/50" 
             style={{ marginLeft: `${level * 32 + 15.5}px` }}
           />
           <div className="space-y-1.5">

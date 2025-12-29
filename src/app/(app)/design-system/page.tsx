@@ -33,15 +33,15 @@ export default function DesignSystemPage() {
       />
 
       {/* Documentation Link */}
-      <Card className="bg-primary-50 border-primary-200">
+      <Card className="bg-primary/5 border-primary/20">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
-            <BookOpen className="h-8 w-8 text-primary-600" />
+            <BookOpen className="h-8 w-8 text-primary" />
             <div className="flex-1">
-              <h3 className="font-semibold text-primary-900">
+              <h3 className="font-semibold text-foreground">
                 Design System Documentation
               </h3>
-              <p className="text-sm text-primary-700">
+              <p className="text-sm text-muted-foreground">
                 Full design tokens, usage guidelines, and code examples.
               </p>
             </div>
@@ -95,17 +95,16 @@ export default function DesignSystemPage() {
 
       {/* 1. Colors */}
       <section id="colors" className="space-y-4 scroll-mt-8">
-        <h2 className="text-2xl font-bold tracking-tight border-b pb-2 flex items-center gap-2">
+        <h2 className="text-2xl font-bold tracking-tight border-b border-border pb-2 flex items-center gap-2">
           <Palette className="h-6 w-6" />
           Colors
         </h2>
         <p className="text-muted-foreground">
-          Industrial color palette with semantic meaning. Primary orange for
-          actions, status colors for equipment and work order states.
+          Theme-aware color palette. Colors adapt based on the current theme (Elegant, Industrial, or Dark).
         </p>
         <div className="grid gap-8">
           <ColorSwatch
-            name="Primary (Industrial Orange)"
+            name="Primary"
             description="CTAs, active states, brand identity"
             variable="primary"
             colors={[
@@ -123,7 +122,7 @@ export default function DesignSystemPage() {
             ]}
           />
           <ColorSwatch
-            name="Secondary (Steel Blue)"
+            name="Secondary"
             description="Information, links, secondary actions"
             variable="secondary"
             colors={[
@@ -144,19 +143,19 @@ export default function DesignSystemPage() {
               name="Success"
               description="Completed, operational"
               variable="success"
-              colors={["100", "500", "600"]}
+              colors={["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"]}
             />
             <ColorSwatch
               name="Warning"
               description="Pending, maintenance"
               variable="warning"
-              colors={["100", "500", "600"]}
+              colors={["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"]}
             />
             <ColorSwatch
               name="Danger"
               description="Errors, critical, down"
               variable="danger"
-              colors={["100", "500", "600"]}
+              colors={["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"]}
             />
           </div>
         </div>
@@ -223,7 +222,7 @@ export default function DesignSystemPage() {
 
       {/* 3. Spacing Scale */}
       <section id="spacing" className="space-y-4 scroll-mt-8">
-        <h2 className="text-2xl font-bold tracking-tight border-b pb-2 flex items-center gap-2">
+        <h2 className="text-2xl font-bold tracking-tight border-b border-border pb-2 flex items-center gap-2">
           <Space className="h-6 w-6" />
           Spacing Scale
         </h2>
@@ -245,14 +244,14 @@ export default function DesignSystemPage() {
               ].map((item) => (
                 <div key={item.token} className="flex items-center gap-4">
                   <div
-                    className="bg-primary-500 rounded flex-shrink-0"
+                    className="bg-primary rounded flex-shrink-0"
                     style={{
                       width: item.value,
                       height: "24px",
                     }}
                   />
                   <div className="flex-1 grid grid-cols-3 gap-4 text-sm">
-                    <code className="font-mono text-primary-600">
+                    <code className="font-mono text-primary">
                       {item.token}
                     </code>
                     <span className="text-muted-foreground">{item.value}</span>
@@ -504,7 +503,7 @@ export default function DesignSystemPage() {
 
       {/* Animation Examples */}
       <section className="space-y-4 scroll-mt-8">
-        <h2 className="text-2xl font-bold tracking-tight border-b pb-2">
+        <h2 className="text-2xl font-bold tracking-tight border-b border-border pb-2">
           Animations
         </h2>
         <Card>
@@ -523,7 +522,7 @@ export default function DesignSystemPage() {
             <div>
               <p className="text-sm font-medium mb-3">Interactive States</p>
               <div className="flex gap-4">
-                <button type="button" className="focus-ring px-4 py-2 bg-primary-500 text-white rounded-lg">
+                <button type="button" className="focus-ring px-4 py-2 bg-primary text-primary-foreground rounded-lg">
                   Focus Ring (Tab to me)
                 </button>
                 <div className="animate-glow-pulse p-4 bg-card rounded-lg border">

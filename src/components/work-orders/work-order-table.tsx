@@ -37,9 +37,9 @@ export function WorkOrderTable({
   const params = searchParams || {};
 
   return (
-    <div className="hidden lg:block overflow-hidden rounded-xl border bg-white shadow-sm">
+    <div className="hidden lg:block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
       <Table>
-        <TableHeader className="bg-slate-50">
+        <TableHeader className="bg-muted/50">
           <TableRow className="border-b text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
             <SortHeader
               label="ID"
@@ -90,7 +90,7 @@ export function WorkOrderTable({
             <TableHead className="p-4" />
           </TableRow>
         </TableHeader>
-        <TableBody className="divide-y">
+        <TableBody className="divide-y divide-border">
           {workOrders.map((workOrder, index) => (
             <WorkOrderRow
               key={workOrder.id}
@@ -125,28 +125,28 @@ function WorkOrderRow({
   return (
     <TableRow
       className={cn(
-        "group hover:bg-slate-50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1",
+        "group hover:bg-muted/50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1",
         staggerClass
       )}
       onClick={() => router.push(`/maintenance/work-orders/${workOrder.id}`)}
     >
       <TableCell className="p-4">
-        <span className="font-mono text-xs font-bold text-zinc-500">
+        <span className="font-mono text-xs font-bold text-muted-foreground">
           #{String(workOrder.id).padStart(3, "0")}
         </span>
       </TableCell>
       <TableCell className="p-4">
         <div className="flex flex-col">
-          <span className="font-bold text-sm text-zinc-900 leading-tight group-hover:text-primary-600 transition-colors">
+          <span className="font-bold text-sm text-foreground leading-tight group-hover:text-primary transition-colors">
             {workOrder.title}
           </span>
-          <span className="text-xs text-zinc-500 line-clamp-1 mt-0.5">
+          <span className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
             {workOrder.description}
           </span>
         </div>
       </TableCell>
       <TableCell className="p-4 hidden md:table-cell">
-        <span className="text-sm font-medium text-zinc-700">
+        <span className="text-sm font-medium text-foreground/80">
           {workOrder.equipment?.name || "—"}
         </span>
       </TableCell>
@@ -168,20 +168,20 @@ function WorkOrderRow({
         <div className="flex items-center gap-2">
           {workOrder.assignedTo ? (
             <>
-              <div className="h-6 w-6 rounded-full bg-zinc-100 border flex items-center justify-center text-[10px] font-bold text-zinc-600">
+              <div className="h-6 w-6 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                 {workOrder.assignedTo.name[0]}
               </div>
-              <span className="text-sm text-zinc-600">
+              <span className="text-sm text-foreground/70">
                 {workOrder.assignedTo.name}
               </span>
             </>
           ) : (
-            <span className="text-sm text-zinc-400 italic">Unassigned</span>
+            <span className="text-sm text-muted-foreground italic">Unassigned</span>
           )}
         </div>
       </TableCell>
       <TableCell className="p-4 hidden sm:table-cell">
-        <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
           <Timer className="h-3.5 w-3.5" />
           {formatRelativeTime(workOrder.createdAt)}
         </div>

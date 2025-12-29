@@ -184,27 +184,27 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-zinc-800 bg-zinc-950 transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none",
+          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-zinc-800 px-6">
+        <div className="flex h-16 items-center justify-between border-b border-border px-6">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 group"
             onClick={handleNavClick}
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-500 text-white shadow-lg shadow-primary-500/20 group-hover:scale-110 transition-transform">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
               <Wrench className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">
+            <span className="text-xl font-bold tracking-tight text-foreground font-serif-brand">
               FixIt
             </span>
           </Link>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white lg:hidden"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
           >
             <X className="h-5 w-5" />
           </button>
@@ -215,7 +215,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
             {filteredGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 {group.label && (
-                  <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  <h3 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.15em] text-foreground/40">
                     {group.label}
                   </h3>
                 )}
@@ -232,18 +232,18 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                           href={item.href}
                           onClick={handleNavClick}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all group",
+                            "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-all group",
                             isActive
-                              ? "bg-zinc-800 text-primary-500 shadow-sm ring-1 ring-white/5"
-                              : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                              ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
+                              : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
                           )}
                         >
                           <span
                             className={cn(
                               "transition-colors",
                               isActive
-                                ? "text-primary-500"
-                                : "group-hover:text-primary-500"
+                                ? "text-primary"
+                                : "text-foreground/40 group-hover:text-primary transition-colors"
                             )}
                           >
                             {item.icon}
@@ -259,11 +259,11 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           </div>
 
           {canCreateTicket && (
-            <div className="mt-6 border-t border-zinc-800 pt-4">
+            <div className="mt-6 border-t border-border pt-4">
               <Link
                 href="/"
                 onClick={handleNavClick}
-                className="flex items-center gap-3 rounded-lg bg-primary-500/10 border border-primary-500/20 px-3 py-2.5 text-sm font-semibold text-primary-500 hover:bg-primary-500/20 transition-colors"
+                className="flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors"
               >
                 <AlertTriangle className="h-5 w-5" />
                 Report Equipment Issue
@@ -272,13 +272,13 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           )}
         </nav>
 
-        <div className="border-t border-zinc-800 p-4">
+        <div className="border-t border-border p-4">
           <Link
             href="/profile"
             onClick={handleNavClick}
-            className="mb-3 flex items-center gap-3 rounded-xl bg-zinc-900 p-3 transition-all hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 group"
+            className="mb-3 flex items-center gap-3 rounded-2xl bg-muted/30 p-3 transition-all hover:bg-muted/50 border border-border group"
           >
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-zinc-700 bg-zinc-800 shadow-sm ring-1 ring-zinc-700 group-hover:ring-primary-500/50 transition-all">
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow-sm ring-1 ring-border group-hover:ring-primary/50 transition-all">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
@@ -286,20 +286,20 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-zinc-400 bg-zinc-800 font-bold text-xs uppercase">
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground bg-muted font-bold text-xs uppercase">
                   {user.name.slice(0, 2)}
                 </div>
               )}
             </div>
             <div className="overflow-hidden">
-              <p className="truncate text-sm font-bold text-white leading-tight">
+              <p className="truncate text-sm font-bold text-foreground leading-tight">
                 {user.name}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="flex-none rounded bg-zinc-800 px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-zinc-400 border border-zinc-700">
+                <span className="flex-none rounded bg-muted px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-muted-foreground border border-border">
                   {user.roleName}
                 </span>
-                <p className="truncate text-[11px] font-mono text-zinc-500">
+                <p className="truncate text-[11px] font-mono text-muted-foreground/70">
                   {user.employeeId}
                 </p>
               </div>
@@ -309,7 +309,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
             <button
               type="submit"
               data-testid="sign-out-button"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 hover:bg-danger-500/10 hover:text-danger-500 transition-colors group"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors group"
             >
               <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
               Sign Out

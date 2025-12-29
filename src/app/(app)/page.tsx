@@ -82,7 +82,7 @@ export default async function HomePage({ searchParams }: PageProps) {
     .then((rows) => rows.length);
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 industrial-grid pb-20 lg:pb-0">
+    <div className="min-h-screen bg-background/50 industrial-grid pb-20 lg:pb-0 transition-colors duration-500">
       <UserHeader user={user} avatarUrl={avatarUrl} unreadCount={unreadCount} />
 
       {/* Main content */}
@@ -94,12 +94,12 @@ export default async function HomePage({ searchParams }: PageProps) {
         {/* Equipment Search Section */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black text-zinc-400 uppercase tracking-widest">
+            <h2 className="text-sm font-black text-muted-foreground/60 uppercase tracking-widest">
               Monitor Assets
             </h2>
             <Link
               href="/assets/equipment"
-              className="text-[10px] font-bold text-zinc-400 hover:text-primary-600 uppercase tracking-widest transition-colors"
+              className="text-[10px] font-bold text-muted-foreground hover:text-primary uppercase tracking-widest transition-colors"
             >
               See All
             </Link>
