@@ -3,6 +3,7 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import type React from "react";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
@@ -86,8 +87,8 @@ export function DashboardShell({
           userId={user.id}
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 animate-in relative z-10 transition-all duration-300">
-          <div className="mx-auto max-w-7xl h-full">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-8 animate-in relative z-10 transition-all duration-300">
+          <div className="mx-auto max-w-7xl">
             {children}
           </div>
         </main>

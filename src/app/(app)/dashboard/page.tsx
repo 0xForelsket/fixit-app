@@ -1,19 +1,17 @@
 import { Suspense } from "react";
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/ui/page-header";
-import { StatsCard } from "@/components/ui/stats-card";
+import { PageLayout } from "@/components/ui/page-layout";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import { and, eq, or, sql } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowRight,
   Clock,
   Inbox,
-  MonitorCog,
   Timer,
   User,
   Users,
@@ -27,10 +25,6 @@ interface Stats {
   critical: number;
 }
 
-/**
- * Fetch global and personal stats in a single optimized query per scope.
- * Uses SQL aggregation to minimize database round-trips.
- */
 async function getStats(
   user: SessionUser | null
 ): Promise<{ global: Stats; personal: Stats | null }> {
@@ -94,7 +88,7 @@ async function getMyWorkOrders(userId: number) {
       or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
       eq(workOrders.assignedToId, userId)
     ),
-    limit: 5,
+    limit: 7,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
       equipment: {
@@ -117,7 +111,7 @@ async function getRecentWorkOrders(user: SessionUser | null) {
 
   return db.query.workOrders.findMany({
     where: and(...conditions),
-    limit: 5,
+    limit: 7,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
       equipment: {
@@ -131,35 +125,29 @@ async function getRecentWorkOrders(user: SessionUser | null) {
   });
 }
 
-// Loading skeleton for stats section
 function StatsLoading() {
   return (
-    <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-1 grid-cols-1 sm:grid-cols-2 lg:grid-flow-col lg:auto-cols-fr bg-border rounded-xl overflow-hidden shadow-lg animate-pulse">
       {[1, 2, 3, 4].map((i) => (
-        <div
-          key={i}
-          className="h-24 bg-zinc-100 animate-pulse rounded-lg border border-zinc-200"
-        />
+        <div key={i} className="h-24 bg-card/50" />
       ))}
     </div>
   );
 }
 
-// Loading skeleton for work order feed
 function FeedLoading() {
   return (
     <div className="space-y-3">
       {[1, 2, 3].map((i) => (
         <div
           key={i}
-          className="h-20 bg-zinc-100 animate-pulse rounded-lg border border-zinc-200"
+          className="h-20 bg-card animate-pulse rounded-lg border border-border"
         />
       ))}
     </div>
   );
 }
 
-// Personal stats section component
 async function PersonalStatsSection({ user }: { user: SessionUser }) {
   const { personal: myStats } = await getStats(user);
   if (!myStats) return null;
@@ -168,69 +156,57 @@ async function PersonalStatsSection({ user }: { user: SessionUser }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <User className="h-5 w-5 text-primary-600" />
-        <h2 className="text-lg font-bold tracking-tight text-zinc-800">
+      <div className="flex items-center gap-2">
+        <User className="h-4 w-4 text-primary" />
+        <h2 className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
           My Assigned Work Orders
         </h2>
-        <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
+        <span className="text-[8px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
           {myTotalActive} active
         </span>
       </div>
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="My Open"
-          value={myStats.open}
-          icon={Inbox}
-          variant="primary"
-          href="/maintenance/work-orders?assigned=me&status=open"
-          className="animate-stagger-1 animate-in"
-        />
-        <StatsCard
-          title="My In Progress"
-          value={myStats.inProgress}
-          icon={Timer}
-          variant="info"
-          href="/maintenance/work-orders?assigned=me&status=in_progress"
-          className="animate-stagger-2 animate-in"
-        />
-        <StatsCard
-          title="My Overdue"
-          value={myStats.overdue}
-          icon={Clock}
-          variant="danger"
-          className={cn(
-            "animate-stagger-3 animate-in",
-            myStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
-          )}
-          href="/maintenance/work-orders?assigned=me&overdue=true"
-        />
-        <StatsCard
-          title="My Critical"
-          value={myStats.critical}
-          icon={AlertTriangle}
-          variant="danger"
-          className={cn(
-            "animate-stagger-4 animate-in",
-            myStats.critical > 0 ? "animate-pulse border-danger-300" : ""
-          )}
-          href="/maintenance/work-orders?assigned=me&priority=critical"
-        />
-      </div>
+      <StatsTicker
+        variant="compact"
+        stats={[
+          {
+            label: "My Open",
+            value: myStats.open,
+            icon: Inbox,
+            variant: "primary",
+          },
+          {
+            label: "My In Progress",
+            value: myStats.inProgress,
+            icon: Timer,
+            variant: "default",
+          },
+          {
+            label: "My Overdue",
+            value: myStats.overdue,
+            icon: Clock,
+            variant: "danger",
+          },
+          {
+            label: "My Critical",
+            value: myStats.critical,
+            icon: AlertTriangle,
+            variant: "danger",
+          },
+        ]}
+      />
     </div>
   );
 }
 
-// Personal queue section component
 async function PersonalQueueSection({ userId }: { userId: number }) {
   const myWorkOrders = await getMyWorkOrders(userId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-2 w-8 bg-primary-500 rounded-full" />
-          <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+        <div className="flex items-center gap-2">
+          <div className="h-1 w-6 bg-primary rounded-full" />
+          <h2 className="text-xs font-black text-muted-foreground uppercase tracking-wider">
             My Queue
           </h2>
         </div>
@@ -238,13 +214,13 @@ async function PersonalQueueSection({ userId }: { userId: number }) {
           variant="ghost"
           size="sm"
           asChild
-          className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
+          className="h-7 text-[9px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest transition-colors"
         >
           <Link
             href="/maintenance/work-orders?assigned=me"
-            className="gap-2"
+            className="gap-1.5"
           >
-            MY WORK ORDERS <ArrowRight className="h-4 w-4" />
+            LIST VIEW <ArrowRight className="h-2.5 w-2.5" />
           </Link>
         </Button>
       </div>
@@ -254,74 +230,61 @@ async function PersonalQueueSection({ userId }: { userId: number }) {
   );
 }
 
-// Global (or Departmental) stats section component
 async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
   const { global: globalStats } = await getStats(user);
   const title = user?.roleName === "tech" ? "Departmental Overview" : "System Overview";
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Users className="h-5 w-5 text-zinc-400" />
-        <h2 className="text-lg font-bold tracking-tight text-zinc-600">
+      <div className="flex items-center gap-2">
+        <Users className="h-4 w-4 text-muted-foreground" />
+        <h2 className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
           {title}
         </h2>
       </div>
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Open WOs"
-          value={globalStats.open}
-          icon={Inbox}
-          variant="secondary"
-          href="/maintenance/work-orders?status=open"
-          className="animate-stagger-1 animate-in"
-        />
-        <StatsCard
-          title="In Progress"
-          value={globalStats.inProgress}
-          icon={Timer}
-          variant="info"
-          href="/maintenance/work-orders?status=in_progress"
-          className="animate-stagger-2 animate-in"
-        />
-        <StatsCard
-          title="Overdue"
-          value={globalStats.overdue}
-          icon={Clock}
-          variant="danger"
-          className={cn(
-            "animate-stagger-3 animate-in",
-            globalStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
-          )}
-          href="/maintenance/work-orders?overdue=true"
-        />
-        <StatsCard
-          title="Critical"
-          value={globalStats.critical}
-          icon={AlertTriangle}
-          variant="danger"
-          className={cn(
-            "animate-stagger-4 animate-in",
-            globalStats.critical > 0 ? "animate-pulse border-danger-300" : ""
-          )}
-          href="/maintenance/work-orders?priority=critical"
-        />
-      </div>
+      <StatsTicker
+        variant="compact"
+        stats={[
+          {
+            label: "Open WOs",
+            value: globalStats.open,
+            icon: Inbox,
+            variant: "default",
+          },
+          {
+            label: "In Progress",
+            value: globalStats.inProgress,
+            icon: Timer,
+            variant: "default",
+          },
+          {
+            label: "Overdue",
+            value: globalStats.overdue,
+            icon: Clock,
+            variant: "danger",
+          },
+          {
+            label: "Critical",
+            value: globalStats.critical,
+            icon: AlertTriangle,
+            variant: "danger",
+          },
+        ]}
+      />
     </div>
   );
 }
 
-// Global (or Departmental) queue section component
 async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
   const recentWorkOrders = await getRecentWorkOrders(user);
   const title = user?.roleName === "tech" ? "Department Priority Queue" : "System Priority Queue";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-2 w-8 bg-zinc-400 rounded-full" />
-          <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+        <div className="flex items-center gap-2">
+          <div className="h-1 w-6 bg-muted-foreground/30 rounded-full" />
+          <h2 className="text-xs font-black text-muted-foreground uppercase tracking-wider">
             {title}
           </h2>
         </div>
@@ -329,10 +292,10 @@ async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
           variant="ghost"
           size="sm"
           asChild
-          className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
+          className="h-7 text-[9px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest transition-colors"
         >
-          <Link href="/maintenance/work-orders" className="gap-2">
-            ALL WORK ORDERS <ArrowRight className="h-4 w-4" />
+          <Link href="/maintenance/work-orders" className="gap-1.5">
+            ALL TICKETS <ArrowRight className="h-2.5 w-2.5" />
           </Link>
         </Button>
       </div>
@@ -342,56 +305,54 @@ async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
   );
 }
 
-/**
- * Dashboard Page
- *
- * This page uses React Suspense for progressive loading:
- * - Each data section is a separate async component
- * - Sections load independently with their own loading states
- * - Improves perceived performance and prevents single bottleneck
- *
- * Performance considerations:
- * - Stats queries use SQL aggregation (single query per scope)
- * - Work order lists use eager loading for related data
- * - Suspense boundaries allow parallel data fetching
- */
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 
   return (
-    <div className="space-y-6 sm:space-y-10 pb-8 min-h-full">
-      {/* Page Header */}
-      <PageHeader
-        title="Technician"
-        highlight="Terminal"
-        description="Control panel for maintenance operations"
-        icon={MonitorCog}
-        className="pb-4"
-      />
+    <PageLayout
+      id="dashboard-page"
+      title="Technician Terminal"
+      subtitle="Infrastructure Control"
+      description="CENTRALIZED CONTROL PANEL FOR MAINTENANCE OPERATIONS"
+      bgSymbol="TT"
+      headerActions={
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10" asChild>
+            <Link href="/assets/qr-codes">
+              SCAN QR
+            </Link>
+          </Button>
+          <Button size="sm" className="h-8 text-[10px] font-black uppercase tracking-widest" asChild>
+            <Link href="/">
+              REPORT ISSUE
+            </Link>
+          </Button>
+        </div>
+      }
+      stats={
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {user && (
+            <Suspense fallback={<StatsLoading />}>
+              <PersonalStatsSection user={user} />
+            </Suspense>
+          )}
+          <Suspense fallback={<StatsLoading />}>
+            <GlobalStatsSection user={user} />
+          </Suspense>
+        </div>
+      }
+    >
+      <div className="space-y-8">
+        {user && (
+          <Suspense fallback={<FeedLoading />}>
+            <PersonalQueueSection userId={user.id} />
+          </Suspense>
+        )}
 
-      {/* My Work Orders Stats - Personal (Suspense boundary) */}
-      {user && (
-        <Suspense fallback={<StatsLoading />}>
-          <PersonalStatsSection user={user} />
-        </Suspense>
-      )}
-
-      {/* My Work Orders Queue (Suspense boundary) */}
-      {user && (
         <Suspense fallback={<FeedLoading />}>
-          <PersonalQueueSection userId={user.id} />
+          <GlobalQueueSection user={user} />
         </Suspense>
-      )}
-
-      {/* System Stats - Global (Suspense boundary) */}
-      <Suspense fallback={<StatsLoading />}>
-        <GlobalStatsSection user={user} />
-      </Suspense>
-
-      {/* Recent Work Orders section - Global Queue (Suspense boundary) */}
-      <Suspense fallback={<FeedLoading />}>
-        <GlobalQueueSection user={user} />
-      </Suspense>
-    </div>
+      </div>
+    </PageLayout>
   );
 }

@@ -108,9 +108,9 @@ export function BottomNav({ permissions }: BottomNavProps) {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.1)]">
-      {/* Dynamic nav bar with safe area padding */}
-      <div className="bg-card border-t border-border px-2 pb-[env(safe-area-inset-bottom)] transition-colors duration-300">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden isolate">
+      {/* Glassmorphic nav bar with safe area padding */}
+      <div className="bg-background/80 backdrop-blur-xl border-t border-border px-2 pb-[env(safe-area-inset-bottom)] transition-colors duration-300">
         <ul className="flex h-[72px] items-center justify-around">
           {/* Left nav items */}
           {leftNavItems.map(renderNavItem)}
@@ -131,7 +131,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
         <button
           type="button"
           onClick={() => setIsScannerOpen(true)}
-          className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md active:scale-95 transition-all cursor-pointer border-4 border-background z-[60]"
+          className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/90 backdrop-blur-md text-primary-foreground shadow-[0_8px_32px_rgba(var(--primary),0.3)] active:scale-95 transition-all cursor-pointer border-4 border-background/20 z-[60]"
           aria-label="Scan Equipment"
         >
           <ScanLine className="h-6 w-6" />
