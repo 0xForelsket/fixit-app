@@ -9,7 +9,7 @@ vi.mock("@/db", () => ({
   },
 }));
 
-import { GET } from "@/app/api/health/route";
+import { GET } from "@/app/(app)/api/health/route";
 import { db } from "@/db";
 
 describe("GET /api/health", () => {

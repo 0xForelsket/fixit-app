@@ -15,7 +15,7 @@ vi.mock("@/lib/rate-limit", () => ({
   },
 }));
 
-import { POST } from "@/app/api/auth/login/route";
+import { POST } from "@/app/(app)/api/auth/login/route";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { authenticateUser } from "@/lib/services/auth.service";
 

@@ -37,7 +37,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { GET, POST } from "@/app/api/labor/route";
+import { GET, POST } from "@/app/(app)/api/labor/route";
 import { db } from "@/db";
 import { getCurrentUser } from "@/lib/session";
 

@@ -151,7 +151,7 @@ describe("POST /api/scheduler/run", () => {
   });
 
   it("rejects user without scheduler permission", async () => {
-    delete process.env.CRON_SECRET;
+    process.env.CRON_SECRET = ""; // Empty string
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "TECH-001",
@@ -161,12 +161,20 @@ describe("POST /api/scheduler/run", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech, // No scheduler permission
     });
 
+    // Reset db mock to not return any schedules
+    vi.mocked(db.select).mockReturnValue({
+      from: vi.fn(() => ({
+        where: vi.fn().mockResolvedValue([]),
+      })),
+    } as unknown as ReturnType<typeof db.select>);
+
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
     });
 
     const response = await POST(request);
 
+    // The tech user doesn't have system:scheduler permission, so should be unauthorized
     expect(response.status).toBe(401);
   });
 

@@ -14,6 +14,11 @@ vi.mock("@/lib/logger", () => ({
     warn: vi.fn(),
     info: vi.fn(),
   },
+  apiLogger: {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+  },
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 

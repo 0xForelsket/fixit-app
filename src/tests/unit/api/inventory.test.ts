@@ -41,7 +41,7 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
-import { GET, POST } from "@/app/api/inventory/parts/route";
+import { GET, POST } from "@/app/(app)/api/inventory/parts/route";
 import { db } from "@/db";
 import { userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";

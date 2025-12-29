@@ -21,7 +21,7 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
-import { POST } from "@/app/api/attachments/presigned-url/route";
+import { POST } from "@/app/(app)/api/attachments/presigned-url/route";
 import { getPresignedUploadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 

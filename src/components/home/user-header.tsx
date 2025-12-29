@@ -1,4 +1,4 @@
-import { OperatorNav } from "@/app/(operator)/nav";
+import { OperatorNav } from "@/app/(app)/nav";
 import type { SessionUser } from "@/lib/session";
 import Link from "next/link";
 

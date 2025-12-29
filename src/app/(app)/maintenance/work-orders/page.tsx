@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { and, asc, count, desc, eq, ilike, lt, or } from "drizzle-orm";
+import { type SQL, and, asc, count, desc, eq, ilike, lt, or } from "drizzle-orm";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -138,49 +138,37 @@ async function getStats(user: SessionUser | null) {
   const departmentId = user?.departmentId;
   const isTech = user?.roleName === "tech";
 
-  const getBaseQuery = () => {
-    const q = db.select({ count: count() }).from(workOrders);
+  const runCountQuery = async (...extraConditions: (SQL | undefined)[]) => {
+    const conditions = extraConditions.filter((c): c is SQL => c !== undefined);
+    
     if (isTech && departmentId) {
-      return q.where(eq(workOrders.departmentId, departmentId));
+      conditions.push(eq(workOrders.departmentId, departmentId));
     }
-    return q;
+
+    const [result] = await db
+      .select({ count: count() })
+      .from(workOrders)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+    return result?.count || 0;
   };
 
-  const [openWorkOrders] = await getBaseQuery()
-    .where(
-      isTech && departmentId
-        ? and(eq(workOrders.status, "open"), eq(workOrders.departmentId, departmentId))
-        : eq(workOrders.status, "open")
-    );
-
-  const [inProgressWorkOrders] = await getBaseQuery()
-    .where(
-      isTech && departmentId
-        ? and(eq(workOrders.status, "in_progress"), eq(workOrders.departmentId, departmentId))
-        : eq(workOrders.status, "in_progress")
-    );
-
-  const [resolvedWorkOrders] = await getBaseQuery()
-    .where(
-      isTech && departmentId
-        ? and(eq(workOrders.status, "resolved"), eq(workOrders.departmentId, departmentId))
-        : eq(workOrders.status, "resolved")
-    );
-
-  const [criticalWorkOrders] = await getBaseQuery()
-    .where(
-      and(
-        eq(workOrders.priority, "critical"),
-        eq(workOrders.status, "open"),
-        isTech && departmentId ? eq(workOrders.departmentId, departmentId) : undefined
-      )
-    );
+  const openCount = await runCountQuery(eq(workOrders.status, "open"));
+  
+  const inProgressCount = await runCountQuery(eq(workOrders.status, "in_progress"));
+  
+  const resolvedCount = await runCountQuery(eq(workOrders.status, "resolved"));
+  
+  const criticalCount = await runCountQuery(
+    eq(workOrders.priority, "critical"),
+    eq(workOrders.status, "open")
+  );
 
   return {
-    open: openWorkOrders.count,
-    inProgress: inProgressWorkOrders.count,
-    resolved: resolvedWorkOrders.count,
-    critical: criticalWorkOrders.count,
+    open: openCount,
+    inProgress: inProgressCount,
+    resolved: resolvedCount,
+    critical: criticalCount,
   };
 }
 

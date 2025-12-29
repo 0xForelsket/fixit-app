@@ -1,5 +1,5 @@
-import { EquipmentGrid } from "@/app/(operator)/equipment-grid";
-import { EquipmentSearch } from "@/app/(operator)/equipment-search";
+import { EquipmentGrid } from "@/app/(app)/equipment-grid";
+import { EquipmentSearch } from "@/app/(app)/equipment-search";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
 import { and, eq, ilike, sql } from "drizzle-orm";

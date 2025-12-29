@@ -10,8 +10,8 @@ import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EquipmentGrid } from "../(operator)/equipment-grid";
-import { EquipmentSearch } from "../(operator)/equipment-search";
+import { EquipmentGrid } from "./equipment-grid";
+import { EquipmentSearch } from "./equipment-search";
 
 interface PageProps {
   searchParams: Promise<{ search?: string; location?: string }>;

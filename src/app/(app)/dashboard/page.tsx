@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatsCard } from "@/components/ui/stats-card";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
+import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { and, eq, or, sql } from "drizzle-orm";
 import {

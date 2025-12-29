@@ -133,12 +133,18 @@ export async function createWorkOrder(
       });
 
       if (techRole) {
+        const whereConditions = [
+          eq(users.roleId, techRole.id),
+          eq(users.isActive, true)
+        ];
+
+        // Only filter by department if the equipment has one
+        if (equipmentItem.departmentId) {
+          whereConditions.push(eq(users.departmentId, equipmentItem.departmentId));
+        }
+
         const techs = await db.query.users.findMany({
-          where: and(
-            eq(users.roleId, techRole.id),
-            eq(users.isActive, true),
-            eq(users.departmentId, equipmentItem.departmentId)
-          ),
+          where: and(...whereConditions),
         });
 
         if (techs.length > 0) {

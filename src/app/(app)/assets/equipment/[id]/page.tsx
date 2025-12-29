@@ -12,6 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
+import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import {

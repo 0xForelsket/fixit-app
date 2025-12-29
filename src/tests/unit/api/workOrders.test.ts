@@ -40,7 +40,7 @@ vi.mock("@/lib/rate-limit", () => ({
   },
 }));
 
-import { GET, POST } from "@/app/api/work-orders/route";
+import { GET, POST } from "@/app/(app)/api/work-orders/route";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf } from "@/lib/session";
 
