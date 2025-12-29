@@ -34,6 +34,11 @@ export const metadata: Metadata = {
   description:
     "Lightweight maintenance management system for tracking equipment maintenance requests",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
