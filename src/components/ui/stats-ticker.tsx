@@ -44,11 +44,11 @@ export function StatsTicker({ stats, className, variant = "default" }: StatsTick
             className={cn(
               "bg-card p-5 lg:p-6 flex flex-col justify-between gap-3 relative overflow-hidden group hover:bg-muted/50 transition-colors",
               isCompact && "p-4 gap-2",
-              // Subtle colored backgrounds for active states
-              isDanger && "hover:bg-rose-500/5",
-              isWarning && "hover:bg-amber-500/5",
-              isSuccess && "hover:bg-emerald-500/5",
-              isPrimary && "hover:bg-primary-500/5"
+              // Subtle colored backgrounds for active states - ALWAYS VISIBLE
+              isDanger && "bg-rose-500/5 hover:bg-rose-500/10",
+              isWarning && "bg-amber-500/5 hover:bg-amber-500/10",
+              isSuccess && "bg-emerald-500/5 hover:bg-emerald-500/10",
+              isPrimary && "bg-primary-500/5 hover:bg-primary-500/10"
             )}
           >
             {/* Header: Label & Icon */}
@@ -58,7 +58,7 @@ export function StatsTicker({ stats, className, variant = "default" }: StatsTick
                 isCompact && "text-[9px]"
               )}>{stat.label}</span>
               <Icon className={cn(
-                "h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity", 
+                "h-4 w-4 opacity-75 group-hover:opacity-100 transition-opacity", 
                 isDanger ? "text-rose-500" : 
                 isWarning ? "text-amber-500" : 
                 isSuccess ? "text-emerald-500" : 
@@ -90,9 +90,9 @@ export function StatsTicker({ stats, className, variant = "default" }: StatsTick
               )}
             </div>
             
-            {/* Decorative bottom accent bar */}
+            {/* Decorative bottom accent bar - ALWAYS VISIBLE with lower opacity, full opacity on hover */}
             <div className={cn(
-              "absolute bottom-0 left-0 w-full h-0.5 opacity-0 group-hover:opacity-100 transition-opacity",
+              "absolute bottom-0 left-0 w-full h-0.5 opacity-40 group-hover:opacity-100 transition-opacity",
               isDanger ? "bg-rose-500" : 
               isWarning ? "bg-amber-500" : 
               isSuccess ? "bg-emerald-500" : 
