@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -26,6 +27,10 @@ interface Stats {
   critical: number;
 }
 
+/**
+ * Fetch global and personal stats in a single optimized query per scope.
+ * Uses SQL aggregation to minimize database round-trips.
+ */
 async function getStats(
   userId?: number
 ): Promise<{ global: Stats; personal: Stats | null }> {
@@ -111,13 +116,230 @@ async function getRecentWorkOrders() {
   });
 }
 
-export default async function DashboardPage() {
-  const user = await getCurrentUser();
-  const { global: globalStats, personal: myStats } = await getStats(user?.id);
-  const myWorkOrders = user ? await getMyWorkOrders(user.id) : [];
+// Loading skeleton for stats section
+function StatsLoading() {
+  return (
+    <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="h-24 bg-zinc-100 animate-pulse rounded-lg border border-zinc-200"
+        />
+      ))}
+    </div>
+  );
+}
+
+// Loading skeleton for work order feed
+function FeedLoading() {
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="h-20 bg-zinc-100 animate-pulse rounded-lg border border-zinc-200"
+        />
+      ))}
+    </div>
+  );
+}
+
+// Personal stats section component
+async function PersonalStatsSection({ userId }: { userId: number }) {
+  const { personal: myStats } = await getStats(userId);
+  if (!myStats) return null;
+
+  const myTotalActive = myStats.open + myStats.inProgress;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <User className="h-5 w-5 text-primary-600" />
+        <h2 className="text-lg font-bold tracking-tight text-zinc-800">
+          My Assigned Work Orders
+        </h2>
+        <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
+          {myTotalActive} active
+        </span>
+      </div>
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="My Open"
+          value={myStats.open}
+          icon={Inbox}
+          variant="primary"
+          href="/maintenance/work-orders?assigned=me&status=open"
+          className="animate-stagger-1 animate-in"
+        />
+        <StatsCard
+          title="My In Progress"
+          value={myStats.inProgress}
+          icon={Timer}
+          variant="info"
+          href="/maintenance/work-orders?assigned=me&status=in_progress"
+          className="animate-stagger-2 animate-in"
+        />
+        <StatsCard
+          title="My Overdue"
+          value={myStats.overdue}
+          icon={Clock}
+          variant="danger"
+          className={cn(
+            "animate-stagger-3 animate-in",
+            myStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
+          )}
+          href="/maintenance/work-orders?assigned=me&overdue=true"
+        />
+        <StatsCard
+          title="My Critical"
+          value={myStats.critical}
+          icon={AlertTriangle}
+          variant="danger"
+          className={cn(
+            "animate-stagger-4 animate-in",
+            myStats.critical > 0 ? "animate-pulse border-danger-300" : ""
+          )}
+          href="/maintenance/work-orders?assigned=me&priority=critical"
+        />
+      </div>
+    </div>
+  );
+}
+
+// Personal queue section component
+async function PersonalQueueSection({ userId }: { userId: number }) {
+  const myWorkOrders = await getMyWorkOrders(userId);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-2 w-8 bg-primary-500 rounded-full" />
+          <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+            My Queue
+          </h2>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
+        >
+          <Link
+            href="/maintenance/work-orders?assigned=me"
+            className="gap-2"
+          >
+            MY WORK ORDERS <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+
+      <DashboardWorkOrderFeed workOrders={myWorkOrders} />
+    </div>
+  );
+}
+
+// Global stats section component
+async function GlobalStatsSection() {
+  const { global: globalStats } = await getStats();
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Users className="h-5 w-5 text-zinc-400" />
+        <h2 className="text-lg font-bold tracking-tight text-zinc-600">
+          System Overview
+        </h2>
+      </div>
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Open WOs"
+          value={globalStats.open}
+          icon={Inbox}
+          variant="secondary"
+          href="/maintenance/work-orders?status=open"
+          className="animate-stagger-1 animate-in"
+        />
+        <StatsCard
+          title="In Progress"
+          value={globalStats.inProgress}
+          icon={Timer}
+          variant="info"
+          href="/maintenance/work-orders?status=in_progress"
+          className="animate-stagger-2 animate-in"
+        />
+        <StatsCard
+          title="Overdue"
+          value={globalStats.overdue}
+          icon={Clock}
+          variant="danger"
+          className={cn(
+            "animate-stagger-3 animate-in",
+            globalStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
+          )}
+          href="/maintenance/work-orders?overdue=true"
+        />
+        <StatsCard
+          title="Critical"
+          value={globalStats.critical}
+          icon={AlertTriangle}
+          variant="danger"
+          className={cn(
+            "animate-stagger-4 animate-in",
+            globalStats.critical > 0 ? "animate-pulse border-danger-300" : ""
+          )}
+          href="/maintenance/work-orders?priority=critical"
+        />
+      </div>
+    </div>
+  );
+}
+
+// Global queue section component
+async function GlobalQueueSection() {
   const recentWorkOrders = await getRecentWorkOrders();
 
-  const myTotalActive = myStats ? myStats.open + myStats.inProgress : 0;
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-2 w-8 bg-zinc-400 rounded-full" />
+          <h2 className="text-xl font-bold tracking-tight text-zinc-800">
+            Priority Queue
+          </h2>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
+        >
+          <Link href="/maintenance/work-orders" className="gap-2">
+            ALL WORK ORDERS <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+
+      <DashboardWorkOrderFeed workOrders={recentWorkOrders} />
+    </div>
+  );
+}
+
+/**
+ * Dashboard Page
+ *
+ * This page uses React Suspense for progressive loading:
+ * - Each data section is a separate async component
+ * - Sections load independently with their own loading states
+ * - Improves perceived performance and prevents single bottleneck
+ *
+ * Performance considerations:
+ * - Stats queries use SQL aggregation (single query per scope)
+ * - Work order lists use eager loading for related data
+ * - Suspense boundaries allow parallel data fetching
+ */
+export default async function DashboardPage() {
+  const user = await getCurrentUser();
 
   return (
     <div className="space-y-6 sm:space-y-10 pb-8 min-h-full">
@@ -130,163 +352,29 @@ export default async function DashboardPage() {
         className="pb-4"
       />
 
-      {/* My Work Orders Stats - Personal */}
-      {myStats && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <User className="h-5 w-5 text-primary-600" />
-            <h2 className="text-lg font-bold tracking-tight text-zinc-800">
-              My Assigned Work Orders
-            </h2>
-            <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
-              {myTotalActive} active
-            </span>
-          </div>
-          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-            <StatsCard
-              title="My Open"
-              value={myStats.open}
-              icon={Inbox}
-              variant="primary"
-              href="/maintenance/work-orders?assigned=me&status=open"
-              className="animate-stagger-1 animate-in"
-            />
-            <StatsCard
-              title="My In Progress"
-              value={myStats.inProgress}
-              icon={Timer}
-              variant="info"
-              href="/maintenance/work-orders?assigned=me&status=in_progress"
-              className="animate-stagger-2 animate-in"
-            />
-            <StatsCard
-              title="My Overdue"
-              value={myStats.overdue}
-              icon={Clock}
-              variant="danger"
-              className={cn(
-                "animate-stagger-3 animate-in",
-                myStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
-              )}
-              href="/maintenance/work-orders?assigned=me&overdue=true"
-            />
-            <StatsCard
-              title="My Critical"
-              value={myStats.critical}
-              icon={AlertTriangle}
-              variant="danger"
-              className={cn(
-                "animate-stagger-4 animate-in",
-                myStats.critical > 0 ? "animate-pulse border-danger-300" : ""
-              )}
-              href="/maintenance/work-orders?assigned=me&priority=critical"
-            />
-          </div>
-        </div>
+      {/* My Work Orders Stats - Personal (Suspense boundary) */}
+      {user && (
+        <Suspense fallback={<StatsLoading />}>
+          <PersonalStatsSection userId={user.id} />
+        </Suspense>
       )}
 
-      {/* My Work Orders Queue */}
-      {myStats && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-2 w-8 bg-primary-500 rounded-full" />
-              <h2 className="text-xl font-bold tracking-tight text-zinc-800">
-                My Queue
-              </h2>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
-            >
-              <Link
-                href="/maintenance/work-orders?assigned=me"
-                className="gap-2"
-              >
-                MY WORK ORDERS <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-
-          <DashboardWorkOrderFeed workOrders={myWorkOrders} />
-        </div>
+      {/* My Work Orders Queue (Suspense boundary) */}
+      {user && (
+        <Suspense fallback={<FeedLoading />}>
+          <PersonalQueueSection userId={user.id} />
+        </Suspense>
       )}
 
-      {/* System Stats - Global */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Users className="h-5 w-5 text-zinc-400" />
-          <h2 className="text-lg font-bold tracking-tight text-zinc-600">
-            System Overview
-          </h2>
-        </div>
-        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Open WOs"
-            value={globalStats.open}
-            icon={Inbox}
-            variant="secondary"
-            href="/maintenance/work-orders?status=open"
-            className="animate-stagger-1 animate-in"
-          />
-          <StatsCard
-            title="In Progress"
-            value={globalStats.inProgress}
-            icon={Timer}
-            variant="info"
-            href="/maintenance/work-orders?status=in_progress"
-            className="animate-stagger-2 animate-in"
-          />
-          <StatsCard
-            title="Overdue"
-            value={globalStats.overdue}
-            icon={Clock}
-            variant="danger"
-            className={cn(
-              "animate-stagger-3 animate-in",
-              globalStats.overdue > 0 ? "animate-pulse border-danger-300" : ""
-            )}
-            href="/maintenance/work-orders?overdue=true"
-          />
-          <StatsCard
-            title="Critical"
-            value={globalStats.critical}
-            icon={AlertTriangle}
-            variant="danger"
-            className={cn(
-              "animate-stagger-4 animate-in",
-              globalStats.critical > 0 ? "animate-pulse border-danger-300" : ""
-            )}
-            href="/maintenance/work-orders?priority=critical"
-          />
-        </div>
-      </div>
+      {/* System Stats - Global (Suspense boundary) */}
+      <Suspense fallback={<StatsLoading />}>
+        <GlobalStatsSection />
+      </Suspense>
 
-      {/* Recent Work Orders section - Global Queue */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-8 bg-zinc-400 rounded-full" />
-            <h2 className="text-xl font-bold tracking-tight text-zinc-800">
-              Priority Queue
-            </h2>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 font-bold"
-          >
-            <Link href="/maintenance/work-orders" className="gap-2">
-              ALL WORK ORDERS <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-
-        <DashboardWorkOrderFeed workOrders={recentWorkOrders} />
-      </div>
+      {/* Recent Work Orders section - Global Queue (Suspense boundary) */}
+      <Suspense fallback={<FeedLoading />}>
+        <GlobalQueueSection />
+      </Suspense>
     </div>
   );
 }

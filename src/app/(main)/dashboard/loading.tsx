@@ -1,51 +1,60 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { SkeletonStatsGrid } from "@/components/ui/skeleton";
-import { MonitorCog, User, Users } from "lucide-react";
+import { Loader2, MonitorCog } from "lucide-react";
 
+/**
+ * Dashboard Loading State
+ *
+ * This loading.tsx file enables Next.js streaming:
+ * - Shows immediately while the page data is being fetched
+ * - Improves perceived performance by showing layout structure
+ * - Used as a fallback during initial page load
+ */
 export default function DashboardLoading() {
   return (
-    <div className="space-y-10 animate-in">
+    <div className="space-y-6 sm:space-y-10 pb-8 min-h-full">
+      {/* Page Header */}
       <PageHeader
         title="Technician"
         highlight="Terminal"
-        description="SYNCING OPERATIONAL DATA..."
+        description="Control panel for maintenance operations"
         icon={MonitorCog}
+        className="pb-4"
       />
 
-      {/* Personal Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <User className="h-5 w-5 text-zinc-300" />
-          <div className="h-6 w-48 rounded bg-zinc-100 animate-pulse" />
+      {/* Loading indicator */}
+      <div className="flex items-center justify-center py-12">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+          <p className="text-sm text-zinc-500 font-medium">
+            Loading dashboard data...
+          </p>
         </div>
-        <SkeletonStatsGrid />
       </div>
 
-      {/* Queue Section */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-8 bg-zinc-200 rounded-full" />
-            <div className="h-8 w-32 rounded bg-zinc-100 animate-pulse" />
-          </div>
-        </div>
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+      {/* Stats skeleton */}
+      <div className="space-y-4">
+        <div className="h-6 w-48 bg-zinc-200 animate-pulse rounded" />
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-24 rounded-2xl bg-zinc-100 animate-pulse border border-zinc-200"
+              className="h-24 bg-zinc-100 animate-pulse rounded-lg border border-zinc-200"
             />
           ))}
         </div>
       </div>
 
-      {/* Global Section */}
+      {/* Feed skeleton */}
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Users className="h-5 w-5 text-zinc-300" />
-          <div className="h-6 w-32 rounded bg-zinc-100 animate-pulse" />
+        <div className="h-6 w-32 bg-zinc-200 animate-pulse rounded" />
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-20 bg-zinc-100 animate-pulse rounded-lg border border-zinc-200"
+            />
+          ))}
         </div>
-        <SkeletonStatsGrid />
       </div>
     </div>
   );

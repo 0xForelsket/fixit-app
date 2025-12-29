@@ -23,6 +23,7 @@ export interface SessionPayload {
 }
 
 const SESSION_COOKIE_NAME = "fixit_session";
+const SESSION_EXPIRY_COOKIE_NAME = "fixit_session_exp";
 const CSRF_COOKIE_NAME = "fixit_csrf";
 const SESSION_MAX_AGE = 24 * 60 * 60; // 24 hours in seconds
 
@@ -88,6 +89,16 @@ export async function createSession(user: SessionUser): Promise<string> {
     path: "/",
   });
 
+  // Set session expiry cookie (readable by Edge middleware for expiry checks)
+  // This allows middleware to reject expired sessions without decoding JWT
+  cookieStore.set(SESSION_EXPIRY_COOKIE_NAME, String(expiresAt), {
+    httpOnly: false, // Edge middleware needs to read this
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: SESSION_MAX_AGE,
+    path: "/",
+  });
+
   // Set CSRF cookie (readable by JS for including in requests)
   cookieStore.set(CSRF_COOKIE_NAME, csrfToken, {
     httpOnly: false, // JS needs to read this
@@ -120,6 +131,7 @@ export async function getSession(): Promise<SessionPayload | null> {
 export async function deleteSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.delete(SESSION_EXPIRY_COOKIE_NAME);
   cookieStore.delete(CSRF_COOKIE_NAME);
 }
 

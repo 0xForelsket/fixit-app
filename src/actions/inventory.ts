@@ -26,6 +26,17 @@ export async function createTransactionAction(input: TransactionInput) {
 
   const validated = transactionSchema.parse(input);
 
+  /**
+   * Inventory transaction with stock level updates.
+   *
+   * Transaction Requirements:
+   * - CRITICAL: Uses read-then-write pattern for stock levels
+   * - Must prevent race conditions (two concurrent deductions)
+   * - SQLite SERIALIZABLE isolation handles this automatically
+   * - PostgreSQL migration: MUST use SERIALIZABLE isolation level
+   *
+   * @see docs/transactions.md for isolation level documentation
+   */
   try {
     await db.transaction(async (tx) => {
       // 1. Handle Source Location Level

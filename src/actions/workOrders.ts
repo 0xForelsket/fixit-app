@@ -71,7 +71,16 @@ export async function createWorkOrder(
   // Calculate SLA due date
   const dueBy = calculateDueBy(priority);
 
-  // Create the work order within a transaction to ensure all or nothing
+  /**
+   * Create work order within a transaction to ensure atomicity.
+   *
+   * Transaction Requirements:
+   * - Work order and attachments must be created together (all-or-nothing)
+   * - SQLite SERIALIZABLE isolation is sufficient for this insert-only pattern
+   * - PostgreSQL migration: READ COMMITTED is acceptable (no read-then-write)
+   *
+   * @see docs/transactions.md for isolation level documentation
+   */
   try {
     const workOrder = await db.transaction(async (tx) => {
       const [newWorkOrder] = await tx
