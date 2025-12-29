@@ -11,6 +11,7 @@ import {
   History,
   Inbox,
   MonitorCog,
+  Timer,
   User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
