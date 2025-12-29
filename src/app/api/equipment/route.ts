@@ -22,6 +22,7 @@ export async function GET(request: Request) {
     });
 
     const locationId = searchParams.get("locationId");
+    const departmentId = searchParams.get("departmentId");
     const status = searchParams.get("status");
     const search = searchParams.get("search");
 
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
 
     if (locationId) {
       conditions.push(eq(equipmentTable.locationId, Number(locationId)));
+    }
+
+    if (departmentId) {
+      conditions.push(eq(equipmentTable.departmentId, Number(departmentId)));
     }
 
     if (status) {

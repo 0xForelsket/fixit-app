@@ -69,6 +69,16 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
 
   if (!workOrder) notFound();
 
+  // Security Audit: Technicians only allowed to view work orders in their own department
+  if (
+    user.roleName === "tech" &&
+    user.departmentId &&
+    workOrder.departmentId &&
+    user.departmentId !== workOrder.departmentId
+  ) {
+    notFound();
+  }
+
   // Fetch checklist items
   const checklistItems = await db.query.checklistCompletions.findMany({
     where: eq(checklistCompletions.workOrderId, workOrderId),

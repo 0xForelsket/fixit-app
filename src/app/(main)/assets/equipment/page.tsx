@@ -34,6 +34,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AssetTree } from "./explorer/asset-tree";
 import { ViewToggle } from "@/components/ui/view-toggle";
+import { type SessionUser, getCurrentUser } from "@/lib/session";
+import { and, eq } from "drizzle-orm";
 
 type SearchParams = {
   status?: string;
@@ -50,8 +52,18 @@ type SearchParams = {
   view?: "list" | "tree";
 };
 
-async function getEquipment(params: SearchParams) {
+async function getEquipment(params: SearchParams, user: SessionUser | null) {
+  const departmentId = user?.departmentId;
+  const isTech = user?.roleName === "tech";
+
+  const conditions = [];
+
+  if (isTech && departmentId) {
+    conditions.push(eq(equipmentTable.departmentId, departmentId));
+  }
+
   const equipmentList = await db.query.equipment.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
     orderBy: [desc(equipmentTable.createdAt)],
     with: {
       location: true,
@@ -119,8 +131,18 @@ async function getEquipment(params: SearchParams) {
   return filtered;
 }
 
-async function getEquipmentStats() {
-  const allEquipment = await db.query.equipment.findMany();
+async function getEquipmentStats(user: SessionUser | null) {
+  const departmentId = user?.departmentId;
+  const isTech = user?.roleName === "tech";
+
+  const conditions = [];
+  if (isTech && departmentId) {
+    conditions.push(eq(equipmentTable.departmentId, departmentId));
+  }
+
+  const allEquipment = await db.query.equipment.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+  });
   return {
     total: allEquipment.length,
     operational: allEquipment.filter((m) => m.status === "operational").length,
@@ -135,8 +157,9 @@ export default async function EquipmentPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const equipmentList = await getEquipment(params);
-  const stats = await getEquipmentStats();
+  const user = await getCurrentUser();
+  const equipmentList = await getEquipment(params, user);
+  const stats = await getEquipmentStats(user);
 
   return (
     <div className="space-y-10 animate-in">

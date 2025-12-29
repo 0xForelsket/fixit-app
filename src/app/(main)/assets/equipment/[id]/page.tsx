@@ -79,6 +79,17 @@ export default async function EquipmentDetailPage({
     notFound();
   }
 
+  // Security Audit: Technicians only allowed in their department
+  const user = await getCurrentUser();
+  if (
+    user?.roleName === "tech" &&
+    user.departmentId &&
+    equipmentItem.departmentId &&
+    user.departmentId !== equipmentItem.departmentId
+  ) {
+    notFound();
+  }
+
   const statusConfigs: Record<
     string,
     { icon: React.ElementType; color: string; bg: string; label: string }

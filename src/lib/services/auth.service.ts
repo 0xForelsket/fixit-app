@@ -114,6 +114,7 @@ export async function authenticateUser(
     name: user.name,
     roleName: roleName,
     roleId: user.roleId,
+    departmentId: user.departmentId,
     permissions,
     hourlyRate: user.hourlyRate,
   };

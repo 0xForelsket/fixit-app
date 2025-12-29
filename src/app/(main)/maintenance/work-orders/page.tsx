@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { WorkOrderList } from "@/components/work-orders/work-order-list";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
-import { getCurrentUser } from "@/lib/session";
+import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { and, asc, count, desc, eq, ilike, lt, or } from "drizzle-orm";
 import {
@@ -32,11 +32,18 @@ type SearchParams = {
 
 const PAGE_SIZE = 10;
 
-async function getWorkOrders(params: SearchParams, userId?: number) {
+async function getWorkOrders(params: SearchParams, user: SessionUser | null) {
+  const userId = user?.id;
+  const departmentId = user?.departmentId;
   const page = Number.parseInt(params.page || "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
 
   const conditions = [];
+
+  // Data Isolation: Technicians only see their department's work orders
+  if (user?.roleName === "tech" && departmentId) {
+    conditions.push(eq(workOrders.departmentId, departmentId));
+  }
 
   if (params.status && params.status !== "all") {
     conditions.push(
@@ -127,27 +134,46 @@ async function getWorkOrders(params: SearchParams, userId?: number) {
   };
 }
 
-async function getStats() {
-  const [openWorkOrders] = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(eq(workOrders.status, "open"));
+async function getStats(user: SessionUser | null) {
+  const departmentId = user?.departmentId;
+  const isTech = user?.roleName === "tech";
 
-  const [inProgressWorkOrders] = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(eq(workOrders.status, "in_progress"));
+  const getBaseQuery = () => {
+    const q = db.select({ count: count() }).from(workOrders);
+    if (isTech && departmentId) {
+      return q.where(eq(workOrders.departmentId, departmentId));
+    }
+    return q;
+  };
 
-  const [resolvedWorkOrders] = await db
-    .select({ count: count() })
-    .from(workOrders)
-    .where(eq(workOrders.status, "resolved"));
-
-  const [criticalWorkOrders] = await db
-    .select({ count: count() })
-    .from(workOrders)
+  const [openWorkOrders] = await getBaseQuery()
     .where(
-      and(eq(workOrders.priority, "critical"), eq(workOrders.status, "open"))
+      isTech && departmentId
+        ? and(eq(workOrders.status, "open"), eq(workOrders.departmentId, departmentId))
+        : eq(workOrders.status, "open")
+    );
+
+  const [inProgressWorkOrders] = await getBaseQuery()
+    .where(
+      isTech && departmentId
+        ? and(eq(workOrders.status, "in_progress"), eq(workOrders.departmentId, departmentId))
+        : eq(workOrders.status, "in_progress")
+    );
+
+  const [resolvedWorkOrders] = await getBaseQuery()
+    .where(
+      isTech && departmentId
+        ? and(eq(workOrders.status, "resolved"), eq(workOrders.departmentId, departmentId))
+        : eq(workOrders.status, "resolved")
+    );
+
+  const [criticalWorkOrders] = await getBaseQuery()
+    .where(
+      and(
+        eq(workOrders.priority, "critical"),
+        eq(workOrders.status, "open"),
+        isTech && departmentId ? eq(workOrders.departmentId, departmentId) : undefined
+      )
     );
 
   return {
@@ -170,8 +196,8 @@ export default async function WorkOrdersPage({
     total,
     page,
     totalPages,
-  } = await getWorkOrders(params, user?.id);
-  const stats = await getStats();
+  } = await getWorkOrders(params, user);
+  const stats = await getStats(user);
   const isMyWorkOrdersView = params.assigned === "me";
 
   const activeFilters =

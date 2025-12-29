@@ -32,12 +32,15 @@ interface Stats {
  * Uses SQL aggregation to minimize database round-trips.
  */
 async function getStats(
-  userId?: number
+  user: SessionUser | null
 ): Promise<{ global: Stats; personal: Stats | null }> {
+  const userId = user?.id;
+  const departmentId = user?.departmentId;
+  const isTech = user?.roleName === "tech";
   const now = new Date();
 
-  // Optimized global stats query
-  const [globalResult] = await db
+  // Optimized global (or departmental) stats query
+  const query = db
     .select({
       open: sql<number>`sum(case when ${workOrders.status} = 'open' then 1 else 0 end)`,
       inProgress: sql<number>`sum(case when ${workOrders.status} = 'in_progress' then 1 else 0 end)`,
@@ -45,6 +48,12 @@ async function getStats(
       critical: sql<number>`sum(case when ${workOrders.priority} = 'critical' and ${workOrders.status} = 'open' then 1 else 0 end)`,
     })
     .from(workOrders);
+
+  if (isTech && departmentId) {
+    query.where(eq(workOrders.departmentId, departmentId));
+  }
+
+  const [globalResult] = await query;
 
   const globalStats: Stats = {
     open: Number(globalResult?.open || 0),
@@ -99,9 +108,15 @@ async function getMyWorkOrders(userId: number) {
   });
 }
 
-async function getRecentWorkOrders() {
+async function getRecentWorkOrders(user: SessionUser | null) {
+  const conditions = [eq(workOrders.status, "open")];
+  
+  if (user?.roleName === "tech" && user?.departmentId) {
+    conditions.push(eq(workOrders.departmentId, user.departmentId));
+  }
+
   return db.query.workOrders.findMany({
-    where: eq(workOrders.status, "open"),
+    where: and(...conditions),
     limit: 5,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
     with: {
@@ -145,8 +160,8 @@ function FeedLoading() {
 }
 
 // Personal stats section component
-async function PersonalStatsSection({ userId }: { userId: number }) {
-  const { personal: myStats } = await getStats(userId);
+async function PersonalStatsSection({ user }: { user: SessionUser }) {
+  const { personal: myStats } = await getStats(user);
   if (!myStats) return null;
 
   const myTotalActive = myStats.open + myStats.inProgress;
@@ -239,16 +254,17 @@ async function PersonalQueueSection({ userId }: { userId: number }) {
   );
 }
 
-// Global stats section component
-async function GlobalStatsSection() {
-  const { global: globalStats } = await getStats();
+// Global (or Departmental) stats section component
+async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
+  const { global: globalStats } = await getStats(user);
+  const title = user?.roleName === "tech" ? "Departmental Overview" : "System Overview";
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Users className="h-5 w-5 text-zinc-400" />
         <h2 className="text-lg font-bold tracking-tight text-zinc-600">
-          System Overview
+          {title}
         </h2>
       </div>
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
@@ -295,9 +311,10 @@ async function GlobalStatsSection() {
   );
 }
 
-// Global queue section component
-async function GlobalQueueSection() {
-  const recentWorkOrders = await getRecentWorkOrders();
+// Global (or Departmental) queue section component
+async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
+  const recentWorkOrders = await getRecentWorkOrders(user);
+  const title = user?.roleName === "tech" ? "Department Priority Queue" : "System Priority Queue";
 
   return (
     <div className="space-y-6">
@@ -305,7 +322,7 @@ async function GlobalQueueSection() {
         <div className="flex items-center gap-3">
           <div className="h-2 w-8 bg-zinc-400 rounded-full" />
           <h2 className="text-xl font-bold tracking-tight text-zinc-800">
-            Priority Queue
+            {title}
           </h2>
         </div>
         <Button
@@ -355,7 +372,7 @@ export default async function DashboardPage() {
       {/* My Work Orders Stats - Personal (Suspense boundary) */}
       {user && (
         <Suspense fallback={<StatsLoading />}>
-          <PersonalStatsSection userId={user.id} />
+          <PersonalStatsSection user={user} />
         </Suspense>
       )}
 
@@ -368,12 +385,12 @@ export default async function DashboardPage() {
 
       {/* System Stats - Global (Suspense boundary) */}
       <Suspense fallback={<StatsLoading />}>
-        <GlobalStatsSection />
+        <GlobalStatsSection user={user} />
       </Suspense>
 
       {/* Recent Work Orders section - Global Queue (Suspense boundary) */}
       <Suspense fallback={<FeedLoading />}>
-        <GlobalQueueSection />
+        <GlobalQueueSection user={user} />
       </Suspense>
     </div>
   );

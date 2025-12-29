@@ -12,6 +12,7 @@ export interface SessionUser {
   name: string;
   roleName: string;
   roleId?: number | null;
+  departmentId?: number | null;
   permissions: string[];
   hourlyRate?: number | null;
 }
