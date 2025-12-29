@@ -6,50 +6,50 @@ This plan outlines the steps to implement the missing "basic" features identifie
 **Goal:** Allow users to manage their own credentials, profile details, and app preferences without admin intervention.
 
 ### 1.1 Database Schema
-- [ ] **Schema Update**: Add `preferences` JSON column to `users` table.
+- [x] **Schema Update**: Add `preferences` JSON column to `users` table.
   - Structure: `{ theme: 'system' | 'light' | 'dark', density: 'compact' | 'comfortable', homePage: string, notifications: { email: boolean } }`
-- [ ] **Migration**: Generate and push migration.
+- [x] **Migration**: Generate and push migration.
 
 ### 1.2 Backend Actions
-- [ ] **`updateProfile`**: Handle Name and Email updates.
-- [ ] **`changePin`**: Securely update PIN (require `currentPin` verification).
-- [ ] **`updatePreferences`**: Update the JSON preferences object.
-- [ ] **`revokeSessions`**: Invalidate all session tokens for the user (security feature).
+- [x] **`updateProfile`**: Handle Name and Email updates.
+- [x] **`changePin`**: Securely update PIN (require `currentPin` verification).
+- [x] **`updatePreferences`**: Update the JSON preferences object.
+- [x] **`revokeSessions`**: Invalidate all session tokens for the user (security feature).
 
 ### 1.3 UI Implementation (`/profile/settings`)
-- [ ] **Profile Form**: Edit Name/Email.
-- [ ] **Security Card**: Change PIN form + "Log out all other devices" button.
-- [ ] **Appearance Card**:
+- [x] **Profile Form**: Edit Name/Email.
+- [x] **Security Card**: Change PIN form + "Log out all other devices" button.
+- [x] **Appearance Card**:
   - Theme Selector (System/Light/Dark).
   - Density Toggle (Compact/Comfortable) - *Affects table row heights globally*.
-- [ ] **Notifications Card**: Toggle email alert preferences.
+- [x] **Notifications Card**: Toggle email alert preferences.
 
 ## 2. Global Search (Command Palette)
 **Goal:** Provide quick navigation to any entity in the system via `CMD+K`.
-- [ ] **Component**: Create a `GlobalSearch` component using `cmdk` (already in package.json).
-- [ ] **Data Fetching**: Create a new API route `/api/search/global` that matches:
+- [x] **Component**: Create a `GlobalSearch` component using `cmdk` (already in package.json).
+- [x] **Data Fetching**: Create a new API route `/api/search/global` that matches:
   - Work Orders (`#123`, `Broken Pump`)
   - Equipment (`P-101`, `Centrifugal Pump`)
   - Parts (`Bearing`, `SKU-999`)
   - Pages (`Dashboard`, `Settings`, `Profile`)
-- [ ] **Integration**: Mount the component in `src/components/layout/sidebar.tsx` or the main layout so it's accessible everywhere.
+- [x] **Integration**: Mount the component in `src/components/layout/sidebar.tsx` or the main layout so it's accessible everywhere.
 
 ## 3. Notifications Center
 **Goal:** Centralized view for alerts beyond just "My Tickets".
-- [ ] **Schema**: Create a `notifications` table in `db/schema.ts`.
+- [x] **Schema**: Create a `notifications` table in `db/schema.ts`.
   - Fields: `userId`, `title`, `message`, `type` (info, success, warning, error), `read` (boolean), `link` (optional), `createdAt`.
-- [ ] **Backend**: Add logic to create notifications on key events:
+- [x] **Backend**: Add logic to create notifications on key events:
   - Ticket Assigned
   - Ticket Status Changed (for reporter)
   - Inventory Low (for admins/techs)
-- [ ] **UI**: Create a `NotificationsPopover` in the header (`src/components/layout/header.tsx`).
-- [ ] **Real-time (Optional)**: For now, just poll or revalidate on page load.
+- [x] **UI**: Create a `NotificationsPopover` in the header (`src/components/layout/header.tsx`).
+- [x] **Real-time (Optional)**: For now, just poll or revalidate on page load.
 
 ## 4. Vendor / Supplier Management
 **Goal:** Track where parts and services come from.
-- [ ] **Schema**: Create a `vendors` table.
+- [x] **Schema**: Create a `vendors` table.
   - Fields: `name`, `contactPerson`, `email`, `phone`, `website`, `address`.
-- [ ] **Relation**: Add `vendorId` to `spare_parts` table.
+- [x] **Relation**: Add `vendorId` to `spare_parts` table.
 - [ ] **UI**:
   - Add "Vendors" tab under "Assets".
   - CRUD pages for Vendors.
