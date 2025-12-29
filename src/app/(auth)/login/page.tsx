@@ -241,7 +241,7 @@ export default function LoginPage() {
             <div className="mt-6 pt-4 border-t border-zinc-100 text-center">
               <p className="text-xs text-muted-foreground">
                 Demo:{" "}
-                <span className="font-mono text-primary-600">ADMIN-001</span> /{" "}
+                <span className="font-mono text-primary-600">admin001</span> /{" "}
                 <span className="font-mono text-primary-600">1234</span>
               </p>
             </div>
