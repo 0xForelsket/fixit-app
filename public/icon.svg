@@ -1,27 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
-    </linearGradient>
-  </defs>
+  <!-- Background: Dark Charcoal for high contrast -->
+  <rect width="512" height="512" rx="120" fill="#1A1A1A" />
   
-  <!-- Background: Deep Charcoal for contrast -->
-  <rect width="512" height="512" rx="120" fill="url(#grad1)" />
-  
-  <!-- Icon Group: Centered -->
-  <g transform="translate(106, 106) scale(0.6)">
-    <!-- Stylized Gear/Nut backing (Cream) -->
-    <path d="M256 0c-141.4 0-256 114.6-256 256s114.6 256 256 256 256-114.6 256-256-114.6-256-256-256zm0 432c-97.2 0-176-78.8-176-176s78.8-176 176-176 176 78.8 176 176-78.8 176-176 176z" fill="#F3F1E7" opacity="0.1"/>
+  <!-- Centered Symbol Group -->
+  <g transform="translate(141, 128)">
+    <!-- The Stem (Cream) -->
+    <!-- Modeled after a heavy I-beam or machined part -->
+    <path d="M40 0 L100 0 L100 256 L40 256 Z" fill="#F3F1E7" />
     
-    <!-- Abstract F / Wrench Symbol -->
-    <!-- Wrench Handle/Body (Terracotta Orange) -->
-    <path d="M360 120c-30 0-58 12-78 32l-20 20-100 100c-12 12-20 30-20 48v80c0 22 18 40 40 40h80c18 0 36-8 48-20l100-100 20-20c20-20 32-48 32-78s-56-102-102-102z" fill="#F97316" />
+    <!-- Top Arm (Terracotta) - Abstract Wrench Jaw -->
+    <path d="M100 0 L240 0 C260 0 280 20 280 40 C280 60 260 80 240 80 L100 80 Z" fill="#E07A5F" />
     
-    <!-- Cutout/Detail for Wrench Head (Dark to transparent) -->
-    <circle cx="360" cy="180" r="30" fill="#1A1A1A" />
+    <!-- Middle Arm (Cream) -->
+    <path d="M100 110 L190 110 C205 110 215 125 215 140 C215 155 205 170 190 170 L100 170 Z" fill="#F3F1E7" />
     
-    <!-- Accent Line (Cream) -->
-    <path d="M162 340l80-80" stroke="#F3F1E7" stroke-width="20" stroke-linecap="round" />
+    <!-- Industrial Detail: Hex Bolt in the 'F' Negative Space -->
+    <path d="M100 110 L130 110 L130 170 L100 170 Z" fill="#1A1A1A" opacity="0.2" />
+    
+    <!-- Floating "Nut" Accent (Bottom Right) -->
+    <path d="M180 210 L220 210 L240 245 L220 280 L180 280 L160 245 Z" fill="none" stroke="#E07A5F" stroke-width="8" />
   </g>
 </svg>

@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
-  <!-- Symbol (Left) -->
+  <!-- Symbol (Left) - Matching the approved Icon style -->
   <g transform="translate(40, 40) scale(0.6)">
-    <path d="M140 20c-30 0-58 12-78 32l-20 20-20 20c-12 12-20 30-20 48v40c0 22 18 40 40 40h40c18 0 36-8 48-20l20-20 20-20c20-20 32-48 32-78s-56-62-62-62z" fill="#F97316" />
-    <path d="M80 140l-40 40" stroke="#1A1A1A" stroke-width="12" stroke-linecap="round" />
+    <!-- Stem -->
+    <path d="M40 0 L100 0 L100 200 L40 200 Z" fill="#1A1A1A" />
+    <!-- Top Arm (Terracotta) -->
+    <path d="M100 0 L240 0 C260 0 280 20 280 40 C280 60 260 80 240 80 L100 80 Z" fill="#E07A5F" />
+    <!-- Middle Arm -->
+    <path d="M100 110 L190 110 C205 110 215 125 215 140 C215 155 205 170 190 170 L100 170 Z" fill="#1A1A1A" />
   </g>
 
   <!-- Text "FIXIT" (Serif Style) -->
-  <text x="180" y="140" font-family="serif" font-weight="900" font-size="120" fill="#1A1A1A" letter-spacing="-4">FIXIT</text>
+  <text x="240" y="145" font-family="serif" font-weight="900" font-size="120" fill="#1A1A1A" letter-spacing="-4">FIXIT</text>
   
   <!-- Tagline/Accent -->
-  <text x="560" y="130" font-family="monospace" font-weight="bold" font-size="24" fill="#F97316" letter-spacing="4">PRO</text>
+  <text x="620" y="135" font-family="monospace" font-weight="bold" font-size="24" fill="#E07A5F" letter-spacing="4">PRO</text>
 </svg>
