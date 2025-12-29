@@ -124,3 +124,79 @@ export function truncate(text: string, maxLength: number): string {
 export function generateId(): string {
   return Math.random().toString(36).slice(2, 11);
 }
+
+/**
+ * Result type for safeJsonParse
+ */
+export type JsonParseResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+/**
+ * Safely parse JSON with optional Zod schema validation.
+ *
+ * Always wraps JSON.parse in try/catch to prevent crashes from malformed input.
+ *
+ * @param json - The JSON string to parse
+ * @param schema - Optional Zod schema for validation
+ * @returns Result object with success boolean and data/error
+ *
+ * @example
+ * // Basic parsing
+ * const result = safeJsonParse<MyType>(jsonString);
+ * if (result.success) {
+ *   console.log(result.data);
+ * }
+ *
+ * @example
+ * // With Zod validation
+ * const result = safeJsonParse(jsonString, myZodSchema);
+ * if (result.success) {
+ *   // result.data is typed and validated
+ * }
+ */
+export function safeJsonParse<T>(
+  json: string | null | undefined,
+  schema?: { safeParse: (data: unknown) => { success: boolean; data?: T; error?: { message: string } } }
+): JsonParseResult<T> {
+  if (!json) {
+    return { success: false, error: "No input provided" };
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(json);
+
+    if (schema) {
+      const validated = schema.safeParse(parsed);
+      if (!validated.success) {
+        return {
+          success: false,
+          error: validated.error?.message || "Validation failed",
+        };
+      }
+      return { success: true, data: validated.data as T };
+    }
+
+    return { success: true, data: parsed as T };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof SyntaxError ? "Invalid JSON format" : "Failed to parse JSON",
+    };
+  }
+}
+
+/**
+ * Parse JSON or return a default value on failure.
+ *
+ * @param json - The JSON string to parse
+ * @param defaultValue - Value to return if parsing fails
+ * @returns Parsed value or default
+ */
+export function safeJsonParseOrDefault<T>(
+  json: string | null | undefined,
+  defaultValue: T
+): T {
+  const result = safeJsonParse<T>(json);
+  return result.success ? result.data : defaultValue;
+}

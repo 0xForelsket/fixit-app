@@ -16,6 +16,7 @@ import { workOrderLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
 import type { ActionResult } from "@/lib/types/actions";
+import { safeJsonParseOrDefault } from "@/lib/utils";
 import {
   createWorkOrderSchema,
   resolveWorkOrderSchema,
@@ -38,9 +39,9 @@ export async function createWorkOrder(
     };
   }
 
-  // Extract attachments from JSON if provided
+  // Extract attachments from JSON if provided (using safe parsing)
   const attachmentsJson = formData.get("attachments")?.toString();
-  const parsedAttachments = attachmentsJson ? JSON.parse(attachmentsJson) : [];
+  const parsedAttachments = safeJsonParseOrDefault<unknown[]>(attachmentsJson, []);
 
   const rawData = {
     equipmentId: Number(formData.get("equipmentId")),
