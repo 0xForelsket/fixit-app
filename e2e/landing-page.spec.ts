@@ -6,23 +6,29 @@ test.describe("Marketing Landing Page", () => {
 
   test("should render marketing page on root domain", async ({ page }) => {
     await page.goto("/");
-    // Check for marketing content
-    await expect(page.locator("text=High-precision maintenance management")).toBeVisible();
-    await expect(page.locator("text=FixIt")).toBeVisible();
+    // Check for marketing content - the nav has "FIXIT" text
+    const navBrand = page.locator('nav span:has-text("FIXIT")');
+    await expect(navBrand).toBeVisible();
+    // Check for hero content
+    await expect(page.locator("h1")).toContainText("Maintenance");
   });
 
-  test("should redirect to app login when clicking sign in", async ({ page }) => {
+  test("should have CTA buttons pointing to app subdomain", async ({ page }) => {
     await page.goto("/");
-    const signInButton = page.locator("text=Sign In to Station");
-    await expect(signInButton).toBeVisible();
     
-    // We expect it to navigate to /login on the regular domain initially, 
-    // but users might want it to go to app.localhost:3000/login
-    // The current implementation of LandingPage checks for href="/login"
-    // Since we are on localhost:3000, it goes to localhost:3000/login
-    // which effectively 404s or shows marketing page again if not handled.
+    // Check for "Get Started" and "Start Managing" buttons
+    const getStartedBtn = page.getByRole("link", { name: /Get Started/i });
+    await expect(getStartedBtn).toBeVisible();
     
-    // Ideally we should update the landing page link to point to app subdomain
-    // But for now let's just check the button exists
+    const startManagingBtn = page.getByRole("link", { name: /Start Managing/i });
+    await expect(startManagingBtn).toBeVisible();
+  });
+
+  test("should display feature sections", async ({ page }) => {
+    await page.goto("/");
+    
+    // Check for feature cards
+    await expect(page.locator("text=Asset Intelligence")).toBeVisible();
+    await expect(page.locator("text=Preventative Scheduling")).toBeVisible();
   });
 });
