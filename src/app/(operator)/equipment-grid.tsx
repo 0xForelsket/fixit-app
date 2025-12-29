@@ -16,9 +16,10 @@ interface EquipmentWithLocation extends Equipment {
 
 interface EquipmentGridProps {
   equipment: EquipmentWithLocation[];
+  hash?: string;
 }
 
-export function EquipmentGrid({ equipment }: EquipmentGridProps) {
+export function EquipmentGrid({ equipment, hash }: EquipmentGridProps) {
   if (equipment.length === 0) {
     return (
       <EmptyState
@@ -32,7 +33,7 @@ export function EquipmentGrid({ equipment }: EquipmentGridProps) {
   return (
     <div className="flex flex-col gap-2 pb-2">
       {equipment.map((item, index) => (
-        <EquipmentCard key={item.id} equipment={item} index={index} />
+        <EquipmentCard key={item.id} equipment={item} index={index} hash={hash} />
       ))}
     </div>
   );
@@ -41,20 +42,25 @@ export function EquipmentGrid({ equipment }: EquipmentGridProps) {
 function EquipmentCard({
   equipment,
   index,
+  hash,
 }: {
   equipment: EquipmentWithLocation;
   index: number;
+  hash?: string;
 }) {
   const staggerClass =
     index < 20
       ? `animate-in animate-stagger-${Math.min(index + 1, 20)}`
       : "animate-in fade-in duration-500";
 
+  const href = `/equipment/${equipment.code}${hash ? `#${hash}` : ""}`;
+
   return (
     <Link
-      href={`/equipment/${equipment.code}`}
+      href={href}
+      title={`View details for ${equipment.name}`}
       className={cn(
-        "group flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:bg-zinc-50 hover:border-zinc-300 active:scale-[0.99]",
+        "group flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-md active:scale-[0.98] cursor-pointer",
         staggerClass
       )}
     >
@@ -83,3 +89,4 @@ function EquipmentCard({
     </Link>
   );
 }
+

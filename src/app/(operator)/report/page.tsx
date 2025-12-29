@@ -59,7 +59,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
         <EquipmentSearch locations={locationList} initialSearch={search} />
       </div>
 
-      <EquipmentGrid equipment={equipmentList} />
+      <EquipmentGrid equipment={equipmentList} hash="report" />
     </div>
   );
 }
