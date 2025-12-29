@@ -20,6 +20,9 @@ vi.mock("@/db", () => ({
       workOrders: {
         findFirst: vi.fn(),
       },
+      roles: {
+        findFirst: vi.fn(),
+      },
     },
     transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) => {
       // Call the callback with a mock transaction object
@@ -228,6 +231,17 @@ describe("createWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
+    // Mock the tech role lookup - this is required for notification logic
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      id: 2,
+      name: "tech",
+      description: "Maintenance technician",
+      permissions: ["ticket:view", "ticket:update"],
+      isSystemRole: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
     vi.mocked(db.query.users.findMany).mockResolvedValue([
       {
         id: 2,
@@ -254,8 +268,8 @@ describe("createWorkOrder action", () => {
 
     await createWorkOrder(undefined, formData);
 
-    // Should have called insert for work order and notifications
-    expect(db.insert).toHaveBeenCalled();
+    // Should have called insert for notifications (via mockInsert)
+    expect(mockInsert).toHaveBeenCalled();
   });
 });
 

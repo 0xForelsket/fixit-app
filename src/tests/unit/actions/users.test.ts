@@ -17,8 +17,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-// Mock DB
-const mockTx = {
+// Mock DB - use vi.hoisted to avoid hoisting issues with vi.mock factory
+const mockTx = vi.hoisted(() => ({
   query: {
     users: {
       findFirst: vi.fn(),
@@ -33,7 +33,7 @@ const mockTx = {
   update: vi.fn().mockReturnThis(),
   set: vi.fn().mockReturnThis(),
   where: vi.fn(),
-};
+}));
 
 vi.mock("@/db", () => ({
   db: mockTx,

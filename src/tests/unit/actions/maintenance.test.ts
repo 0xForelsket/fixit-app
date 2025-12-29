@@ -30,16 +30,22 @@ vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
 }));
 
-// Mock DB
-const mockTx = {
-  insert: vi.fn().mockReturnThis(),
-  values: vi.fn().mockReturnThis(),
-  returning: vi.fn(),
-  update: vi.fn().mockReturnThis(),
-  set: vi.fn().mockReturnThis(),
-  where: vi.fn(),
-  delete: vi.fn().mockReturnThis(),
-};
+// Mock DB - use vi.hoisted to avoid hoisting issues with vi.mock factory
+// Create a proper chainable mock that supports Drizzle's fluent API
+const mockReturning = vi.hoisted(() => vi.fn());
+const mockWhere = vi.hoisted(() => vi.fn(() => ({ returning: mockReturning })));
+const mockSet = vi.hoisted(() => vi.fn(() => ({ where: mockWhere, returning: mockReturning })));
+const mockValues = vi.hoisted(() => vi.fn(() => ({ returning: mockReturning })));
+
+const mockTx = vi.hoisted(() => ({
+  insert: vi.fn(() => ({ values: mockValues })),
+  values: mockValues,
+  returning: mockReturning,
+  update: vi.fn(() => ({ set: mockSet })),
+  set: mockSet,
+  where: mockWhere,
+  delete: vi.fn(() => ({ where: mockWhere, returning: mockReturning })),
+}));
 
 vi.mock("@/db", () => ({
   db: mockTx,
@@ -96,12 +102,12 @@ describe("Maintenance Actions", () => {
     });
 
     it("should create schedule and checklists successfully", async () => {
-      mockTx.returning.mockResolvedValue([{ id: 100 }]);
+      mockReturning.mockResolvedValue([{ id: 100 }]);
 
       await createScheduleAction(validInput);
 
       expect(mockTx.insert).toHaveBeenCalledWith(maintenanceSchedules);
-      expect(mockTx.values).toHaveBeenCalledWith(
+      expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Monthly Service",
           equipmentId: 1,
@@ -109,7 +115,7 @@ describe("Maintenance Actions", () => {
       );
 
       expect(mockTx.insert).toHaveBeenCalledWith(maintenanceChecklists);
-      expect(mockTx.values).toHaveBeenCalledWith(
+      expect(mockValues).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             scheduleId: 100,
@@ -132,12 +138,12 @@ describe("Maintenance Actions", () => {
     };
 
     it("should update schedule successfully", async () => {
-      mockTx.returning.mockResolvedValue([{ id: scheduleId }]);
+      mockReturning.mockResolvedValue([{ id: scheduleId }]);
 
       await updateScheduleAction(scheduleId, updateInput);
 
       expect(mockTx.update).toHaveBeenCalledWith(maintenanceSchedules);
-      expect(mockTx.set).toHaveBeenCalledWith(
+      expect(mockSet).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Updated Service",
           frequencyDays: 60,
@@ -146,7 +152,7 @@ describe("Maintenance Actions", () => {
     });
 
     it("should return error if schedule not found", async () => {
-      mockTx.returning.mockResolvedValue([]);
+      mockReturning.mockResolvedValue([]);
 
       const result = await updateScheduleAction(scheduleId, updateInput);
 
@@ -158,7 +164,7 @@ describe("Maintenance Actions", () => {
     const scheduleId = 100;
 
     it("should delete schedule successfully", async () => {
-      mockTx.returning.mockResolvedValue([{ id: scheduleId }]);
+      mockReturning.mockResolvedValue([{ id: scheduleId }]);
 
       const result = await deleteScheduleAction(scheduleId);
 
@@ -168,7 +174,7 @@ describe("Maintenance Actions", () => {
     });
 
     it("should return error if schedule not found", async () => {
-      mockTx.returning.mockResolvedValue([]);
+      mockReturning.mockResolvedValue([]);
 
       const result = await deleteScheduleAction(scheduleId);
 

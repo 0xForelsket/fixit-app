@@ -34,8 +34,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-// Mock DB
-const mockTx = {
+// Mock DB - use vi.hoisted to avoid hoisting issues with vi.mock factory
+const mockTx = vi.hoisted(() => ({
   query: {
     inventoryLevels: {
       findFirst: vi.fn(),
@@ -46,11 +46,11 @@ const mockTx = {
   update: vi.fn().mockReturnThis(),
   set: vi.fn().mockReturnThis(),
   where: vi.fn(),
-};
+}));
 
 vi.mock("@/db", () => ({
   db: {
-    transaction: vi.fn((callback) => callback(mockTx)),
+    transaction: vi.fn((callback: (tx: typeof mockTx) => unknown) => callback(mockTx)),
   },
 }));
 
@@ -81,22 +81,20 @@ describe("Inventory Actions", () => {
       notes: "Test transaction",
     };
 
-    it("should return error if user is unauthorized", async () => {
+    it("should throw error if user is unauthorized", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue(null);
 
-      const result = await createTransactionAction(validInput);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Unauthorized");
+      await expect(createTransactionAction(validInput)).rejects.toThrow(
+        "Unauthorized"
+      );
     });
 
-    it("should return error if user lacks permission", async () => {
+    it("should throw error if user lacks permission", async () => {
       vi.mocked(userHasPermission).mockReturnValue(false);
 
-      const result = await createTransactionAction(validInput);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Unauthorized");
+      await expect(createTransactionAction(validInput)).rejects.toThrow(
+        "Unauthorized"
+      );
     });
 
     it("should process 'in' transaction correctly", async () => {
@@ -197,11 +195,12 @@ describe("Inventory Actions", () => {
       quantity: 2,
     };
 
-    it("should return error if user is unauthorized", async () => {
+    it("should throw error if user is unauthorized", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue(null);
-      const result = await consumeWorkOrderPartAction(validInput);
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Unauthorized");
+
+      await expect(consumeWorkOrderPartAction(validInput)).rejects.toThrow(
+        "Unauthorized"
+      );
     });
 
     it("should fail if stock is insufficient", async () => {
