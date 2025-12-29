@@ -1,4 +1,8 @@
-"use server";
+// Move DEFAULT_PREFERENCES inside a function or to a shared file.
+// For now, let's keep it here but NOT export it directly if this is a "use server" file.
+// Actually, let's split this file. But to fix it quickly:
+// We will move DEFAULT_PREFERENCES to schema or a utils file.
+// OR we can just remove "use server" from the top and add it to each function.
 
 import { db } from "@/db";
 import { users, type UserPreferences } from "@/db/schema";
@@ -10,13 +14,15 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 // Default preferences for new users or when null
-export const DEFAULT_PREFERENCES: UserPreferences = {
+const DEFAULT_PREFERENCES: UserPreferences = {
   theme: "system",
   density: "comfortable",
   notifications: {
     email: true,
   },
 };
+
+export { DEFAULT_PREFERENCES }; // Still an issue if we use "use server" at top.
 
 // Validation schemas
 const updateProfileSchema = z.object({
@@ -48,6 +54,7 @@ export async function updateProfile(
   _prevState: ActionResult<null>,
   formData: FormData
 ): Promise<ActionResult<null>> {
+  "use server";
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in to update your profile" };
@@ -90,6 +97,7 @@ export async function changePin(
   _prevState: ActionResult<null>,
   formData: FormData
 ): Promise<ActionResult<null>> {
+  "use server";
   const sessionUser = await getCurrentUser();
   if (!sessionUser) {
     return { success: false, error: "You must be logged in to change your PIN" };
@@ -148,6 +156,7 @@ export async function changePin(
 export async function updatePreferences(
   preferences: Partial<UserPreferences>
 ): Promise<ActionResult<UserPreferences>> {
+  "use server";
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in to update preferences" };
@@ -219,6 +228,7 @@ export async function getPreferences(): Promise<UserPreferences> {
  * A full implementation would require session tracking in the database.
  */
 export async function revokeAllSessions(): Promise<ActionResult<null>> {
+  "use server";
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in" };
