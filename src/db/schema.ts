@@ -108,6 +108,15 @@ export const transactionTypes = [
 ] as const;
 export type TransactionType = (typeof transactionTypes)[number];
 
+// User preferences type
+export interface UserPreferences {
+  theme: "system" | "light" | "dark";
+  density: "compact" | "comfortable";
+  notifications: {
+    email: boolean;
+  };
+}
+
 // ============ TABLES ============
 
 export const roles = sqliteTable("roles", {
@@ -155,6 +164,7 @@ export const users = sqliteTable("users", {
   departmentId: integer("department_id").references(() => departments.id),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   hourlyRate: real("hourly_rate"), // For labor cost tracking
+  preferences: text("preferences", { mode: "json" }).$type<UserPreferences>(),
   failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
   lockedUntil: integer("locked_until", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -437,6 +447,26 @@ export const checklistCompletions = sqliteTable("checklist_completions", {
 // ============ PHASE 12: INVENTORY MANAGEMENT ============
 
 // Spare parts catalog
+// Vendors (suppliers for parts and services)
+export const vendors = sqliteTable("vendors", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  code: text("code").unique().notNull(), // Short code like "ACME"
+  contactPerson: text("contact_person"),
+  email: text("email"),
+  phone: text("phone"),
+  website: text("website"),
+  address: text("address"),
+  notes: text("notes"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 export const spareParts = sqliteTable("spare_parts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
@@ -444,6 +474,7 @@ export const spareParts = sqliteTable("spare_parts", {
   barcode: text("barcode"),
   description: text("description"),
   category: text("category", { enum: partCategories }).notNull(),
+  vendorId: integer("vendor_id").references(() => vendors.id),
   unitCost: real("unit_cost"),
   reorderPoint: integer("reorder_point").notNull().default(0),
   leadTimeDays: integer("lead_time_days"),
@@ -768,7 +799,15 @@ export const checklistCompletionsRelations = relations(
 );
 
 // Phase 12: Inventory relations
-export const sparePartsRelations = relations(spareParts, ({ many }) => ({
+export const vendorsRelations = relations(vendors, ({ many }) => ({
+  parts: many(spareParts),
+}));
+
+export const sparePartsRelations = relations(spareParts, ({ one, many }) => ({
+  vendor: one(vendors, {
+    fields: [spareParts.vendorId],
+    references: [vendors.id],
+  }),
   inventoryLevels: many(inventoryLevels),
   transactions: many(inventoryTransactions),
   workOrderParts: many(workOrderParts),
@@ -893,7 +932,10 @@ export type NewMaintenanceChecklist = typeof maintenanceChecklists.$inferInsert;
 export type ChecklistCompletion = typeof checklistCompletions.$inferSelect;
 export type NewChecklistCompletion = typeof checklistCompletions.$inferInsert;
 
-// Phase 12: Inventory types
+/// Phase 12: Inventory types
+export type Vendor = typeof vendors.$inferSelect;
+export type NewVendor = typeof vendors.$inferInsert;
+
 export type SparePart = typeof spareParts.$inferSelect;
 export type NewSparePart = typeof spareParts.$inferInsert;
 
