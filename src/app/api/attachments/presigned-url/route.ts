@@ -1,21 +1,21 @@
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getPresignedUploadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
-import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return ApiErrors.unauthorized(requestId);
   }
 
   try {
     const { filename, mimeType, entityType, entityId } = await request.json();
 
     if (!filename || !mimeType || !entityType || !entityId) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Missing required fields", requestId);
     }
 
     // Generate a unique S3 key
@@ -25,12 +25,9 @@ export async function POST(request: Request) {
 
     const uploadUrl = await getPresignedUploadUrl(s3Key, mimeType);
 
-    return NextResponse.json({ uploadUrl, s3Key });
+    return apiSuccess({ uploadUrl, s3Key });
   } catch (error) {
-    console.error("Failed to generate presigned URL:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to generate presigned URL");
+    return ApiErrors.internal(error, requestId);
   }
 }

@@ -1,15 +1,18 @@
 import { db } from "@/db";
 import { laborLogs } from "@/db/schema";
+import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { revalidatePath } from "next/cache";
-import { NextResponse } from "next/server";
 
 // POST /api/labor - Create new labor log
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const body = await request.json();
@@ -25,10 +28,7 @@ export async function POST(request: Request) {
     } = body;
 
     if (!workOrderId || !userId || !durationMinutes) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Missing required fields", requestId);
     }
 
     const [log] = await db
@@ -48,22 +48,21 @@ export async function POST(request: Request) {
     revalidatePath(`/maintenance/work-orders/${workOrderId}`);
     revalidatePath("/maintenance/work-orders");
 
-    return NextResponse.json(log, { status: 201 });
+    return apiSuccess(log, HttpStatus.CREATED, requestId);
   } catch (error) {
-    console.error("Error creating labor log:", error);
-    return NextResponse.json(
-      { error: "Failed to create labor log" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error creating labor log");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
 // GET /api/labor - List labor logs (with optional workOrderId filter)
 export async function GET(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { searchParams } = new URL(request.url);
@@ -80,12 +79,9 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(logs);
+    return apiSuccess(logs);
   } catch (error) {
-    console.error("Error fetching labor logs:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch labor logs" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error fetching labor logs");
+    return ApiErrors.internal(error, requestId);
   }
 }

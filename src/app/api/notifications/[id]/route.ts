@@ -1,28 +1,29 @@
 import { db } from "@/db";
 import { notifications } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const notificationId = Number.parseInt(id, 10);
 
     if (Number.isNaN(notificationId)) {
-      return NextResponse.json(
-        { error: "Invalid notification ID" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Invalid notification ID", requestId);
     }
 
     const body = await request.json();
@@ -33,14 +34,11 @@ export async function PATCH(
     });
 
     if (!notification) {
-      return NextResponse.json(
-        { error: "Notification not found" },
-        { status: 404 }
-      );
+      return ApiErrors.notFound("Notification", requestId);
     }
 
     if (notification.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return ApiErrors.forbidden(requestId);
     }
 
     // Update notification
@@ -49,12 +47,9 @@ export async function PATCH(
       .set({ isRead: body.isRead })
       .where(eq(notifications.id, notificationId));
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    console.error("Failed to update notification:", error);
-    return NextResponse.json(
-      { error: "Failed to update notification" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to update notification");
+    return ApiErrors.internal(error, requestId);
   }
 }

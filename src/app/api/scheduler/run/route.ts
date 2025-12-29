@@ -5,12 +5,15 @@ import {
   maintenanceSchedules,
   workOrders,
 } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { schedulerLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq, lte } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     // 1. Authorization: Hybrid approach (Cron Secret OR Authenticated Session)
     const authHeader = request.headers.get("Authorization");
@@ -27,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     if (!isAuthorized) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     // 2. Find due schedules
@@ -43,7 +46,7 @@ export async function POST(request: Request) {
       );
 
     if (pendingSchedules.length === 0) {
-      return NextResponse.json({ message: "No schedules due", generated: 0 });
+      return apiSuccess({ message: "No schedules due", generated: 0 });
     }
 
     let generatedCount = 0;
@@ -105,30 +108,31 @@ export async function POST(request: Request) {
             })
             .where(eq(maintenanceSchedules.id, schedule.id));
 
-          // D. Create Notifications (for all Techs and Admins)
-          // TODO: Implement notification logic in future phase
-          // Currently relying on dashboard "Active Tickets" for visibility
-
           generatedCount++;
         });
       } catch (err) {
-        console.error(`Failed to process schedule ${schedule.id}:`, err);
+        schedulerLogger.error(
+          { requestId, scheduleId: schedule.id, error: err },
+          "Failed to process schedule"
+        );
         errors.push(
           `Schedule ${schedule.id}: ${err instanceof Error ? err.message : String(err)}`
         );
       }
     }
 
-    return NextResponse.json({
+    schedulerLogger.info(
+      { requestId, generated: generatedCount, errorCount: errors.length },
+      "Scheduler run complete"
+    );
+
+    return apiSuccess({
       message: "Scheduler run complete",
       generated: generatedCount,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (err) {
-    console.error("Scheduler fatal error:", err);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    schedulerLogger.error({ requestId, error: err }, "Scheduler fatal error");
+    return ApiErrors.internal(err, requestId);
   }
 }

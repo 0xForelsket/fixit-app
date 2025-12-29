@@ -1,25 +1,28 @@
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const partId = Number.parseInt(id);
 
     if (Number.isNaN(partId)) {
-      return NextResponse.json({ error: "Invalid part ID" }, { status: 400 });
+      return ApiErrors.badRequest("Invalid part ID", requestId);
     }
 
     const part = await db.query.spareParts.findFirst({
@@ -27,16 +30,13 @@ export async function GET(
     });
 
     if (!part) {
-      return NextResponse.json({ error: "Part not found" }, { status: 404 });
+      return ApiErrors.notFound("Part", requestId);
     }
 
-    return NextResponse.json(part);
+    return apiSuccess(part);
   } catch (error) {
-    console.error("Error fetching part:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch part" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error fetching part");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
@@ -44,17 +44,19 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_UPDATE)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const partId = Number.parseInt(id);
 
     if (Number.isNaN(partId)) {
-      return NextResponse.json({ error: "Invalid part ID" }, { status: 400 });
+      return ApiErrors.badRequest("Invalid part ID", requestId);
     }
 
     const body = await request.json();
@@ -88,16 +90,13 @@ export async function PATCH(
       .returning();
 
     if (!part) {
-      return NextResponse.json({ error: "Part not found" }, { status: 404 });
+      return ApiErrors.notFound("Part", requestId);
     }
 
-    return NextResponse.json(part);
+    return apiSuccess(part);
   } catch (error) {
-    console.error("Error updating part:", error);
-    return NextResponse.json(
-      { error: "Failed to update part" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error updating part");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
@@ -105,17 +104,19 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_DELETE)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const partId = Number.parseInt(id);
 
     if (Number.isNaN(partId)) {
-      return NextResponse.json({ error: "Invalid part ID" }, { status: 400 });
+      return ApiErrors.badRequest("Invalid part ID", requestId);
     }
 
     const [deleted] = await db
@@ -124,15 +125,12 @@ export async function DELETE(
       .returning();
 
     if (!deleted) {
-      return NextResponse.json({ error: "Part not found" }, { status: 404 });
+      return ApiErrors.notFound("Part", requestId);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    console.error("Error deleting part:", error);
-    return NextResponse.json(
-      { error: "Failed to delete part" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error deleting part");
+    return ApiErrors.internal(error, requestId);
   }
 }

@@ -1,9 +1,13 @@
+import { ApiErrors } from "@/lib/api-error";
+import { authLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { authenticateUser } from "@/lib/services/auth.service";
 import { loginSchema } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     const clientIp = getClientIp(request);
     const rateLimit = checkRateLimit(
@@ -13,28 +17,15 @@ export async function POST(request: Request) {
     );
 
     if (!rateLimit.success) {
-      return NextResponse.json(
-        { error: "Too many login attempts. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(
-              Math.ceil((rateLimit.reset - Date.now()) / 1000)
-            ),
-            "X-RateLimit-Remaining": "0",
-          },
-        }
-      );
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
     }
 
     const body = await request.json();
 
     const result = loginSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: result.error.flatten() },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Invalid credentials format", requestId);
     }
 
     const { employeeId, pin } = result.data;
@@ -42,11 +33,14 @@ export async function POST(request: Request) {
     const authResult = await authenticateUser(employeeId, pin);
 
     if (!authResult.success) {
+      authLogger.warn({ requestId, employeeId }, "Login failed");
       return NextResponse.json(
         { error: authResult.error },
         { status: authResult.status || 401 }
       );
     }
+
+    authLogger.info({ requestId, userId: authResult.user.id }, "Login successful");
 
     return NextResponse.json({
       success: true,
@@ -60,10 +54,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
-    return NextResponse.json(
-      { error: "An error occurred during login" },
-      { status: 500 }
-    );
+    authLogger.error({ requestId, error }, "Login error");
+    return ApiErrors.internal(error, requestId);
   }
 }

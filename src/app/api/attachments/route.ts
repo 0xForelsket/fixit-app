@@ -1,17 +1,21 @@
 import { db } from "@/db";
 import { type AttachmentType, type EntityType, attachments } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateS3Key, getPresignedUploadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 // GET /api/attachments - List attachments for an entity
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -19,15 +23,15 @@ export async function GET(request: NextRequest) {
     const entityId = searchParams.get("entityId");
 
     if (!entityType || !entityId) {
-      return NextResponse.json(
-        { error: "entityType and entityId are required" },
-        { status: 400 }
+      return ApiErrors.validationError(
+        "entityType and entityId are required",
+        requestId
       );
     }
 
     const entityIdNum = Number.parseInt(entityId, 10);
     if (Number.isNaN(entityIdNum)) {
-      return NextResponse.json({ error: "Invalid entityId" }, { status: 400 });
+      return ApiErrors.badRequest("Invalid entityId", requestId);
     }
 
     const attachmentList = await db.query.attachments.findMany({
@@ -40,18 +44,17 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ attachments: attachmentList });
+    return apiSuccess({ attachments: attachmentList });
   } catch (error) {
-    console.error("Failed to list attachments:", error);
-    return NextResponse.json(
-      { error: "Failed to list attachments" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to list attachments");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
 // POST /api/attachments - Create attachment record and get upload URL
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+
   try {
     const clientIp = getClientIp(request);
     const rateLimit = checkRateLimit(
@@ -61,23 +64,13 @@ export async function POST(request: NextRequest) {
     );
 
     if (!rateLimit.success) {
-      return NextResponse.json(
-        { error: "Upload limit exceeded. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "Retry-After": String(
-              Math.ceil((rateLimit.reset - Date.now()) / 1000)
-            ),
-            "X-RateLimit-Remaining": "0",
-          },
-        }
-      );
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
     }
 
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const body = await request.json();
@@ -99,12 +92,9 @@ export async function POST(request: NextRequest) {
       !mimeType ||
       !sizeBytes
     ) {
-      return NextResponse.json(
-        {
-          error:
-            "Missing required fields: entityType, entityId, attachmentType, filename, mimeType, sizeBytes",
-        },
-        { status: 400 }
+      return ApiErrors.validationError(
+        "Missing required fields: entityType, entityId, attachmentType, filename, mimeType, sizeBytes",
+        requestId
       );
     }
 
@@ -135,15 +125,12 @@ export async function POST(request: NextRequest) {
     // Generate presigned upload URL
     const uploadUrl = await getPresignedUploadUrl(s3Key, mimeType);
 
-    return NextResponse.json({
+    return apiSuccess({
       attachment: { ...attachment, s3Key },
       uploadUrl,
     });
   } catch (error) {
-    console.error("Failed to create attachment:", error);
-    return NextResponse.json(
-      { error: "Failed to create attachment" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to create attachment");
+    return ApiErrors.internal(error, requestId);
   }
 }

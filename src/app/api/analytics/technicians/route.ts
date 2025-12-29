@@ -1,14 +1,17 @@
 import { db } from "@/db";
 import { roles, users, workOrders } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { eq, sql } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export async function GET() {
+  const requestId = generateRequestId();
   const user = await getCurrentUser();
+
   if (!user || !userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return ApiErrors.unauthorized(requestId);
   }
 
   try {
@@ -25,12 +28,9 @@ export async function GET() {
       .where(eq(roles.name, "tech"))
       .groupBy(users.id);
 
-    return NextResponse.json(result);
+    return apiSuccess(result);
   } catch (error) {
-    console.error("Tech stats error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Tech stats error");
+    return ApiErrors.internal(error, requestId);
   }
 }

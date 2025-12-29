@@ -6,8 +6,10 @@ import {
   locations,
   users,
 } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { requirePermission } from "@/lib/auth";
 import { mapCSVToObjects, parseCSV } from "@/lib/csv";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { PERMISSIONS } from "@/lib/permissions";
 import {
   type EquipmentImportRow,
@@ -20,6 +22,8 @@ import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     await requirePermission(PERMISSIONS.EQUIPMENT_CREATE);
 
@@ -28,7 +32,7 @@ export async function POST(request: Request) {
     const optionsJson = formData.get("options") as string | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+      return ApiErrors.validationError("No file provided", requestId);
     }
 
     const options = optionsJson
@@ -39,7 +43,7 @@ export async function POST(request: Request) {
     const { rows, headers } = parseCSV(content);
 
     if (rows.length === 0) {
-      return NextResponse.json({ error: "CSV file is empty" }, { status: 400 });
+      return ApiErrors.validationError("CSV file is empty", requestId);
     }
 
     const mapping = equipmentImportFieldDefinitions.map((def) => {
@@ -238,7 +242,7 @@ export async function POST(request: Request) {
     if (options.validateOnly) {
       result.inserted = toInsert.length;
       result.updated = toUpdate.length;
-      return NextResponse.json(result);
+      return apiSuccess(result);
     }
 
     if (toInsert.length > 0) {
@@ -261,18 +265,12 @@ export async function POST(request: Request) {
     }
     result.updated = toUpdate.length;
 
-    return NextResponse.json(result);
+    return apiSuccess(result);
   } catch (error) {
     if (error instanceof Error && error.message === "Forbidden") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return ApiErrors.forbidden(requestId);
     }
-    console.error("Equipment import error:", error);
-    return NextResponse.json(
-      {
-        error: "Import failed",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Equipment import error");
+    return ApiErrors.internal(error, requestId);
   }
 }

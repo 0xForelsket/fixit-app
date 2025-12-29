@@ -1,21 +1,24 @@
 import { db } from "@/db";
 import { equipmentBoms } from "@/db/schema";
+import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (
       !user ||
       !userHasPermission(user, PERMISSIONS.EQUIPMENT_MANAGE_MODELS)
     ) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id: modelIdStr } = await params;
@@ -25,10 +28,7 @@ export async function POST(
     const { partId, quantityRequired, notes } = body;
 
     if (!partId) {
-      return NextResponse.json(
-        { error: "Part ID is required" },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Part ID is required", requestId);
     }
 
     // Check if exists
@@ -49,7 +49,7 @@ export async function POST(
         })
         .where(eq(equipmentBoms.id, existing.id))
         .returning();
-      return NextResponse.json(updated);
+      return apiSuccess(updated);
     }
 
     // Insert
@@ -63,12 +63,9 @@ export async function POST(
       })
       .returning();
 
-    return NextResponse.json(newItem, { status: 201 });
+    return apiSuccess(newItem, HttpStatus.CREATED, requestId);
   } catch (error) {
-    console.error("Error adding BOM item:", error);
-    return NextResponse.json(
-      { error: "Failed to add BOM item" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error adding BOM item");
+    return ApiErrors.internal(error, requestId);
   }
 }

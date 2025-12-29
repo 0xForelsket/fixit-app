@@ -59,7 +59,7 @@ describe("POST /api/auth/login", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toBe("Invalid input");
+    expect(data.error).toBe("Invalid credentials format");
   });
 
   it("returns 401 for invalid credentials", async () => {

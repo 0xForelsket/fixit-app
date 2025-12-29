@@ -1,5 +1,7 @@
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
+import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { PERMISSIONS } from "@/lib/permissions";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf, requirePermission } from "@/lib/session";
@@ -8,6 +10,8 @@ import { and, eq, ilike, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     await requireAuth();
 
@@ -78,17 +82,16 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
-    console.error("Get equipment error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch equipment" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Get equipment error");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     // Rate limiting check
     const clientIp = getClientIp(request);
@@ -99,16 +102,8 @@ export async function POST(request: Request) {
     );
 
     if (!rateLimit.success) {
-      return NextResponse.json(
-        { error: "Too many requests. Please try again later." },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Remaining": rateLimit.remaining.toString(),
-            "X-RateLimit-Reset": rateLimit.reset.toString(),
-          },
-        }
-      );
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
     }
 
     await requireCsrf(request);
@@ -118,10 +113,7 @@ export async function POST(request: Request) {
     const result = createEquipmentSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: result.error.flatten() },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Invalid input data", requestId);
     }
 
     const [newItem] = await db
@@ -129,24 +121,21 @@ export async function POST(request: Request) {
       .values(result.data)
       .returning();
 
-    return NextResponse.json(newItem, { status: 201 });
+    return apiSuccess(newItem, HttpStatus.CREATED, requestId);
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "Unauthorized") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return ApiErrors.unauthorized(requestId);
       }
       if (
         error.message === "Forbidden" ||
         error.message === "CSRF token missing" ||
         error.message === "CSRF token invalid"
       ) {
-        return NextResponse.json({ error: error.message }, { status: 403 });
+        return ApiErrors.forbidden(requestId);
       }
     }
-    console.error("Create equipment error:", error);
-    return NextResponse.json(
-      { error: "Failed to create equipment" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Create equipment error");
+    return ApiErrors.internal(error, requestId);
   }
 }

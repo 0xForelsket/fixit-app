@@ -1,14 +1,17 @@
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { and, gt, isNotNull, sql } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export async function GET() {
+  const requestId = generateRequestId();
   const user = await getCurrentUser();
+
   if (!user || !userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return ApiErrors.unauthorized(requestId);
   }
 
   try {
@@ -90,7 +93,7 @@ export async function GET() {
         ? Math.round((slaCompliantCount / resolvedWithDue.length) * 100)
         : 100;
 
-    return NextResponse.json({
+    return apiSuccess({
       openWorkOrders,
       highPriorityOpen,
       mttrHours,
@@ -98,10 +101,7 @@ export async function GET() {
       period: "30d",
     });
   } catch (error) {
-    console.error("KPIs error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "KPIs error");
+    return ApiErrors.internal(error, requestId);
   }
 }

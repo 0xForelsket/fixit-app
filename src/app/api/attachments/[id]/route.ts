@@ -1,29 +1,30 @@
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { deleteObject, getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 // GET /api/attachments/[id] - Get presigned download URL
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const attachmentId = Number.parseInt(id, 10);
     if (Number.isNaN(attachmentId)) {
-      return NextResponse.json(
-        { error: "Invalid attachment ID" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Invalid attachment ID", requestId);
     }
 
     const attachment = await db.query.attachments.findFirst({
@@ -31,24 +32,18 @@ export async function GET(
     });
 
     if (!attachment) {
-      return NextResponse.json(
-        { error: "Attachment not found" },
-        { status: 404 }
-      );
+      return ApiErrors.notFound("Attachment", requestId);
     }
 
     const downloadUrl = await getPresignedDownloadUrl(attachment.s3Key);
 
-    return NextResponse.json({
+    return apiSuccess({
       attachment,
       downloadUrl,
     });
   } catch (error) {
-    console.error("Failed to get attachment:", error);
-    return NextResponse.json(
-      { error: "Failed to get attachment" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to get attachment");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
@@ -57,19 +52,18 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const attachmentId = Number.parseInt(id, 10);
     if (Number.isNaN(attachmentId)) {
-      return NextResponse.json(
-        { error: "Invalid attachment ID" },
-        { status: 400 }
-      );
+      return ApiErrors.badRequest("Invalid attachment ID", requestId);
     }
 
     const attachment = await db.query.attachments.findFirst({
@@ -77,34 +71,29 @@ export async function DELETE(
     });
 
     if (!attachment) {
-      return NextResponse.json(
-        { error: "Attachment not found" },
-        { status: 404 }
-      );
+      return ApiErrors.notFound("Attachment", requestId);
     }
 
     const isOwner = attachment.uploadedById === user.id;
     const canDeleteAny = userHasPermission(user, PERMISSIONS.ALL);
     if (!isOwner && !canDeleteAny) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return ApiErrors.forbidden(requestId);
     }
 
     // Delete from S3
     try {
       await deleteObject(attachment.s3Key);
     } catch (s3Error) {
-      console.warn("Failed to delete from S3 (may not exist):", s3Error);
+      // Log but continue - file may not exist
+      apiLogger.warn({ requestId, s3Error }, "Failed to delete from S3");
     }
 
     // Delete from database
     await db.delete(attachments).where(eq(attachments.id, attachmentId));
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    console.error("Failed to delete attachment:", error);
-    return NextResponse.json(
-      { error: "Failed to delete attachment" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to delete attachment");
+    return ApiErrors.internal(error, requestId);
   }
 }

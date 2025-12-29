@@ -4,17 +4,21 @@ import {
   type WorkOrderStatus,
   workOrders,
 } from "@/db/schema";
+import { ApiErrors } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
 
     if (!user || !userHasPermission(user, PERMISSIONS.REPORTS_EXPORT)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const searchParams = request.nextUrl.searchParams;
@@ -102,11 +106,8 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Failed to export work orders:", error);
-    return NextResponse.json(
-      { error: "Failed to export work orders" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Failed to export work orders");
+    return ApiErrors.internal(error, requestId);
   }
 }
 

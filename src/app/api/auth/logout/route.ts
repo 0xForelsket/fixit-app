@@ -1,15 +1,16 @@
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { authLogger, generateRequestId } from "@/lib/logger";
 import { deleteSession } from "@/lib/session";
-import { NextResponse } from "next/server";
 
 export async function POST() {
+  const requestId = generateRequestId();
+
   try {
     await deleteSession();
-    return NextResponse.json({ success: true });
+    authLogger.info({ requestId }, "User logged out");
+    return apiSuccess({ success: true });
   } catch (error) {
-    console.error("Logout error:", error);
-    return NextResponse.json(
-      { error: "An error occurred during logout" },
-      { status: 500 }
-    );
+    authLogger.error({ requestId, error }, "Logout error");
+    return ApiErrors.internal(error, requestId);
   }
 }

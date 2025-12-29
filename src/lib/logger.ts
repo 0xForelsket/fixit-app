@@ -16,6 +16,7 @@ export const dbLogger = logger.child({ module: "db" });
 export const apiLogger = logger.child({ module: "api" });
 export const inventoryLogger = logger.child({ module: "inventory" });
 export const workOrderLogger = logger.child({ module: "workOrder" });
+export const schedulerLogger = logger.child({ module: "scheduler" });
 
 export function generateRequestId(): string {
   return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;

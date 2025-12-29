@@ -1,25 +1,28 @@
 import { db } from "@/db";
 import { laborLogs } from "@/db/schema";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 // GET /api/labor/[id] - Get single labor log
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const logId = Number.parseInt(id);
 
     if (Number.isNaN(logId)) {
-      return NextResponse.json({ error: "Invalid log ID" }, { status: 400 });
+      return ApiErrors.badRequest("Invalid log ID", requestId);
     }
 
     const log = await db.query.laborLogs.findFirst({
@@ -31,16 +34,13 @@ export async function GET(
     });
 
     if (!log) {
-      return NextResponse.json({ error: "Log not found" }, { status: 404 });
+      return ApiErrors.notFound("Labor log", requestId);
     }
 
-    return NextResponse.json(log);
+    return apiSuccess(log);
   } catch (error) {
-    console.error("Error fetching labor log:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch labor log" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error fetching labor log");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
@@ -49,17 +49,19 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const { id } = await params;
     const logId = Number.parseInt(id);
 
     if (Number.isNaN(logId)) {
-      return NextResponse.json({ error: "Invalid log ID" }, { status: 400 });
+      return ApiErrors.badRequest("Invalid log ID", requestId);
     }
 
     const [deleted] = await db
@@ -68,15 +70,12 @@ export async function DELETE(
       .returning();
 
     if (!deleted) {
-      return NextResponse.json({ error: "Log not found" }, { status: 404 });
+      return ApiErrors.notFound("Labor log", requestId);
     }
 
-    return NextResponse.json({ success: true });
+    return apiSuccess({ success: true });
   } catch (error) {
-    console.error("Error deleting labor log:", error);
-    return NextResponse.json(
-      { error: "Failed to delete labor log" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error deleting labor log");
+    return ApiErrors.internal(error, requestId);
   }
 }

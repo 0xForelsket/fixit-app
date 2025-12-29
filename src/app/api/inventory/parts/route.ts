@@ -1,14 +1,17 @@
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
+import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
-import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_CREATE)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const body = await request.json();
@@ -25,10 +28,7 @@ export async function POST(request: Request) {
     } = body;
 
     if (!name || !sku || !category) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+      return ApiErrors.validationError("Missing required fields", requestId);
     }
 
     const [part] = await db
@@ -46,31 +46,27 @@ export async function POST(request: Request) {
       })
       .returning();
 
-    return NextResponse.json(part, { status: 201 });
+    return apiSuccess(part, HttpStatus.CREATED, requestId);
   } catch (error) {
-    console.error("Error creating part:", error);
-    return NextResponse.json(
-      { error: "Failed to create part" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error creating part");
+    return ApiErrors.internal(error, requestId);
   }
 }
 
 export async function GET() {
+  const requestId = generateRequestId();
+
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return ApiErrors.unauthorized(requestId);
     }
 
     const parts = await db.query.spareParts.findMany();
 
-    return NextResponse.json(parts);
+    return apiSuccess(parts);
   } catch (error) {
-    console.error("Error fetching parts:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch parts" },
-      { status: 500 }
-    );
+    apiLogger.error({ requestId, error }, "Error fetching parts");
+    return ApiErrors.internal(error, requestId);
   }
 }
