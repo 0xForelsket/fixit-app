@@ -477,3 +477,50 @@ body {
   color: white;
   box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
+
+/* Print Styles */
+@media print {
+  /* Hide navigation, buttons, and other non-essential elements */
+  nav, 
+  button, 
+  [role="button"],
+  .no-print,
+  .bottom-nav,
+  header {
+    display: none !important;
+  }
+
+  /* Reset main content for print */
+  main, 
+  .container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Force background colors and colors in PDF */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Ensure cards look good */
+  .card {
+    border: 1px solid #e4e4e7 !important;
+    break-inside: avoid;
+  }
+
+  /* Show full text in line-clamp elements */
+  .line-clamp-1, .line-clamp-2, .line-clamp-3, .line-clamp-4 {
+    display: block !important;
+    -webkit-line-clamp: none !important;
+    line-clamp: none !important;
+  }
+}
+

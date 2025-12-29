@@ -19,6 +19,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CommentForm } from "./comment-form";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PrintButton } from "@/components/work-orders/print-button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -103,18 +104,22 @@ export default async function WorkOrderDetailPage({ params, searchParams }: Page
         </div>
       )}
 
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 px-1">
-        <Link
-          href="/my-tickets"
-          className="hover:text-primary-600 transition-colors flex items-center gap-1"
-        >
-          <ArrowLeft className="h-3 w-3" />
-          My Tickets
-        </Link>
-        <span className="text-zinc-300">/</span>
-        <span className="text-zinc-900">#{workOrder.id}</span>
-      </nav>
+      {/* Breadcrumb and Actions */}
+      <div className="flex items-center justify-between no-print px-1">
+        <nav className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400">
+          <Link
+            href="/my-tickets"
+            className="hover:text-primary-600 transition-colors flex items-center gap-1"
+          >
+            <ArrowLeft className="h-3 w-3" />
+            My Tickets
+          </Link>
+          <span className="text-zinc-300">/</span>
+          <span className="text-zinc-900">#{workOrder.id}</span>
+        </nav>
+
+        <PrintButton />
+      </div>
 
       {/* Main Header Card */}
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm overflow-hidden relative">
