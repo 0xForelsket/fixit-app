@@ -1,5 +1,5 @@
-import { LandingPage } from "@/components/home/landing-page";
 import { QuickActions } from "@/components/home/quick-actions";
+import { RecentEquipment } from "@/components/home/recent-equipment";
 import { UserHeader } from "@/components/home/user-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { db } from "@/db";
@@ -8,22 +8,20 @@ import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, ilike, sql } from "drizzle-orm";
-
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EquipmentGrid } from "./(operator)/equipment-grid";
-import { EquipmentSearch } from "./(operator)/equipment-search";
-import { RecentEquipment } from "@/components/home/recent-equipment";
+import { EquipmentGrid } from "../(operator)/equipment-grid";
+import { EquipmentSearch } from "../(operator)/equipment-search";
 
 interface PageProps {
   searchParams: Promise<{ search?: string; location?: string }>;
 }
 
-export default async function Home({ searchParams }: PageProps) {
+export default async function HomePage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
-    return <LandingPage />;
+    redirect("/login");
   }
 
   if (hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
@@ -33,7 +31,7 @@ export default async function Home({ searchParams }: PageProps) {
   // Get avatar URL
   const avatarUrl = await getUserAvatarUrl(user.id);
 
-  // Operator interface
+  // Operator interface logic
   const params = await searchParams;
   const search = params.search || "";
   const locationId = params.location ? Number(params.location) : undefined;
@@ -64,8 +62,8 @@ export default async function Home({ searchParams }: PageProps) {
     with: {
       location: true,
       children: {
-        columns: { id: true }
-      }
+        columns: { id: true },
+      },
     },
   });
 
@@ -73,8 +71,6 @@ export default async function Home({ searchParams }: PageProps) {
   const locationList = await db.query.locations.findMany({
     orderBy: (locations, { asc }) => [asc(locations.name)],
   });
-
-
 
   // Get unread notification count
   const unreadCount = await db
@@ -102,7 +98,7 @@ export default async function Home({ searchParams }: PageProps) {
               Monitor Assets
             </h2>
             <Link
-              href="/"
+              href="/assets/equipment"
               className="text-[10px] font-bold text-zinc-400 hover:text-primary-600 uppercase tracking-widest transition-colors"
             >
               See All

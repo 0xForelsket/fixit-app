@@ -64,40 +64,61 @@ function isSessionValid(request: NextRequest): boolean {
  * The session is fully verified server-side in requireAuth/getCurrentUser.
  */
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const url = request.nextUrl;
+  const hostname = request.headers.get("host") || "";
+  
+  // Define allowed domains (localhost for dev, actual domain for prod)
+  // Adjust this logic based on your actual domain setup
+  const isAppSubdomain = hostname.startsWith("app.");
+  
+  const { pathname } = url;
 
-  // Allow public paths
-  if (PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
-    return NextResponse.next();
-  }
-
-  // Allow static assets and Next.js internals
+  // public/static files bypass
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.includes(".")
+    pathname.includes(".") ||
+    pathname.startsWith("/api/health") // Always allow health checks
   ) {
     return NextResponse.next();
   }
 
-  // Check session validity (existence + expiry)
-  if (!isSessionValid(request)) {
-    // Clear any stale cookies and redirect to login
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", pathname);
+  // Handle subdomain routing
+  if (isAppSubdomain) {
+    // If on app subdomain, rewriting to (app) path
+    // But first, check auth for app routes
+    if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
+       // Allow public paths on app subdomain (like /login)
+       // We rewrite them to (app) group if they exist there, or let them pass if they are shared
+       // For now, let's assume /login is shared or in (app)
+       return NextResponse.rewrite(new URL(`/(app)${pathname}`, request.url));
+    }
 
-    const response = NextResponse.redirect(loginUrl);
+    if (!isSessionValid(request)) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.delete(SESSION_COOKIE);
+      response.cookies.delete(SESSION_EXPIRY_COOKIE);
+      return response;
+    }
+    
+    // Valid session on app subdomain
+    return NextResponse.rewrite(new URL(`/(app)${pathname}`, request.url));
+  } 
 
-    // Clear expired cookies
-    response.cookies.delete(SESSION_COOKIE);
-    response.cookies.delete(SESSION_EXPIRY_COOKIE);
-
-    return response;
+  // Root domain (Marketing)
+  // If user visits root domain, show marketing page
+  // We rewrite to (marketing) group
+  
+  // Specific redirects from root to app
+  if (pathname === "/login" || pathname === "/dashboard") {
+       const url = request.nextUrl.clone();
+       url.hostname = `app.${hostname}`;
+       return NextResponse.redirect(url);
   }
 
-  // Session is valid - allow the request
-  // Fine-grained role checks happen in page/API handlers
-  return NextResponse.next();
+  return NextResponse.rewrite(new URL(`/(marketing)${pathname}`, request.url));
 }
 
 export const config = {
