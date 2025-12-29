@@ -1,6 +1,7 @@
 "use client";
 
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { GlobalSearch } from "@/components/global-search";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import type React from "react";
@@ -22,6 +23,7 @@ interface DashboardShellProps {
 
 const getPageTitle = (pathname: string): string => {
   if (pathname === "/dashboard") return "Dashboard";
+  if (pathname === "/dashboard/notifications") return "Notifications";
   if (pathname === "/analytics") return "Analytics";
   
   if (pathname.startsWith("/maintenance/work-orders")) {
@@ -94,6 +96,7 @@ export function DashboardShell({
         </main>
         <BottomNav permissions={user.permissions} />
       </div>
+      <GlobalSearch />
     </div>
   );
 }

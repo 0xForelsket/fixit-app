@@ -185,7 +185,7 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
             <div className="border-t px-4 py-2">
               <Link
                 href="/dashboard/notifications"
-                className="block text-center text-sm text-primary-600 hover:underline"
+                className="block text-center text-sm text-primary hover:underline"
                 onClick={() => setIsOpen(false)}
               >
                 View all notifications

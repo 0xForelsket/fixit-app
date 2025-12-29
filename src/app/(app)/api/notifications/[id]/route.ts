@@ -53,3 +53,46 @@ export async function PATCH(
     return ApiErrors.internal(error, requestId);
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const requestId = generateRequestId();
+
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return ApiErrors.unauthorized(requestId);
+    }
+
+    const { id } = await params;
+    const notificationId = Number.parseInt(id, 10);
+
+    if (Number.isNaN(notificationId)) {
+      return ApiErrors.badRequest("Invalid notification ID", requestId);
+    }
+
+    // Verify the notification belongs to the user
+    const notification = await db.query.notifications.findFirst({
+      where: eq(notifications.id, notificationId),
+    });
+
+    if (!notification) {
+      return ApiErrors.notFound("Notification", requestId);
+    }
+
+    if (notification.userId !== user.id) {
+      return ApiErrors.forbidden(requestId);
+    }
+
+    // Delete notification
+    await db.delete(notifications).where(eq(notifications.id, notificationId));
+
+    return apiSuccess({ success: true });
+  } catch (error) {
+    apiLogger.error({ requestId, error }, "Failed to delete notification");
+    return ApiErrors.internal(error, requestId);
+  }
+}
