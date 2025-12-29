@@ -16,6 +16,7 @@ interface EquipmentFormProps {
     status: string;
     locationId: number;
     ownerId: number | null;
+    departmentId: number | null;
     modelId: number | null;
     typeId: number | null;
     type?: {
@@ -24,6 +25,7 @@ interface EquipmentFormProps {
     parentId: number | null;
   };
   locations: { id: number; name: string }[];
+  departments: { id: number; name: string }[];
   users: { id: number; name: string }[];
   models: { id: number; name: string }[];
   categories: EquipmentCategory[];
@@ -35,6 +37,7 @@ interface EquipmentFormProps {
 export function EquipmentForm({
   equipment,
   locations,
+  departments,
   users,
   models,
   categories,
@@ -54,6 +57,9 @@ export function EquipmentForm({
     equipment?.locationId?.toString() || searchParams.get("locationId") || ""
   );
   const [ownerId, setOwnerId] = useState(equipment?.ownerId?.toString() || "");
+  const [departmentId, setDepartmentId] = useState(
+    equipment?.departmentId?.toString() || ""
+  );
   const [modelId, setModelId] = useState(equipment?.modelId?.toString() || "");
 
   const [categoryId, setCategoryId] = useState(
@@ -95,6 +101,7 @@ export function EquipmentForm({
         status,
         locationId: Number.parseInt(locationId),
         ownerId: ownerId ? Number.parseInt(ownerId) : null,
+        departmentId: departmentId ? Number.parseInt(departmentId) : null,
         modelId: modelId ? Number.parseInt(modelId) : null,
         typeId: typeId ? Number.parseInt(typeId) : null,
         parentId: parentId ? Number.parseInt(parentId) : null,
@@ -199,7 +206,7 @@ export function EquipmentForm({
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="e.g. Printer 01"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
@@ -214,7 +221,7 @@ export function EquipmentForm({
               onChange={(e) => setCode(e.target.value)}
               required
               placeholder="e.g. PR-01"
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
@@ -232,7 +239,7 @@ export function EquipmentForm({
                 setCategoryId(e.target.value);
                 setTypeId(""); // Reset type when category changes
               }}
-              className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Select Category...</option>
               {categories.map((cat) => (
@@ -279,7 +286,7 @@ export function EquipmentForm({
               id="model"
               value={modelId}
               onChange={(e) => setModelId(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Select a model...</option>
               {models.map((m) => (
@@ -294,6 +301,30 @@ export function EquipmentForm({
           </div>
 
           <div>
+            <label
+              htmlFor="department"
+              className="mb-1 block text-sm font-medium text-destructive uppercase tracking-tight flex items-center gap-1.5"
+            >
+              Responsible Department
+              <span className="text-[10px] bg-destructive/10 text-destructive px-1 rounded">REQUIRED</span>
+            </label>
+            <select
+              id="department"
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+              required
+              className="flex h-10 w-full rounded-md border-2 border-destructive/20 bg-destructive/5 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus:border-destructive focus:ring-2 focus:ring-destructive/30 focus:ring-offset-2"
+            >
+              <option value="">Select Department...</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label htmlFor="status" className="mb-1 block text-sm font-medium">
               Status
             </label>
@@ -301,7 +332,7 @@ export function EquipmentForm({
               id="status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="operational">Operational</option>
               <option value="down">Down</option>
@@ -321,7 +352,7 @@ export function EquipmentForm({
               value={locationId}
               onChange={(e) => setLocationId(e.target.value)}
               required
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Select a location...</option>
               {locations.map((loc) => (
@@ -339,7 +370,7 @@ export function EquipmentForm({
               id="owner"
               value={ownerId}
               onChange={(e) => setOwnerId(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Select an owner...</option>
               {users.map((u) => (
@@ -385,7 +416,7 @@ export function EquipmentForm({
                       placeholder="Search to find parent asset..."
                       value={parentSearch}
                       onChange={(e) => setParentSearch(e.target.value)}
-                      className="w-full rounded-lg border border-zinc-200 pl-9 pr-3 py-2 text-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                      className="flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
                   
@@ -400,10 +431,10 @@ export function EquipmentForm({
                               setParentId(e.id.toString());
                               setParentSearch("");
                             }}
-                            className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-50 flex items-center justify-between group"
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center justify-between group"
                           >
-                            <span className="font-medium text-zinc-900">{e.name}</span>
-                            <span className="text-[10px] font-mono text-zinc-400 group-hover:text-primary-600">{e.code}</span>
+                            <span className="font-medium text-foreground">{e.name}</span>
+                            <span className="text-[10px] font-mono text-muted-foreground group-hover:text-primary">{e.code}</span>
                           </button>
                         ))
                       ) : (

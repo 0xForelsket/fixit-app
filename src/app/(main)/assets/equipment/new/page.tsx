@@ -9,7 +9,7 @@ import { EquipmentForm } from "../equipment-form";
 export default async function NewEquipmentPage() {
   await requirePermission(PERMISSIONS.EQUIPMENT_CREATE);
 
-    const [locationsList, usersList, modelsList, categoriesList, typesList, equipmentList] =
+    const [locationsList, usersList, modelsList, categoriesList, typesList, equipmentList, departmentsList] =
       await Promise.all([
         db.query.locations.findMany({
           where: eq(locations.isActive, true),
@@ -23,6 +23,7 @@ export default async function NewEquipmentPage() {
         db.query.equipment.findMany({
           columns: { id: true, name: true, code: true },
         }),
+        db.query.departments.findMany(),
       ]);
   
     return (
@@ -30,6 +31,7 @@ export default async function NewEquipmentPage() {
         <Suspense fallback={<div className="h-96 rounded-xl border border-zinc-200 bg-white animate-pulse" />}>
           <EquipmentForm
             locations={locationsList}
+            departments={departmentsList}
             users={usersList}
             models={modelsList}
             categories={categoriesList}

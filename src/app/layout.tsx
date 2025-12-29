@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Outfit } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import "./globals.css";
 
-const outfit = Outfit({
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${outfit.variable} ${jetbrainsMono.variable} min-h-screen antialiased font-sans`}
+        className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen antialiased font-sans`}
         suppressHydrationWarning
       >
         {children}

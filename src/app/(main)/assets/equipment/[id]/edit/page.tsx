@@ -29,6 +29,7 @@ export default async function EditEquipmentPage({
     categoriesList,
     typesList,
     equipmentList,
+    departmentsList,
   ] = await Promise.all([
     db.query.equipment.findFirst({
       where: eq(equipment.id, equipmentId),
@@ -48,6 +49,7 @@ export default async function EditEquipmentPage({
     db.query.equipment.findMany({
       columns: { id: true, name: true, code: true },
     }),
+    db.query.departments.findMany(),
   ]);
 
   if (!equipmentItem) {
@@ -60,6 +62,7 @@ export default async function EditEquipmentPage({
         <EquipmentForm
           equipment={equipmentItem}
           locations={locationsList}
+          departments={departmentsList}
           users={usersList}
           models={modelsList}
           categories={categoriesList}

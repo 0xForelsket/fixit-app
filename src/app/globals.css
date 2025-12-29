@@ -71,7 +71,7 @@
   --color-info-600: #7c3aed;
 
   /* Fonts */
-  --font-sans: var(--font-sans), "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, SFMono-Regular,
     monospace;
 }
