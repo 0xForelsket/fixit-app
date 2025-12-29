@@ -4,6 +4,7 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { requirePermission } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { EquipmentForm } from "../../equipment-form";
 
 export default async function EditEquipmentPage({
@@ -54,14 +55,18 @@ export default async function EditEquipmentPage({
   }
 
   return (
-    <EquipmentForm
-      equipment={equipmentItem}
-      locations={locationsList}
-      users={usersList}
-      models={modelsList}
-      categories={categoriesList}
-      types={typesList}
-      equipmentList={equipmentList}
-    />
+    <div className="space-y-6">
+      <Suspense fallback={<div className="h-96 rounded-xl border border-zinc-200 bg-white animate-pulse" />}>
+        <EquipmentForm
+          equipment={equipmentItem}
+          locations={locationsList}
+          users={usersList}
+          models={modelsList}
+          categories={categoriesList}
+          types={typesList}
+          equipmentList={equipmentList}
+        />
+      </Suspense>
+    </div>
   );
 }

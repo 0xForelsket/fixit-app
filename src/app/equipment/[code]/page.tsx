@@ -153,6 +153,7 @@ export default async function EquipmentPage({ params }: PageProps) {
               equipment={equipmentItem}
               hasDuePM={hasDuePM}
               openWorkOrderCount={openWorkOrderCount}
+              permissions={user.permissions}
             />
           }
           historyContent={<EquipmentHistory workOrders={workOrderHistory} />}

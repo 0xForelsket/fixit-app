@@ -8,9 +8,11 @@ import {
   Calendar,
   CheckCircle2,
   ClipboardCheck,
+  Plus,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
+import { PERMISSIONS } from "@/lib/permissions";
 
 interface EquipmentOverviewProps {
   equipment: {
@@ -29,16 +31,21 @@ interface EquipmentOverviewProps {
       code: string;
       status: "operational" | "down" | "maintenance";
     }[] | null;
+    locationId: number;
   };
   hasDuePM: boolean;
   openWorkOrderCount: number;
+  permissions: string[];
 }
 
 export function EquipmentOverview({
   equipment,
   hasDuePM,
   openWorkOrderCount,
+  permissions,
 }: EquipmentOverviewProps) {
+  const canCreate = permissions.includes(PERMISSIONS.EQUIPMENT_CREATE) || permissions.includes('*');
+
   return (
     <div className="space-y-6">
       {/* PM Alert - Compact */}
@@ -68,9 +75,20 @@ export function EquipmentOverview({
       {/* Hierarchy Section */}
       {(equipment.parent || (equipment.children && equipment.children.length > 0)) && (
         <div className="space-y-2">
-          <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Asset Hierarchy
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+              Asset Hierarchy
+            </h3>
+            {canCreate && (
+              <Link 
+                href={`/assets/equipment/new?parentId=${equipment.id}&locationId=${equipment.locationId || ''}`}
+                className="text-[10px] font-black text-primary-600 hover:text-primary-700 flex items-center gap-1"
+              >
+                <Plus className="h-3 w-3" />
+                ADD SUB-ASSET
+              </Link>
+            )}
+          </div>
           <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-sm">
             {/* Parent Asset */}
             {equipment.parent && (
@@ -126,18 +144,20 @@ export function EquipmentOverview({
         </h3>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
           <QuickActionButton
-            icon={AlertTriangle}
-            label="Report Issue"
-            variant="danger"
-            href="#report"
-          />
-          <QuickActionButton
             icon={ClipboardCheck}
             label="Complete PM"
             variant="primary"
             href="#maintenance"
             disabled={!hasDuePM}
           />
+          {canCreate && (
+            <QuickActionButton
+              icon={Plus}
+              label="Add Part"
+              variant="outline"
+              href={`/assets/equipment/new?parentId=${equipment.id}&locationId=${equipment.locationId || ''}`}
+            />
+          )}
         </div>
       </div>
 
@@ -174,13 +194,14 @@ function QuickActionButton({
 }: {
   icon: React.ElementType;
   label: string;
-  variant: "danger" | "primary";
+  variant: "danger" | "primary" | "outline";
   href: string;
   disabled?: boolean;
 }) {
   const styles = {
     danger: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700",
     primary: "bg-zinc-900 border-zinc-950 text-white hover:bg-black",
+    outline: "bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50",
   };
 
   if (disabled) {

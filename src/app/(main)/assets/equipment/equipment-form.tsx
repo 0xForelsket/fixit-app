@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import type { EquipmentCategory, EquipmentType } from "@/db/schema";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
 
 interface EquipmentFormProps {
   equipment?: {
@@ -42,6 +43,7 @@ export function EquipmentForm({
   isNew,
 }: EquipmentFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +51,7 @@ export function EquipmentForm({
   const [code, setCode] = useState(equipment?.code || "");
   const [status, setStatus] = useState(equipment?.status || "operational");
   const [locationId, setLocationId] = useState(
-    equipment?.locationId?.toString() || ""
+    equipment?.locationId?.toString() || searchParams.get("locationId") || ""
   );
   const [ownerId, setOwnerId] = useState(equipment?.ownerId?.toString() || "");
   const [modelId, setModelId] = useState(equipment?.modelId?.toString() || "");
@@ -58,7 +60,8 @@ export function EquipmentForm({
     equipment?.type?.categoryId?.toString() || ""
   );
   const [typeId, setTypeId] = useState(equipment?.typeId?.toString() || "");
-  const [parentId, setParentId] = useState(equipment?.parentId?.toString() || "");
+  const [parentId, setParentId] = useState(equipment?.parentId?.toString() || searchParams.get("parentId") || "");
+  const [parentSearch, setParentSearch] = useState("");
 
   const filteredTypes = useMemo(() => {
     if (!categoryId) return [];
@@ -66,6 +69,19 @@ export function EquipmentForm({
       (t: EquipmentType) => t.categoryId === Number.parseInt(categoryId)
     );
   }, [categoryId, types]);
+
+  const filteredParents = useMemo(() => {
+    return equipmentList.filter((e) => {
+      const matchesSearch = e.name.toLowerCase().includes(parentSearch.toLowerCase()) || 
+                           e.code.toLowerCase().includes(parentSearch.toLowerCase());
+      const isNotSelf = e.id !== equipment?.id;
+      return matchesSearch && isNotSelf;
+    });
+  }, [equipmentList, parentSearch, equipment?.id]);
+
+  const activeParent = useMemo(() => {
+    return equipmentList.find((e) => e.id.toString() === parentId);
+  }, [equipmentList, parentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -338,23 +354,70 @@ export function EquipmentForm({
             <label htmlFor="parent" className="mb-1 block text-sm font-medium">
               Parent Asset
             </label>
-            <select
-              id="parent"
-              value={parentId}
-              onChange={(e) => setParentId(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm"
-            >
-              <option value="">No Parent (Top Level)</option>
-              {equipmentList
-                .filter((e) => e.id !== equipment?.id)
-                .map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.name} ({e.code})
-                  </option>
-                ))}
-            </select>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Define where this asset belongs (e.g. Machine belongs to Production Line).
+            <div className="space-y-2">
+              {activeParent && (
+                <div className="flex items-center justify-between rounded-lg border border-primary-100 bg-primary-50/50 px-3 py-2 text-sm">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-primary-600 uppercase">Currently Linked To</span>
+                    <span className="font-bold text-zinc-900">{activeParent.name} ({activeParent.code})</span>
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[10px] font-black hover:bg-primary-100"
+                    onClick={() => {
+                      setParentId("");
+                      setParentSearch("");
+                    }}
+                  >
+                    DETACH
+                  </Button>
+                </div>
+              )}
+              
+              {!activeParent && (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400" />
+                    <input
+                      type="text"
+                      placeholder="Search to find parent asset..."
+                      value={parentSearch}
+                      onChange={(e) => setParentSearch(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 pl-9 pr-3 py-2 text-sm focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10"
+                    />
+                  </div>
+                  
+                  {parentSearch.length > 0 && (
+                    <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-50">
+                      {filteredParents.length > 0 ? (
+                        filteredParents.slice(0, 10).map((e) => (
+                          <button
+                            key={e.id}
+                            type="button"
+                            onClick={() => {
+                              setParentId(e.id.toString());
+                              setParentSearch("");
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-zinc-50 flex items-center justify-between group"
+                          >
+                            <span className="font-medium text-zinc-900">{e.name}</span>
+                            <span className="text-[10px] font-mono text-zinc-400 group-hover:text-primary-600">{e.code}</span>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-3 py-4 text-center text-xs text-zinc-400">
+                          No matching assets found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground italic">
+              Linking establishes a nested relationship in the asset registry.
             </p>
           </div>
         </div>

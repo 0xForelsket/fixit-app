@@ -19,72 +19,30 @@ async function seed() {
 
   // Clear existing data (in reverse order of dependencies)
   console.log("Clearing existing data...");
-  // Phase 12-13 tables
-  await db
-    .delete(schema.workOrderParts)
-    .catch(() =>
-      console.log("Cleanup: workOrderParts table empty or not found")
-    );
-  await db
-    .delete(schema.laborLogs)
-    .catch(() => console.log("Cleanup: laborLogs table empty or not found"));
-  await db
-    .delete(schema.inventoryTransactions)
-    .catch(() =>
-      console.log("Cleanup: inventoryTransactions table empty or not found")
-    );
-  await db
-    .delete(schema.inventoryLevels)
-    .catch(() =>
-      console.log("Cleanup: inventoryLevels table empty or not found")
-    );
-  // Phase 10-15 tables
-  await db
-    .delete(schema.checklistCompletions)
-    .catch(() =>
-      console.log("Cleanup: checklistCompletions table empty or not found")
-    );
-  await db
-    .delete(schema.maintenanceChecklists)
-    .catch(() =>
-      console.log("Cleanup: maintenanceChecklists table empty or not found")
-    );
-  await db
-    .delete(schema.equipmentBoms)
-    .catch(() =>
-      console.log("Cleanup: equipmentBoms table empty or not found")
-    );
-  await db
-    .delete(schema.equipmentModels)
-    .catch(() =>
-      console.log("Cleanup: equipmentModels table empty or not found")
-    );
-  await db
-    .delete(schema.spareParts)
-    .catch(() => console.log("Cleanup: spareParts table empty or not found"));
-  await db
-    .delete(schema.equipmentTypes)
-    .catch(() =>
-      console.log("Cleanup: equipmentTypes table empty or not found")
-    );
-  await db
-    .delete(schema.equipmentCategories)
-    .catch(() =>
-      console.log("Cleanup: equipmentCategories table empty or not found")
-    );
-  // Core tables
-  await db.delete(schema.equipmentStatusLogs);
-  await db.delete(schema.notifications);
-  await db.delete(schema.attachments);
-  await db.delete(schema.workOrderLogs);
-  await db.delete(schema.maintenanceSchedules);
-  await db.delete(schema.workOrders);
-  await db.delete(schema.equipment);
-  await db.delete(schema.locations);
-  await db.delete(schema.users);
-  await db
-    .delete(schema.roles)
-    .catch(() => console.log("Cleanup: roles table empty or not found"));
+  // Core tables (Deletions must happen from children to parents)
+  await db.delete(schema.equipmentStatusLogs).catch(() => {});
+  await db.delete(schema.notifications).catch(() => {});
+  await db.delete(schema.attachments).catch(() => {});
+  await db.delete(schema.workOrderLogs).catch(() => {});
+  await db.delete(schema.maintenanceSchedules).catch(() => {});
+  await db.delete(schema.workOrderParts).catch(() => {});
+  await db.delete(schema.laborLogs).catch(() => {});
+  await db.delete(schema.workOrders).catch(() => {});
+  await db.delete(schema.equipment).catch(() => {});
+
+  // Dependency tables
+  await db.delete(schema.inventoryTransactions).catch(() => {});
+  await db.delete(schema.inventoryLevels).catch(() => {});
+  await db.delete(schema.checklistCompletions).catch(() => {});
+  await db.delete(schema.maintenanceChecklists).catch(() => {});
+  await db.delete(schema.equipmentBoms).catch(() => {});
+  await db.delete(schema.equipmentModels).catch(() => {});
+  await db.delete(schema.spareParts).catch(() => {});
+  await db.delete(schema.equipmentTypes).catch(() => {});
+  await db.delete(schema.equipmentCategories).catch(() => {});
+  await db.delete(schema.locations).catch(() => {});
+  await db.delete(schema.users).catch(() => {});
+  await db.delete(schema.roles).catch(() => {});
 
   console.log("Creating roles...");
   const [operatorRole] = await db
@@ -348,6 +306,26 @@ async function seed() {
     })
     .returning();
 
+  // Sub-assets for Injection Molder A
+  await db.insert(schema.equipment).values([
+    {
+      name: "IM-A Hydraulic Pump",
+      code: "IM-001-PUMP",
+      typeId: typeMolder.id,
+      locationId: moldingArea.id,
+      parentId: equipment1.id,
+      status: "operational",
+    },
+    {
+      name: "IM-A Control Panel",
+      code: "IM-001-CTRL",
+      typeId: typeMolder.id,
+      locationId: moldingArea.id,
+      parentId: equipment1.id,
+      status: "operational",
+    }
+  ]);
+
   const [equipment2] = await db
     .insert(schema.equipment)
     .values({
@@ -371,6 +349,16 @@ async function seed() {
       status: "operational",
     })
     .returning();
+
+  // Sub-asset for Conveyor 1
+  await db.insert(schema.equipment).values({
+    name: "CONV-1 Drive Motor",
+    code: "CONV-001-MTR",
+    typeId: typeConveyor.id,
+    locationId: lineA1.id,
+    parentId: equipment3.id,
+    status: "operational",
+  });
 
   const [equipment4] = await db
     .insert(schema.equipment)
@@ -406,7 +394,7 @@ async function seed() {
   });
 
   console.log(
-    `Created ${6} equipment (using SAP Types: ${typeMolder.code}, ${typeConveyor.code}, ${typeRobot.code}, ${typeMill.code}, ${typeScanner.code})`
+    `Created ${9} equipment (including hierarchical sub-assets)`
   );
   console.log(
     `Categories initialized: ${catM.label}, ${catE.label}, ${catI.label}`

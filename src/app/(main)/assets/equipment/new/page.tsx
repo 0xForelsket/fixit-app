@@ -3,6 +3,7 @@ import { locations, users } from "@/db/schema";
 import { PERMISSIONS } from "@/lib/permissions";
 import { requirePermission } from "@/lib/session";
 import { eq } from "drizzle-orm";
+import { Suspense } from "react";
 import { EquipmentForm } from "../equipment-form";
 
 export default async function NewEquipmentPage() {
@@ -25,14 +26,18 @@ export default async function NewEquipmentPage() {
       ]);
   
     return (
-      <EquipmentForm
-        locations={locationsList}
-        users={usersList}
-        models={modelsList}
-        categories={categoriesList}
-        types={typesList}
-        equipmentList={equipmentList}
-        isNew
-      />
+      <div className="space-y-6">
+        <Suspense fallback={<div className="h-96 rounded-xl border border-zinc-200 bg-white animate-pulse" />}>
+          <EquipmentForm
+            locations={locationsList}
+            users={usersList}
+            models={modelsList}
+            categories={categoriesList}
+            types={typesList}
+            equipmentList={equipmentList}
+            isNew
+          />
+        </Suspense>
+      </div>
     );
 }
