@@ -311,7 +311,7 @@ export default async function PartsPage({
                     </TableCell>
                     <TableCell className="p-4">
                       <Badge
-                        variant={part.isActive ? "success" : "muted"}
+                        variant={part.isActive ? "success" : "secondary"}
                         className="font-black uppercase tracking-wider text-[10px]"
                       >
                         {part.isActive ? "Active" : "Inactive"}
@@ -354,7 +354,7 @@ export default async function PartsPage({
                     </div>
                   </div>
                   <Badge
-                    variant={part.isActive ? "success" : "muted"}
+                    variant={part.isActive ? "success" : "secondary"}
                     className="text-[9px] font-black uppercase px-2 py-0 border"
                   >
                     {part.isActive ? "Active" : "Inactive"}

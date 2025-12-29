@@ -1,15 +1,14 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonCard, SkeletonStatsGrid } from "@/components/ui/skeleton";
-import { Box } from "lucide-react";
 
 export default function InventoryLoading() {
   return (
     <div className="space-y-10 animate-in">
       <PageHeader
         title="Inventory"
-        highlight="Control"
+        subtitle="Control"
         description="SYNCING WAREHOUSE DATA..."
-        icon={Box}
+        bgSymbol="IV"
       />
 
       <SkeletonStatsGrid />

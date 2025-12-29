@@ -26,6 +26,9 @@
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-success: var(--success-500);
+  --color-warning: var(--warning-500);
+  --color-danger: var(--danger-500);
 
   /* Full Scale Mappings for Design System Page */
   --color-primary-50: var(--primary-50);

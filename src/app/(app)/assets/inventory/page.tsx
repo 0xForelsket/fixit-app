@@ -68,29 +68,32 @@ export default async function InventoryPage() {
       {/* Header */}
       <PageHeader
         title="Inventory"
-        highlight="Control"
+        subtitle="Control"
         description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
-        icon={Box}
-      >
-        <Button variant="outline" asChild>
-          <Link href="/admin/import">
-            <Upload className="mr-2 h-4 w-4" />
-            IMPORT DATA
-          </Link>
-        </Button>
-        <Button variant="ghost" asChild>
-          <Link href="/assets/inventory/parts">
-            <Package className="mr-2 h-4 w-4" />
-            CATALOG
-          </Link>
-        </Button>
-        <Button asChild>
-          <Link href="/assets/inventory/parts/new">
-            <Plus className="mr-2 h-4 w-4" />
-            ADD NEW PART
-          </Link>
-        </Button>
-      </PageHeader>
+        bgSymbol="IV"
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/admin/import">
+                <Upload className="mr-2 h-4 w-4" />
+                IMPORT DATA
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild>
+              <Link href="/assets/inventory/parts">
+                <Package className="mr-2 h-4 w-4" />
+                CATALOG
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/assets/inventory/parts/new">
+                <Plus className="mr-2 h-4 w-4" />
+                ADD NEW PART
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-3">

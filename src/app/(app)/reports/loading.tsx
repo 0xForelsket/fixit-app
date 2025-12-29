@@ -1,15 +1,14 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonStatsGrid, SkeletonTable } from "@/components/ui/skeleton";
-import { FileText } from "lucide-react";
 
 export default function ReportsLoading() {
   return (
     <div className="space-y-10 animate-in">
       <PageHeader
         title="Reports"
-        highlight="Analytics"
+        subtitle="Analytics"
         description="GENERATING OPERATIONAL SUMMARY..."
-        icon={FileText}
+        bgSymbol="RE"
       />
 
       <SkeletonStatsGrid />

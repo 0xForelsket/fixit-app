@@ -1,15 +1,14 @@
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonStatsGrid, SkeletonTable } from "@/components/ui/skeleton";
-import { MonitorCog } from "lucide-react";
 
 export default function EquipmentLoading() {
   return (
     <div className="space-y-10 animate-in">
       <PageHeader
         title="Equipment"
-        highlight="List"
+        subtitle="Asset Registry"
         description="SCANNING ASSET REGISTRY..."
-        icon={MonitorCog}
+        bgSymbol="EQ"
       />
 
       <SkeletonStatsGrid />

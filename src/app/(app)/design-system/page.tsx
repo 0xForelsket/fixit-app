@@ -11,7 +11,6 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
-  LayoutTemplate,
   Loader2,
   Palette,
   Plus,
@@ -27,9 +26,9 @@ export default function DesignSystemPage() {
     <div className="space-y-12 pb-20">
       <PageHeader
         title="Industrial UI"
-        highlight="Design System"
+        subtitle="Design System"
         description="Core components and design tokens for the FixIt application."
-        icon={LayoutTemplate}
+        bgSymbol="UI"
       />
 
       {/* Documentation Link */}

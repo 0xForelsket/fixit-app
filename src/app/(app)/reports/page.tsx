@@ -186,17 +186,18 @@ export default async function ReportsPage({
       {/* Header */}
       <PageHeader
         title="System"
-        highlight="Reports"
+        subtitle="Reports"
         description={`${total} WORK ORDERS PROCESSED${hasFilters ? " • FILTERED RESULTS" : ""}`}
-        icon={FileText}
-      >
-        <Button asChild>
-          <a href={csvUrl} download="work-order-report.csv">
-            <Download className="mr-2 h-4 w-4" />
-            EXPORT CSV
-          </a>
-        </Button>
-      </PageHeader>
+        bgSymbol="RE"
+        actions={
+          <Button asChild>
+            <a href={csvUrl} download="work-order-report.csv">
+              <Download className="mr-2 h-4 w-4" />
+              EXPORT CSV
+            </a>
+          </Button>
+        }
+      />
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-5">
