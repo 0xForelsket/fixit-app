@@ -14,6 +14,8 @@ import {
   MapPin,
   MonitorCog,
   Package,
+  PanelLeftClose,
+  PanelLeftOpen,
   QrCode,
   Shield,
   Upload,
@@ -147,9 +149,11 @@ interface SidebarProps {
   avatarUrl?: string | null;
   isOpen?: boolean;
   onClose?: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
+export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
 
   const filteredGroups = navGroups
@@ -184,23 +188,46 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none",
+          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none overflow-hidden",
+          isCollapsed ? "w-16" : "w-64",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-border px-6">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 group"
-            onClick={handleNavClick}
+        <div className={cn(
+          "flex h-16 items-center border-b border-border transition-all duration-300",
+          isCollapsed ? "justify-center px-0" : "justify-between px-4"
+        )}>
+          {!isCollapsed && (
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 group transition-all duration-300"
+              onClick={handleNavClick}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
+                <Wrench className="h-5 w-5" />
+              </div>
+              <span className="text-xl font-bold tracking-tight text-foreground font-serif-brand whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
+                FixIt
+              </span>
+            </Link>
+          )}
+
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className={cn(
+              "rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer",
+              isCollapsed ? "flex" : "hidden lg:flex"
+            )}
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-              <Wrench className="h-5 w-5" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-foreground font-serif-brand">
-              FixIt
-            </span>
-          </Link>
+            {isCollapsed ? (
+              <PanelLeftOpen className="h-5 w-5" />
+            ) : (
+              <PanelLeftClose className="h-5 w-5" />
+            )}
+          </button>
+          
           <button
             type="button"
             onClick={onClose}
@@ -210,14 +237,17 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-4">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 custom-scrollbar">
           <div className="space-y-6">
             {filteredGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
-                {group.label && (
-                  <h3 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.15em] text-foreground/40">
+                {group.label && !isCollapsed && (
+                  <h3 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.15em] text-foreground/40 whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
                     {group.label}
                   </h3>
+                )}
+                {isCollapsed && group.label && (
+                  <div className="h-px bg-border/50 mx-2 mb-4" />
                 )}
                 <ul className="space-y-1">
                   {group.items.map((item) => {
@@ -231,8 +261,10 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                         <Link
                           href={item.href}
                           onClick={handleNavClick}
+                          title={isCollapsed ? item.label : undefined}
                           className={cn(
-                            "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition-all group",
+                            "flex items-center rounded-xl p-2.5 text-sm font-semibold transition-all group relative",
+                            isCollapsed ? "justify-center" : "gap-3 px-3",
                             isActive
                               ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
                               : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
@@ -240,15 +272,22 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                         >
                           <span
                             className={cn(
-                              "transition-colors",
+                              "shrink-0 transition-colors",
                               isActive
                                 ? "text-primary"
-                                : "text-foreground/40 group-hover:text-primary transition-colors"
+                                : "text-foreground/40 group-hover:text-primary"
                             )}
                           >
                             {item.icon}
                           </span>
-                          {item.label}
+                          {!isCollapsed && (
+                            <span className="whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
+                              {item.label}
+                            </span>
+                          )}
+                          {isCollapsed && isActive && (
+                            <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
+                          )}
                         </Link>
                       </li>
                     );
@@ -259,14 +298,22 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           </div>
 
           {canCreateTicket && (
-            <div className="mt-6 border-t border-border pt-4">
+            <div className={cn("mt-6 border-t border-border pt-4", isCollapsed && "flex justify-center")}>
               <Link
                 href="/"
                 onClick={handleNavClick}
-                className="flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors"
+                title={isCollapsed ? "Report Equipment Issue" : undefined}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors",
+                  isCollapsed ? "w-10 h-10 justify-center px-0 py-0" : "px-3"
+                )}
               >
-                <AlertTriangle className="h-5 w-5" />
-                Report Equipment Issue
+                <AlertTriangle className="h-5 w-5 shrink-0" />
+                {!isCollapsed && (
+                  <span className="whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
+                    Report Issue
+                  </span>
+                )}
               </Link>
             </div>
           )}
@@ -276,7 +323,11 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
           <Link
             href="/profile"
             onClick={handleNavClick}
-            className="mb-3 flex items-center gap-3 rounded-2xl bg-muted/30 p-3 transition-all hover:bg-muted/50 border border-border group"
+            title={isCollapsed ? user.name : undefined}
+            className={cn(
+              "mb-3 flex items-center rounded-2xl bg-muted/30 p-2 transition-all hover:bg-muted/50 border border-border group",
+              isCollapsed ? "justify-center px-2" : "gap-3 p-3"
+            )}
           >
             <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow-sm ring-1 ring-border group-hover:ring-primary/50 transition-all">
               {avatarUrl ? (
@@ -291,28 +342,31 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose }: SidebarProps) {
                 </div>
               )}
             </div>
-            <div className="overflow-hidden">
-              <p className="truncate text-sm font-bold text-foreground leading-tight">
-                {user.name}
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="flex-none rounded bg-muted px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-muted-foreground border border-border">
-                  {user.roleName}
-                </span>
-                <p className="truncate text-[11px] font-mono text-muted-foreground/70">
-                  {user.employeeId}
+            {!isCollapsed && (
+              <div className="overflow-hidden animate-in fade-in slide-in-from-left-2">
+                <p className="truncate text-sm font-bold text-foreground leading-tight">
+                  {user.name}
                 </p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="flex-none rounded bg-muted px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-muted-foreground border border-border">
+                    {user.roleName}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </Link>
           <form action={logout}>
             <button
               type="submit"
               data-testid="sign-out-button"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors group"
+              className={cn(
+                "flex w-full items-center transition-colors group",
+                isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+              )}
+              title={isCollapsed ? "Sign Out" : undefined}
             >
-              <LogOut className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
-              Sign Out
+              <LogOut className={cn("h-5 w-5 transition-transform", !isCollapsed && "group-hover:-translate-x-1", isCollapsed ? "text-muted-foreground hover:text-destructive" : "")} />
+              {!isCollapsed && <span>Sign Out</span>}
             </button>
           </form>
         </div>

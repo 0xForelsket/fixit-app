@@ -15,7 +15,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import { Edit, Plus, Search, Shield, User, Users, Wrench } from "lucide-react";
+import { Edit, Plus, Search, Shield, User, Users, Wrench, Upload } from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -118,8 +118,8 @@ export default async function UsersPage({
     { icon: React.ElementType; color: string; bg: string; border: string }
   > = {
     operator: { icon: User, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" },
-    tech: { icon: Wrench, color: "text-primary-700", bg: "bg-primary-100", border: "border-primary-200" },
-    admin: { icon: Shield, color: "text-danger-700", bg: "bg-danger-100", border: "border-danger-200" },
+    tech: { icon: Wrench, color: "text-primary-700", bg: "bg-primary-500/15", border: "border-primary-500/30" },
+    admin: { icon: Shield, color: "text-danger-700", bg: "bg-danger-500/15", border: "border-danger-500/30" },
   };
 
   return (
@@ -135,12 +135,20 @@ export default async function UsersPage({
             {stats.total} ACCOUNTS • {stats.active} ACTIVE
           </div>
         </div>
-        <Button asChild>
-          <Link href="/admin/users/new">
-            <Plus className="mr-2 h-4 w-4" />
-            ADD USER
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" asChild>
+            <Link href="/admin/import?type=users">
+              <Upload className="mr-2 h-4 w-4" />
+              BULK IMPORT
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/users/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD USER
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}

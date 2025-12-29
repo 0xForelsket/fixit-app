@@ -23,6 +23,7 @@ import {
   MapPin,
   Plus,
   Search,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -118,7 +119,6 @@ export default async function LocationsPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-8">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-black tracking-tight text-foreground uppercase font-serif-brand">
@@ -132,6 +132,12 @@ export default async function LocationsPage({
         <div className="flex items-center gap-3">
           <ViewToggle />
           <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
+          <Button variant="outline" asChild>
+            <Link href="/admin/import?type=locations">
+              <Upload className="mr-2 h-4 w-4" />
+              BULK IMPORT
+            </Link>
+          </Button>
           <Button asChild>
             <Link href="/assets/locations/new">
               <Plus className="mr-2 h-4 w-4" />
@@ -180,15 +186,15 @@ export default async function LocationsPage({
               name="search"
               placeholder="Search by name or code..."
               defaultValue={params.search}
-              className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </form>
       </div>
 
       {params.view === "tree" ? (
-        <div className="rounded-2xl border border-zinc-200 bg-white/50 backdrop-blur-sm shadow-xl shadow-zinc-200/20 overflow-hidden">
-          <Suspense fallback={<div className="h-96 animate-pulse bg-white rounded-2xl" />}>
+        <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-border/20 overflow-hidden">
+          <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded-2xl" />}>
             <LocationTree initialLocations={locationsList} />
           </Suspense>
         </div>
@@ -206,10 +212,10 @@ export default async function LocationsPage({
           icon={MapPin}
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
           <Table>
-            <TableHeader className="bg-slate-50">
-              <TableRow className="border-b text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+            <TableHeader className="bg-muted/50">
+              <TableRow className="border-b border-border text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
                 <SortHeader
                   label="Location"
                   field="name"
@@ -253,7 +259,7 @@ export default async function LocationsPage({
                 <TableHead className="p-4" />
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y">
+            <TableBody className="divide-y divide-border">
               {locationsList.map((location, index) => {
                 const staggerClass =
                   index < 5
@@ -263,17 +269,17 @@ export default async function LocationsPage({
                   <TableRow
                     key={location.id}
                     className={cn(
-                      "hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+                      "hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-bottom-1",
                       staggerClass
                     )}
                   >
                     <TableCell className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-                          <MapPin className="h-5 w-5 text-primary-600" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                          <MapPin className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="font-medium">{location.name}</p>
+                          <p className="font-medium text-foreground">{location.name}</p>
                           {location.description && (
                             <p className="text-xs text-muted-foreground line-clamp-1">
                               {location.description}
@@ -283,7 +289,7 @@ export default async function LocationsPage({
                       </div>
                     </TableCell>
                     <TableCell className="p-4 hidden md:table-cell">
-                      <Badge variant="outline" className="font-mono text-xs">
+                      <Badge variant="outline" className="font-mono text-xs border-border text-muted-foreground">
                         {location.code}
                       </Badge>
                     </TableCell>
@@ -301,11 +307,11 @@ export default async function LocationsPage({
                     </TableCell>
                     <TableCell className="p-4">
                       {location.isActive ? (
-                        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                        <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/15 px-2.5 py-0.5 text-xs font-medium text-success-700">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700">
+                        <span className="inline-flex items-center rounded-full border border-muted-foreground/30 bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                           Inactive
                         </span>
                       )}
@@ -316,7 +322,7 @@ export default async function LocationsPage({
                       </span>
                     </TableCell>
                     <TableCell className="p-4">
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary">
                         <Link href={`/assets/locations/${location.id}`}>
                           <Edit className="h-4 w-4" />
                         </Link>

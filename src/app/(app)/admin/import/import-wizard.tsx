@@ -23,7 +23,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 type DuplicateStrategy = "skip" | "update" | "error";
 type ResourceType = "equipment" | "spare-parts" | "locations" | "users";
@@ -130,8 +131,19 @@ ADMIN-NEW-001,Bob Admin,bob@company.com,9999,admin,75.00`,
 };
 
 export function ImportWizard() {
-  const [step, setStep] = useState<Step>("select");
-  const [resourceType, setResourceType] = useState<ResourceType>("equipment");
+  const searchParams = useSearchParams();
+  const initialType = searchParams.get("type") as ResourceType;
+  
+  const [step, setStep] = useState<Step>(initialType ? "upload" : "select");
+  const [resourceType, setResourceType] = useState<ResourceType>(initialType || "equipment");
+
+  useEffect(() => {
+    if (initialType && resourceConfigs[initialType]) {
+      setResourceType(initialType);
+      setStep("upload");
+    }
+  }, [initialType]);
+
   const [file, setFile] = useState<File | null>(null);
   const [headers, setHeaders] = useState<string[]>([]);
   const [previewRows, setPreviewRows] = useState<string[][]>([]);

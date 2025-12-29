@@ -3,7 +3,7 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 interface DashboardShellProps {
@@ -48,8 +48,24 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
   const pathname = usePathname();
   const title = getPageTitle(pathname);
+
+  // Load sidebar preference
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved !== null) {
+      setSidebarCollapsed(saved === "true");
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    const newVal = !sidebarCollapsed;
+    setSidebarCollapsed(newVal);
+    localStorage.setItem("sidebar-collapsed", String(newVal));
+  };
 
   return (
     <div className="flex h-screen bg-background/50 industrial-grid transition-colors duration-500">
@@ -58,6 +74,8 @@ export function DashboardShell({
         avatarUrl={avatarUrl}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={toggleSidebar}
       />
       <div className="flex flex-1 flex-col overflow-hidden relative">
         {/* Decorative glow - adjusted to use theme primary */}
@@ -69,7 +87,9 @@ export function DashboardShell({
           onMenuClick={() => setSidebarOpen(true)}
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 lg:pb-8 animate-in relative z-10 transition-all duration-300">
-          {children}
+          <div className="mx-auto max-w-7xl h-full">
+            {children}
+          </div>
         </main>
         <BottomNav permissions={user.permissions} />
       </div>

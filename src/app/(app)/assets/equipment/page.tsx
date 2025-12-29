@@ -173,7 +173,7 @@ export default async function EquipmentPage({
         <ViewToggle />
         <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
         <Button variant="outline" asChild>
-          <Link href="/admin/import">
+          <Link href="/admin/import?type=equipment">
             <Upload className="mr-2 h-4 w-4" />
             BULK IMPORT
           </Link>

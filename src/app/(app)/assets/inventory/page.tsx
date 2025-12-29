@@ -15,6 +15,7 @@ import {
   Package,
   Plus,
   TrendingDown,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -71,6 +72,12 @@ export default async function InventoryPage() {
         description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
         icon={Box}
       >
+        <Button variant="outline" asChild>
+          <Link href="/admin/import">
+            <Upload className="mr-2 h-4 w-4" />
+            IMPORT DATA
+          </Link>
+        </Button>
         <Button variant="ghost" asChild>
           <Link href="/assets/inventory/parts">
             <Package className="mr-2 h-4 w-4" />

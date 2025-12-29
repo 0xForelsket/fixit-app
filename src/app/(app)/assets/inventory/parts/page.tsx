@@ -13,7 +13,7 @@ import { db } from "@/db";
 import { spareParts } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import { ArrowLeft, ChevronRight, Package, Plus, Search } from "lucide-react";
+import { ArrowLeft, ChevronRight, Package, Plus, Search, Upload } from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -120,24 +120,37 @@ export default async function PartsPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-border pb-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-primary">
             <Link href="/assets/inventory">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Parts Catalog</h1>
-            <p className="text-muted-foreground">{totalParts} parts</p>
+            <h1 className="text-3xl font-black tracking-tight text-foreground uppercase font-serif-brand">
+              Parts <span className="text-primary">Catalog</span>
+            </h1>
+            <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+              <Package className="h-3.5 w-3.5" />
+              {totalParts} REGISTERED MODULES
+            </div>
           </div>
         </div>
-        <Button asChild>
-          <Link href="/assets/inventory/parts/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Part
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" asChild>
+            <Link href="/admin/import?type=spare-parts">
+              <Upload className="mr-2 h-4 w-4" />
+              BULK IMPORT
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/assets/inventory/parts/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD PART
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -152,7 +165,7 @@ export default async function PartsPage({
             name="search"
             placeholder="Search parts by name, SKU, or barcode..."
             defaultValue={params.search}
-            className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </form>
         <div className="flex flex-wrap gap-2">
@@ -170,8 +183,8 @@ export default async function PartsPage({
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}{" "}
               {categoryCounts[cat] > 0 && (
-                <span className="text-muted-foreground">
-                  ({categoryCounts[cat]})
+                <span className="text-[10px] opacity-70 ml-1">
+                  {categoryCounts[cat]}
                 </span>
               )}
             </FilterLink>
@@ -181,14 +194,14 @@ export default async function PartsPage({
 
       {/* Parts List */}
       {parts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 text-center bg-white shadow-sm">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-50 border shadow-inner">
-            <Package className="h-6 w-6 text-zinc-400" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-12 text-center bg-card shadow-sm shadow-border/10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border shadow-inner">
+            <Package className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h3 className="mt-4 text-lg font-black uppercase tracking-tight">
+          <h3 className="mt-4 text-lg font-black uppercase tracking-tight text-foreground">
             No parts found
           </h3>
-          <p className="text-sm text-zinc-500 font-medium font-mono">
+          <p className="text-sm text-muted-foreground font-medium font-mono">
             {params.search || params.category
               ? "ADJUST FILTERS AND RETRY"
               : "COMMENCE CATALOGING"}
@@ -206,10 +219,10 @@ export default async function PartsPage({
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden lg:block overflow-hidden rounded-xl border-2 bg-white shadow-sm">
+          <div className="hidden lg:block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
             <Table className="w-full text-sm">
-              <TableHeader className="bg-zinc-50">
-                <TableRow className="border-b text-left font-black uppercase tracking-widest text-[10px] text-zinc-500 hover:bg-transparent">
+              <TableHeader className="bg-muted/50">
+                <TableRow className="border-b border-border text-left font-black uppercase tracking-widest text-[10px] text-muted-foreground hover:bg-transparent">
                   <SortHeader
                     label="Part"
                     field="name"
@@ -256,50 +269,50 @@ export default async function PartsPage({
                   <TableHead className="p-4 w-10" />
                 </TableRow>
               </TableHeader>
-              <TableBody className="divide-y divide-zinc-100">
+              <TableBody className="divide-y divide-border">
                 {parts.map((part) => (
                   <TableRow
                     key={part.id}
-                    className="hover:bg-zinc-50 transition-colors group"
+                    className="hover:bg-muted/50 transition-colors group"
                   >
                     <TableCell className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-100 border-2 border-transparent group-hover:border-primary-200 transition-all">
-                          <Package className="h-5 w-5 text-zinc-600" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border group-hover:border-primary/50 transition-all">
+                          <Package className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div>
-                          <p className="font-bold text-zinc-900 leading-tight uppercase tracking-tight">
+                          <p className="font-bold text-foreground leading-tight uppercase tracking-tight">
                             {part.name}
                           </p>
                           {part.barcode && (
-                            <p className="text-[10px] font-mono text-zinc-400">
+                            <p className="text-[10px] font-mono text-muted-foreground">
                               SN: {part.barcode}
                             </p>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="p-4 md:table-cell font-mono text-xs font-bold text-zinc-500">
+                    <TableCell className="p-4 md:table-cell font-mono text-xs font-bold text-muted-foreground">
                       {part.sku}
                     </TableCell>
                     <TableCell className="p-4 lg:table-cell">
                       <Badge
                         variant="secondary"
-                        className="capitalize font-mono text-[10px]"
+                        className="capitalize font-mono text-[10px] font-bold"
                       >
                         {part.category}
                       </Badge>
                     </TableCell>
-                    <TableCell className="p-4 sm:table-cell font-bold text-zinc-700">
+                    <TableCell className="p-4 sm:table-cell font-bold text-foreground/80">
                       {part.unitCost ? `$${part.unitCost.toFixed(2)}` : "-"}
                     </TableCell>
-                    <TableCell className="p-4 md:table-cell text-zinc-500 font-mono text-xs font-bold">
+                    <TableCell className="p-4 md:table-cell text-muted-foreground font-mono text-xs font-bold">
                       {part.reorderPoint}
                     </TableCell>
                     <TableCell className="p-4">
                       <Badge
-                        variant={part.isActive ? "success" : "secondary"}
-                        className="font-black uppercase tracking-tighter text-[10px]"
+                        variant={part.isActive ? "success" : "muted"}
+                        className="font-black uppercase tracking-wider text-[10px]"
                       >
                         {part.isActive ? "Active" : "Inactive"}
                       </Badge>
@@ -307,7 +320,7 @@ export default async function PartsPage({
                     <TableCell className="p-4">
                       <Link
                         href={`/assets/inventory/parts/${part.id}`}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-300 hover:bg-zinc-100 hover:text-primary-600 transition-all"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-primary transition-all"
                       >
                         <ChevronRight className="h-5 w-5" />
                       </Link>
@@ -324,41 +337,41 @@ export default async function PartsPage({
               <Link
                 key={part.id}
                 href={`/assets/inventory/parts/${part.id}`}
-                className="block rounded-2xl border-2 bg-white p-4 shadow-sm active:scale-[0.98] transition-all hover:border-primary-100"
+                className="block rounded-2xl border border-border bg-card p-4 shadow-sm active:scale-[0.98] transition-all hover:border-primary/30"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-zinc-50 border-2 flex items-center justify-center text-zinc-400">
+                    <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground">
                       <Package className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-black text-sm uppercase tracking-tight text-zinc-900 leading-none mb-1">
+                      <p className="font-black text-sm uppercase tracking-tight text-foreground leading-none mb-1">
                         {part.name}
                       </p>
-                      <p className="text-[10px] font-mono font-bold text-zinc-400">
+                      <p className="text-[10px] font-mono font-bold text-muted-foreground">
                         SKU: {part.sku}
                       </p>
                     </div>
                   </div>
                   <Badge
-                    variant={part.isActive ? "success" : "secondary"}
-                    className="text-[9px] font-black uppercase px-2 py-0 border-2"
+                    variant={part.isActive ? "success" : "muted"}
+                    className="text-[9px] font-black uppercase px-2 py-0 border"
                   >
                     {part.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-zinc-100">
-                  <div className="bg-zinc-50 rounded-lg p-2 text-center border">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">
+                <div className="grid grid-cols-2 gap-2 pt-3 border-t border-border">
+                  <div className="bg-muted rounded-lg p-2 text-center border border-border">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">
                       Category
                     </p>
-                    <p className="text-xs font-bold uppercase text-zinc-700">
+                    <p className="text-xs font-bold uppercase text-foreground/80">
                       {part.category}
                     </p>
                   </div>
-                  <div className="bg-zinc-50 rounded-lg p-2 text-center border text-zinc-700">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">
+                  <div className="bg-muted rounded-lg p-2 text-center border border-border text-foreground/80">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">
                       Unit Cost
                     </p>
                     <p className="text-xs font-black">
@@ -367,9 +380,9 @@ export default async function PartsPage({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mt-3 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                <div className="flex items-center justify-between mt-3 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                   <span>Barcode: {part.barcode || "—"}</span>
-                  <span className="flex items-center gap-1 text-primary-600 font-black">
+                  <span className="flex items-center gap-1 text-primary font-black">
                     Details <ChevronRight className="h-3 w-3" />
                   </span>
                 </div>
@@ -395,10 +408,10 @@ function FilterLink({
     <Link
       href={href}
       className={cn(
-        "rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "rounded-lg px-3 py-2 text-xs font-black uppercase tracking-widest transition-all",
         active
-          ? "bg-primary-100 text-primary-700"
-          : "text-muted-foreground hover:bg-slate-100 hover:text-foreground"
+          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
       )}
     >
       {children}
