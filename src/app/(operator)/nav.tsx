@@ -96,17 +96,15 @@ export function OperatorNav({
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <form action={logout}>
-              <DropdownMenuItem asChild>
-                <button
-                  type="submit"
-                  className="w-full cursor-pointer text-danger-600 focus:text-danger-600 focus:bg-danger-50 font-medium"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </button>
-              </DropdownMenuItem>
-            </form>
+            <DropdownMenuItem
+              onSelect={async () => {
+                await logout();
+              }}
+              className="w-full cursor-pointer text-danger-600 focus:text-danger-600 focus:bg-danger-50 font-medium"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
