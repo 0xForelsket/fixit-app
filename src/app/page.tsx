@@ -13,6 +13,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EquipmentGrid } from "./(operator)/equipment-grid";
 import { EquipmentSearch } from "./(operator)/equipment-search";
+import { RecentEquipment } from "@/components/home/recent-equipment";
 
 interface PageProps {
   searchParams: Promise<{ search?: string; location?: string }>;
@@ -86,8 +87,10 @@ export default async function Home({ searchParams }: PageProps) {
       <UserHeader user={user} avatarUrl={avatarUrl} unreadCount={unreadCount} />
 
       {/* Main content */}
-      <main className="container mx-auto px-4 pt-4 pb-20 max-w-5xl space-y-4 animate-in">
+      <main className="container mx-auto px-4 pt-4 pb-20 max-w-5xl space-y-6 animate-in">
         <QuickActions />
+
+        <RecentEquipment />
 
         {/* Equipment Search Section */}
         <section className="space-y-3">
