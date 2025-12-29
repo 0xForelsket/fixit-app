@@ -22,9 +22,10 @@ import { StatusBadge } from "@/components/ui/status-badge";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ success?: string }>;
 }
 
-export default async function WorkOrderDetailPage({ params }: PageProps) {
+export default async function WorkOrderDetailPage({ params, searchParams }: PageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -32,13 +33,14 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   }
 
   const { id } = await params;
+  const { success } = await searchParams;
   const workOrderId = Number.parseInt(id, 10);
 
   if (Number.isNaN(workOrderId)) {
     notFound();
   }
-
-  // Fetch work order with all related data
+  
+  // ... rest of data fetching ...
   const workOrder = await db.query.workOrders.findFirst({
     where: eq(workOrders.id, workOrderId),
     with: {
@@ -88,6 +90,19 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      {/* Success Banner */}
+      {success === "true" && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center gap-3 shadow-sm animate-in zoom-in-95 duration-300">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 font-bold">
+            <CheckCircle2 className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="font-bold text-emerald-900">Ticket Reported Successfully</h3>
+            <p className="text-xs text-emerald-700 font-medium">A technician has been notified and will respond based on the priority level.</p>
+          </div>
+        </div>
+      )}
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 px-1">
         <Link
