@@ -5,7 +5,7 @@ import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft, User, Settings } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AvatarUpload } from "./avatar-upload";
@@ -66,6 +66,15 @@ export default async function ProfilePage() {
           </p>
           <div className="mt-2 inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700 uppercase tracking-wide">
             {user.roleName}
+          </div>
+
+          <div className="mt-6">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/profile/settings" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Account Settings
+              </Link>
+            </Button>
           </div>
 
           <div className="mt-8 border-t pt-8 text-left">
