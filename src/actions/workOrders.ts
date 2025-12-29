@@ -82,6 +82,15 @@ export async function createWorkOrder(
    * @see docs/transactions.md for isolation level documentation
    */
   try {
+    // Get equipment details to inherit department and check ownership
+    const equipmentItem = await db.query.equipment.findFirst({
+      where: eq(equipmentTable.id, equipmentId),
+    });
+
+    if (!equipmentItem) {
+      return { success: false, error: "Equipment not found" };
+    }
+
     const workOrder = await db.transaction(async (tx) => {
       const [newWorkOrder] = await tx
         .insert(workOrders)
@@ -92,6 +101,7 @@ export async function createWorkOrder(
           description,
           priority,
           reportedById: user.id,
+          departmentId: equipmentItem.departmentId, // Inherit department from equipment
           status: "open",
           dueBy,
         })
@@ -116,11 +126,6 @@ export async function createWorkOrder(
       return newWorkOrder;
     });
 
-    // Get equipment details for notifications
-    const equipmentItem = await db.query.equipment.findFirst({
-      where: eq(equipmentTable.id, equipmentId),
-    });
-
     // Notify techs for critical/high priority work orders
     if (priority === "critical" || priority === "high") {
       const techRole = await db.query.roles.findFirst({
@@ -129,7 +134,11 @@ export async function createWorkOrder(
 
       if (techRole) {
         const techs = await db.query.users.findMany({
-          where: and(eq(users.roleId, techRole.id), eq(users.isActive, true)),
+          where: and(
+            eq(users.roleId, techRole.id),
+            eq(users.isActive, true),
+            eq(users.departmentId, equipmentItem.departmentId)
+          ),
         });
 
         if (techs.length > 0) {

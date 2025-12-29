@@ -147,6 +147,7 @@ describe("createEquipment action", () => {
     formData.set("name", "Test Equipment");
     formData.set("code", "tm-001"); // Lowercase - should be uppercased
     formData.set("locationId", "1");
+    formData.set("departmentId", "1");
 
     const result = await createEquipment({}, formData);
 
@@ -178,6 +179,7 @@ describe("createEquipment action", () => {
     formData.set("name", "Test Equipment");
     formData.set("code", "TM-001");
     formData.set("locationId", "1");
+    formData.set("departmentId", "1");
 
     const result = await createEquipment({}, formData);
 

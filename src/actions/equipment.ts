@@ -34,6 +34,7 @@ export async function createEquipment(
     name: formData.get("name"),
     code: formData.get("code")?.toString().toUpperCase(),
     locationId: Number(formData.get("locationId")),
+    departmentId: Number(formData.get("departmentId")),
     ownerId: formData.get("ownerId") ? Number(formData.get("ownerId")) : null,
     typeId: formData.get("typeId") ? Number(formData.get("typeId")) : null,
     parentId: formData.get("parentId") ? Number(formData.get("parentId")) : null,
