@@ -129,6 +129,21 @@ export const roles = sqliteTable("roles", {
     .default(sql`(unixepoch())`),
 });
 
+export const departments = sqliteTable("departments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").unique().notNull(), // e.g., "Electrical", "Mechanical", "Facilities"
+  code: text("code").unique().notNull(), // e.g., "ELEC", "MECH"
+  description: text("description"),
+  managerId: integer("manager_id"), // Dept Manager - removed explicit .references() to avoid circularity
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // Users table
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -137,6 +152,7 @@ export const users = sqliteTable("users", {
   email: text("email").unique(),
   pin: text("pin").notNull(),
   roleId: integer("role_id").references(() => roles.id),
+  departmentId: integer("department_id").references(() => departments.id),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   hourlyRate: real("hourly_rate"), // For labor cost tracking
   failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
@@ -212,6 +228,7 @@ export const equipment = sqliteTable(
       .references(() => locations.id)
       .notNull(),
     ownerId: integer("owner_id").references(() => users.id), // Owner
+    departmentId: integer("department_id").references(() => departments.id), // Responsible Department
     parentId: integer("parent_id"), // Self-reference for hierarchy (Station -> Machine -> Component)
     status: text("status", { enum: equipmentStatuses })
       .notNull()
@@ -226,6 +243,7 @@ export const equipment = sqliteTable(
   (table) => ({
     codeIdx: index("eq_code_idx").on(table.code),
     statusIdx: index("eq_status_idx").on(table.status),
+    deptIdx: index("eq_dept_idx").on(table.departmentId),
   })
 );
 
@@ -242,6 +260,7 @@ export const workOrders = sqliteTable(
       .references(() => users.id)
       .notNull(),
     assignedToId: integer("assigned_to_id").references(() => users.id),
+    departmentId: integer("department_id").references(() => departments.id),
     title: text("title").notNull(),
     description: text("description").notNull(),
     priority: text("priority", { enum: workOrderPriorities })
@@ -268,6 +287,7 @@ export const workOrders = sqliteTable(
     assignedToIdx: index("wo_assigned_to_idx").on(table.assignedToId),
     // Composite indexes for common query patterns
     assignedStatusIdx: index("wo_assigned_status_idx").on(table.assignedToId, table.status),
+    deptStatusIdx: index("wo_dept_status_idx").on(table.departmentId, table.status),
     equipmentHistoryIdx: index("wo_equipment_history_idx").on(table.equipmentId, table.createdAt),
   })
 );
@@ -526,6 +546,17 @@ export const laborLogs = sqliteTable(
 
 // ============ RELATIONS ============
 
+export const departmentsRelations = relations(departments, ({ one, many }) => ({
+  manager: one(users, {
+    fields: [departments.managerId],
+    references: [users.id],
+    relationName: "departmentManager",
+  }),
+  members: many(users, { relationName: "departmentMember" }),
+  equipment: many(equipment),
+  workOrders: many(workOrders),
+}));
+
 export const rolesRelations = relations(roles, ({ many }) => ({
   users: many(users),
 }));
@@ -534,6 +565,14 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   assignedRole: one(roles, {
     fields: [users.roleId],
     references: [roles.id],
+  }),
+  department: one(departments, {
+    fields: [users.departmentId],
+    references: [departments.id],
+    relationName: "departmentMember",
+  }),
+  managedDepartment: many(departments, {
+    relationName: "departmentManager",
   }),
   ownedEquipment: many(equipment, { relationName: "equipmentOwner" }),
   reportedWorkOrders: many(workOrders, { relationName: "workOrderReporter" }),
@@ -585,6 +624,10 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
     fields: [equipment.typeId],
     references: [equipmentTypes.id],
   }),
+  responsibleDepartment: one(departments, {
+    fields: [equipment.departmentId],
+    references: [departments.id],
+  }),
   owner: one(users, {
     fields: [equipment.ownerId],
     references: [users.id],
@@ -607,6 +650,10 @@ export const workOrdersRelations = relations(workOrders, ({ one, many }) => ({
   equipment: one(equipment, {
     fields: [workOrders.equipmentId],
     references: [equipment.id],
+  }),
+  department: one(departments, {
+    fields: [workOrders.departmentId],
+    references: [departments.id],
   }),
   reportedBy: one(users, {
     fields: [workOrders.reportedById],
@@ -862,3 +909,6 @@ export type NewWorkOrderPart = typeof workOrderParts.$inferInsert;
 // Phase 13: Labor types
 export type LaborLog = typeof laborLogs.$inferSelect;
 export type NewLaborLog = typeof laborLogs.$inferInsert;
+
+export type Department = typeof departments.$inferSelect;
+export type NewDepartment = typeof departments.$inferInsert;
