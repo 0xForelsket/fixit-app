@@ -22,6 +22,7 @@ import {
   Cuboid,
   Edit,
   Flag,
+  Layers,
   MapPin,
   MonitorCog,
   Plus,
@@ -144,6 +145,12 @@ export default async function EquipmentPage({
         description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
         icon={MonitorCog}
       >
+        <Button variant="outline" asChild>
+          <Link href="/assets/equipment/explorer">
+            <Layers className="mr-2 h-4 w-4" />
+            EXPLORE HIERARCHY
+          </Link>
+        </Button>
         <Button variant="outline" asChild>
           <Link href="/admin/import">
             <Upload className="mr-2 h-4 w-4" />
