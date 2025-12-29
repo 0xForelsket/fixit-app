@@ -25,11 +25,15 @@ import {
   Search,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { LocationTree } from "./location-tree";
+import { ViewToggle } from "@/components/ui/view-toggle";
 
 type SearchParams = {
   search?: string;
   sort?: "name" | "code" | "parent" | "status" | "createdAt";
   dir?: "asc" | "desc";
+  view?: "list" | "tree";
 };
 
 async function getLocations(params: SearchParams) {
@@ -125,12 +129,15 @@ export default async function LocationsPage({
             {stats.total} ZONES • {stats.roots} ROOT AREAS
           </div>
         </div>
-        <Button asChild>
-          <Link href="/assets/locations/new">
-            <Plus className="mr-2 h-4 w-4" />
-            ADD LOCATION
-          </Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <ViewToggle />
+          <Button asChild>
+            <Link href="/assets/locations/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD LOCATION
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -178,8 +185,16 @@ export default async function LocationsPage({
         </form>
       </div>
 
-      {/* Locations Table */}
-      {locationsList.length === 0 ? (
+      {params.view === "tree" ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white/50 backdrop-blur-sm shadow-xl shadow-zinc-200/20 overflow-hidden">
+          <Suspense fallback={<div className="h-96 animate-pulse bg-white rounded-2xl" />}>
+            <LocationTree initialLocations={locationsList} />
+          </Suspense>
+        </div>
+      ) : (
+        <>
+          {/* Locations Table */}
+          {locationsList.length === 0 ? (
         <EmptyState
           title="No locations found"
           description={
@@ -312,6 +327,8 @@ export default async function LocationsPage({
             </TableBody>
           </Table>
         </div>
+      )}
+        </>
       )}
     </div>
   );

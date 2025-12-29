@@ -33,7 +33,7 @@ import {
 import Link from "next/link";
 import { Suspense } from "react";
 import { AssetTree } from "./explorer/asset-tree";
-import { ViewToggle } from "./view-toggle";
+import { ViewToggle } from "@/components/ui/view-toggle";
 
 type SearchParams = {
   status?: string;
