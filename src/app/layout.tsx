@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Outfit } from "next/font/google";
+import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -46,7 +47,9 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <OfflineIndicator />
       </body>
     </html>
   );
 }
+

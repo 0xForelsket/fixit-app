@@ -1,0 +1,616 @@
+openapi: 3.0.3
+info:
+  title: FixIt CMMS API
+  description: |
+    REST API for the FixIt Computerized Maintenance Management System (CMMS).
+    
+    ## Authentication
+    
+    All API endpoints (except `/api/auth/login`) require a valid session cookie (`fixit_session`).
+    Mutating operations also require a valid CSRF token in the `X-CSRF-Token` header.
+    
+    ## Rate Limiting
+    
+    API endpoints are rate-limited:
+    - General API: 100 requests per minute
+    - Login: 5 attempts per minute
+    - File uploads: 10 per minute
+    
+    When rate-limited, the API returns:
+    - HTTP 429 (Too Many Requests)
+    - `Retry-After` header with seconds until reset
+    - `X-RateLimit-Remaining` header
+    
+    ## Error Responses
+    
+    All errors follow a consistent format:
+    ```json
+    {
+      "error": "Human-readable error message",
+      "code": "ERROR_CODE",
+      "requestId": "req_abc123_xyz789",
+      "timestamp": "2024-01-01T00:00:00.000Z"
+    }
+    ```
+    
+  version: 1.0.0
+  contact:
+    name: FixIt Development Team
+  license:
+    name: MIT
+
+servers:
+  - url: /api
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: Authentication and session management
+  - name: Work Orders
+    description: Work order management
+  - name: Equipment
+    description: Equipment and asset management
+  - name: Inventory
+    description: Spare parts and inventory management
+  - name: Notifications
+    description: User notifications
+  - name: Analytics
+    description: Analytics and KPIs
+  - name: Reports
+    description: Report generation and export
+  - name: Labor
+    description: Labor time tracking
+  - name: Scheduler
+    description: Maintenance schedule management
+
+paths:
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Login with employee credentials
+      description: Authenticates a user with their employee ID and PIN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Account locked
+        '429':
+          description: Too many login attempts
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Log out current user
+      description: Invalidates the current session and clears cookies
+      responses:
+        '200':
+          description: Logout successful
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      description: Returns the currently authenticated user's information
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Not authenticated
+
+  /work-orders:
+    get:
+      tags: [Work Orders]
+      summary: List work orders
+      description: Returns a paginated list of work orders with optional filters
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/WorkOrderStatus'
+        - name: priority
+          in: query
+          schema:
+            $ref: '#/components/schemas/WorkOrderPriority'
+        - name: assignedToId
+          in: query
+          schema:
+            type: integer
+        - name: equipmentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paginated list of work orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrderListResponse'
+        '401':
+          description: Unauthorized
+
+    post:
+      tags: [Work Orders]
+      summary: Create work order
+      description: Creates a new work order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkOrderRequest'
+      responses:
+        '201':
+          description: Work order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: CSRF token invalid or forbidden
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List user notifications
+      description: Returns notifications for the current user
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '401':
+          description: Unauthorized
+
+  /notifications/{id}:
+    patch:
+      tags: [Notifications]
+      summary: Mark notification as read
+      description: Updates the read status of a notification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isRead:
+                  type: boolean
+      responses:
+        '200':
+          description: Notification updated
+        '401':
+          description: Unauthorized
+        '404':
+          description: Notification not found
+
+  /notifications/read-all:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      description: Marks all unread notifications as read for the current user
+      responses:
+        '200':
+          description: All notifications marked as read
+        '401':
+          description: Unauthorized
+
+  /equipment:
+    get:
+      tags: [Equipment]
+      summary: List equipment
+      description: Returns a paginated list of equipment
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: locationId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/EquipmentStatus'
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated list of equipment
+        '401':
+          description: Unauthorized
+
+    post:
+      tags: [Equipment]
+      summary: Create equipment
+      description: Creates a new equipment item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentRequest'
+      responses:
+        '201':
+          description: Equipment created
+        '400':
+          description: Validation error
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+
+  /analytics/kpis:
+    get:
+      tags: [Analytics]
+      summary: Get KPI data
+      description: Returns key performance indicators for the dashboard
+      responses:
+        '200':
+          description: KPI metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KPIResponse'
+        '401':
+          description: Unauthorized
+
+  /analytics/trends:
+    get:
+      tags: [Analytics]
+      summary: Get trend data
+      description: Returns work order trends over time
+      responses:
+        '200':
+          description: Trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrendDataPoint'
+        '401':
+          description: Unauthorized
+
+  /reports/export:
+    get:
+      tags: [Reports]
+      summary: Export work orders
+      description: Exports work orders as a CSV file
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+
+  /scheduler/run:
+    post:
+      tags: [Scheduler]
+      summary: Run maintenance scheduler
+      description: |
+        Manually triggers the maintenance scheduler to generate work orders 
+        for due schedules. Can be called by authenticated admins or via 
+        cron secret in Authorization header.
+      responses:
+        '200':
+          description: Scheduler run complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  generated:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Error code for programmatic handling
+        requestId:
+          type: string
+          description: Unique request ID for debugging
+        timestamp:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - employeeId
+        - pin
+      properties:
+        employeeId:
+          type: string
+          minLength: 1
+          example: "TECH-001"
+        pin:
+          type: string
+          minLength: 4
+          maxLength: 6
+          example: "1234"
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/User'
+        csrfToken:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        employeeId:
+          type: string
+        name:
+          type: string
+        roleName:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    UserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        csrfToken:
+          type: string
+
+    WorkOrderStatus:
+      type: string
+      enum: [open, in_progress, on_hold, resolved, closed]
+
+    WorkOrderPriority:
+      type: string
+      enum: [low, medium, high, critical]
+
+    WorkOrderType:
+      type: string
+      enum: [breakdown, preventive, corrective, installation, inspection]
+
+    WorkOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/WorkOrderStatus'
+        priority:
+          $ref: '#/components/schemas/WorkOrderPriority'
+        type:
+          $ref: '#/components/schemas/WorkOrderType'
+        equipmentId:
+          type: integer
+        reportedById:
+          type: integer
+        assignedToId:
+          type: integer
+        dueBy:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    WorkOrderListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkOrder'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+
+    CreateWorkOrderRequest:
+      type: object
+      required:
+        - equipmentId
+        - type
+        - title
+        - priority
+      properties:
+        equipmentId:
+          type: integer
+        type:
+          $ref: '#/components/schemas/WorkOrderType'
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        description:
+          type: string
+        priority:
+          $ref: '#/components/schemas/WorkOrderPriority'
+
+    EquipmentStatus:
+      type: string
+      enum: [operational, down, maintenance]
+
+    CreateEquipmentRequest:
+      type: object
+      required:
+        - name
+        - code
+        - locationId
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        locationId:
+          type: integer
+        status:
+          $ref: '#/components/schemas/EquipmentStatus'
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        isRead:
+          type: boolean
+        link:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    KPIResponse:
+      type: object
+      properties:
+        openWorkOrders:
+          type: integer
+        highPriorityOpen:
+          type: integer
+        mttrHours:
+          type: number
+        slaRate:
+          type: number
+        period:
+          type: string
+
+    TrendDataPoint:
+      type: object
+      properties:
+        day:
+          type: string
+        created_count:
+          type: integer
+        resolved_count:
+          type: integer
+
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: fixit_session
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+
+security:
+  - sessionCookie: []
