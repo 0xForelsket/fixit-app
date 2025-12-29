@@ -1,13 +1,24 @@
-import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { formatTimeRemaining, getUrgencyLevel } from "@/lib/sla";
-import { formatDateTime, formatRelativeTime } from "@/lib/utils";
+import { cn, formatDateTime, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
+import { 
+  ArrowLeft, 
+  Clock, 
+  MonitorCog, 
+  User as UserIcon, 
+  MessageSquare, 
+  RefreshCw, 
+  CheckCircle2,
+  Calendar,
+  AlertCircle
+} from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CommentForm } from "./comment-form";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -76,35 +87,46 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   const urgency = getUrgencyLevel(workOrder.dueBy);
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 industrial-grid py-8 pb-24 lg:pb-8">
-      <div className="mx-auto max-w-3xl px-4 space-y-6">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-zinc-500 font-bold">
-          <Link
-            href="/my-tickets"
-            className="hover:text-primary-600 transition-colors"
-          >
-            My Tickets
-          </Link>
-          <span className="text-zinc-300">/</span>
-          <span className="text-zinc-900">#{workOrder.id}</span>
-        </nav>
+    <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 px-1">
+        <Link
+          href="/my-tickets"
+          className="hover:text-primary-600 transition-colors flex items-center gap-1"
+        >
+          <ArrowLeft className="h-3 w-3" />
+          My Tickets
+        </Link>
+        <span className="text-zinc-300">/</span>
+        <span className="text-zinc-900">#{workOrder.id}</span>
+      </nav>
 
-        {/* Work order header */}
-        <div className="rounded-2xl border-2 bg-white p-6">
+      {/* Main Header Card */}
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-primary-500/10" />
+        
+        <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="text-xl font-black text-zinc-900">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-black text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded uppercase">
+                  Ticket #{workOrder.id}
+                </span>
+                <StatusBadge status={workOrder.status} showIcon />
+              </div>
+              <h1 className="text-xl font-black text-zinc-900 tracking-tight leading-tight">
                 {workOrder.title}
               </h1>
-              <p className="mt-1 text-sm text-zinc-500 font-medium">
-                Reported {formatRelativeTime(workOrder.createdAt)}
-              </p>
-            </div>
-
-            <div className="flex flex-col items-end gap-2">
-              <StatusBadge status={workOrder.status} />
-              <PriorityBadge priority={workOrder.priority} />
+              <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Reported {formatRelativeTime(workOrder.createdAt)}
+                </div>
+                <span className="text-zinc-300">•</span>
+                <div className="flex items-center gap-1">
+                  <StatusBadge status={workOrder.priority} className="text-[10px] py-0 px-2 h-5" />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -113,206 +135,167 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
             workOrder.status !== "closed" &&
             workOrder.dueBy && (
               <div
-                className={`mt-4 rounded-lg p-3 ${
+                className={cn(
+                  "rounded-xl p-3 border flex items-center gap-3",
                   urgency === "overdue"
-                    ? "bg-danger-50 text-danger-700"
+                    ? "bg-rose-50 border-rose-100 text-rose-700"
                     : urgency === "critical"
-                      ? "bg-warning-50 text-warning-700"
-                      : "bg-muted text-muted-foreground"
-                }`}
+                      ? "bg-amber-50 border-amber-100 text-amber-700"
+                      : "bg-zinc-50 border-zinc-100 text-zinc-600"
+                )}
               >
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="text-sm font-medium">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-70">SLA Requirement</span>
+                  <span className="text-sm font-bold">
                     {formatTimeRemaining(workOrder.dueBy)}
                   </span>
                 </div>
               </div>
             )}
         </div>
+      </div>
 
+      <div className="grid gap-4 md:grid-cols-2">
         {/* Equipment info */}
         {workOrder.equipment && (
-          <div className="rounded-2xl border-2 bg-white p-4">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              Equipment
-            </h2>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 border">
-                <svg
-                  className="h-5 w-5 text-muted-foreground"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                </svg>
+          <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <MonitorCog className="h-4 w-4 text-primary-600" />
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                Asset Information
+              </h2>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-100 p-2">
+                <MonitorCog className="h-full w-full text-zinc-400" />
               </div>
-              <div>
-                <p className="font-bold text-zinc-900">
+              <div className="min-w-0">
+                <p className="font-bold text-sm text-zinc-900 truncate">
                   {workOrder.equipment.name}
                 </p>
-                <p className="text-sm text-zinc-500">
+                <p className="text-xs font-mono text-zinc-500 mt-0.5">
                   {workOrder.equipment.code}
-                  {workOrder.equipment.location &&
-                    ` • ${workOrder.equipment.location.name}`}
                 </p>
+                {workOrder.equipment.location && (
+                  <p className="text-[11px] font-medium text-zinc-400 mt-1">
+                    {workOrder.equipment.location.name}
+                  </p>
+                )}
               </div>
             </div>
           </div>
         )}
-
-        {/* Description */}
-        <div className="rounded-2xl border-2 bg-white p-4">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Description
-          </h2>
-          <p className="mt-2 whitespace-pre-wrap text-zinc-700">
-            {workOrder.description}
-          </p>
-        </div>
 
         {/* Assignment */}
-        {workOrder.assignedTo ? (
-          <div className="rounded-2xl border-2 bg-white p-4">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <UserIcon className="h-4 w-4 text-primary-600" />
             <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-              Assigned Technician
+              Responsible Tech
             </h2>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-black">
-                {workOrder.assignedTo.name.charAt(0).toUpperCase()}
+          </div>
+          {workOrder.assignedTo ? (
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-700 border border-primary-100">
+                <span className="text-sm font-black uppercase">
+                  {workOrder.assignedTo.name.charAt(0)}
+                </span>
               </div>
               <div>
-                <p className="font-bold text-zinc-900">
+                <p className="font-bold text-sm text-zinc-900">
                   {workOrder.assignedTo.name}
                 </p>
-                <p className="text-sm text-zinc-500">
-                  {workOrder.assignedTo.employeeId}
+                <p className="text-xs font-mono text-zinc-500 mt-0.5">
+                  ID: {workOrder.assignedTo.employeeId}
                 </p>
               </div>
             </div>
+          ) : (
+            <div className="h-[42px] flex items-center justify-center rounded-xl bg-zinc-50 border border-dashed border-zinc-200">
+              <p className="text-xs text-zinc-400 font-medium italic">
+                Awaiting technician assignment...
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Description & Resolution */}
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">
+            Issue Description
+          </h2>
+          <div className="text-sm text-zinc-700 leading-relaxed bg-zinc-50/50 p-4 rounded-xl border border-zinc-100">
+            {workOrder.description}
           </div>
-        ) : (
-          <div className="rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 p-4 text-center">
-            <p className="text-sm text-zinc-500 font-medium">
-              Waiting for a technician to be assigned...
-            </p>
-          </div>
-        )}
+        </div>
 
         {/* Resolution notes */}
         {workOrder.resolutionNotes && (
-          <div className="rounded-lg border border-success-200 bg-success-50 p-4">
-            <h2 className="text-sm font-medium text-success-700">Resolution</h2>
-            <p className="mt-2 whitespace-pre-wrap text-success-800">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <h2 className="text-[10px] font-black uppercase tracking-widest text-emerald-600/70">
+                Resolution Report
+              </h2>
+            </div>
+            <div className="text-sm text-emerald-900 leading-relaxed font-medium bg-white/50 p-4 rounded-xl border border-emerald-100">
               {workOrder.resolutionNotes}
-            </p>
+            </div>
             {workOrder.resolvedAt && (
-              <p className="mt-2 text-sm text-success-600">
-                Resolved {formatDateTime(workOrder.resolvedAt)}
-              </p>
+              <div className="mt-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600/60">
+                <Calendar className="h-3 w-3" />
+                Completed {formatDateTime(workOrder.resolvedAt)}
+              </div>
             )}
           </div>
         )}
+      </div>
 
-        {/* Activity log */}
-        <div className="rounded-2xl border-2 bg-white p-4">
+      {/* Activity log */}
+      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            Activity
+            Communication & History
           </h2>
+        </div>
 
-          {/* Add comment form */}
-          {workOrder.status !== "resolved" && workOrder.status !== "closed" && (
+        {/* Add comment form */}
+        {workOrder.status !== "resolved" && workOrder.status !== "closed" && (
+          <div className="mb-8">
             <CommentForm workOrderId={workOrder.id} />
-          )}
+          </div>
+        )}
 
-          {/* Activity timeline */}
-          <div className="mt-4 space-y-4">
-            {workOrder.logs.map((log) => (
-              <ActivityItem key={log.id} log={log} />
-            ))}
+        {/* Activity timeline */}
+        <div className="relative space-y-6 before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px before:bg-zinc-100">
+          {workOrder.logs.map((log) => (
+            <ActivityItem key={log.id} log={log} />
+          ))}
 
-            {/* Created event */}
-            <div className="flex gap-3 text-sm">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary-100">
-                <svg
-                  className="h-4 w-4 text-primary-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p>
-                  <span className="font-medium">
-                    {workOrder.reportedBy?.name}
-                  </span>{" "}
-                  created this work order
-                </p>
-                <p className="text-muted-foreground">
-                  {formatDateTime(workOrder.createdAt)}
-                </p>
-              </div>
+          {/* Created event */}
+          <div className="flex gap-4 group relative">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50 border border-primary-100 z-10">
+              <AlertCircle className="h-4 w-4 text-primary-600" />
+            </div>
+            <div className="flex-1 pt-1">
+              <p className="text-xs text-zinc-900 font-bold">
+                <span className="text-primary-700 underline decoration-primary-200">
+                  {workOrder.reportedBy?.name}
+                </span>{" "}
+                initiated the request
+              </p>
+              <p className="text-[10px] font-medium text-zinc-400 mt-0.5">
+                {formatDateTime(workOrder.createdAt)}
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const config: Record<
-    string,
-    { label: string; variant: "default" | "warning" | "success" | "secondary" }
-  > = {
-    open: { label: "Open", variant: "default" },
-    in_progress: { label: "In Progress", variant: "warning" },
-    resolved: { label: "Resolved", variant: "success" },
-    closed: { label: "Closed", variant: "secondary" },
-  };
-
-  const { label, variant } = config[status] || config.open;
-  return <Badge variant={variant}>{label}</Badge>;
-}
-
-function PriorityBadge({ priority }: { priority: string }) {
-  const config: Record<
-    string,
-    { label: string; variant: "default" | "warning" | "danger" | "secondary" }
-  > = {
-    low: { label: "Low Priority", variant: "secondary" },
-    medium: { label: "Medium Priority", variant: "default" },
-    high: { label: "High Priority", variant: "warning" },
-    critical: { label: "Critical", variant: "danger" },
-  };
-
-  const { label, variant } = config[priority] || config.medium;
-  return <Badge variant={variant}>{label}</Badge>;
 }
 
 interface ActivityLog {
@@ -328,53 +311,11 @@ function ActivityItem({ log }: { log: ActivityLog }) {
   const getIcon = () => {
     switch (log.action) {
       case "status_change":
-        return (
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-        );
+        return <RefreshCw className="h-4 w-4 text-zinc-500" />;
       case "assignment":
-        return (
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-        );
+        return <UserIcon className="h-4 w-4 text-zinc-500" />;
       case "comment":
-        return (
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
-        );
+        return <MessageSquare className="h-4 w-4 text-primary-600" />;
       default:
         return null;
     }
@@ -385,42 +326,49 @@ function ActivityItem({ log }: { log: ActivityLog }) {
       case "status_change":
         return (
           <>
-            changed status from{" "}
-            <span className="font-medium">{log.oldValue}</span> to{" "}
-            <span className="font-medium">{log.newValue}</span>
+            updated status from{" "}
+            <span className="font-bold text-zinc-900">{log.oldValue}</span> to{" "}
+            <span className="font-bold text-zinc-900">{log.newValue}</span>
           </>
         );
       case "assignment":
         return log.newValue === "unassigned" ? (
-          <>unassigned the work order</>
+          <>removed technical assignment</>
         ) : (
-          <>assigned a technician</>
+          <>assigned a technician to resolve the issue</>
         );
       case "comment":
         return (
-          <>
-            added a comment:
-            <p className="mt-1 rounded-lg bg-muted p-3 text-foreground">
+          <div className="space-y-2">
+            <span className="text-zinc-500">added a note:</span>
+            <div className="rounded-xl bg-zinc-50 p-3 text-sm text-zinc-700 border border-zinc-100 font-medium leading-relaxed">
               {log.newValue}
-            </p>
-          </>
+            </div>
+          </div>
         );
       default:
-        return log.newValue;
+        return <span>{log.newValue}</span>;
     }
   };
 
   return (
-    <div className="flex gap-3 text-sm">
-      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-muted">
+    <div className="flex gap-4 group relative">
+      <div className={cn(
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full z-10",
+        log.action === 'comment' ? "bg-primary-50 border border-primary-100" : "bg-zinc-50 border border-zinc-100"
+      )}>
         {getIcon()}
       </div>
-      <div className="flex-1">
-        <p>
-          <span className="font-medium">{log.createdBy?.name || "System"}</span>{" "}
+      <div className="flex-1 pt-1">
+        <div className="text-xs text-zinc-600">
+          <span className="font-black text-zinc-900 uppercase tracking-tighter mr-1">
+            {log.createdBy?.name || "System"}
+          </span>{" "}
           {getMessage()}
+        </div>
+        <p className="text-[10px] font-medium text-zinc-400 mt-1">
+          {formatDateTime(log.createdAt)}
         </p>
-        <p className="text-muted-foreground">{formatDateTime(log.createdAt)}</p>
       </div>
     </div>
   );
