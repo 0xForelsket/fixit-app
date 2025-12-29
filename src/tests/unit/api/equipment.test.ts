@@ -355,6 +355,7 @@ describe("POST /api/equipment", () => {
         name: "New Machine",
         code: "NM-001",
         locationId: 1,
+        departmentId: 1,
       }),
     });
 

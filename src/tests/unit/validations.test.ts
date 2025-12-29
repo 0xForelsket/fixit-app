@@ -168,6 +168,7 @@ describe("createEquipmentSchema", () => {
       name: "Injection Molder A",
       code: "IM-001",
       locationId: 1,
+      departmentId: 1,
     });
     expect(result.success).toBe(true);
   });
@@ -176,6 +177,16 @@ describe("createEquipmentSchema", () => {
     const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
+      departmentId: 1,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should require department ID", () => {
+    const result = createEquipmentSchema.safeParse({
+      name: "Injection Molder A",
+      code: "IM-001",
+      locationId: 1,
     });
     expect(result.success).toBe(false);
   });
@@ -185,6 +196,7 @@ describe("createEquipmentSchema", () => {
       name: "Injection Molder A",
       code: "IM-001",
       locationId: 1,
+      departmentId: 1,
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -198,6 +210,7 @@ describe("createEquipmentSchema", () => {
         name: "Equipment",
         code: "M-001",
         locationId: 1,
+        departmentId: 1,
         status,
       });
       expect(result.success).toBe(true);
@@ -209,6 +222,7 @@ describe("createEquipmentSchema", () => {
       name: "Equipment",
       code: "M-001",
       locationId: 1,
+      departmentId: 1,
       ownerId: 5,
     });
     expect(result.success).toBe(true);

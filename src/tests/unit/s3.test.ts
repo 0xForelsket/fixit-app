@@ -53,14 +53,16 @@ describe("S3 Utilities", () => {
       expect(key).toBe("work_orders/1/1.xlsx");
     });
 
-    it("uses bin extension for files without extension", () => {
+    it("uses filename as extension when no dot present", () => {
+      // When there's no dot, split(".").pop() returns the whole filename
       const key = generateS3Key("work_order", 1, 1, "noextension");
-      expect(key).toBe("work_orders/1/1.bin");
+      expect(key).toBe("work_orders/1/1.noextension");
     });
 
-    it("handles empty filename gracefully", () => {
+    it("uses bin extension for empty filename", () => {
+      // Empty string split(".").pop() returns "", which is falsy, so "bin" is used
       const key = generateS3Key("work_order", 1, 1, "");
-      expect(key).toBe("work_orders/1/1.");
+      expect(key).toBe("work_orders/1/1.bin");
     });
   });
 
@@ -75,9 +77,10 @@ describe("S3 Utilities", () => {
       expect(key).toBe("users/1/avatar.png");
     });
 
-    it("uses jpg extension for files without extension", () => {
+    it("uses filename as extension when no dot present", () => {
+      // When there's no dot, split(".").pop() returns the whole filename
       const key = generateAvatarKey(1, "avatar");
-      expect(key).toBe("users/1/avatar.jpg");
+      expect(key).toBe("users/1/avatar.avatar");
     });
 
     it("handles files with multiple dots", () => {

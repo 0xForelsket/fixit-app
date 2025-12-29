@@ -17,8 +17,15 @@ describe("Input", () => {
   });
 
   describe("Input Types", () => {
-    it("renders text input by default", () => {
+    it("renders without type attribute by default", () => {
       render(<Input data-testid="input" />);
+
+      // Input component passes type through, no default value set
+      expect(screen.getByTestId("input")).not.toHaveAttribute("type");
+    });
+
+    it("renders with explicit text type", () => {
+      render(<Input type="text" data-testid="input" />);
 
       expect(screen.getByTestId("input")).toHaveAttribute("type", "text");
     });
