@@ -1,22 +1,28 @@
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface StatItem {
   label: string;
   value: string | number;
   icon: LucideIcon;
   variant?: "default" | "danger" | "warning" | "success" | "primary";
+  trend?: number;
+  trendLabel?: string;
 }
 
 interface StatsTickerProps {
   stats: StatItem[];
   className?: string;
+  variant?: "default" | "compact";
 }
 
-export function StatsTicker({ stats, className }: StatsTickerProps) {
+export function StatsTicker({ stats, className, variant = "default" }: StatsTickerProps) {
+  const isCompact = variant === "compact";
+
   return (
     <div className={cn(
-      "grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-border rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700",
+      "grid grid-cols-1 sm:grid-cols-2 lg:grid-flow-col lg:auto-cols-fr gap-[1px] bg-border rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-700",
+      isCompact && "rounded-xl shadow-lg",
       className
     )}>
       {stats.map((stat, i) => {
@@ -31,6 +37,7 @@ export function StatsTicker({ stats, className }: StatsTickerProps) {
             key={i}
             className={cn(
               "bg-card p-6 flex flex-col gap-4 relative overflow-hidden group transition-all hover:bg-muted/50",
+              isCompact && "p-4 gap-2",
               isDanger && "bg-rose-500/5",
               isWarning && "bg-amber-500/5",
               isSuccess && "bg-emerald-500/5",
@@ -38,9 +45,13 @@ export function StatsTicker({ stats, className }: StatsTickerProps) {
             )}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{stat.label}</span>
+              <span className={cn(
+                "text-[10px] font-black text-muted-foreground uppercase tracking-widest",
+                isCompact && "text-[9px] tracking-wider"
+              )}>{stat.label}</span>
               <Icon className={cn(
                 "h-4 w-4", 
+                isCompact && "h-3 w-3",
                 isDanger ? "text-rose-500 animate-pulse" : 
                 isWarning ? "text-amber-500" : 
                 isSuccess ? "text-emerald-500" : 
@@ -50,14 +61,29 @@ export function StatsTicker({ stats, className }: StatsTickerProps) {
             <div className="flex items-baseline gap-2">
               <span className={cn(
                 "text-5xl font-mono font-black tracking-tighter",
+                isCompact && "text-3xl",
                 isDanger ? "text-rose-500" : 
                 isWarning ? "text-amber-500" : 
                 isSuccess ? "text-emerald-500" : 
                 isPrimary ? "text-primary-500" : "text-foreground"
               )}>
-                {typeof stat.value === 'number' ? stat.value.toString().padStart(2, '0') : stat.value}
+                {String(stat.value).padStart(2, '0')}
               </span>
+              {stat.trend !== undefined && (
+                <div className={cn(
+                  "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md",
+                  stat.trend > 0 ? "text-emerald-500 bg-emerald-500/10" : "text-rose-500 bg-rose-500/10",
+                  isCompact && "text-[8px] px-1"
+                )}>
+                  {stat.trend > 0 ? "+" : ""}{stat.trend}%
+                </div>
+              )}
             </div>
+            {stat.trendLabel && (
+              <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
+                {stat.trendLabel}
+              </span>
+            )}
             
             {/* Accent Line */}
             <div className={cn(

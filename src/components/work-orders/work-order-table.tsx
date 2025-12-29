@@ -11,18 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Equipment, User, WorkOrder } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
 import { ArrowRight, Timer } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-type WorkOrderWithRelations = WorkOrder & {
-  equipment: Equipment | null;
-  reportedBy: User | null;
-  assignedTo: User | null;
-};
+import type { WorkOrderWithRelations } from "./work-order-card";
 
 interface WorkOrderTableProps {
   workOrders: WorkOrderWithRelations[];
@@ -39,15 +33,15 @@ export function WorkOrderTable({
   return (
     <div className="hidden lg:block overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
       <Table>
-        <TableHeader className="bg-muted/50">
-          <TableRow className="border-b text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+        <TableHeader className="bg-muted/30">
+          <TableRow className="border-b text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-transparent">
             <SortHeader
               label="ID"
               field="id"
               currentSort={params.sort}
               currentDir={params.dir}
               params={params}
-              className="p-4"
+              className="p-3 w-[80px]"
             />
             <SortHeader
               label="Work Order"
@@ -55,9 +49,9 @@ export function WorkOrderTable({
               currentSort={params.sort}
               currentDir={params.dir}
               params={params}
-              className="p-4"
+              className="p-3"
             />
-            <TableHead className="p-4 hidden md:table-cell">
+            <TableHead className="p-3 hidden md:table-cell">
               Equipment
             </TableHead>
             <SortHeader
@@ -66,7 +60,7 @@ export function WorkOrderTable({
               currentSort={params.sort}
               currentDir={params.dir}
               params={params}
-              className="p-4 hidden lg:table-cell"
+              className="p-3 hidden lg:table-cell"
             />
             <SortHeader
               label="Priority"
@@ -74,9 +68,9 @@ export function WorkOrderTable({
               currentSort={params.sort}
               currentDir={params.dir}
               params={params}
-              className="p-4 hidden lg:table-cell"
+              className="p-3 hidden lg:table-cell"
             />
-            <TableHead className="p-4 hidden xl:table-cell">
+            <TableHead className="p-3 hidden xl:table-cell">
               Assigned To
             </TableHead>
             <SortHeader
@@ -85,9 +79,9 @@ export function WorkOrderTable({
               currentSort={params.sort}
               currentDir={params.dir}
               params={params}
-              className="p-4 hidden sm:table-cell"
+              className="p-3 hidden sm:table-cell text-right"
             />
-            <TableHead className="p-4" />
+            <TableHead className="p-3 w-[100px] text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="divide-y divide-border">
@@ -125,79 +119,95 @@ function WorkOrderRow({
   return (
     <TableRow
       className={cn(
-        "group hover:bg-muted/50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1",
+        "group hover:bg-muted/50 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-1 text-xs",
         staggerClass
       )}
       onClick={() => router.push(`/maintenance/work-orders/${workOrder.id}`)}
     >
-      <TableCell className="p-4">
-        <span className="font-mono text-xs font-bold text-muted-foreground">
-          #{String(workOrder.id).padStart(3, "0")}
-        </span>
+      <TableCell className="p-3 font-mono font-bold text-muted-foreground">
+        #{String(workOrder.id).padStart(3, "0")}
       </TableCell>
-      <TableCell className="p-4">
-        <div className="flex flex-col">
-          <span className="font-bold text-sm text-foreground leading-tight group-hover:text-primary transition-colors">
+      <TableCell className="p-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-bold text-sm text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-1">
             {workOrder.title}
           </span>
-          <span className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-            {workOrder.description}
+          <span className="text-[10px] text-muted-foreground line-clamp-1 font-medium">
+            {workOrder.description || "No description provided"}
           </span>
         </div>
       </TableCell>
-      <TableCell className="p-4 hidden md:table-cell">
-        <span className="text-sm font-medium text-foreground/80">
-          {workOrder.equipment?.name || "—"}
-        </span>
+      <TableCell className="p-3 hidden md:table-cell">
+        <div className="flex flex-col">
+          <span className="font-bold text-foreground/80 line-clamp-1">
+            {workOrder.equipment?.name || "—"}
+          </span>
+          {workOrder.equipment?.location && (
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">
+              {workOrder.equipment.location.name}
+            </span>
+          )}
+        </div>
       </TableCell>
-      <TableCell className="p-4 hidden lg:table-cell">
+      <TableCell className="p-3 hidden lg:table-cell">
         <Badge
-          className={`${statusConfig.bg} ${statusConfig.color} border-transparent font-bold uppercase text-[10px] tracking-wider hover:bg-opacity-80`}
+          variant="outline"
+          className={cn(
+            "border-transparent font-black uppercase text-[9px] tracking-widest px-2 py-0.5 rounded-full shadow-sm",
+            statusConfig.bg,
+            statusConfig.color
+          )}
         >
           {statusConfig.label}
         </Badge>
       </TableCell>
-      <TableCell className="p-4 hidden lg:table-cell">
+      <TableCell className="p-3 hidden lg:table-cell">
         <Badge
-          className={`${priorityConfig.bg} ${priorityConfig.color} border-transparent font-bold uppercase text-[10px] tracking-wider hover:bg-opacity-80`}
+          variant="outline"
+          className={cn(
+            "border-transparent font-black uppercase text-[9px] tracking-widest px-2 py-0.5 rounded-full shadow-sm",
+            priorityConfig.bg,
+            priorityConfig.color
+          )}
         >
           {priorityConfig.label}
         </Badge>
       </TableCell>
-      <TableCell className="p-4 hidden xl:table-cell">
+      <TableCell className="p-3 hidden xl:table-cell">
         <div className="flex items-center gap-2">
           {workOrder.assignedTo ? (
             <>
-              <div className="h-6 w-6 rounded-full bg-muted border border-border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
+              <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[9px] font-black text-primary">
                 {workOrder.assignedTo.name[0]}
               </div>
-              <span className="text-sm text-foreground/70">
-                {workOrder.assignedTo.name}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-[11px] font-bold text-foreground leading-none">
+                  {workOrder.assignedTo.name.split(" ")[0]}
+                </span>
+              </div>
             </>
           ) : (
-            <span className="text-sm text-muted-foreground italic">Unassigned</span>
+            <span className="text-[10px] text-muted-foreground font-medium italic px-2 py-0.5 rounded-full bg-muted">Unassigned</span>
           )}
         </div>
       </TableCell>
-      <TableCell className="p-4 hidden sm:table-cell">
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-          <Timer className="h-3.5 w-3.5" />
+      <TableCell className="p-3 hidden sm:table-cell text-right">
+        <div className="flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
           {formatRelativeTime(workOrder.createdAt)}
         </div>
       </TableCell>
-      <TableCell className="p-4 text-right">
+      <TableCell className="p-3 text-center">
         <Button
-          variant="ghost"
           size="sm"
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          className="h-7 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shadow-none"
           asChild
         >
           <Link href={`/maintenance/work-orders/${workOrder.id}`}>
-            <ArrowRight className="h-4 w-4" />
+            VIEW
           </Link>
         </Button>
       </TableCell>
     </TableRow>
   );
 }
+

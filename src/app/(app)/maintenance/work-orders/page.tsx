@@ -6,18 +6,18 @@ import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import { type SQL, and, asc, count, desc, eq, ilike, lt, or } from "drizzle-orm";
 import {
-  AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   Filter,
-  Inbox,
   Search,
-  Timer,
   User as UserIcon,
   X,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
+import { PageLayout } from "@/components/ui/page-layout";
+import { StatsTicker } from "@/components/ui/stats-ticker";
+import { Inbox, Timer, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type SearchParams = {
   status?: string;
@@ -196,31 +196,22 @@ export default async function WorkOrdersPage({
     params.overdue === "true";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-zinc-200 pb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
-            {params.overdue === "true"
-              ? "Overdue "
-              : isMyWorkOrdersView
-                ? "My "
-                : "Work Order "}
-            <span className="text-primary-600">Queue</span>
-          </h1>
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <Inbox className="h-3.5 w-3.5" />
-            {total} TOTAL TICKETS • PAGE {page} OF {totalPages || 1}
-          </div>
-        </div>
+    <PageLayout
+      id="work-orders-page"
+      title={params.overdue === "true" ? "Overdue Queue" : isMyWorkOrdersView ? "My Work Queue" : "Work Order Queue"}
+      subtitle="Maintenance Operations"
+      description="CENTRALIZED WORK ORDER DISPATCH AND MONITORING TERMINAL"
+      bgSymbol="WQ"
+      headerActions={
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border-2 border-zinc-200 bg-white overflow-hidden">
+          <div className="flex rounded-lg border border-border bg-card overflow-hidden h-9">
             <Link
               href="/maintenance/work-orders"
               className={cn(
-                "px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors",
+                "px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all flex items-center",
                 !isMyWorkOrdersView
-                  ? "bg-primary-500 text-white"
-                  : "text-zinc-500 hover:bg-zinc-50"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted"
               )}
             >
               All
@@ -228,141 +219,115 @@ export default async function WorkOrdersPage({
             <Link
               href="/maintenance/work-orders?assigned=me"
               className={cn(
-                "px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-colors flex items-center gap-1.5",
+                "px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5",
                 isMyWorkOrdersView
-                  ? "bg-primary-500 text-white"
-                  : "text-zinc-500 hover:bg-zinc-50"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted"
               )}
             >
               <UserIcon className="h-3 w-3" />
               Mine
             </Link>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className="font-bold border-2"
-          >
-            <Link href="/dashboard">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              BACK
+          <Button size="sm" className="h-9 text-[10px] font-black uppercase tracking-widest" asChild>
+            <Link href="/">
+              <Plus className="mr-2 h-3.5 w-3.5" />
+              NEW TICKET
             </Link>
           </Button>
         </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatFilterCard
-          title="Open"
-          value={stats.open}
-          icon={Inbox}
-          color="text-primary-600"
-          bg="bg-primary-50"
-          href="?status=open"
-          active={params.status === "open"}
-          index={0}
+      }
+      stats={
+        <StatsTicker
+          variant="compact"
+          stats={[
+            {
+              label: "Open",
+              value: stats.open,
+              icon: Inbox,
+              variant: "primary",
+            },
+            {
+              label: "In Progress",
+              value: stats.inProgress,
+              icon: Timer,
+              variant: "default",
+            },
+            {
+              label: "Resolved",
+              value: stats.resolved,
+              icon: CheckCircle2,
+              variant: "success",
+            },
+            {
+              label: "Critical",
+              value: stats.critical,
+              icon: AlertTriangle,
+              variant: "danger",
+            },
+          ]}
         />
-        <StatFilterCard
-          title="In Progress"
-          value={stats.inProgress}
-          icon={Timer}
-          color="text-amber-600"
-          bg="bg-amber-50"
-          href="?status=in_progress"
-          active={params.status === "in_progress"}
-          index={1}
-        />
-        <StatFilterCard
-          title="Resolved"
-          value={stats.resolved}
-          icon={CheckCircle2}
-          color="text-emerald-600"
-          bg="bg-emerald-50"
-          href="?status=resolved"
-          active={params.status === "resolved"}
-          index={2}
-        />
-        <StatFilterCard
-          title="Critical"
-          value={stats.critical}
-          icon={AlertTriangle}
-          color="text-rose-600"
-          bg="bg-rose-50"
-          href="?priority=critical"
-          active={params.priority === "critical"}
-          index={3}
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <form
-          className="flex-1 min-w-[200px]"
-          action="/maintenance/work-orders"
-          method="get"
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      }
+      filters={
+        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-muted/30 p-4 rounded-xl border border-border/50">
+          <form
+            className="flex-1 relative"
+            action="/maintenance/work-orders"
+            method="get"
+          >
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               name="search"
-              placeholder="Search work orders..."
+              placeholder="FILTER BY TITLE, DESCRIPTION OR ASSET..."
               defaultValue={params.search}
-              className="w-full rounded-lg border bg-white py-2 pl-10 pr-4 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+              className="w-full h-10 rounded-lg border border-border bg-card pl-10 pr-4 text-[11px] font-bold uppercase tracking-wider focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/50 transition-all"
             />
-            {params.status && (
-              <input type="hidden" name="status" value={params.status} />
-            )}
-            {params.priority && (
-              <input type="hidden" name="priority" value={params.priority} />
-            )}
-            {params.assigned && (
-              <input type="hidden" name="assigned" value={params.assigned} />
-            )}
-            {params.overdue && (
-              <input type="hidden" name="overdue" value={params.overdue} />
+            {params.status && <input type="hidden" name="status" value={params.status} />}
+            {params.priority && <input type="hidden" name="priority" value={params.priority} />}
+            {params.assigned && <input type="hidden" name="assigned" value={params.assigned} />}
+            {params.overdue && <input type="hidden" name="overdue" value={params.overdue} />}
+          </form>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterSelect
+              name="status"
+              value={params.status || "all"}
+              options={[
+                { value: "all", label: "ANY STATUS" },
+                { value: "open", label: "OPEN" },
+                { value: "in_progress", label: "IN PROGRESS" },
+                { value: "resolved", label: "RESOLVED" },
+                { value: "closed", label: "CLOSED" },
+              ]}
+              searchParams={params}
+            />
+
+            <FilterSelect
+              name="priority"
+              value={params.priority || "all"}
+              options={[
+                { value: "all", label: "ANY PRIORITY" },
+                { value: "critical", label: "CRITICAL" },
+                { value: "high", label: "HIGH" },
+                { value: "medium", label: "MEDIUM" },
+                { value: "low", label: "LOW" },
+              ]}
+              searchParams={params}
+            />
+
+            {activeFilters && (
+              <Button variant="ghost" size="sm" className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors" asChild>
+                <Link href="/maintenance/work-orders">
+                  <X className="mr-2 h-3.5 w-3.5" />
+                  RESET
+                </Link>
+              </Button>
             )}
           </div>
-        </form>
-
-        <FilterSelect
-          name="status"
-          value={params.status || "all"}
-          options={[
-            { value: "all", label: "All Status" },
-            { value: "open", label: "Open" },
-            { value: "in_progress", label: "In Progress" },
-            { value: "resolved", label: "Resolved" },
-            { value: "closed", label: "Closed" },
-          ]}
-          searchParams={params}
-        />
-
-        <FilterSelect
-          name="priority"
-          value={params.priority || "all"}
-          options={[
-            { value: "all", label: "All Priority" },
-            { value: "critical", label: "Critical" },
-            { value: "high", label: "High" },
-            { value: "medium", label: "Medium" },
-            { value: "low", label: "Low" },
-          ]}
-          searchParams={params}
-        />
-
-        {activeFilters && (
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/maintenance/work-orders">
-              <X className="mr-1 h-4 w-4" />
-              Clear
-            </Link>
-          </Button>
-        )}
-      </div>
-
+        </div>
+      }
+    >
       {/* Work Orders List */}
       <WorkOrderList
         workOrders={workOrdersList}
@@ -427,7 +392,7 @@ export default async function WorkOrdersPage({
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }
 
@@ -441,55 +406,6 @@ function buildSearchParams(params: Record<string, string | undefined>): string {
   return searchParams.toString();
 }
 
-function StatFilterCard({
-  title,
-  value,
-  icon: Icon,
-  color,
-  bg,
-  href,
-  active,
-  index,
-}: {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-  color: string;
-  bg: string;
-  href: string;
-  active: boolean;
-  index: number;
-}) {
-  const staggerClass =
-    index < 4 ? `animate-stagger-${index + 1}` : "animate-in";
-  return (
-    <Link
-      href={active ? "/maintenance/work-orders" : href}
-      className={cn(
-        "flex flex-1 items-center gap-3 rounded-xl border p-3 sm:p-4 transition-all hover:shadow-md bg-white animate-in fade-in slide-in-from-bottom-2 duration-500",
-        active
-          ? "ring-2 ring-primary-500 border-primary-300 shadow-inner"
-          : "shadow-sm border-zinc-200",
-        staggerClass
-      )}
-    >
-      <div
-        className={cn(
-          "flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg shrink-0",
-          bg
-        )}
-      >
-        <Icon className={cn("h-5 w-5", color)} />
-      </div>
-      <div>
-        <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-wider">
-          {title}
-        </p>
-        <p className={cn("text-lg sm:text-2xl font-black", color)}>{value}</p>
-      </div>
-    </Link>
-  );
-}
 
 function FilterSelect({
   name,
@@ -519,21 +435,22 @@ function FilterSelect({
     <div className="relative group flex-1 sm:flex-none">
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-2 appearance-none rounded-lg border-2 bg-white py-2 pl-3 pr-10 text-sm font-bold hover:border-primary-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 shadow-sm"
+        className="flex w-full items-center justify-between gap-2 appearance-none rounded-lg border border-border bg-card py-2.5 pl-3 pr-8 text-[10px] font-black uppercase tracking-wider hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all min-w-[140px]"
       >
-        <span className="truncate">{currentOption}</span>
-        <Filter className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <span className="truncate text-muted-foreground group-hover:text-foreground transition-colors">{currentOption}</span>
+        <Filter className="absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
       </button>
       {/* Dropdown */}
-      <div className="hidden group-focus-within:block group-hover:block absolute top-full left-0 mt-1 z-20 min-w-full sm:min-w-[180px] rounded-xl border-2 bg-white shadow-xl py-1">
+      <div className="hidden group-focus-within:block group-hover:block absolute top-full left-0 mt-1 z-20 min-w-[200px] rounded-xl border border-border bg-popover shadow-xl py-1 animate-in fade-in zoom-in-95 duration-200">
         {options.map((option) => (
           <Link
             key={option.value}
             href={buildUrl(option.value)}
             className={cn(
-              "block px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 transition-colors",
-              option.value === value &&
-                "bg-primary-50 text-primary-700 font-bold"
+              "block px-4 py-2 text-[10px] font-bold uppercase tracking-wider hover:bg-muted transition-colors",
+              option.value === value 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             {option.label}
