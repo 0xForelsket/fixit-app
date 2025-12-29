@@ -1,48 +1,58 @@
 import { cn } from "@/lib/utils";
-import type React from "react";
+import type { ReactNode } from "react";
 
-interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PageHeaderProps {
   title: string;
-  highlight?: string;
-  description?: React.ReactNode;
-  icon?: React.ElementType;
-  className?: string; // Additional classes for the container
-  children?: React.ReactNode; // Actions (buttons)
+  subtitle?: string;
+  description?: string;
+  actions?: ReactNode;
+  bgSymbol?: string;
+  className?: string;
 }
 
 export function PageHeader({
   title,
-  highlight,
+  subtitle,
   description,
-  icon: Icon,
+  actions,
+  bgSymbol,
   className,
-  children,
-  ...props
 }: PageHeaderProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border pb-8",
-        className
+    <div className={cn("space-y-8 animate-in relative", className)}>
+      {/* Background Decorative Element */}
+      {bgSymbol && (
+        <div className="absolute top-0 right-0 -z-10 opacity-[0.03] pointer-events-none select-none">
+          <div className="text-[15rem] font-black leading-none select-none">
+            {bgSymbol}
+          </div>
+        </div>
       )}
-      {...props}
-    >
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black tracking-tight text-foreground uppercase font-serif-brand">
-          {title}{" "}
-          {highlight && <span className="text-primary">{highlight}</span>}
-        </h1>
-        {description && (
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1">
-            {Icon && <Icon className="h-3.5 w-3.5" />}
-            {description}
+
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 border-b-2 border-foreground pb-8 relative overflow-hidden">
+        <div className="flex flex-col gap-2">
+          {subtitle && (
+            <div className="flex items-center gap-2 text-primary font-mono text-[10px] font-black uppercase tracking-[0.3em]">
+              <span className="w-8 h-px bg-primary" />
+              {subtitle}
+            </div>
+          )}
+          <h1 className="text-4xl sm:text-6xl font-serif font-black tracking-tighter text-foreground leading-[0.9]">
+            {title}
+          </h1>
+          {description && (
+            <p className="max-w-md text-[10px] text-muted-foreground font-mono font-bold uppercase tracking-wider leading-relaxed mt-2">
+              {description}
+            </p>
+          )}
+        </div>
+
+        {actions && (
+          <div className="flex flex-wrap items-center gap-3">
+            {actions}
           </div>
         )}
       </div>
-
-      {children && (
-        <div className="flex flex-wrap items-center gap-3">{children}</div>
-      )}
     </div>
   );
 }

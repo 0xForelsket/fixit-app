@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { SortHeader } from "@/components/ui/sort-header";
-import { StatsCard } from "@/components/ui/stats-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
@@ -27,7 +26,6 @@ import {
   Plus,
   Search,
   Upload,
-  Wrench,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +34,8 @@ import { AssetTree } from "./explorer/asset-tree";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
+import { PageContainer } from "@/components/ui/page-container";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 
 type SearchParams = {
   status?: string;
@@ -162,70 +162,60 @@ export default async function EquipmentPage({
   const stats = await getEquipmentStats(user);
 
   return (
-    <div className="space-y-10 animate-in">
-      {/* Header */}
+    <PageContainer id="equipment-page" className="space-y-10">
       <PageHeader
-        title="Equipment"
-        highlight="List"
+        title="Asset Inventory"
+        subtitle="Infrastructure Monitoring"
         description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
-        icon={MonitorCog}
-      >
-        <ViewToggle />
-        <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-        <Button variant="outline" asChild>
-          <Link href="/admin/import?type=equipment">
-            <Upload className="mr-2 h-4 w-4" />
-            BULK IMPORT
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/assets/equipment/models">
-            <Cuboid className="mr-2 h-4 w-4" />
-            VIEW MODELS
-          </Link>
-        </Button>
-        <Button asChild>
-          <Link href="/assets/equipment/new">
-            <Plus className="mr-2 h-4 w-4" />
-            ADD EQUIPMENT
-          </Link>
-        </Button>
-      </PageHeader>
+        bgSymbol="EQ"
+        actions={
+          <>
+            <ViewToggle />
+            <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
+            <Button variant="outline" asChild className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all">
+              <Link href="/admin/import?type=equipment">
+                <Upload className="mr-2 h-4 w-4" />
+                Bulk Import
+              </Link>
+            </Button>
+            <Button variant="outline" asChild className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all">
+              <Link href="/assets/equipment/models">
+                <Cuboid className="mr-2 h-4 w-4" />
+                Models
+              </Link>
+            </Button>
+            <Button asChild className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all">
+              <Link href="/assets/equipment/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Asset
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4 mb-6">
-        <StatsCard
-          title="Total Units"
-          value={stats.total}
-          icon={MonitorCog}
-          href="/assets/equipment"
-          active={!params.status || params.status === "all"}
-        />
-        <StatsCard
-          title="Operational"
-          value={stats.operational}
-          icon={CheckCircle2}
-          variant="success"
-          href="?status=operational"
-          active={params.status === "operational"}
-        />
-        <StatsCard
-          title="Down"
-          value={stats.down}
-          icon={AlertCircle}
-          variant="danger"
-          href="?status=down"
-          active={params.status === "down"}
-        />
-        <StatsCard
-          title="Maintenance"
-          value={stats.maintenance}
-          icon={Wrench}
-          variant="warning"
-          href="?status=maintenance"
-          active={params.status === "maintenance"}
-        />
-      </div>
+      <StatsTicker
+        stats={[
+          {
+            label: "Total Inventory",
+            value: stats.total,
+            icon: MonitorCog,
+            variant: "default",
+          },
+          {
+            label: "Operational",
+            value: stats.operational,
+            icon: CheckCircle2,
+            variant: "success",
+          },
+          {
+            label: "Maintenance / Down",
+            value: stats.maintenance + stats.down,
+            icon: AlertCircle,
+            variant: "danger",
+          },
+        ]}
+      />
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm mb-6">
@@ -450,6 +440,6 @@ export default async function EquipmentPage({
       )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

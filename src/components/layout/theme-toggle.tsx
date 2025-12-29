@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import { useTheme } from "@/components/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Palette, Zap, Moon } from "lucide-react";
@@ -12,6 +14,19 @@ import {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon" className="rounded-full" disabled>
+        <Palette className="h-5 w-5 opacity-50" />
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>

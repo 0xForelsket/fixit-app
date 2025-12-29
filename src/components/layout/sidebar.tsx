@@ -188,8 +188,8 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none overflow-hidden",
-          isCollapsed ? "w-16" : "w-64",
+          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none",
+          isCollapsed ? "w-16" : "w-64 overflow-hidden",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
@@ -237,7 +237,10 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 custom-scrollbar">
+        <nav className={cn(
+          "flex-1 p-3 custom-scrollbar",
+          isCollapsed ? "overflow-visible" : "overflow-y-auto overflow-x-hidden"
+        )}>
           <div className="space-y-6">
             {filteredGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
@@ -261,7 +264,8 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
                         <Link
                           href={item.href}
                           onClick={handleNavClick}
-                          title={isCollapsed ? item.label : undefined}
+                          // Removed title to use custom tooltip below
+
                           className={cn(
                             "flex items-center rounded-xl p-2.5 text-sm font-semibold transition-all group relative",
                             isCollapsed ? "justify-center" : "gap-3 px-3",
@@ -285,6 +289,11 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
                               {item.label}
                             </span>
                           )}
+                          {isCollapsed && (
+                            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
+                              {item.label}
+                            </div>
+                          )}
                           {isCollapsed && isActive && (
                             <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
                           )}
@@ -302,9 +311,10 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
               <Link
                 href="/"
                 onClick={handleNavClick}
-                title={isCollapsed ? "Report Equipment Issue" : undefined}
+                // title={isCollapsed ? "Report Equipment Issue" : undefined}
+
                 className={cn(
-                  "flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors",
+                  "flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors group relative",
                   isCollapsed ? "w-10 h-10 justify-center px-0 py-0" : "px-3"
                 )}
               >
@@ -314,6 +324,12 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
                     Report Issue
                   </span>
                 )}
+                {isCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
+                    Report Issue
+                  </div>
+                )}
+
               </Link>
             </div>
           )}
@@ -323,9 +339,10 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
           <Link
             href="/profile"
             onClick={handleNavClick}
-            title={isCollapsed ? user.name : undefined}
+            // title={isCollapsed ? user.name : undefined}
+
             className={cn(
-              "mb-3 flex items-center rounded-2xl bg-muted/30 p-2 transition-all hover:bg-muted/50 border border-border group",
+              "mb-3 flex items-center rounded-2xl bg-muted/30 p-2 transition-all hover:bg-muted/50 border border-border group relative",
               isCollapsed ? "justify-center px-2" : "gap-3 p-3"
             )}
           >
@@ -354,19 +371,32 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
                 </div>
               </div>
             )}
+            {isCollapsed && (
+              <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
+                {user.name}
+              </div>
+            )}
+
           </Link>
           <form action={logout}>
             <button
               type="submit"
               data-testid="sign-out-button"
               className={cn(
-                "flex w-full items-center transition-colors group",
+                "flex w-full items-center transition-colors group relative",
                 isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               )}
-              title={isCollapsed ? "Sign Out" : undefined}
+              // title={isCollapsed ? "Sign Out" : undefined}
+
             >
               <LogOut className={cn("h-5 w-5 transition-transform", !isCollapsed && "group-hover:-translate-x-1", isCollapsed ? "text-muted-foreground hover:text-destructive" : "")} />
               {!isCollapsed && <span>Sign Out</span>}
+              {isCollapsed && (
+                <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-destructive text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
+                  Sign Out
+                </div>
+              )}
+
             </button>
           </form>
         </div>
