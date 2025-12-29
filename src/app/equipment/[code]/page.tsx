@@ -6,13 +6,10 @@ import {
   workOrders,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import { desc, eq } from "drizzle-orm";
 import {
   ArrowLeft,
-  Factory,
   MapPin,
-  User,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -32,6 +29,16 @@ export default async function EquipmentPage({ params }: PageProps) {
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Explicit permission check (Operator has EQUIPMENT_VIEW)
+  const canView =
+    user.permissions.includes("equipment:view") ||
+    user.permissions.includes("ticket:view_all") ||
+    user.permissions.includes("*");
+
+  if (!canView) {
+    redirect("/");
   }
 
   const { code } = await params;

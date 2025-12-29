@@ -462,13 +462,13 @@ body {
 
 .priority-high {
   background: linear-gradient(135deg, #f97316, #ea580c);
-  color: #431407; /* primary-950 */
+  color: white;
   box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 }
 
 .priority-medium {
   background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #451a03; /* amber-950 */
+  color: white;
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
