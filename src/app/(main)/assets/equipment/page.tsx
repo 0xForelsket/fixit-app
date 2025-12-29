@@ -22,7 +22,6 @@ import {
   Cuboid,
   Edit,
   Flag,
-  Layers,
   MapPin,
   MonitorCog,
   Plus,
@@ -32,6 +31,9 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
+import { AssetTree } from "./explorer/asset-tree";
+import { ViewToggle } from "./view-toggle";
 
 type SearchParams = {
   status?: string;
@@ -45,6 +47,7 @@ type SearchParams = {
     | "classification"
     | "responsible";
   dir?: "asc" | "desc";
+  view?: "list" | "tree";
 };
 
 async function getEquipment(params: SearchParams) {
@@ -146,12 +149,6 @@ export default async function EquipmentPage({
         icon={MonitorCog}
       >
         <Button variant="outline" asChild>
-          <Link href="/assets/equipment/explorer">
-            <Layers className="mr-2 h-4 w-4" />
-            EXPLORE HIERARCHY
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
           <Link href="/admin/import">
             <Upload className="mr-2 h-4 w-4" />
             BULK IMPORT
@@ -163,6 +160,8 @@ export default async function EquipmentPage({
             VIEW MODELS
           </Link>
         </Button>
+        <div className="w-px h-8 bg-zinc-200 mx-2 hidden lg:block" />
+        <ViewToggle />
         <Button asChild>
           <Link href="/assets/equipment/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -238,8 +237,16 @@ export default async function EquipmentPage({
         )}
       </div>
 
-      {/* Equipment Table */}
-      {equipmentList.length === 0 ? (
+      {params.view === "tree" ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white/50 backdrop-blur-sm shadow-xl shadow-zinc-200/20 overflow-hidden">
+          <Suspense fallback={<div className="h-96 animate-pulse bg-white rounded-2xl" />}>
+            <AssetTree initialEquipment={equipmentList} />
+          </Suspense>
+        </div>
+      ) : (
+        <>
+          {/* Equipment Table */}
+          {equipmentList.length === 0 ? (
         <EmptyState
           title="No assets identified"
           description={
@@ -418,6 +425,8 @@ export default async function EquipmentPage({
             </TableBody>
           </Table>
         </div>
+      )}
+        </>
       )}
     </div>
   );
