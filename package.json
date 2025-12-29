@@ -43,7 +43,6 @@
     "jose": "^6.1.3",
     "lucide-react": "^0.468.0",
     "next": "^15.1.0",
-    "next-pwa": "^5.6.0",
     "pino": "^10.1.0",
     "pino-pretty": "^13.1.3",
     "qrcode.react": "^4.2.0",
@@ -56,6 +55,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@next/swc-linux-x64-gnu": "^16.1.1",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.0.0",
