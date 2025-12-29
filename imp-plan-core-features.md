@@ -3,12 +3,26 @@
 This plan outlines the steps to implement the missing "basic" features identified for the MVP+.
 
 ## 1. User Settings (Self-Service)
-**Goal:** Allow users to manage their own credentials and profile details without admin intervention.
-- [ ] **Backend**: Add `updateProfile` server action to handle Name, Email, and PIN updates.
-  - *Note:* PIN updates must require verifying the *current* PIN first for security.
-- [ ] **UI**: Update `/profile/page.tsx` to include an "Edit Profile" form.
-  - Fields: Name, Email (optional), Current PIN, New PIN.
-  - Use a dialog or a dedicated settings tab.
+**Goal:** Allow users to manage their own credentials, profile details, and app preferences without admin intervention.
+
+### 1.1 Database Schema
+- [ ] **Schema Update**: Add `preferences` JSON column to `users` table.
+  - Structure: `{ theme: 'system' | 'light' | 'dark', density: 'compact' | 'comfortable', homePage: string, notifications: { email: boolean } }`
+- [ ] **Migration**: Generate and push migration.
+
+### 1.2 Backend Actions
+- [ ] **`updateProfile`**: Handle Name and Email updates.
+- [ ] **`changePin`**: Securely update PIN (require `currentPin` verification).
+- [ ] **`updatePreferences`**: Update the JSON preferences object.
+- [ ] **`revokeSessions`**: Invalidate all session tokens for the user (security feature).
+
+### 1.3 UI Implementation (`/profile/settings`)
+- [ ] **Profile Form**: Edit Name/Email.
+- [ ] **Security Card**: Change PIN form + "Log out all other devices" button.
+- [ ] **Appearance Card**:
+  - Theme Selector (System/Light/Dark).
+  - Density Toggle (Compact/Comfortable) - *Affects table row heights globally*.
+- [ ] **Notifications Card**: Toggle email alert preferences.
 
 ## 2. Global Search (Command Palette)
 **Goal:** Provide quick navigation to any entity in the system via `CMD+K`.
