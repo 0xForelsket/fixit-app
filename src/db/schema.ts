@@ -265,6 +265,9 @@ export const workOrders = sqliteTable(
     priorityIdx: index("wo_priority_idx").on(table.priority),
     dueByIdx: index("wo_due_by_idx").on(table.dueBy),
     assignedToIdx: index("wo_assigned_to_idx").on(table.assignedToId),
+    // Composite indexes for common query patterns
+    assignedStatusIdx: index("wo_assigned_status_idx").on(table.assignedToId, table.status),
+    equipmentHistoryIdx: index("wo_equipment_history_idx").on(table.equipmentId, table.createdAt),
   })
 );
 
@@ -339,6 +342,8 @@ export const notifications = sqliteTable(
   },
   (table) => ({
     userIdIdx: index("notif_user_idx").on(table.userId),
+    // Composite index for unread notification queries
+    userUnreadIdx: index("notif_user_unread_idx").on(table.userId, table.isRead),
   })
 );
 
@@ -490,26 +495,33 @@ export const workOrderParts = sqliteTable("work_order_parts", {
 // ============ PHASE 13: LABOR TRACKING ============
 
 // Labor/time logs
-export const laborLogs = sqliteTable("labor_logs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  workOrderId: integer("work_order_id")
-    .references(() => workOrders.id)
-    .notNull(),
-  userId: integer("user_id")
-    .references(() => users.id)
-    .notNull(),
-  startTime: integer("start_time", { mode: "timestamp" }).notNull(),
-  endTime: integer("end_time", { mode: "timestamp" }),
-  durationMinutes: integer("duration_minutes"),
-  hourlyRate: real("hourly_rate"),
-  isBillable: integer("is_billable", { mode: "boolean" })
-    .notNull()
-    .default(true),
-  notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+export const laborLogs = sqliteTable(
+  "labor_logs",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    workOrderId: integer("work_order_id")
+      .references(() => workOrders.id)
+      .notNull(),
+    userId: integer("user_id")
+      .references(() => users.id)
+      .notNull(),
+    startTime: integer("start_time", { mode: "timestamp" }).notNull(),
+    endTime: integer("end_time", { mode: "timestamp" }),
+    durationMinutes: integer("duration_minutes"),
+    hourlyRate: real("hourly_rate"),
+    isBillable: integer("is_billable", { mode: "boolean" })
+      .notNull()
+      .default(true),
+    notes: text("notes"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    // Composite index for time tracking aggregations
+    workOrderUserIdx: index("labor_wo_user_idx").on(table.workOrderId, table.userId),
+  })
+);
 
 // ============ RELATIONS ============
 
