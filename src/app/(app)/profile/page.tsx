@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
+import { redirect } from "next/navigation";
 
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
@@ -13,7 +14,7 @@ export default async function ProfilePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/dashboard");
   }
 
 
@@ -32,7 +33,7 @@ export default async function ProfilePage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <PageHeader heading="My Profile" />
+      <PageHeader title="My Profile" subtitle="User Settings" />
 
       <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
         <div className="space-y-6">

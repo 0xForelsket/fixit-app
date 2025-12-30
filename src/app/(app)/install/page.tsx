@@ -4,7 +4,7 @@ import { Download, Smartphone, Monitor } from "lucide-react";
 export default function InstallPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
-      <PageHeader heading="Install Application" />
+      <PageHeader title="Install Application" subtitle="Get Started" />
       
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
