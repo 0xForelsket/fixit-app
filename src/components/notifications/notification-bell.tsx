@@ -4,6 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import type { NotificationType } from "@/db/schema";
+import {
+  type Notification,
+  useNotificationsSSE,
+} from "@/hooks/use-notifications-sse";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -16,21 +20,11 @@ import {
   MessageSquare,
   RefreshCw,
   User,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-const POLL_INTERVAL_MS = 30000; // 30 seconds
-
-interface Notification {
-  id: number;
-  type: NotificationType;
-  title: string;
-  message: string;
-  link: string | null;
-  isRead: boolean;
-  createdAt: string | number;
-}
 
 interface NotificationBellProps {
   userId: number;
@@ -38,49 +32,28 @@ interface NotificationBellProps {
 
 export function NotificationBell({ userId: _userId }: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const prevUnreadCountRef = useRef<number | null>(null);
   const { toast } = useToast();
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const res = await fetch("/api/notifications");
-      if (res.ok) {
-        const data = await res.json();
-        const newNotifications: Notification[] = data.notifications || [];
-        setNotifications(newNotifications);
-
-        // Check for new notifications and show toast
-        const newUnreadCount = newNotifications.filter((n) => !n.isRead).length;
-        if (
-          prevUnreadCountRef.current !== null &&
-          newUnreadCount > prevUnreadCountRef.current
-        ) {
-          const diff = newUnreadCount - prevUnreadCountRef.current;
-          toast({
-            title: "New Notification",
-            description: `You have ${diff} new notification${diff > 1 ? "s" : ""}.`,
-          });
-        }
-        prevUnreadCountRef.current = newUnreadCount;
-      }
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  // Fetch notifications with polling
-  useEffect(() => {
-    fetchNotifications();
-    const intervalId = setInterval(fetchNotifications, POLL_INTERVAL_MS);
-    return () => clearInterval(intervalId);
-  }, [fetchNotifications]);
+  // Use SSE for real-time notifications
+  const {
+    notifications,
+    unreadCount,
+    isConnected,
+    isLoading,
+    markAsRead,
+    markAllAsRead,
+  } = useNotificationsSSE({
+    onNewNotification: useCallback(
+      (notification: Notification) => {
+        toast({
+          title: notification.title,
+          description: notification.message,
+        });
+      },
+      [toast]
+    ),
+  });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -96,38 +69,12 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const markAsRead = async (id: number) => {
-    try {
-      await fetch(`/api/notifications/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isRead: true }),
-      });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      );
-      // Update ref to avoid false toast on next poll
-      if (prevUnreadCountRef.current !== null) {
-        prevUnreadCountRef.current = Math.max(
-          0,
-          prevUnreadCountRef.current - 1
-        );
-      }
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
-    }
+  const handleMarkAsRead = async (id: number) => {
+    await markAsRead(id);
   };
 
-  const markAllAsRead = async () => {
-    try {
-      await fetch("/api/notifications/read-all", {
-        method: "POST",
-      });
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      prevUnreadCountRef.current = 0;
-    } catch (error) {
-      console.error("Failed to mark all as read:", error);
-    }
+  const handleMarkAllAsRead = async () => {
+    await markAllAsRead();
   };
 
   const getIcon = (type: NotificationType) => {
@@ -176,13 +123,23 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
         <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border bg-background shadow-lg z-50">
           {/* Header */}
           <div className="flex items-center justify-between border-b px-4 py-3">
-            <h3 className="font-semibold">Notifications</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold">Notifications</h3>
+              {/* Connection status indicator */}
+              <span title={isConnected ? "Connected" : "Reconnecting..."}>
+                {isConnected ? (
+                  <Wifi className="h-3 w-3 text-emerald-500" />
+                ) : (
+                  <WifiOff className="h-3 w-3 text-amber-500" />
+                )}
+              </span>
+            </div>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-auto text-xs py-1 px-2"
-                onClick={markAllAsRead}
+                onClick={handleMarkAllAsRead}
               >
                 <CheckCheck className="mr-1 h-3 w-3" />
                 Mark all read
@@ -192,7 +149,7 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
 
           {/* Notification List */}
           <div className="max-h-80 overflow-y-auto">
-            {loading ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
               </div>
@@ -209,7 +166,7 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
                   <NotificationItem
                     key={notification.id}
                     notification={notification}
-                    onMarkRead={() => markAsRead(notification.id)}
+                    onMarkRead={() => handleMarkAsRead(notification.id)}
                     getIcon={getIcon}
                   />
                 ))}

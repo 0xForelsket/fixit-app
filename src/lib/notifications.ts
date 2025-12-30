@@ -6,6 +6,7 @@ import {
   users,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { sendToUser } from "./sse";
 
 /**
  * Maps notification types to their corresponding preference keys.
@@ -59,13 +60,24 @@ export async function createNotification(
   }
 
   // Create the notification
-  await db.insert(notifications).values({
-    userId,
-    type,
-    title,
-    message,
-    link: link ?? null,
-  });
+  const [inserted] = await db
+    .insert(notifications)
+    .values({
+      userId,
+      type,
+      title,
+      message,
+      link: link ?? null,
+    })
+    .returning();
+
+  // Push to connected SSE clients in real-time
+  if (inserted) {
+    sendToUser(userId, {
+      event: "notification",
+      data: inserted,
+    });
+  }
 
   return true;
 }
@@ -106,11 +118,22 @@ export async function createCriticalNotification(
 ): Promise<void> {
   const { userId, type, title, message, link } = params;
 
-  await db.insert(notifications).values({
-    userId,
-    type,
-    title,
-    message,
-    link: link ?? null,
-  });
+  const [inserted] = await db
+    .insert(notifications)
+    .values({
+      userId,
+      type,
+      title,
+      message,
+      link: link ?? null,
+    })
+    .returning();
+
+  // Push to connected SSE clients in real-time
+  if (inserted) {
+    sendToUser(userId, {
+      event: "notification",
+      data: inserted,
+    });
+  }
 }
