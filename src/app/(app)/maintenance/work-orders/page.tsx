@@ -1,23 +1,33 @@
 import { Button } from "@/components/ui/button";
+import { PageLayout } from "@/components/ui/page-layout";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import { WorkOrderList } from "@/components/work-orders/work-order-list";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { type SQL, and, asc, count, desc, eq, ilike, lt, or } from "drizzle-orm";
+import {
+  type SQL,
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  lt,
+  or,
+} from "drizzle-orm";
 import {
   ArrowLeft,
   ArrowRight,
   Filter,
+  Plus,
   Search,
   User as UserIcon,
   X,
-  Plus,
 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Inbox, Timer } from "lucide-react";
 import Link from "next/link";
-import { PageLayout } from "@/components/ui/page-layout";
-import { StatsTicker } from "@/components/ui/stats-ticker";
-import { Inbox, Timer, CheckCircle2, AlertTriangle } from "lucide-react";
 
 type SearchParams = {
   status?: string;
@@ -140,7 +150,7 @@ async function getStats(user: SessionUser | null) {
 
   const runCountQuery = async (...extraConditions: (SQL | undefined)[]) => {
     const conditions = extraConditions.filter((c): c is SQL => c !== undefined);
-    
+
     if (isTech && departmentId) {
       conditions.push(eq(workOrders.departmentId, departmentId));
     }
@@ -154,11 +164,13 @@ async function getStats(user: SessionUser | null) {
   };
 
   const openCount = await runCountQuery(eq(workOrders.status, "open"));
-  
-  const inProgressCount = await runCountQuery(eq(workOrders.status, "in_progress"));
-  
+
+  const inProgressCount = await runCountQuery(
+    eq(workOrders.status, "in_progress")
+  );
+
   const resolvedCount = await runCountQuery(eq(workOrders.status, "resolved"));
-  
+
   const criticalCount = await runCountQuery(
     eq(workOrders.priority, "critical"),
     eq(workOrders.status, "open")
@@ -198,7 +210,13 @@ export default async function WorkOrdersPage({
   return (
     <PageLayout
       id="work-orders-page"
-      title={params.overdue === "true" ? "Overdue Queue" : isMyWorkOrdersView ? "My Work Queue" : "Work Order Queue"}
+      title={
+        params.overdue === "true"
+          ? "Overdue Queue"
+          : isMyWorkOrdersView
+            ? "My Work Queue"
+            : "Work Order Queue"
+      }
       subtitle="Maintenance Operations"
       description="CENTRALIZED WORK ORDER DISPATCH AND MONITORING TERMINAL"
       bgSymbol="WQ"
@@ -229,7 +247,11 @@ export default async function WorkOrdersPage({
               Mine
             </Link>
           </div>
-          <Button size="sm" className="h-9 text-[10px] font-black uppercase tracking-widest" asChild>
+          <Button
+            size="sm"
+            className="h-9 text-[10px] font-black uppercase tracking-widest"
+            asChild
+          >
             <Link href="/">
               <Plus className="mr-2 h-3.5 w-3.5" />
               NEW TICKET
@@ -283,10 +305,18 @@ export default async function WorkOrdersPage({
               defaultValue={params.search}
               className="w-full h-10 rounded-lg border border-border bg-card pl-10 pr-4 text-[11px] font-bold uppercase tracking-wider focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/50 transition-all"
             />
-            {params.status && <input type="hidden" name="status" value={params.status} />}
-            {params.priority && <input type="hidden" name="priority" value={params.priority} />}
-            {params.assigned && <input type="hidden" name="assigned" value={params.assigned} />}
-            {params.overdue && <input type="hidden" name="overdue" value={params.overdue} />}
+            {params.status && (
+              <input type="hidden" name="status" value={params.status} />
+            )}
+            {params.priority && (
+              <input type="hidden" name="priority" value={params.priority} />
+            )}
+            {params.assigned && (
+              <input type="hidden" name="assigned" value={params.assigned} />
+            )}
+            {params.overdue && (
+              <input type="hidden" name="overdue" value={params.overdue} />
+            )}
           </form>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -317,7 +347,12 @@ export default async function WorkOrdersPage({
             />
 
             {activeFilters && (
-              <Button variant="ghost" size="sm" className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors" asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                asChild
+              >
                 <Link href="/maintenance/work-orders">
                   <X className="mr-2 h-3.5 w-3.5" />
                   RESET
@@ -406,7 +441,6 @@ function buildSearchParams(params: Record<string, string | undefined>): string {
   return searchParams.toString();
 }
 
-
 function FilterSelect({
   name,
   value,
@@ -437,7 +471,9 @@ function FilterSelect({
         type="button"
         className="flex w-full items-center justify-between gap-2 appearance-none rounded-lg border border-border bg-card py-2.5 pl-3 pr-8 text-[10px] font-black uppercase tracking-wider hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all min-w-[140px]"
       >
-        <span className="truncate text-muted-foreground group-hover:text-foreground transition-colors">{currentOption}</span>
+        <span className="truncate text-muted-foreground group-hover:text-foreground transition-colors">
+          {currentOption}
+        </span>
         <Filter className="absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
       </button>
       {/* Dropdown */}
@@ -448,8 +484,8 @@ function FilterSelect({
             href={buildUrl(option.value)}
             className={cn(
               "block px-4 py-2 text-[10px] font-bold uppercase tracking-wider hover:bg-muted transition-colors",
-              option.value === value 
-                ? "bg-primary/10 text-primary" 
+              option.value === value
+                ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >

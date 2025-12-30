@@ -2,8 +2,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn, formatRelativeTime } from "@/lib/utils";
 import type { Notification } from "@/db/schema";
+import { cn, formatRelativeTime } from "@/lib/utils";
 import {
   AlertTriangle,
   Bell,

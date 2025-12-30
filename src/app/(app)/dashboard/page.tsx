@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -17,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
 interface Stats {
   open: number;
@@ -104,7 +104,7 @@ async function getMyWorkOrders(userId: number) {
 
 async function getRecentWorkOrders(user: SessionUser | null) {
   const conditions = [eq(workOrders.status, "open")];
-  
+
   if (user?.roleName === "tech" && user?.departmentId) {
     conditions.push(eq(workOrders.departmentId, user.departmentId));
   }
@@ -216,10 +216,7 @@ async function PersonalQueueSection({ userId }: { userId: number }) {
           asChild
           className="h-7 text-[9px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest transition-colors"
         >
-          <Link
-            href="/maintenance/work-orders?assigned=me"
-            className="gap-1.5"
-          >
+          <Link href="/maintenance/work-orders?assigned=me" className="gap-1.5">
             LIST VIEW <ArrowRight className="h-2.5 w-2.5" />
           </Link>
         </Button>
@@ -232,7 +229,8 @@ async function PersonalQueueSection({ userId }: { userId: number }) {
 
 async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
   const { global: globalStats } = await getStats(user);
-  const title = user?.roleName === "tech" ? "Departmental Overview" : "System Overview";
+  const title =
+    user?.roleName === "tech" ? "Departmental Overview" : "System Overview";
 
   return (
     <div className="space-y-4">
@@ -277,7 +275,10 @@ async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
 
 async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
   const recentWorkOrders = await getRecentWorkOrders(user);
-  const title = user?.roleName === "tech" ? "Department Priority Queue" : "System Priority Queue";
+  const title =
+    user?.roleName === "tech"
+      ? "Department Priority Queue"
+      : "System Priority Queue";
 
   return (
     <div className="space-y-4">
@@ -317,15 +318,20 @@ export default async function DashboardPage() {
       bgSymbol="TT"
       headerActions={
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10" asChild>
-            <Link href="/assets/qr-codes">
-              SCAN QR
-            </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10"
+            asChild
+          >
+            <Link href="/assets/qr-codes">SCAN QR</Link>
           </Button>
-          <Button size="sm" className="h-8 text-[10px] font-black uppercase tracking-widest" asChild>
-            <Link href="/">
-              REPORT ISSUE
-            </Link>
+          <Button
+            size="sm"
+            className="h-8 text-[10px] font-black uppercase tracking-widest"
+            asChild
+          >
+            <Link href="/">REPORT ISSUE</Link>
           </Button>
         </div>
       }
