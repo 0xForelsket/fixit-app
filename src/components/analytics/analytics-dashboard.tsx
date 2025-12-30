@@ -54,10 +54,22 @@ export function AnalyticsDashboard() {
           fetch("/api/analytics/equipment"),
         ]);
 
-        if (kpiRes.ok) setKpis(await kpiRes.json());
-        if (trendRes.ok) setTrends(await trendRes.json());
-        if (techRes.ok) setTechStats(await techRes.json());
-        if (equipmentRes.ok) setEquipmentStats(await equipmentRes.json());
+        if (kpiRes.ok) {
+          const json = await kpiRes.json();
+          setKpis(json.data);
+        }
+        if (trendRes.ok) {
+          const json = await trendRes.json();
+          setTrends(json.data);
+        }
+        if (techRes.ok) {
+          const json = await techRes.json();
+          setTechStats(json.data);
+        }
+        if (equipmentRes.ok) {
+          const json = await equipmentRes.json();
+          setEquipmentStats(json.data);
+        }
       } catch (error) {
         console.error("Failed to fetch analytics:", error);
       } finally {
