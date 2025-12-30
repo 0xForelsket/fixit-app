@@ -1,8 +1,8 @@
 "use client";
 
-import { LayoutList, Layers } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Layers, LayoutList } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export function ViewToggle() {
   const router = useRouter();

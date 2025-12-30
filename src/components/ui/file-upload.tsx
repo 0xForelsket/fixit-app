@@ -103,7 +103,9 @@ export function FileUpload({
         {uploadError && (
           <p className="text-[10px] font-bold text-danger-600">{uploadError}</p>
         )}
-        {!hidePreviews && <PreviewList previews={previews} onRemove={removePreview} />}
+        {!hidePreviews && (
+          <PreviewList previews={previews} onRemove={removePreview} />
+        )}
       </div>
     );
   }
@@ -159,7 +161,9 @@ export function FileUpload({
         <p className="text-sm font-medium text-destructive">{uploadError}</p>
       )}
 
-      {!hidePreviews && <PreviewList previews={previews} onRemove={removePreview} />}
+      {!hidePreviews && (
+        <PreviewList previews={previews} onRemove={removePreview} />
+      )}
     </div>
   );
 }

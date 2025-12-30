@@ -1,15 +1,9 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
-import { 
-  ChevronRight, 
-  ChevronDown, 
-  Search, 
-  X,
-  Layers
-} from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronRight, Layers, Search, X } from "lucide-react";
+import { type ReactNode, useMemo, useState } from "react";
 
 export interface BaseTreeItem {
   id: number | string;
@@ -42,10 +36,12 @@ export function TreeExplorer<T extends BaseTreeItem>({
   renderActions,
   getSearchTerms,
   emptyMessage = "No items found in the registry.",
-  className
+  className,
 }: TreeExplorerProps<T>) {
   const [search, setSearch] = useState("");
-  const [expandedNodes, setExpandedNodes] = useState<Set<number | string>>(new Set());
+  const [expandedNodes, setExpandedNodes] = useState<Set<number | string>>(
+    new Set()
+  );
 
   // Build tree structure
   const tree = useMemo(() => {
@@ -93,18 +89,26 @@ export function TreeExplorer<T extends BaseTreeItem>({
     if (!term) return true;
     const lowerTerm = term.toLowerCase();
     const searchTerms = getSearchTerms ? getSearchTerms(item) : [];
-    
-    return searchTerms.some(t => t.toLowerCase().includes(lowerTerm));
+
+    return searchTerms.some((t) => t.toLowerCase().includes(lowerTerm));
   };
 
-  const nodeMatchesSearch = (node: InternalTreeNode<T>, term: string): boolean => {
+  const nodeMatchesSearch = (
+    node: InternalTreeNode<T>,
+    term: string
+  ): boolean => {
     if (!term) return true;
     if (itemMatchesSearch(node.data, term)) return true;
-    return node.children.some(child => nodeMatchesSearch(child, term));
+    return node.children.some((child) => nodeMatchesSearch(child, term));
   };
 
   return (
-    <div className={cn("flex flex-col h-[600px] bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-colors", className)}>
+    <div
+      className={cn(
+        "flex flex-col h-[600px] bg-card rounded-2xl border border-border shadow-sm overflow-hidden transition-colors",
+        className
+      )}
+    >
       {/* Toolbar */}
       <div className="p-4 border-b border-border bg-muted/30 flex flex-col sm:flex-row items-center gap-4">
         <div className="relative flex-1">
@@ -117,7 +121,7 @@ export function TreeExplorer<T extends BaseTreeItem>({
             className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
           />
           {search && (
-            <button 
+            <button
               type="button"
               onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
@@ -127,11 +131,21 @@ export function TreeExplorer<T extends BaseTreeItem>({
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" onClick={expandAll} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={expandAll}
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3"
+          >
             EXPAND ALL
           </Button>
           <div className="w-px h-4 bg-border" />
-          <Button variant="ghost" size="sm" onClick={collapseAll} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={collapseAll}
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground px-3"
+          >
             COLLAPSE
           </Button>
         </div>
@@ -142,19 +156,21 @@ export function TreeExplorer<T extends BaseTreeItem>({
         {tree.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Layers className="h-12 w-12 text-muted-foreground/30 mb-4" />
-            <h3 className="text-sm font-black text-foreground uppercase">Registry Empty</h3>
+            <h3 className="text-sm font-black text-foreground uppercase">
+              Registry Empty
+            </h3>
             <p className="text-xs text-muted-foreground max-w-[200px] mt-2">
               {emptyMessage}
             </p>
           </div>
         ) : (
           <div className="space-y-1.5">
-            {tree.map(node => (
-              <TreeExplorerItem 
-                key={node.id} 
-                node={node} 
-                level={0} 
-                expandedNodes={expandedNodes} 
+            {tree.map((node) => (
+              <TreeExplorerItem
+                key={node.id}
+                node={node}
+                level={0}
+                expandedNodes={expandedNodes}
                 onToggle={toggleNode}
                 search={search}
                 nodeMatchesSearch={nodeMatchesSearch}
@@ -188,11 +204,11 @@ interface TreeExplorerItemProps<T extends BaseTreeItem> {
   renderActions?: (item: T) => ReactNode;
 }
 
-function TreeExplorerItem<T extends BaseTreeItem>({ 
-  node, 
-  level, 
-  expandedNodes, 
-  onToggle, 
+function TreeExplorerItem<T extends BaseTreeItem>({
+  node,
+  level,
+  expandedNodes,
+  onToggle,
   search,
   nodeMatchesSearch,
   itemMatchesSearch,
@@ -200,33 +216,44 @@ function TreeExplorerItem<T extends BaseTreeItem>({
   renderTitle,
   renderSubtitle,
   renderBadges,
-  renderActions
+  renderActions,
 }: TreeExplorerItemProps<T>) {
-  const isExpanded = expandedNodes.has(node.id) || (search.length > 0 && nodeMatchesSearch(node, search));
+  const isExpanded =
+    expandedNodes.has(node.id) ||
+    (search.length > 0 && nodeMatchesSearch(node, search));
   const hasChildren = node.children.length > 0;
   const isVisible = nodeMatchesSearch(node, search);
-  const isDirectMatch = search.length > 0 && itemMatchesSearch(node.data, search);
+  const isDirectMatch =
+    search.length > 0 && itemMatchesSearch(node.data, search);
 
   if (!isVisible && search.length > 0) return null;
 
   return (
     <div className="space-y-1.5">
-      <div 
+      <div
         className={cn(
           "group flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-border hover:bg-muted/50 active:scale-[0.995]",
-          level === 0 ? "bg-muted/30 border-border" : "bg-transparent border-transparent",
-          isDirectMatch ? "ring-2 ring-primary/20 bg-primary/5 border-primary/30" : ""
+          level === 0
+            ? "bg-muted/30 border-border"
+            : "bg-transparent border-transparent",
+          isDirectMatch
+            ? "ring-2 ring-primary/20 bg-primary/5 border-primary/30"
+            : ""
         )}
         style={{ marginLeft: `${level * 32}px` }}
       >
         <div className="flex items-center gap-1 min-w-0 flex-1">
           {hasChildren ? (
-            <button 
+            <button
               type="button"
               onClick={() => onToggle(node.id)}
               className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors"
             >
-              {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+              {isExpanded ? (
+                <ChevronDown className="h-5 w-5" />
+              ) : (
+                <ChevronRight className="h-5 w-5" />
+              )}
             </button>
           ) : (
             <div className="w-8" />
@@ -258,7 +285,7 @@ function TreeExplorerItem<T extends BaseTreeItem>({
               {renderBadges(node.data)}
             </div>
           )}
-          
+
           {renderActions && (
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pr-1">
               {renderActions(node.data)}
@@ -270,17 +297,17 @@ function TreeExplorerItem<T extends BaseTreeItem>({
       {hasChildren && isExpanded && (
         <div className="relative">
           {/* Vertical line indicator */}
-          <div 
-            className="absolute left-0 top-0 bottom-0 w-px bg-border/50" 
+          <div
+            className="absolute left-0 top-0 bottom-0 w-px bg-border/50"
             style={{ marginLeft: `${level * 32 + 15.5}px` }}
           />
           <div className="space-y-1.5">
-            {node.children.map(child => (
-              <TreeExplorerItem 
-                key={child.id} 
-                node={child} 
-                level={level + 1} 
-                expandedNodes={expandedNodes} 
+            {node.children.map((child) => (
+              <TreeExplorerItem
+                key={child.id}
+                node={child}
+                level={level + 1}
+                expandedNodes={expandedNodes}
                 onToggle={onToggle}
                 search={search}
                 nodeMatchesSearch={nodeMatchesSearch}
