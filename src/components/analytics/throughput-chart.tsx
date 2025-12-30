@@ -39,8 +39,8 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
               <XAxis
                 dataKey="day"
                 stroke="#a1a1aa"
-                fontSize={10}
-                fontFamily="var(--font-mono)"
+                fontSize={12}
+                fontFamily="Geist Mono"
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => {
@@ -50,8 +50,8 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
               />
               <YAxis
                 stroke="#a1a1aa"
-                fontSize={10}
-                fontFamily="var(--font-mono)"
+                fontSize={12}
+                fontFamily="Geist Mono"
                 tickLine={false}
                 axisLine={false}
               />
