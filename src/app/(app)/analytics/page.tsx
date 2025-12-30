@@ -1,5 +1,9 @@
+import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { getCurrentUser } from "@/lib/session";
+import { redirect } from "next/navigation";
 
 export default async function AnalyticsPage() {
   const user = await getCurrentUser();
