@@ -53,14 +53,14 @@ This plan outlines the steps to implement the missing "basic" features identifie
 - [x] **UI**:
   - [x] Add "Vendors" tab under "Assets".
   - [x] CRUD pages for Vendors.
-  - [ ] Dropdown on Spare Part form to select Vendor.
+  - [x] Dropdown on Spare Part form to select Vendor.
 
 ## 5. Audit Logs (System-Wide)
 **Goal:** Track who did what to critical assets.
-- [ ] **Schema**: Create `audit_logs` table.
+- [x] **Schema**: Create `audit_logs` table.
   - Fields: `entityType` (equipment, part, user), `entityId`, `action` (create, update, delete), `actorId` (user), `details` (JSON diff), `createdAt`.
-- [ ] **Backend**: Create a helper function `logAudit(action, entity, details)` and insert it into mutations (create/update assets).
-- [ ] **UI**: Add an "History" tab to the Equipment Detail and Part Detail pages showing this log.
+- [x] **Backend**: Create a helper function `logAudit(action, entity, details)` and insert it into mutations (create/update assets).
+- [x] **UI**: Add an "History" tab to the Equipment Detail and Part Detail pages showing this log.
 
 ## Execution Order
 1. **User Settings** (Low effort, high value)
