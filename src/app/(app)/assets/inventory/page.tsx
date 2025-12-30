@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { StatsCard } from "@/components/ui/stats-card";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -64,28 +65,39 @@ export default async function InventoryPage() {
   const recentParts = await getRecentParts();
 
   return (
-    <div className="space-y-10 animate-in">
+    <PageContainer className="space-y-10 animate-in">
       {/* Header */}
       <PageHeader
-        title="Inventory"
-        subtitle="Control"
+        title="Inventory Control"
+        subtitle="Stock Management"
         description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
         bgSymbol="IV"
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" asChild>
+            <Button
+              variant="outline"
+              asChild
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
               <Link href="/admin/import">
                 <Upload className="mr-2 h-4 w-4" />
                 IMPORT DATA
               </Link>
             </Button>
-            <Button variant="ghost" asChild>
+            <Button
+              variant="ghost"
+              asChild
+              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
               <Link href="/assets/inventory/parts">
                 <Package className="mr-2 h-4 w-4" />
                 CATALOG
               </Link>
             </Button>
-            <Button asChild>
+            <Button
+              asChild
+              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+            >
               <Link href="/assets/inventory/parts/new">
                 <Plus className="mr-2 h-4 w-4" />
                 ADD NEW PART
@@ -95,30 +107,29 @@ export default async function InventoryPage() {
         }
       />
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <StatsCard
-          title="Total Parts"
-          value={stats.totalParts}
-          icon={Box}
-          variant="secondary"
-        />
-        <StatsCard
-          title="Low Stock Warning"
-          value={stats.lowStockCount}
-          icon={AlertTriangle}
-          variant={stats.lowStockCount > 0 ? "danger" : "default"}
-          className={
-            stats.lowStockCount > 0 ? "animate-pulse border-danger-300" : ""
-          }
-        />
-        <StatsCard
-          title="Inventory Assets"
-          value={`$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}`}
-          icon={TrendingDown}
-          variant="success"
-        />
-      </div>
+      {/* Stats Ticker */}
+      <StatsTicker
+        stats={[
+          {
+            label: "Total Parts",
+            value: stats.totalParts,
+            icon: Box,
+            variant: "default",
+          },
+          {
+            label: "Low Stock Warning",
+            value: stats.lowStockCount,
+            icon: AlertTriangle,
+            variant: stats.lowStockCount > 0 ? "danger" : "default",
+          },
+          {
+            label: "Inventory Assets",
+            value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}`,
+            icon: TrendingDown,
+            variant: "success",
+          },
+        ]}
+      />
 
       {/* Low Stock Alerts */}
       {stats.lowStockCount > 0 && (
@@ -283,7 +294,7 @@ export default async function InventoryPage() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

@@ -1,14 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
-import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
-import { ArrowLeft, Settings, User } from "lucide-react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { PageHeader } from "@/components/ui/page-header";
 import { AvatarUpload } from "./avatar-upload";
+import { ProfileForm } from "./settings/profile-form";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -17,9 +16,7 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  const backLink = hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)
-    ? "/dashboard"
-    : "/";
+
 
   // Fetch current avatar
   const avatar = await db.query.attachments.findFirst({
@@ -34,54 +31,52 @@ export default async function ProfilePage() {
   const avatarUrl = avatar ? await getPresignedDownloadUrl(avatar.s3Key) : null;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
-      <div className="mx-auto max-w-lg px-4 space-y-8">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={backLink} className="gap-2 text-muted-foreground">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Link>
-          </Button>
+    <div className="flex flex-col gap-6 p-6">
+      <PageHeader heading="My Profile" />
+
+      <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
+        <div className="space-y-6">
+          {/* Avatar Card */}
+          <div className="card-premium rounded-xl p-6 text-center">
+            <div className="relative mx-auto mb-4 h-32 w-32">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={user.name}
+                  className="h-full w-full rounded-full object-cover ring-2 ring-primary/10"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-muted border-2 border-border shadow-inner">
+                  <User className="h-16 w-16 text-muted-foreground/50" />
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-xl font-bold font-serif-brand">{user.name}</h2>
+            <p className="text-sm font-mono text-muted-foreground mt-1">
+              {user.employeeId}
+            </p>
+            <div className="mt-3 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary uppercase tracking-wider">
+              {user.roleName}
+            </div>
+            
+            <div className="mt-6 border-t border-border pt-6 text-left">
+               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
+                Update Photo
+              </h3>
+              <AvatarUpload userId={user.id} />
+             </div>
+          </div>
         </div>
 
-        <div className="rounded-2xl border bg-white p-8 shadow-sm text-center">
-          <div className="relative mx-auto mb-6 h-32 w-32">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={user.name}
-                className="h-full w-full rounded-full object-cover border-4 border-slate-100"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-100 border-4 border-white shadow-inner">
-                <User className="h-16 w-16 text-slate-300" />
-              </div>
-            )}
-          </div>
-
-          <h1 className="text-2xl font-bold text-slate-900">{user.name}</h1>
-          <p className="text-slate-500 font-mono text-sm mt-1">
-            {user.employeeId}
-          </p>
-          <div className="mt-2 inline-flex items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700 uppercase tracking-wide">
-            {user.roleName}
-          </div>
-
-          <div className="mt-6">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/profile/settings" className="gap-2">
-                <Settings className="h-4 w-4" />
-                Account Settings
-              </Link>
-            </Button>
-          </div>
-
-          <div className="mt-8 border-t pt-8 text-left">
-            <h2 className="text-sm font-semibold text-slate-900 mb-4">
-              Update Profile Picture
-            </h2>
-            <AvatarUpload userId={user.id} />
+        <div className="space-y-6">
+          {/* Profile Form Card */}
+          <div className="card-premium rounded-xl p-8">
+            <div className="mb-6">
+              <h2 className="text-2xl font-serif-brand font-bold mb-1">Profile</h2>
+              <p className="text-muted-foreground">Update your personal information.</p>
+            </div>
+             <ProfileForm initialName={user.name} initialEmail={""} />
           </div>
         </div>
       </div>
