@@ -1,15 +1,19 @@
 import { db } from "@/db";
 import {
   checklistCompletions,
+  equipment,
   maintenanceChecklists,
   maintenanceSchedules,
+  roles,
+  users,
   workOrders,
 } from "@/db/schema";
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { generateRequestId, schedulerLogger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 import { getCurrentUser } from "@/lib/session";
-import { and, eq, lte } from "drizzle-orm";
+import { and, eq, inArray, isNull, lt } from "drizzle-orm";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
@@ -33,24 +37,21 @@ export async function POST(request: Request) {
       return ApiErrors.unauthorized(requestId);
     }
 
-    // 2. Find due schedules
     const now = new Date();
+    let generatedCount = 0;
+    let escalatedCount = 0;
+    const errors: string[] = [];
+
+    // 2. Find due schedules
     const pendingSchedules = await db
       .select()
       .from(maintenanceSchedules)
       .where(
         and(
           eq(maintenanceSchedules.isActive, true),
-          lte(maintenanceSchedules.nextDue, now)
+          lt(maintenanceSchedules.nextDue, now)
         )
       );
-
-    if (pendingSchedules.length === 0) {
-      return apiSuccess({ message: "No schedules due", generated: 0 });
-    }
-
-    let generatedCount = 0;
-    const errors: string[] = [];
 
     // 3. Process each schedule
     for (const schedule of pendingSchedules) {
@@ -121,14 +122,94 @@ export async function POST(request: Request) {
       }
     }
 
+    // 4. Check for work orders that need escalation (SLA breached)
+    const workOrdersToEscalate = await db
+      .select()
+      .from(workOrders)
+      .where(
+        and(
+          inArray(workOrders.status, ["open", "in_progress"]),
+          lt(workOrders.dueBy, now),
+          isNull(workOrders.escalatedAt)
+        )
+      );
+
+    // Get admin role for notification targeting
+    const adminRole = await db.query.roles.findFirst({
+      where: eq(roles.name, "admin"),
+    });
+
+    const admins = adminRole
+      ? await db.query.users.findMany({
+          where: and(eq(users.roleId, adminRole.id), eq(users.isActive, true)),
+        })
+      : [];
+
+    for (const wo of workOrdersToEscalate) {
+      try {
+        // Mark as escalated
+        await db
+          .update(workOrders)
+          .set({ escalatedAt: now, updatedAt: now })
+          .where(eq(workOrders.id, wo.id));
+
+        // Get equipment info for notification message
+        const equipmentItem = wo.equipmentId
+          ? await db.query.equipment.findFirst({
+              where: eq(equipment.id, wo.equipmentId),
+            })
+          : null;
+
+        const equipmentName = equipmentItem?.name || "Unknown Equipment";
+
+        // Notify admins about escalation
+        for (const admin of admins) {
+          await createNotification({
+            userId: admin.id,
+            type: "work_order_escalated",
+            title: "Work Order Escalated - SLA Breached",
+            message: `${wo.title} - ${equipmentName} is overdue`,
+            link: `/maintenance/work-orders/${wo.id}`,
+          });
+        }
+
+        // Also notify the assigned technician if any
+        if (wo.assignedToId) {
+          await createNotification({
+            userId: wo.assignedToId,
+            type: "work_order_escalated",
+            title: "Your Work Order Has Been Escalated",
+            message: `${wo.title} - SLA breached, please prioritize`,
+            link: `/maintenance/work-orders/${wo.id}`,
+          });
+        }
+
+        escalatedCount++;
+      } catch (err) {
+        schedulerLogger.error(
+          { requestId, workOrderId: wo.id, error: err },
+          "Failed to escalate work order"
+        );
+        errors.push(
+          `Escalation WO ${wo.id}: ${err instanceof Error ? err.message : String(err)}`
+        );
+      }
+    }
+
     schedulerLogger.info(
-      { requestId, generated: generatedCount, errorCount: errors.length },
+      {
+        requestId,
+        generated: generatedCount,
+        escalated: escalatedCount,
+        errorCount: errors.length,
+      },
       "Scheduler run complete"
     );
 
     return apiSuccess({
       message: "Scheduler run complete",
       generated: generatedCount,
+      escalated: escalatedCount,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (err) {

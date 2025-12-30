@@ -3,18 +3,104 @@
 import { updatePreferences } from "@/actions/profile-actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { UserPreferences } from "@/db/schema";
+import type {
+  InAppNotificationPreferences,
+  UserPreferences,
+} from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { Check, Loader2, Mail } from "lucide-react";
+import {
+  AlertTriangle,
+  Calendar,
+  Check,
+  CheckCircle2,
+  ClipboardList,
+  Loader2,
+  Mail,
+  MessageSquare,
+  RefreshCw,
+  User,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 
 interface NotificationsFormProps {
   preferences: UserPreferences;
 }
 
+const DEFAULT_IN_APP_PREFS: InAppNotificationPreferences = {
+  workOrderCreated: true,
+  workOrderAssigned: true,
+  workOrderEscalated: true,
+  workOrderResolved: true,
+  workOrderCommented: true,
+  workOrderStatusChanged: true,
+  maintenanceDue: true,
+};
+
+const NOTIFICATION_TYPES: {
+  key: keyof InAppNotificationPreferences;
+  label: string;
+  description: string;
+  icon: React.ElementType;
+  iconColor: string;
+}[] = [
+  {
+    key: "workOrderCreated",
+    label: "Work Order Created",
+    description:
+      "When a new work order is created on equipment in your department",
+    icon: ClipboardList,
+    iconColor: "text-primary-600",
+  },
+  {
+    key: "workOrderAssigned",
+    label: "Work Order Assigned",
+    description: "When a work order is assigned to you",
+    icon: User,
+    iconColor: "text-emerald-600",
+  },
+  {
+    key: "workOrderEscalated",
+    label: "Work Order Escalated",
+    description: "When a work order breaches SLA and is escalated",
+    icon: AlertTriangle,
+    iconColor: "text-amber-600",
+  },
+  {
+    key: "workOrderResolved",
+    label: "Work Order Resolved",
+    description: "When a work order you reported is resolved",
+    icon: CheckCircle2,
+    iconColor: "text-emerald-600",
+  },
+  {
+    key: "workOrderCommented",
+    label: "Comments",
+    description: "When someone comments on work orders you're involved in",
+    icon: MessageSquare,
+    iconColor: "text-blue-600",
+  },
+  {
+    key: "workOrderStatusChanged",
+    label: "Status Changes",
+    description: "When the status of work orders you reported changes",
+    icon: RefreshCw,
+    iconColor: "text-violet-600",
+  },
+  {
+    key: "maintenanceDue",
+    label: "Maintenance Due",
+    description: "When scheduled maintenance is coming up",
+    icon: Calendar,
+    iconColor: "text-rose-600",
+  },
+];
+
 export function NotificationsForm({ preferences }: NotificationsFormProps) {
   const [emailEnabled, setEmailEnabled] = useState(
     preferences.notifications.email
+  );
+  const [inAppPrefs, setInAppPrefs] = useState<InAppNotificationPreferences>(
+    preferences.notifications.inApp || DEFAULT_IN_APP_PREFS
   );
   const [isPending, startTransition] = useTransition();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -24,7 +110,10 @@ export function NotificationsForm({ preferences }: NotificationsFormProps) {
     setError(null);
     startTransition(async () => {
       const result = await updatePreferences({
-        notifications: { email: emailEnabled },
+        notifications: {
+          email: emailEnabled,
+          inApp: inAppPrefs,
+        },
       });
       if (result.success) {
         setShowSuccess(true);
@@ -35,24 +124,77 @@ export function NotificationsForm({ preferences }: NotificationsFormProps) {
     });
   };
 
+  const toggleInApp = (key: keyof InAppNotificationPreferences) => {
+    setInAppPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const allEnabled = Object.values(inAppPrefs).every(Boolean);
+  const noneEnabled = Object.values(inAppPrefs).every((v) => !v);
+
+  const toggleAll = () => {
+    const newValue = !allEnabled;
+    setInAppPrefs({
+      workOrderCreated: newValue,
+      workOrderAssigned: newValue,
+      workOrderEscalated: newValue,
+      workOrderResolved: newValue,
+      workOrderCommented: newValue,
+      workOrderStatusChanged: newValue,
+      maintenanceDue: newValue,
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Email Notifications */}
       <div className="space-y-3">
         <Label>Email Notifications</Label>
-        <div className="space-y-3">
-          <ToggleOption
-            icon={Mail}
-            label="Email alerts"
-            description="Receive email notifications for important events like work order assignments and status changes."
-            checked={emailEnabled}
-            onChange={setEmailEnabled}
-          />
+        <ToggleOption
+          icon={Mail}
+          label="Email alerts"
+          description="Receive email notifications for important events"
+          checked={emailEnabled}
+          onChange={setEmailEnabled}
+        />
+        <p className="text-xs text-muted-foreground">
+          Make sure you have an email address configured in your profile.
+        </p>
+      </div>
+
+      {/* In-App Notification Preferences */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>In-App Notifications</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-auto py-1 px-2 text-xs"
+            onClick={toggleAll}
+          >
+            {allEnabled
+              ? "Disable All"
+              : noneEnabled
+                ? "Enable All"
+                : "Toggle All"}
+          </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Make sure you have an email address configured in your profile to
-          receive notifications.
+          Choose which notifications appear in your notification bell.
         </p>
+        <div className="space-y-2">
+          {NOTIFICATION_TYPES.map((notifType) => (
+            <ToggleOption
+              key={notifType.key}
+              icon={notifType.icon}
+              iconColor={notifType.iconColor}
+              label={notifType.label}
+              description={notifType.description}
+              checked={inAppPrefs[notifType.key]}
+              onChange={() => toggleInApp(notifType.key)}
+            />
+          ))}
+        </div>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -81,12 +223,14 @@ export function NotificationsForm({ preferences }: NotificationsFormProps) {
 
 function ToggleOption({
   icon: Icon,
+  iconColor,
   label,
   description,
   checked,
   onChange,
 }: {
   icon: React.ElementType;
+  iconColor?: string;
   label: string;
   description: string;
   checked: boolean;
@@ -106,7 +250,7 @@ function ToggleOption({
       <Icon
         className={cn(
           "h-5 w-5 mt-0.5",
-          checked ? "text-primary" : "text-muted-foreground"
+          checked ? iconColor || "text-primary" : "text-muted-foreground"
         )}
       />
       <div className="flex-1">

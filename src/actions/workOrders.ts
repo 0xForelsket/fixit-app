@@ -13,6 +13,7 @@ import {
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { workOrderLogger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 import { getCurrentUser } from "@/lib/session";
 import { calculateDueBy } from "@/lib/sla";
 import type { ActionResult } from "@/lib/types/actions";
@@ -263,6 +264,17 @@ export async function updateWorkOrder(
       newValue: result.data.status,
       createdById: user.id,
     });
+
+    // Notify reporter of status change (if not the one making the change)
+    if (existingWorkOrder.reportedById !== user.id) {
+      await createNotification({
+        userId: existingWorkOrder.reportedById,
+        type: "work_order_status_changed",
+        title: `Work Order ${result.data.status.replace("_", " ").toUpperCase()}`,
+        message: existingWorkOrder.title,
+        link: `/maintenance/work-orders/${workOrderId}`,
+      });
+    }
   }
 
   // Log assignment changes
@@ -349,6 +361,17 @@ export async function resolveWorkOrder(
     createdById: user.id,
   });
 
+  // Notify reporter that their work order was resolved
+  if (existingWorkOrder.reportedById !== user.id) {
+    await createNotification({
+      userId: existingWorkOrder.reportedById,
+      type: "work_order_resolved",
+      title: "Your Work Order Has Been Resolved",
+      message: existingWorkOrder.title,
+      link: `/maintenance/work-orders/${workOrderId}`,
+    });
+  }
+
   revalidatePath(`/maintenance/work-orders/${workOrderId}`);
   revalidatePath("/maintenance/work-orders");
   revalidatePath("/dashboard");
@@ -371,6 +394,15 @@ export async function addWorkOrderComment(
     return { success: false, error: "Comment is required" };
   }
 
+  // Fetch work order to get reporter and assignee
+  const workOrder = await db.query.workOrders.findFirst({
+    where: eq(workOrders.id, workOrderId),
+  });
+
+  if (!workOrder) {
+    return { success: false, error: "Work order not found" };
+  }
+
   await db.insert(workOrderLogs).values({
     workOrderId,
     action: "comment",
@@ -378,6 +410,25 @@ export async function addWorkOrderComment(
     newValue: comment.trim(),
     createdById: user.id,
   });
+
+  // Notify reporter and assignee (excluding the commenter)
+  const usersToNotify = new Set<number>();
+  if (workOrder.reportedById !== user.id) {
+    usersToNotify.add(workOrder.reportedById);
+  }
+  if (workOrder.assignedToId && workOrder.assignedToId !== user.id) {
+    usersToNotify.add(workOrder.assignedToId);
+  }
+
+  for (const userId of usersToNotify) {
+    await createNotification({
+      userId,
+      type: "work_order_commented",
+      title: "New Comment on Work Order",
+      message: `${user.name} commented on: ${workOrder.title}`,
+      link: `/maintenance/work-orders/${workOrderId}`,
+    });
+  }
 
   revalidatePath(`/maintenance/work-orders/${workOrderId}`);
 

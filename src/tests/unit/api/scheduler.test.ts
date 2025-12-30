@@ -21,6 +21,13 @@ vi.mock("@/db", () => ({
     query: {
       users: {
         findMany: vi.fn(),
+        findFirst: vi.fn(),
+      },
+      roles: {
+        findFirst: vi.fn(),
+      },
+      equipment: {
+        findFirst: vi.fn(),
       },
     },
     transaction: vi.fn(),
@@ -42,8 +49,14 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
+// Mock notifications helper
+vi.mock("@/lib/notifications", () => ({
+  createNotification: vi.fn().mockResolvedValue(true),
+}));
+
 import { POST } from "@/app/(app)/api/scheduler/run/route";
 import { db } from "@/db";
+import { createNotification } from "@/lib/notifications";
 import { getCurrentUser } from "@/lib/session";
 
 describe("POST /api/scheduler/run", () => {
@@ -74,11 +87,14 @@ describe("POST /api/scheduler/run", () => {
   it("authorizes with valid cron secret", async () => {
     process.env.CRON_SECRET = "test-secret";
 
+    // Mock no pending schedules and no work orders to escalate
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([]), // No pending schedules
+        where: vi.fn().mockResolvedValue([]),
       })),
     } as unknown as ReturnType<typeof db.select>);
+
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -91,8 +107,9 @@ describe("POST /api/scheduler/run", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.message).toBe("No schedules due");
+    expect(data.data.message).toBe("Scheduler run complete");
     expect(data.data.generated).toBe(0);
+    expect(data.data.escalated).toBe(0);
   });
 
   it("authorizes with user having scheduler permission", async () => {
@@ -113,6 +130,8 @@ describe("POST /api/scheduler/run", () => {
         where: vi.fn().mockResolvedValue([]),
       })),
     } as unknown as ReturnType<typeof db.select>);
+
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -143,6 +162,8 @@ describe("POST /api/scheduler/run", () => {
         where: vi.fn().mockResolvedValue([]),
       })),
     } as unknown as ReturnType<typeof db.select>);
+
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -198,11 +219,21 @@ describe("POST /api/scheduler/run", () => {
       createdAt: new Date(),
     };
 
+    // First call returns schedules, second call returns no work orders to escalate
+    let selectCallCount = 0;
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([mockSchedule]),
+        where: vi.fn().mockImplementation(() => {
+          selectCallCount++;
+          if (selectCallCount === 1) {
+            return Promise.resolve([mockSchedule]);
+          }
+          return Promise.resolve([]); // No work orders to escalate
+        }),
       })),
     } as unknown as ReturnType<typeof db.select>);
+
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
 
     // Mock the transaction
     vi.mocked(db.transaction).mockImplementation(async (callback) => {
@@ -263,12 +294,20 @@ describe("POST /api/scheduler/run", () => {
       createdAt: new Date(),
     };
 
+    let selectCallCount = 0;
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([mockSchedule]),
+        where: vi.fn().mockImplementation(() => {
+          selectCallCount++;
+          if (selectCallCount === 1) {
+            return Promise.resolve([mockSchedule]);
+          }
+          return Promise.resolve([]);
+        }),
       })),
     } as unknown as ReturnType<typeof db.select>);
 
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
     vi.mocked(db.transaction).mockRejectedValue(
       new Error("Transaction failed")
     );
@@ -286,5 +325,219 @@ describe("POST /api/scheduler/run", () => {
     expect(response.status).toBe(200);
     expect(data.data.generated).toBe(0);
     expect(data.data.errors).toHaveLength(1);
+  });
+
+  describe("Escalation", () => {
+    it("escalates overdue work orders and notifies admins", async () => {
+      process.env.CRON_SECRET = "test-secret";
+
+      const overdueWorkOrder = {
+        id: 1,
+        equipmentId: 10,
+        title: "Fix Machine A",
+        status: "open",
+        dueBy: new Date(Date.now() - 3600000), // 1 hour ago
+        escalatedAt: null,
+        assignedToId: 5,
+      };
+
+      let selectCallCount = 0;
+      vi.mocked(db.select).mockReturnValue({
+        from: vi.fn(() => ({
+          where: vi.fn().mockImplementation(() => {
+            selectCallCount++;
+            if (selectCallCount === 1) {
+              return Promise.resolve([]); // No schedules
+            }
+            return Promise.resolve([overdueWorkOrder]); // Overdue work order
+          }),
+        })),
+      } as unknown as ReturnType<typeof db.select>);
+
+      // Mock admin role and users
+      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+        id: 1,
+        name: "admin",
+      });
+      vi.mocked(db.query.users.findMany).mockResolvedValue([
+        { id: 2, name: "Admin User" },
+      ]);
+      vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+        id: 10,
+        name: "Machine A",
+      });
+
+      const request = new Request("http://localhost/api/scheduler/run", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer test-secret",
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.escalated).toBe(1);
+
+      // Should update work order with escalatedAt
+      expect(db.update).toHaveBeenCalled();
+
+      // Should notify admin and assigned technician
+      expect(createNotification).toHaveBeenCalledTimes(2);
+      expect(createNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 2, // Admin
+          type: "work_order_escalated",
+          title: "Work Order Escalated - SLA Breached",
+        })
+      );
+      expect(createNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 5, // Assigned tech
+          type: "work_order_escalated",
+          title: "Your Work Order Has Been Escalated",
+        })
+      );
+    });
+
+    it("does not escalate work orders that are already escalated", async () => {
+      process.env.CRON_SECRET = "test-secret";
+
+      // Work order with escalatedAt already set should not be returned
+      // because the query filters for isNull(escalatedAt)
+      vi.mocked(db.select).mockReturnValue({
+        from: vi.fn(() => ({
+          where: vi.fn().mockResolvedValue([]),
+        })),
+      } as unknown as ReturnType<typeof db.select>);
+
+      vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+
+      const request = new Request("http://localhost/api/scheduler/run", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer test-secret",
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.escalated).toBe(0);
+      expect(createNotification).not.toHaveBeenCalled();
+    });
+
+    it("escalates work order without assigned tech (admin only notification)", async () => {
+      process.env.CRON_SECRET = "test-secret";
+
+      const unassignedOverdueWorkOrder = {
+        id: 2,
+        equipmentId: 10,
+        title: "Unassigned Work Order",
+        status: "open",
+        dueBy: new Date(Date.now() - 3600000),
+        escalatedAt: null,
+        assignedToId: null, // No assignee
+      };
+
+      let selectCallCount = 0;
+      vi.mocked(db.select).mockReturnValue({
+        from: vi.fn(() => ({
+          where: vi.fn().mockImplementation(() => {
+            selectCallCount++;
+            if (selectCallCount === 1) {
+              return Promise.resolve([]);
+            }
+            return Promise.resolve([unassignedOverdueWorkOrder]);
+          }),
+        })),
+      } as unknown as ReturnType<typeof db.select>);
+
+      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+        id: 1,
+        name: "admin",
+      });
+      vi.mocked(db.query.users.findMany).mockResolvedValue([
+        { id: 2, name: "Admin 1" },
+        { id: 3, name: "Admin 2" },
+      ]);
+      vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+        id: 10,
+        name: "Equipment X",
+      });
+
+      const request = new Request("http://localhost/api/scheduler/run", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer test-secret",
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.escalated).toBe(1);
+
+      // Should notify both admins but no tech (no assignee)
+      expect(createNotification).toHaveBeenCalledTimes(2);
+    });
+
+    it("handles escalation errors gracefully", async () => {
+      process.env.CRON_SECRET = "test-secret";
+
+      const overdueWorkOrder = {
+        id: 1,
+        equipmentId: 10,
+        title: "Problematic Work Order",
+        status: "in_progress",
+        dueBy: new Date(Date.now() - 3600000),
+        escalatedAt: null,
+        assignedToId: 5,
+      };
+
+      let selectCallCount = 0;
+      vi.mocked(db.select).mockReturnValue({
+        from: vi.fn(() => ({
+          where: vi.fn().mockImplementation(() => {
+            selectCallCount++;
+            if (selectCallCount === 1) {
+              return Promise.resolve([]);
+            }
+            return Promise.resolve([overdueWorkOrder]);
+          }),
+        })),
+      } as unknown as ReturnType<typeof db.select>);
+
+      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+        id: 1,
+        name: "admin",
+      });
+      vi.mocked(db.query.users.findMany).mockResolvedValue([]);
+
+      // Make update fail
+      vi.mocked(db.update).mockReturnValue({
+        set: vi.fn(() => ({
+          where: vi.fn().mockRejectedValue(new Error("Update failed")),
+        })),
+      } as unknown as ReturnType<typeof db.update>);
+
+      const request = new Request("http://localhost/api/scheduler/run", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer test-secret",
+        },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.data.escalated).toBe(0);
+      expect(data.data.errors).toHaveLength(1);
+      expect(data.data.errors[0]).toContain("Escalation WO 1");
+    });
   });
 });
