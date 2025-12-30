@@ -213,7 +213,11 @@ export default function LoginPage() {
               >
                 {isPending ? (
                   <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
                       <circle
                         className="opacity-25"
                         cx="12"
