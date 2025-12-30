@@ -13,10 +13,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useActionState } from "react";
 
+import { ThemeToggle } from "@/components/layout/theme-toggle"; // Add import
+
 const initialState: LoginState = {};
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, initialState);
+
+  const demoAccounts =
+    process.env.NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS === "true"
+      ? [
+          { role: "System Admin", id: "ADMIN-001", pin: "1234" },
+          { role: "Molding Manager", id: "MGT-MOLD", pin: "1234" },
+          { role: "Molding Tech", id: "TECH-MOLD-01", pin: "5678" },
+          { role: "Operator", id: "OP-001", pin: "0000" },
+        ]
+      : [];
+
+  const fillCredentials = (employeeId: string, pin: string) => {
+    const idInput = document.getElementById("employeeId") as HTMLInputElement;
+    const pinInput = document.getElementById("pin") as HTMLInputElement;
+    if (idInput && pinInput) {
+      idInput.value = employeeId;
+      pinInput.value = pin;
+    }
+  };
 
   return (
     <main className="flex min-h-screen">
@@ -24,7 +45,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-zinc-950 relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 -left-20 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-20 -left-20 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-20 -right-20 w-96 h-96 bg-primary-600/10 rounded-full blur-3xl" />
         </div>
 
@@ -130,7 +151,10 @@ export default function LoginPage() {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-zinc-50 via-white to-orange-50">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-zinc-50 via-white to-orange-50 relative">
+        <div className="absolute top-4 right-4 z-20">
+          <ThemeToggle />
+        </div>
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none lg:left-1/2">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl" />
@@ -241,14 +265,39 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Demo credentials hint */}
-            <div className="mt-6 pt-4 border-t border-zinc-100 text-center">
-              <p className="text-xs text-muted-foreground">
-                Demo:{" "}
-                <span className="font-mono text-primary-600">admin001</span> /{" "}
-                <span className="font-mono text-primary-600">1234</span>
-              </p>
-            </div>
+            {/* Demo credentials hint - Only visible in demo mode */}
+            {process.env.NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS === "true" && (
+              <div className="mt-8 pt-6 border-t border-zinc-100">
+                <div className="flex items-center gap-2 mb-4 justify-center">
+                  <div className="h-px bg-zinc-200 flex-1" />
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
+                    Demo Access
+                  </span>
+                  <div className="h-px bg-zinc-200 flex-1" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {demoAccounts.map((acc) => (
+                    <Button
+                      key={acc.id}
+                      type="button"
+                      variant="outline"
+                      className="h-auto py-3 px-3 flex flex-col items-start gap-1.5 border-zinc-200 hover:border-primary-500 hover:bg-primary-50/50 bg-white transition-all group cursor-pointer"
+                      onClick={() => fillCredentials(acc.id, acc.pin)}
+                    >
+                      <span className="text-xs font-bold text-zinc-700 group-hover:text-primary-700">
+                        {acc.role}
+                      </span>
+                      <div className="flex items-center gap-2 w-full">
+                        <span className="font-mono text-[10px] text-zinc-400 group-hover:text-primary-600/80">
+                          {acc.id}
+                        </span>
+                        <div className="ml-auto h-1.5 w-1.5 rounded-full bg-zinc-200 group-hover:bg-primary-500 transition-colors" />
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

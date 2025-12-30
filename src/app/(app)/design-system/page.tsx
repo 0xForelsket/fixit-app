@@ -136,6 +136,7 @@ export default function DesignSystemPage() {
               "700",
               "800",
               "900",
+              "950",
             ]}
           />
           <div className="grid gap-8 md:grid-cols-3">
@@ -154,6 +155,7 @@ export default function DesignSystemPage() {
                 "700",
                 "800",
                 "900",
+                "950",
               ]}
             />
             <ColorSwatch
@@ -171,6 +173,7 @@ export default function DesignSystemPage() {
                 "700",
                 "800",
                 "900",
+                "950",
               ]}
             />
             <ColorSwatch
@@ -188,6 +191,7 @@ export default function DesignSystemPage() {
                 "700",
                 "800",
                 "900",
+                "950",
               ]}
             />
           </div>
@@ -607,7 +611,7 @@ function ColorSwatch({
           <div key={shade} className="space-y-1.5">
             <div
               className="h-16 w-full rounded-lg shadow-sm border"
-              style={{ backgroundColor: `var(--color-${variable}-${shade})` }}
+              style={{ backgroundColor: `var(--${variable}-${shade})` }}
             />
             <div className="px-1">
               <p className="text-xs font-medium text-foreground">

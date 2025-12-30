@@ -1,33 +1,14 @@
-
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { ViewToggle } from "@/components/ui/view-toggle";
+import { LocationsTable } from "@/components/locations/locations-table";
 import { db } from "@/db";
 import { locations } from "@/db/schema";
-import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import {
-  Building,
-  ChevronRight,
-  Edit,
-  FolderTree,
-  MapPin,
-  Plus,
-  Search,
-  Upload,
-} from "lucide-react";
+import { Building, FolderTree, MapPin, Plus, Search, Upload } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LocationTree } from "./location-tree";
@@ -221,135 +202,7 @@ export default async function LocationsPage({
               icon={MapPin}
             />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="border-b border-border hover:bg-transparent">
-                    <SortHeader
-                      label="Location"
-                      field="name"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-                    />
-                    <SortHeader
-                      label="Code"
-                      field="code"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:table-cell"
-                    />
-                    <SortHeader
-                      label="Parent"
-                      field="parent"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell"
-                    />
-                    <SortHeader
-                      label="Status"
-                      field="status"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-                    />
-                    <SortHeader
-                      label="Created"
-                      field="createdAt"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
-                    />
-                    <TableHead className="p-5 w-24" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-border">
-                  {locationsList.map((location, index) => {
-                    const staggerClass =
-                      index < 5
-                        ? `animate-stagger-${index + 1}`
-                        : "animate-in fade-in duration-500";
-                    return (
-                      <TableRow
-                        key={location.id}
-                        className={cn(
-                          "hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-bottom-1",
-                          staggerClass
-                        )}
-                      >
-                        <TableCell className="p-5">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border shadow-sm">
-                              <MapPin className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <p className="font-bold text-foreground text-sm font-serif-brand">
-                                {location.name}
-                              </p>
-                              {location.description && (
-                                <p className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground line-clamp-1 mt-0.5">
-                                  {location.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-5 hidden md:table-cell">
-                          <span className="font-mono font-bold text-xs text-muted-foreground uppercase tracking-widest">
-                            {location.code}
-                          </span>
-                        </TableCell>
-                        <TableCell className="p-5 hidden lg:table-cell">
-                          {location.parent ? (
-                            <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
-                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
-                              {location.parent.name}
-                            </div>
-                          ) : (
-                            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/50 bg-muted/50 px-2 py-1 rounded">
-                              ROOT
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="p-5">
-                          {location.isActive ? (
-                            <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/10 px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-success-700">
-                              Active
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-muted-foreground">
-                              Inactive
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="p-5 hidden sm:table-cell">
-                          <span className="text-sm font-mono text-muted-foreground">
-                            {formatRelativeTime(location.createdAt)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="p-5 text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
-                          >
-                            <Link href={`/assets/locations/${location.id}`}>
-                              <Edit className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+            <LocationsTable locations={locationsList} searchParams={params} />
           )}
         </>
       )}

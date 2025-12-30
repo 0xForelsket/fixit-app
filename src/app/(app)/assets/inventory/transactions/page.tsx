@@ -1,12 +1,4 @@
-import { Badge } from "@/components/ui/badge";
-import { SortHeader } from "@/components/ui/sort-header";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TransactionsTable } from "@/components/inventory/transactions-table";
 import { db } from "@/db";
 import {
   inventoryTransactions,
@@ -14,9 +6,7 @@ import {
   spareParts,
   users,
 } from "@/db/schema";
-import { formatRelativeTime } from "@/lib/utils";
 import { aliasedTable, asc, desc, eq } from "drizzle-orm";
-import { MoveDown, MoveUp, RefreshCw, RotateCcw } from "lucide-react";
 
 const PAGE_SIZE = 50;
 
@@ -126,141 +116,8 @@ export default async function TransactionsPage(props: {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <SortHeader
-                label="Type"
-                field="type"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-              <SortHeader
-                label="Part"
-                field="part"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-              <SortHeader
-                label="Quantity"
-                field="quantity"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-              <SortHeader
-                label="Location"
-                field="location"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-              <SortHeader
-                label="Reference"
-                field="reference"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-              <SortHeader
-                label="User"
-                field="user"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-              <SortHeader
-                label="Date"
-                field="createdAt"
-                currentSort={searchParams.sort}
-                currentDir={searchParams.dir}
-                params={searchParams}
-              />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  No transactions found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              transactions.map((tx) => (
-                <TableRow key={tx.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <TransactionIcon type={tx.type} />
-                      <span className="capitalize">{tx.type}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{tx.partName}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {tx.partSku}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={
-                        tx.type === "in" || tx.type === "adjustment"
-                          ? "text-emerald-600 font-medium"
-                          : "text-rose-600 font-medium"
-                      }
-                    >
-                      {tx.type === "out" || tx.type === "transfer" ? "-" : "+"}
-                      {tx.quantity}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col text-sm">
-                      <span>{tx.locationName}</span>
-                      {tx.type === "transfer" && tx.toLocationName && (
-                        <span className="text-muted-foreground">
-                          → {tx.toLocationName}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {tx.workOrderId ? (
-                      <Badge variant="outline">WO #{tx.workOrderId}</Badge>
-                    ) : (
-                      <span className="text-sm text-muted-foreground">
-                        {tx.reference || "-"}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>{tx.userName}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatRelativeTime(tx.createdAt)}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <TransactionsTable transactions={transactions} searchParams={searchParams} />
     </div>
   );
 }
 
-function TransactionIcon({ type }: { type: string }) {
-  switch (type) {
-    case "in":
-      return <MoveDown className="h-4 w-4 text-emerald-600" />;
-    case "out":
-      return <MoveUp className="h-4 w-4 text-rose-600" />;
-    case "transfer":
-      return <RefreshCw className="h-4 w-4 text-blue-600" />;
-    case "adjustment":
-      return <RotateCcw className="h-4 w-4 text-amber-600" />;
-    default:
-      return null;
-  }
-}

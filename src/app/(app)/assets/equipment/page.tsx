@@ -2,31 +2,18 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
-import { StatusBadge } from "@/components/ui/status-badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { ViewToggle } from "@/components/ui/view-toggle";
+import { EquipmentTable } from "@/components/equipment/equipment-table";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import { desc } from "drizzle-orm";
 import { and, eq } from "drizzle-orm";
 import {
   AlertCircle,
   CheckCircle2,
   Cuboid,
-  Edit,
-  Flag,
-  MapPin,
   MonitorCog,
   Plus,
   Search,
@@ -293,167 +280,7 @@ export default async function EquipmentPage({
               )}
             </EmptyState>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="hover:bg-transparent border-border">
-                    <SortHeader
-                      label="Code"
-                      field="code"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                      className="w-32"
-                    />
-                    <SortHeader
-                      label="Equipment / Asset"
-                      field="name"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                    />
-                    <SortHeader
-                      label="Classification"
-                      field="classification"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      className="hidden lg:table-cell"
-                      params={params}
-                    />
-                    <SortHeader
-                      label="Location"
-                      field="location"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      className="hidden lg:table-cell"
-                      params={params}
-                    />
-                    <SortHeader
-                      label="Status"
-                      field="status"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      params={params}
-                    />
-                    <SortHeader
-                      label="Responsible"
-                      field="responsible"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      className="hidden xl:table-cell"
-                      params={params}
-                    />
-                    <TableHead className="w-24" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-border">
-                  {equipmentList.map((equipment, index) => {
-                    const staggerClass =
-                      index < 5
-                        ? `animate-stagger-${index + 1}`
-                        : "animate-in fade-in duration-500";
-                    return (
-                      <TableRow
-                        key={equipment.id}
-                        className={cn(
-                          "hover:bg-muted/50 transition-colors group animate-in fade-in slide-in-from-bottom-1",
-                          staggerClass
-                        )}
-                      >
-                        <TableCell className="p-5">
-                          <span className="font-mono font-bold text-muted-foreground uppercase tracking-widest text-xs">
-                            {equipment.code}
-                          </span>
-                        </TableCell>
-                        <TableCell className="p-5">
-                          <Link
-                            href={`/assets/equipment/${equipment.id}`}
-                            data-testid="equipment-link"
-                            className="flex items-center gap-4 group/item"
-                          >
-                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-md transition-transform group-hover/item:scale-105">
-                              <MonitorCog className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <p className="font-black text-foreground group-hover/item:text-primary transition-colors uppercase tracking-tight text-sm font-serif-brand">
-                                {equipment.name}
-                              </p>
-                              <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
-                                ID: {equipment.id}
-                              </p>
-                            </div>
-                          </Link>
-                        </TableCell>
-                        <TableCell className="p-5 hidden lg:table-cell">
-                          {equipment.type ? (
-                            <div className="inline-flex flex-col bg-muted px-2.5 py-1 rounded-md border border-border">
-                              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">
-                                {equipment.type.category.label}
-                              </span>
-                              <span className="text-xs font-bold text-foreground/80">
-                                {equipment.type.name}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-xs font-bold text-muted-foreground tracking-widest bg-muted/50 px-2 py-1 rounded-md border border-border">
-                              UNCLASSIFIED
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="p-5 hidden lg:table-cell">
-                          <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border w-fit">
-                            <MapPin className="h-3.5 w-3.5" />
-                            {equipment.location?.name || "UNASSIGNED"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="p-5">
-                          <StatusBadge status={equipment.status} />
-                        </TableCell>
-                        <TableCell className="p-5 hidden xl:table-cell">
-                          <span
-                            className={cn(
-                              "text-sm font-bold",
-                              equipment.owner?.name
-                                ? "text-foreground/80"
-                                : "text-muted-foreground italic"
-                            )}
-                          >
-                            {equipment.owner?.name || "OFF-SYSTEM"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="p-5 text-right flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            className="rounded-xl hover:bg-warning-500 hover:text-white transition-all text-muted-foreground"
-                            title="Report Issue"
-                          >
-                            <Link
-                              href={`/maintenance/work-orders/new?equipmentId=${equipment.id}`}
-                            >
-                              <Flag className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all transform group-hover:rotate-12 text-muted-foreground"
-                          >
-                            <Link
-                              href={`/assets/equipment/${equipment.id}/edit`}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
+            <EquipmentTable equipment={equipmentList} searchParams={params} />
           )}
         </>
       )}

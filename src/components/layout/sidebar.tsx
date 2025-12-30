@@ -10,6 +10,7 @@ import {
   ClipboardList,
   Cog,
   Download,
+  Factory,
   FileText,
   Globe,
   HelpCircle,
@@ -112,6 +113,12 @@ const navGroups: NavGroup[] = [
         label: "Inventory",
         href: "/assets/inventory",
         icon: <Package className="h-5 w-5" />,
+        permission: PERMISSIONS.INVENTORY_VIEW,
+      },
+      {
+        label: "Vendors",
+        href: "/assets/vendors",
+        icon: <Factory className="h-5 w-5" />,
         permission: PERMISSIONS.INVENTORY_VIEW,
       },
       {

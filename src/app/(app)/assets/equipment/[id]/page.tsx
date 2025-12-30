@@ -124,61 +124,28 @@ export default async function EquipmentDetailPage({
   const OverviewHeader = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="lg:hidden text-white/80 hover:text-white hover:bg-white/10"
-        >
-          <Link href="/assets/equipment">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             {equipmentItem.name}
           </h1>
-          <div className="flex flex-wrap items-center gap-2 text-muted-foreground mt-1 text-xs sm:text-sm">
-            <Badge
-              variant="outline"
-              className="font-mono bg-zinc-50 px-1.5 py-0"
-            >
-              {equipmentItem.code}
-            </Badge>
-            {equipmentItem.type && (
-              <Badge variant="secondary" className="font-bold">
-                {equipmentItem.type.category.label} / {equipmentItem.type.name}
-              </Badge>
-            )}
-            {equipmentItem.model && (
-              <span className="border-l pl-2 ml-1">
-                Model:{" "}
-                <Link
-                  href={`/assets/equipment/models/${equipmentItem.model.id}`}
-                  className="font-medium hover:underline text-primary-600 truncate max-w-[150px] inline-block align-bottom"
-                >
-                  {equipmentItem.model.name}
-                </Link>
-              </span>
-            )}
-          </div>
+          <p className="text-muted-foreground font-mono">{equipmentItem.code}</p>
         </div>
       </div>
       <Button
         variant="outline"
         asChild
-        className="hidden sm:flex border-white/20 bg-white/10 text-white hover:bg-white hover:text-primary-600 hover:border-white"
+        className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold"
       >
         <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
           <Edit className="mr-2 h-4 w-4" />
-          Edit Equipment
+          EDIT EQUIPMENT
         </Link>
       </Button>
     </div>
   );
 
   const HealthSection = (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-6">
       <h3 className="font-semibold mb-4 flex items-center gap-2">
         <CheckCircle2 className="h-4 w-4 text-emerald-600" />
         Maintenance Health
@@ -209,7 +176,7 @@ export default async function EquipmentDetailPage({
                   On-Time Rate
                 </span>
               </div>
-              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all",
@@ -242,7 +209,7 @@ export default async function EquipmentDetailPage({
   );
 
   const StatusSection = (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-6">
       <div className="mb-6 flex justify-center">
         <div
           className={cn(
@@ -279,7 +246,7 @@ export default async function EquipmentDetailPage({
   );
 
   const HistorySection = (
-    <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="border-b p-4">
         <h3 className="font-semibold flex items-center gap-2">
           <History className="h-4 w-4" />
@@ -302,7 +269,7 @@ export default async function EquipmentDetailPage({
                 key={workOrder.id}
                 href={`/maintenance/work-orders/${workOrder.id}`}
                 className={cn(
-                  "block p-4 hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+                  "block p-4 hover:bg-muted transition-colors animate-in fade-in slide-in-from-bottom-1",
                   staggerClass
                 )}
               >
@@ -330,20 +297,29 @@ export default async function EquipmentDetailPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-20 lg:pb-8">
-      {/* Desktop Header Navigation */}
-      <div className="hidden lg:flex items-center gap-4">
-        <Button variant="ghost" size="sm" asChild>
+      {/* Header with Back Button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <Link
             href="/assets/equipment"
-            className="gap-2 text-muted-foreground"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card transition-colors hover:bg-muted"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to List
+            <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{equipmentItem.name}</h1>
+            <p className="text-muted-foreground font-mono">{equipmentItem.code}</p>
+          </div>
+        </div>
+        <Button variant="outline" asChild className="hidden sm:flex">
+          <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
           </Link>
         </Button>
       </div>
 
       <div className="space-y-6 lg:hidden">
-        {OverviewHeader}
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4 h-12">
             <TabsTrigger value="overview">
@@ -373,7 +349,7 @@ export default async function EquipmentDetailPage({
           </TabsContent>
 
           <TabsContent value="bom" className="mt-6">
-            <div className="rounded-xl border bg-white shadow-sm p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Recommended Spares
@@ -384,7 +360,7 @@ export default async function EquipmentDetailPage({
                   <div
                     key={item.id}
                     className={cn(
-                      "p-3 bg-zinc-50 rounded-lg border animate-in fade-in slide-in-from-bottom-1",
+                      "p-3 bg-muted rounded-lg border border-border animate-in fade-in slide-in-from-bottom-1",
                       index < 5
                         ? `animate-stagger-${index + 1}`
                         : "animate-in fade-in duration-500"
@@ -427,7 +403,7 @@ export default async function EquipmentDetailPage({
           </TabsContent>
 
           <TabsContent value="schedules" className="mt-6">
-            <div className="rounded-xl border bg-white shadow-sm divide-y">
+            <div className="rounded-xl border border-border bg-card divide-y divide-border">
               {equipmentItem.maintenanceSchedules.map((schedule, index) => (
                 <div
                   key={schedule.id}
@@ -470,7 +446,6 @@ export default async function EquipmentDetailPage({
 
       {/* Desktop Grid Layout */}
       <div className="hidden lg:grid grid-cols-12 gap-8">
-        <div className="col-span-12">{OverviewHeader}</div>
         <div className="col-span-4 space-y-6">
           {StatusSection}
           {HealthSection}
@@ -488,9 +463,9 @@ export default async function EquipmentDetailPage({
             </TabsContent>
             <TabsContent value="bom" className="mt-4">
               {/* Full table for desktop */}
-              <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
                 <Table className="w-full text-sm">
-                  <TableHeader className="bg-slate-50 border-b">
+                  <TableHeader className="bg-muted border-b border-border">
                     <TableRow className="text-left font-medium text-muted-foreground">
                       <TableHead className="p-3">Part</TableHead>
                       <TableHead className="p-3">SKU</TableHead>
@@ -544,7 +519,7 @@ export default async function EquipmentDetailPage({
               </div>
             </TabsContent>
             <TabsContent value="schedules" className="mt-4">
-              <div className="rounded-xl border bg-white shadow-sm divide-y">
+              <div className="rounded-xl border border-border bg-card divide-y divide-border">
                 {equipmentItem.maintenanceSchedules.map((schedule, index) => (
                   <div
                     key={schedule.id}
@@ -571,13 +546,11 @@ export default async function EquipmentDetailPage({
       </div>
 
       {/* Fixed Mobile Bottom Action */}
-      <div className="fixed bottom-16 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t lg:hidden z-30">
-        <Button
-          asChild
-          className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold h-12 rounded-xl"
-        >
+      <div className="fixed bottom-16 left-0 right-0 p-4 bg-card/80 backdrop-blur-lg border-t border-border lg:hidden z-30">
+        <Button asChild size="lg" className="w-full">
           <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
-            <Edit className="mr-2 h-5 w-5" /> Edit Equipment
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Equipment
           </Link>
         </Button>
       </div>

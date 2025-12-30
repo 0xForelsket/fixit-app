@@ -53,6 +53,7 @@
   --color-secondary-700: var(--secondary-700);
   --color-secondary-800: var(--secondary-800);
   --color-secondary-900: var(--secondary-900);
+  --color-secondary-950: var(--secondary-950);
 
   --color-success-50: var(--success-50);
   --color-success-100: var(--success-100);
@@ -64,6 +65,7 @@
   --color-success-700: var(--success-700);
   --color-success-800: var(--success-800);
   --color-success-900: var(--success-900);
+  --color-success-950: var(--success-950);
 
   --color-warning-50: var(--warning-50);
   --color-warning-100: var(--warning-100);
@@ -75,6 +77,7 @@
   --color-warning-700: var(--warning-700);
   --color-warning-800: var(--warning-800);
   --color-warning-900: var(--warning-900);
+  --color-warning-950: var(--warning-950);
 
   --color-danger-50: var(--danger-50);
   --color-danger-100: var(--danger-100);
@@ -86,6 +89,7 @@
   --color-danger-700: var(--danger-700);
   --color-danger-800: var(--danger-800);
   --color-danger-900: var(--danger-900);
+  --color-danger-950: var(--danger-950);
 
   --font-sans: "Inter", "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
@@ -106,34 +110,34 @@
   --card-foreground: #1a1a1a;
   --popover: #f3f1e7;
   --popover-foreground: #1a1a1a;
-  --primary: #f97316; /* Safety Orange */
-  --primary-foreground: #ffffff;
+  --primary: #000000;
+  --primary-foreground: #f3f1e7;
   --secondary: #e6e4d9;
   --secondary-foreground: #1a1a1a;
   --muted: #e6e4d9;
   --muted-foreground: #555555;
-  --accent: #f97316;
-  --accent-foreground: #ffffff;
+  --accent: #000000;
+  --accent-foreground: #f3f1e7;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: rgba(26, 26, 26, 0.08);
   --input: rgba(26, 26, 26, 0.1);
-  --ring: #f97316;
+  --ring: #1a1a1a;
   --radius: 2rem;
-  --sidebar: #f3f1e7;
+  --sidebar: #e5e1d3;
   --sidebar-foreground: #1a1a1a;
 
-  --primary-50: #fff7ed;
-  --primary-100: #ffedd5;
-  --primary-200: #fed7aa;
-  --primary-300: #fdba74;
-  --primary-400: #fb923c;
-  --primary-500: #f97316;
-  --primary-600: #ea580c;
-  --primary-700: #c2410c;
-  --primary-800: #9a3412;
-  --primary-900: #7c2d12;
-  --primary-950: #431407;
+  --primary-50: #f5f5f5;
+  --primary-100: #e5e5e5;
+  --primary-200: #cccccc;
+  --primary-300: #a3a3a3;
+  --primary-400: #737373;
+  --primary-500: #525252;
+  --primary-600: #404040;
+  --primary-700: #2d2d2d;
+  --primary-800: #1a1a1a;
+  --primary-900: #0a0a0a;
+  --primary-950: #000000;
   --secondary-50: #fafaf9;
   --secondary-100: #f5f5f4;
   --secondary-200: #e7e5e4;
@@ -144,6 +148,7 @@
   --secondary-700: #44403c;
   --secondary-800: #292524;
   --secondary-900: #1c1917;
+  --secondary-950: #0c0a09;
   --success-50: #f0fdf4;
   --success-100: #dcfce7;
   --success-200: #bbf7d0;
@@ -154,6 +159,7 @@
   --success-700: #15803d;
   --success-800: #166534;
   --success-900: #14532d;
+  --success-950: #052e16;
   --warning-50: #fffbeb;
   --warning-100: #fef3c7;
   --warning-200: #fde68a;
@@ -164,6 +170,7 @@
   --warning-700: #b45309;
   --warning-800: #92400e;
   --warning-900: #78350f;
+  --warning-950: #451a03;
   --danger-50: #fef2f2;
   --danger-100: #fee2e2;
   --danger-200: #fecaca;
@@ -174,6 +181,7 @@
   --danger-700: #b91c1c;
   --danger-800: #991b1b;
   --danger-900: #7f1d1d;
+  --danger-950: #450a0a;
 
   --grid-color: transparent;
 }
@@ -201,7 +209,7 @@
   --ring: #f97316;
   --radius: 0.375rem; /* Industrial precision */
   --sidebar: #000000; /* COMPLETELY BLACK SIDEBAR */
-  --sidebar-foreground: #a1a1aa;
+  --sidebar-foreground: #e2e8f0;
 
   --primary-50: #fff7ed;
   --primary-100: #ffedd5;
@@ -224,6 +232,7 @@
   --secondary-700: #334155;
   --secondary-800: #1e293b;
   --secondary-900: #0f172a;
+  --secondary-950: #020617;
 
   --success-50: #ecfdf5;
   --success-100: #d1fae5;
@@ -235,6 +244,7 @@
   --success-700: #047857;
   --success-800: #065f46;
   --success-900: #064e3b;
+  --success-950: #022c22;
   --warning-50: #fffbeb;
   --warning-100: #fef3c7;
   --warning-200: #fde68a;
@@ -245,6 +255,7 @@
   --warning-700: #b45309;
   --warning-800: #92400e;
   --warning-900: #78350f;
+  --warning-950: #451a03;
   --danger-50: #fef2f2;
   --danger-100: #fee2e2;
   --danger-200: #fecaca;
@@ -255,8 +266,25 @@
   --danger-700: #b91c1c;
   --danger-800: #991b1b;
   --danger-900: #7f1d1d;
+  --danger-950: #450a0a;
 
   --grid-color: rgba(148, 163, 184, 0.12);
+}
+
+/* Industrial Theme Sidebar Override */
+[data-theme="industrial"] .bg-sidebar {
+  --foreground: var(--sidebar-foreground);
+  --color-foreground: var(--sidebar-foreground);
+  --muted-foreground: #94a3b8;
+  --color-muted-foreground: #94a3b8;
+  color: var(--sidebar-foreground);
+}
+
+[data-theme="industrial"] .bg-sidebar .text-foreground {
+  color: var(--sidebar-foreground);
+}
+[data-theme="industrial"] .bg-sidebar .text-muted-foreground {
+  color: #94a3b8;
 }
 
 /* 3. DARK MODE (Classic Neutral Dark) */
@@ -282,7 +310,7 @@
   --input: #3f3f46;
   --ring: #ffffff;
   --sidebar: #050505;
-  --sidebar-foreground: #71717a;
+  --sidebar-foreground: #fafafa;
   --radius: 0.5rem;
 
   --primary-50: #f9f9f9;

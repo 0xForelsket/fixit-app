@@ -1,32 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { UsersTable } from "@/components/users/users-table";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import {
-  Edit,
-  Plus,
-  Search,
-  Shield,
-  Upload,
-  User,
-  Users,
-  Wrench,
-} from "lucide-react";
+import { Plus, Search, Shield, Upload, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -124,30 +105,6 @@ export default async function UsersPage({
   const usersList = await getUsers(params);
   const stats = await getUserStats();
 
-  const roleConfigs: Record<
-    string,
-    { icon: React.ElementType; color: string; bg: string; border: string }
-  > = {
-    operator: {
-      icon: User,
-      color: "text-muted-foreground",
-      bg: "bg-muted",
-      border: "border-border",
-    },
-    tech: {
-      icon: Wrench,
-      color: "text-primary-700",
-      bg: "bg-primary-500/15",
-      border: "border-primary-500/30",
-    },
-    admin: {
-      icon: Shield,
-      color: "text-danger-700",
-      bg: "bg-danger-500/15",
-      border: "border-danger-500/30",
-    },
-  };
-
   return (
     <PageContainer className="space-y-6">
       {/* Header */}
@@ -242,151 +199,7 @@ export default async function UsersPage({
           icon={Users}
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
-          <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow className="border-b border-border hover:bg-transparent">
-                <SortHeader
-                  label="User"
-                  field="name"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-                />
-                <SortHeader
-                  label="Employee ID"
-                  field="employeeId"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:table-cell"
-                />
-                <SortHeader
-                  label="Email"
-                  field="email"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell"
-                />
-                <SortHeader
-                  label="Role"
-                  field="role"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-                />
-                <SortHeader
-                  label="Status"
-                  field="status"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Created"
-                  field="createdAt"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden xl:table-cell"
-                />
-                <TableHead className="p-5 w-24" />
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-border">
-              {usersList.map((user, index) => {
-                const roleName = user.assignedRole?.name || "operator";
-                const roleConfig =
-                  roleConfigs[roleName] || roleConfigs.operator;
-                const RoleIcon = roleConfig.icon;
-                const staggerClass =
-                  index < 5
-                    ? `animate-stagger-${index + 1}`
-                    : "animate-in fade-in duration-500";
-
-                return (
-                  <TableRow
-                    key={user.id}
-                    className={cn(
-                      "hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-bottom-1",
-                      staggerClass
-                    )}
-                  >
-                    <TableCell className="p-5">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border shadow-sm">
-                          <User className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-foreground text-sm font-serif-brand">
-                            {user.name}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-5 hidden md:table-cell">
-                      <span className="font-mono font-bold text-xs text-muted-foreground uppercase tracking-widest">
-                        {user.employeeId}
-                      </span>
-                    </TableCell>
-                    <TableCell className="p-5 hidden lg:table-cell">
-                      <span className="text-sm font-medium text-muted-foreground">
-                        {user.email || "—"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="p-5">
-                      <div className="flex flex-col gap-1">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider w-fit shadow-sm",
-                            roleConfig.bg,
-                            roleConfig.color,
-                            roleConfig.border
-                          )}
-                        >
-                          <RoleIcon className="h-3.5 w-3.5" />
-                          {roleName}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-5 hidden sm:table-cell">
-                      {user.isActive ? (
-                        <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/10 px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-success-700">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-muted-foreground">
-                          Inactive
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="p-5 hidden xl:table-cell">
-                      <span className="text-sm font-mono text-muted-foreground">
-                        {formatRelativeTime(user.createdAt)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="p-5 text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        asChild
-                        className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
-                      >
-                        <Link href={`/admin/users/${user.id}`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+        <UsersTable users={usersList} searchParams={params} />
       )}
     </PageContainer>
   );

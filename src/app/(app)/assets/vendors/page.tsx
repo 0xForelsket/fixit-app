@@ -1,15 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
-import { SortHeader } from "@/components/ui/sort-header";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { VendorsTable } from "@/components/vendors/vendors-table";
 import { db } from "@/db";
 import { vendors } from "@/db/schema";
 import { asc, desc, like, or } from "drizzle-orm";
@@ -107,89 +99,7 @@ export default async function VendorsPage({
           </Button>
         </EmptyState>
       ) : (
-        <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-          <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow>
-                <SortHeader
-                  label="Code"
-                  field="code"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                />
-                <SortHeader
-                  label="Name"
-                  field="name"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                />
-                <SortHeader
-                  label="Contact"
-                  field="contactPerson"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="hidden md:table-cell"
-                />
-                <SortHeader
-                  label="Phone"
-                  field="phone"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="hidden sm:table-cell"
-                />
-                <SortHeader
-                  label="Email"
-                  field="email"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="hidden lg:table-cell"
-                />
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {vendorList.map((vendor) => (
-                <TableRow key={vendor.id} className="group">
-                  <TableCell className="font-mono text-xs font-medium">
-                    {vendor.code}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <Link
-                      href={`/assets/vendors/${vendor.id}`}
-                      className="hover:underline decoration-primary underline-offset-4"
-                    >
-                      {vendor.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground">
-                    {vendor.contactPerson || "—"}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">
-                    {vendor.phone || "—"}
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell text-muted-foreground">
-                    {vendor.email || "—"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      asChild
-                    >
-                      <Link href={`/assets/vendors/${vendor.id}`}>Edit</Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <VendorsTable vendors={vendorList} searchParams={params} />
       )}
     </div>
   );
