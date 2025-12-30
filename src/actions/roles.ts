@@ -6,11 +6,42 @@ import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 import type { ActionResult } from "@/lib/types/actions";
 import { createRoleSchema, updateRoleSchema } from "@/lib/validations/roles";
-import { eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
-export async function getRoles() {
+export async function getRoles(params?: {
+  sort?: "name" | "description" | "userCount";
+  dir?: "asc" | "desc";
+}) {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
+
+  const orderBy = [];
+  if (params?.sort) {
+    const direction = params.dir === "asc" ? asc : desc;
+    switch (params.sort) {
+      case "name":
+        orderBy.push(direction(roles.name));
+        break;
+      case "description":
+        orderBy.push(direction(roles.description));
+        break;
+      case "userCount":
+        // Sorting by calculated field requires repeating the scalar subquery in orderBy or using sql fragment if supported.
+        // Drizzle 0.30+ supports ordering by aliased columns if selected.
+        // Let's try ordering by the sql fragment for now if aliasing issues arise.
+        orderBy.push(
+          direction(
+            sql<number>`(SELECT COUNT(*) FROM users WHERE users.role_id = roles.id)`
+          )
+        );
+        break;
+    }
+  }
+
+  // Default sort
+  if (orderBy.length === 0) {
+    orderBy.push(asc(roles.name));
+  }
 
   const rolesList = await db
     .select({
@@ -24,7 +55,7 @@ export async function getRoles() {
       userCount: sql<number>`(SELECT COUNT(*) FROM users WHERE users.role_id = roles.id)`,
     })
     .from(roles)
-    .orderBy(roles.name);
+    .orderBy(...orderBy);
 
   return rolesList;
 }

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { SortHeader } from "@/components/ui/sort-header";
 import {
   Table,
   TableBody,
@@ -11,23 +12,54 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/db";
 import { vendors } from "@/db/schema";
-import { desc, like, or } from "drizzle-orm";
+import { asc, desc, like, or } from "drizzle-orm";
 import { Factory, Plus, Search } from "lucide-react";
 import Link from "next/link";
 
 export default async function VendorsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    sort?: "name" | "code" | "contactPerson" | "phone" | "email";
+    dir?: "asc" | "desc";
+  }>;
 }) {
   const params = await searchParams;
   const query = params.q;
+
+  const orderBy = [];
+  if (params.sort) {
+    const direction = params.dir === "asc" ? asc : desc;
+    switch (params.sort) {
+      case "name":
+        orderBy.push(direction(vendors.name));
+        break;
+      case "code":
+        orderBy.push(direction(vendors.code));
+        break;
+      case "contactPerson":
+        orderBy.push(direction(vendors.contactPerson));
+        break;
+      case "phone":
+        orderBy.push(direction(vendors.phone));
+        break;
+      case "email":
+        orderBy.push(direction(vendors.email));
+        break;
+    }
+  }
+
+  // Default sort
+  if (orderBy.length === 0) {
+    orderBy.push(desc(vendors.createdAt));
+  }
 
   const vendorList = await db.query.vendors.findMany({
     where: query
       ? or(like(vendors.name, `%${query}%`), like(vendors.code, `%${query}%`))
       : undefined,
-    orderBy: [desc(vendors.createdAt)],
+    orderBy,
   });
 
   return (
@@ -79,11 +111,44 @@ export default async function VendorsPage({
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden md:table-cell">Contact</TableHead>
-                <TableHead className="hidden sm:table-cell">Phone</TableHead>
-                <TableHead className="hidden lg:table-cell">Email</TableHead>
+                <SortHeader
+                  label="Code"
+                  field="code"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                />
+                <SortHeader
+                  label="Name"
+                  field="name"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                />
+                <SortHeader
+                  label="Contact"
+                  field="contactPerson"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="hidden md:table-cell"
+                />
+                <SortHeader
+                  label="Phone"
+                  field="phone"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="hidden sm:table-cell"
+                />
+                <SortHeader
+                  label="Email"
+                  field="email"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="hidden lg:table-cell"
+                />
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>

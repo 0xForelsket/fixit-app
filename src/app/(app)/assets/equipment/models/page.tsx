@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SortHeader } from "@/components/ui/sort-header";
 import {
   Table,
   TableBody,
@@ -10,17 +11,46 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/db";
+import { equipmentModels } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { asc, desc } from "drizzle-orm";
 import { Package, Plus } from "lucide-react";
 import Link from "next/link";
 
-export default async function EquipmentModelsPage() {
+export default async function EquipmentModelsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    sort?: "name" | "manufacturer";
+    dir?: "asc" | "desc";
+  }>;
+}) {
+  const params = await searchParams;
+
+  const orderBy = [];
+  if (params.sort) {
+    const direction = params.dir === "asc" ? asc : desc;
+    switch (params.sort) {
+      case "name":
+        orderBy.push(direction(equipmentModels.name));
+        break;
+      case "manufacturer":
+        orderBy.push(direction(equipmentModels.manufacturer));
+        break;
+    }
+  }
+
+  // Default sort
+  if (orderBy.length === 0) {
+    orderBy.push(desc(equipmentModels.id));
+  }
+
   const models = await db.query.equipmentModels.findMany({
     with: {
       equipment: true,
       bom: true,
     },
-    orderBy: (models, { desc }) => [desc(models.id)],
+    orderBy,
   });
 
   return (
@@ -46,8 +76,22 @@ export default async function EquipmentModelsPage() {
         <Table className="w-full text-sm">
           <TableHeader className="bg-slate-50">
             <TableRow className="text-left font-medium text-muted-foreground">
-              <TableHead className="p-3">Model Name</TableHead>
-              <TableHead className="p-3">Manufacturer</TableHead>
+              <SortHeader
+                label="Model Name"
+                field="name"
+                currentSort={params.sort}
+                currentDir={params.dir}
+                params={params}
+                className="p-3"
+              />
+              <SortHeader
+                label="Manufacturer"
+                field="manufacturer"
+                currentSort={params.sort}
+                currentDir={params.dir}
+                params={params}
+                className="p-3"
+              />
               <TableHead className="p-3">Equipment</TableHead>
               <TableHead className="p-3">BOM Parts</TableHead>
               <TableHead className="p-3 w-20" />

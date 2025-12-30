@@ -1,6 +1,10 @@
 import { getRoles } from "@/actions/roles";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageContainer } from "@/components/ui/page-container";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatsTicker } from "@/components/ui/stats-ticker";
+import { SortHeader } from "@/components/ui/sort-header";
 import {
   Table,
   TableBody,
@@ -14,31 +18,59 @@ import { Edit, Plus, Shield, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 import { DeleteRoleButton } from "./delete-role-button";
 
-export default async function RolesPage() {
-  const roles = await getRoles();
+export default async function RolesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    sort?: "name" | "description" | "userCount";
+    dir?: "asc" | "desc";
+  }>;
+}) {
+  const params = await searchParams;
+  const roles = await getRoles(params);
 
   return (
-    <div className="space-y-10 animate-in">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-zinc-200 pb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">
-            Role <span className="text-primary-600">Management</span>
-          </h1>
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
-            <Shield className="h-3.5 w-3.5" />
-            {roles.length} ROLES CONFIGURED
-          </div>
-        </div>
-        <Button
-          asChild
-          className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold shadow-lg shadow-primary-500/25"
-        >
-          <Link href="/admin/roles/new">
-            <Plus className="mr-2 h-4 w-4" />
-            CREATE ROLE
-          </Link>
-        </Button>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Role Management"
+        subtitle="Access Control"
+        description={`${roles.length} ROLES CONFIGURED`}
+        bgSymbol="RO"
+        actions={
+          <Button
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+          >
+            <Link href="/admin/roles/new">
+              <Plus className="mr-2 h-4 w-4" />
+              CREATE ROLE
+            </Link>
+          </Button>
+        }
+      />
+
+      <StatsTicker
+        stats={[
+          {
+            label: "Total Roles",
+            value: roles.length,
+            icon: Shield,
+            variant: "default",
+          },
+          {
+            label: "System Roles",
+            value: roles.filter((r) => r.isSystemRole).length,
+            icon: ShieldCheck,
+            variant: "primary",
+          },
+          {
+            label: "Custom Roles",
+            value: roles.filter((r) => !r.isSystemRole).length,
+            icon: Shield,
+            variant: "default",
+          },
+        ]}
+      />
 
       {roles.length === 0 ? (
         <EmptyState
@@ -47,26 +79,41 @@ export default async function RolesPage() {
           icon={Shield}
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/80 backdrop-blur-sm shadow-xl shadow-zinc-200/20">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
           <Table className="w-full text-left border-collapse">
-            <TableHeader>
-              <TableRow className="border-b border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/50">
-                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                  Role
-                </TableHead>
-                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">
-                  Description
-                </TableHead>
-                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden lg:table-cell">
+            <TableHeader className="bg-muted/50">
+              <TableRow className="border-b border-border bg-transparent hover:bg-transparent">
+                <SortHeader
+                  label="Role"
+                  field="name"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                />
+                <SortHeader
+                  label="Description"
+                  field="description"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:table-cell"
+                />
+                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell">
                   Permissions
                 </TableHead>
-                <TableHead className="p-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                  Users
-                </TableHead>
+                <SortHeader
+                  label="Users"
+                  field="userCount"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+                />
                 <TableHead className="p-5 w-28" />
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-zinc-100">
+            <TableBody className="divide-y divide-border">
               {roles.map((role, index) => {
                 const staggerClass =
                   index < 5
@@ -76,7 +123,7 @@ export default async function RolesPage() {
                   <TableRow
                     key={role.id}
                     className={cn(
-                      "hover:bg-primary-50/30 transition-colors group animate-in fade-in slide-in-from-bottom-1",
+                      "hover:bg-muted/50 transition-colors group animate-in fade-in slide-in-from-bottom-1",
                       staggerClass
                     )}
                   >
@@ -97,7 +144,7 @@ export default async function RolesPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-black text-zinc-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+                          <p className="font-black text-foreground group-hover:text-primary transition-colors uppercase tracking-tight">
                             {role.name}
                           </p>
                           {role.isSystemRole && (
@@ -109,7 +156,7 @@ export default async function RolesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="p-5 hidden md:table-cell">
-                      <span className="text-sm text-zinc-600">
+                      <span className="text-sm text-muted-foreground">
                         {role.description || "—"}
                       </span>
                     </TableCell>
@@ -120,14 +167,14 @@ export default async function RolesPage() {
                             ALL PERMISSIONS
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-zinc-600">
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted px-3 py-1 text-[11px] font-black uppercase tracking-wider text-muted-foreground">
                             {role.permissions.length} PERMISSIONS
                           </span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell className="p-5">
-                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-600 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200/50 w-fit">
+                      <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border w-fit">
                         <Users className="h-3.5 w-3.5" />
                         {role.userCount}
                       </div>
@@ -138,7 +185,7 @@ export default async function RolesPage() {
                           variant="ghost"
                           size="icon"
                           asChild
-                          className="rounded-xl hover:bg-primary-500 hover:text-white transition-all"
+                          className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all"
                         >
                           <Link href={`/admin/roles/${role.id}`}>
                             <Edit className="h-4 w-4" />
@@ -160,6 +207,6 @@ export default async function RolesPage() {
           </Table>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -1,6 +1,7 @@
 import { SchedulerButton } from "@/components/maintenance/scheduler-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SortHeader } from "@/components/ui/sort-header";
 import {
   Table,
   TableBody,
@@ -13,7 +14,7 @@ import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { desc } from "drizzle-orm";
+import { asc, desc } from "drizzle-orm";
 import {
   ArrowLeft,
   Calendar,
@@ -29,9 +30,12 @@ import Link from "next/link";
 type SearchParams = {
   search?: string;
   type?: string;
+  sort?: "title" | "equipment" | "frequency" | "nextDue" | "status";
+  dir?: "asc" | "desc";
 };
 
 async function getSchedules(params: SearchParams) {
+  // Fetch all for stats calculation
   const allSchedules = await db.query.maintenanceSchedules.findMany({
     with: {
       equipment: {
@@ -43,7 +47,7 @@ async function getSchedules(params: SearchParams) {
     orderBy: [desc(maintenanceSchedules.nextDue)],
   });
 
-  let filtered = allSchedules;
+  let filtered = [...allSchedules];
 
   if (params.search) {
     const search = params.search.toLowerCase();
@@ -58,7 +62,41 @@ async function getSchedules(params: SearchParams) {
     filtered = filtered.filter((s) => s.type === params.type);
   }
 
-  return filtered;
+  if (params.sort) {
+    filtered.sort((a, b) => {
+      let valA: string | number | boolean | Date = "";
+      let valB: string | number | boolean | Date = "";
+
+      switch (params.sort) {
+        case "title":
+          valA = a.title.toLowerCase();
+          valB = b.title.toLowerCase();
+          break;
+        case "equipment":
+          valA = a.equipment?.name.toLowerCase() || "";
+          valB = b.equipment?.name.toLowerCase() || "";
+          break;
+        case "frequency":
+          valA = a.frequencyDays;
+          valB = b.frequencyDays;
+          break;
+        case "nextDue":
+          valA = a.nextDue ? new Date(a.nextDue).getTime() : 0;
+          valB = b.nextDue ? new Date(b.nextDue).getTime() : 0;
+          break;
+        case "status":
+          valA = a.isActive ? 1 : 0;
+          valB = b.isActive ? 1 : 0;
+          break;
+      }
+
+      if (valA < valB) return params.dir === "desc" ? 1 : -1;
+      if (valA > valB) return params.dir === "desc" ? -1 : 1;
+      return 0;
+    });
+  }
+
+  return { filtered, allSchedules };
 }
 
 export default async function SchedulesPage({
@@ -68,18 +106,18 @@ export default async function SchedulesPage({
 }) {
   const user = await getCurrentUser();
   const params = await searchParams;
-  const schedules = await getSchedules(params);
+  const { filtered: schedules, allSchedules } = await getSchedules(params);
   const today = new Date();
 
   // Stats
-  const activeCount = schedules.filter((s) => s.isActive).length;
-  const maintenanceCount = schedules.filter(
+  const activeCount = allSchedules.filter((s) => s.isActive).length;
+  const maintenanceCount = allSchedules.filter(
     (s) => s.type === "maintenance"
   ).length;
-  const calibrationCount = schedules.filter(
+  const calibrationCount = allSchedules.filter(
     (s) => s.type === "calibration"
   ).length;
-  const overdueCount = schedules.filter((s) => {
+  const overdueCount = allSchedules.filter((s) => {
     if (!s.nextDue || !s.isActive) return false;
     return new Date(s.nextDue) < today;
   }).length;
@@ -207,17 +245,46 @@ export default async function SchedulesPage({
           <Table className="w-full text-sm">
             <TableHeader className="bg-slate-50">
               <TableRow className="border-b text-left font-medium text-muted-foreground hover:bg-transparent">
-                <TableHead className="p-3">Schedule</TableHead>
-                <TableHead className="p-3 hidden md:table-cell">
-                  Equipment
-                </TableHead>
-                <TableHead className="p-3 hidden lg:table-cell">
-                  Frequency
-                </TableHead>
-                <TableHead className="p-3">Next Due</TableHead>
-                <TableHead className="p-3 hidden sm:table-cell">
-                  Status
-                </TableHead>
+                <SortHeader
+                  label="Schedule"
+                  field="title"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-3"
+                />
+                <SortHeader
+                  label="Equipment"
+                  field="equipment"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-3 hidden md:table-cell"
+                />
+                <SortHeader
+                  label="Frequency"
+                  field="frequency"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-3 hidden lg:table-cell"
+                />
+                <SortHeader
+                  label="Next Due"
+                  field="nextDue"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-3"
+                />
+                <SortHeader
+                  label="Status"
+                  field="status"
+                  currentSort={params.sort}
+                  currentDir={params.dir}
+                  params={params}
+                  className="p-3 hidden sm:table-cell"
+                />
                 <TableHead className="p-3 w-10" />
               </TableRow>
             </TableHeader>

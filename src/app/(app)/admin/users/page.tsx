@@ -1,8 +1,10 @@
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageContainer } from "@/components/ui/page-container";
+import { PageHeader } from "@/components/ui/page-header";
 import { SortHeader } from "@/components/ui/sort-header";
-import { StatsCard } from "@/components/ui/stats-card";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import {
   Table,
   TableBody,
@@ -147,73 +149,67 @@ export default async function UsersPage({
   };
 
   return (
-    <div className="space-y-6">
+    <PageContainer className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-foreground uppercase font-serif-brand">
-            User <span className="text-primary">Directory</span>
-          </h1>
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-            <Users className="h-3.5 w-3.5" />
-            {stats.total} ACCOUNTS • {stats.active} ACTIVE
+      <PageHeader
+        title="User Directory"
+        subtitle="Team Management"
+        description={`${stats.total} ACCOUNTS • ${stats.active} ACTIVE`}
+        bgSymbol="US"
+        actions={
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              asChild
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
+              <Link href="/admin/import?type=users">
+                <Upload className="mr-2 h-4 w-4" />
+                BULK IMPORT
+              </Link>
+            </Button>
+            <Button
+              asChild
+              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+            >
+              <Link href="/admin/users/new">
+                <Plus className="mr-2 h-4 w-4" />
+                ADD USER
+              </Link>
+            </Button>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" asChild>
-            <Link href="/admin/import?type=users">
-              <Upload className="mr-2 h-4 w-4" />
-              BULK IMPORT
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/admin/users/new">
-              <Plus className="mr-2 h-4 w-4" />
-              ADD USER
-            </Link>
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatsCard
-          title="Operators"
-          value={stats.operators}
-          icon={User}
-          variant="secondary"
-          href="?role=operator"
-          active={params.role === "operator"}
-          className="animate-stagger-1 animate-in"
-        />
-        <StatsCard
-          title="Technicians"
-          value={stats.techs}
-          icon={Wrench}
-          variant="primary"
-          href="?role=tech"
-          active={params.role === "tech"}
-          className="animate-stagger-2 animate-in"
-        />
-        <StatsCard
-          title="Admins"
-          value={stats.admins}
-          icon={Shield}
-          variant="danger"
-          href="?role=admin"
-          active={params.role === "admin"}
-          className="animate-stagger-3 animate-in"
-        />
-        <StatsCard
-          title="All Users"
-          value={stats.total}
-          icon={Users}
-          variant="success"
-          href="/admin/users"
-          active={!params.role || params.role === "all"}
-          className="animate-stagger-4 animate-in"
-        />
-      </div>
+      {/* Stats Ticker */}
+      <StatsTicker
+        stats={[
+          {
+            label: "All Users",
+            value: stats.total,
+            icon: Users,
+            variant: "default",
+          },
+          {
+            label: "Operators",
+            value: stats.operators,
+            icon: User,
+            variant: "default",
+          },
+          {
+            label: "Technicians",
+            value: stats.techs,
+            icon: Wrench,
+            variant: "primary",
+          },
+          {
+            label: "Admins",
+            value: stats.admins,
+            icon: Shield,
+            variant: "danger",
+          },
+        ]}
+      />
 
       {/* Search */}
       <div className="flex items-center gap-3">
@@ -223,9 +219,9 @@ export default async function UsersPage({
             <input
               type="text"
               name="search"
-              placeholder="Filter by name or employee ID..."
+              placeholder="FILTER BY NAME OR ID..."
               defaultValue={params.search}
-              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
             />
             {params.role && (
               <input type="hidden" name="role" value={params.role} />
@@ -246,17 +242,17 @@ export default async function UsersPage({
           icon={Users}
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
           <Table>
             <TableHeader className="bg-muted/50">
-              <TableRow className="border-b border-border text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+              <TableRow className="border-b border-border hover:bg-transparent">
                 <SortHeader
                   label="User"
                   field="name"
                   currentSort={params.sort}
                   currentDir={params.dir}
                   params={params}
-                  className="p-4"
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 />
                 <SortHeader
                   label="Employee ID"
@@ -264,7 +260,7 @@ export default async function UsersPage({
                   currentSort={params.sort}
                   currentDir={params.dir}
                   params={params}
-                  className="p-4 hidden md:table-cell"
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:table-cell"
                 />
                 <SortHeader
                   label="Email"
@@ -272,7 +268,7 @@ export default async function UsersPage({
                   currentSort={params.sort}
                   currentDir={params.dir}
                   params={params}
-                  className="p-4 hidden lg:table-cell"
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell"
                 />
                 <SortHeader
                   label="Role"
@@ -280,7 +276,7 @@ export default async function UsersPage({
                   currentSort={params.sort}
                   currentDir={params.dir}
                   params={params}
-                  className="p-4"
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 />
                 <SortHeader
                   label="Status"
@@ -288,7 +284,7 @@ export default async function UsersPage({
                   currentSort={params.sort}
                   currentDir={params.dir}
                   params={params}
-                  className="p-4 hidden sm:table-cell"
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
                 />
                 <SortHeader
                   label="Created"
@@ -296,9 +292,9 @@ export default async function UsersPage({
                   currentSort={params.sort}
                   currentDir={params.dir}
                   params={params}
-                  className="p-4 hidden xl:table-cell"
+                  className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden xl:table-cell"
                 />
-                <TableHead className="p-4" />
+                <TableHead className="p-5 w-24" />
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-border">
@@ -320,68 +316,65 @@ export default async function UsersPage({
                       staggerClass
                     )}
                   >
-                    <TableCell className="p-4">
+                    <TableCell className="p-5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted border border-border">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border shadow-sm">
                           <User className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">
+                          <p className="font-bold text-foreground text-sm font-serif-brand">
                             {user.name}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="p-4 hidden md:table-cell">
-                      <Badge
-                        variant="outline"
-                        className="font-mono text-xs border-border text-muted-foreground"
-                      >
+                    <TableCell className="p-5 hidden md:table-cell">
+                      <span className="font-mono font-bold text-xs text-muted-foreground uppercase tracking-widest">
                         {user.employeeId}
-                      </Badge>
+                      </span>
                     </TableCell>
-                    <TableCell className="p-4 hidden lg:table-cell">
-                      <span className="text-sm text-muted-foreground">
+                    <TableCell className="p-5 hidden lg:table-cell">
+                      <span className="text-sm font-medium text-muted-foreground">
                         {user.email || "—"}
                       </span>
                     </TableCell>
-                    <TableCell className="p-4">
+                    <TableCell className="p-5">
                       <div className="flex flex-col gap-1">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-black tracking-wider w-fit",
+                            "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider w-fit shadow-sm",
                             roleConfig.bg,
                             roleConfig.color,
                             roleConfig.border
                           )}
                         >
                           <RoleIcon className="h-3.5 w-3.5" />
-                          {roleName.toUpperCase()}
+                          {roleName}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="p-4 hidden sm:table-cell">
+                    <TableCell className="p-5 hidden sm:table-cell">
                       {user.isActive ? (
-                        <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/15 px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-success-700">
+                        <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/10 px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-success-700">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex items-center rounded-full border border-muted-foreground/30 bg-muted px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-muted-foreground">
+                        <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-muted-foreground">
                           Inactive
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="p-4 hidden xl:table-cell">
-                      <span className="text-sm text-muted-foreground">
+                    <TableCell className="p-5 hidden xl:table-cell">
+                      <span className="text-sm font-mono text-muted-foreground">
                         {formatRelativeTime(user.createdAt)}
                       </span>
                     </TableCell>
-                    <TableCell className="p-4">
+                    <TableCell className="p-5 text-right">
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         asChild
-                        className="text-muted-foreground hover:text-primary"
+                        className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
                       >
                         <Link href={`/admin/users/${user.id}`}>
                           <Edit className="h-4 w-4" />
@@ -395,6 +388,6 @@ export default async function UsersPage({
           </Table>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

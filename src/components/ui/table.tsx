@@ -1,3 +1,5 @@
+"use client"
+
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
@@ -67,17 +69,58 @@ TableRow.displayName = "TableRow";
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
-  React.ThHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
-  <th
-    ref={ref}
-    className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
-      className
-    )}
-    {...props}
-  />
-));
+  React.ThHTMLAttributes<HTMLTableCellElement> & { resizable?: boolean }
+>(({ className, resizable = true, children, ...props }, ref) => {
+  const internalRef = React.useRef<HTMLTableCellElement>(null);
+
+  React.useImperativeHandle(ref, () => internalRef.current as HTMLTableCellElement);
+
+  const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const th = internalRef.current;
+    if (!th) return;
+
+    const startX = e.pageX;
+    const startWidth = th.offsetWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = Math.max(50, startWidth + (moveEvent.pageX - startX)); // Min width 50px
+      th.style.width = `${newWidth}px`;
+      
+      // Also set min-width to ensure it sticks
+      th.style.minWidth = `${newWidth}px`;
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      // Optional: Reset cursor or active state if you add one
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, []);
+
+  return (
+    <th
+      ref={internalRef}
+      className={cn(
+        "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 relative group", // Added relative & group
+        className
+      )}
+      {...props}
+    >
+      {children}
+      {resizable && (
+        <div
+          onMouseDown={handleMouseDown}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/50 group-hover:bg-primary/20 transition-colors z-10"
+        />
+      )}
+    </th>
+  );
+});
 TableHead.displayName = "TableHead";
 
 const TableCell = React.forwardRef<

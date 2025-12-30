@@ -1,8 +1,10 @@
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageContainer } from "@/components/ui/page-container";
+import { PageHeader } from "@/components/ui/page-header";
 import { SortHeader } from "@/components/ui/sort-header";
-import { StatsCard } from "@/components/ui/stats-card";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import {
   Table,
   TableBody,
@@ -117,60 +119,63 @@ export default async function LocationsPage({
   const stats = await getLocationStats();
 
   return (
-    <div className="space-y-6">
+    <PageContainer className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-8">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-foreground uppercase font-serif-brand">
-            Facility <span className="text-primary">Locations</span>
-          </h1>
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-            <MapPin className="h-3.5 w-3.5" />
-            {stats.total} ZONES • {stats.roots} ROOT AREAS
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <ViewToggle />
-          <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-          <Button variant="outline" asChild>
-            <Link href="/admin/import?type=locations">
-              <Upload className="mr-2 h-4 w-4" />
-              BULK IMPORT
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link href="/assets/locations/new">
-              <Plus className="mr-2 h-4 w-4" />
-              ADD LOCATION
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Facility Locations"
+        subtitle="Infrastructure Mapping"
+        description={`${stats.total} ZONES • ${stats.roots} ROOT AREAS`}
+        bgSymbol="LO"
+        actions={
+          <>
+            <ViewToggle />
+            <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
+            <Button
+              variant="outline"
+              asChild
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
+              <Link href="/admin/import?type=locations">
+                <Upload className="mr-2 h-4 w-4" />
+                BULK IMPORT
+              </Link>
+            </Button>
+            <Button
+              asChild
+              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+            >
+              <Link href="/assets/locations/new">
+                <Plus className="mr-2 h-4 w-4" />
+                ADD LOCATION
+              </Link>
+            </Button>
+          </>
+        }
+      />
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatsCard
-          title="Total Locations"
-          value={stats.total}
-          icon={MapPin}
-          variant="primary"
-          className="animate-stagger-1 animate-in"
-        />
-        <StatsCard
-          title="Root Areas"
-          value={stats.roots}
-          icon={Building}
-          variant="secondary"
-          className="animate-stagger-2 animate-in"
-        />
-        <StatsCard
-          title="Active"
-          value={stats.active}
-          icon={FolderTree}
-          variant="success"
-          className="animate-stagger-3 animate-in"
-        />
-      </div>
+      {/* Stats Ticker */}
+      <StatsTicker
+        stats={[
+          {
+            label: "Total Locations",
+            value: stats.total,
+            icon: MapPin,
+            variant: "default",
+          },
+          {
+            label: "Root Areas",
+            value: stats.roots,
+            icon: Building,
+            variant: "default",
+          },
+          {
+            label: "Active Zones",
+            value: stats.active,
+            icon: FolderTree,
+            variant: "success",
+          },
+        ]}
+      />
 
       {/* Search */}
       <div className="flex items-center gap-3">
@@ -184,9 +189,9 @@ export default async function LocationsPage({
             <input
               type="text"
               name="search"
-              placeholder="Search by name or code..."
+              placeholder="SEARCH BY NAME OR CODE..."
               defaultValue={params.search}
-              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
             />
           </div>
         </form>
@@ -216,17 +221,17 @@ export default async function LocationsPage({
               icon={MapPin}
             />
           ) : (
-            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-border/20">
               <Table>
                 <TableHeader className="bg-muted/50">
-                  <TableRow className="border-b border-border text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+                  <TableRow className="border-b border-border hover:bg-transparent">
                     <SortHeader
                       label="Location"
                       field="name"
                       currentSort={params.sort}
                       currentDir={params.dir}
                       params={params}
-                      className="p-4"
+                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                     />
                     <SortHeader
                       label="Code"
@@ -234,7 +239,7 @@ export default async function LocationsPage({
                       currentSort={params.sort}
                       currentDir={params.dir}
                       params={params}
-                      className="p-4 hidden md:table-cell"
+                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:table-cell"
                     />
                     <SortHeader
                       label="Parent"
@@ -242,7 +247,7 @@ export default async function LocationsPage({
                       currentSort={params.sort}
                       currentDir={params.dir}
                       params={params}
-                      className="p-4 hidden lg:table-cell"
+                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell"
                     />
                     <SortHeader
                       label="Status"
@@ -250,7 +255,7 @@ export default async function LocationsPage({
                       currentSort={params.sort}
                       currentDir={params.dir}
                       params={params}
-                      className="p-4"
+                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                     />
                     <SortHeader
                       label="Created"
@@ -258,9 +263,9 @@ export default async function LocationsPage({
                       currentSort={params.sort}
                       currentDir={params.dir}
                       params={params}
-                      className="p-4 hidden sm:table-cell"
+                      className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
                     />
-                    <TableHead className="p-4" />
+                    <TableHead className="p-5 w-24" />
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-border">
@@ -277,65 +282,62 @@ export default async function LocationsPage({
                           staggerClass
                         )}
                       >
-                        <TableCell className="p-4">
+                        <TableCell className="p-5">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                              <MapPin className="h-5 w-5 text-primary" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted border border-border shadow-sm">
+                              <MapPin className="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div>
-                              <p className="font-medium text-foreground">
+                              <p className="font-bold text-foreground text-sm font-serif-brand">
                                 {location.name}
                               </p>
                               {location.description && (
-                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                <p className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground line-clamp-1 mt-0.5">
                                   {location.description}
                                 </p>
                               )}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="p-4 hidden md:table-cell">
-                          <Badge
-                            variant="outline"
-                            className="font-mono text-xs border-border text-muted-foreground"
-                          >
+                        <TableCell className="p-5 hidden md:table-cell">
+                          <span className="font-mono font-bold text-xs text-muted-foreground uppercase tracking-widest">
                             {location.code}
-                          </Badge>
+                          </span>
                         </TableCell>
-                        <TableCell className="p-4 hidden lg:table-cell">
+                        <TableCell className="p-5 hidden lg:table-cell">
                           {location.parent ? (
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <ChevronRight className="h-3.5 w-3.5" />
+                            <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                               {location.parent.name}
                             </div>
                           ) : (
-                            <span className="text-sm text-muted-foreground">
-                              Root
+                            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/50 bg-muted/50 px-2 py-1 rounded">
+                              ROOT
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="p-4">
+                        <TableCell className="p-5">
                           {location.isActive ? (
-                            <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/15 px-2.5 py-0.5 text-xs font-medium text-success-700">
+                            <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/10 px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-success-700">
                               Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center rounded-full border border-muted-foreground/30 bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                            <span className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase text-muted-foreground">
                               Inactive
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="p-4 hidden sm:table-cell">
-                          <span className="text-sm text-muted-foreground">
+                        <TableCell className="p-5 hidden sm:table-cell">
+                          <span className="text-sm font-mono text-muted-foreground">
                             {formatRelativeTime(location.createdAt)}
                           </span>
                         </TableCell>
-                        <TableCell className="p-4">
+                        <TableCell className="p-5 text-right">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
                             asChild
-                            className="text-muted-foreground hover:text-primary"
+                            className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
                           >
                             <Link href={`/assets/locations/${location.id}`}>
                               <Edit className="h-4 w-4" />
@@ -351,6 +353,6 @@ export default async function LocationsPage({
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
