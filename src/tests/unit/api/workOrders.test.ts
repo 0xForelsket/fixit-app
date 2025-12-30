@@ -1,4 +1,4 @@
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
+import type { SessionUser } from "@/lib/session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/db", () => ({
@@ -128,14 +128,17 @@ describe("POST /api/work-orders", () => {
       reset: Date.now() + 60000,
     });
     vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    vi.mocked(requireAuth).mockResolvedValue({
+    const mockUser: SessionUser = {
       id: 1,
       employeeId: "TECH-001",
       name: "Test User",
-      roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      roleName: "tech",
+      departmentId: 1,
+      permissions: ["ticket:create", "ticket:view"],
+      hourlyRate: 25.0,
+    };
+    vi.mocked(requireAuth).mockResolvedValue(mockUser);
 
     const request = new Request("http://localhost/api/work-orders", {
       method: "POST",

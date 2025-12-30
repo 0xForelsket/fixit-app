@@ -13,20 +13,24 @@ test.describe("Marketing Landing Page", () => {
     await expect(page.locator("h1")).toContainText("Maintenance");
   });
 
-  test("should have CTA buttons pointing to app subdomain", async ({ page }) => {
+  test("should have CTA buttons pointing to app subdomain", async ({
+    page,
+  }) => {
     await page.goto("/");
-    
+
     // Check for "Get Started" and "Start Managing" buttons
     const getStartedBtn = page.getByRole("link", { name: /Get Started/i });
     await expect(getStartedBtn).toBeVisible();
-    
-    const startManagingBtn = page.getByRole("link", { name: /Start Managing/i });
+
+    const startManagingBtn = page.getByRole("link", {
+      name: /Start Managing/i,
+    });
     await expect(startManagingBtn).toBeVisible();
   });
 
   test("should display feature sections", async ({ page }) => {
     await page.goto("/");
-    
+
     // Check for feature cards
     await expect(page.locator("text=Asset Intelligence")).toBeVisible();
     await expect(page.locator("text=Preventative Scheduling")).toBeVisible();

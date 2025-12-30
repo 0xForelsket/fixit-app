@@ -80,7 +80,7 @@ describe("EmptyState", () => {
   it("renders children when provided", () => {
     render(
       <EmptyState title="No items">
-        <button>Custom action</button>
+        <button type="button">Custom action</button>
       </EmptyState>
     );
     expect(

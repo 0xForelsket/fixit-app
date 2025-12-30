@@ -1,7 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { vendors, type NewVendor } from "@/db/schema";
+import { vendors } from "@/db/schema";
+import { logAudit } from "@/lib/audit";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -27,15 +28,28 @@ export async function createVendor(data: z.infer<typeof vendorSchema>) {
 
   // TODO: Add permission check for INVENTORY_CREATE
 
-  await db.insert(vendors).values({
-    ...data,
+  const [vendor] = await db
+    .insert(vendors)
+    .values({
+      ...data,
+    })
+    .returning();
+
+  await logAudit({
+    entityType: "vendor",
+    entityId: vendor.id,
+    action: "CREATE",
+    details: data,
   });
 
   revalidatePath("/assets/vendors");
   redirect("/assets/vendors");
 }
 
-export async function updateVendor(id: number, data: z.infer<typeof vendorSchema>) {
+export async function updateVendor(
+  id: number,
+  data: z.infer<typeof vendorSchema>
+) {
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Unauthorized");
@@ -44,6 +58,13 @@ export async function updateVendor(id: number, data: z.infer<typeof vendorSchema
   // TODO: Add permission check for INVENTORY_UPDATE
 
   await db.update(vendors).set(data).where(eq(vendors.id, id));
+
+  await logAudit({
+    entityType: "vendor",
+    entityId: id,
+    action: "UPDATE",
+    details: data,
+  });
 
   revalidatePath("/assets/vendors");
   revalidatePath(`/assets/vendors/${id}`);
@@ -58,10 +79,14 @@ export async function deleteVendor(id: number) {
 
   // TODO: Add permission check for INVENTORY_DELETE
 
-  // Soft delete or hard delete? Schema has isActive, let's use that or hard delete.
-  // For now, let's just toggle isActive to false (soft delete approach often prefered in industrial)
-  // But wait, schema says isActive default true. Let's just update isActive.
   await db.update(vendors).set({ isActive: false }).where(eq(vendors.id, id));
+
+  await logAudit({
+    entityType: "vendor",
+    entityId: id,
+    action: "DELETE",
+    details: { reason: "Soft delete (isActive=false)" },
+  });
 
   revalidatePath("/assets/vendors");
 }

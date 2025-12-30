@@ -46,6 +46,7 @@ export default function ApiDocsPage() {
           crossOrigin="anonymous"
         />
         <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: Required for Swagger UI initialization script
           dangerouslySetInnerHTML={{
             __html: `
               window.onload = function() {

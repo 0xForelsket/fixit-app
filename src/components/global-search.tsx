@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Command } from "cmdk";
 import {
-  Box,
   FileText,
   LayoutDashboard,
   Loader2,
@@ -147,6 +146,10 @@ export function GlobalSearch({ showTrigger = false }: GlobalSearchProps) {
           <div
             className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             onClick={() => setOpen(false)}
+            onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
+            role="button"
+            tabIndex={0}
+            aria-label="Close search"
           />
 
           {/* Dialog */}
@@ -226,7 +229,9 @@ export function GlobalSearch({ showTrigger = false }: GlobalSearchProps) {
 
               <div className="flex items-center justify-between border-t px-3 py-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <kbd className="rounded border bg-muted px-1.5 py-0.5">↑↓</kbd>
+                  <kbd className="rounded border bg-muted px-1.5 py-0.5">
+                    ↑↓
+                  </kbd>
                   <span>Navigate</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -234,7 +239,9 @@ export function GlobalSearch({ showTrigger = false }: GlobalSearchProps) {
                   <span>Select</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <kbd className="rounded border bg-muted px-1.5 py-0.5">esc</kbd>
+                  <kbd className="rounded border bg-muted px-1.5 py-0.5">
+                    esc
+                  </kbd>
                   <span>Close</span>
                 </div>
               </div>

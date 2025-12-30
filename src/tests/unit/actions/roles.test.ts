@@ -1,4 +1,5 @@
 import { createRole, deleteRole, updateRole } from "@/actions/roles";
+import type { SessionUser } from "@/lib/session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
@@ -42,16 +43,20 @@ import { db } from "@/db";
 import { requirePermission } from "@/lib/auth";
 
 describe("roles actions", () => {
+  const mockUser: SessionUser = {
+    id: 1,
+    name: "Admin",
+    employeeId: "ADMIN-001",
+    roleId: 3,
+    roleName: "admin",
+    departmentId: 1,
+    permissions: ["*"],
+    hourlyRate: 50.0,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(requirePermission).mockResolvedValue({
-      id: 1,
-      employeeId: "ADMIN-001",
-      name: "Admin",
-      roleName: "admin",
-      roleId: 3,
-      permissions: ["*"],
-    });
+    vi.mocked(requirePermission).mockResolvedValue(mockUser);
   });
 
   describe("createRole", () => {
@@ -117,7 +122,7 @@ describe("roles actions", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.id).toBe(5);
+        expect(result.data?.id).toBe(5);
       }
     });
   });
@@ -305,6 +310,8 @@ describe("roles actions", () => {
         failedLoginAttempts: 0,
         lockedUntil: null,
         email: null,
+        departmentId: null,
+        preferences: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

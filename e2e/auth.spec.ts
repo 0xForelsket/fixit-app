@@ -43,17 +43,19 @@ test.describe("Authentication", () => {
 
   test("should logout successfully", async ({ page, loginAsAdmin }) => {
     await loginAsAdmin();
-    
+
     // Navigate to a page with the sidebar layout (like admin/users which has sidebar)
     await page.goto("/admin/users");
     await page.waitForLoadState("networkidle");
-    
+
     // Look for the Sign Out button in sidebar
     const signOutBtn = page.locator('button:has-text("Sign Out")');
-    
+
     // Wait for the button to be visible and click
-    const isVisible = await signOutBtn.isVisible({ timeout: 5000 }).catch(() => false);
-    
+    const isVisible = await signOutBtn
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
+
     if (isVisible) {
       await signOutBtn.click({ force: true });
       await page.waitForURL(/\/login/, { timeout: 10000 });
@@ -66,7 +68,9 @@ test.describe("Authentication", () => {
         await userButton.click();
         // Look for sign out in dropdown
         const signOutDropdown = page.getByText("Sign Out");
-        if (await signOutDropdown.isVisible({ timeout: 3000 }).catch(() => false)) {
+        if (
+          await signOutDropdown.isVisible({ timeout: 3000 }).catch(() => false)
+        ) {
           await signOutDropdown.click();
           await page.waitForURL(/\/login/, { timeout: 10000 });
           await expect(page).toHaveURL(/\/login/);

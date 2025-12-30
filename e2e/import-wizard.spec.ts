@@ -57,12 +57,12 @@ test.describe("Admin - Import Wizard", () => {
 
     await expect(page.getByText("equipment-val.csv")).toBeVisible();
     await expect(page.getByText("2 rows to import")).toBeVisible();
-    
+
     // Verify the preview table shows the data
     await expect(page.getByRole("table")).toBeVisible();
   });
 
-  // Note: The actual import tests are skipped because the API may have validation 
+  // Note: The actual import tests are skipped because the API may have validation
   // errors for equipment imports (requires valid type_code, location_code references)
   // These tests would need a fresh seeded database with matching references
 

@@ -33,7 +33,11 @@ describe("Textarea", () => {
 
   it("handles value prop", () => {
     render(
-      <Textarea value="Initial value" onChange={() => {}} data-testid="textarea" />
+      <Textarea
+        value="Initial value"
+        onChange={() => {}}
+        data-testid="textarea"
+      />
     );
     expect(screen.getByTestId("textarea")).toHaveValue("Initial value");
   });
@@ -80,7 +84,10 @@ describe("Textarea", () => {
 
   it("handles name prop", () => {
     render(<Textarea name="description" data-testid="textarea" />);
-    expect(screen.getByTestId("textarea")).toHaveAttribute("name", "description");
+    expect(screen.getByTestId("textarea")).toHaveAttribute(
+      "name",
+      "description"
+    );
   });
 
   it("handles id prop", () => {
@@ -146,7 +153,7 @@ describe("Textarea", () => {
     render(
       <>
         <Textarea onBlur={handleBlur} data-testid="textarea" />
-        <button>Other</button>
+        <button type="button">Other</button>
       </>
     );
 

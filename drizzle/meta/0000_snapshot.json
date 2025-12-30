@@ -85,12 +85,8 @@
           "name": "attachments_uploaded_by_id_users_id_fk",
           "tableFrom": "attachments",
           "tableTo": "users",
-          "columnsFrom": [
-            "uploaded_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploaded_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -159,12 +155,8 @@
           "name": "checklist_completions_checklist_id_maintenance_checklists_id_fk",
           "tableFrom": "checklist_completions",
           "tableTo": "maintenance_checklists",
-          "columnsFrom": [
-            "checklist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["checklist_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -172,12 +164,8 @@
           "name": "checklist_completions_work_order_id_work_orders_id_fk",
           "tableFrom": "checklist_completions",
           "tableTo": "work_orders",
-          "columnsFrom": [
-            "work_order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_order_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -185,12 +173,8 @@
           "name": "checklist_completions_completed_by_id_users_id_fk",
           "tableFrom": "checklist_completions",
           "tableTo": "users",
-          "columnsFrom": [
-            "completed_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["completed_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -265,16 +249,12 @@
       "indexes": {
         "departments_name_unique": {
           "name": "departments_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         },
         "departments_code_unique": {
           "name": "departments_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -377,30 +357,22 @@
       "indexes": {
         "equipment_code_unique": {
           "name": "equipment_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         },
         "eq_code_idx": {
           "name": "eq_code_idx",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": false
         },
         "eq_status_idx": {
           "name": "eq_status_idx",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "eq_dept_idx": {
           "name": "eq_dept_idx",
-          "columns": [
-            "department_id"
-          ],
+          "columns": ["department_id"],
           "isUnique": false
         }
       },
@@ -409,12 +381,8 @@
           "name": "equipment_model_id_equipment_models_id_fk",
           "tableFrom": "equipment",
           "tableTo": "equipment_models",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -422,12 +390,8 @@
           "name": "equipment_type_id_equipment_types_id_fk",
           "tableFrom": "equipment",
           "tableTo": "equipment_types",
-          "columnsFrom": [
-            "type_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["type_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -435,12 +399,8 @@
           "name": "equipment_location_id_locations_id_fk",
           "tableFrom": "equipment",
           "tableTo": "locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -448,12 +408,8 @@
           "name": "equipment_owner_id_users_id_fk",
           "tableFrom": "equipment",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -461,12 +417,8 @@
           "name": "equipment_department_id_departments_id_fk",
           "tableFrom": "equipment",
           "tableTo": "departments",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -529,12 +481,8 @@
           "name": "equipment_boms_model_id_equipment_models_id_fk",
           "tableFrom": "equipment_boms",
           "tableTo": "equipment_models",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -542,12 +490,8 @@
           "name": "equipment_boms_part_id_spare_parts_id_fk",
           "tableFrom": "equipment_boms",
           "tableTo": "spare_parts",
-          "columnsFrom": [
-            "part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -708,12 +652,8 @@
           "name": "equipment_status_logs_equipment_id_equipment_id_fk",
           "tableFrom": "equipment_status_logs",
           "tableTo": "equipment",
-          "columnsFrom": [
-            "equipment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -721,12 +661,8 @@
           "name": "equipment_status_logs_changed_by_id_users_id_fk",
           "tableFrom": "equipment_status_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "changed_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["changed_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -777,9 +713,7 @@
       "indexes": {
         "equipment_types_code_unique": {
           "name": "equipment_types_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -788,12 +722,8 @@
           "name": "equipment_types_category_id_equipment_categories_id_fk",
           "tableFrom": "equipment_types",
           "tableTo": "equipment_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -849,12 +779,8 @@
           "name": "inventory_levels_part_id_spare_parts_id_fk",
           "tableFrom": "inventory_levels",
           "tableTo": "spare_parts",
-          "columnsFrom": [
-            "part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -862,12 +788,8 @@
           "name": "inventory_levels_location_id_locations_id_fk",
           "tableFrom": "inventory_levels",
           "tableTo": "locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -964,12 +886,8 @@
           "name": "inventory_transactions_part_id_spare_parts_id_fk",
           "tableFrom": "inventory_transactions",
           "tableTo": "spare_parts",
-          "columnsFrom": [
-            "part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -977,12 +895,8 @@
           "name": "inventory_transactions_location_id_locations_id_fk",
           "tableFrom": "inventory_transactions",
           "tableTo": "locations",
-          "columnsFrom": [
-            "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -990,12 +904,8 @@
           "name": "inventory_transactions_work_order_id_work_orders_id_fk",
           "tableFrom": "inventory_transactions",
           "tableTo": "work_orders",
-          "columnsFrom": [
-            "work_order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_order_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1003,12 +913,8 @@
           "name": "inventory_transactions_to_location_id_locations_id_fk",
           "tableFrom": "inventory_transactions",
           "tableTo": "locations",
-          "columnsFrom": [
-            "to_location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to_location_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1016,12 +922,8 @@
           "name": "inventory_transactions_created_by_id_users_id_fk",
           "tableFrom": "inventory_transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1109,10 +1011,7 @@
       "indexes": {
         "labor_wo_user_idx": {
           "name": "labor_wo_user_idx",
-          "columns": [
-            "work_order_id",
-            "user_id"
-          ],
+          "columns": ["work_order_id", "user_id"],
           "isUnique": false
         }
       },
@@ -1121,12 +1020,8 @@
           "name": "labor_logs_work_order_id_work_orders_id_fk",
           "tableFrom": "labor_logs",
           "tableTo": "work_orders",
-          "columnsFrom": [
-            "work_order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_order_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1134,12 +1029,8 @@
           "name": "labor_logs_user_id_users_id_fk",
           "tableFrom": "labor_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1214,9 +1105,7 @@
       "indexes": {
         "locations_code_unique": {
           "name": "locations_code_unique",
-          "columns": [
-            "code"
-          ],
+          "columns": ["code"],
           "isUnique": true
         }
       },
@@ -1286,12 +1175,8 @@
           "name": "maintenance_checklists_schedule_id_maintenance_schedules_id_fk",
           "tableFrom": "maintenance_checklists",
           "tableTo": "maintenance_schedules",
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1375,12 +1260,8 @@
           "name": "maintenance_schedules_equipment_id_equipment_id_fk",
           "tableFrom": "maintenance_schedules",
           "tableTo": "equipment",
-          "columnsFrom": [
-            "equipment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1454,17 +1335,12 @@
       "indexes": {
         "notif_user_idx": {
           "name": "notif_user_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         },
         "notif_user_unread_idx": {
           "name": "notif_user_unread_idx",
-          "columns": [
-            "user_id",
-            "is_read"
-          ],
+          "columns": ["user_id", "is_read"],
           "isUnique": false
         }
       },
@@ -1473,12 +1349,8 @@
           "name": "notifications_user_id_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1547,9 +1419,7 @@
       "indexes": {
         "roles_name_unique": {
           "name": "roles_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -1653,9 +1523,7 @@
       "indexes": {
         "spare_parts_sku_unique": {
           "name": "spare_parts_sku_unique",
-          "columns": [
-            "sku"
-          ],
+          "columns": ["sku"],
           "isUnique": true
         }
       },
@@ -1774,16 +1642,12 @@
       "indexes": {
         "users_employee_id_unique": {
           "name": "users_employee_id_unique",
-          "columns": [
-            "employee_id"
-          ],
+          "columns": ["employee_id"],
           "isUnique": true
         },
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -1792,12 +1656,8 @@
           "name": "users_role_id_roles_id_fk",
           "tableFrom": "users",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1805,12 +1665,8 @@
           "name": "users_department_id_departments_id_fk",
           "tableFrom": "users",
           "tableTo": "departments",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1879,12 +1735,8 @@
           "name": "work_order_logs_work_order_id_work_orders_id_fk",
           "tableFrom": "work_order_logs",
           "tableTo": "work_orders",
-          "columnsFrom": [
-            "work_order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_order_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1892,12 +1744,8 @@
           "name": "work_order_logs_created_by_id_users_id_fk",
           "tableFrom": "work_order_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["created_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1966,12 +1814,8 @@
           "name": "work_order_parts_work_order_id_work_orders_id_fk",
           "tableFrom": "work_order_parts",
           "tableTo": "work_orders",
-          "columnsFrom": [
-            "work_order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["work_order_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1979,12 +1823,8 @@
           "name": "work_order_parts_part_id_spare_parts_id_fk",
           "tableFrom": "work_order_parts",
           "tableTo": "spare_parts",
-          "columnsFrom": [
-            "part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1992,12 +1832,8 @@
           "name": "work_order_parts_added_by_id_users_id_fk",
           "tableFrom": "work_order_parts",
           "tableTo": "users",
-          "columnsFrom": [
-            "added_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["added_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2129,54 +1965,37 @@
       "indexes": {
         "wo_status_idx": {
           "name": "wo_status_idx",
-          "columns": [
-            "status"
-          ],
+          "columns": ["status"],
           "isUnique": false
         },
         "wo_priority_idx": {
           "name": "wo_priority_idx",
-          "columns": [
-            "priority"
-          ],
+          "columns": ["priority"],
           "isUnique": false
         },
         "wo_due_by_idx": {
           "name": "wo_due_by_idx",
-          "columns": [
-            "due_by"
-          ],
+          "columns": ["due_by"],
           "isUnique": false
         },
         "wo_assigned_to_idx": {
           "name": "wo_assigned_to_idx",
-          "columns": [
-            "assigned_to_id"
-          ],
+          "columns": ["assigned_to_id"],
           "isUnique": false
         },
         "wo_assigned_status_idx": {
           "name": "wo_assigned_status_idx",
-          "columns": [
-            "assigned_to_id",
-            "status"
-          ],
+          "columns": ["assigned_to_id", "status"],
           "isUnique": false
         },
         "wo_dept_status_idx": {
           "name": "wo_dept_status_idx",
-          "columns": [
-            "department_id",
-            "status"
-          ],
+          "columns": ["department_id", "status"],
           "isUnique": false
         },
         "wo_equipment_history_idx": {
           "name": "wo_equipment_history_idx",
-          "columns": [
-            "equipment_id",
-            "created_at"
-          ],
+          "columns": ["equipment_id", "created_at"],
           "isUnique": false
         }
       },
@@ -2185,12 +2004,8 @@
           "name": "work_orders_equipment_id_equipment_id_fk",
           "tableFrom": "work_orders",
           "tableTo": "equipment",
-          "columnsFrom": [
-            "equipment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2198,12 +2013,8 @@
           "name": "work_orders_reported_by_id_users_id_fk",
           "tableFrom": "work_orders",
           "tableTo": "users",
-          "columnsFrom": [
-            "reported_by_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reported_by_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2211,12 +2022,8 @@
           "name": "work_orders_assigned_to_id_users_id_fk",
           "tableFrom": "work_orders",
           "tableTo": "users",
-          "columnsFrom": [
-            "assigned_to_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["assigned_to_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2224,12 +2031,8 @@
           "name": "work_orders_department_id_departments_id_fk",
           "tableFrom": "work_orders",
           "tableTo": "departments",
-          "columnsFrom": [
-            "department_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["department_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

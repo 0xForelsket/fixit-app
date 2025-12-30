@@ -9,28 +9,32 @@ test.describe("Maintenance Automation & Checklists", () => {
     // 1. Admin goes to schedules page
     await loginAsAdmin();
     await page.goto("/maintenance/schedules");
-    
+
     // Check the page loaded
     await expect(page).toHaveURL(/\/maintenance\/schedules/);
-    
+
     // 2. Admin triggers scheduler (if button exists)
     const runButton = page.getByRole("button", { name: /Run Scheduler/i });
-    const hasRunButton = await runButton.isVisible({ timeout: 3000 }).catch(() => false);
-    
+    const hasRunButton = await runButton
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+
     if (hasRunButton) {
       await runButton.click();
       // Wait for some feedback
       await page.waitForTimeout(2000);
     }
 
-    // 3. Tech checks work orders 
+    // 3. Tech checks work orders
     await loginAsTech();
     await page.goto("/maintenance/work-orders");
 
     // Find any work order row
     const workOrderRow = page.locator("tr").nth(1);
-    const hasWorkOrders = await workOrderRow.isVisible({ timeout: 5000 }).catch(() => false);
-    
+    const hasWorkOrders = await workOrderRow
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
+
     if (!hasWorkOrders) {
       console.log("No work orders found to test checklist interaction");
       return;
@@ -41,9 +45,14 @@ test.describe("Maintenance Automation & Checklists", () => {
     await page.waitForURL(/\/maintenance\/work-orders\/\d+/);
 
     // 4. Check for procedure/checklist section
-    const procedureSection = page.locator('text=Maintenance Procedure, text=Checklist');
-    const hasProcedure = await procedureSection.first().isVisible({ timeout: 3000 }).catch(() => false);
-    
+    const procedureSection = page.locator(
+      "text=Maintenance Procedure, text=Checklist"
+    );
+    const hasProcedure = await procedureSection
+      .first()
+      .isVisible({ timeout: 3000 })
+      .catch(() => false);
+
     if (hasProcedure) {
       // Find first checklist toggle button
       const checkItemBtn = page.locator("button:has(svg)").first();
@@ -53,7 +62,7 @@ test.describe("Maintenance Automation & Checklists", () => {
         await page.waitForTimeout(500);
       }
     }
-    
+
     // Test passed if we got this far without errors
     await expect(page).toHaveURL(/\/maintenance\/work-orders\/\d+/);
   });

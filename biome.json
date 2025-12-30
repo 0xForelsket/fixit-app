@@ -7,7 +7,14 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [".next", "node_modules", "*.d.ts"]
+    "ignore": [
+      ".next",
+      "node_modules",
+      "*.d.ts",
+      "public/sw.js",
+      "public/workbox-*.js",
+      "drizzle/"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -44,5 +51,17 @@
       "semicolons": "always",
       "trailingCommas": "es5"
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["src/tests/**/*.ts", "src/tests/**/*.tsx", "e2e/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
 }

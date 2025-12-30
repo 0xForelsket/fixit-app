@@ -1,5 +1,4 @@
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
 vi.mock("@/db", () => ({
@@ -60,7 +59,7 @@ describe("POST /api/scheduler/run", () => {
   });
 
   it("returns 401 when not authenticated and no cron secret", async () => {
-    delete process.env.CRON_SECRET;
+    process.env.CRON_SECRET = undefined;
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/scheduler/run", {
@@ -97,14 +96,16 @@ describe("POST /api/scheduler/run", () => {
   });
 
   it("authorizes with user having scheduler permission", async () => {
-    delete process.env.CRON_SECRET;
+    process.env.CRON_SECRET = undefined;
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["system:scheduler"], // Has scheduler permission
+      departmentId: 1,
+      permissions: ["system:scheduler"],
+      hourlyRate: 50.0,
     });
 
     vi.mocked(db.select).mockReturnValue({
@@ -125,14 +126,16 @@ describe("POST /api/scheduler/run", () => {
   });
 
   it("authorizes with wildcard permission", async () => {
-    delete process.env.CRON_SECRET;
+    process.env.CRON_SECRET = undefined;
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"], // Wildcard permission
+      departmentId: 1,
+      permissions: ["*"],
+      hourlyRate: 50.0,
     });
 
     vi.mocked(db.select).mockReturnValue({
@@ -158,7 +161,9 @@ describe("POST /api/scheduler/run", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, // No scheduler permission
+      departmentId: 1,
+      permissions: ["ticket:view", "equipment:view"],
+      hourlyRate: 25.0,
     });
 
     // Reset db mock to not return any schedules
@@ -185,10 +190,12 @@ describe("POST /api/scheduler/run", () => {
       id: 1,
       equipmentId: 1,
       title: "Monthly Maintenance",
-      type: "maintenance",
+      type: "preventive" as const,
       frequencyDays: 30,
+      lastGenerated: null,
       nextDue: new Date(Date.now() - 1000), // Due in the past
       isActive: true,
+      createdAt: new Date(),
     };
 
     vi.mocked(db.select).mockReturnValue({
@@ -202,9 +209,9 @@ describe("POST /api/scheduler/run", () => {
       const tx = {
         query: {
           users: {
-            findMany: vi.fn().mockResolvedValue([
-              { id: 1, assignedRole: { name: "admin" } },
-            ]),
+            findMany: vi
+              .fn()
+              .mockResolvedValue([{ id: 1, assignedRole: { name: "admin" } }]),
           },
         },
         insert: vi.fn(() => ({
@@ -223,7 +230,7 @@ describe("POST /api/scheduler/run", () => {
           })),
         })),
       };
-      return callback(tx as unknown as typeof db);
+      return callback(tx as any);
     });
 
     const request = new Request("http://localhost/api/scheduler/run", {
@@ -248,10 +255,12 @@ describe("POST /api/scheduler/run", () => {
       id: 1,
       equipmentId: 1,
       title: "Maintenance",
-      type: "maintenance",
+      type: "preventive" as const,
       frequencyDays: 7,
+      lastGenerated: null,
       nextDue: new Date(Date.now() - 1000),
       isActive: true,
+      createdAt: new Date(),
     };
 
     vi.mocked(db.select).mockReturnValue({
@@ -260,7 +269,9 @@ describe("POST /api/scheduler/run", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    vi.mocked(db.transaction).mockRejectedValue(new Error("Transaction failed"));
+    vi.mocked(db.transaction).mockRejectedValue(
+      new Error("Transaction failed")
+    );
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",

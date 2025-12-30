@@ -11,13 +11,15 @@ import {
   locations,
   spareParts,
   users,
+  workOrderLogs,
   workOrderParts,
   workOrders,
 } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { and, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
+import type { LucideIcon } from "lucide-react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -62,7 +64,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
         with: {
           createdBy: true,
         },
-        orderBy: (logs, { desc }) => [desc(logs.createdAt)],
+        orderBy: desc(workOrderLogs.createdAt),
       },
     },
   });
@@ -85,7 +87,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     with: {
       checklist: true,
     },
-    orderBy: (items, { asc }) => [asc(items.id)],
+    orderBy: asc(checklistCompletions.id),
   });
 
   // Fetch attachments
@@ -119,7 +121,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     with: {
       user: true,
     },
-    orderBy: (logs, { desc }) => [desc(logs.createdAt)],
+    orderBy: desc(laborLogs.createdAt),
   });
 
   // Fetch work order parts
@@ -129,7 +131,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       part: true,
       addedBy: true,
     },
-    orderBy: (tp, { desc }) => [desc(tp.addedAt)],
+    orderBy: desc(workOrderParts.addedAt),
   });
 
   // Fetch all parts and locations for the manager
@@ -144,7 +146,16 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   });
 
   // Status Configuration
-  const statusConfig = {
+  const statusConfigs: Record<
+    string,
+    {
+      label: string;
+      icon: LucideIcon;
+      color: string;
+      bg: string;
+      border: string;
+    }
+  > = {
     open: {
       label: "Open",
       icon: AlertTriangle,
@@ -173,14 +184,18 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       bg: "bg-slate-50",
       border: "border-slate-200",
     },
-  }[workOrder.status];
+  };
+  const statusConfig =
+    statusConfigs[workOrder.status as string] || statusConfigs.open;
 
-  const priorityConfig = {
+  const priorityConfigs: Record<string, { color: string; label: string }> = {
     low: { color: "bg-slate-500", label: "Low" },
     medium: { color: "bg-primary-500", label: "Medium" },
     high: { color: "bg-amber-500", label: "High" },
     critical: { color: "bg-rose-600", label: "Critical" },
-  }[workOrder.priority];
+  };
+  const priorityConfig =
+    priorityConfigs[workOrder.priority as string] || priorityConfigs.medium;
 
   const StatusIcon = statusConfig.icon;
 

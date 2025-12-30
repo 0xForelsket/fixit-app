@@ -1,12 +1,20 @@
 "use client";
 
-import { updatePreferences } from "@/actions/profile";
+import { updatePreferences } from "@/actions/profile-actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { UserPreferences } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { Check, Loader2, Monitor, Moon, Sun, LayoutGrid, LayoutList } from "lucide-react";
-import { useState, useTransition, useEffect } from "react";
+import {
+  Check,
+  LayoutGrid,
+  LayoutList,
+  Loader2,
+  Monitor,
+  Moon,
+  Sun,
+} from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
 
 interface AppearanceFormProps {
   preferences: UserPreferences;
@@ -46,21 +54,18 @@ export function AppearanceForm({ preferences }: AppearanceFormProps) {
         <Label>Theme</Label>
         <div className="grid grid-cols-3 gap-3">
           <ThemeOption
-            value="system"
             label="System"
             icon={Monitor}
             selected={theme === "system"}
             onSelect={() => setTheme("system")}
           />
           <ThemeOption
-            value="light"
             label="Light"
             icon={Sun}
             selected={theme === "light"}
             onSelect={() => setTheme("light")}
           />
           <ThemeOption
-            value="dark"
             label="Dark"
             icon={Moon}
             selected={theme === "dark"}
@@ -77,7 +82,6 @@ export function AppearanceForm({ preferences }: AppearanceFormProps) {
         <Label>Display Density</Label>
         <div className="grid grid-cols-2 gap-3">
           <DensityOption
-            value="comfortable"
             label="Comfortable"
             icon={LayoutGrid}
             description="More spacing, easier to read"
@@ -85,7 +89,6 @@ export function AppearanceForm({ preferences }: AppearanceFormProps) {
             onSelect={() => setDensity("comfortable")}
           />
           <DensityOption
-            value="compact"
             label="Compact"
             icon={LayoutList}
             description="Fits more content on screen"
@@ -120,13 +123,11 @@ export function AppearanceForm({ preferences }: AppearanceFormProps) {
 }
 
 function ThemeOption({
-  value,
   label,
   icon: Icon,
   selected,
   onSelect,
 }: {
-  value: string;
   label: string;
   icon: React.ElementType;
   selected: boolean;
@@ -143,7 +144,12 @@ function ThemeOption({
           : "border-border hover:border-primary/50"
       )}
     >
-      <Icon className={cn("h-6 w-6", selected ? "text-primary" : "text-muted-foreground")} />
+      <Icon
+        className={cn(
+          "h-6 w-6",
+          selected ? "text-primary" : "text-muted-foreground"
+        )}
+      />
       <span className={cn("text-sm font-medium", selected && "text-primary")}>
         {label}
       </span>
@@ -152,14 +158,12 @@ function ThemeOption({
 }
 
 function DensityOption({
-  value,
   label,
   icon: Icon,
   description,
   selected,
   onSelect,
 }: {
-  value: string;
   label: string;
   icon: React.ElementType;
   description: string;
@@ -177,7 +181,12 @@ function DensityOption({
           : "border-border hover:border-primary/50"
       )}
     >
-      <Icon className={cn("h-5 w-5 mt-0.5", selected ? "text-primary" : "text-muted-foreground")} />
+      <Icon
+        className={cn(
+          "h-5 w-5 mt-0.5",
+          selected ? "text-primary" : "text-muted-foreground"
+        )}
+      />
       <div>
         <p className={cn("text-sm font-medium", selected && "text-primary")}>
           {label}
@@ -192,7 +201,8 @@ function applyTheme(theme: "system" | "light" | "dark") {
   const root = document.documentElement;
 
   if (theme === "system") {
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+      .matches
       ? "dark"
       : "light";
     root.setAttribute("data-theme", systemTheme === "dark" ? "dark" : "");

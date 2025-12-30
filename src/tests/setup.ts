@@ -1,5 +1,38 @@
 import "@testing-library/jest-dom/vitest";
+import type { SessionUser } from "@/lib/session";
 import { vi } from "vitest";
+
+// Shared mock user for tests
+export const createMockUser = (
+  overrides: Partial<SessionUser> = {}
+): SessionUser => ({
+  id: 1,
+  employeeId: "TEST-001",
+  name: "Test User",
+  roleId: 2,
+  roleName: "tech",
+  departmentId: 1,
+  permissions: ["ticket:create", "ticket:view"],
+  hourlyRate: 25.0,
+  ...overrides,
+});
+
+export const mockAdminUser: SessionUser = createMockUser({
+  employeeId: "ADMIN-001",
+  name: "Admin User",
+  roleId: 1,
+  roleName: "admin",
+  permissions: ["*"],
+  hourlyRate: 50.0,
+});
+
+export const mockTechUser: SessionUser = createMockUser({
+  employeeId: "TECH-001",
+  name: "Tech User",
+  roleId: 2,
+  roleName: "tech",
+  permissions: ["ticket:create", "ticket:view", "ticket:update"],
+});
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({

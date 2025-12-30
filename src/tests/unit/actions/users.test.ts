@@ -1,6 +1,7 @@
 import { createUser, deleteUser, updateUser } from "@/actions/users";
 import { users } from "@/db/schema";
 import { requirePermission } from "@/lib/auth";
+import type { SessionUser } from "@/lib/session";
 import { getCurrentUser } from "@/lib/session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -40,14 +41,15 @@ vi.mock("@/db", () => ({
 }));
 
 describe("User Actions", () => {
-  const mockUser = {
+  const mockUser: SessionUser = {
     id: 1,
     name: "Admin User",
-    roleName: "admin",
     employeeId: "ADMIN-001",
-    permissions: ["*"],
     roleId: 1,
-    hourlyRate: null,
+    roleName: "admin",
+    departmentId: 1,
+    permissions: ["*"],
+    hourlyRate: 50.0,
   };
 
   beforeEach(() => {
