@@ -1,7 +1,7 @@
 import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
-import { drizzle } from "drizzle-orm/libsql";
 import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/libsql";
 import { DEFAULT_ROLE_PERMISSIONS } from "../lib/permissions";
 import * as schema from "./schema";
 
@@ -80,29 +80,41 @@ async function seed() {
   console.log(`Created ${3} roles`);
 
   console.log("Creating departments...");
-  const [deptAssy] = await db.insert(schema.departments).values({
-    name: "Assembly",
-    code: "ASSY",
-    description: "Final product assembly and packaging lines",
-  }).returning();
+  const [deptAssy] = await db
+    .insert(schema.departments)
+    .values({
+      name: "Assembly",
+      code: "ASSY",
+      description: "Final product assembly and packaging lines",
+    })
+    .returning();
 
-  const [deptMold] = await db.insert(schema.departments).values({
-    name: "Molding",
-    code: "MOLD",
-    description: "Injection molding and raw material processing",
-  }).returning();
+  const [deptMold] = await db
+    .insert(schema.departments)
+    .values({
+      name: "Molding",
+      code: "MOLD",
+      description: "Injection molding and raw material processing",
+    })
+    .returning();
 
-  const [deptWhse] = await db.insert(schema.departments).values({
-    name: "Warehouse",
-    code: "WHSE",
-    description: "Logistics, storage, and shipping/receiving",
-  }).returning();
+  const [deptWhse] = await db
+    .insert(schema.departments)
+    .values({
+      name: "Warehouse",
+      code: "WHSE",
+      description: "Logistics, storage, and shipping/receiving",
+    })
+    .returning();
 
-  const [deptFclt] = await db.insert(schema.departments).values({
-    name: "Facilities",
-    code: "FCLT",
-    description: "Utility systems, building maintenance, and HVAC",
-  }).returning();
+  const [deptFclt] = await db
+    .insert(schema.departments)
+    .values({
+      name: "Facilities",
+      code: "FCLT",
+      description: "Utility systems, building maintenance, and HVAC",
+    })
+    .returning();
 
   console.log("Created 4 departments");
 
@@ -122,125 +134,170 @@ async function seed() {
   });
 
   // Molding Dept
-  const [moldManager] = await db.insert(schema.users).values({
-    employeeId: "MGT-MOLD",
-    name: "Robert Chen",
-    email: "robert.chen@fixit.local",
-    pin: adminPin,
-    roleId: adminRole.id,
-    departmentId: deptMold.id,
-    isActive: true,
-  }).returning();
+  const [moldManager] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "MGT-MOLD",
+      name: "Robert Chen",
+      email: "robert.chen@fixit.local",
+      pin: adminPin,
+      roleId: adminRole.id,
+      departmentId: deptMold.id,
+      isActive: true,
+    })
+    .returning();
 
-  const [techMold1] = await db.insert(schema.users).values({
-    employeeId: "TECH-MOLD-01",
-    name: "John Smith",
-    email: "john.smith@fixit.local",
-    pin: techPin,
-    roleId: techRole.id,
-    departmentId: deptMold.id,
-    isActive: true,
-  }).returning();
+  const [techMold1] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "TECH-MOLD-01",
+      name: "John Smith",
+      email: "john.smith@fixit.local",
+      pin: techPin,
+      roleId: techRole.id,
+      departmentId: deptMold.id,
+      isActive: true,
+    })
+    .returning();
 
-  const [techMold2] = await db.insert(schema.users).values({
-    employeeId: "TECH-MOLD-02",
-    name: "Maria Garcia",
-    email: "maria.garcia@fixit.local",
-    pin: techPin,
-    roleId: techRole.id,
-    departmentId: deptMold.id,
-    isActive: true,
-  }).returning();
+  await db
+    .insert(schema.users)
+    .values({
+      employeeId: "TECH-MOLD-02",
+      name: "Maria Garcia",
+      email: "maria.garcia@fixit.local",
+      pin: techPin,
+      roleId: techRole.id,
+      departmentId: deptMold.id,
+      isActive: true,
+    })
+    .returning();
 
   // Assembly Dept
-  const [assyManager] = await db.insert(schema.users).values({
-    employeeId: "MGT-ASSY",
-    name: "Linda Wu",
-    email: "linda.wu@fixit.local",
-    pin: adminPin,
-    roleId: adminRole.id,
-    departmentId: deptAssy.id,
-    isActive: true,
-  }).returning();
+  const [assyManager] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "MGT-ASSY",
+      name: "Linda Wu",
+      email: "linda.wu@fixit.local",
+      pin: adminPin,
+      roleId: adminRole.id,
+      departmentId: deptAssy.id,
+      isActive: true,
+    })
+    .returning();
 
-  const [techAssy1] = await db.insert(schema.users).values({
-    employeeId: "TECH-ASSY-01",
-    name: "David Miller",
-    email: "david.miller@fixit.local",
-    pin: techPin,
-    roleId: techRole.id,
-    departmentId: deptAssy.id,
-    isActive: true,
-  }).returning();
+  const [techAssy1] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "TECH-ASSY-01",
+      name: "David Miller",
+      email: "david.miller@fixit.local",
+      pin: techPin,
+      roleId: techRole.id,
+      departmentId: deptAssy.id,
+      isActive: true,
+    })
+    .returning();
 
   // Warehouse Dept
-  const [whseManager] = await db.insert(schema.users).values({
-    employeeId: "MGT-WHSE",
-    name: "Jim Barker",
-    email: "jim.barker@fixit.local",
-    pin: adminPin,
-    roleId: adminRole.id,
-    departmentId: deptWhse.id,
-    isActive: true,
-  }).returning();
+  const [whseManager] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "MGT-WHSE",
+      name: "Jim Barker",
+      email: "jim.barker@fixit.local",
+      pin: adminPin,
+      roleId: adminRole.id,
+      departmentId: deptWhse.id,
+      isActive: true,
+    })
+    .returning();
 
-  const [techWhse1] = await db.insert(schema.users).values({
-    employeeId: "TECH-WHSE-01",
-    name: "Alice Thompson",
-    email: "alice.thompson@fixit.local",
-    pin: techPin,
-    roleId: techRole.id,
-    departmentId: deptWhse.id,
-    isActive: true,
-  }).returning();
+  await db
+    .insert(schema.users)
+    .values({
+      employeeId: "TECH-WHSE-01",
+      name: "Alice Thompson",
+      email: "alice.thompson@fixit.local",
+      pin: techPin,
+      roleId: techRole.id,
+      departmentId: deptWhse.id,
+      isActive: true,
+    })
+    .returning();
 
   // Facilities Dept
-  const [fcltManager] = await db.insert(schema.users).values({
-    employeeId: "MGT-FCLT",
-    name: "George Harris",
-    email: "george.harris@fixit.local",
-    pin: adminPin,
-    roleId: adminRole.id,
-    departmentId: deptFclt.id,
-    isActive: true,
-  }).returning();
+  const [fcltManager] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "MGT-FCLT",
+      name: "George Harris",
+      email: "george.harris@fixit.local",
+      pin: adminPin,
+      roleId: adminRole.id,
+      departmentId: deptFclt.id,
+      isActive: true,
+    })
+    .returning();
 
-  const [techFclt1] = await db.insert(schema.users).values({
-    employeeId: "TECH-FCLT-01",
-    name: "Kevin Brown",
-    email: "kevin.brown@fixit.local",
-    pin: techPin,
-    roleId: techRole.id,
-    departmentId: deptFclt.id,
-    isActive: true,
-  }).returning();
+  await db
+    .insert(schema.users)
+    .values({
+      employeeId: "TECH-FCLT-01",
+      name: "Kevin Brown",
+      email: "kevin.brown@fixit.local",
+      pin: techPin,
+      roleId: techRole.id,
+      departmentId: deptFclt.id,
+      isActive: true,
+    })
+    .returning();
 
   // Operators
-  const [operator1] = await db.insert(schema.users).values({
-    employeeId: "OP-001",
-    name: "Mike Johnson",
-    email: null,
-    pin: operatorPin,
-    roleId: operatorRole.id,
-    departmentId: deptAssy.id,
-    isActive: true,
-  }).returning();
+  const [operator1] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "OP-001",
+      name: "Mike Johnson",
+      email: null,
+      pin: operatorPin,
+      roleId: operatorRole.id,
+      departmentId: deptAssy.id,
+      isActive: true,
+    })
+    .returning();
 
-  const [operator2] = await db.insert(schema.users).values({
-    employeeId: "OP-002",
-    name: "Sarah Wilson",
-    email: null,
-    pin: operatorPin,
-    roleId: operatorRole.id,
-    departmentId: deptMold.id,
-    isActive: true,
-  }).returning();
+  const [operator2] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "OP-002",
+      name: "Sarah Wilson",
+      email: null,
+      pin: operatorPin,
+      roleId: operatorRole.id,
+      departmentId: deptMold.id,
+      isActive: true,
+    })
+    .returning();
 
   // Update department managers
-  await db.update(schema.departments).set({ managerId: assyManager.id }).where(eq(schema.departments.id, deptAssy.id));
-  await db.update(schema.departments).set({ managerId: moldManager.id }).where(eq(schema.departments.id, deptMold.id));
-  await db.update(schema.departments).set({ managerId: whseManager.id }).where(eq(schema.departments.id, deptWhse.id));
-  await db.update(schema.departments).set({ managerId: fcltManager.id }).where(eq(schema.departments.id, deptFclt.id));
+  await db
+    .update(schema.departments)
+    .set({ managerId: assyManager.id })
+    .where(eq(schema.departments.id, deptAssy.id));
+  await db
+    .update(schema.departments)
+    .set({ managerId: moldManager.id })
+    .where(eq(schema.departments.id, deptMold.id));
+  await db
+    .update(schema.departments)
+    .set({ managerId: whseManager.id })
+    .where(eq(schema.departments.id, deptWhse.id));
+  await db
+    .update(schema.departments)
+    .set({ managerId: fcltManager.id })
+    .where(eq(schema.departments.id, deptFclt.id));
 
   console.log("Created users and linked session managers");
 
@@ -428,7 +485,7 @@ async function seed() {
       departmentId: deptMold.id,
       parentId: equipment1.id,
       status: "operational",
-    }
+    },
   ]);
 
   const [equipment2] = await db
@@ -504,9 +561,7 @@ async function seed() {
     status: "operational",
   });
 
-  console.log(
-    `Created ${9} equipment (including hierarchical sub-assets)`
-  );
+  console.log(`Created ${9} equipment (including hierarchical sub-assets)`);
   console.log(
     `Categories initialized: ${catM.label}, ${catE.label}, ${catI.label}`
   );
@@ -965,7 +1020,9 @@ async function seed() {
   console.log(`Created ${3} work order logs`);
 
   console.log("\n✅ Database seeded successfully!");
-  console.log("\n📋 Default credentials (PIN: 1234 for admin/mgt, 5678 for tech, 0000 for ops):");
+  console.log(
+    "\n📋 Default credentials (PIN: 1234 for admin/mgt, 5678 for tech, 0000 for ops):"
+  );
   console.log("  Molding Mgt:    MGT-MOLD");
   console.log("  Assembly Tech:  TECH-ASSY-01");
   console.log("  Operator:       OP-001");

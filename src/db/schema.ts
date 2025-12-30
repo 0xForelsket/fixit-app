@@ -58,6 +58,8 @@ export const entityTypes = [
   "equipment",
   "work_order",
   "location",
+  "vendor",
+  "spare_part",
 ] as const;
 export type EntityType = (typeof entityTypes)[number];
 
@@ -296,9 +298,18 @@ export const workOrders = sqliteTable(
     dueByIdx: index("wo_due_by_idx").on(table.dueBy),
     assignedToIdx: index("wo_assigned_to_idx").on(table.assignedToId),
     // Composite indexes for common query patterns
-    assignedStatusIdx: index("wo_assigned_status_idx").on(table.assignedToId, table.status),
-    deptStatusIdx: index("wo_dept_status_idx").on(table.departmentId, table.status),
-    equipmentHistoryIdx: index("wo_equipment_history_idx").on(table.equipmentId, table.createdAt),
+    assignedStatusIdx: index("wo_assigned_status_idx").on(
+      table.assignedToId,
+      table.status
+    ),
+    deptStatusIdx: index("wo_dept_status_idx").on(
+      table.departmentId,
+      table.status
+    ),
+    equipmentHistoryIdx: index("wo_equipment_history_idx").on(
+      table.equipmentId,
+      table.createdAt
+    ),
   })
 );
 
@@ -374,7 +385,10 @@ export const notifications = sqliteTable(
   (table) => ({
     userIdIdx: index("notif_user_idx").on(table.userId),
     // Composite index for unread notification queries
-    userUnreadIdx: index("notif_user_unread_idx").on(table.userId, table.isRead),
+    userUnreadIdx: index("notif_user_unread_idx").on(
+      table.userId,
+      table.isRead
+    ),
   })
 );
 
@@ -571,7 +585,30 @@ export const laborLogs = sqliteTable(
   },
   (table) => ({
     // Composite index for time tracking aggregations
-    workOrderUserIdx: index("labor_wo_user_idx").on(table.workOrderId, table.userId),
+    workOrderUserIdx: index("labor_wo_user_idx").on(
+      table.workOrderId,
+      table.userId
+    ),
+  })
+);
+
+// System-wide audit logs
+export const auditLogs = sqliteTable(
+  "audit_logs",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    entityType: text("entity_type", { enum: entityTypes }).notNull(),
+    entityId: integer("entity_id").notNull(),
+    action: text("action").notNull(), // "CREATE", "UPDATE", "DELETE", "LOGIN", etc.
+    details: text("details", { mode: "json" }), // JSON description of what changed
+    userId: integer("user_id").references(() => users.id),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    entityIdx: index("audit_entity_idx").on(table.entityType, table.entityId),
+    user_idx: index("audit_user_idx").on(table.userId),
   })
 );
 
@@ -881,6 +918,13 @@ export const laborLogsRelations = relations(laborLogs, ({ one }) => ({
   }),
 }));
 
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [auditLogs.userId],
+    references: [users.id],
+  }),
+}));
+
 // ============ TYPE EXPORTS ============
 
 export type Role = typeof roles.$inferSelect;
@@ -954,3 +998,6 @@ export type NewLaborLog = typeof laborLogs.$inferInsert;
 
 export type Department = typeof departments.$inferSelect;
 export type NewDepartment = typeof departments.$inferInsert;
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type NewAuditLog = typeof auditLogs.$inferInsert;
