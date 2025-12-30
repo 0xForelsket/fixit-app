@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type Theme = "elegant" | "industrial" | "dark";
 
@@ -11,7 +17,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("elegant");
 
   useEffect(() => {
@@ -30,10 +36,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem("fixit-theme", newTheme);
-    
+
     // Apply theme attribute
     document.documentElement.setAttribute("data-theme", newTheme);
-    
+
     // Handle dark mode class specifically if needed for legacy/third-party compat
     if (newTheme === "dark") {
       document.documentElement.classList.add("dark");

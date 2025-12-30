@@ -75,15 +75,19 @@ export function BottomNav({ permissions }: BottomNavProps) {
           href={item.href}
           className={cn(
             "flex flex-col items-center justify-center gap-1 transition-all h-full min-h-[64px] relative group",
-            isActive ? "text-primary" : "text-muted-foreground active:text-foreground/70"
+            isActive
+              ? "text-primary"
+              : "text-muted-foreground active:text-foreground/70"
           )}
         >
           {/* Active background indicator for the whole area */}
-          <div className={cn(
-            "absolute inset-x-1 inset-y-1 rounded-xl transition-colors",
-            isActive ? "bg-primary/10" : "group-active:bg-muted/50"
-          )} />
-          
+          <div
+            className={cn(
+              "absolute inset-x-1 inset-y-1 rounded-xl transition-colors",
+              isActive ? "bg-primary/10" : "group-active:bg-muted/50"
+            )}
+          />
+
           <div
             className={cn(
               "flex h-10 w-10 items-center justify-center rounded-xl transition-all relative z-10",

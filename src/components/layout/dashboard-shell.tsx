@@ -1,12 +1,12 @@
 "use client";
 
-import { BottomNav } from "@/components/layout/bottom-nav";
 import { GlobalSearch } from "@/components/global-search";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
+import { usePathname } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 
 interface DashboardShellProps {
   user: {
@@ -25,23 +25,23 @@ const getPageTitle = (pathname: string): string => {
   if (pathname === "/dashboard") return "Dashboard";
   if (pathname === "/dashboard/notifications") return "Notifications";
   if (pathname === "/analytics") return "Analytics";
-  
+
   if (pathname.startsWith("/maintenance/work-orders")) {
     if (pathname.split("/").length > 3) return "Work Order Details";
     return "Work Orders";
   }
   if (pathname.startsWith("/maintenance/schedules")) return "Schedules";
-  
+
   if (pathname.startsWith("/assets/equipment")) return "Equipment";
   if (pathname.startsWith("/assets/locations")) return "Locations";
   if (pathname.startsWith("/assets/inventory")) return "Inventory";
-  
+
   if (pathname.startsWith("/admin/users")) return "User Management";
   if (pathname.startsWith("/admin/roles")) return "Role Management";
   if (pathname.startsWith("/admin/settings")) return "System Settings";
-  
+
   if (pathname === "/design-system") return "Design System";
-  
+
   return "FixIt CMMS";
 };
 
@@ -52,7 +52,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
+
   const pathname = usePathname();
   const title = getPageTitle(pathname);
 
@@ -90,9 +90,7 @@ export function DashboardShell({
           onMenuClick={() => setSidebarOpen(true)}
         />
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-8 animate-in relative z-10 transition-all duration-300">
-          <div className="mx-auto max-w-7xl">
-            {children}
-          </div>
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
         <BottomNav permissions={user.permissions} />
       </div>

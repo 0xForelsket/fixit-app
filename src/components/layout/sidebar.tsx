@@ -153,7 +153,14 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
+export function Sidebar({
+  user,
+  avatarUrl,
+  isOpen,
+  onClose,
+  isCollapsed,
+  onToggleCollapse,
+}: SidebarProps) {
   const pathname = usePathname();
 
   const filteredGroups = navGroups
@@ -193,10 +200,12 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        <div className={cn(
-          "flex h-16 items-center border-b border-border transition-all duration-300",
-          isCollapsed ? "justify-center px-0" : "justify-between px-4"
-        )}>
+        <div
+          className={cn(
+            "flex h-16 items-center border-b border-border transition-all duration-300",
+            isCollapsed ? "justify-center px-0" : "justify-between px-4"
+          )}
+        >
           {!isCollapsed && (
             <Link
               href="/dashboard"
@@ -227,7 +236,7 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
               <PanelLeftClose className="h-5 w-5" />
             )}
           </button>
-          
+
           <button
             type="button"
             onClick={onClose}
@@ -237,10 +246,14 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
           </button>
         </div>
 
-        <nav className={cn(
-          "flex-1 p-3 custom-scrollbar",
-          isCollapsed ? "overflow-visible" : "overflow-y-auto overflow-x-hidden"
-        )}>
+        <nav
+          className={cn(
+            "flex-1 p-3 custom-scrollbar",
+            isCollapsed
+              ? "overflow-visible"
+              : "overflow-y-auto overflow-x-hidden"
+          )}
+        >
           <div className="space-y-6">
             {filteredGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
@@ -307,7 +320,12 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
           </div>
 
           {canCreateTicket && (
-            <div className={cn("mt-6 border-t border-border pt-4", isCollapsed && "flex justify-center")}>
+            <div
+              className={cn(
+                "mt-6 border-t border-border pt-4",
+                isCollapsed && "flex justify-center"
+              )}
+            >
               <Link
                 href="/"
                 onClick={handleNavClick}
@@ -329,7 +347,6 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
                     Report Issue
                   </div>
                 )}
-
               </Link>
             </div>
           )}
@@ -376,7 +393,6 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
                 {user.name}
               </div>
             )}
-
           </Link>
           <form action={logout}>
             <button
@@ -384,19 +400,27 @@ export function Sidebar({ user, avatarUrl, isOpen, onClose, isCollapsed, onToggl
               data-testid="sign-out-button"
               className={cn(
                 "flex w-full items-center transition-colors group relative",
-                isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                isCollapsed
+                  ? "justify-center p-2.5"
+                  : "gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               )}
               // title={isCollapsed ? "Sign Out" : undefined}
-
             >
-              <LogOut className={cn("h-5 w-5 transition-transform", !isCollapsed && "group-hover:-translate-x-1", isCollapsed ? "text-muted-foreground hover:text-destructive" : "")} />
+              <LogOut
+                className={cn(
+                  "h-5 w-5 transition-transform",
+                  !isCollapsed && "group-hover:-translate-x-1",
+                  isCollapsed
+                    ? "text-muted-foreground hover:text-destructive"
+                    : ""
+                )}
+              />
               {!isCollapsed && <span>Sign Out</span>}
               {isCollapsed && (
                 <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-destructive text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
                   Sign Out
                 </div>
               )}
-
             </button>
           </form>
         </div>
