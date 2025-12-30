@@ -6,9 +6,13 @@ import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   BarChart3,
+  ChevronsUpDown,
   ClipboardList,
   Cog,
+  Download,
   FileText,
+  Globe,
+  HelpCircle,
   Home,
   LogOut,
   MapPin,
@@ -19,10 +23,20 @@ import {
   QrCode,
   Shield,
   Upload,
+  User,
   Users,
   Wrench,
   X,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -353,76 +367,106 @@ export function Sidebar({
         </nav>
 
         <div className="border-t border-border p-4">
-          <Link
-            href="/profile"
-            onClick={handleNavClick}
-            // title={isCollapsed ? user.name : undefined}
-
-            className={cn(
-              "mb-3 flex items-center rounded-2xl bg-muted/30 p-2 transition-all hover:bg-muted/50 border border-border group relative",
-              isCollapsed ? "justify-center px-2" : "gap-3 p-3"
-            )}
-          >
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow-sm ring-1 ring-border group-hover:ring-primary/50 transition-all">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={user.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-muted-foreground bg-muted font-bold text-xs uppercase">
-                  {user.name.slice(0, 2)}
-                </div>
-              )}
-            </div>
-            {!isCollapsed && (
-              <div className="overflow-hidden animate-in fade-in slide-in-from-left-2">
-                <p className="truncate text-sm font-bold text-foreground leading-tight">
-                  {user.name}
-                </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="flex-none rounded bg-muted px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-muted-foreground border border-border">
-                    {user.roleName}
-                  </span>
-                </div>
-              </div>
-            )}
-            {isCollapsed && (
-              <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
-                {user.name}
-              </div>
-            )}
-          </Link>
-          <form action={logout}>
-            <button
-              type="submit"
-              data-testid="sign-out-button"
-              className={cn(
-                "flex w-full items-center transition-colors group relative",
-                isCollapsed
-                  ? "justify-center p-2.5"
-                  : "gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              )}
-              // title={isCollapsed ? "Sign Out" : undefined}
-            >
-              <LogOut
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
                 className={cn(
-                  "h-5 w-5 transition-transform",
-                  !isCollapsed && "group-hover:-translate-x-1",
-                  isCollapsed
-                    ? "text-muted-foreground hover:text-destructive"
-                    : ""
+                  "flex w-full items-center rounded-2xl bg-muted/30 p-2 transition-all hover:bg-muted/50 border border-border group relative outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  isCollapsed ? "justify-center px-2" : "gap-3 p-3"
                 )}
-              />
-              {!isCollapsed && <span>Sign Out</span>}
-              {isCollapsed && (
-                <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-destructive text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
-                  Sign Out
+              >
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow-sm ring-1 ring-border group-hover:ring-primary/50 transition-all">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={user.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-muted-foreground bg-muted font-bold text-xs uppercase">
+                      {user.name.slice(0, 2)}
+                    </div>
+                  )}
                 </div>
-              )}
-            </button>
-          </form>
+                {!isCollapsed && (
+                  <>
+                    <div className="flex flex-1 flex-col text-left overflow-hidden animate-in fade-in slide-in-from-left-2">
+                      <p className="truncate text-sm font-bold text-foreground leading-tight">
+                        {user.name}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="flex-none rounded bg-muted px-1 py-0.5 text-[10px] font-mono font-bold uppercase tracking-tight text-muted-foreground border border-border">
+                          {user.roleName}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
+                  </>
+                )}
+                {isCollapsed && (
+                  <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
+                    {user.name}
+                  </div>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="w-56"
+              side={isCollapsed ? "right" : "top"}
+              align="end"
+              sideOffset={8}
+            >
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{user.name}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user.employeeId} - {user.roleName}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="w-full cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile/settings" className="w-full cursor-pointer">
+                    <Cog className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <Globe className="mr-2 h-4 w-4" />
+                  <span>Language</span>
+                  <span className="ml-auto text-xs text-muted-foreground opacity-70">(Coming Soon)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/docs" className="w-full cursor-pointer">
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    <span>Get help</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                  <Link href="/install" className="w-full cursor-pointer">
+                    <Download className="mr-2 h-4 w-4" />
+                    <span>Download App</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
     </>
