@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Legend,
   Area,
   AreaChart,
   CartesianGrid,
