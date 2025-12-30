@@ -66,11 +66,11 @@ function isSessionValid(request: NextRequest): boolean {
 export function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get("host") || "";
-  
+
   // Define allowed domains (localhost for dev, actual domain for prod)
   // Adjust this logic based on your actual domain setup
   const isAppSubdomain = hostname.startsWith("app.");
-  
+
   const { pathname } = url;
 
   // public/static files bypass

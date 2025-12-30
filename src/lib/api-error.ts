@@ -117,10 +117,14 @@ export const ApiErrors = {
 
   /** User lacks permission for this action */
   forbidden: (requestId?: string) =>
-    apiError("You don't have permission to perform this action", HttpStatus.FORBIDDEN, {
-      code: ErrorCode.PERMISSION_DENIED,
-      requestId,
-    }),
+    apiError(
+      "You don't have permission to perform this action",
+      HttpStatus.FORBIDDEN,
+      {
+        code: ErrorCode.PERMISSION_DENIED,
+        requestId,
+      }
+    ),
 
   /** Resource not found */
   notFound: (resource = "Resource", requestId?: string) =>
@@ -152,11 +156,15 @@ export const ApiErrors = {
 
   /** Generic internal error - logs the actual error, returns safe message */
   internal: (error: unknown, requestId?: string) =>
-    apiError("An unexpected error occurred. Please try again later.", HttpStatus.INTERNAL_SERVER_ERROR, {
-      code: ErrorCode.INTERNAL_ERROR,
-      requestId,
-      logError: error,
-    }),
+    apiError(
+      "An unexpected error occurred. Please try again later.",
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      {
+        code: ErrorCode.INTERNAL_ERROR,
+        requestId,
+        logError: error,
+      }
+    ),
 
   /** Bad request */
   badRequest: (message = "Bad request", requestId?: string) =>

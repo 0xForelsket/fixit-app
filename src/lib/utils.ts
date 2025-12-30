@@ -157,7 +157,13 @@ export type JsonParseResult<T> =
  */
 export function safeJsonParse<T>(
   json: string | null | undefined,
-  schema?: { safeParse: (data: unknown) => { success: boolean; data?: T; error?: { message: string } } }
+  schema?: {
+    safeParse: (data: unknown) => {
+      success: boolean;
+      data?: T;
+      error?: { message: string };
+    };
+  }
 ): JsonParseResult<T> {
   if (!json) {
     return { success: false, error: "No input provided" };
@@ -181,7 +187,10 @@ export function safeJsonParse<T>(
   } catch (error) {
     return {
       success: false,
-      error: error instanceof SyntaxError ? "Invalid JSON format" : "Failed to parse JSON",
+      error:
+        error instanceof SyntaxError
+          ? "Invalid JSON format"
+          : "Failed to parse JSON",
     };
   }
 }
