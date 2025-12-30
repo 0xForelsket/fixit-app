@@ -29,7 +29,8 @@ export function SortHeader({
 
   // Preserve all existing params
   for (const [key, value] of Object.entries(params)) {
-    if (value && key !== "sort" && key !== "dir") {
+    // Exclude pagination when sorting changes so we reset to page 1
+    if (value && key !== "sort" && key !== "dir" && key !== "page") {
       query.set(key, value);
     }
   }
