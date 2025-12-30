@@ -1,6 +1,6 @@
-import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Fraunces } from "next/font/google";
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
+import type { Metadata, Viewport } from "next";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -67,4 +67,3 @@ export default function RootLayout({
     </html>
   );
 }
-
