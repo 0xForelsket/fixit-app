@@ -39,12 +39,12 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.1} />
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#ea580c" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#ea580c" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorResolved" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.1} />
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#0d9488" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#0d9488" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -123,7 +123,7 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
                 type="monotone"
                 dataKey="created_count"
                 name="CREATED"
-                stroke="#f97316"
+                stroke="#ea580c"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorCreated)"
@@ -132,7 +132,7 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
                 type="monotone"
                 dataKey="resolved_count"
                 name="RESOLVED"
-                stroke="#22c55e"
+                stroke="#0d9488"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorResolved)"

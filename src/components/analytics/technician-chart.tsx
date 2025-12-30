@@ -96,14 +96,14 @@ export function TechnicianChart({ data }: TechnicianChartProps) {
               <Bar
                 dataKey="resolvedCount"
                 name="RESOLVED"
-                fill="#22c55e"
+                fill="#0d9488"
                 radius={[0, 4, 4, 0]}
                 barSize={24}
               />
               <Bar
                 dataKey="activeCount"
                 name="ACTIVE"
-                fill="#f59e0b"
+                fill="#ea580c"
                 radius={[0, 4, 4, 0]}
                 barSize={24}
               />
