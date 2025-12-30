@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   Legend,
   ResponsiveContainer,
   Tooltip,
@@ -36,36 +37,75 @@ export function TechnicianChart({ data }: TechnicianChartProps) {
       <CardContent className="pt-6">
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+            <BarChart data={data} layout="vertical" margin={{ left: 0 }}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                horizontal={false}
+                stroke="#e4e4e7"
+              />
               <XAxis type="number" hide />
               <YAxis
                 dataKey="name"
                 type="category"
                 width={100}
-                stroke="#a1a1aa"
-                fontSize={13}
+                stroke="#71717a"
+                fontSize={12}
                 fontFamily="var(--font-sans)"
                 tickLine={false}
                 axisLine={false}
               />
               <Tooltip
-                cursor={{ fill: "rgba(0,0,0,0.02)" }}
-                contentStyle={{ borderRadius: "12px" }}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5">
+                        <div className="space-y-1">
+                          {payload.map((entry: any) => (
+                            <div
+                              key={entry.name}
+                              className="flex items-center gap-2 text-sm"
+                            >
+                              <div
+                                className="h-2 w-2 rounded-full"
+                                style={{ backgroundColor: entry.color }}
+                              />
+                              <span className="font-medium text-zinc-700">
+                                {entry.name}:
+                              </span>
+                              <span className="font-mono font-bold">
+                                {entry.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
               />
-              <Legend iconType="circle" />
+              <Legend
+                iconType="circle"
+                wrapperStyle={{
+                  paddingTop: "20px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  fontFamily: "var(--font-sans)",
+                }}
+              />
               <Bar
                 dataKey="resolvedCount"
                 name="RESOLVED"
                 fill="#22c55e"
-                radius={[0, 6, 6, 0]}
-                barSize={20}
+                radius={[0, 4, 4, 0]}
+                barSize={24}
               />
               <Bar
                 dataKey="activeCount"
                 name="ACTIVE"
                 fill="#f59e0b"
-                radius={[0, 6, 6, 0]}
-                barSize={20}
+                radius={[0, 4, 4, 0]}
+                barSize={24}
               />
             </BarChart>
           </ResponsiveContainer>
