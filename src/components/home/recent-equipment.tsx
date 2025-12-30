@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ArrowRight, Clock, MonitorCog } from "lucide-react";
 import Link from "next/link";
-import { Clock, MonitorCog, ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface SimpleEquipment {
   id: number;
@@ -33,7 +33,8 @@ export function RecentEquipment() {
     };
 
     window.addEventListener("recent-equipment-updated", handleRefresh);
-    return () => window.removeEventListener("recent-equipment-updated", handleRefresh);
+    return () =>
+      window.removeEventListener("recent-equipment-updated", handleRefresh);
   }, []);
 
   if (recent.length === 0) return null;
@@ -60,7 +61,7 @@ export function RecentEquipment() {
               </div>
               <ArrowRight className="h-3 w-3 text-zinc-300 group-hover:text-primary-500 opacity-0 group-hover:opacity-100 transition-all" />
             </div>
-            
+
             <div className="min-w-0">
               <p className="font-bold text-xs text-zinc-900 truncate">
                 {item.name}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
-import { ArrowRight, Timer } from "lucide-react";
+// ArrowRight and Timer were unused
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { WorkOrderWithRelations } from "./work-order-card";
@@ -187,7 +187,9 @@ function WorkOrderRow({
               </div>
             </>
           ) : (
-            <span className="text-[10px] text-muted-foreground font-medium italic px-2 py-0.5 rounded-full bg-muted">Unassigned</span>
+            <span className="text-[10px] text-muted-foreground font-medium italic px-2 py-0.5 rounded-full bg-muted">
+              Unassigned
+            </span>
           )}
         </div>
       </TableCell>
@@ -202,12 +204,9 @@ function WorkOrderRow({
           className="h-7 text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground shadow-none"
           asChild
         >
-          <Link href={`/maintenance/work-orders/${workOrder.id}`}>
-            VIEW
-          </Link>
+          <Link href={`/maintenance/work-orders/${workOrder.id}`}>VIEW</Link>
         </Button>
       </TableCell>
     </TableRow>
   );
 }
-

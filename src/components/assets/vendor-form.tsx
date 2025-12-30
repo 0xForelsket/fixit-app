@@ -1,5 +1,6 @@
 "use client";
 
+import { createVendor, updateVendor } from "@/actions/vendors";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,11 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import type { Vendor } from "@/db/schema";
-import { createVendor, updateVendor } from "@/actions/vendors";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
 
 export function VendorForm({ vendor }: { vendor?: Vendor }) {
   const router = useRouter();
@@ -46,9 +46,9 @@ export function VendorForm({ vendor }: { vendor?: Vendor }) {
       }
     } catch (error) {
       console.error(error);
-      toast({ 
-        title: "Something went wrong", 
-        variant: "destructive" 
+      toast({
+        title: "Something went wrong",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -164,7 +164,11 @@ export function VendorForm({ vendor }: { vendor?: Vendor }) {
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : vendor ? "Save Changes" : "Create Vendor"}
+            {isSubmitting
+              ? "Saving..."
+              : vendor
+                ? "Save Changes"
+                : "Create Vendor"}
           </Button>
         </CardFooter>
       </form>

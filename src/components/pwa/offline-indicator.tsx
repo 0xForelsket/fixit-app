@@ -2,7 +2,7 @@
 
 import { useOnlineStatus } from "@/hooks/use-offline";
 import { cn } from "@/lib/utils";
-import { WifiOff, Wifi, CloudOff } from "lucide-react";
+import { CloudOff, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface OfflineIndicatorProps {
@@ -64,7 +64,8 @@ export function OfflineIndicator({
           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
             <span className="font-semibold">You&apos;re offline</span>
             <span className="text-sm text-amber-100">
-              Some features may be limited. Changes will sync when you reconnect.
+              Some features may be limited. Changes will sync when you
+              reconnect.
             </span>
           </div>
         </div>

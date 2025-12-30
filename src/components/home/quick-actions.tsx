@@ -1,10 +1,5 @@
 import { cn } from "@/lib/utils";
-import {
-  AlertTriangle,
-  ClipboardList,
-  MonitorCog,
-  Wrench,
-} from "lucide-react";
+import { AlertTriangle, ClipboardList, MonitorCog, Wrench } from "lucide-react";
 import Link from "next/link";
 
 export function QuickActions() {
@@ -55,9 +50,7 @@ export function QuickActions() {
           >
             {/* Remove inner container styles to simply show the icon */}
             {action.icon}
-            <span className="text-sm">
-              {action.label}
-            </span>
+            <span className="text-sm">{action.label}</span>
           </Link>
         ))}
       </div>

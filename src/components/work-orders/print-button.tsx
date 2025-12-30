@@ -1,9 +1,9 @@
 "use client";
 
-import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function PrintButton() {
   const [ticketUrl, setTicketUrl] = useState("");
@@ -16,7 +16,7 @@ export function PrintButton() {
 
   const handlePrint = () => {
     // Dynamically add print styles for line-clamp
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.innerHTML = `
       /* Show full text in line-clamp elements */
       @media print {

@@ -1,7 +1,7 @@
 "use client";
 
-import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatRelativeTime } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -76,8 +76,14 @@ export function DashboardWorkOrderTable({
                 </td>
                 <td className="p-2">
                   <div className="flex flex-wrap gap-1">
-                    <StatusBadge status={workOrder.priority} className="h-4 px-1 text-[8px]" />
-                    <StatusBadge status={workOrder.status} className="h-4 px-1 text-[8px]" />
+                    <StatusBadge
+                      status={workOrder.priority}
+                      className="h-4 px-1 text-[8px]"
+                    />
+                    <StatusBadge
+                      status={workOrder.status}
+                      className="h-4 px-1 text-[8px]"
+                    />
                   </div>
                 </td>
                 <td className="p-2">
@@ -87,7 +93,7 @@ export function DashboardWorkOrderTable({
                         {workOrder.assignedTo.name[0]}
                       </div>
                       <span className="text-[10px] font-bold text-foreground/70 group-hover:text-foreground transition-colors">
-                        {workOrder.assignedTo.name.split(' ')[0]}
+                        {workOrder.assignedTo.name.split(" ")[0]}
                       </span>
                     </div>
                   ) : (
