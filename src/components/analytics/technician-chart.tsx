@@ -44,7 +44,7 @@ export function TechnicianChart({ data }: TechnicianChartProps) {
                 width={80}
                 stroke="#a1a1aa"
                 fontSize={12}
-                fontFamily="Geist Mono"
+                fontFamily="var(--font-sans)"
                 tickLine={false}
                 axisLine={false}
               />
