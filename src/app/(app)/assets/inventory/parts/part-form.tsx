@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { SparePart } from "@/db/schema";
+import type { SparePart, Vendor } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -22,9 +22,10 @@ const categories = [
 interface PartFormProps {
   part?: SparePart;
   isNew?: boolean;
+  vendors?: Vendor[];
 }
 
-export function PartForm({ part, isNew }: PartFormProps) {
+export function PartForm({ part, isNew, vendors = [] }: PartFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export function PartForm({ part, isNew }: PartFormProps) {
   const [leadTimeDays, setLeadTimeDays] = useState(
     part?.leadTimeDays?.toString() || ""
   );
+  const [vendorId, setVendorId] = useState(part?.vendorId?.toString() || "");
   const [isActive, setIsActive] = useState(part?.isActive ?? true);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,6 +63,7 @@ export function PartForm({ part, isNew }: PartFormProps) {
         unitCost: unitCost ? Number.parseFloat(unitCost) : null,
         reorderPoint: Number.parseInt(reorderPoint) || 0,
         leadTimeDays: leadTimeDays ? Number.parseInt(leadTimeDays) : null,
+        vendorId: vendorId ? Number.parseInt(vendorId) : null,
         isActive,
       };
 
@@ -239,6 +242,25 @@ export function PartForm({ part, isNew }: PartFormProps) {
               placeholder="Part description, specifications, etc."
               className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
+          </div>
+
+          <div>
+            <label htmlFor="vendor" className="mb-1 block text-sm font-medium">
+              Vendor (optional)
+            </label>
+            <select
+              id="vendor"
+              value={vendorId}
+              onChange={(e) => setVendorId(e.target.value)}
+              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+            >
+              <option value="">Select a vendor...</option>
+              {vendors.map((vendor) => (
+                <option key={vendor.id} value={vendor.id}>
+                  {vendor.name} ({vendor.code})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </div>

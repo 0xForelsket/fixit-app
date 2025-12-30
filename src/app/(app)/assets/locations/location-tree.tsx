@@ -1,15 +1,10 @@
 "use client";
 
-import { 
-  Plus, 
-  Settings,
-  MapPin,
-  Building
-} from "lucide-react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { TreeExplorer } from "@/components/ui/tree-explorer";
 import type { BaseTreeItem } from "@/components/ui/tree-explorer";
+import { Building, MapPin, Plus, Settings } from "lucide-react";
+import Link from "next/link";
 
 interface Location extends BaseTreeItem {
   id: number;
@@ -27,9 +22,13 @@ export function LocationTree({ initialLocations }: LocationTreeProps) {
   return (
     <TreeExplorer
       items={initialLocations}
-      renderIcon={(_item, hasChildren) => (
-        hasChildren ? <Building className="h-5 w-5" /> : <MapPin className="h-5 w-5" />
-      )}
+      renderIcon={(_item, hasChildren) =>
+        hasChildren ? (
+          <Building className="h-5 w-5" />
+        ) : (
+          <MapPin className="h-5 w-5" />
+        )
+      }
       renderTitle={(item) => (
         <div className="flex items-center gap-3">
           <span>{item.name}</span>
@@ -39,7 +38,7 @@ export function LocationTree({ initialLocations }: LocationTreeProps) {
         </div>
       )}
       renderSubtitle={(item) => item.description || "No description"}
-      renderBadges={(item) => (
+      renderBadges={(item) =>
         item.isActive ? (
           <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 scale-75 origin-right">
             Active
@@ -49,15 +48,27 @@ export function LocationTree({ initialLocations }: LocationTreeProps) {
             Inactive
           </span>
         )
-      )}
+      }
       renderActions={(item) => (
         <>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" asChild title="Add Sub-location">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-lg"
+            asChild
+            title="Add Sub-location"
+          >
             <Link href={`/assets/locations/new?parentId=${item.id}`}>
               <Plus className="h-3.5 w-3.5" />
             </Link>
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-primary-600 hover:text-primary-700" asChild title="View Details / Edit">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-lg text-primary-600 hover:text-primary-700"
+            asChild
+            title="View Details / Edit"
+          >
             <Link href={`/assets/locations/${item.id}`}>
               <Settings className="h-3.5 w-3.5" />
             </Link>

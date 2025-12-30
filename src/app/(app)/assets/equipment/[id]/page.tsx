@@ -1,3 +1,4 @@
+import { AuditLogList } from "@/components/audit/audit-log-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -16,6 +17,7 @@ import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
 import {
+  Activity,
   AlertCircle,
   ArrowLeft,
   Calendar,
@@ -356,6 +358,9 @@ export default async function EquipmentDetailPage({
             <TabsTrigger value="schedules">
               <Calendar className="h-4 w-4" />
             </TabsTrigger>
+            <TabsTrigger value="logs">
+              <Activity className="h-4 w-4" />
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
@@ -456,6 +461,10 @@ export default async function EquipmentDetailPage({
               )}
             </div>
           </TabsContent>
+
+          <TabsContent value="logs" className="mt-6">
+            <AuditLogList entityType="equipment" entityId={equipmentId} />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -468,10 +477,11 @@ export default async function EquipmentDetailPage({
         </div>
         <div className="col-span-8 space-y-6">
           <Tabs defaultValue="history" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="bom">Parts (BOM)</TabsTrigger>
               <TabsTrigger value="schedules">Schedules</TabsTrigger>
+              <TabsTrigger value="logs">System Logs</TabsTrigger>
             </TabsList>
             <TabsContent value="history" className="mt-4">
               {HistorySection}
@@ -552,6 +562,9 @@ export default async function EquipmentDetailPage({
                   </div>
                 ))}
               </div>
+            </TabsContent>
+            <TabsContent value="logs" className="mt-4">
+              <AuditLogList entityType="equipment" entityId={equipmentId} />
             </TabsContent>
           </Tabs>
         </div>

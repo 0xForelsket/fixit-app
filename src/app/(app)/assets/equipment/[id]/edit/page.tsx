@@ -58,7 +58,11 @@ export default async function EditEquipmentPage({
 
   return (
     <div className="space-y-6">
-      <Suspense fallback={<div className="h-96 rounded-xl border border-zinc-200 bg-white animate-pulse" />}>
+      <Suspense
+        fallback={
+          <div className="h-96 rounded-xl border border-zinc-200 bg-white animate-pulse" />
+        }
+      >
         <EquipmentForm
           equipment={equipmentItem}
           locations={locationsList}

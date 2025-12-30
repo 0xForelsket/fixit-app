@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ViewToggle } from "@/components/ui/view-toggle";
 import { db } from "@/db";
 import { locations } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
@@ -28,7 +29,6 @@ import {
 import Link from "next/link";
 import { Suspense } from "react";
 import { LocationTree } from "./location-tree";
-import { ViewToggle } from "@/components/ui/view-toggle";
 
 type SearchParams = {
   search?: string;
@@ -194,7 +194,11 @@ export default async function LocationsPage({
 
       {params.view === "tree" ? (
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-border/20 overflow-hidden">
-          <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded-2xl" />}>
+          <Suspense
+            fallback={
+              <div className="h-96 animate-pulse bg-muted rounded-2xl" />
+            }
+          >
             <LocationTree initialLocations={locationsList} />
           </Suspense>
         </div>
@@ -202,139 +206,149 @@ export default async function LocationsPage({
         <>
           {/* Locations Table */}
           {locationsList.length === 0 ? (
-        <EmptyState
-          title="No locations found"
-          description={
-            params.search
-              ? "Try adjusting your search to find the zones you're looking for."
-              : "Define your first physical or virtual location to begin mapping assets."
-          }
-          icon={MapPin}
-        />
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
-          <Table>
-            <TableHeader className="bg-muted/50">
-              <TableRow className="border-b border-border text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
-                <SortHeader
-                  label="Location"
-                  field="name"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-4"
-                />
-                <SortHeader
-                  label="Code"
-                  field="code"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-4 hidden md:table-cell"
-                />
-                <SortHeader
-                  label="Parent"
-                  field="parent"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-4 hidden lg:table-cell"
-                />
-                <SortHeader
-                  label="Status"
-                  field="status"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-4"
-                />
-                <SortHeader
-                  label="Created"
-                  field="createdAt"
-                  currentSort={params.sort}
-                  currentDir={params.dir}
-                  params={params}
-                  className="p-4 hidden sm:table-cell"
-                />
-                <TableHead className="p-4" />
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-border">
-              {locationsList.map((location, index) => {
-                const staggerClass =
-                  index < 5
-                    ? `animate-stagger-${index + 1}`
-                    : "animate-in fade-in duration-500";
-                return (
-                  <TableRow
-                    key={location.id}
-                    className={cn(
-                      "hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-bottom-1",
-                      staggerClass
-                    )}
-                  >
-                    <TableCell className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <MapPin className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{location.name}</p>
-                          {location.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-1">
-                              {location.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="p-4 hidden md:table-cell">
-                      <Badge variant="outline" className="font-mono text-xs border-border text-muted-foreground">
-                        {location.code}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="p-4 hidden lg:table-cell">
-                      {location.parent ? (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <ChevronRight className="h-3.5 w-3.5" />
-                          {location.parent.name}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">
-                          Root
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="p-4">
-                      {location.isActive ? (
-                        <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/15 px-2.5 py-0.5 text-xs font-medium text-success-700">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full border border-muted-foreground/30 bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                          Inactive
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="p-4 hidden sm:table-cell">
-                      <span className="text-sm text-muted-foreground">
-                        {formatRelativeTime(location.createdAt)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="p-4">
-                      <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary">
-                        <Link href={`/assets/locations/${location.id}`}>
-                          <Edit className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
+            <EmptyState
+              title="No locations found"
+              description={
+                params.search
+                  ? "Try adjusting your search to find the zones you're looking for."
+                  : "Define your first physical or virtual location to begin mapping assets."
+              }
+              icon={MapPin}
+            />
+          ) : (
+            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="border-b border-border text-left text-sm font-medium text-muted-foreground hover:bg-transparent">
+                    <SortHeader
+                      label="Location"
+                      field="name"
+                      currentSort={params.sort}
+                      currentDir={params.dir}
+                      params={params}
+                      className="p-4"
+                    />
+                    <SortHeader
+                      label="Code"
+                      field="code"
+                      currentSort={params.sort}
+                      currentDir={params.dir}
+                      params={params}
+                      className="p-4 hidden md:table-cell"
+                    />
+                    <SortHeader
+                      label="Parent"
+                      field="parent"
+                      currentSort={params.sort}
+                      currentDir={params.dir}
+                      params={params}
+                      className="p-4 hidden lg:table-cell"
+                    />
+                    <SortHeader
+                      label="Status"
+                      field="status"
+                      currentSort={params.sort}
+                      currentDir={params.dir}
+                      params={params}
+                      className="p-4"
+                    />
+                    <SortHeader
+                      label="Created"
+                      field="createdAt"
+                      currentSort={params.sort}
+                      currentDir={params.dir}
+                      params={params}
+                      className="p-4 hidden sm:table-cell"
+                    />
+                    <TableHead className="p-4" />
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                </TableHeader>
+                <TableBody className="divide-y divide-border">
+                  {locationsList.map((location, index) => {
+                    const staggerClass =
+                      index < 5
+                        ? `animate-stagger-${index + 1}`
+                        : "animate-in fade-in duration-500";
+                    return (
+                      <TableRow
+                        key={location.id}
+                        className={cn(
+                          "hover:bg-muted/50 transition-colors animate-in fade-in slide-in-from-bottom-1",
+                          staggerClass
+                        )}
+                      >
+                        <TableCell className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                              <MapPin className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {location.name}
+                              </p>
+                              {location.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                  {location.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-4 hidden md:table-cell">
+                          <Badge
+                            variant="outline"
+                            className="font-mono text-xs border-border text-muted-foreground"
+                          >
+                            {location.code}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="p-4 hidden lg:table-cell">
+                          {location.parent ? (
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <ChevronRight className="h-3.5 w-3.5" />
+                              {location.parent.name}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">
+                              Root
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="p-4">
+                          {location.isActive ? (
+                            <span className="inline-flex items-center rounded-full border border-success-500/30 bg-success-500/15 px-2.5 py-0.5 text-xs font-medium text-success-700">
+                              Active
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full border border-muted-foreground/30 bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                              Inactive
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="p-4 hidden sm:table-cell">
+                          <span className="text-sm text-muted-foreground">
+                            {formatRelativeTime(location.createdAt)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="p-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="text-muted-foreground hover:text-primary"
+                          >
+                            <Link href={`/assets/locations/${location.id}`}>
+                              <Edit className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </>
       )}
     </div>

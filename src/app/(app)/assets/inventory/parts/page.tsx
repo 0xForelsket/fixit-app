@@ -13,7 +13,14 @@ import { db } from "@/db";
 import { spareParts } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import { ArrowLeft, ChevronRight, Package, Plus, Search, Upload } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronRight,
+  Package,
+  Plus,
+  Search,
+  Upload,
+} from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -122,7 +129,12 @@ export default async function PartsPage({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild className="text-muted-foreground hover:text-primary">
+          <Button
+            variant="ghost"
+            size="icon"
+            asChild
+            className="text-muted-foreground hover:text-primary"
+          >
             <Link href="/assets/inventory">
               <ArrowLeft className="h-4 w-4" />
             </Link>

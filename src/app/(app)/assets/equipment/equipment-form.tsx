@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button";
 import type { EquipmentCategory, EquipmentType } from "@/db/schema";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
 
 interface EquipmentFormProps {
   equipment?: {
@@ -66,7 +66,9 @@ export function EquipmentForm({
     equipment?.type?.categoryId?.toString() || ""
   );
   const [typeId, setTypeId] = useState(equipment?.typeId?.toString() || "");
-  const [parentId, setParentId] = useState(equipment?.parentId?.toString() || searchParams.get("parentId") || "");
+  const [parentId, setParentId] = useState(
+    equipment?.parentId?.toString() || searchParams.get("parentId") || ""
+  );
   const [parentSearch, setParentSearch] = useState("");
 
   const filteredTypes = useMemo(() => {
@@ -78,8 +80,9 @@ export function EquipmentForm({
 
   const filteredParents = useMemo(() => {
     return equipmentList.filter((e) => {
-      const matchesSearch = e.name.toLowerCase().includes(parentSearch.toLowerCase()) || 
-                           e.code.toLowerCase().includes(parentSearch.toLowerCase());
+      const matchesSearch =
+        e.name.toLowerCase().includes(parentSearch.toLowerCase()) ||
+        e.code.toLowerCase().includes(parentSearch.toLowerCase());
       const isNotSelf = e.id !== equipment?.id;
       return matchesSearch && isNotSelf;
     });
@@ -306,7 +309,9 @@ export function EquipmentForm({
               className="mb-1 block text-sm font-medium text-destructive uppercase tracking-tight flex items-center gap-1.5"
             >
               Responsible Department
-              <span className="text-[10px] bg-destructive/10 text-destructive px-1 rounded">REQUIRED</span>
+              <span className="text-[10px] bg-destructive/10 text-destructive px-1 rounded">
+                REQUIRED
+              </span>
             </label>
             <select
               id="department"
@@ -389,13 +394,17 @@ export function EquipmentForm({
               {activeParent && (
                 <div className="flex items-center justify-between rounded-lg border border-primary-100 bg-primary-50/50 px-3 py-2 text-sm">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-primary-600 uppercase">Currently Linked To</span>
-                    <span className="font-bold text-zinc-900">{activeParent.name} ({activeParent.code})</span>
+                    <span className="text-[10px] font-black text-primary-600 uppercase">
+                      Currently Linked To
+                    </span>
+                    <span className="font-bold text-zinc-900">
+                      {activeParent.name} ({activeParent.code})
+                    </span>
                   </div>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     className="h-7 text-[10px] font-black hover:bg-primary-100"
                     onClick={() => {
                       setParentId("");
@@ -406,7 +415,7 @@ export function EquipmentForm({
                   </Button>
                 </div>
               )}
-              
+
               {!activeParent && (
                 <div className="space-y-2">
                   <div className="relative">
@@ -419,7 +428,7 @@ export function EquipmentForm({
                       className="flex h-10 w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   </div>
-                  
+
                   {parentSearch.length > 0 && (
                     <div className="max-h-40 overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-50">
                       {filteredParents.length > 0 ? (
@@ -433,8 +442,12 @@ export function EquipmentForm({
                             }}
                             className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center justify-between group"
                           >
-                            <span className="font-medium text-foreground">{e.name}</span>
-                            <span className="text-[10px] font-mono text-muted-foreground group-hover:text-primary">{e.code}</span>
+                            <span className="font-medium text-foreground">
+                              {e.name}
+                            </span>
+                            <span className="text-[10px] font-mono text-muted-foreground group-hover:text-primary">
+                              {e.code}
+                            </span>
                           </button>
                         ))
                       ) : (

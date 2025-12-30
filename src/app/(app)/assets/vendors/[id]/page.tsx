@@ -1,12 +1,12 @@
 import { VendorForm } from "@/components/assets/vendor-form";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { db } from "@/db";
 import { vendors } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export default async function EditVendorPage({
   params,
