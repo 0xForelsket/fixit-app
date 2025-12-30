@@ -3,7 +3,7 @@ import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { WorkOrderList } from "@/components/work-orders/work-order-list";
 import { db } from "@/db";
-import { workOrders } from "@/db/schema";
+import { roles, users, workOrders } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import {
@@ -144,6 +144,22 @@ async function getWorkOrders(params: SearchParams, user: SessionUser | null) {
   };
 }
 
+async function getTechnicians() {
+  const techRole = await db.query.roles.findFirst({
+    where: eq(roles.name, "tech"),
+  });
+
+  if (!techRole) return [];
+
+  const techs = await db.query.users.findMany({
+    where: and(eq(users.roleId, techRole.id), eq(users.isActive, true)),
+    columns: { id: true, name: true },
+    orderBy: [asc(users.name)],
+  });
+
+  return techs;
+}
+
 async function getStats(user: SessionUser | null) {
   const departmentId = user?.departmentId;
   const isTech = user?.roleName === "tech";
@@ -191,13 +207,12 @@ export default async function WorkOrdersPage({
 }) {
   const user = await getCurrentUser();
   const params = await searchParams;
-  const {
-    workOrders: workOrdersList,
-    total,
-    page,
-    totalPages,
-  } = await getWorkOrders(params, user);
-  const stats = await getStats(user);
+  const [{ workOrders: workOrdersList, total, page, totalPages }, stats, technicians] =
+    await Promise.all([
+      getWorkOrders(params, user),
+      getStats(user),
+      getTechnicians(),
+    ]);
   const isMyWorkOrdersView = params.assigned === "me";
 
   const activeFilters =
@@ -372,6 +387,7 @@ export default async function WorkOrdersPage({
             : "No work orders have been created yet."
         }
         searchParams={params}
+        technicians={technicians}
       />
 
       {/* Pagination */}

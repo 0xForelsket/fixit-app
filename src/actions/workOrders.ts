@@ -435,6 +435,125 @@ export async function addWorkOrderComment(
   return { success: true };
 }
 
+export interface BulkUpdateData {
+  ids: number[];
+  status?: "open" | "in_progress" | "resolved" | "closed";
+  priority?: "low" | "medium" | "high" | "critical";
+  assignedToId?: number | null;
+}
+
+export async function bulkUpdateWorkOrders(
+  data: BulkUpdateData
+): Promise<ActionResult<{ updated: number }>> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: "You must be logged in" };
+  }
+
+  if (!userHasPermission(user, PERMISSIONS.TICKET_UPDATE)) {
+    return {
+      success: false,
+      error: "You don't have permission to update work orders",
+    };
+  }
+
+  const { ids, status, priority, assignedToId } = data;
+
+  if (!ids || ids.length === 0) {
+    return { success: false, error: "No work orders selected" };
+  }
+
+  if (ids.length > 100) {
+    return { success: false, error: "Maximum 100 work orders can be updated at once" };
+  }
+
+  // Build update data
+  const updateData: Record<string, unknown> = {
+    updatedAt: new Date(),
+  };
+
+  if (status) updateData.status = status;
+  if (priority) updateData.priority = priority;
+  if (assignedToId !== undefined) updateData.assignedToId = assignedToId;
+
+  // Check if there's anything to update
+  if (Object.keys(updateData).length === 1) {
+    return { success: false, error: "No changes specified" };
+  }
+
+  try {
+    // Update all selected work orders
+    let updated = 0;
+
+    for (const id of ids) {
+      const existing = await db.query.workOrders.findFirst({
+        where: eq(workOrders.id, id),
+      });
+
+      if (!existing) continue;
+
+      await db
+        .update(workOrders)
+        .set(updateData)
+        .where(eq(workOrders.id, id));
+
+      updated++;
+
+      // Log status changes
+      if (status && status !== existing.status) {
+        await db.insert(workOrderLogs).values({
+          workOrderId: id,
+          action: "status_change",
+          oldValue: existing.status,
+          newValue: status,
+          createdById: user.id,
+        });
+      }
+
+      // Log assignment changes and notify
+      if (assignedToId !== undefined && assignedToId !== existing.assignedToId) {
+        await db.insert(workOrderLogs).values({
+          workOrderId: id,
+          action: "assignment",
+          oldValue: existing.assignedToId?.toString() || null,
+          newValue: assignedToId?.toString() || "unassigned",
+          createdById: user.id,
+        });
+
+        // Notify newly assigned user
+        if (assignedToId) {
+          await db.insert(notifications).values({
+            userId: assignedToId,
+            type: "work_order_assigned",
+            title: "Work Order Assigned to You",
+            message: existing.title,
+            link: `/maintenance/work-orders/${id}`,
+          });
+        }
+      }
+    }
+
+    workOrderLogger.info(
+      { userId: user.id, count: updated, action: "bulk_update" },
+      "Bulk updated work orders"
+    );
+
+    revalidatePath("/maintenance/work-orders");
+    revalidatePath("/dashboard");
+
+    return { success: true, data: { updated } };
+  } catch (error) {
+    workOrderLogger.error(
+      { error, userId: user.id },
+      "Failed to bulk update work orders"
+    );
+    return {
+      success: false,
+      error: "Failed to update work orders. Please try again.",
+    };
+  }
+}
+
 export async function updateChecklistItem(
   completionId: number,
   workOrderId: number,

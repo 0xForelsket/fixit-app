@@ -79,6 +79,14 @@ export interface DataTableProps<TData> {
   compact?: boolean;
   /** Custom row className function */
   getRowClassName?: (row: TData, index: number) => string;
+  /** Enable row selection */
+  selectable?: boolean;
+  /** Currently selected row IDs */
+  selectedIds?: (string | number)[];
+  /** Callback when a row is selected/deselected */
+  onSelect?: (id: string | number) => void;
+  /** Callback when select all is toggled */
+  onSelectAll?: () => void;
 }
 
 // ============================================================================
@@ -203,6 +211,7 @@ function StaticHeader({ column, compact }: StaticHeaderProps) {
 
 interface DataTableRowProps<TData> {
   row: TData;
+  rowId: string | number;
   index: number;
   columns: ColumnDef<TData>[];
   onRowClick?: (row: TData) => void;
@@ -211,10 +220,14 @@ interface DataTableRowProps<TData> {
   maxStaggerRows?: number;
   compact?: boolean;
   getRowClassName?: (row: TData, index: number) => string;
+  selectable?: boolean;
+  isSelected?: boolean;
+  onSelect?: (id: string | number) => void;
 }
 
 function DataTableRow<TData>({
   row,
+  rowId,
   index,
   columns,
   onRowClick,
@@ -223,6 +236,9 @@ function DataTableRow<TData>({
   maxStaggerRows = 5,
   compact,
   getRowClassName,
+  selectable,
+  isSelected,
+  onSelect,
 }: DataTableRowProps<TData>) {
   const router = useRouter();
   const isClickable = !!onRowClick || !!getRowHref;
@@ -256,6 +272,7 @@ function DataTableRow<TData>({
         "group transition-colors",
         enableAnimations && "animate-in fade-in slide-in-from-bottom-1",
         isClickable && "cursor-pointer hover:bg-muted/50 active:bg-muted/60",
+        isSelected && "bg-primary/5",
         staggerClass,
         customClass
       )}
@@ -263,6 +280,39 @@ function DataTableRow<TData>({
       onKeyDown={isClickable ? handleKeyDown : undefined}
       tabIndex={isClickable ? 0 : undefined}
     >
+      {selectable && (
+        <TableCell
+          className={cn(compact ? "p-2" : "p-3", "w-12")}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            type="button"
+            onClick={() => onSelect?.(rowId)}
+            className={cn(
+              "h-5 w-5 rounded border-2 flex items-center justify-center transition-all mx-auto",
+              isSelected
+                ? "bg-primary border-primary text-primary-foreground"
+                : "border-muted-foreground/30 hover:border-primary"
+            )}
+          >
+            {isSelected && (
+              <svg
+                className="h-3 w-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+          </button>
+        </TableCell>
+      )}
       {columns.map((column) => {
         const hideClass = column.hideBelow ? hideClasses[column.hideBelow] : "";
         const alignClass = alignClasses[column.align || "left"];
@@ -333,9 +383,17 @@ export function DataTable<TData>({
   tableClassName,
   compact = false,
   getRowClassName,
+  selectable = false,
+  selectedIds = [],
+  onSelect,
+  onSelectAll,
 }: DataTableProps<TData>) {
   const currentSort = searchParams.sort;
   const currentDir = searchParams.dir;
+
+  const allSelected = data.length > 0 && selectedIds.length === data.length;
+  const someSelected = selectedIds.length > 0 && !allSelected;
+  const colSpan = selectable ? columns.length + 1 : columns.length;
 
   return (
     <div
@@ -347,6 +405,46 @@ export function DataTable<TData>({
       <Table className={tableClassName}>
         <TableHeader className="bg-muted/30">
           <TableRow className="border-b hover:bg-transparent">
+            {selectable && (
+              <TableHead className={cn(compact ? "p-2" : "p-3", "w-12")}>
+                <button
+                  type="button"
+                  onClick={onSelectAll}
+                  className={cn(
+                    "h-5 w-5 rounded border-2 flex items-center justify-center transition-all mx-auto",
+                    allSelected
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : someSelected
+                        ? "bg-primary/50 border-primary text-primary-foreground"
+                        : "border-muted-foreground/30 hover:border-primary"
+                  )}
+                >
+                  {(allSelected || someSelected) && (
+                    <svg
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      {allSelected ? (
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
+                      ) : (
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 12h14"
+                        />
+                      )}
+                    </svg>
+                  )}
+                </button>
+              </TableHead>
+            )}
             {columns.map((column) =>
               column.sortable ? (
                 <SortableHeader
@@ -372,23 +470,30 @@ export function DataTable<TData>({
             <EmptyState
               message={emptyMessage}
               icon={emptyIcon}
-              colSpan={columns.length}
+              colSpan={colSpan}
             />
           ) : (
-            data.map((row, index) => (
-              <DataTableRow
-                key={getRowId(row)}
-                row={row}
-                index={index}
-                columns={columns}
-                onRowClick={onRowClick}
-                getRowHref={getRowHref}
-                enableAnimations={enableAnimations}
-                maxStaggerRows={maxStaggerRows}
-                compact={compact}
-                getRowClassName={getRowClassName}
-              />
-            ))
+            data.map((row, index) => {
+              const rowId = getRowId(row);
+              return (
+                <DataTableRow
+                  key={rowId}
+                  row={row}
+                  rowId={rowId}
+                  index={index}
+                  columns={columns}
+                  onRowClick={onRowClick}
+                  getRowHref={getRowHref}
+                  enableAnimations={enableAnimations}
+                  maxStaggerRows={maxStaggerRows}
+                  compact={compact}
+                  getRowClassName={getRowClassName}
+                  selectable={selectable}
+                  isSelected={selectedIds.includes(rowId)}
+                  onSelect={onSelect}
+                />
+              );
+            })
           )}
         </TableBody>
       </Table>

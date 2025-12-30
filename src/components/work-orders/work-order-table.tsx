@@ -11,6 +11,10 @@ import type { WorkOrderWithRelations } from "./work-order-card";
 interface WorkOrderTableProps {
   workOrders: WorkOrderWithRelations[];
   searchParams?: Record<string, string | undefined>;
+  selectable?: boolean;
+  selectedIds?: number[];
+  onSelect?: (id: number) => void;
+  onSelectAll?: () => void;
 }
 
 /**
@@ -19,6 +23,10 @@ interface WorkOrderTableProps {
 export function WorkOrderTable({
   workOrders,
   searchParams,
+  selectable = false,
+  selectedIds = [],
+  onSelect,
+  onSelectAll,
 }: WorkOrderTableProps) {
   const columns: ColumnDef<WorkOrderWithRelations>[] = [
     {
@@ -176,6 +184,10 @@ export function WorkOrderTable({
         getRowHref={(row) => `/maintenance/work-orders/${row.id}`}
         emptyMessage="No work orders found"
         compact
+        selectable={selectable}
+        selectedIds={selectedIds}
+        onSelect={onSelect ? (id) => onSelect(id as number) : undefined}
+        onSelectAll={onSelectAll}
       />
     </div>
   );
