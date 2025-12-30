@@ -57,3 +57,7 @@ bun.lockb
 
 # Playwright MCP Screenshots
 .playwright-mcp/
+
+# PWA
+public/sw.js
+public/workbox-*.js
