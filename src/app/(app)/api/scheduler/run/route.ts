@@ -7,7 +7,7 @@ import {
 } from "@/db/schema";
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
-import { schedulerLogger, generateRequestId } from "@/lib/logger";
+import { generateRequestId, schedulerLogger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq, lte } from "drizzle-orm";
 

@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { equipment, spareParts, users, workOrders } from "@/db/schema";
-import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
+import { equipment, spareParts, workOrders } from "@/db/schema";
+import { ApiErrors } from "@/lib/api-error";
 import { generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
-import { ilike, or, eq, sql } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export type SearchResult = {
@@ -17,14 +17,62 @@ export type SearchResult = {
 
 // Static pages for navigation
 const STATIC_PAGES: SearchResult[] = [
-  { id: "page-dashboard", type: "page", title: "Dashboard", subtitle: "Technician terminal", href: "/dashboard" },
-  { id: "page-work-orders", type: "page", title: "Work Orders", subtitle: "View all work orders", href: "/maintenance/work-orders" },
-  { id: "page-equipment", type: "page", title: "Equipment", subtitle: "Asset management", href: "/assets/equipment" },
-  { id: "page-inventory", type: "page", title: "Inventory", subtitle: "Spare parts", href: "/inventory/parts" },
-  { id: "page-analytics", type: "page", title: "Analytics", subtitle: "KPIs and reports", href: "/analytics" },
-  { id: "page-settings", type: "page", title: "Settings", subtitle: "Account preferences", href: "/profile/settings" },
-  { id: "page-users", type: "page", title: "Users", subtitle: "User management", href: "/admin/users" },
-  { id: "page-roles", type: "page", title: "Roles", subtitle: "Role management", href: "/admin/roles" },
+  {
+    id: "page-dashboard",
+    type: "page",
+    title: "Dashboard",
+    subtitle: "Technician terminal",
+    href: "/dashboard",
+  },
+  {
+    id: "page-work-orders",
+    type: "page",
+    title: "Work Orders",
+    subtitle: "View all work orders",
+    href: "/maintenance/work-orders",
+  },
+  {
+    id: "page-equipment",
+    type: "page",
+    title: "Equipment",
+    subtitle: "Asset management",
+    href: "/assets/equipment",
+  },
+  {
+    id: "page-inventory",
+    type: "page",
+    title: "Inventory",
+    subtitle: "Spare parts",
+    href: "/inventory/parts",
+  },
+  {
+    id: "page-analytics",
+    type: "page",
+    title: "Analytics",
+    subtitle: "KPIs and reports",
+    href: "/analytics",
+  },
+  {
+    id: "page-settings",
+    type: "page",
+    title: "Settings",
+    subtitle: "Account preferences",
+    href: "/profile/settings",
+  },
+  {
+    id: "page-users",
+    type: "page",
+    title: "Users",
+    subtitle: "User management",
+    href: "/admin/users",
+  },
+  {
+    id: "page-roles",
+    type: "page",
+    title: "Roles",
+    subtitle: "Role management",
+    href: "/admin/roles",
+  },
 ];
 
 export async function GET(request: Request) {

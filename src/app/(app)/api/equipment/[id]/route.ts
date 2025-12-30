@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { equipment as equipmentTable, equipmentStatusLogs } from "@/db/schema";
-import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
+import { equipmentStatusLogs, equipment as equipmentTable } from "@/db/schema";
+import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { PERMISSIONS } from "@/lib/permissions";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -110,7 +110,8 @@ export async function PATCH(
     return apiSuccess(updatedItem, HttpStatus.OK, requestId);
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message === "Unauthorized") return ApiErrors.unauthorized(requestId);
+      if (error.message === "Unauthorized")
+        return ApiErrors.unauthorized(requestId);
       if (error.message === "Forbidden") return ApiErrors.forbidden(requestId);
     }
     apiLogger.error({ requestId, id, error }, "Update equipment error");
@@ -143,11 +144,17 @@ export async function DELETE(
     }
 
     if (existing.workOrders.length > 0) {
-      return ApiErrors.badRequest("Cannot delete equipment with existing work orders", requestId);
+      return ApiErrors.badRequest(
+        "Cannot delete equipment with existing work orders",
+        requestId
+      );
     }
 
     if (existing.children.length > 0) {
-      return ApiErrors.badRequest("Cannot delete equipment that has sub-assets", requestId);
+      return ApiErrors.badRequest(
+        "Cannot delete equipment that has sub-assets",
+        requestId
+      );
     }
 
     await db.delete(equipmentTable).where(eq(equipmentTable.id, equipmentId));
@@ -157,7 +164,8 @@ export async function DELETE(
     return apiSuccess({ deleted: true }, HttpStatus.OK, requestId);
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message === "Unauthorized") return ApiErrors.unauthorized(requestId);
+      if (error.message === "Unauthorized")
+        return ApiErrors.unauthorized(requestId);
       if (error.message === "Forbidden") return ApiErrors.forbidden(requestId);
     }
     apiLogger.error({ requestId, id, error }, "Delete equipment error");

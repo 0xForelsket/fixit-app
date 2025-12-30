@@ -40,7 +40,10 @@ export async function POST(request: Request) {
       );
     }
 
-    authLogger.info({ requestId, userId: authResult.user.id }, "Login successful");
+    authLogger.info(
+      { requestId, userId: authResult.user.id },
+      "Login successful"
+    );
 
     return NextResponse.json({
       success: true,

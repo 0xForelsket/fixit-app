@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
-import { ApiErrors, apiSuccess, HttpStatus } from "@/lib/api-error";
+import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
@@ -24,6 +24,7 @@ export async function POST(request: Request) {
       unitCost,
       reorderPoint,
       leadTimeDays,
+      vendorId,
       isActive,
     } = body;
 
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
         unitCost,
         reorderPoint: reorderPoint ?? 0,
         leadTimeDays,
+        vendorId,
         isActive: isActive ?? true,
       })
       .returning();

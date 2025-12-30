@@ -69,6 +69,7 @@ export async function PATCH(
       unitCost,
       reorderPoint,
       leadTimeDays,
+      vendorId,
       isActive,
     } = body;
 
@@ -83,6 +84,7 @@ export async function PATCH(
         unitCost,
         reorderPoint,
         leadTimeDays,
+        vendorId,
         isActive,
         updatedAt: new Date(),
       })
