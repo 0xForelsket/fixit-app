@@ -50,7 +50,11 @@ export function EquipmentMaintenance({ schedules }: EquipmentMaintenanceProps) {
             Priority Maintenance
           </h3>
           {overdueSchedules.map((schedule) => (
-            <ScheduleCondensedCard key={schedule.id} schedule={schedule} isOverdue />
+            <ScheduleCondensedCard
+              key={schedule.id}
+              schedule={schedule}
+              isOverdue
+            />
           ))}
         </div>
       )}
@@ -115,7 +119,9 @@ function ScheduleCondensedCard({
               Due in {daysUntilDue}d
             </span>
           ) : (
-            <span className="text-zinc-400 uppercase tracking-wider">Due {formatRelativeTime(schedule.nextDueDate)}</span>
+            <span className="text-zinc-400 uppercase tracking-wider">
+              Due {formatRelativeTime(schedule.nextDueDate)}
+            </span>
           )}
         </div>
       </div>

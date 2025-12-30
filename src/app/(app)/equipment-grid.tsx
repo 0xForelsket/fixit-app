@@ -1,15 +1,10 @@
 "use client";
 import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { Equipment, Location } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import {
-  ArrowRight,
-  Factory,
-  MapPin,
-  Layers,
-} from "lucide-react";
+import { ArrowRight, Factory, Layers, MapPin } from "lucide-react";
 import Link from "next/link";
-import { StatusBadge } from "@/components/ui/status-badge";
 
 import { saveToRecent } from "@/components/home/recent-equipment";
 
@@ -37,7 +32,12 @@ export function EquipmentGrid({ equipment, hash }: EquipmentGridProps) {
   return (
     <div className="flex flex-col gap-2 pb-2">
       {equipment.map((item, index) => (
-        <EquipmentCard key={item.id} equipment={item} index={index} hash={hash} />
+        <EquipmentCard
+          key={item.id}
+          equipment={item}
+          index={index}
+          hash={hash}
+        />
       ))}
     </div>
   );
@@ -93,7 +93,7 @@ function EquipmentCard({
             <Layers className="h-3 w-3 text-primary-500/50" />
           )}
         </div>
-        
+
         {equipment.location && (
           <div className="flex items-center gap-1 text-[11px] text-zinc-500">
             <MapPin className="h-2.5 w-2.5 shrink-0 opacity-70" />
@@ -103,10 +103,12 @@ function EquipmentCard({
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <StatusBadge status={equipment.status} className="scale-90 origin-right" />
+        <StatusBadge
+          status={equipment.status}
+          className="scale-90 origin-right"
+        />
         <ArrowRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-zinc-500 transition-colors" />
       </div>
     </Link>
   );
 }
-

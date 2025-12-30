@@ -234,7 +234,12 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   className="sr-only"
                 />
                 <span
-                  className={cn("text-[10px] font-black uppercase tracking-widest", config.color.includes('text-white') ? 'text-white' : config.color)}
+                  className={cn(
+                    "text-[10px] font-black uppercase tracking-widest",
+                    config.color.includes("text-white")
+                      ? "text-white"
+                      : config.color
+                  )}
                 >
                   {priority}
                 </span>
@@ -316,12 +321,15 @@ export function ReportForm({ equipment }: ReportFormProps) {
               variant="compact"
             />
           </div>
-          
+
           {/* Photos from camera (since FileUpload only shows its own previews) */}
           {attachments.length > 0 && (
             <div className="grid grid-cols-3 gap-2 mt-2">
               {attachments.map((file, idx) => (
-                <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 shadow-sm group">
+                <div
+                  key={idx}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-zinc-200 shadow-sm group"
+                >
                   <img
                     src="https://placehold.co/200x200?text=Attachment" // In a real app we'd show the actual image
                     alt={file.filename}
@@ -329,7 +337,9 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   />
                   <button
                     type="button"
-                    onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))}
+                    onClick={() =>
+                      setAttachments((prev) => prev.filter((_, i) => i !== idx))
+                    }
                     className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 className="h-3 w-3" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { PERMISSIONS } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -12,7 +13,6 @@ import {
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { PERMISSIONS } from "@/lib/permissions";
 
 interface EquipmentOverviewProps {
   equipment: {
@@ -25,12 +25,14 @@ interface EquipmentOverviewProps {
       name: string;
       code: string;
     } | null;
-    children?: {
-      id: number;
-      name: string;
-      code: string;
-      status: "operational" | "down" | "maintenance";
-    }[] | null;
+    children?:
+      | {
+          id: number;
+          name: string;
+          code: string;
+          status: "operational" | "down" | "maintenance";
+        }[]
+      | null;
     locationId: number;
   };
   hasDuePM: boolean;
@@ -44,7 +46,9 @@ export function EquipmentOverview({
   openWorkOrderCount,
   permissions,
 }: EquipmentOverviewProps) {
-  const canCreate = permissions.includes(PERMISSIONS.EQUIPMENT_CREATE) || permissions.includes('*');
+  const canCreate =
+    permissions.includes(PERMISSIONS.EQUIPMENT_CREATE) ||
+    permissions.includes("*");
 
   return (
     <div className="space-y-6">
@@ -56,7 +60,9 @@ export function EquipmentOverview({
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-black text-zinc-900 leading-none">Maintenance Due</p>
+              <p className="text-sm font-black text-zinc-900 leading-none">
+                Maintenance Due
+              </p>
               <p className="text-[10px] font-bold text-zinc-500 mt-1">
                 Scheduled attention required
               </p>
@@ -73,15 +79,16 @@ export function EquipmentOverview({
       )}
 
       {/* Hierarchy Section */}
-      {(equipment.parent || (equipment.children && equipment.children.length > 0)) && (
+      {(equipment.parent ||
+        (equipment.children && equipment.children.length > 0)) && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
               Asset Hierarchy
             </h3>
             {canCreate && (
-              <Link 
-                href={`/assets/equipment/new?parentId=${equipment.id}&locationId=${equipment.locationId || ''}`}
+              <Link
+                href={`/assets/equipment/new?parentId=${equipment.id}&locationId=${equipment.locationId || ""}`}
                 className="text-[10px] font-black text-primary-600 hover:text-primary-700 flex items-center gap-1"
               >
                 <Plus className="h-3 w-3" />
@@ -98,11 +105,18 @@ export function EquipmentOverview({
                     <Wrench className="h-3 w-3" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-tighter">Parent Asset</p>
-                    <p className="text-xs font-bold text-zinc-900 truncate tracking-tight">{equipment.parent.name}</p>
+                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-tighter">
+                      Parent Asset
+                    </p>
+                    <p className="text-xs font-bold text-zinc-900 truncate tracking-tight">
+                      {equipment.parent.name}
+                    </p>
                   </div>
                 </div>
-                <Link href={`/equipment/${equipment.parent.code}`} className="text-[10px] font-black text-primary-600 hover:text-primary-700 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Link
+                  href={`/equipment/${equipment.parent.code}`}
+                  className="text-[10px] font-black text-primary-600 hover:text-primary-700 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
                   VIEW PARENT
                   <ArrowRight className="h-3 w-3" />
                 </Link>
@@ -119,13 +133,21 @@ export function EquipmentOverview({
                     className="flex items-center justify-between p-3 hover:bg-zinc-50 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "h-2 w-2 rounded-full",
-                        child.status === 'operational' ? 'bg-emerald-500' : 'bg-rose-500'
-                      )} />
+                      <div
+                        className={cn(
+                          "h-2 w-2 rounded-full",
+                          child.status === "operational"
+                            ? "bg-emerald-500"
+                            : "bg-rose-500"
+                        )}
+                      />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-zinc-900 truncate leading-none mb-1">{child.name}</p>
-                        <p className="text-[9px] font-mono font-bold text-zinc-400 uppercase">{child.code}</p>
+                        <p className="text-xs font-bold text-zinc-900 truncate leading-none mb-1">
+                          {child.name}
+                        </p>
+                        <p className="text-[9px] font-mono font-bold text-zinc-400 uppercase">
+                          {child.code}
+                        </p>
                       </div>
                     </div>
                     <ArrowRight className="h-4 w-4 text-zinc-200 group-hover:text-zinc-400 transition-colors" />
@@ -155,7 +177,7 @@ export function EquipmentOverview({
               icon={Plus}
               label="Add Part"
               variant="outline"
-              href={`/assets/equipment/new?parentId=${equipment.id}&locationId=${equipment.locationId || ''}`}
+              href={`/assets/equipment/new?parentId=${equipment.id}&locationId=${equipment.locationId || ""}`}
             />
           )}
         </div>
@@ -243,9 +265,19 @@ function StatusCondensedCard({
     warning: "text-amber-600",
     danger: "text-rose-600",
   };
-  
+
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm border-l-4 border-l-current overflow-hidden" style={{ color: variant === 'success' ? '#10b981' : variant === 'warning' ? '#f59e0b' : '#ef4444' }}>
+    <div
+      className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm border-l-4 border-l-current overflow-hidden"
+      style={{
+        color:
+          variant === "success"
+            ? "#10b981"
+            : variant === "warning"
+              ? "#f59e0b"
+              : "#ef4444",
+      }}
+    >
       <div className="flex items-center gap-1.5 mb-1 text-zinc-400">
         <Icon className={cn("h-3 w-3", textStyles[variant])} />
         <span className="text-[9px] font-black uppercase tracking-widest">

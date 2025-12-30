@@ -63,19 +63,30 @@ export function EquipmentHistory({ workOrders }: EquipmentHistoryProps) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const config: Record<
-    string,
-    { label: string; color: string }
-  > = {
+  const config: Record<string, { label: string; color: string }> = {
     open: { label: "Open", color: "text-blue-600 bg-blue-50 border-blue-100" },
-    in_progress: { label: "In Progress", color: "text-amber-600 bg-amber-50 border-amber-100" },
-    resolved: { label: "Resolved", color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
-    closed: { label: "Closed", color: "text-zinc-600 bg-zinc-50 border-zinc-200" },
+    in_progress: {
+      label: "In Progress",
+      color: "text-amber-600 bg-amber-50 border-amber-100",
+    },
+    resolved: {
+      label: "Resolved",
+      color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+    },
+    closed: {
+      label: "Closed",
+      color: "text-zinc-600 bg-zinc-50 border-zinc-200",
+    },
   };
 
   const { label, color } = config[status] || config.open;
   return (
-    <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border", color)}>
+    <span
+      className={cn(
+        "px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border",
+        color
+      )}
+    >
       {label}
     </span>
   );

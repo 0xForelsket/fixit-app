@@ -1,4 +1,5 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { db } from "@/db";
 import {
   equipment as equipmentTable,
@@ -7,13 +8,9 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { desc, eq } from "drizzle-orm";
-import {
-  ArrowLeft,
-  MapPin,
-} from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { EquipmentHistory } from "./equipment-history";
 import { EquipmentMaintenance } from "./equipment-maintenance";
 import { EquipmentOverview } from "./equipment-overview";

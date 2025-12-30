@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Calendar, ClipboardList, History } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface EquipmentTabsProps {
   equipmentId: number;
@@ -29,7 +29,7 @@ export function EquipmentTabs({
         setActiveTab(hash);
       }
     };
-    
+
     // Check on mount
     handleHash();
 
