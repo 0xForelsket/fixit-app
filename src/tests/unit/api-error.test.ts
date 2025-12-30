@@ -1,4 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
 import {
   ApiErrors,
   ErrorCode,
@@ -6,6 +5,7 @@ import {
   apiError,
   apiSuccess,
 } from "@/lib/api-error";
+import { describe, expect, it, vi } from "vitest";
 
 // Mock the logger to avoid console noise in tests
 vi.mock("@/lib/logger", () => ({
@@ -154,7 +154,9 @@ describe("api-error", () => {
         const body = await response.json();
 
         expect(response.status).toBe(403);
-        expect(body.error).toBe("You don't have permission to perform this action");
+        expect(body.error).toBe(
+          "You don't have permission to perform this action"
+        );
         expect(body.code).toBe(ErrorCode.PERMISSION_DENIED);
       });
     });
@@ -209,11 +211,15 @@ describe("api-error", () => {
 
     describe("internal", () => {
       it("should return 500 with generic message", async () => {
-        const response = ApiErrors.internal(new Error("Database connection failed"));
+        const response = ApiErrors.internal(
+          new Error("Database connection failed")
+        );
         const body = await response.json();
 
         expect(response.status).toBe(500);
-        expect(body.error).toBe("An unexpected error occurred. Please try again later.");
+        expect(body.error).toBe(
+          "An unexpected error occurred. Please try again later."
+        );
         expect(body.code).toBe(ErrorCode.INTERNAL_ERROR);
         // Should NOT leak the actual error message
         expect(body.error).not.toContain("Database");

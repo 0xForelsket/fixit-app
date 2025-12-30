@@ -34,8 +34,12 @@ vi.mock("next/navigation", () => ({
 // Create a proper chainable mock that supports Drizzle's fluent API
 const mockReturning = vi.hoisted(() => vi.fn());
 const mockWhere = vi.hoisted(() => vi.fn(() => ({ returning: mockReturning })));
-const mockSet = vi.hoisted(() => vi.fn(() => ({ where: mockWhere, returning: mockReturning })));
-const mockValues = vi.hoisted(() => vi.fn(() => ({ returning: mockReturning })));
+const mockSet = vi.hoisted(() =>
+  vi.fn(() => ({ where: mockWhere, returning: mockReturning }))
+);
+const mockValues = vi.hoisted(() =>
+  vi.fn(() => ({ returning: mockReturning }))
+);
 
 const mockTx = vi.hoisted(() => ({
   insert: vi.fn(() => ({ values: mockValues })),

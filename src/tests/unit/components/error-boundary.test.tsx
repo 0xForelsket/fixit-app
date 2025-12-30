@@ -1,7 +1,7 @@
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 // Component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
@@ -61,7 +61,9 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
 
-    expect(screen.getByRole("button", { name: /Try Again/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Try Again/i })
+    ).toBeInTheDocument();
   });
 
   it("logs error to console", () => {

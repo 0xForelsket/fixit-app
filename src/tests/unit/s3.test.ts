@@ -15,17 +15,21 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 }));
 
 import {
-  generateS3Key,
-  generateAvatarKey,
-  getPresignedUploadUrl,
-  getPresignedDownloadUrl,
   deleteObject,
-  uploadFile,
+  generateAvatarKey,
+  generateS3Key,
+  getPresignedDownloadUrl,
+  getPresignedUploadUrl,
   getS3Config,
   s3Client,
+  uploadFile,
 } from "@/lib/s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 
 describe("S3 Utilities", () => {
   beforeEach(() => {
@@ -43,9 +47,9 @@ describe("S3 Utilities", () => {
       expect(key).toBe("equipments/42/99.jpg");
     });
 
-    it("generates correct key for part entity", () => {
-      const key = generateS3Key("part", 10, 20, "specs.docx");
-      expect(key).toBe("parts/10/20.docx");
+    it("generates correct key for spare_part entity", () => {
+      const key = generateS3Key("spare_part", 10, 20, "specs.docx");
+      expect(key).toBe("spare_parts/10/20.docx");
     });
 
     it("extracts extension from filename", () => {
@@ -91,9 +95,14 @@ describe("S3 Utilities", () => {
 
   describe("getPresignedUploadUrl", () => {
     it("generates presigned upload URL with default expiry", async () => {
-      vi.mocked(getSignedUrl).mockResolvedValue("https://s3.example.com/presigned-url");
+      vi.mocked(getSignedUrl).mockResolvedValue(
+        "https://s3.example.com/presigned-url"
+      );
 
-      const url = await getPresignedUploadUrl("test/key.pdf", "application/pdf");
+      const url = await getPresignedUploadUrl(
+        "test/key.pdf",
+        "application/pdf"
+      );
 
       expect(url).toBe("https://s3.example.com/presigned-url");
       expect(PutObjectCommand).toHaveBeenCalledWith({
@@ -101,29 +110,29 @@ describe("S3 Utilities", () => {
         Key: "test/key.pdf",
         ContentType: "application/pdf",
       });
-      expect(getSignedUrl).toHaveBeenCalledWith(
-        s3Client,
-        expect.any(Object),
-        { expiresIn: 3600 }
-      );
+      expect(getSignedUrl).toHaveBeenCalledWith(s3Client, expect.any(Object), {
+        expiresIn: 3600,
+      });
     });
 
     it("generates presigned upload URL with custom expiry", async () => {
-      vi.mocked(getSignedUrl).mockResolvedValue("https://s3.example.com/presigned-url");
+      vi.mocked(getSignedUrl).mockResolvedValue(
+        "https://s3.example.com/presigned-url"
+      );
 
       await getPresignedUploadUrl("test/key.pdf", "application/pdf", 7200);
 
-      expect(getSignedUrl).toHaveBeenCalledWith(
-        s3Client,
-        expect.any(Object),
-        { expiresIn: 7200 }
-      );
+      expect(getSignedUrl).toHaveBeenCalledWith(s3Client, expect.any(Object), {
+        expiresIn: 7200,
+      });
     });
   });
 
   describe("getPresignedDownloadUrl", () => {
     it("generates presigned download URL with default expiry", async () => {
-      vi.mocked(getSignedUrl).mockResolvedValue("https://s3.example.com/download-url");
+      vi.mocked(getSignedUrl).mockResolvedValue(
+        "https://s3.example.com/download-url"
+      );
 
       const url = await getPresignedDownloadUrl("test/key.pdf");
 
@@ -132,23 +141,21 @@ describe("S3 Utilities", () => {
         Bucket: "fixit-attachments",
         Key: "test/key.pdf",
       });
-      expect(getSignedUrl).toHaveBeenCalledWith(
-        s3Client,
-        expect.any(Object),
-        { expiresIn: 3600 }
-      );
+      expect(getSignedUrl).toHaveBeenCalledWith(s3Client, expect.any(Object), {
+        expiresIn: 3600,
+      });
     });
 
     it("generates presigned download URL with custom expiry", async () => {
-      vi.mocked(getSignedUrl).mockResolvedValue("https://s3.example.com/download-url");
+      vi.mocked(getSignedUrl).mockResolvedValue(
+        "https://s3.example.com/download-url"
+      );
 
       await getPresignedDownloadUrl("test/key.pdf", 1800);
 
-      expect(getSignedUrl).toHaveBeenCalledWith(
-        s3Client,
-        expect.any(Object),
-        { expiresIn: 1800 }
-      );
+      expect(getSignedUrl).toHaveBeenCalledWith(s3Client, expect.any(Object), {
+        expiresIn: 1800,
+      });
     });
   });
 

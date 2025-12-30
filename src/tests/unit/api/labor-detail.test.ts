@@ -103,8 +103,13 @@ describe("GET /api/labor/[id]", () => {
       id: 1,
       userId: 1,
       workOrderId: 1,
-      minutes: 60,
-      description: "Maintenance work",
+      startTime: new Date(),
+      endTime: new Date(),
+      durationMinutes: 60,
+      hourlyRate: 50,
+      isBillable: true,
+      notes: "Maintenance work",
+      createdAt: new Date(),
       user: { id: 1, name: "Tech User" },
       workOrder: { id: 1, title: "Work Order 1" },
     };
@@ -118,7 +123,7 @@ describe("GET /api/labor/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(data.data.id).toBe(1);
-    expect(data.data.minutes).toBe(60);
+    expect(data.data.durationMinutes).toBe(60);
     expect(data.data.user.name).toBe("Tech User");
     expect(data.data.workOrder.title).toBe("Work Order 1");
   });

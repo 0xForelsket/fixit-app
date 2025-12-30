@@ -39,29 +39,42 @@ vi.mock("@/lib/permissions", () => ({
   getLegacyRolePermissions: vi.fn(() => ["work_orders:read"]),
 }));
 
-import { authenticateUser } from "@/lib/services/auth.service";
 import { db } from "@/db";
 import { verifyPin } from "@/lib/auth";
-import { createSession } from "@/lib/session";
 import { authLogger } from "@/lib/logger";
+import { authenticateUser } from "@/lib/services/auth.service";
+import { createSession } from "@/lib/session";
 
 describe("Auth Service", () => {
   const mockUser = {
     id: 1,
     employeeId: "EMP-001",
     name: "Test User",
+    email: "test@example.com",
     pin: "hashed_pin",
-    isActive: true,
-    lockedUntil: null,
-    failedLoginAttempts: 0,
     roleId: 1,
-    hourlyRate: "25.00",
+    departmentId: 1,
+    isActive: true,
+    hourlyRate: 25.0,
+    preferences: {
+      theme: "light" as const,
+      density: "comfortable" as const,
+      notifications: { email: true },
+    },
+    failedLoginAttempts: 0,
+    lockedUntil: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   const mockRole = {
     id: 1,
     name: "operator",
+    description: "Operator role",
+    isSystemRole: false,
     permissions: ["work_orders:read", "work_orders:write"],
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   beforeEach(() => {
@@ -178,8 +191,14 @@ describe("Auth Service", () => {
           name: "Test User",
           roleName: "operator",
           roleId: 1,
+          departmentId: 1,
           permissions: ["work_orders:read", "work_orders:write"],
-          hourlyRate: "25.00",
+          hourlyRate: 25.0,
+          preferences: {
+            theme: "light",
+            density: "comfortable",
+            notifications: { email: true },
+          },
         });
         expect(result.csrfToken).toBe("csrf-token-123");
       }
@@ -217,7 +236,7 @@ describe("Auth Service", () => {
       vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
         ...mockRole,
-        permissions: null,
+        permissions: [],
       });
       vi.mocked(verifyPin).mockResolvedValue(true);
       vi.mocked(createSession).mockResolvedValue("csrf-token");

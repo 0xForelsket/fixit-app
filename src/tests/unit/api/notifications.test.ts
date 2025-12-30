@@ -58,24 +58,28 @@ describe("GET /api/notifications", () => {
       {
         id: 1,
         userId: 1,
-        type: "work_order_assigned",
+        type: "work_order_assigned" as const,
         title: "New work order assigned",
         message: "You have been assigned to WO-123",
+        link: "/maintenance/work-orders/123",
         isRead: false,
         createdAt: new Date(),
       },
       {
         id: 2,
         userId: 1,
-        type: "critical_issue",
+        type: "work_order_escalated" as const,
         title: "Critical issue reported",
         message: "Machine A is down",
+        link: "/maintenance/work-orders/456",
         isRead: true,
         createdAt: new Date(),
       },
     ];
 
-    vi.mocked(db.query.notifications.findMany).mockResolvedValue(mockNotifications);
+    vi.mocked(db.query.notifications.findMany).mockResolvedValue(
+      mockNotifications
+    );
 
     const response = await GET();
     const data = await response.json();

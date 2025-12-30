@@ -50,7 +50,9 @@ const mockTx = vi.hoisted(() => ({
 
 vi.mock("@/db", () => ({
   db: {
-    transaction: vi.fn((callback: (tx: typeof mockTx) => unknown) => callback(mockTx)),
+    transaction: vi.fn((callback: (tx: typeof mockTx) => unknown) =>
+      callback(mockTx)
+    ),
   },
 }));
 

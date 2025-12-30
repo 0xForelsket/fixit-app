@@ -1,6 +1,6 @@
+import { Badge } from "@/components/ui/badge";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Badge } from "@/components/ui/badge";
 
 describe("Badge", () => {
   it("renders children", () => {
@@ -17,13 +17,17 @@ describe("Badge", () => {
     });
 
     it("renders secondary variant", () => {
-      const { container } = render(<Badge variant="secondary">Secondary</Badge>);
+      const { container } = render(
+        <Badge variant="secondary">Secondary</Badge>
+      );
 
       expect(container.firstChild).toHaveClass("bg-secondary");
     });
 
     it("renders destructive variant", () => {
-      const { container } = render(<Badge variant="destructive">Destructive</Badge>);
+      const { container } = render(
+        <Badge variant="destructive">Destructive</Badge>
+      );
 
       expect(container.firstChild).toHaveClass("bg-destructive");
     });
@@ -90,7 +94,9 @@ describe("Badge", () => {
 
     it("merges custom className with variant styles", () => {
       const { container } = render(
-        <Badge variant="success" className="extra-styling">Merged</Badge>
+        <Badge variant="success" className="extra-styling">
+          Merged
+        </Badge>
       );
 
       expect(container.firstChild).toHaveClass("bg-success-100");
@@ -100,16 +106,18 @@ describe("Badge", () => {
 
   describe("Props Passthrough", () => {
     it("passes through additional HTML attributes", () => {
-      render(<Badge data-testid="test-badge" id="my-badge">Props</Badge>);
+      render(
+        <Badge data-testid="test-badge" id="my-badge">
+          Props
+        </Badge>
+      );
 
       const badge = screen.getByTestId("test-badge");
       expect(badge).toHaveAttribute("id", "my-badge");
     });
 
     it("passes through onClick handler", () => {
-      const { container } = render(
-        <Badge onClick={() => {}}>Clickable</Badge>
-      );
+      const { container } = render(<Badge onClick={() => {}}>Clickable</Badge>);
 
       expect(container.firstChild).toBeDefined();
     });

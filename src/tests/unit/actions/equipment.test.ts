@@ -35,6 +35,11 @@ vi.mock("@/lib/session", () => ({
   getCurrentUser: vi.fn(),
 }));
 
+// Mock audit
+vi.mock("@/lib/audit", () => ({
+  logAudit: vi.fn(),
+}));
+
 import { db } from "@/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -133,6 +138,10 @@ describe("createEquipment action", () => {
       locationId: 1,
       status: "operational",
       ownerId: null,
+      typeId: null,
+      modelId: null,
+      departmentId: 1,
+      parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -256,10 +265,12 @@ describe("updateEquipment action", () => {
       name: "Old Name",
       code: "TM-001",
       locationId: 1,
-      status: "operational",
+      status: "operational" as const,
       ownerId: null,
       typeId: null,
       modelId: null,
+      departmentId: 1,
+      parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -296,6 +307,8 @@ describe("updateEquipment action", () => {
       ownerId: null,
       typeId: null,
       modelId: null,
+      departmentId: 1,
+      parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -336,6 +349,8 @@ describe("updateEquipment action", () => {
       ownerId: null,
       typeId: null,
       modelId: null,
+      departmentId: 1,
+      parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

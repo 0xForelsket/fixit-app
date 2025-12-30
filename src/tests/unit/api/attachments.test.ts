@@ -48,7 +48,9 @@ vi.mock("@/lib/rate-limit", () => ({
 vi.mock("@/lib/s3", () => ({
   generateS3Key: vi.fn(() => "work_orders/1/1.pdf"),
   getPresignedUploadUrl: vi.fn(() => "https://s3.example.com/presigned-upload"),
-  getPresignedDownloadUrl: vi.fn(() => "https://s3.example.com/presigned-download"),
+  getPresignedDownloadUrl: vi.fn(
+    () => "https://s3.example.com/presigned-download"
+  ),
   deleteObject: vi.fn(),
 }));
 
@@ -62,11 +64,11 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
-import { GET, POST } from "@/app/(app)/api/attachments/route";
 import {
-  GET as GET_BY_ID,
   DELETE,
+  GET as GET_BY_ID,
 } from "@/app/(app)/api/attachments/[id]/route";
+import { GET, POST } from "@/app/(app)/api/attachments/route";
 import { db } from "@/db";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { deleteObject } from "@/lib/s3";
@@ -84,7 +86,9 @@ describe("GET /api/attachments", () => {
       "http://localhost/api/attachments?entityType=work_order&entityId=1"
     ) as unknown as import("next/server").NextRequest;
     Object.defineProperty(request, "nextUrl", {
-      value: new URL("http://localhost/api/attachments?entityType=work_order&entityId=1"),
+      value: new URL(
+        "http://localhost/api/attachments?entityType=work_order&entityId=1"
+      ),
     });
 
     const response = await GET(request);
@@ -95,12 +99,24 @@ describe("GET /api/attachments", () => {
   it("returns 400 when entityType is missing", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request(
       "http://localhost/api/attachments?entityId=1"
@@ -117,12 +133,24 @@ describe("GET /api/attachments", () => {
   it("returns 400 when entityId is missing", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request(
       "http://localhost/api/attachments?entityType=work_order"
@@ -139,18 +167,32 @@ describe("GET /api/attachments", () => {
   it("returns 400 when entityId is not a number", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request(
       "http://localhost/api/attachments?entityType=work_order&entityId=abc"
     ) as unknown as import("next/server").NextRequest;
     Object.defineProperty(request, "nextUrl", {
-      value: new URL("http://localhost/api/attachments?entityType=work_order&entityId=abc"),
+      value: new URL(
+        "http://localhost/api/attachments?entityType=work_order&entityId=abc"
+      ),
     });
 
     const response = await GET(request);
@@ -161,19 +203,37 @@ describe("GET /api/attachments", () => {
   it("returns attachments list", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockAttachments = [
       {
         id: 1,
-        entityType: "work_order",
+        entityType: "work_order" as const,
         entityId: 1,
+        type: "document" as const,
         filename: "report.pdf",
+        s3Key: "work_orders/1/report.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 1024,
+        uploadedById: 1,
+        createdAt: new Date(),
         uploadedBy: { id: 1, name: "Tech" },
       },
     ];
@@ -183,7 +243,9 @@ describe("GET /api/attachments", () => {
       "http://localhost/api/attachments?entityType=work_order&entityId=1"
     ) as unknown as import("next/server").NextRequest;
     Object.defineProperty(request, "nextUrl", {
-      value: new URL("http://localhost/api/attachments?entityType=work_order&entityId=1"),
+      value: new URL(
+        "http://localhost/api/attachments?entityType=work_order&entityId=1"
+      ),
     });
 
     const response = await GET(request);
@@ -251,12 +313,24 @@ describe("POST /api/attachments", () => {
     });
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request("http://localhost/api/attachments", {
       method: "POST",
@@ -280,23 +354,36 @@ describe("POST /api/attachments", () => {
     });
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockAttachment = {
       id: 1,
-      entityType: "work_order",
+      entityType: "work_order" as const,
       entityId: 1,
-      type: "photo",
+      type: "photo" as const,
       filename: "image.jpg",
-      s3Key: "",
+      s3Key: "work_orders/1/image.jpg",
       mimeType: "image/jpeg",
       sizeBytes: 1024,
       uploadedById: 1,
+      createdAt: new Date(),
     };
     vi.mocked(db.insert).mockReturnValue({
       values: vi.fn(() => ({
@@ -351,12 +438,24 @@ describe("GET /api/attachments/[id]", () => {
   it("returns 400 for invalid attachment ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request(
       "http://localhost/api/attachments/abc"
@@ -372,12 +471,24 @@ describe("GET /api/attachments/[id]", () => {
   it("returns 404 when attachment not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue(undefined);
 
     const request = new Request(
@@ -394,17 +505,36 @@ describe("GET /api/attachments/[id]", () => {
   it("returns attachment with download URL", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockAttachment = {
       id: 1,
+      entityType: "work_order" as const,
+      entityId: 1,
+      type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 1024,
+      uploadedById: 1,
+      createdAt: new Date(),
     };
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue(mockAttachment);
 
@@ -447,12 +577,24 @@ describe("DELETE /api/attachments/[id]", () => {
   it("returns 404 when attachment not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/attachments/999", {
@@ -477,9 +619,15 @@ describe("DELETE /api/attachments/[id]", () => {
     });
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
       id: 1,
+      entityType: "work_order" as const,
+      entityId: 1,
+      type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 1024,
       uploadedById: 1, // Owned by user 1
+      createdAt: new Date(),
     });
 
     const request = new Request("http://localhost/api/attachments/1", {
@@ -496,17 +644,35 @@ describe("DELETE /api/attachments/[id]", () => {
   it("deletes attachment when user is owner", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
       id: 1,
+      entityType: "work_order" as const,
+      entityId: 1,
+      type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 1024,
       uploadedById: 1, // Same user
+      createdAt: new Date(),
     });
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(),
@@ -529,17 +695,35 @@ describe("DELETE /api/attachments/[id]", () => {
   it("deletes attachment when user is admin", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 2,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"], // Admin with wildcard permission
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
       id: 1,
+      entityType: "work_order" as const,
+      entityId: 1,
+      type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 1024,
       uploadedById: 1, // Different user
+      createdAt: new Date(),
     });
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(),

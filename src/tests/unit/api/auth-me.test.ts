@@ -22,8 +22,8 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
-import { GET } from "@/app/(app)/api/auth/me/route";
 import { POST } from "@/app/(app)/api/auth/logout/route";
+import { GET } from "@/app/(app)/api/auth/me/route";
 import { deleteSession, getCurrentUser } from "@/lib/session";
 
 describe("GET /api/auth/me", () => {

@@ -1,4 +1,3 @@
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
@@ -39,11 +38,7 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
-import {
-  DELETE,
-  GET,
-  PATCH,
-} from "@/app/(app)/api/inventory/parts/[id]/route";
+import { DELETE, GET, PATCH } from "@/app/(app)/api/inventory/parts/[id]/route";
 import { db } from "@/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -66,12 +61,24 @@ describe("GET /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request("http://localhost/api/inventory/parts/abc");
     const response = await GET(request, {
@@ -84,12 +91,24 @@ describe("GET /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.query.spareParts.findFirst).mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/inventory/parts/999");
@@ -103,22 +122,39 @@ describe("GET /api/inventory/parts/[id]", () => {
   it("returns part details", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockPart = {
       id: 1,
       name: "Bearing SKF-123",
       sku: "SKF-123",
+      barcode: null,
       description: "High quality bearing",
-      category: "Bearings",
+      category: "mechanical" as const,
+      vendorId: 1,
       unitCost: 25.5,
       reorderPoint: 10,
+      leadTimeDays: 5,
       isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     vi.mocked(db.query.spareParts.findFirst).mockResolvedValue(mockPart);
 
@@ -157,12 +193,24 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 401 when user lacks permission", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "OP-001",
       name: "Operator",
-      roleName: "operator",
+      email: "op@example.com",
+      pin: "hashed",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, // No inventory:update permission
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "OP-001",
+      hourlyRate: 20.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request("http://localhost/api/inventory/parts/1", {
       method: "PATCH",
@@ -179,12 +227,24 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request("http://localhost/api/inventory/parts/abc", {
       method: "PATCH",
@@ -201,12 +261,24 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.update).mockReturnValue({
       set: vi.fn(() => ({
         where: vi.fn(() => ({
@@ -230,12 +302,24 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("updates part successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const updatedPart = {
       id: 1,
@@ -292,7 +376,9 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, // No inventory:delete permission
+      departmentId: 1,
+      permissions: ["ticket:view", "equipment:view"],
+      hourlyRate: 25.0,
     });
 
     const request = new Request("http://localhost/api/inventory/parts/1", {
@@ -308,12 +394,24 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const request = new Request("http://localhost/api/inventory/parts/abc", {
       method: "DELETE",
@@ -328,12 +426,24 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(() => ({
         returning: vi.fn().mockResolvedValue([]),
@@ -353,12 +463,24 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("deletes part successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "ADMIN-001",
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(() => ({
         returning: vi.fn().mockResolvedValue([{ id: 1 }]),

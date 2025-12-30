@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { StatsCard } from "@/components/ui/stats-card";
+import { render, screen } from "@testing-library/react";
 import { AlertTriangle, Clock, Inbox } from "lucide-react";
+import { describe, expect, it } from "vitest";
 
 describe("StatsCard", () => {
   const defaultProps = {
@@ -51,31 +51,41 @@ describe("StatsCard", () => {
 
   describe("Variants", () => {
     it("applies default variant styles", () => {
-      const { container } = render(<StatsCard {...defaultProps} variant="default" />);
+      const { container } = render(
+        <StatsCard {...defaultProps} variant="default" />
+      );
 
       expect(container.firstChild).toHaveClass("bg-white");
     });
 
     it("applies primary variant styles", () => {
-      const { container } = render(<StatsCard {...defaultProps} variant="primary" />);
+      const { container } = render(
+        <StatsCard {...defaultProps} variant="primary" />
+      );
 
       expect(container.firstChild).toHaveClass("bg-primary-50/50");
     });
 
     it("applies success variant styles", () => {
-      const { container } = render(<StatsCard {...defaultProps} variant="success" />);
+      const { container } = render(
+        <StatsCard {...defaultProps} variant="success" />
+      );
 
       expect(container.firstChild).toHaveClass("bg-success-50/50");
     });
 
     it("applies warning variant styles", () => {
-      const { container } = render(<StatsCard {...defaultProps} variant="warning" />);
+      const { container } = render(
+        <StatsCard {...defaultProps} variant="warning" />
+      );
 
       expect(container.firstChild).toHaveClass("bg-warning-50/50");
     });
 
     it("applies danger variant styles", () => {
-      const { container } = render(<StatsCard {...defaultProps} variant="danger" />);
+      const { container } = render(
+        <StatsCard {...defaultProps} variant="danger" />
+      );
 
       expect(container.firstChild).toHaveClass("bg-danger-50/50");
     });
@@ -99,10 +109,7 @@ describe("StatsCard", () => {
   describe("Trend Display", () => {
     it("renders positive trend", () => {
       render(
-        <StatsCard
-          {...defaultProps}
-          trend={{ value: 15, positive: true }}
-        />
+        <StatsCard {...defaultProps} trend={{ value: 15, positive: true }} />
       );
 
       expect(screen.getByText("+15%")).toBeInTheDocument();
@@ -110,10 +117,7 @@ describe("StatsCard", () => {
 
     it("renders negative trend", () => {
       render(
-        <StatsCard
-          {...defaultProps}
-          trend={{ value: 10, positive: false }}
-        />
+        <StatsCard {...defaultProps} trend={{ value: 10, positive: false }} />
       );
 
       expect(screen.getByText("10%")).toBeInTheDocument();
@@ -132,10 +136,7 @@ describe("StatsCard", () => {
 
     it("applies correct color for positive trend", () => {
       const { container } = render(
-        <StatsCard
-          {...defaultProps}
-          trend={{ value: 10, positive: true }}
-        />
+        <StatsCard {...defaultProps} trend={{ value: 10, positive: true }} />
       );
 
       expect(container.querySelector(".bg-success-100")).toBeInTheDocument();
@@ -143,10 +144,7 @@ describe("StatsCard", () => {
 
     it("applies correct color for negative trend", () => {
       const { container } = render(
-        <StatsCard
-          {...defaultProps}
-          trend={{ value: 10, positive: false }}
-        />
+        <StatsCard {...defaultProps} trend={{ value: 10, positive: false }} />
       );
 
       expect(container.querySelector(".bg-danger-100")).toBeInTheDocument();
@@ -155,14 +153,18 @@ describe("StatsCard", () => {
 
   describe("Icon Rendering", () => {
     it("renders the provided icon", () => {
-      const { container } = render(<StatsCard {...defaultProps} icon={AlertTriangle} />);
+      const { container } = render(
+        <StatsCard {...defaultProps} icon={AlertTriangle} />
+      );
 
       // SVG icon should be rendered
       expect(container.querySelector("svg")).toBeInTheDocument();
     });
 
     it("uses different icons for different cards", () => {
-      const { rerender, container } = render(<StatsCard {...defaultProps} icon={Inbox} />);
+      const { rerender, container } = render(
+        <StatsCard {...defaultProps} icon={Inbox} />
+      );
       expect(container.querySelector("svg")).toBeInTheDocument();
 
       rerender(<StatsCard {...defaultProps} icon={Clock} />);

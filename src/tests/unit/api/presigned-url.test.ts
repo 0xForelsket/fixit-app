@@ -33,16 +33,19 @@ describe("POST /api/attachments/presigned-url", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
-    const request = new Request("http://localhost/api/attachments/presigned-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: "photo.jpg",
-        mimeType: "image/jpeg",
-        entityType: "work_order",
-        entityId: 1,
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/attachments/presigned-url",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: "photo.jpg",
+          mimeType: "image/jpeg",
+          entityType: "work_order",
+          entityId: 1,
+        }),
+      }
+    );
 
     const response = await POST(request);
 
@@ -59,14 +62,17 @@ describe("POST /api/attachments/presigned-url", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
-    const request = new Request("http://localhost/api/attachments/presigned-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: "photo.jpg",
-        // Missing mimeType, entityType, entityId
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/attachments/presigned-url",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: "photo.jpg",
+          // Missing mimeType, entityType, entityId
+        }),
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -89,22 +95,27 @@ describe("POST /api/attachments/presigned-url", () => {
       "https://s3.example.com/upload?signed=true"
     );
 
-    const request = new Request("http://localhost/api/attachments/presigned-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: "photo.jpg",
-        mimeType: "image/jpeg",
-        entityType: "work_order",
-        entityId: 5,
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/attachments/presigned-url",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: "photo.jpg",
+          mimeType: "image/jpeg",
+          entityType: "work_order",
+          entityId: 5,
+        }),
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.uploadUrl).toBe("https://s3.example.com/upload?signed=true");
+    expect(data.data.uploadUrl).toBe(
+      "https://s3.example.com/upload?signed=true"
+    );
     expect(data.data.s3Key).toContain("work_orders/5/");
     expect(data.data.s3Key).toContain(".jpg");
   });
@@ -119,18 +130,23 @@ describe("POST /api/attachments/presigned-url", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
-    vi.mocked(getPresignedUploadUrl).mockResolvedValue("https://s3.example.com/upload");
+    vi.mocked(getPresignedUploadUrl).mockResolvedValue(
+      "https://s3.example.com/upload"
+    );
 
-    const request = new Request("http://localhost/api/attachments/presigned-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: "manual.pdf",
-        mimeType: "application/pdf",
-        entityType: "equipment",
-        entityId: 10,
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/attachments/presigned-url",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: "manual.pdf",
+          mimeType: "application/pdf",
+          entityType: "equipment",
+          entityId: 10,
+        }),
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -153,16 +169,19 @@ describe("POST /api/attachments/presigned-url", () => {
       new Error("S3 bucket not accessible")
     );
 
-    const request = new Request("http://localhost/api/attachments/presigned-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: "photo.jpg",
-        mimeType: "image/jpeg",
-        entityType: "work_order",
-        entityId: 1,
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/attachments/presigned-url",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: "photo.jpg",
+          mimeType: "image/jpeg",
+          entityType: "work_order",
+          entityId: 1,
+        }),
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -181,18 +200,23 @@ describe("POST /api/attachments/presigned-url", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
     });
 
-    vi.mocked(getPresignedUploadUrl).mockResolvedValue("https://s3.example.com/upload");
+    vi.mocked(getPresignedUploadUrl).mockResolvedValue(
+      "https://s3.example.com/upload"
+    );
 
-    const request = new Request("http://localhost/api/attachments/presigned-url", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filename: "document.with.dots.png",
-        mimeType: "image/png",
-        entityType: "work_order",
-        entityId: 1,
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/attachments/presigned-url",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: "document.with.dots.png",
+          mimeType: "image/png",
+          entityType: "work_order",
+          entityId: 1,
+        }),
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();

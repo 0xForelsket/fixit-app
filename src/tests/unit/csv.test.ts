@@ -1,4 +1,3 @@
-import { describe, expect, it } from "vitest";
 import {
   autoDetectMapping,
   generateCSV,
@@ -6,11 +5,13 @@ import {
   parseCSV,
   validateCSVFile,
 } from "@/lib/csv";
+import { describe, expect, it } from "vitest";
 
 describe("csv utilities", () => {
   describe("parseCSV", () => {
     it("should parse simple CSV content", () => {
-      const content = "name,email,age\nJohn,john@test.com,30\nJane,jane@test.com,25";
+      const content =
+        "name,email,age\nJohn,john@test.com,30\nJane,jane@test.com,25";
       const result = parseCSV(content);
 
       expect(result.headers).toEqual(["name", "email", "age"]);
@@ -80,18 +81,20 @@ describe("csv utilities", () => {
 
   describe("mapCSVToObjects", () => {
     it("should map rows to objects using column mapping", () => {
-      const rows = [["John", "john@test.com"], ["Jane", "jane@test.com"]];
+      const rows = [
+        ["John", "john@test.com"],
+        ["Jane", "jane@test.com"],
+      ];
       const headers = ["name", "email"];
       const mapping = [
         { csvHeader: "name", field: "fullName" },
         { csvHeader: "email", field: "emailAddress" },
       ];
 
-      const result = mapCSVToObjects<{ fullName: string; emailAddress: string }>(
-        rows,
-        headers,
-        mapping
-      );
+      const result = mapCSVToObjects<{
+        fullName: string;
+        emailAddress: string;
+      }>(rows, headers, mapping);
 
       expect(result.data).toHaveLength(2);
       expect(result.data[0]).toEqual({
@@ -192,7 +195,10 @@ describe("csv utilities", () => {
     });
 
     it("should return correct row numbers in errors", () => {
-      const rows = [["John", "valid@email.com"], ["Jane", ""]];
+      const rows = [
+        ["John", "valid@email.com"],
+        ["Jane", ""],
+      ];
       const headers = ["name", "email"];
       const mapping = [
         { csvHeader: "name", field: "name" },
@@ -216,15 +222,26 @@ describe("csv utilities", () => {
       const mapping = autoDetectMapping(headers, definitions);
 
       expect(mapping).toHaveLength(2);
-      expect(mapping[0]).toEqual({ csvHeader: "name", field: "name", required: undefined });
-      expect(mapping[1]).toEqual({ csvHeader: "email", field: "email", required: undefined });
+      expect(mapping[0]).toEqual({
+        csvHeader: "name",
+        field: "name",
+        required: undefined,
+      });
+      expect(mapping[1]).toEqual({
+        csvHeader: "email",
+        field: "email",
+        required: undefined,
+      });
     });
 
     it("should detect alias matches", () => {
       const headers = ["Full Name", "E-mail Address"];
       const definitions = [
         { field: "name", aliases: ["full name", "fullname"] },
-        { field: "email", aliases: ["e-mail", "e-mail address", "email address"] },
+        {
+          field: "email",
+          aliases: ["e-mail", "e-mail address", "email address"],
+        },
       ];
 
       const mapping = autoDetectMapping(headers, definitions);
@@ -311,7 +328,9 @@ describe("csv utilities", () => {
 
     it("should quote fields containing newlines", () => {
       const data = [{ description: "Line 1\nLine 2" }];
-      const columns = [{ field: "description" as const, header: "Description" }];
+      const columns = [
+        { field: "description" as const, header: "Description" },
+      ];
 
       const csv = generateCSV(data, columns);
 

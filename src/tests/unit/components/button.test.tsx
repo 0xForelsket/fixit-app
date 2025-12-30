@@ -1,13 +1,15 @@
+import { Button } from "@/components/ui/button";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { Button } from "@/components/ui/button";
 
 describe("Button", () => {
   it("renders with default props", () => {
     render(<Button>Click me</Button>);
 
-    expect(screen.getByRole("button", { name: /click me/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /click me/i })
+    ).toBeInTheDocument();
   });
 
   it("renders as a button element by default", () => {
@@ -32,7 +34,11 @@ describe("Button", () => {
     const handleClick = vi.fn();
     const user = userEvent.setup();
 
-    render(<Button disabled onClick={handleClick}>Disabled</Button>);
+    render(
+      <Button disabled onClick={handleClick}>
+        Disabled
+      </Button>
+    );
 
     const button = screen.getByRole("button");
     expect(button).toBeDisabled();
@@ -88,7 +94,11 @@ describe("Button", () => {
   });
 
   it("passes through additional props", () => {
-    render(<Button type="submit" data-testid="submit-btn">Submit</Button>);
+    render(
+      <Button type="submit" data-testid="submit-btn">
+        Submit
+      </Button>
+    );
 
     const button = screen.getByTestId("submit-btn");
     expect(button).toHaveAttribute("type", "submit");

@@ -51,28 +51,43 @@ describe("GET /api/reports/export", () => {
       id: 1,
       title: "Fix conveyor belt",
       description: "Belt is slipping",
-      type: "corrective",
-      priority: "high",
-      status: "open",
+      type: "breakdown" as const,
+      priority: "high" as const,
+      status: "open" as const,
+      equipmentId: 1,
+      reportedById: 1,
+      assignedToId: 2,
+      departmentId: 1,
       createdAt: new Date("2024-01-15T10:00:00Z"),
+      updatedAt: new Date("2024-01-15T10:00:00Z"),
       resolvedAt: null,
+      escalatedAt: null,
+      dueBy: null,
       resolutionNotes: null,
       equipment: {
+        id: 1,
         name: "Conveyor Belt A",
-        location: { name: "Assembly Line 1" },
+        location: { id: 1, name: "Assembly Line 1" },
       },
-      reportedBy: { name: "John Doe" },
-      assignedTo: { name: "Jane Smith" },
+      reportedBy: { id: 1, name: "John Doe" },
+      assignedTo: { id: 2, name: "Jane Smith" },
     },
     {
       id: 2,
       title: "Replace motor, check oil",
       description: 'Description with "quotes" and commas, here',
-      type: "preventive",
-      priority: "medium",
-      status: "resolved",
+      type: "maintenance" as const,
+      priority: "medium" as const,
+      status: "resolved" as const,
+      equipmentId: 2,
+      reportedById: 1,
+      assignedToId: null,
+      departmentId: 1,
       createdAt: new Date("2024-01-10T08:00:00Z"),
+      updatedAt: new Date("2024-01-10T08:00:00Z"),
       resolvedAt: new Date("2024-01-12T14:00:00Z"),
+      escalatedAt: null,
+      dueBy: null,
       resolutionNotes: "Motor replaced successfully",
       equipment: null,
       reportedBy: null,
@@ -209,10 +224,12 @@ describe("GET /api/reports/export", () => {
       vi.mocked(userHasPermission).mockReturnValue(true);
       vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
 
-      await GET(createRequest({
-        from: "2024-01-01",
-        to: "2024-01-31",
-      }));
+      await GET(
+        createRequest({
+          from: "2024-01-01",
+          to: "2024-01-31",
+        })
+      );
 
       expect(db.query.workOrders.findMany).toHaveBeenCalled();
     });
@@ -260,7 +277,9 @@ describe("GET /api/reports/export", () => {
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
     vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockRejectedValue(new Error("Database error"));
+    vi.mocked(db.query.workOrders.findMany).mockRejectedValue(
+      new Error("Database error")
+    );
 
     const response = await GET(createRequest());
 

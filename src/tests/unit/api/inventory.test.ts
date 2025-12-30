@@ -1,4 +1,3 @@
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
@@ -64,31 +63,55 @@ describe("GET /api/inventory/parts", () => {
   it("returns parts list when authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockParts = [
       {
         id: 1,
         name: "Bearing",
         sku: "BRG-001",
-        category: "mechanical",
+        barcode: null,
+        description: "Standard ball bearing",
+        category: "mechanical" as const,
+        vendorId: 1,
         unitCost: 25.99,
         reorderPoint: 10,
+        leadTimeDays: 7,
         isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: 2,
         name: "Motor",
         sku: "MTR-001",
-        category: "electrical",
+        barcode: null,
+        description: "Replacement motor",
+        category: "electrical" as const,
+        vendorId: 2,
         unitCost: 150.0,
         reorderPoint: 5,
+        leadTimeDays: 14,
         isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
 
@@ -105,12 +128,24 @@ describe("GET /api/inventory/parts", () => {
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     vi.mocked(db.query.spareParts.findMany).mockRejectedValue(
       new Error("Database connection lost")
@@ -153,12 +188,24 @@ describe("POST /api/inventory/parts", () => {
   it("returns 401 when lacking permission", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "OP-001",
       name: "Operator",
-      roleName: "operator",
+      employeeId: "OP-001",
+      email: "op@example.com",
+      pin: "hashed",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
-    });
+      departmentId: 1,
+      isActive: true,
+      hourlyRate: 20.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(userHasPermission).mockReturnValue(false);
 
     const request = new Request("http://localhost/api/inventory/parts", {
@@ -179,12 +226,24 @@ describe("POST /api/inventory/parts", () => {
   it("returns 400 when missing required fields", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      employeeId: "ADMIN-001",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(userHasPermission).mockReturnValue(true);
 
     const request = new Request("http://localhost/api/inventory/parts", {
@@ -206,21 +265,37 @@ describe("POST /api/inventory/parts", () => {
   it("creates part successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      employeeId: "ADMIN-001",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(userHasPermission).mockReturnValue(true);
 
     const mockPart = {
       id: 5,
       name: "New Bearing",
       sku: "NB-001",
-      category: "mechanical",
+      barcode: null,
+      description: "Standard ball bearing",
+      category: "mechanical" as const,
+      vendorId: 1,
       unitCost: 35.0,
       reorderPoint: 10,
+      leadTimeDays: 7,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -255,21 +330,38 @@ describe("POST /api/inventory/parts", () => {
   it("sets default values for optional fields", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      employeeId: "ADMIN-001",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(userHasPermission).mockReturnValue(true);
 
     const mockPart = {
       id: 6,
       name: "Basic Part",
       sku: "BP-001",
-      category: "electrical",
-      reorderPoint: 0, // Default
-      isActive: true, // Default
+      barcode: null,
+      description: null,
+      category: "electrical" as const,
+      vendorId: null,
+      unitCost: 0,
+      reorderPoint: 0,
+      leadTimeDays: null,
+      isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -304,12 +396,24 @@ describe("POST /api/inventory/parts", () => {
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
-      employeeId: "ADMIN-001",
       name: "Admin",
-      roleName: "admin",
+      employeeId: "ADMIN-001",
+      email: "admin@example.com",
+      pin: "hashed",
       roleId: 3,
-      permissions: ["*"],
-    });
+      departmentId: 1,
+      isActive: true,
+      hourlyRate: 50.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
     vi.mocked(userHasPermission).mockReturnValue(true);
 
     vi.mocked(db.insert).mockReturnValue({

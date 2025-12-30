@@ -74,7 +74,9 @@ describe("GET /api/equipment/[id]", () => {
     vi.mocked(requireAuth).mockRejectedValue(new Error("Unauthorized"));
 
     const request = new Request("http://localhost/api/equipment/1");
-    const response = await GET(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await GET(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(401);
   });
@@ -91,7 +93,9 @@ describe("GET /api/equipment/[id]", () => {
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/equipment/999");
-    const response = await GET(request, { params: Promise.resolve({ id: "999" }) });
+    const response = await GET(request, {
+      params: Promise.resolve({ id: "999" }),
+    });
 
     expect(response.status).toBe(404);
   });
@@ -110,16 +114,26 @@ describe("GET /api/equipment/[id]", () => {
       id: 1,
       name: "Machine A",
       code: "MA-001",
-      status: "operational",
+      status: "operational" as const,
+      locationId: 1,
       location: { id: 1, name: "Floor 1" },
+      ownerId: null,
       owner: null,
+      parentId: null,
       parent: null,
+      departmentId: 1,
+      modelId: null,
+      typeId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       children: [],
     };
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(mockEquipment);
 
     const request = new Request("http://localhost/api/equipment/1");
-    const response = await GET(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await GET(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -145,7 +159,9 @@ describe("PATCH /api/equipment/[id]", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Updated" }),
     });
-    const response = await PATCH(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(429);
   });
@@ -163,7 +179,9 @@ describe("PATCH /api/equipment/[id]", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Updated" }),
     });
-    const response = await PATCH(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(403);
   });
@@ -182,7 +200,9 @@ describe("PATCH /api/equipment/[id]", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Updated" }),
     });
-    const response = await PATCH(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(401);
   });
@@ -209,7 +229,9 @@ describe("PATCH /api/equipment/[id]", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "Updated" }),
     });
-    const response = await PATCH(request, { params: Promise.resolve({ id: "999" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "999" }),
+    });
 
     expect(response.status).toBe(404);
   });
@@ -234,15 +256,33 @@ describe("PATCH /api/equipment/[id]", () => {
       id: 1,
       name: "Old Name",
       code: "MA-001",
-      status: "operational",
+      status: "operational" as const,
+      locationId: 1,
+      departmentId: 1,
+      ownerId: null,
+      parentId: null,
+      modelId: null,
+      typeId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue(existingEquipment);
+    vi.mocked(db.query.equipment.findFirst).mockResolvedValue(
+      existingEquipment
+    );
 
     const updatedEquipment = {
       id: 1,
       name: "New Name",
       code: "MA-001",
-      status: "operational",
+      status: "operational" as const,
+      locationId: 1,
+      departmentId: 1,
+      ownerId: null,
+      parentId: null,
+      modelId: null,
+      typeId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
     vi.mocked(db.update).mockReturnValue({
       set: vi.fn(() => ({
@@ -257,7 +297,9 @@ describe("PATCH /api/equipment/[id]", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "New Name" }),
     });
-    const response = await PATCH(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -285,7 +327,9 @@ describe("PATCH /api/equipment/[id]", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "invalid_status" }),
     });
-    const response = await PATCH(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(400);
   });
@@ -302,7 +346,9 @@ describe("DELETE /api/equipment/[id]", () => {
     const request = new Request("http://localhost/api/equipment/1", {
       method: "DELETE",
     });
-    const response = await DELETE(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(403);
   });
@@ -314,7 +360,9 @@ describe("DELETE /api/equipment/[id]", () => {
     const request = new Request("http://localhost/api/equipment/1", {
       method: "DELETE",
     });
-    const response = await DELETE(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
 
     expect(response.status).toBe(401);
   });
@@ -334,7 +382,9 @@ describe("DELETE /api/equipment/[id]", () => {
     const request = new Request("http://localhost/api/equipment/999", {
       method: "DELETE",
     });
-    const response = await DELETE(request, { params: Promise.resolve({ id: "999" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "999" }),
+    });
 
     expect(response.status).toBe(404);
   });
@@ -353,14 +403,25 @@ describe("DELETE /api/equipment/[id]", () => {
       id: 1,
       name: "Machine",
       code: "MA-001",
+      status: "operational" as const,
+      locationId: 1,
+      departmentId: 1,
+      ownerId: null,
+      parentId: null,
+      modelId: null,
+      typeId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       workOrders: [{ id: 1 }],
       children: [],
-    });
+    } as any);
 
     const request = new Request("http://localhost/api/equipment/1", {
       method: "DELETE",
     });
-    const response = await DELETE(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -381,14 +442,25 @@ describe("DELETE /api/equipment/[id]", () => {
       id: 1,
       name: "Machine",
       code: "MA-001",
+      status: "operational" as const,
+      locationId: 1,
+      departmentId: 1,
+      ownerId: null,
+      parentId: null,
+      modelId: null,
+      typeId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       workOrders: [],
       children: [{ id: 2 }],
-    });
+    } as any);
 
     const request = new Request("http://localhost/api/equipment/1", {
       method: "DELETE",
     });
-    const response = await DELETE(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -409,9 +481,18 @@ describe("DELETE /api/equipment/[id]", () => {
       id: 1,
       name: "Machine",
       code: "MA-001",
+      status: "operational" as const,
+      locationId: 1,
+      departmentId: 1,
+      ownerId: null,
+      parentId: null,
+      modelId: null,
+      typeId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       workOrders: [],
       children: [],
-    });
+    } as any);
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(),
     } as unknown as ReturnType<typeof db.delete>);
@@ -419,7 +500,9 @@ describe("DELETE /api/equipment/[id]", () => {
     const request = new Request("http://localhost/api/equipment/1", {
       method: "DELETE",
     });
-    const response = await DELETE(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
     const data = await response.json();
 
     expect(response.status).toBe(200);

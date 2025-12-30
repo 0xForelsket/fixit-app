@@ -86,7 +86,9 @@ describe("CardDescription", () => {
 
   it("has muted foreground styling", () => {
     render(<CardDescription>Description</CardDescription>);
-    expect(screen.getByText("Description")).toHaveClass("text-muted-foreground");
+    expect(screen.getByText("Description")).toHaveClass(
+      "text-muted-foreground"
+    );
   });
 });
 

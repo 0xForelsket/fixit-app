@@ -1,4 +1,3 @@
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the db module
@@ -76,29 +75,53 @@ describe("GET /api/equipment", () => {
   it("returns equipment list with pagination", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockEquipment = [
       {
         id: 1,
         name: "Machine A",
         code: "MA-001",
-        status: "operational",
-        location: { id: 1, name: "Floor 1" },
-        owner: null,
+        status: "operational" as const,
+        locationId: 1,
+        departmentId: 1,
+        modelId: null,
+        typeId: null,
+        ownerId: null,
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: 2,
         name: "Machine B",
         code: "MB-001",
-        status: "operational",
-        location: { id: 1, name: "Floor 1" },
-        owner: { id: 2, name: "John", employeeId: "EMP-001" },
+        status: "operational" as const,
+        locationId: 1,
+        departmentId: 1,
+        modelId: null,
+        typeId: null,
+        ownerId: 2,
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
 
@@ -109,7 +132,9 @@ describe("GET /api/equipment", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    const request = new Request("http://localhost/api/equipment?page=1&limit=10");
+    const request = new Request(
+      "http://localhost/api/equipment?page=1&limit=10"
+    );
     const response = await GET(request);
     const data = await response.json();
 
@@ -123,15 +148,40 @@ describe("GET /api/equipment", () => {
   it("accepts locationId filter parameter", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     const mockEquipment = [
-      { id: 1, name: "Machine A", code: "MA-001", status: "operational", location: { id: 5, name: "Floor 1" }, owner: null },
+      {
+        id: 1,
+        name: "Machine A",
+        code: "MA-001",
+        status: "operational" as const,
+        locationId: 5,
+        departmentId: 1,
+        modelId: null,
+        typeId: null,
+        ownerId: null,
+        parentId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
 
     vi.mocked(db.query.equipment.findMany).mockResolvedValue(mockEquipment);
@@ -152,12 +202,24 @@ describe("GET /api/equipment", () => {
   it("accepts status filter parameter", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     vi.mocked(db.query.equipment.findMany).mockResolvedValue([]);
     vi.mocked(db.select).mockReturnValue({
@@ -176,12 +238,24 @@ describe("GET /api/equipment", () => {
   it("accepts search parameter", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
       id: 1,
-      employeeId: "TECH-001",
       name: "Tech",
-      roleName: "tech",
+      email: "tech@example.com",
+      pin: "hashed",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-    });
+      departmentId: 1,
+      isActive: true,
+      employeeId: "TECH-001",
+      hourlyRate: 25.0,
+      preferences: {
+        theme: "light",
+        density: "comfortable",
+        notifications: { email: true },
+      },
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
 
     vi.mocked(db.query.equipment.findMany).mockResolvedValue([]);
     vi.mocked(db.select).mockReturnValue({
@@ -334,10 +408,12 @@ describe("POST /api/equipment", () => {
       name: "New Machine",
       code: "NM-001",
       locationId: 1,
-      status: "operational",
-      ownerId: null,
-      typeId: null,
+      departmentId: 1,
       modelId: null,
+      typeId: null,
+      ownerId: null,
+      parentId: null,
+      status: "operational" as const,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

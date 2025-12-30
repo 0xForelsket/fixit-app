@@ -1,6 +1,6 @@
+import { StatusBadge } from "@/components/ui/status-badge";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { StatusBadge } from "@/components/ui/status-badge";
 
 describe("StatusBadge", () => {
   describe("Work Order Statuses", () => {
@@ -105,17 +105,13 @@ describe("StatusBadge", () => {
     });
 
     it("shows icon when showIcon is true", () => {
-      const { container } = render(
-        <StatusBadge status="open" showIcon />
-      );
+      const { container } = render(<StatusBadge status="open" showIcon />);
       // Icon should be rendered (svg element)
       expect(container.querySelector("svg")).toBeInTheDocument();
     });
 
     it("applies pulse animation when pulse prop is true on dot-based status", () => {
-      const { container } = render(
-        <StatusBadge status="operational" pulse />
-      );
+      const { container } = render(<StatusBadge status="operational" pulse />);
       // Should have ping animation for statuses with showDot
       expect(container.querySelector(".animate-ping")).toBeInTheDocument();
     });

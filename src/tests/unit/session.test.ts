@@ -32,23 +32,28 @@ vi.mock("@/lib/permissions", () => ({
 }));
 
 // Set environment variable
-process.env.SESSION_SECRET = "test-secret-key-that-is-at-least-32-characters-long";
+process.env.SESSION_SECRET =
+  "test-secret-key-that-is-at-least-32-characters-long";
 
 import {
+  PERMISSIONS,
+  hasAnyPermission,
+  hasPermission,
+} from "@/lib/permissions";
+import {
+  type SessionUser,
   createSession,
-  getSession,
   deleteSession,
   getCurrentUser,
-  requireAuth,
-  requirePermission,
-  requireAnyPermission,
-  verifyCsrfToken,
-  requireCsrf,
+  getSession,
   refreshSessionIfNeeded,
-  type SessionUser,
+  requireAnyPermission,
+  requireAuth,
+  requireCsrf,
+  requirePermission,
+  verifyCsrfToken,
 } from "@/lib/session";
 import { jwtVerify } from "jose";
-import { hasPermission, hasAnyPermission } from "@/lib/permissions";
 
 describe("Session Utilities", () => {
   const mockUser: SessionUser = {
@@ -57,7 +62,9 @@ describe("Session Utilities", () => {
     name: "Test User",
     roleName: "operator",
     roleId: 1,
-    permissions: ["work_orders:read"],
+    departmentId: 1,
+    permissions: [PERMISSIONS.MAINTENANCE_VIEW],
+    hourlyRate: 20.0,
   };
 
   beforeEach(() => {
@@ -243,13 +250,15 @@ describe("Session Utilities", () => {
     it("throws Forbidden when user lacks permission", async () => {
       vi.mocked(hasPermission).mockReturnValue(false);
 
-      await expect(requirePermission("admin:manage")).rejects.toThrow("Forbidden");
+      await expect(
+        requirePermission(PERMISSIONS.SYSTEM_SETTINGS)
+      ).rejects.toThrow("Forbidden");
     });
 
     it("returns user when permission granted", async () => {
       vi.mocked(hasPermission).mockReturnValue(true);
 
-      const user = await requirePermission("work_orders:read");
+      const user = await requirePermission(PERMISSIONS.TICKET_VIEW);
 
       expect(user).toEqual(mockUser);
     });
@@ -271,14 +280,20 @@ describe("Session Utilities", () => {
       vi.mocked(hasAnyPermission).mockReturnValue(false);
 
       await expect(
-        requireAnyPermission(["admin:manage", "users:manage"])
+        requireAnyPermission([
+          PERMISSIONS.SYSTEM_SETTINGS,
+          PERMISSIONS.USER_CREATE,
+        ])
       ).rejects.toThrow("Forbidden");
     });
 
     it("returns user when any permission granted", async () => {
       vi.mocked(hasAnyPermission).mockReturnValue(true);
 
-      const user = await requireAnyPermission(["work_orders:read", "admin:manage"]);
+      const user = await requireAnyPermission([
+        PERMISSIONS.TICKET_VIEW,
+        PERMISSIONS.SYSTEM_SETTINGS,
+      ]);
 
       expect(user).toEqual(mockUser);
     });

@@ -187,7 +187,9 @@ describe("attachments actions", () => {
 
       vi.mocked(db.insert).mockReturnValue({
         values: vi.fn(() => ({
-          returning: vi.fn().mockRejectedValue(new Error("DB connection failed")),
+          returning: vi
+            .fn()
+            .mockRejectedValue(new Error("DB connection failed")),
         })),
       } as unknown as ReturnType<typeof db.insert>);
 

@@ -1,7 +1,7 @@
+import { Input } from "@/components/ui/input";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { Input } from "@/components/ui/input";
 
 describe("Input", () => {
   it("renders as an input element", () => {
@@ -33,7 +33,10 @@ describe("Input", () => {
     it("renders password input", () => {
       render(<Input type="password" data-testid="password" />);
 
-      expect(screen.getByTestId("password")).toHaveAttribute("type", "password");
+      expect(screen.getByTestId("password")).toHaveAttribute(
+        "type",
+        "password"
+      );
     });
 
     it("renders email input", () => {
@@ -155,19 +158,28 @@ describe("Input", () => {
     it("supports aria-label", () => {
       render(<Input aria-label="Search field" />);
 
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-label", "Search field");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-label",
+        "Search field"
+      );
     });
 
     it("supports aria-describedby", () => {
       render(<Input aria-describedby="help-text" />);
 
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-describedby", "help-text");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-describedby",
+        "help-text"
+      );
     });
 
     it("supports aria-invalid", () => {
       render(<Input aria-invalid="true" />);
 
-      expect(screen.getByRole("textbox")).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "aria-invalid",
+        "true"
+      );
     });
 
     it("supports required attribute", () => {
@@ -205,7 +217,10 @@ describe("Input", () => {
     it("passes through autoComplete attribute", () => {
       render(<Input autoComplete="off" />);
 
-      expect(screen.getByRole("textbox")).toHaveAttribute("autoComplete", "off");
+      expect(screen.getByRole("textbox")).toHaveAttribute(
+        "autoComplete",
+        "off"
+      );
     });
 
     it("supports defaultValue", () => {

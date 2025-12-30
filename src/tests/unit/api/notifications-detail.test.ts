@@ -117,7 +117,12 @@ describe("PATCH /api/notifications/[id]", () => {
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
       id: 1,
       userId: 1, // Belongs to user 1
+      type: "work_order_created" as const,
+      title: "New Work Order",
+      message: "A new work order has been created",
+      link: "/maintenance/work-orders/1",
       isRead: false,
+      createdAt: new Date(),
     });
 
     const request = new Request("http://localhost/api/notifications/1", {
@@ -145,7 +150,12 @@ describe("PATCH /api/notifications/[id]", () => {
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
       id: 1,
       userId: 1, // Same user
+      type: "work_order_created" as const,
+      title: "New Work Order",
+      message: "A new work order has been created",
+      link: "/maintenance/work-orders/1",
       isRead: false,
+      createdAt: new Date(),
     });
 
     const request = new Request("http://localhost/api/notifications/1", {
@@ -176,7 +186,12 @@ describe("PATCH /api/notifications/[id]", () => {
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
       id: 1,
       userId: 1,
+      type: "work_order_created" as const,
+      title: "New Work Order",
+      message: "A new work order has been created",
+      link: "/maintenance/work-orders/1",
       isRead: true,
+      createdAt: new Date(),
     });
 
     const request = new Request("http://localhost/api/notifications/1", {
