@@ -1,18 +1,18 @@
 "use client";
 
-import { changePin, revokeAllSessions } from "@/actions/profile";
+import { changePin, revokeAllSessions } from "@/actions/profile-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/types/actions";
-import { Check, Loader2, LogOut, Key } from "lucide-react";
+import { Check, Key, Loader2, LogOut } from "lucide-react";
 import { useActionState, useEffect, useState, useTransition } from "react";
 
 export function SecurityForm() {
-  const [state, formAction, isPending] = useActionState<ActionResult<null>, FormData>(
-    changePin,
-    { success: true, data: null }
-  );
+  const [state, formAction, isPending] = useActionState<
+    ActionResult<null>,
+    FormData
+  >(changePin, { success: true, data: null });
   const [showSuccess, setShowSuccess] = useState(false);
   const [isRevokingPending, startRevokeTransition] = useTransition();
 

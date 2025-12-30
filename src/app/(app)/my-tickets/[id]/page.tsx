@@ -1,32 +1,35 @@
+import { StatusBadge } from "@/components/ui/status-badge";
+import { PrintButton } from "@/components/work-orders/print-button";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { formatTimeRemaining, getUrgencyLevel } from "@/lib/sla";
 import { cn, formatDateTime, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
-import { 
-  ArrowLeft, 
-  Clock, 
-  MonitorCog, 
-  User as UserIcon, 
-  MessageSquare, 
-  RefreshCw, 
-  CheckCircle2,
+import {
+  AlertCircle,
+  ArrowLeft,
   Calendar,
-  AlertCircle
+  CheckCircle2,
+  Clock,
+  MessageSquare,
+  MonitorCog,
+  RefreshCw,
+  User as UserIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CommentForm } from "./comment-form";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { PrintButton } from "@/components/work-orders/print-button";
 
 interface PageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ success?: string }>;
 }
 
-export default async function WorkOrderDetailPage({ params, searchParams }: PageProps) {
+export default async function WorkOrderDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -40,7 +43,7 @@ export default async function WorkOrderDetailPage({ params, searchParams }: Page
   if (Number.isNaN(workOrderId)) {
     notFound();
   }
-  
+
   // ... rest of data fetching ...
   const workOrder = await db.query.workOrders.findFirst({
     where: eq(workOrders.id, workOrderId),
@@ -98,8 +101,13 @@ export default async function WorkOrderDetailPage({ params, searchParams }: Page
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="font-bold text-emerald-900">Ticket Reported Successfully</h3>
-            <p className="text-xs text-emerald-700 font-medium">A technician has been notified and will respond based on the priority level.</p>
+            <h3 className="font-bold text-emerald-900">
+              Ticket Reported Successfully
+            </h3>
+            <p className="text-xs text-emerald-700 font-medium">
+              A technician has been notified and will respond based on the
+              priority level.
+            </p>
           </div>
         </div>
       )}
@@ -124,7 +132,7 @@ export default async function WorkOrderDetailPage({ params, searchParams }: Page
       {/* Main Header Card */}
       <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm overflow-hidden relative">
         <div className="absolute top-0 left-0 right-0 h-1 bg-primary-500/10" />
-        
+
         <div className="flex flex-col gap-4">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
@@ -144,7 +152,10 @@ export default async function WorkOrderDetailPage({ params, searchParams }: Page
                 </div>
                 <span className="text-zinc-300">•</span>
                 <div className="flex items-center gap-1">
-                  <StatusBadge status={workOrder.priority} className="text-[10px] py-0 px-2 h-5" />
+                  <StatusBadge
+                    status={workOrder.priority}
+                    className="text-[10px] py-0 px-2 h-5"
+                  />
                 </div>
               </div>
             </div>
@@ -166,7 +177,9 @@ export default async function WorkOrderDetailPage({ params, searchParams }: Page
               >
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-70">SLA Requirement</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-70">
+                    SLA Requirement
+                  </span>
                   <span className="text-sm font-bold">
                     {formatTimeRemaining(workOrder.dueBy)}
                   </span>
@@ -373,10 +386,14 @@ function ActivityItem({ log }: { log: ActivityLog }) {
 
   return (
     <div className="flex gap-4 group relative">
-      <div className={cn(
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full z-10",
-        log.action === 'comment' ? "bg-primary-50 border border-primary-100" : "bg-zinc-50 border border-zinc-100"
-      )}>
+      <div
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-full z-10",
+          log.action === "comment"
+            ? "bg-primary-50 border border-primary-100"
+            : "bg-zinc-50 border border-zinc-100"
+        )}
+      >
         {getIcon()}
       </div>
       <div className="flex-1 pt-1">

@@ -1,4 +1,3 @@
-import { getProfileData } from "@/actions/profile";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,13 +6,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, Settings, Shield, Palette, Bell } from "lucide-react";
+import { getProfileData } from "@/data/profile";
+import { ArrowLeft, Bell, Palette, Settings, Shield } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ProfileForm } from "./profile-form";
-import { SecurityForm } from "./security-form";
 import { AppearanceForm } from "./appearance-form";
 import { NotificationsForm } from "./notifications-form";
+import { ProfileForm } from "./profile-form";
+import { SecurityForm } from "./security-form";
 
 export default async function ProfileSettingsPage() {
   const profile = await getProfileData();
@@ -51,9 +51,7 @@ export default async function ProfileSettingsPage() {
             <CardTitle className="text-lg flex items-center gap-2">
               Profile
             </CardTitle>
-            <CardDescription>
-              Update your personal information.
-            </CardDescription>
+            <CardDescription>Update your personal information.</CardDescription>
           </CardHeader>
           <CardContent>
             <ProfileForm

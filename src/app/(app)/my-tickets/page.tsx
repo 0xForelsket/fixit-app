@@ -189,16 +189,29 @@ function StatTickerCard({
   }[type];
 
   return (
-    <div className={cn(
-      "flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 shadow-sm min-w-[100px]",
-      type === 'in_progress' && count > 0 && "border-amber-200"
-    )}>
-      <div className={cn("h-1.5 w-1.5 rounded-full shrink-0", config.dot, count > 0 && "animate-pulse")} />
+    <div
+      className={cn(
+        "flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 shadow-sm min-w-[100px]",
+        type === "in_progress" && count > 0 && "border-amber-200"
+      )}
+    >
+      <div
+        className={cn(
+          "h-1.5 w-1.5 rounded-full shrink-0",
+          config.dot,
+          count > 0 && "animate-pulse"
+        )}
+      />
       <div className="flex flex-col">
         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-0.5">
           {label}
         </span>
-        <span className={cn("text-sm font-black leading-none", count > 0 ? config.color : "text-zinc-300")}>
+        <span
+          className={cn(
+            "text-sm font-black leading-none",
+            count > 0 ? config.color : "text-zinc-300"
+          )}
+        >
           {count}
         </span>
       </div>
@@ -228,12 +241,13 @@ function WorkOrderListItem({
       ? `animate-stagger-${index + 1}`
       : "animate-in fade-in duration-500";
 
-  const priorityColors = {
-    low: "bg-slate-400",
-    medium: "bg-primary-500",
-    high: "bg-amber-500",
-    critical: "bg-rose-600",
-  }[workOrder.priority] || "bg-zinc-300";
+  const priorityColors =
+    {
+      low: "bg-slate-400",
+      medium: "bg-primary-500",
+      high: "bg-amber-500",
+      critical: "bg-rose-600",
+    }[workOrder.priority] || "bg-zinc-300";
 
   return (
     <Link
@@ -245,10 +259,12 @@ function WorkOrderListItem({
       )}
     >
       {/* Subtle priority indicator */}
-      <div className={cn(
-        "absolute left-0 top-3 bottom-3 w-1 rounded-r-full transition-all group-hover:top-2 group-hover:bottom-2",
-        isResolved ? "bg-zinc-200" : priorityColors
-      )} />
+      <div
+        className={cn(
+          "absolute left-0 top-3 bottom-3 w-1 rounded-r-full transition-all group-hover:top-2 group-hover:bottom-2",
+          isResolved ? "bg-zinc-200" : priorityColors
+        )}
+      />
 
       <div className="min-w-0 flex-1 pl-2 space-y-1">
         <div className="flex items-center gap-2">

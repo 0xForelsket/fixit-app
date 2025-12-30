@@ -1,6 +1,6 @@
 "use client";
 
-import { updatePreferences } from "@/actions/profile";
+import { updatePreferences } from "@/actions/profile-actions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { UserPreferences } from "@/db/schema";
@@ -13,7 +13,9 @@ interface NotificationsFormProps {
 }
 
 export function NotificationsForm({ preferences }: NotificationsFormProps) {
-  const [emailEnabled, setEmailEnabled] = useState(preferences.notifications.email);
+  const [emailEnabled, setEmailEnabled] = useState(
+    preferences.notifications.email
+  );
   const [isPending, startTransition] = useTransition();
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,8 @@ export function NotificationsForm({ preferences }: NotificationsFormProps) {
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Make sure you have an email address configured in your profile to receive notifications.
+          Make sure you have an email address configured in your profile to
+          receive notifications.
         </p>
       </div>
 

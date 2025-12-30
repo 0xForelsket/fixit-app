@@ -5,7 +5,7 @@ import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
-import { ArrowLeft, User, Settings } from "lucide-react";
+import { ArrowLeft, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AvatarUpload } from "./avatar-upload";

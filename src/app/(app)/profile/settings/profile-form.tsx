@@ -1,6 +1,6 @@
 "use client";
 
-import { updateProfile } from "@/actions/profile";
+import { updateProfile } from "@/actions/profile-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +14,10 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ initialName, initialEmail }: ProfileFormProps) {
-  const [state, formAction, isPending] = useActionState<ActionResult<null>, FormData>(
-    updateProfile,
-    { success: true, data: null }
-  );
+  const [state, formAction, isPending] = useActionState<
+    ActionResult<null>,
+    FormData
+  >(updateProfile, { success: true, data: null });
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {

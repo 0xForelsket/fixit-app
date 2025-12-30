@@ -60,7 +60,13 @@ const typeConfig: Record<
 
 const priorityConfig: Record<
   string,
-  { label: string; color: string; bg: string; border: string; description: string }
+  {
+    label: string;
+    color: string;
+    bg: string;
+    border: string;
+    description: string;
+  }
 > = {
   low: {
     label: "Low",
@@ -245,20 +251,30 @@ export function ReportForm({ equipment }: ReportFormProps) {
                 />
                 <div className="flex-1">
                   <span
-                    className={cn("font-bold text-lg capitalize block", config.color)}
+                    className={cn(
+                      "font-bold text-lg capitalize block",
+                      config.color
+                    )}
                   >
                     {priority}
                   </span>
-                  <span className={cn("text-xs block mt-0.5", 
-                    priority === 'critical' ? 'text-danger-100' : 'text-zinc-500'
-                  )}>
+                  <span
+                    className={cn(
+                      "text-xs block mt-0.5",
+                      priority === "critical"
+                        ? "text-danger-100"
+                        : "text-zinc-500"
+                    )}
+                  >
                     {config.description}
                   </span>
                 </div>
-                <div className={cn(
-                  "h-5 w-5 rounded-full border-2 border-zinc-300 flex items-center justify-center p-0.5 group-has-[:checked]:border-primary-600",
-                  priority === 'critical' && "border-danger-300"
-                )}>
+                <div
+                  className={cn(
+                    "h-5 w-5 rounded-full border-2 border-zinc-300 flex items-center justify-center p-0.5 group-has-[:checked]:border-primary-600",
+                    priority === "critical" && "border-danger-300"
+                  )}
+                >
                   <div className="h-full w-full rounded-full bg-primary-600 opacity-0 group-has-[:checked]:opacity-100 transition-opacity" />
                 </div>
               </label>
@@ -335,15 +351,20 @@ export function ReportForm({ equipment }: ReportFormProps) {
         {attachments.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mt-2">
             {attachments.map((file, idx) => (
-              <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border bg-zinc-100 group">
-                <img 
-                  src={`/api/attachments/preview?key=${file.s3Key}`} 
+              <div
+                key={idx}
+                className="relative aspect-square rounded-lg overflow-hidden border bg-zinc-100 group"
+              >
+                <img
+                  src={`/api/attachments/preview?key=${file.s3Key}`}
                   alt={file.filename}
                   className="h-full w-full object-cover"
                 />
                 <button
                   type="button"
-                  onClick={() => setAttachments(prev => prev.filter((_, i) => i !== idx))}
+                  onClick={() =>
+                    setAttachments((prev) => prev.filter((_, i) => i !== idx))
+                  }
                   className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <span className="text-lg">×</span>
