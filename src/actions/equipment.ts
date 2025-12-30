@@ -2,6 +2,7 @@
 
 import { db } from "@/db";
 import { equipmentStatusLogs, equipment as equipmentTable } from "@/db/schema";
+import { logAudit } from "@/lib/audit";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import {
@@ -37,7 +38,9 @@ export async function createEquipment(
     departmentId: Number(formData.get("departmentId")),
     ownerId: formData.get("ownerId") ? Number(formData.get("ownerId")) : null,
     typeId: formData.get("typeId") ? Number(formData.get("typeId")) : null,
-    parentId: formData.get("parentId") ? Number(formData.get("parentId")) : null,
+    parentId: formData.get("parentId")
+      ? Number(formData.get("parentId"))
+      : null,
     status: formData.get("status") || "operational",
   };
 
@@ -53,6 +56,13 @@ export async function createEquipment(
       .insert(equipmentTable)
       .values(result.data)
       .returning();
+
+    await logAudit({
+      entityType: "equipment",
+      entityId: newItem.id,
+      action: "CREATE",
+      details: result.data,
+    });
 
     revalidatePath("/assets/equipment");
     return { success: true, data: newItem };
@@ -107,7 +117,9 @@ export async function updateEquipment(
     rawData.typeId = typeId ? Number(typeId) : null;
   }
   if (formData.get("parentId") !== null) {
-    rawData.parentId = formData.get("parentId") ? Number(formData.get("parentId")) : null;
+    rawData.parentId = formData.get("parentId")
+      ? Number(formData.get("parentId"))
+      : null;
   }
   if (status) rawData.status = status;
 
@@ -134,6 +146,13 @@ export async function updateEquipment(
         updatedAt: new Date(),
       })
       .where(eq(equipmentTable.id, equipmentId));
+
+    await logAudit({
+      entityType: "equipment",
+      entityId: equipmentId,
+      action: "UPDATE",
+      details: result.data,
+    });
 
     revalidatePath("/assets/equipment");
     revalidatePath(`/assets/equipment/${equipmentId}`);
@@ -180,6 +199,16 @@ export async function deleteEquipment(
   }
 
   await db.delete(equipmentTable).where(eq(equipmentTable.id, equipmentId));
+
+  await logAudit({
+    entityType: "equipment",
+    entityId: equipmentId,
+    action: "DELETE",
+    details: {
+      name: equipmentWithWorkOrders.name,
+      code: equipmentWithWorkOrders.code,
+    },
+  });
 
   revalidatePath("/assets/equipment");
   return { success: true };

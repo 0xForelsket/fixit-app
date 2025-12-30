@@ -41,7 +41,10 @@ export async function createWorkOrder(
 
   // Extract attachments from JSON if provided (using safe parsing)
   const attachmentsJson = formData.get("attachments")?.toString();
-  const parsedAttachments = safeJsonParseOrDefault<unknown[]>(attachmentsJson, []);
+  const parsedAttachments = safeJsonParseOrDefault<unknown[]>(
+    attachmentsJson,
+    []
+  );
 
   const rawData = {
     equipmentId: Number(formData.get("equipmentId")),
@@ -135,12 +138,14 @@ export async function createWorkOrder(
       if (techRole) {
         const whereConditions = [
           eq(users.roleId, techRole.id),
-          eq(users.isActive, true)
+          eq(users.isActive, true),
         ];
 
         // Only filter by department if the equipment has one
         if (equipmentItem.departmentId) {
-          whereConditions.push(eq(users.departmentId, equipmentItem.departmentId));
+          whereConditions.push(
+            eq(users.departmentId, equipmentItem.departmentId)
+          );
         }
 
         const techs = await db.query.users.findMany({
