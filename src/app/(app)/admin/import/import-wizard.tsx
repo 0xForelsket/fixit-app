@@ -133,9 +133,11 @@ ADMIN-NEW-001,Bob Admin,bob@company.com,9999,admin,75.00`,
 export function ImportWizard() {
   const searchParams = useSearchParams();
   const initialType = searchParams.get("type") as ResourceType;
-  
+
   const [step, setStep] = useState<Step>(initialType ? "upload" : "select");
-  const [resourceType, setResourceType] = useState<ResourceType>(initialType || "equipment");
+  const [resourceType, setResourceType] = useState<ResourceType>(
+    initialType || "equipment"
+  );
 
   useEffect(() => {
     if (initialType && resourceConfigs[initialType]) {

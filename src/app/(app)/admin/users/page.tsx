@@ -15,7 +15,16 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import { Edit, Plus, Search, Shield, User, Users, Wrench, Upload } from "lucide-react";
+import {
+  Edit,
+  Plus,
+  Search,
+  Shield,
+  Upload,
+  User,
+  Users,
+  Wrench,
+} from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -117,9 +126,24 @@ export default async function UsersPage({
     string,
     { icon: React.ElementType; color: string; bg: string; border: string }
   > = {
-    operator: { icon: User, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" },
-    tech: { icon: Wrench, color: "text-primary-700", bg: "bg-primary-500/15", border: "border-primary-500/30" },
-    admin: { icon: Shield, color: "text-danger-700", bg: "bg-danger-500/15", border: "border-danger-500/30" },
+    operator: {
+      icon: User,
+      color: "text-muted-foreground",
+      bg: "bg-muted",
+      border: "border-border",
+    },
+    tech: {
+      icon: Wrench,
+      color: "text-primary-700",
+      bg: "bg-primary-500/15",
+      border: "border-primary-500/30",
+    },
+    admin: {
+      icon: Shield,
+      color: "text-danger-700",
+      bg: "bg-danger-500/15",
+      border: "border-danger-500/30",
+    },
   };
 
   return (
@@ -302,12 +326,17 @@ export default async function UsersPage({
                           <User className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{user.name}</p>
+                          <p className="font-medium text-foreground">
+                            {user.name}
+                          </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell className="p-4 hidden md:table-cell">
-                      <Badge variant="outline" className="font-mono text-xs border-border text-muted-foreground">
+                      <Badge
+                        variant="outline"
+                        className="font-mono text-xs border-border text-muted-foreground"
+                      >
                         {user.employeeId}
                       </Badge>
                     </TableCell>
@@ -348,7 +377,12 @@ export default async function UsersPage({
                       </span>
                     </TableCell>
                     <TableCell className="p-4">
-                      <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-primary">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        asChild
+                        className="text-muted-foreground hover:text-primary"
+                      >
                         <Link href={`/admin/users/${user.id}`}>
                           <Edit className="h-4 w-4" />
                         </Link>

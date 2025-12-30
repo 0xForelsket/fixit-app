@@ -99,7 +99,8 @@ export default function DesignSystemPage() {
           Colors
         </h2>
         <p className="text-muted-foreground">
-          Theme-aware color palette. Colors adapt based on the current theme (Elegant, Industrial, or Dark).
+          Theme-aware color palette. Colors adapt based on the current theme
+          (Elegant, Industrial, or Dark).
         </p>
         <div className="grid gap-8">
           <ColorSwatch
@@ -142,19 +143,52 @@ export default function DesignSystemPage() {
               name="Success"
               description="Completed, operational"
               variable="success"
-              colors={["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"]}
+              colors={[
+                "50",
+                "100",
+                "200",
+                "300",
+                "400",
+                "500",
+                "600",
+                "700",
+                "800",
+                "900",
+              ]}
             />
             <ColorSwatch
               name="Warning"
               description="Pending, maintenance"
               variable="warning"
-              colors={["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"]}
+              colors={[
+                "50",
+                "100",
+                "200",
+                "300",
+                "400",
+                "500",
+                "600",
+                "700",
+                "800",
+                "900",
+              ]}
             />
             <ColorSwatch
               name="Danger"
               description="Errors, critical, down"
               variable="danger"
-              colors={["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"]}
+              colors={[
+                "50",
+                "100",
+                "200",
+                "300",
+                "400",
+                "500",
+                "600",
+                "700",
+                "800",
+                "900",
+              ]}
             />
           </div>
         </div>
@@ -233,10 +267,22 @@ export default function DesignSystemPage() {
             <div className="space-y-4">
               {[
                 { token: "1", value: "4px", usage: "Inline spacing" },
-                { token: "2", value: "8px", usage: "Standard gap between related items" },
+                {
+                  token: "2",
+                  value: "8px",
+                  usage: "Standard gap between related items",
+                },
                 { token: "3", value: "12px", usage: "Small padding" },
-                { token: "4", value: "16px", usage: "Card padding, comfortable gap" },
-                { token: "6", value: "24px", usage: "Standard container padding" },
+                {
+                  token: "4",
+                  value: "16px",
+                  usage: "Card padding, comfortable gap",
+                },
+                {
+                  token: "6",
+                  value: "24px",
+                  usage: "Standard container padding",
+                },
                 { token: "8", value: "32px", usage: "Large section spacing" },
                 { token: "10", value: "40px", usage: "Page margins (mobile)" },
                 { token: "12", value: "48px", usage: "Page margins (desktop)" },
@@ -250,9 +296,7 @@ export default function DesignSystemPage() {
                     }}
                   />
                   <div className="flex-1 grid grid-cols-3 gap-4 text-sm">
-                    <code className="font-mono text-primary">
-                      {item.token}
-                    </code>
+                    <code className="font-mono text-primary">{item.token}</code>
                     <span className="text-muted-foreground">{item.value}</span>
                     <span>{item.usage}</span>
                   </div>
@@ -521,7 +565,10 @@ export default function DesignSystemPage() {
             <div>
               <p className="text-sm font-medium mb-3">Interactive States</p>
               <div className="flex gap-4">
-                <button type="button" className="focus-ring px-4 py-2 bg-primary text-primary-foreground rounded-lg">
+                <button
+                  type="button"
+                  className="focus-ring px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+                >
                   Focus Ring (Tab to me)
                 </button>
                 <div className="animate-glow-pulse p-4 bg-card rounded-lg border">
