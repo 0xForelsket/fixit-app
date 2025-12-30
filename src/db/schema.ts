@@ -76,6 +76,9 @@ export const notificationTypes = [
   "work_order_created",
   "work_order_assigned",
   "work_order_escalated",
+  "work_order_resolved",
+  "work_order_commented",
+  "work_order_status_changed",
   "maintenance_due",
 ] as const;
 export type NotificationType = (typeof notificationTypes)[number];
@@ -110,12 +113,24 @@ export const transactionTypes = [
 ] as const;
 export type TransactionType = (typeof transactionTypes)[number];
 
+// In-app notification preferences per type
+export interface InAppNotificationPreferences {
+  workOrderCreated: boolean;
+  workOrderAssigned: boolean;
+  workOrderEscalated: boolean;
+  workOrderResolved: boolean;
+  workOrderCommented: boolean;
+  workOrderStatusChanged: boolean;
+  maintenanceDue: boolean;
+}
+
 // User preferences type
 export interface UserPreferences {
   theme: "system" | "light" | "dark";
   density: "compact" | "comfortable";
   notifications: {
     email: boolean;
+    inApp?: InAppNotificationPreferences;
   };
 }
 
