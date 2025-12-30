@@ -41,9 +41,9 @@ export function TechnicianChart({ data }: TechnicianChartProps) {
               <YAxis
                 dataKey="name"
                 type="category"
-                width={80}
+                width={100}
                 stroke="#a1a1aa"
-                fontSize={12}
+                fontSize={13}
                 fontFamily="var(--font-sans)"
                 tickLine={false}
                 axisLine={false}
