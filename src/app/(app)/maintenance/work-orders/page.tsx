@@ -13,6 +13,7 @@ import {
   count,
   desc,
   eq,
+  gte,
   ilike,
   lt,
   or,
@@ -36,9 +37,46 @@ type SearchParams = {
   page?: string;
   assigned?: string;
   overdue?: string;
+  dateRange?: string;
   sort?: "id" | "title" | "priority" | "status" | "createdAt" | "dueBy";
   dir?: "asc" | "desc";
 };
+
+function getDateRangeStart(dateRange: string): Date | null {
+  const now = new Date();
+  switch (dateRange) {
+    case "today": {
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+    case "last7days": {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 7);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+    case "last30days": {
+      const start = new Date(now);
+      start.setDate(start.getDate() - 30);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+    case "thisMonth": {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+    case "lastQuarter": {
+      const start = new Date(now);
+      start.setMonth(start.getMonth() - 3);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+    default:
+      return null;
+  }
+}
 
 const PAGE_SIZE = 10;
 
@@ -93,6 +131,13 @@ async function getWorkOrders(params: SearchParams, user: SessionUser | null) {
       conditions.push(
         or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress"))
       );
+    }
+  }
+
+  if (params.dateRange && params.dateRange !== "all") {
+    const dateStart = getDateRangeStart(params.dateRange);
+    if (dateStart) {
+      conditions.push(gte(workOrders.createdAt, dateStart));
     }
   }
 
@@ -207,17 +252,21 @@ export default async function WorkOrdersPage({
 }) {
   const user = await getCurrentUser();
   const params = await searchParams;
-  const [{ workOrders: workOrdersList, total, page, totalPages }, stats, technicians] =
-    await Promise.all([
-      getWorkOrders(params, user),
-      getStats(user),
-      getTechnicians(),
-    ]);
+  const [
+    { workOrders: workOrdersList, total, page, totalPages },
+    stats,
+    technicians,
+  ] = await Promise.all([
+    getWorkOrders(params, user),
+    getStats(user),
+    getTechnicians(),
+  ]);
   const isMyWorkOrdersView = params.assigned === "me";
 
   const activeFilters =
     (params.status && params.status !== "all") ||
     (params.priority && params.priority !== "all") ||
+    (params.dateRange && params.dateRange !== "all") ||
     params.search ||
     isMyWorkOrdersView ||
     params.overdue === "true";
@@ -332,6 +381,9 @@ export default async function WorkOrdersPage({
             {params.overdue && (
               <input type="hidden" name="overdue" value={params.overdue} />
             )}
+            {params.dateRange && (
+              <input type="hidden" name="dateRange" value={params.dateRange} />
+            )}
           </form>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -357,6 +409,20 @@ export default async function WorkOrdersPage({
                 { value: "high", label: "HIGH" },
                 { value: "medium", label: "MEDIUM" },
                 { value: "low", label: "LOW" },
+              ]}
+              searchParams={params}
+            />
+
+            <FilterSelect
+              name="dateRange"
+              value={params.dateRange || "all"}
+              options={[
+                { value: "all", label: "ANY TIME" },
+                { value: "today", label: "TODAY" },
+                { value: "last7days", label: "LAST 7 DAYS" },
+                { value: "last30days", label: "LAST 30 DAYS" },
+                { value: "thisMonth", label: "THIS MONTH" },
+                { value: "lastQuarter", label: "LAST QUARTER" },
               ]}
               searchParams={params}
             />
