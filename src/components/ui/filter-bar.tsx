@@ -5,8 +5,9 @@ import { FilterSelect } from "@/components/ui/filter-select";
 import type { SelectOption } from "@/components/ui/styled-select";
 import { Search, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export interface FilterConfig {
   /** The URL parameter name for this filter */
@@ -30,8 +31,12 @@ export interface FilterBarProps {
   filters?: FilterConfig[];
   /** Whether to show custom date range (from/to) inputs */
   enableCustomDateRange?: boolean;
+  /** Optional override for active filters state */
+  hasActiveFilters?: boolean;
   /** Additional class name for the container */
   className?: string;
+  /** Whether to trigger search automatically while typing (debounced) */
+  enableRealtimeSearch?: boolean;
 }
 
 export function FilterBar({
@@ -43,10 +48,41 @@ export function FilterBar({
   hasActiveFilters: hasActiveFiltersOverride,
   enableCustomDateRange = false,
   className,
+  enableRealtimeSearch = false,
 }: FilterBarProps) {
   const router = useRouter();
+  const nextSearchParams = useSearchParams();
 
-  const searchValue = searchParams[searchParamName];
+  const searchValue = searchParams[searchParamName] || "";
+  const [inputValue, setInputValue] = useState(searchValue);
+  const debouncedSearchValue = useDebounce(inputValue, 500);
+
+  // Keep internal state in sync with external prop changes (e.g., Reset All)
+  useEffect(() => {
+    setInputValue(searchValue);
+  }, [searchValue]);
+
+  const updateFilters = useCallback((search: string) => {
+    const params = new URLSearchParams(nextSearchParams.toString());
+    
+    if (search) {
+      params.set(searchParamName, search);
+    } else {
+      params.delete(searchParamName);
+    }
+
+    // Always reset to first page when search changes
+    params.delete("page");
+    
+    const queryString = params.toString();
+    router.push(`${basePath}${queryString ? `?${queryString}` : ""}`);
+  }, [basePath, router, nextSearchParams, searchParamName]);
+
+  useEffect(() => {
+    if (enableRealtimeSearch && debouncedSearchValue !== searchValue) {
+      updateFilters(debouncedSearchValue);
+    }
+  }, [debouncedSearchValue, enableRealtimeSearch, searchValue, updateFilters]);
 
   const hasActiveFilters =
     hasActiveFiltersOverride ??
@@ -65,22 +101,25 @@ export function FilterBar({
     const formData = new FormData(e.currentTarget);
     const search = formData.get(searchParamName) as string;
 
-    const params = new URLSearchParams();
-    if (search) params.set(searchParamName, search);
+    const params = new URLSearchParams(nextSearchParams.toString());
+    if (search) {
+      params.set(searchParamName, search);
+    } else {
+      params.delete(searchParamName);
+    }
 
     if (enableCustomDateRange) {
       const from = formData.get("from") as string;
       const to = formData.get("to") as string;
       if (from) params.set("from", from);
+      else params.delete("from");
+      
       if (to) params.set("to", to);
+      else params.delete("to");
     }
 
-    for (const filter of filters) {
-      const value = searchParams[filter.name];
-      if (value && value !== "all") {
-        params.set(filter.name, value);
-      }
-    }
+    // Always reset to first page when search/dates change
+    params.delete("page");
 
     const queryString = params.toString();
     router.push(`${basePath}${queryString ? `?${queryString}` : ""}`);
@@ -108,10 +147,11 @@ export function FilterBar({
             type="text"
             name={searchParamName}
             placeholder={searchPlaceholder}
-            defaultValue={searchValue}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-4 pr-11 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
           />
-          {searchValue ? (
+          {inputValue ? (
             <button
               type="button"
               onClick={handleClearSearch}
