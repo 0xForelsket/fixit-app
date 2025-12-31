@@ -20,7 +20,7 @@ export function Header({ title, userId, onMenuClick }: HeaderProps) {
   }, []);
 
   return (
-    <header className="relative flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-md px-6 sticky top-0 z-40 transition-colors duration-300">
+    <header className="relative flex h-16 items-center justify-between border-b bg-background/80 backdrop-blur-md px-6 sticky top-0 z-40 transition-colors duration-300 print:hidden">
       {/* Industrial accent bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary/60 opacity-0 [[data-theme='industrial']_&]:opacity-100 dark:opacity-100 transition-opacity" />
 

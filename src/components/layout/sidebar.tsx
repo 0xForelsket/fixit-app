@@ -1,6 +1,15 @@
 "use client";
 
 import { logout } from "@/actions/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PERMISSIONS, type Permission, hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import {
@@ -29,15 +38,6 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -216,7 +216,7 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none",
+          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none print:hidden",
           isCollapsed ? "w-16" : "w-64 overflow-hidden",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
@@ -426,7 +426,9 @@ export function Sidebar({
             >
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user.name}</p>
+                  <p className="text-sm font-medium leading-none">
+                    {user.name}
+                  </p>
                   <p className="text-xs leading-none text-muted-foreground">
                     {user.employeeId} - {user.roleName}
                   </p>
@@ -441,7 +443,10 @@ export function Sidebar({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile/settings" className="w-full cursor-pointer">
+                  <Link
+                    href="/profile/settings"
+                    className="w-full cursor-pointer"
+                  >
                     <Cog className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </Link>
@@ -449,7 +454,9 @@ export function Sidebar({
                 <DropdownMenuItem disabled>
                   <Globe className="mr-2 h-4 w-4" />
                   <span>Language</span>
-                  <span className="ml-auto text-xs text-muted-foreground opacity-70">(Coming Soon)</span>
+                  <span className="ml-auto text-xs text-muted-foreground opacity-70">
+                    (Coming Soon)
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/docs" className="w-full cursor-pointer">
@@ -468,7 +475,10 @@ export function Sidebar({
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => logout()}
+                className="cursor-pointer"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

@@ -35,6 +35,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MobileWorkOrderView } from "./mobile-work-order-view";
+import { PrintWorkOrderButton } from "./print-work-order-button";
 import { WorkOrderActions } from "./work-order-actions";
 
 interface PageProps {
@@ -421,13 +422,14 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-5xl space-y-6 pb-20 lg:pb-12">
       {/* Navigation - Desktop Only */}
-      <div className="hidden lg:flex items-center gap-4">
+      <div className="hidden lg:flex items-center justify-between print:hidden">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard" className="gap-2 text-muted-foreground">
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
         </Button>
+        <PrintWorkOrderButton />
       </div>
 
       {/* Desktop View */}

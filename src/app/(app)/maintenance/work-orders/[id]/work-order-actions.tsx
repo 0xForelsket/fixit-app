@@ -54,7 +54,7 @@ export function WorkOrderActions({
   const isAssignedToMe = workOrder.assignedToId === currentUser.id;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print:hidden">
       {/* Quick Actions Card */}
       <Card>
         <CardHeader>
