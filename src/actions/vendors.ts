@@ -3,6 +3,7 @@
 import { db } from "@/db";
 import { vendors } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -26,7 +27,9 @@ export async function createVendor(data: z.infer<typeof vendorSchema>) {
     throw new Error("Unauthorized");
   }
 
-  // TODO: Add permission check for INVENTORY_CREATE
+  if (!userHasPermission(user, PERMISSIONS.INVENTORY_CREATE)) {
+    throw new Error("Forbidden: You don't have permission to create vendors");
+  }
 
   const [vendor] = await db
     .insert(vendors)
@@ -55,7 +58,9 @@ export async function updateVendor(
     throw new Error("Unauthorized");
   }
 
-  // TODO: Add permission check for INVENTORY_UPDATE
+  if (!userHasPermission(user, PERMISSIONS.INVENTORY_UPDATE)) {
+    throw new Error("Forbidden: You don't have permission to update vendors");
+  }
 
   await db.update(vendors).set(data).where(eq(vendors.id, id));
 
@@ -77,7 +82,9 @@ export async function deleteVendor(id: number) {
     throw new Error("Unauthorized");
   }
 
-  // TODO: Add permission check for INVENTORY_DELETE
+  if (!userHasPermission(user, PERMISSIONS.INVENTORY_DELETE)) {
+    throw new Error("Forbidden: You don't have permission to delete vendors");
+  }
 
   await db.update(vendors).set({ isActive: false }).where(eq(vendors.id, id));
 

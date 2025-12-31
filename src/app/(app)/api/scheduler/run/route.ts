@@ -12,7 +12,8 @@ import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { generateRequestId, schedulerLogger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
-import { getCurrentUser } from "@/lib/session";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getCurrentUser, requireCsrf } from "@/lib/session";
 import { and, eq, inArray, isNull, lt } from "drizzle-orm";
 
 export async function POST(request: Request) {
@@ -23,10 +24,15 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get("Authorization");
     const cronSecret = process.env.CRON_SECRET;
     let isAuthorized = false;
+    let isCronJob = false;
 
     if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
       isAuthorized = true;
+      isCronJob = true;
     } else {
+      // For user-triggered runs, require CSRF protection
+      await requireCsrf(request);
+
       const user = await getCurrentUser();
       if (user && userHasPermission(user, PERMISSIONS.SYSTEM_SCHEDULER)) {
         isAuthorized = true;
@@ -35,6 +41,20 @@ export async function POST(request: Request) {
 
     if (!isAuthorized) {
       return ApiErrors.unauthorized(requestId);
+    }
+
+    // Rate limiting for manual triggers (not cron jobs)
+    if (!isCronJob) {
+      const clientIp = getClientIp(request);
+      const rateLimit = checkRateLimit(
+        `scheduler:${clientIp}`,
+        5, // 5 manual runs per minute
+        60 * 1000
+      );
+      if (!rateLimit.success) {
+        const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+        return ApiErrors.rateLimited(retryAfter, requestId);
+      }
     }
 
     const now = new Date();

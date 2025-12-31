@@ -11,6 +11,8 @@ import { requirePermission } from "@/lib/auth";
 import { mapCSVToObjects, parseCSV } from "@/lib/csv";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { PERMISSIONS } from "@/lib/permissions";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireCsrf } from "@/lib/session";
 import {
   type EquipmentImportRow,
   type ImportResult,
@@ -25,6 +27,21 @@ export async function POST(request: Request) {
   const requestId = generateRequestId();
 
   try {
+    // CSRF protection
+    await requireCsrf(request);
+
+    // Rate limiting - imports are heavy operations
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `import:${clientIp}`,
+      10, // 10 imports per minute
+      60 * 1000
+    );
+    if (!rateLimit.success) {
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
+    }
+
     await requirePermission(PERMISSIONS.EQUIPMENT_CREATE);
 
     const formData = await request.formData();

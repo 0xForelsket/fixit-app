@@ -5,6 +5,7 @@ import {
   real,
   sqliteTable,
   text,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
 // Enums as const objects for type safety
@@ -517,19 +518,29 @@ export const spareParts = sqliteTable("spare_parts", {
 });
 
 // Stock levels per location
-export const inventoryLevels = sqliteTable("inventory_levels", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  partId: integer("part_id")
-    .references(() => spareParts.id)
-    .notNull(),
-  locationId: integer("location_id")
-    .references(() => locations.id)
-    .notNull(),
-  quantity: integer("quantity").notNull().default(0),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+export const inventoryLevels = sqliteTable(
+  "inventory_levels",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    partId: integer("part_id")
+      .references(() => spareParts.id)
+      .notNull(),
+    locationId: integer("location_id")
+      .references(() => locations.id)
+      .notNull(),
+    quantity: integer("quantity").notNull().default(0),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    // Unique constraint to prevent duplicate inventory levels for same part+location
+    partLocationUnique: uniqueIndex("inv_part_location_unique_idx").on(
+      table.partId,
+      table.locationId
+    ),
+  })
+);
 
 // Inventory transactions (stock movements)
 export const inventoryTransactions = sqliteTable("inventory_transactions", {

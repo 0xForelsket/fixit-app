@@ -2,7 +2,8 @@
 
 import { db } from "@/db";
 import type { Attachment } from "@/db/schema";
-import { attachments, equipment, users, workOrders } from "@/db/schema";
+import { attachments, equipment, workOrders } from "@/db/schema";
+import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { deleteObject, getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/types/actions";
@@ -28,6 +29,37 @@ export async function getAllAttachments(
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "Unauthorized" };
+  }
+
+  // Check permission based on entity type filter
+  // If no filter, user needs permission to view both work orders and equipment
+  if (filters?.entityType === "work_order") {
+    if (!userHasPermission(user, PERMISSIONS.TICKET_VIEW)) {
+      return {
+        success: false,
+        error: "You don't have permission to view work order attachments",
+      };
+    }
+  } else if (filters?.entityType === "equipment") {
+    if (!userHasPermission(user, PERMISSIONS.EQUIPMENT_VIEW)) {
+      return {
+        success: false,
+        error: "You don't have permission to view equipment attachments",
+      };
+    }
+  } else {
+    // No filter - need at least one view permission
+    const canViewWorkOrders = userHasPermission(user, PERMISSIONS.TICKET_VIEW);
+    const canViewEquipment = userHasPermission(
+      user,
+      PERMISSIONS.EQUIPMENT_VIEW
+    );
+    if (!canViewWorkOrders && !canViewEquipment) {
+      return {
+        success: false,
+        error: "You don't have permission to view attachments",
+      };
+    }
   }
 
   const conditions = [];
@@ -168,22 +200,34 @@ export async function deleteAttachment(
     return { success: false, error: "Attachment not found" };
   }
 
-  // Check permissions
-  const dbUser = await db.query.users.findFirst({
-    where: eq(users.id, user.id),
-    with: {
-      assignedRole: true,
-    },
-  });
-
-  const isAdmin = dbUser?.assignedRole?.name === "admin";
+  // Check permissions - user can delete if:
+  // 1. They uploaded the attachment (owner)
+  // 2. They have the appropriate delete permission for the entity type
   const isOwner = attachment.uploadedById === user.id;
 
-  if (!isOwner && !isAdmin) {
-    return {
-      success: false,
-      error: "Forbidden: You can only delete your own uploads",
-    };
+  if (!isOwner) {
+    // Check entity-specific delete permissions
+    let hasDeletePermission = false;
+
+    if (attachment.entityType === "work_order") {
+      hasDeletePermission = userHasPermission(user, PERMISSIONS.TICKET_UPDATE);
+    } else if (attachment.entityType === "equipment") {
+      hasDeletePermission = userHasPermission(
+        user,
+        PERMISSIONS.EQUIPMENT_UPDATE
+      );
+    } else {
+      // For other entity types, require wildcard permission
+      hasDeletePermission = userHasPermission(user, PERMISSIONS.ALL);
+    }
+
+    if (!hasDeletePermission) {
+      return {
+        success: false,
+        error:
+          "Forbidden: You can only delete your own uploads or need appropriate permissions",
+      };
+    }
   }
 
   try {

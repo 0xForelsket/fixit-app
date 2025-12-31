@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { notifications } from "@/db/schema";
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { apiLogger, generateRequestId } from "@/lib/logger";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser, requireCsrf } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
@@ -13,6 +13,9 @@ export async function PATCH(
   const requestId = generateRequestId();
 
   try {
+    // CSRF protection
+    await requireCsrf(request);
+
     const user = await getCurrentUser();
 
     if (!user) {
@@ -55,12 +58,15 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const requestId = generateRequestId();
 
   try {
+    // CSRF protection
+    await requireCsrf(request);
+
     const user = await getCurrentUser();
 
     if (!user) {

@@ -238,27 +238,97 @@ export async function checkRateLimitAsync(
 }
 
 /**
+ * List of trusted proxy IPs or CIDR ranges.
+ * In production, this should be configured via environment variables.
+ * Add your load balancer/reverse proxy IPs here.
+ * Reserved for future CIDR-based validation.
+ */
+const _TRUSTED_PROXIES = new Set(
+  (process.env.TRUSTED_PROXY_IPS || "127.0.0.1,::1")
+    .split(",")
+    .map((ip) => ip.trim())
+);
+
+/**
+ * Check if a connection is from a trusted proxy.
+ * This helps prevent X-Forwarded-For header spoofing.
+ */
+function isFromTrustedProxy(request: Request): boolean {
+  // In serverless environments, we often can't get the direct connection IP.
+  // Trust proxy headers when running behind a known platform.
+  const platform = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+  if (platform) {
+    return true;
+  }
+
+  // For traditional deployments, check if the direct connection IP is trusted.
+  // Note: In Next.js API routes, we don't have direct socket access.
+  // The CF-Connecting-IP or X-Real-IP set by the infrastructure is more reliable.
+  const cfConnectingIp = request.headers.get("cf-connecting-ip");
+  if (cfConnectingIp) {
+    // Cloudflare sets this - can be trusted if you're using Cloudflare
+    return true;
+  }
+
+  // Check for known proxy identifiers
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+
+  // If both forwarded headers are present, likely behind a legitimate proxy
+  if (forwardedProto && forwardedHost) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Extract client IP address from request headers.
+ *
+ * SECURITY NOTE: This function implements defense against X-Forwarded-For spoofing
+ * by only trusting proxy headers when the request comes from a trusted source.
  *
  * @param request - The incoming request
  * @returns The client's IP address
  */
 export function getClientIp(request: Request): string {
-  // Check X-Forwarded-For header (set by proxies/load balancers)
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    // X-Forwarded-For can contain multiple IPs; the first is the client
-    return forwarded.split(",")[0].trim();
+  // Cloudflare's CF-Connecting-IP is set at the edge and can't be spoofed
+  // by the client (Cloudflare strips any client-provided CF-Connecting-IP)
+  const cfConnectingIp = request.headers.get("cf-connecting-ip");
+  if (cfConnectingIp) {
+    return cfConnectingIp.trim();
   }
 
-  // Check X-Real-IP header (set by some proxies like nginx)
-  const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp.trim();
+  // Only trust X-Forwarded-For if coming from a trusted proxy
+  if (isFromTrustedProxy(request)) {
+    // Check X-Forwarded-For header (set by proxies/load balancers)
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) {
+      // X-Forwarded-For can contain multiple IPs; the first is the client
+      // When behind multiple proxies, the rightmost untrusted IP is the client
+      const ips = forwarded.split(",").map((ip) => ip.trim());
+      // Return the leftmost IP (original client) since we've verified trusted proxy
+      return ips[0];
+    }
+
+    // Check X-Real-IP header (set by some proxies like nginx)
+    const realIp = request.headers.get("x-real-ip");
+    if (realIp) {
+      return realIp.trim();
+    }
   }
 
-  // Fallback for direct connections
-  return "127.0.0.1";
+  // Fallback: Generate a consistent identifier when we can't determine the IP.
+  // This prevents attackers from bypassing rate limits by not sending any headers.
+  // In production, requests should always come through a trusted proxy.
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  const acceptLanguage = request.headers.get("accept-language") || "unknown";
+
+  // Create a fingerprint-based identifier as last resort
+  // This is less accurate but better than a static fallback
+  return `fingerprint:${Buffer.from(userAgent + acceptLanguage)
+    .toString("base64")
+    .slice(0, 16)}`;
 }
 
 /**

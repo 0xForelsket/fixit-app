@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { attachments, roles, users } from "@/db/schema";
-import { requirePermission } from "@/lib/auth";
+import { hashPin, requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 import { deleteObject } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
@@ -150,13 +150,16 @@ export async function createUser(
     }
   }
 
+  // Hash the PIN before storing
+  const hashedPin = await hashPin(parsed.data.pin);
+
   const [newUser] = await db
     .insert(users)
     .values({
       employeeId: parsed.data.employeeId,
       name: parsed.data.name,
       email: parsed.data.email || null,
-      pin: parsed.data.pin,
+      pin: hashedPin,
       roleId: parsed.data.roleId ?? null,
       isActive: parsed.data.isActive,
       hourlyRate: parsed.data.hourlyRate ?? null,
@@ -227,8 +230,10 @@ export async function updateUser(
   if (parsed.data.name !== undefined) updateData.name = parsed.data.name;
   if (parsed.data.email !== undefined)
     updateData.email = parsed.data.email || null;
-  if (parsed.data.pin !== undefined && parsed.data.pin !== "")
-    updateData.pin = parsed.data.pin;
+  if (parsed.data.pin !== undefined && parsed.data.pin !== "") {
+    // Hash the PIN before storing
+    updateData.pin = await hashPin(parsed.data.pin);
+  }
   if (parsed.data.roleId !== undefined) {
     updateData.roleId = parsed.data.roleId;
   }

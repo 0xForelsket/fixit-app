@@ -4,7 +4,7 @@ import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateS3Key, getPresignedUploadUrl } from "@/lib/s3";
-import { getCurrentUser } from "@/lib/session";
+import { getCurrentUser, requireCsrf } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
@@ -56,6 +56,9 @@ export async function POST(request: NextRequest) {
   const requestId = generateRequestId();
 
   try {
+    // CSRF protection
+    await requireCsrf(request);
+
     const clientIp = getClientIp(request);
     const rateLimit = checkRateLimit(
       `upload:${clientIp}`,

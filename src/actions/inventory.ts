@@ -271,6 +271,21 @@ export async function importPartsFromCSV(
   });
   const existingSkus = new Set(existingParts.map((p) => p.sku.toLowerCase()));
 
+  // Validate all rows first and prepare batch data
+  type ValidatedRow = {
+    rowNum: number;
+    sku: string;
+    name: string;
+    description: string | null;
+    minStock: number;
+    unitCost: number | null;
+    quantity?: number;
+    locationId?: number;
+    manufacturer?: string;
+  };
+
+  const validRows: ValidatedRow[] = [];
+
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const rowNum = i + 1;
@@ -321,49 +336,20 @@ export async function importPartsFromCSV(
         }
       }
 
-      // Insert the part
-      const [insertedPart] = await db
-        .insert(spareParts)
-        .values({
-          sku: sku,
-          name: row.name.trim(),
-          description: row.description?.trim() || null,
-          category: "other", // Default category
-          reorderPoint: minStock ?? 0,
-          unitCost: unitCost ?? null,
-          isActive: true,
-        })
-        .returning({ id: spareParts.id });
-
       // Add to existing SKUs set to prevent duplicates within same import
       existingSkus.add(sku.toLowerCase());
 
-      // If quantity and location provided, create inventory level and transaction
-      if (quantity !== undefined && quantity > 0 && locationId) {
-        await db.insert(inventoryLevels).values({
-          partId: insertedPart.id,
-          locationId: locationId,
-          quantity: quantity,
-        });
-
-        await db.insert(inventoryTransactions).values({
-          partId: insertedPart.id,
-          locationId: locationId,
-          type: "in",
-          quantity: quantity,
-          reference: "CSV Import",
-          notes: `Initial stock from CSV import${row.manufacturer ? ` - Manufacturer: ${row.manufacturer}` : ""}`,
-          createdById: user.id,
-        });
-      }
-
-      results.push({
-        row: rowNum,
-        success: true,
-        partNumber: sku,
-        partId: insertedPart.id,
+      validRows.push({
+        rowNum,
+        sku,
+        name: row.name.trim(),
+        description: row.description?.trim() || null,
+        minStock: minStock ?? 0,
+        unitCost: unitCost ?? null,
+        quantity,
+        locationId,
+        manufacturer: row.manufacturer,
       });
-      successCount++;
     } catch (error) {
       results.push({
         row: rowNum,
@@ -372,6 +358,100 @@ export async function importPartsFromCSV(
         error: error instanceof Error ? error.message : "Unknown error",
       });
       failureCount++;
+    }
+  }
+
+  // Batch insert valid parts
+  if (validRows.length > 0) {
+    try {
+      // Insert all parts in a single batch
+      const insertedParts = await db
+        .insert(spareParts)
+        .values(
+          validRows.map((row) => ({
+            sku: row.sku,
+            name: row.name,
+            description: row.description,
+            category: "other" as const,
+            reorderPoint: row.minStock,
+            unitCost: row.unitCost,
+            isActive: true,
+          }))
+        )
+        .returning({ id: spareParts.id });
+
+      // Map inserted parts back to rows
+      const inventoryLevelValues: Array<{
+        partId: number;
+        locationId: number;
+        quantity: number;
+      }> = [];
+
+      const transactionValues: Array<{
+        partId: number;
+        locationId: number;
+        type: "in";
+        quantity: number;
+        reference: string;
+        notes: string;
+        createdById: number;
+      }> = [];
+
+      for (let i = 0; i < validRows.length; i++) {
+        const row = validRows[i];
+        const insertedPart = insertedParts[i];
+
+        results.push({
+          row: row.rowNum,
+          success: true,
+          partNumber: row.sku,
+          partId: insertedPart.id,
+        });
+        successCount++;
+
+        // Collect inventory levels and transactions for batch insert
+        if (row.quantity !== undefined && row.quantity > 0 && row.locationId) {
+          inventoryLevelValues.push({
+            partId: insertedPart.id,
+            locationId: row.locationId,
+            quantity: row.quantity,
+          });
+
+          transactionValues.push({
+            partId: insertedPart.id,
+            locationId: row.locationId,
+            type: "in",
+            quantity: row.quantity,
+            reference: "CSV Import",
+            notes: `Initial stock from CSV import${row.manufacturer ? ` - Manufacturer: ${row.manufacturer}` : ""}`,
+            createdById: user.id,
+          });
+        }
+      }
+
+      // Batch insert inventory levels
+      if (inventoryLevelValues.length > 0) {
+        await db.insert(inventoryLevels).values(inventoryLevelValues);
+      }
+
+      // Batch insert transactions
+      if (transactionValues.length > 0) {
+        await db.insert(inventoryTransactions).values(transactionValues);
+      }
+    } catch (error) {
+      // If batch insert fails, mark all remaining rows as failed
+      for (const row of validRows) {
+        if (!results.find((r) => r.row === row.rowNum)) {
+          results.push({
+            row: row.rowNum,
+            success: false,
+            partNumber: row.sku,
+            error: error instanceof Error ? error.message : "Database error",
+          });
+          failureCount++;
+          successCount = Math.max(0, successCount - 1);
+        }
+      }
     }
   }
 

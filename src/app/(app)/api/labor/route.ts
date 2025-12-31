@@ -2,7 +2,8 @@ import { db } from "@/db";
 import { laborLogs } from "@/db/schema";
 import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
 import { apiLogger, generateRequestId } from "@/lib/logger";
-import { getCurrentUser } from "@/lib/session";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getCurrentUser, requireCsrf } from "@/lib/session";
 import { revalidatePath } from "next/cache";
 
 // POST /api/labor - Create new labor log
@@ -10,6 +11,21 @@ export async function POST(request: Request) {
   const requestId = generateRequestId();
 
   try {
+    // CSRF protection
+    await requireCsrf(request);
+
+    // Rate limiting
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `labor:${clientIp}`,
+      RATE_LIMITS.api.limit,
+      RATE_LIMITS.api.windowMs
+    );
+    if (!rateLimit.success) {
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
+    }
+
     const user = await getCurrentUser();
     if (!user) {
       return ApiErrors.unauthorized(requestId);

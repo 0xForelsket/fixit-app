@@ -110,42 +110,54 @@ export async function updateScheduleAction(
     validated.data;
 
   try {
-    const [schedule] = await db
-      .update(maintenanceSchedules)
-      .set({
-        title,
-        equipmentId,
-        type,
-        frequencyDays,
-        isActive,
-      })
-      .where(eq(maintenanceSchedules.id, id))
-      .returning();
+    // Use transaction to ensure atomic update of schedule and checklists
+    const schedule = await db.transaction(async (tx) => {
+      const [updatedSchedule] = await tx
+        .update(maintenanceSchedules)
+        .set({
+          title,
+          equipmentId,
+          type,
+          frequencyDays,
+          isActive,
+        })
+        .where(eq(maintenanceSchedules.id, id))
+        .returning();
+
+      if (!updatedSchedule) {
+        throw new Error("Schedule not found");
+      }
+
+      // Update checklists within the same transaction
+      if (checklists) {
+        await tx
+          .delete(maintenanceChecklists)
+          .where(eq(maintenanceChecklists.scheduleId, id));
+
+        if (checklists.length > 0) {
+          await tx.insert(maintenanceChecklists).values(
+            checklists.map((item) => ({
+              scheduleId: id,
+              stepNumber: item.stepNumber,
+              description: item.description,
+              isRequired: item.isRequired,
+              estimatedMinutes: item.estimatedMinutes,
+            }))
+          );
+        }
+      }
+
+      return updatedSchedule;
+    });
 
     if (!schedule) {
       return { error: "Schedule not found" };
     }
-
-    // Update checklists
-    if (checklists) {
-      await db
-        .delete(maintenanceChecklists)
-        .where(eq(maintenanceChecklists.scheduleId, id));
-
-      if (checklists.length > 0) {
-        await db.insert(maintenanceChecklists).values(
-          checklists.map((item) => ({
-            scheduleId: id,
-            stepNumber: item.stepNumber,
-            description: item.description,
-            isRequired: item.isRequired,
-            estimatedMinutes: item.estimatedMinutes,
-          }))
-        );
-      }
-    }
   } catch (error) {
     console.error("Error updating schedule:", error);
+    if (error instanceof Error && error.message === "Schedule not found") {
+      return { error: "Schedule not found" };
+    }
     return { error: "Failed to update schedule" };
   }
 

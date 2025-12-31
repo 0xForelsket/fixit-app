@@ -3,12 +3,28 @@ import { spareParts } from "@/db/schema";
 import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
-import { getCurrentUser } from "@/lib/session";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getCurrentUser, requireCsrf } from "@/lib/session";
 
 export async function POST(request: Request) {
   const requestId = generateRequestId();
 
   try {
+    // CSRF protection
+    await requireCsrf(request);
+
+    // Rate limiting
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `inventory:${clientIp}`,
+      RATE_LIMITS.api.limit,
+      RATE_LIMITS.api.windowMs
+    );
+    if (!rateLimit.success) {
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
+    }
+
     const user = await getCurrentUser();
     if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_CREATE)) {
       return ApiErrors.unauthorized(requestId);

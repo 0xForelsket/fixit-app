@@ -24,7 +24,7 @@ import {
   updateChecklistItemSchema,
   updateWorkOrderSchema,
 } from "@/lib/validations";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 
@@ -485,23 +485,49 @@ export async function bulkUpdateWorkOrders(
   }
 
   try {
-    // Update all selected work orders
-    let updated = 0;
+    // Batch fetch all existing work orders to avoid N+1 queries
+    const existingWorkOrders = await db.query.workOrders.findMany({
+      where: inArray(workOrders.id, ids),
+    });
 
+    const existingMap = new Map(existingWorkOrders.map((wo) => [wo.id, wo]));
+
+    // Prepare batch operations
+    const statusLogs: Array<{
+      workOrderId: number;
+      action: "status_change";
+      oldValue: string;
+      newValue: string;
+      createdById: number;
+    }> = [];
+
+    const assignmentLogs: Array<{
+      workOrderId: number;
+      action: "assignment";
+      oldValue: string | null;
+      newValue: string;
+      createdById: number;
+    }> = [];
+
+    const assignmentNotifications: Array<{
+      userId: number;
+      type: "work_order_assigned";
+      title: string;
+      message: string;
+      link: string;
+    }> = [];
+
+    // Filter to only valid IDs and collect logs
+    const validIds: number[] = [];
     for (const id of ids) {
-      const existing = await db.query.workOrders.findFirst({
-        where: eq(workOrders.id, id),
-      });
-
+      const existing = existingMap.get(id);
       if (!existing) continue;
 
-      await db.update(workOrders).set(updateData).where(eq(workOrders.id, id));
+      validIds.push(id);
 
-      updated++;
-
-      // Log status changes
+      // Collect status change logs
       if (status && status !== existing.status) {
-        await db.insert(workOrderLogs).values({
+        statusLogs.push({
           workOrderId: id,
           action: "status_change",
           oldValue: existing.status,
@@ -510,12 +536,12 @@ export async function bulkUpdateWorkOrders(
         });
       }
 
-      // Log assignment changes and notify
+      // Collect assignment logs and notifications
       if (
         assignedToId !== undefined &&
         assignedToId !== existing.assignedToId
       ) {
-        await db.insert(workOrderLogs).values({
+        assignmentLogs.push({
           workOrderId: id,
           action: "assignment",
           oldValue: existing.assignedToId?.toString() || null,
@@ -523,9 +549,8 @@ export async function bulkUpdateWorkOrders(
           createdById: user.id,
         });
 
-        // Notify newly assigned user
         if (assignedToId) {
-          await db.insert(notifications).values({
+          assignmentNotifications.push({
             userId: assignedToId,
             type: "work_order_assigned",
             title: "Work Order Assigned to You",
@@ -535,6 +560,30 @@ export async function bulkUpdateWorkOrders(
         }
       }
     }
+
+    // Execute batch update using a single SQL statement with IN clause
+    if (validIds.length > 0) {
+      await db
+        .update(workOrders)
+        .set(updateData)
+        .where(inArray(workOrders.id, validIds));
+    }
+
+    // Batch insert logs
+    if (statusLogs.length > 0) {
+      await db.insert(workOrderLogs).values(statusLogs);
+    }
+
+    if (assignmentLogs.length > 0) {
+      await db.insert(workOrderLogs).values(assignmentLogs);
+    }
+
+    // Batch insert notifications
+    if (assignmentNotifications.length > 0) {
+      await db.insert(notifications).values(assignmentNotifications);
+    }
+
+    const updated = validIds.length;
 
     workOrderLogger.info(
       { userId: user.id, count: updated, action: "bulk_update" },
