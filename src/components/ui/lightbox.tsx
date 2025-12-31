@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import * as React from "react";
@@ -12,70 +18,28 @@ interface LightboxProps {
 }
 
 export function Lightbox({ src, alt, isOpen, onClose }: LightboxProps) {
-  const dialogRef = React.useRef<HTMLDialogElement>(null);
-
-  React.useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    if (isOpen) {
-      dialog.showModal();
-    } else {
-      dialog.close();
-    }
-  }, [isOpen]);
-
-  // Handle escape key and backdrop click
-  React.useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const handleCancel = (e: Event) => {
-      e.preventDefault();
-      onClose();
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      // Close when clicking on the backdrop (outside the image container)
-      if (e.target === dialog) {
-        onClose();
-      }
-    };
-
-    dialog.addEventListener("cancel", handleCancel);
-    dialog.addEventListener("click", handleClick);
-
-    return () => {
-      dialog.removeEventListener("cancel", handleCancel);
-      dialog.removeEventListener("click", handleClick);
-    };
-  }, [onClose]);
-
   return (
-    <dialog
-      ref={dialogRef}
-      className="fixed inset-0 z-50 flex h-screen w-screen max-h-none max-w-none items-center justify-center bg-black/90 backdrop:bg-transparent"
-      aria-label={`Image: ${alt}`}
-    >
-      {/* Close button */}
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute right-4 top-4 z-10 rounded-full bg-black/50 p-2 text-white opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
-        aria-label="Close lightbox"
-      >
-        <X className="h-6 w-6" />
-      </button>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-[95vw] w-auto h-auto max-h-[95vh] p-0 border-none bg-transparent shadow-none [&>button]:hidden flex items-center justify-center">
+        <DialogTitle className="sr-only">View Image</DialogTitle>
+        <div className="relative flex items-center justify-center w-full h-full">
+          {/* Close button - custom positioned */}
+          <DialogClose
+            className="absolute -top-12 right-0 z-50 rounded-full bg-black/50 p-2 text-white opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-white"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+            <span className="sr-only">Close</span>
+          </DialogClose>
 
-      {/* Image container */}
-      <div className="relative max-h-[90vh] max-w-[90vw]">
-        <img
-          src={src}
-          alt={alt}
-          className="max-h-[90vh] max-w-[90vw] object-contain"
-        />
-      </div>
-    </dialog>
+          <img
+            src={src}
+            alt={alt}
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-md"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -105,7 +69,6 @@ export function LightboxImage({
         className={cn("cursor-zoom-in", containerClassName)}
         aria-label={`View ${alt} in full size`}
       >
-        {/* biome-ignore lint/a11y/useAltText: alt is passed dynamically */}
         <img src={src} alt={alt} className={className} {...props} />
       </button>
       <Lightbox

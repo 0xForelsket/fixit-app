@@ -50,10 +50,6 @@ export function GlobalSearch({ showTrigger = false }: GlobalSearchProps) {
   // Handle keyboard shortcut and custom event
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
       if (e.key === "Escape") {
         setOpen(false);
       }
@@ -203,17 +199,19 @@ export function GlobalSearch({ showTrigger = false }: GlobalSearchProps) {
                               value={result.id}
                               onSelect={() => handleSelect(result.href)}
                               className={cn(
-                                "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm",
-                                "hover:bg-accent aria-selected:bg-accent"
+                                "group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                                "hover:bg-accent hover:text-accent-foreground",
+                                "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                                "data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                               )}
                             >
-                              <ResultIcon className="h-4 w-4 text-muted-foreground" />
+                              <ResultIcon className="h-4 w-4 text-muted-foreground group-hover:text-accent-foreground group-aria-selected:text-accent-foreground group-data-[selected=true]:text-accent-foreground" />
                               <div className="flex-1 overflow-hidden">
                                 <p className="truncate font-medium">
                                   {result.title}
                                 </p>
                                 {result.subtitle && (
-                                  <p className="truncate text-xs text-muted-foreground">
+                                  <p className="truncate text-xs text-muted-foreground group-hover:text-accent-foreground/80 group-aria-selected:text-accent-foreground/80 group-data-[selected=true]:text-accent-foreground/80">
                                     {result.subtitle}
                                   </p>
                                 )}
