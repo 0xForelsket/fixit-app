@@ -1,4 +1,11 @@
 import { BottomNav } from "@/components/layout/bottom-nav";
+import {
+  EntityDetailItem,
+  EntityDetailLayout,
+  EntityGrid,
+  EntityHeader,
+  EntityStatusCard,
+} from "@/components/layout/entity-detail";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { db } from "@/db";
 import {
@@ -8,7 +15,13 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { desc, eq } from "drizzle-orm";
-import { ArrowLeft, MapPin } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  MapPin,
+  Wrench,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EquipmentHistory } from "./equipment-history";
@@ -105,72 +118,111 @@ export default async function EquipmentPage({ params }: PageProps) {
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const hasDuePM = schedules.some((s) => s.nextDue <= sevenDaysFromNow);
 
-  return (
-    <div className="min-h-screen bg-zinc-50/50 industrial-grid pb-24 lg:pb-8">
-      <div className="mx-auto max-w-3xl px-4 py-4 space-y-4">
-        {/* Compact Navigation & Title Bar */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link
-              href="/"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:text-primary-600 hover:border-primary-200 transition-all shadow-sm active:scale-95"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-black tracking-tight text-zinc-900 truncate">
-                  {equipmentItem.name}
-                </h1>
-                <span className="shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-zinc-600">
-                  {equipmentItem.code}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                <MapPin className="h-3 w-3" />
-                {equipmentItem.location?.name || "No Location"}
-              </div>
-            </div>
-          </div>
+    const statusColorMap: Record<string, "zinc" | "blue" | "emerald" | "amber" | "red"> = {
+    operational: "emerald",
+    maintenance: "amber",
+    down: "red",
+  };
+  const statusColor = statusColorMap[equipmentItem.status] || "zinc";
+  
+  const StatusIcon = 
+    equipmentItem.status === "operational" ? CheckCircle2 :
+    equipmentItem.status === "maintenance" ? Wrench :
+    AlertTriangle;
 
+  return (
+    <EntityDetailLayout>
+      <EntityHeader
+        title={equipmentItem.name}
+        badge={equipmentItem.code}
+        parentLink={{ href: "/assets/equipment", label: "Back to Equipment" }}
+        meta={
+          <>
+            <MapPin className="h-3 w-3" />
+            {equipmentItem.location?.name || "No Location"}
+          </>
+        }
+        statusBadge={
           <StatusBadge
             status={equipmentItem.status}
             showIcon
             className="h-8 px-3 text-[11px] font-black rounded-lg border-zinc-200/50"
           />
-        </div>
-      </div>
+        }
+      />
 
-      {/* Tabbed Content */}
-      <div className="mx-auto max-w-3xl px-4 py-6">
-        <EquipmentTabs
-          equipmentId={equipmentItem.id}
-          overviewContent={
-            <EquipmentOverview
-              equipment={equipmentItem}
-              hasDuePM={hasDuePM}
-              openWorkOrderCount={openWorkOrderCount}
-              permissions={user.permissions}
-            />
-          }
-          historyContent={<EquipmentHistory workOrders={workOrderHistory} />}
-          maintenanceContent={
-            <EquipmentMaintenance
-              schedules={schedules.map((s) => ({
-                id: s.id,
-                name: s.title,
-                type: s.type,
-                nextDueDate: s.nextDue,
-                frequencyDays: s.frequencyDays,
-                workOrderId: null,
-              }))}
-            />
-          }
-          reportContent={<ReportForm equipment={equipmentItem} />}
-        />
-      </div>
-
+      <EntityGrid
+        sidebar={
+          <div className="space-y-6">
+            <EntityStatusCard
+              status={equipmentItem.status}
+              statusColor={statusColor}
+              icon={StatusIcon}
+              statusBadge={
+                <StatusBadge
+                  status={equipmentItem.status}
+                  showIcon={false}
+                  className="h-7 px-3 text-xs justify-center"
+                />
+              }
+            >
+              <EntityDetailItem label="Location">
+                <div className="font-bold text-xs text-zinc-900 flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5 text-zinc-400" />
+                  {equipmentItem.location?.name || "Unassigned"}
+                </div>
+              </EntityDetailItem>
+              
+              {equipmentItem.parent && (
+                 <EntityDetailItem label="Parent Asset">
+                    <Link
+                      href={`/assets/equipment/${equipmentItem.parent.code}`}
+                      className="group flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 hover:border-primary-200 hover:bg-primary-50 transition-all"
+                    >
+                      <div className="h-6 w-6 rounded bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-primary-600">
+                        <Wrench className="h-3 w-3" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-bold text-zinc-500 uppercase leading-none mb-0.5">Parent</div>
+                        <div className="text-xs font-bold text-zinc-900 truncate group-hover:text-primary-700">
+                          {equipmentItem.parent.name}
+                        </div>
+                      </div>
+                    </Link>
+                 </EntityDetailItem>
+              )}
+            </EntityStatusCard>
+          </div>
+        }
+        content={
+          <EquipmentTabs
+            equipmentId={equipmentItem.id}
+            overviewContent={
+              <EquipmentOverview
+                equipment={equipmentItem}
+                hasDuePM={hasDuePM}
+                openWorkOrderCount={openWorkOrderCount}
+                permissions={user.permissions}
+              />
+            }
+            historyContent={<EquipmentHistory workOrders={workOrderHistory} />}
+            maintenanceContent={
+              <EquipmentMaintenance
+                schedules={schedules.map((s) => ({
+                  id: s.id,
+                  name: s.title,
+                  type: s.type,
+                  nextDueDate: s.nextDue,
+                  frequencyDays: s.frequencyDays,
+                  workOrderId: null,
+                }))}
+              />
+            }
+            reportContent={<ReportForm equipment={equipmentItem} />}
+          />
+        }
+      />
       <BottomNav permissions={user.permissions} />
-    </div>
+    </EntityDetailLayout>
   );
 }

@@ -357,9 +357,15 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
         sidebar={
           <div className="space-y-6">
             <EntityStatusCard
-              status={workOrder.status.replace("_", " ")}
               statusColor={statusColor}
               icon={StatusIcon}
+              statusBadge={
+                <StatusBadge
+                  status={workOrder.status}
+                  showIcon={false}
+                  className="h-7 px-3 text-xs justify-center"
+                />
+              }
             >
               <EntityDetailItem label="Priority">
                 <StatusBadge status={priority} className="h-6 text-[10px]" />

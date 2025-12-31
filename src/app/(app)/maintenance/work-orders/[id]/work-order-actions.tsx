@@ -100,19 +100,19 @@ export function WorkOrderActions({
         {isResolving && (
           <form
             action={resolveAction}
-            className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-200"
+            className="rounded-xl border border-border bg-muted/40 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-200"
           >
             <div className="space-y-1.5">
               <Label
                 htmlFor="resolutionNotes"
-                className="text-[10px] font-black uppercase tracking-widest text-zinc-500"
+                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
               >
                 Resolution Notes
               </Label>
               <textarea
                 name="resolutionNotes"
                 id="resolutionNotes"
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-success-500 focus:border-success-500 min-h-[60px] transition-all"
+                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm focus:ring-2 focus:ring-success-500 focus:border-success-500 min-h-[60px] transition-all placeholder:text-muted-foreground/50"
                 placeholder="What was done?"
                 required
               />
@@ -149,18 +149,18 @@ export function WorkOrderActions({
         {showCommentForm && (
           <form
             action={commentAction}
-            className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-200"
+            className="rounded-xl border border-border bg-muted/40 p-3 space-y-3 animate-in fade-in zoom-in-95 duration-200"
           >
             <textarea
               name="comment"
-              className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm min-h-[60px] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-sm min-h-[60px] focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all placeholder:text-muted-foreground/50"
               placeholder="Type your comment..."
               required
             />
             <Button
               type="submit"
               size="sm"
-              className="w-full font-bold rounded-lg h-8 text-xs"
+              className="w-full font-bold rounded-lg h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={isCommentPending}
             >
               <Send className="mr-1.5 h-3 w-3" />
@@ -191,7 +191,7 @@ function ActionButton({
 }) {
   const styles = {
     primary: "bg-success-600 border-success-700 text-white hover:bg-success-700 shadow-sm",
-    outline: "bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300",
+    outline: "bg-card border-border text-foreground hover:bg-accent hover:border-accent hover:text-accent-foreground",
     danger: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700 shadow-sm",
   };
 
@@ -201,7 +201,7 @@ function ActionButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex items-center gap-2 rounded-lg border px-3 py-2 transition-all active:scale-95 font-bold text-xs w-full disabled:opacity-50 disabled:cursor-not-allowed",
+        "flex items-center gap-2 rounded-lg border px-3 py-2 transition-all active:scale-95 font-bold text-xs w-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
         styles[variant]
       )}
     >

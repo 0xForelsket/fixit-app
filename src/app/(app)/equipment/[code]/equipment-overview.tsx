@@ -222,15 +222,15 @@ function QuickActionButton({
 }) {
   const styles = {
     danger: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700",
-    primary: "bg-zinc-900 border-zinc-950 text-white hover:bg-black",
-    outline: "bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50",
+    primary: "bg-primary border-primary text-primary-foreground hover:bg-primary/90",
+    outline: "bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground shadow-sm",
   };
 
   if (disabled) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-dashed border-zinc-200 bg-zinc-50 px-4 py-2 opacity-50 cursor-not-allowed whitespace-nowrap">
-        <Icon className="h-4 w-4 text-zinc-400" />
-        <span className="text-xs font-bold text-zinc-400">{label}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-dashed border-border bg-muted/50 px-4 py-2 opacity-50 cursor-not-allowed whitespace-nowrap">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs font-bold text-muted-foreground">{label}</span>
       </div>
     );
   }
@@ -239,7 +239,7 @@ function QuickActionButton({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-2 rounded-lg border px-4 py-2 transition-all active:scale-95 whitespace-nowrap font-bold shadow-sm",
+        "flex items-center gap-2 rounded-lg border px-4 py-2 transition-all active:scale-95 whitespace-nowrap font-bold shadow-sm cursor-pointer",
         styles[variant]
       )}
     >
@@ -268,7 +268,7 @@ function StatusCondensedCard({
 
   return (
     <div
-      className="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm border-l-4 border-l-current overflow-hidden"
+      className="rounded-xl border border-border bg-card p-3 shadow-sm border-l-4 border-l-current overflow-hidden card-premium"
       style={{
         color:
           variant === "success"
@@ -278,13 +278,13 @@ function StatusCondensedCard({
               : "#ef4444",
       }}
     >
-      <div className="flex items-center gap-1.5 mb-1 text-zinc-400">
+      <div className="flex items-center gap-1.5 mb-1 text-muted-foreground">
         <Icon className={cn("h-3 w-3", textStyles[variant])} />
         <span className="text-[9px] font-black uppercase tracking-widest">
           {label}
         </span>
       </div>
-      <p className="text-sm font-black capitalize text-zinc-900 truncate">
+      <p className="text-sm font-black capitalize text-foreground truncate">
         {value.replace("_", " ")}
       </p>
     </div>

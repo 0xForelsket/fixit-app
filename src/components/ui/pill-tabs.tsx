@@ -13,7 +13,7 @@ const PillTabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "flex w-full h-10 p-1 bg-zinc-100/80 rounded-lg gap-1",
+      "flex w-full h-10 p-1 bg-muted/80 rounded-lg gap-1 border border-border/50",
       className
     )}
     {...props}
@@ -28,7 +28,7 @@ const PillTabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-black uppercase tracking-wider rounded-md transition-all disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-primary-700 data-[state=active]:shadow-sm text-zinc-500 hover:text-zinc-900",
+      "flex-1 flex items-center justify-center gap-1.5 h-full text-[10px] font-black uppercase tracking-wider rounded-md transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-card data-[state=active]:text-primary data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground",
       className
     )}
     {...props}
