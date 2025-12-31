@@ -162,35 +162,82 @@ automationRules table:
 ### 9. **Bookmarking / Quick Filters** 🟠 Nice-to-Have
 From the screenshot: "Bookmarked" filter button to save work orders.
 
-**You have `userFavorites` for equipment** — extend it:
-```
-userFavorites.entityType: 'equipment' | 'work_order' | 'location'
-```
+**Current Status:**
+- You already have `userFavorites` table and `FavoriteButton` component.
+- Currently limited to `equipment` only.
+- `getUserFavorites` action is hardcoded to fetch equipment details.
+
+**Implementation Plan:**
+1. **Schema Update:**
+   ```typescript
+   export const favoriteEntityTypes = ["equipment", "work_order"] as const;
+   ```
+2. **Server Action Update (`src/actions/favorites.ts`):**
+   - Update `getUserFavorites` to handle multiple entity types.
+   - Fetch Work Order details (title, status, priority) when `entityType === "work_order"`.
+3. **UI Update:**
+   - Add `<FavoriteButton entityType="work_order" entityId={wo.id} />` to `WorkOrderHeader`.
+   - Create a "Saved Items" dashboard widget listing both equipment and work orders.
 
 ---
 
 ### 10. **Files/Documents Hub** 🟠 Nice-to-Have
 UpKeep has a "Files" menu for centralized document management.
 
-You have `attachments` per entity, but consider:
-- Global file browser page
-- Folder organization
-- Search across all documents
+**Current Status:**
+- You have a polymorphic `attachments` table linking files to entities (`work_order` | `equipment`).
+- No centralized view exists; files are only visible on their parent entity's page.
+
+**Implementation Plan:**
+1. **New Page: `/documents`:**
+   - A global file browser.
+   - **Sidebar/Filters:** Filter by Type (Image, PDF), Entity (Machine A, Work Order #123), or Uploader.
+2. **Virtual Folders:**
+   - Use `entityType` as top-level folders (e.g., "Equipment Manuals", "Work Order Reports").
+   - Use `entityId` (resolved to name) as sub-folders.
+3. **Global Search Action:**
+   - Create `getAllAttachments()` server action.
+   - Search by `filename` or `notes`.
+   
+**Proposed UI Structure:**
+```
+[ Search Documents... ] [ Upload New ]
+
+📁 Equipment Manuals (14)
+   ├── 📄 Pump A Manual.pdf
+   └── 📁 Generator B
+       ├── 📷 Installation.jpg
+       └── 📄 Maintenance_Log.pdf
+📁 Work Order Reports (42)
+   └── ...
+```
 
 ---
 
 ### 11. **People & Teams Management** 🟠 Nice-to-Have
 UpKeep separates "People & Teams" from "Vendors & Customers".
 
-You have `users` and `departments`, but consider adding:
-```
-teams table:
-  - id, name, departmentId
-  - leaderId
-  
-teamMembers table:
-  - teamId, userId
-```
+**Current Status:**
+- You have `users` linked to `departments`.
+- Work orders can be assigned to a `User` OR a `Department`.
+- This functionally matches "Teams".
+
+**Gap Analysis:**
+- **Ad-hoc Teams:** You lack cross-functional teams (e.g., "Safety Committee" containing members from Elec and Mech).
+- **Shift Management:** No way to group by "Night Shift" vs "Day Shift".
+
+**Implementation Plan:**
+1. **Stick with Departments for now.** Your `departments` table works well for functional teams.
+2. **Future: Add `teams` table (Many-to-Many):**
+   If you need ad-hoc groups:
+   ```typescript
+   export const teams = sqliteTable("teams", { ... });
+   export const teamMembers = sqliteTable("team_members", {
+     teamId: integer("team_id"),
+     userId: integer("user_id")
+   });
+   ```
+3. **Immediate Action:** Rename "Departments" to "Teams & Departments" in UI if you want to sound more flexible, or just ensure every user belongs to a department.
 
 ---
 
