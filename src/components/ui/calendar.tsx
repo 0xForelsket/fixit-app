@@ -45,7 +45,6 @@ interface CalendarProps<T> {
   renderAgendaItem: (event: T, index: number) => React.ReactNode;
   onNavigate?: (month: number, year: number) => void;
   className?: string;
-  isLoading?: boolean;
 }
 
 export function Calendar<T>({
@@ -57,11 +56,10 @@ export function Calendar<T>({
   renderAgendaItem,
   onNavigate,
   className,
-  isLoading,
 }: CalendarProps<T>) {
   const today = useMemo(() => new Date(), []);
 
-  const { daysInMonth, firstDayOfWeek, weeks } = useMemo(() => {
+  const { weeks } = useMemo(() => {
     const days = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
 
@@ -79,8 +77,6 @@ export function Calendar<T>({
     }
 
     return {
-      daysInMonth: days,
-      firstDayOfWeek: firstDay,
       weeks: grid,
     };
   }, [month, year]);

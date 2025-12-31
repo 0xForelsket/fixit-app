@@ -60,7 +60,7 @@ export function TechnicianChart({ data }: TechnicianChartProps) {
                     return (
                       <div className="rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5">
                         <div className="space-y-1">
-                          {payload.map((entry: any) => (
+                          {payload.map((entry) => (
                             <div
                               key={entry.name}
                               className="flex items-center gap-2 text-sm"

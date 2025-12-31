@@ -26,7 +26,8 @@ interface PageProps {
 export default async function DocumentsPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const filters: GetAttachmentsFilters = {
-    entityType: resolvedParams.entityType as any,
+    entityType:
+      resolvedParams.entityType as GetAttachmentsFilters["entityType"],
     mimeType: resolvedParams.mimeType,
     search: resolvedParams.search,
   };

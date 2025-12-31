@@ -107,7 +107,7 @@ export function CostTrendChart({ data }: CostTrendChartProps) {
                             {formatMonth(String(label))}
                           </p>
                           <div className="space-y-1">
-                            {payload.map((entry: any) => (
+                            {payload.map((entry) => (
                               <div
                                 key={entry.name}
                                 className="flex items-center gap-2 text-sm"

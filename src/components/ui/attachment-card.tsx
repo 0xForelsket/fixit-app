@@ -87,6 +87,7 @@ export function AttachmentCard({
       >
         {onDelete && (
           <button
+            type="button"
             onClick={handleDelete}
             disabled={isDeleting}
             className={cn(

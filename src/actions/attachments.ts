@@ -53,13 +53,13 @@ export async function getAllAttachments(
   const workOrderIds = new Set<number>();
   const equipmentIds = new Set<number>();
 
-  data.forEach((file) => {
+  for (const file of data) {
     if (file.entityType === "work_order") {
       workOrderIds.add(file.entityId);
     } else if (file.entityType === "equipment") {
       equipmentIds.add(file.entityId);
     }
-  });
+  }
 
   const entityNames = new Map<string, string>();
 
@@ -69,9 +69,9 @@ export async function getAllAttachments(
       where: inArray(workOrders.id, Array.from(workOrderIds)),
       columns: { id: true, title: true },
     });
-    wos.forEach((wo) => {
+    for (const wo of wos) {
       entityNames.set(`work_order-${wo.id}`, wo.title);
-    });
+    }
   }
 
   // Fetch Equipment Names
@@ -80,9 +80,9 @@ export async function getAllAttachments(
       where: inArray(equipment.id, Array.from(equipmentIds)),
       columns: { id: true, name: true },
     });
-    eqs.forEach((eq) => {
-      entityNames.set(`equipment-${eq.id}`, eq.name);
-    });
+    for (const eqItem of eqs) {
+      entityNames.set(`equipment-${eqItem.id}`, eqItem.name);
+    }
   }
 
   const dataWithUrls = await Promise.all(

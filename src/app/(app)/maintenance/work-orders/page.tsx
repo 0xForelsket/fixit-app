@@ -205,11 +205,11 @@ async function getStats(user: SessionUser | null) {
 
 function buildSearchParams(params: SearchParams) {
   const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(params)) {
     if (value && value !== "all") {
       query.set(key, value);
     }
-  });
+  }
   return query.toString();
 }
 

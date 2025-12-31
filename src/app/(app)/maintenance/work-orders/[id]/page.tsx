@@ -270,7 +270,8 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   > = {
     open: "zinc",
     in_progress: "blue",
-    completed: "emerald",
+    resolved: "emerald",
+    closed: "zinc",
     on_hold: "amber",
     cancelled: "red",
   };
@@ -279,7 +280,8 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   const StatusIcon =
     workOrder.status === "in_progress"
       ? Clock
-      : workOrder.status === "completed"
+      : (workOrder.status as string) === "resolved" ||
+          (workOrder.status as string) === "closed"
         ? CheckCircle2
         : AlertTriangle;
 

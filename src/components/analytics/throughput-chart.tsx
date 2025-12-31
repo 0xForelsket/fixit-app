@@ -91,7 +91,7 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
                             : ""}
                         </p>
                         <div className="space-y-1">
-                          {payload.map((entry: any) => (
+                          {payload.map((entry) => (
                             <div
                               key={entry.name}
                               className="flex items-center gap-2 text-sm"

@@ -25,7 +25,6 @@ interface ActivityLogProps {
 export function ActivityLog({
   logs,
   emptyMessage = "No activity recorded",
-  type = "history",
 }: ActivityLogProps) {
   if (logs.length === 0) {
     return (

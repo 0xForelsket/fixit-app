@@ -109,7 +109,7 @@ export function CostDistributionChart({
                     fontWeight: 600,
                     fontFamily: "var(--font-sans)",
                   }}
-                  formatter={(value, _entry: any) => {
+                  formatter={(value) => {
                     const item = data.find((d) => d.name === value);
                     const percentage = item
                       ? ((item.value / total) * 100).toFixed(0)

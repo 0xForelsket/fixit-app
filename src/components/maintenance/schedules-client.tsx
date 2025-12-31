@@ -6,8 +6,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AgendaItem } from "./agenda-item";
 
+interface Schedule {
+  id: number;
+  title: string;
+  nextDue: string | Date | null;
+  type?: string;
+  equipment?: {
+    name: string;
+  };
+}
+
 interface SchedulesClientProps {
-  schedules: any[];
+  schedules: Schedule[];
   initialMonth: number;
   initialYear: number;
 }

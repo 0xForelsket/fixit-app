@@ -77,7 +77,14 @@ export function FileUpload({
 
       e.target.value = "";
     },
-    [entityType, entityId, maxSizeMB, onUploadComplete, uploadFiles]
+    [
+      entityType,
+      entityId,
+      maxSizeMB,
+      onUploadComplete,
+      uploadFiles,
+      attachmentType,
+    ]
   );
 
   const removePreview = (id: string) => {

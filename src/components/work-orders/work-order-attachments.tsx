@@ -38,7 +38,7 @@ export function WorkOrderAttachments({
   const router = useRouter();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const { uploadFiles, isUploading } = useFileUpload();
+  const { uploadFiles } = useFileUpload();
 
   const handleUploadComplete = () => {
     router.refresh();

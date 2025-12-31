@@ -116,9 +116,18 @@ const TableHead = React.forwardRef<
       {children}
       {resizable && (
         <div
+          role="button"
+          tabIndex={0}
           onMouseDown={handleMouseDown}
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
           className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/50 group-hover:bg-primary/20 transition-colors z-10"
+          aria-label="Resize column"
         />
       )}
     </th>

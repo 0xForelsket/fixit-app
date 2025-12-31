@@ -196,10 +196,14 @@ export function AuditLogTable({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-muted/50 rounded-xl border">
           {/* Action Filter */}
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label
+              htmlFor="action-filter"
+              className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+            >
               Action
             </label>
             <select
+              id="action-filter"
               value={params.action || "all"}
               onChange={(e) => updateParams({ action: e.target.value })}
               className="w-full rounded-lg border border-border bg-card py-2 px-3 text-xs font-bold focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
@@ -215,10 +219,14 @@ export function AuditLogTable({
 
           {/* Entity Type Filter */}
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label
+              htmlFor="type-filter"
+              className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+            >
               Entity Type
             </label>
             <select
+              id="type-filter"
               value={params.entityType || "all"}
               onChange={(e) => updateParams({ entityType: e.target.value })}
               className="w-full rounded-lg border border-border bg-card py-2 px-3 text-xs font-bold focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
@@ -234,10 +242,14 @@ export function AuditLogTable({
 
           {/* User Filter */}
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label
+              htmlFor="user-filter"
+              className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+            >
               User
             </label>
             <select
+              id="user-filter"
               value={params.userId || "all"}
               onChange={(e) => updateParams({ userId: e.target.value })}
               className="w-full rounded-lg border border-border bg-card py-2 px-3 text-xs font-bold focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
@@ -253,11 +265,14 @@ export function AuditLogTable({
 
           {/* Date From */}
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label
+              htmlFor="from-filter"
+              className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+            >
               From Date
             </label>
             <input
-              type="date"
+              id="from-filter"
               value={params.from || ""}
               onChange={(e) => updateParams({ from: e.target.value })}
               className="w-full rounded-lg border border-border bg-card py-2 px-3 text-xs font-bold focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10"
@@ -266,10 +281,14 @@ export function AuditLogTable({
 
           {/* Date To */}
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label
+              htmlFor="to-filter"
+              className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5"
+            >
               To Date
             </label>
             <input
+              id="to-filter"
               type="date"
               value={params.to || ""}
               onChange={(e) => updateParams({ to: e.target.value })}
@@ -336,11 +355,18 @@ export function AuditLogTable({
                 return (
                   <tr
                     key={log.id}
+                    tabIndex={0}
+                    {...({ role: "button" } as any)}
                     className={cn(
                       "hover:bg-muted/30 transition-colors cursor-pointer",
                       isExpanded && "bg-muted/20"
                     )}
                     onClick={() => setExpandedLog(isExpanded ? null : log.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setExpandedLog(isExpanded ? null : log.id);
+                      }
+                    }}
                   >
                     <td className="py-3 px-4">
                       <div className="text-xs font-medium">

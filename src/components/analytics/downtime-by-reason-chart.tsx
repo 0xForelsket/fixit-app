@@ -117,7 +117,7 @@ export function DowntimeByReasonChart({ data }: DowntimeByReasonChartProps) {
                     fontWeight: 600,
                     fontFamily: "var(--font-sans)",
                   }}
-                  formatter={(value, _entry: any) => {
+                  formatter={(value) => {
                     const item = chartData.find((d) => d.reason === value);
                     const percentage = item ? item.percentage.toFixed(0) : 0;
                     return (

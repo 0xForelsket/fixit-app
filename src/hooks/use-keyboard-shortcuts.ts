@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export interface KeyboardShortcut {
   key: string;
@@ -26,110 +26,116 @@ export function useKeyboardShortcuts(
   const router = useRouter();
   const [helpOpen, setHelpOpen] = useState(false);
 
-  const shortcuts: KeyboardShortcut[] = [
-    // Global
-    {
-      key: "k",
-      modifiers: ["meta"],
-      description: "Open search",
-      action: () => {
-        document.dispatchEvent(new CustomEvent("toggle-command-menu"));
+  const shortcuts: KeyboardShortcut[] = useMemo(
+    () => [
+      // Global
+      {
+        key: "k",
+        modifiers: ["meta"],
+        description: "Open search",
+        action: () => {
+          document.dispatchEvent(new CustomEvent("toggle-command-menu"));
+        },
+        category: "global",
       },
-      category: "global",
-    },
-    {
-      key: "k",
-      modifiers: ["ctrl"],
-      description: "Open search",
-      action: () => {
-        document.dispatchEvent(new CustomEvent("toggle-command-menu"));
+      {
+        key: "k",
+        modifiers: ["ctrl"],
+        description: "Open search",
+        action: () => {
+          document.dispatchEvent(new CustomEvent("toggle-command-menu"));
+        },
+        category: "global",
       },
-      category: "global",
-    },
-    {
-      key: "?",
-      modifiers: ["shift"],
-      description: "Show keyboard shortcuts",
-      action: () => setHelpOpen(true),
-      category: "global",
-    },
-    {
-      key: "Escape",
-      description: "Close dialogs",
-      action: () => setHelpOpen(false),
-      category: "global",
-    },
-    // Navigation
-    {
-      key: "g",
-      description: "Go to Dashboard (press twice)",
-      action: () => {},
-      category: "navigation",
-    },
-    {
-      key: "h",
-      modifiers: ["shift"],
-      description: "Go to Dashboard",
-      action: () => router.push("/dashboard"),
-      category: "navigation",
-    },
-    {
-      key: "w",
-      modifiers: ["shift"],
-      description: "Go to Work Orders",
-      action: () => router.push("/maintenance/work-orders"),
-      category: "navigation",
-    },
-    {
-      key: "e",
-      modifiers: ["shift"],
-      description: "Go to Equipment",
-      action: () => router.push("/assets/equipment"),
-      category: "navigation",
-    },
-    {
-      key: "i",
-      modifiers: ["shift"],
-      description: "Go to Inventory",
-      action: () => router.push("/assets/inventory"),
-      category: "navigation",
-    },
-    {
-      key: "a",
-      modifiers: ["shift"],
-      description: "Go to Analytics",
-      action: () => router.push("/analytics"),
-      category: "navigation",
-    },
-    // Actions
-    {
-      key: "n",
-      description: "New work order",
-      action: () => router.push("/"),
-      category: "actions",
-    },
-    {
-      key: "r",
-      description: "Report issue (same as N)",
-      action: () => router.push("/"),
-      category: "actions",
-    },
-  ];
+      {
+        key: "?",
+        modifiers: ["shift"],
+        description: "Show keyboard shortcuts",
+        action: () => setHelpOpen(true),
+        category: "global",
+      },
+      {
+        key: "Escape",
+        description: "Close dialogs",
+        action: () => setHelpOpen(false),
+        category: "global",
+      },
+      // Navigation
+      {
+        key: "g",
+        description: "Go to Dashboard (press twice)",
+        action: () => {},
+        category: "navigation",
+      },
+      {
+        key: "h",
+        modifiers: ["shift"],
+        description: "Go to Dashboard",
+        action: () => router.push("/dashboard"),
+        category: "navigation",
+      },
+      {
+        key: "w",
+        modifiers: ["shift"],
+        description: "Go to Work Orders",
+        action: () => router.push("/maintenance/work-orders"),
+        category: "navigation",
+      },
+      {
+        key: "e",
+        modifiers: ["shift"],
+        description: "Go to Equipment",
+        action: () => router.push("/assets/equipment"),
+        category: "navigation",
+      },
+      {
+        key: "i",
+        modifiers: ["shift"],
+        description: "Go to Inventory",
+        action: () => router.push("/assets/inventory"),
+        category: "navigation",
+      },
+      {
+        key: "a",
+        modifiers: ["shift"],
+        description: "Go to Analytics",
+        action: () => router.push("/analytics"),
+        category: "navigation",
+      },
+      // Actions
+      {
+        key: "n",
+        description: "New work order",
+        action: () => router.push("/"),
+        category: "actions",
+      },
+      {
+        key: "r",
+        description: "Report issue (same as N)",
+        action: () => router.push("/"),
+        category: "actions",
+      },
+    ],
+    [router]
+  );
 
   // Go-to mode: Press 'g' then another key for navigation
   const [goToMode, setGoToMode] = useState(false);
   const [goToTimeout, setGoToTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  const goToShortcuts: Record<string, string> = {
-    d: "/dashboard",
-    w: "/maintenance/work-orders",
-    e: "/assets/equipment",
-    i: "/assets/inventory",
-    a: "/analytics",
-    s: "/maintenance/schedules",
-    l: "/assets/locations",
-    p: "/profile",
-  };
+  const goToShortcuts: Record<string, string> = useMemo(
+    () => ({
+      d: "/dashboard",
+      w: "/maintenance/work-orders",
+      e: "/assets/equipment",
+      i: "/assets/inventory",
+      a: "/analytics",
+      s: "/maintenance/schedules",
+      l: "/assets/locations",
+      p: "/profile",
+    }),
+    []
+  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -205,7 +211,7 @@ export function useKeyboardShortcuts(
         }
       }
     },
-    [enabled, goToMode, goToTimeout, router, shortcuts]
+    [enabled, goToMode, goToTimeout, router, shortcuts, goToShortcuts]
   );
 
   useEffect(() => {

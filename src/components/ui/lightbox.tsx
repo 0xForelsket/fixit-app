@@ -69,7 +69,7 @@ export function LightboxImage({
         className={cn("cursor-zoom-in", containerClassName)}
         aria-label={`View ${alt} in full size`}
       >
-        <img src={src} alt={alt} className={className} {...props} />
+        <img src={src} className={className} {...props} alt={alt} />
       </button>
       <Lightbox
         src={src}
