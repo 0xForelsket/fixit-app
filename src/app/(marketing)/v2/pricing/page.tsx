@@ -1,15 +1,15 @@
 import { Metadata } from "next";
+import PricingPage from "./pricing-page";
 
 export const metadata: Metadata = {
   title: "Pricing | FixIt CMMS",
-  description: "Simple, transparent pricing. Free for everyone.",
+  description: "Simple, transparent pricing for any scale. Open source, self-hosted, and enterprise options available.",
+  openGraph: {
+    title: "Pricing | FixIt CMMS",
+    description: "Compare our Community and Enterprise plans. Discover the benefits of zero per-user licensing fees.",
+  }
 };
 
-export default function PricingPage() {
-  return (
-    <div className="container mx-auto py-20 px-6">
-      <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">Community vs Enterprise</h1>
-      <p className="text-xl text-muted-foreground max-w-2xl">Pricing tables under construction.</p>
-    </div>
-  );
+export default function Page() {
+  return <PricingPage />;
 }

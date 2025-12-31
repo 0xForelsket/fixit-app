@@ -30,5 +30,28 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <MarketingPageV2 />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "FixIt CMMS",
+    "operatingSystem": "Linux, Windows, macOS",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "The high-density open-source CMMS for modern industrial operations.",
+    "softwareVersion": "1.2.0"
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MarketingPageV2 />
+    </>
+  );
 }

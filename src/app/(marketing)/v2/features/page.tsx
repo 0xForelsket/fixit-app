@@ -1,15 +1,15 @@
 import { Metadata } from "next";
+import FeaturesPage from "./features-page";
 
 export const metadata: Metadata = {
   title: "Features | FixIt CMMS",
-  description: "Comprehensive feature breakdown for FixIt CMMS.",
+  description: "Comprehensive feature breakdown for FixIt CMMS. Industrial reliability meets modern design.",
+  openGraph: {
+    title: "Features | FixIt CMMS",
+    description: "Every feature you need to run a world-class maintenance department. From Work Orders to Predictive Analytics.",
+  }
 };
 
-export default function FeaturesPage() {
-  return (
-    <div className="container mx-auto py-20 px-6">
-      <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">Everything You Need.<br/>Nothing You Don't.</h1>
-      <p className="text-xl text-muted-foreground max-w-2xl">This page is under construction as part of the Marketing v2 plan.</p>
-    </div>
-  );
+export default function Page() {
+  return <FeaturesPage />;
 }

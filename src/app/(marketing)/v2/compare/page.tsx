@@ -1,15 +1,15 @@
 import { Metadata } from "next";
+import ComparePage from "./compare-page";
 
 export const metadata: Metadata = {
   title: "Compare | FixIt CMMS",
-  description: "See how FixIt compares to UpKeep, Fiix, and others.",
+  description: "See how FixIt compares to SaaS vendors like UpKeep, Fiix, and MaintainX. Modern, open-source, and free.",
+  openGraph: {
+    title: "FixIt vs. The Rest | CMMS Comparison",
+    description: "Compare features, pricing, and infrastructure. Why top engineering teams are switching to FixIt.",
+  }
 };
 
-export default function ComparePage() {
-  return (
-    <div className="container mx-auto py-20 px-6">
-      <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">FixIt vs. The Rest</h1>
-      <p className="text-xl text-muted-foreground max-w-2xl">Comparison matrix under construction.</p>
-    </div>
-  );
+export default function Page() {
+  return <ComparePage />;
 }

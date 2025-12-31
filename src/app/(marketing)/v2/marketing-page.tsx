@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import {
@@ -26,7 +25,6 @@ import {
   Check,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -83,59 +81,15 @@ export default function MarketingPageV2() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
-      {/* Sticky Navigation */}
-      <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/70 backdrop-blur-md">
-        <div className="flex items-center justify-between px-6 py-4 md:px-12 max-w-7xl mx-auto">
-          <div className="flex items-center gap-2">
-            <Link href="/v2" className="flex items-center gap-2 group">
-              <div className="bg-primary p-1.5 rounded-md group-hover:opacity-90 transition-opacity">
-                <Wrench className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-black tracking-tighter font-mono uppercase">
-                FixIt<span className="text-muted-foreground">.io</span>
-              </span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-6 text-sm">
-            <Link
-              href="https://github.com/0xForelsket/fixit-app"
-              className="hidden md:block font-mono text-xs uppercase tracking-widest hover:text-muted-foreground transition-colors"
-            >
-              Github
-            </Link>
-            <Link
-              href="/v2/architecture"
-              className="hidden md:block font-mono text-xs uppercase tracking-widest hover:text-muted-foreground transition-colors"
-            >
-              Engine
-            </Link>
-            <div className="h-4 w-[1px] bg-border hidden md:block" />
-            <Link
-              href="http://app.localhost:3000/login"
-              className="font-mono text-xs uppercase tracking-widest hover:text-muted-foreground transition-colors"
-            >
-              Demo
-            </Link>
-            <Button
-              asChild
-              className="bg-primary text-primary-foreground hover:opacity-90 rounded-md px-5 h-9 font-bold text-xs uppercase tracking-wider"
-            >
-              <Link href="https://github.com/0xForelsket/fixit-app">
-                <Github className="mr-2 h-4 w-4" /> STAR
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
-
+    <>
       <main className="px-6 md:px-12 max-w-7xl mx-auto pt-16 md:pt-24 pb-20">
         {/* Hero Section */}
         <motion.div 
+          id="hero"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
-          className="grid md:grid-cols-2 gap-12 md:gap-24 items-center"
+          className="grid md:grid-cols-2 gap-12 md:gap-24 items-center scroll-mt-24"
         >
           <div className="space-y-8">
             <motion.div variants={itemVariants} className="inline-flex items-center gap-2 bg-secondary border border-border px-3 py-1 rounded-full">
@@ -163,129 +117,138 @@ export default function MarketingPageV2() {
               <Button
                 asChild
                 size="lg"
-                className="bg-primary text-primary-foreground hover:opacity-90 rounded-none px-8 h-14 text-sm font-black uppercase tracking-widest group"
+                className="bg-primary text-primary-foreground hover:opacity-90 rounded-none px-8 h-14 text-sm font-black uppercase tracking-widest group shadow-lg shadow-primary/10 transition-all hover:shadow-primary/20 hover:-translate-y-0.5"
               >
-                <Link href="https://github.com/0xForelsket/fixit-app">
+                <Link href="/v2/deploy">
                   Initialize Deployment
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button
-                asChild
                 variant="outline"
                 size="lg"
-                className="border-border hover:bg-secondary rounded-none px-8 h-14 text-sm font-black uppercase tracking-widest transition-all hover:scale-[1.02]"
+                className="rounded-none px-8 h-14 text-sm font-black uppercase tracking-widest border-2 hover:bg-secondary/50 transition-colors"
+                asChild
               >
-                <Link href="http://app.localhost:3000/login">Launch Demo</Link>
+                <Link href="/v2/features">Explore Platform</Link>
               </Button>
             </motion.div>
           </div>
 
           <motion.div 
             variants={itemVariants}
-            className="relative mt-8 md:mt-0"
+            className="relative h-[400px] md:h-[600px] w-full"
           >
-            {/* Abstract Visual / Hero Graphic */}
-            <div className="aspect-[4/5] md:aspect-square bg-card rounded-2xl flex flex-col justify-between relative overflow-hidden group border border-border shadow-2xl shadow-primary/5 hover:border-primary/20 transition-all duration-500">
-              <div className="absolute inset-0 industrial-grid opacity-10" />
-              <div className="relative z-10 p-8 h-full flex flex-col justify-center items-center">
-                <motion.div
-                  animate={{ y: [0, -15, 0] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <Image
-                    src="/hero-illustration.png"
-                    alt="Industrial Dashboard Illustration"
-                    width={600}
-                    height={600}
-                    className="object-contain opacity-90 drop-shadow-2xl mix-blend-multiply"
-                    priority
-                  />
-                </motion.div>
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-primary/5 rounded-[40px] rotate-3 blur-3xl" />
+            <div className="absolute inset-0 bg-secondary/20 rounded-[40px] -rotate-3 blur-2xl" />
+            <motion.div
+              animate={{ 
+                y: [0, -10, 0],
+              }}
+              transition={{ 
+                duration: 6,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="relative h-full w-full flex items-center justify-center"
+            >
+              <Image
+                src="/hero-illustration.png"
+                alt="Industrial Dashboard Illustration"
+                width={600}
+                height={600}
+                className="object-contain opacity-90 drop-shadow-2xl mix-blend-multiply"
+                priority
+              />
+            </motion.div>
           </motion.div>
         </motion.div>
 
+        {/* System Stats Ticker */}
+        <section id="telemetry" className="py-24 scroll-mt-24">
+          <StatsTicker stats={systemStats} />
+        </section>
 
-
-        {/* Product Screenshots Showcase */}
-        <div className="mt-32 space-y-12">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center space-y-4"
-          >
-            <h2 className="text-3xl md:text-5xl font-serif font-black tracking-tight">
-              Command Center Interface
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Purpose-built for high-velocity maintenance operations. Every pixel calibrated for efficiency.
+        {/* Product Showcase Tabs */}
+        <section id="platform" className="py-24 space-y-12 scroll-mt-24">
+          <div className="space-y-4 max-w-3xl">
+            <h2 className="text-sm font-mono font-bold uppercase tracking-[0.3em] text-primary">Command Center</h2>
+            <p className="text-4xl md:text-6xl font-serif font-black tracking-tight leading-none">
+              DENSITY WITHOUT <br />THE CLUTTER.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <Tabs defaultValue="dashboard" className="w-full">
-              <div className="flex justify-center mb-8">
-                <TabsList className="bg-secondary/50 p-1 border border-border rounded-full">
-                  <TabsTrigger value="dashboard" className="rounded-full px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Dashboard</TabsTrigger>
-                  <TabsTrigger value="work-orders" className="rounded-full px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Work Orders</TabsTrigger>
-                  <TabsTrigger value="equipment" className="rounded-full px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Equipment</TabsTrigger>
-                  <TabsTrigger value="analytics" className="rounded-full px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analytics</TabsTrigger>
-                </TabsList>
+          <Tabs defaultValue="dashboard" className="w-full">
+            <TabsList className="bg-secondary/50 p-1 border border-border rounded-xl mb-8 flex-wrap h-auto">
+              <TabsTrigger value="dashboard" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Dashboard</TabsTrigger>
+              <TabsTrigger value="work-orders" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Work Orders</TabsTrigger>
+              <TabsTrigger value="equipment" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Equipment</TabsTrigger>
+              <TabsTrigger value="analytics" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Analytics</TabsTrigger>
+            </TabsList>
+            <div className="aspect-video w-full bg-card border border-border rounded-[32px] overflow-hidden relative group">
+              <div className="absolute inset-0 industrial-grid opacity-10" />
+              <div className="absolute inset-x-0 top-0 h-10 bg-background/50 border-b border-border flex items-center px-6 gap-2">
+                <div className="w-3 h-3 rounded-full bg-rose-500/20" />
+                <div className="w-3 h-3 rounded-full bg-amber-500/20" />
+                <div className="w-3 h-3 rounded-full bg-emerald-500/20" />
+                <div className="ml-4 h-4 w-48 bg-muted/50 rounded-full" />
               </div>
-
-              {["dashboard", "work-orders", "equipment", "analytics"].map((tab) => (
-                <TabsContent key={tab} value={tab} className="mt-0">
-                  <div className="relative aspect-video bg-card rounded-xl border border-border shadow-2xl overflow-hidden group">
-                    <div className="absolute inset-0 bg-secondary/20 industrial-grid opacity-10" />
-                    
-                    {/* Browser Chrome */}
-                    <div className="bg-background/90 backdrop-blur border-b border-border h-10 px-4 flex items-center gap-2">
-                      <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500/50" />
-                      </div>
-                      <div className="ml-4 bg-secondary/50 rounded-md py-1 px-3 text-[10px] font-mono text-muted-foreground w-64 flex items-center gap-2">
-                        <ShieldCheck className="w-3 h-3" />
-                        app.fixit.io/maintenance/{tab}
-                      </div>
-                    </div>
-
-                    {/* Placeholder Content - In real app, this would be an image */}
-                    <div className="p-12 flex items-center justify-center h-[calc(100%-2.5rem)]">
-                      <div className="text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
-                          {tab === "dashboard" && <Activity className="w-10 h-10 text-primary" />}
-                          {tab === "work-orders" && <Wrench className="w-10 h-10 text-primary" />}
-                          {tab === "equipment" && <Box className="w-10 h-10 text-primary" />}
-                          {tab === "analytics" && <Activity className="w-10 h-10 text-primary" />}
-                        </div>
-                        <h3 className="text-xl font-bold uppercase tracking-widest text-muted-foreground">
-                          {tab.replace("-", " ")} Feature Preview
-                        </h3>
-                        <p className="text-sm text-muted-foreground/60 max-w-md mx-auto">
-                          High-fidelity screenshot of the {tab.replace("-", " ")} interface would appear here.
-                          Currently showing placeholder for development.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
-          </motion.div>
-        </div>
+              
+              <TabsContent value="dashboard" className="h-full mt-0 focus-visible:outline-none relative">
+                 <Image
+                  src="/screenshots/dashboard-preview.png"
+                  alt="Industrial Dashboard Interface"
+                  fill
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Executive Overview</h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">A high-fidelity cockpit showing real-time MTTR, downtime alerts, and technician utilization.</p>
+                </div>
+              </TabsContent>
+              <TabsContent value="work-orders" className="h-full mt-0 focus-visible:outline-none relative">
+                <Image
+                  src="/screenshots/work-orders-preview.png"
+                  alt="Work Order Management Interface"
+                  fill
+                  className="object-cover object-top"
+                />
+                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
+                 <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Active Protocol Tracking</h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">Rapid-fire work order management with sub-second status updates.</p>
+                </div>
+              </TabsContent>
+              <TabsContent value="equipment" className="h-full mt-0 focus-visible:outline-none relative">
+                <Image
+                  src="/screenshots/equipment-preview.png"
+                  alt="Equipment Inventory Interface"
+                  fill
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Asset Vault</h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">Complete digital history for every piece of equipment.</p>
+                </div>
+              </TabsContent>
+              <TabsContent value="analytics" className="h-full mt-0 focus-visible:outline-none relative">
+                <Image
+                  src="/screenshots/analytics-preview.png"
+                  alt="Maintenance Analytics Interface"
+                  fill
+                  className="object-cover object-top"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
+                <div className="absolute bottom-0 left-0 p-8">
+                   <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Deep Intelligence</h3>
+                   <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">Turn historical noise into actionable insights.</p>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </section>
 
         {/* Feature Grid */}
         <div className="mt-32 space-y-12">
@@ -299,7 +262,7 @@ export default function MarketingPageV2() {
               Architecture & Strategy
             </h2>
             <Link
-              href="/v2/architecture"
+              href="/v2/features"
               className="hidden md:flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest hover:opacity-70 transition-opacity"
             >
               Blueprint Reference <ArrowRight className="h-4 w-4" />
@@ -334,51 +297,41 @@ export default function MarketingPageV2() {
           </motion.div>
 
           {/* Social Proof */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="border-y border-border py-12"
-          >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="flex flex-col items-center justify-center gap-2 text-center group cursor-default">
-                <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
-                  <Github className="w-5 h-5" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest">Stars</span>
-                </div>
-                <span className="text-3xl font-serif font-black tracking-tighter">2.4k+</span>
+          <section id="stats" className="py-32 scroll-mt-24">
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1 }}
+              className="bg-secondary/30 border border-border rounded-[48px] p-12 md:p-24"
+            >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {[
+                  { icon: Github, label: "Stars", value: "2.4k+" },
+                  { icon: GitFork, label: "Forks", value: "340+" },
+                  { icon: Users, label: "Users", value: "10k+" },
+                  { icon: Building, label: "Sites", value: "850+" },
+                ].map((stat, i) => (
+                  <div key={i} className="flex flex-col items-center justify-center gap-2 text-center group cursor-default">
+                    <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
+                      <stat.icon className="w-5 h-5" />
+                      <span className="text-xs font-mono font-bold uppercase tracking-widest">{stat.label}</span>
+                    </div>
+                    <span className="text-3xl md:text-4xl font-serif font-black tracking-tighter">{stat.value}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex flex-col items-center justify-center gap-2 text-center group cursor-default">
-                <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
-                  <GitFork className="w-5 h-5" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest">Forks</span>
-                </div>
-                <span className="text-3xl font-serif font-black tracking-tighter">340+</span>
-              </div>
-              <div className="flex flex-col items-center justify-center gap-2 text-center group cursor-default">
-                <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
-                  <Users className="w-5 h-5" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest">Users</span>
-                </div>
-                <span className="text-3xl font-serif font-black tracking-tighter">10k+</span>
-              </div>
-              <div className="flex flex-col items-center justify-center gap-2 text-center group cursor-default">
-                <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
-                  <Building className="w-5 h-5" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-widest">Sites</span>
-                </div>
-                <span className="text-3xl font-serif font-black tracking-tighter">850+</span>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </section>
 
           {/* CTA Box */}
           <motion.div 
+            id="open-source"
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="bg-primary rounded-2xl p-8 md:p-12 overflow-hidden relative group/cta shadow-2xl shadow-primary/20"
+            className="bg-primary rounded-[40px] p-8 md:p-16 mt-32 overflow-hidden relative group/cta shadow-2xl shadow-primary/20 scroll-mt-24"
           >
             <div className="absolute inset-0 industrial-grid opacity-5 invert pointer-events-none" />
             
@@ -439,7 +392,7 @@ export default function MarketingPageV2() {
           </motion.div>
 
           {/* Quick Deploy Section */}
-          <div className="pt-16">
+          <div id="deploy" className="pt-16 scroll-mt-24">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -468,11 +421,13 @@ export default function MarketingPageV2() {
                 icon={Zap}
                 description="One-click serverless deployment with global edge network."
               >
-                 <Button className="w-full bg-foreground text-background hover:opacity-90 font-bold uppercase tracking-wide h-10">
-                   <svg className="mr-2 h-3 w-3" viewBox="0 0 1155 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M577.344 0L1154.69 1000H0L577.344 0Z" />
-                   </svg>
-                   Deploy to Vercel
+                 <Button className="w-full bg-foreground text-background hover:opacity-90 font-bold uppercase tracking-wide h-10" asChild>
+                   <Link href="/v2/deploy">
+                    <svg className="mr-2 h-3 w-3" viewBox="0 0 1155 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M577.344 0L1154.69 1000H0L577.344 0Z" />
+                    </svg>
+                    Deploy to Vercel
+                   </Link>
                  </Button>
               </DeployCard>
 
@@ -481,104 +436,18 @@ export default function MarketingPageV2() {
                 icon={Server}
                 description="Full stack infrastructure. Database included."
               >
-                <Button className="w-full bg-[#a855f7] text-white hover:opacity-90 font-bold uppercase tracking-wide h-10">
-                  <span className="mr-2">🚂</span>
-                  Deploy to Railway
+                <Button className="w-full bg-[#a855f7] text-white hover:opacity-90 font-bold uppercase tracking-wide h-10" asChild>
+                  <Link href="/v2/deploy">
+                    <span className="mr-2"></span>
+                    Deploy to Railway
+                  </Link>
                 </Button>
               </DeployCard>
             </div>
           </div>
         </div>
       </main>
-
-      <footer className="bg-secondary border-t border-border px-6 py-12 md:px-12 md:py-16">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-12 text-foreground font-sans">
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Wrench className="h-6 w-6 text-primary" />
-              <span className="text-xl font-black uppercase tracking-tighter font-mono">
-                FIXIT<span className="text-muted-foreground">.IO</span>
-              </span>
-            </div>
-            <p className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-widest max-w-[240px] leading-loose">
-              Operational Excellence through <br /> Open Source Software.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-12 md:gap-24">
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-                Protocol
-              </h4>
-              <ul className="space-y-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
-                <li>
-                  <Link
-                    href="https://github.com/0xForelsket/fixit-app"
-                    className="hover:text-primary transition-colors"
-                  >
-                    GitHub
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/docs"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Documentation
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/roadmap"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Roadmap
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-                Organization
-              </h4>
-              <ul className="space-y-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    About
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Careers
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Legal
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4">
-          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
-            © 2025 FIXIT OPS INC. ALL RIGHTS RESERVED.
-          </p>
-          <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
-            STABLE_BUILD_HASH: 0XF9E2A
-          </p>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }
 
@@ -676,4 +545,3 @@ function CodeBlock({ code }: { code: string }) {
     </div>
   );
 }
-
