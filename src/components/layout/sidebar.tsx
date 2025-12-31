@@ -23,6 +23,7 @@ import {
   Download,
   Factory,
   FileText,
+  Folder,
   Globe,
   HelpCircle,
   Home,
@@ -88,6 +89,12 @@ const navGroups: NavGroup[] = [
         href: "/reports",
         icon: <FileText className="h-5 w-5" />,
         permission: PERMISSIONS.REPORTS_VIEW,
+      },
+      {
+        label: "Documents",
+        href: "/documents",
+        icon: <Folder className="h-5 w-5" />,
+        permission: PERMISSIONS.TICKET_VIEW_ALL, // Using basic permission for now
       },
     ],
   },

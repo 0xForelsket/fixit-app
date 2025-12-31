@@ -9,8 +9,55 @@ import {
   uploadAttachmentSchema,
 } from "@/lib/validations/attachments";
 import { revalidatePath } from "next/cache";
+import { and, desc, eq, like } from "drizzle-orm";
+import type { ActionResult } from "@/lib/types/actions";
+import { getPresignedDownloadUrl } from "@/lib/s3";
+import type { AttachmentWithUrl } from "@/lib/types/attachments";
 
 export type CreateAttachmentInput = UploadAttachmentInput & { s3Key: string };
+
+export interface GetAttachmentsFilters {
+  entityType?: "work_order" | "equipment";
+  mimeType?: string; // e.g. "image/" or "application/pdf"
+  search?: string;
+}
+
+export async function getAllAttachments(
+  filters?: GetAttachmentsFilters
+): Promise<ActionResult<AttachmentWithUrl[]>> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const conditions = [];
+
+  if (filters?.entityType) {
+    conditions.push(eq(attachments.entityType, filters.entityType));
+  }
+
+  if (filters?.mimeType) {
+    conditions.push(like(attachments.mimeType, `${filters.mimeType}%`));
+  }
+
+  if (filters?.search) {
+    conditions.push(like(attachments.filename, `%${filters.search}%`));
+  }
+
+  const data = await db.query.attachments.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+    orderBy: (attachments, { desc }) => [desc(attachments.createdAt)],
+  });
+
+  const dataWithUrls = await Promise.all(
+    data.map(async (file) => ({
+      ...file,
+      url: await getPresignedDownloadUrl(file.s3Key),
+    }))
+  );
+
+  return { success: true, data: dataWithUrls };
+}
 
 export type AttachmentActionState = {
   error?: string;

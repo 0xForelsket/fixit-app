@@ -1,0 +1,39 @@
+import { getAllAttachments, type GetAttachmentsFilters } from "@/actions/attachments";
+import { DocumentsView } from "@/components/documents/documents-view";
+import { PageHeader } from "@/components/ui/page-header";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Documents | FixIt",
+  description: "Centralized documents hub",
+};
+
+interface PageProps {
+  searchParams: Promise<{
+    entityType?: string;
+    mimeType?: string;
+    search?: string;
+  }>;
+}
+
+export default async function DocumentsPage({ searchParams }: PageProps) {
+  const resolvedParams = await searchParams;
+  const filters: GetAttachmentsFilters = {
+    entityType: resolvedParams.entityType as any,
+    mimeType: resolvedParams.mimeType,
+    search: resolvedParams.search,
+  };
+
+  const result = await getAllAttachments(filters);
+  const attachments = result.success ? result.data : [];
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <PageHeader
+        title="Documents"
+        description="Manage and organized all system files and attachments."
+      />
+      <DocumentsView initialAttachments={attachments || []} />
+    </div>
+  );
+}
