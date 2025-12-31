@@ -84,7 +84,9 @@ export function StyledSelect({
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
-            isFiltered ? "text-primary" : "text-muted-foreground/60 group-hover:text-foreground",
+            isFiltered
+              ? "text-primary"
+              : "text-muted-foreground/60 group-hover:text-foreground",
             "group-data-[state=open]:rotate-180"
           )}
         />

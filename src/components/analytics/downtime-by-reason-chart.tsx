@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PieChart as PieChartIcon } from "lucide-react";
 import {
   Cell,
   Legend,
@@ -10,7 +11,6 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { PieChart as PieChartIcon } from "lucide-react";
 
 interface DowntimeByReason {
   reason: string;
@@ -38,7 +38,7 @@ export function DowntimeByReasonChart({ data }: DowntimeByReasonChartProps) {
     color: COLORS[index % COLORS.length],
   }));
 
-  const totalHours = data.reduce((sum, d) => sum + d.downtimeHours, 0);
+  const _totalHours = data.reduce((sum, d) => sum + d.downtimeHours, 0);
 
   return (
     <Card className="col-span-3 card-industrial border-zinc-200 shadow-sm animate-in">
@@ -117,7 +117,7 @@ export function DowntimeByReasonChart({ data }: DowntimeByReasonChartProps) {
                     fontWeight: 600,
                     fontFamily: "var(--font-sans)",
                   }}
-                  formatter={(value, entry: any) => {
+                  formatter={(value, _entry: any) => {
                     const item = chartData.find((d) => d.reason === value);
                     const percentage = item ? item.percentage.toFixed(0) : 0;
                     return (

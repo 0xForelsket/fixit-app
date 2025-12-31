@@ -1,5 +1,6 @@
 "use client";
 
+import { AttachmentCard } from "@/components/ui/attachment-card";
 import { Button } from "@/components/ui/button";
 import { CameraCapture } from "@/components/ui/camera-capture";
 import {
@@ -9,7 +10,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FileUpload } from "@/components/ui/file-upload";
-import { AttachmentCard } from "@/components/ui/attachment-card";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { cn } from "@/lib/utils";
 import { Camera, Plus, Upload } from "lucide-react";
@@ -56,15 +56,20 @@ export function WorkOrderAttachments({
   };
 
   return (
-    <div className={cn("rounded-xl border border-border bg-card shadow-sm", className)}>
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card shadow-sm",
+        className
+      )}
+    >
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
-            <h2 className="text-sm font-black uppercase tracking-wider text-foreground">
+          <h2 className="text-sm font-black uppercase tracking-wider text-foreground">
             Attachments
-            </h2>
-            <span className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-[10px] font-bold">
+          </h2>
+          <span className="bg-muted text-muted-foreground px-1.5 py-0.5 rounded text-[10px] font-bold">
             {attachments.length}
-            </span>
+          </span>
         </div>
         <Button
           size="sm"
@@ -83,7 +88,9 @@ export function WorkOrderAttachments({
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted mb-3">
               <Upload className="h-6 w-6 text-muted-foreground/50" />
             </div>
-            <p className="text-sm font-medium text-foreground">No attachments</p>
+            <p className="text-sm font-medium text-foreground">
+              No attachments
+            </p>
             <p className="text-xs text-muted-foreground mt-1">
               Upload photos or documents
             </p>
@@ -114,14 +121,16 @@ export function WorkOrderAttachments({
                 <span className="font-bold text-xs">Take Photo</span>
               </Button>
             </div>
-            
+
             <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground font-bold">Or upload file</span>
-                </div>
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground font-bold">
+                  Or upload file
+                </span>
+              </div>
             </div>
 
             <FileUpload
@@ -133,7 +142,7 @@ export function WorkOrderAttachments({
           </div>
         </DialogContent>
       </Dialog>
-      
+
       <CameraCapture
         isOpen={isCameraOpen}
         onClose={() => setIsCameraOpen(false)}

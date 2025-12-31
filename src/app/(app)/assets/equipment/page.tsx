@@ -8,10 +8,7 @@ import { StatsTicker } from "@/components/ui/stats-ticker";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
-import {
-  PERMISSIONS,
-  hasPermission,
-} from "@/lib/permissions";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { desc } from "drizzle-orm";
 import { and, eq } from "drizzle-orm";

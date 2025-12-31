@@ -1,6 +1,11 @@
 "use client";
 
-import { PillTabs, PillTabsContent, PillTabsList, PillTabsTrigger } from "@/components/ui/pill-tabs";
+import {
+  PillTabs,
+  PillTabsContent,
+  PillTabsList,
+  PillTabsTrigger,
+} from "@/components/ui/pill-tabs";
 import { AlertTriangle, Calendar, ClipboardList, History } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -82,21 +87,15 @@ export function EquipmentTabs({
         </PillTabsTrigger>
       </PillTabsList>
 
-      <PillTabsContent value="overview">
-        {overviewContent}
-      </PillTabsContent>
+      <PillTabsContent value="overview">{overviewContent}</PillTabsContent>
 
-      <PillTabsContent value="history">
-        {historyContent}
-      </PillTabsContent>
+      <PillTabsContent value="history">{historyContent}</PillTabsContent>
 
       <PillTabsContent value="maintenance">
         {maintenanceContent}
       </PillTabsContent>
 
-      <PillTabsContent value="report">
-        {reportContent}
-      </PillTabsContent>
+      <PillTabsContent value="report">{reportContent}</PillTabsContent>
     </PillTabs>
   );
 }

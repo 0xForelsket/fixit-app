@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import type { SelectOption } from "@/components/ui/styled-select";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Search, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
 
 export interface FilterConfig {
   /** The URL parameter name for this filter */
@@ -62,21 +62,24 @@ export function FilterBar({
     setInputValue(searchValue);
   }, [searchValue]);
 
-  const updateFilters = useCallback((search: string) => {
-    const params = new URLSearchParams(nextSearchParams.toString());
-    
-    if (search) {
-      params.set(searchParamName, search);
-    } else {
-      params.delete(searchParamName);
-    }
+  const updateFilters = useCallback(
+    (search: string) => {
+      const params = new URLSearchParams(nextSearchParams.toString());
 
-    // Always reset to first page when search changes
-    params.delete("page");
-    
-    const queryString = params.toString();
-    router.push(`${basePath}${queryString ? `?${queryString}` : ""}`);
-  }, [basePath, router, nextSearchParams, searchParamName]);
+      if (search) {
+        params.set(searchParamName, search);
+      } else {
+        params.delete(searchParamName);
+      }
+
+      // Always reset to first page when search changes
+      params.delete("page");
+
+      const queryString = params.toString();
+      router.push(`${basePath}${queryString ? `?${queryString}` : ""}`);
+    },
+    [basePath, router, nextSearchParams, searchParamName]
+  );
 
   useEffect(() => {
     if (enableRealtimeSearch && debouncedSearchValue !== searchValue) {
@@ -113,7 +116,7 @@ export function FilterBar({
       const to = formData.get("to") as string;
       if (from) params.set("from", from);
       else params.delete("from");
-      
+
       if (to) params.set("to", to);
       else params.delete("to");
     }

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Download, FileText, SquareArrowOutUpRight, X } from "lucide-react";
-import * as React from "react";
 
 interface PdfPreviewDialogProps {
   isOpen: boolean;
@@ -83,7 +82,7 @@ export function PdfPreviewDialog({
         {/* Canvas */}
         <div className="flex-1 bg-zinc-200/50 relative w-full h-full overflow-hidden flex flex-col">
           <iframe
-            src={file.url + "#toolbar=0&navpanes=0&scrollbar=0"}
+            src={`${file.url}#toolbar=0&navpanes=0&scrollbar=0`}
             className="w-full h-full border-0 block"
             title={file.filename}
           />

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as TabsPrimitive from "@radix-ui/react-tabs"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import * as React from "react";
 
-const PillTabs = TabsPrimitive.Root
+const PillTabs = TabsPrimitive.Root;
 
 const PillTabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
@@ -18,8 +18,8 @@ const PillTabsList = React.forwardRef<
     )}
     {...props}
   />
-))
-PillTabsList.displayName = TabsPrimitive.List.displayName
+));
+PillTabsList.displayName = TabsPrimitive.List.displayName;
 
 const PillTabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
@@ -33,8 +33,8 @@ const PillTabsTrigger = React.forwardRef<
     )}
     {...props}
   />
-))
-PillTabsTrigger.displayName = TabsPrimitive.Trigger.displayName
+));
+PillTabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
 const PillTabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
@@ -48,7 +48,7 @@ const PillTabsContent = React.forwardRef<
     )}
     {...props}
   />
-))
-PillTabsContent.displayName = TabsPrimitive.Content.displayName
+));
+PillTabsContent.displayName = TabsPrimitive.Content.displayName;
 
-export { PillTabs, PillTabsList, PillTabsTrigger, PillTabsContent }
+export { PillTabs, PillTabsList, PillTabsTrigger, PillTabsContent };

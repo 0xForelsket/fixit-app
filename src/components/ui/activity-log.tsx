@@ -1,6 +1,6 @@
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
 import { Clock, MessageSquare, User } from "lucide-react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export interface ActivityLogItem {
   id: number | string;
@@ -34,7 +34,9 @@ export function ActivityLog({
           <Clock className="h-8 w-8 text-muted-foreground/50" />
         </div>
         <h3 className="text-lg font-black text-foreground">No Activity</h3>
-        <p className="mt-1 text-sm text-muted-foreground max-w-xs">{emptyMessage}</p>
+        <p className="mt-1 text-sm text-muted-foreground max-w-xs">
+          {emptyMessage}
+        </p>
       </div>
     );
   }
@@ -55,9 +57,11 @@ export function ActivityLog({
             ) : (
               <div className="h-7 w-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground shadow-sm border border-border">
                 {log.actor.avatar ? (
-                    <span className="text-[10px] font-bold">{log.actor.avatar}</span>
+                  <span className="text-[10px] font-bold">
+                    {log.actor.avatar}
+                  </span>
                 ) : (
-                    <User className="h-3.5 w-3.5" />
+                  <User className="h-3.5 w-3.5" />
                 )}
               </div>
             )}
@@ -84,7 +88,11 @@ export function ActivityLog({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Changed <strong className="text-foreground font-bold uppercase text-xs tracking-wide">{log.action.replace("_", " ")}</strong> from{" "}
+                Changed{" "}
+                <strong className="text-foreground font-bold uppercase text-xs tracking-wide">
+                  {log.action.replace("_", " ")}
+                </strong>{" "}
+                from{" "}
                 <span className="line-through decoration-muted-foreground/50 text-muted-foreground/80 decoration-2">
                   {log.formatValue
                     ? log.formatValue(log.action, log.oldValue || null)

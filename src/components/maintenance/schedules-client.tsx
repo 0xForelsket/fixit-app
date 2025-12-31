@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { Calendar } from "@/components/ui/calendar";
-import { AgendaItem } from "./agenda-item";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { AgendaItem } from "./agenda-item";
 
 interface SchedulesClientProps {
   schedules: any[];
@@ -12,12 +12,18 @@ interface SchedulesClientProps {
   initialYear: number;
 }
 
-export function SchedulesClient({ schedules, initialMonth, initialYear }: SchedulesClientProps) {
+export function SchedulesClient({
+  schedules,
+  initialMonth,
+  initialYear,
+}: SchedulesClientProps) {
   const router = useRouter();
   const today = new Date();
 
   const handleNavigate = (month: number, year: number) => {
-    router.push(`/maintenance/schedules?month=${month}&year=${year}`, { scroll: false });
+    router.push(`/maintenance/schedules?month=${month}&year=${year}`, {
+      scroll: false,
+    });
   };
 
   return (
@@ -38,16 +44,22 @@ export function SchedulesClient({ schedules, initialMonth, initialYear }: Schedu
               isOverdue
                 ? "bg-rose-50 border-rose-600 text-rose-950"
                 : event.type === "maintenance"
-                ? "bg-amber-50 border-amber-500 text-amber-950"
-                : "bg-primary-50 border-primary-500 text-primary-950"
+                  ? "bg-amber-50 border-amber-500 text-amber-950"
+                  : "bg-primary-50 border-primary-500 text-primary-950"
             )}
           >
             <div className="flex flex-col gap-1">
               <span className="text-[9px] font-black uppercase tracking-wider truncate leading-tight flex items-center gap-1">
-                <span className={cn(
-                  "w-1.5 h-1.5 rounded-full shrink-0",
-                  isOverdue ? "bg-rose-600" : event.type === "maintenance" ? "bg-amber-500" : "bg-primary-500"
-                )} />
+                <span
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full shrink-0",
+                    isOverdue
+                      ? "bg-rose-600"
+                      : event.type === "maintenance"
+                        ? "bg-amber-500"
+                        : "bg-primary-500"
+                  )}
+                />
                 {event.equipment?.name || "System"}
               </span>
               <span className="text-[11px] font-black truncate leading-tight">

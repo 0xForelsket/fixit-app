@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export function EntityDetailLayout({
   children,
@@ -62,9 +62,9 @@ export function EntityHeader({
               </span>
             )}
             {subtitle && (
-               <span className="text-lg text-muted-foreground/70 font-bold ml-2 hidden sm:inline-block">
-                 {subtitle}
-               </span>
+              <span className="text-lg text-muted-foreground/70 font-bold ml-2 hidden sm:inline-block">
+                {subtitle}
+              </span>
             )}
           </div>
           {meta && (
@@ -92,7 +92,9 @@ export function EntityGrid({
 }) {
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-start">
-      <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 space-y-6">{sidebar}</div>
+      <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0 space-y-6">
+        {sidebar}
+      </div>
       <div className="flex-1 min-w-0 w-full">{content}</div>
     </div>
   );
@@ -180,7 +182,9 @@ export function EntityDetailItem({
   className?: string;
 }) {
   return (
-    <div className={cn("py-3 border-t border-zinc-100 first:border-0", className)}>
+    <div
+      className={cn("py-3 border-t border-zinc-100 first:border-0", className)}
+    >
       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest block mb-1">
         {label}
       </span>

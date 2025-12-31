@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 
 interface SelectionCardProps {
   selected?: boolean;
@@ -59,8 +59,6 @@ export function SelectionGrid({
   className?: string;
 }) {
   return (
-    <div className={cn("grid gap-3 md:grid-cols-3", className)}>
-      {children}
-    </div>
+    <div className={cn("grid gap-3 md:grid-cols-3", className)}>{children}</div>
   );
 }

@@ -4,8 +4,8 @@ import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { Button } from "@/components/ui/button";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { cn } from "@/lib/utils";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
 import { Edit, Flag, MapPin, MonitorCog } from "lucide-react";
 import Link from "next/link";
 
@@ -42,10 +42,7 @@ export function EquipmentTable({
   userPermissions = [],
 }: EquipmentTableProps) {
   const favoriteSet = new Set(favoriteIds);
-  const canEdit = hasPermission(
-    userPermissions,
-    PERMISSIONS.EQUIPMENT_UPDATE
-  );
+  const canEdit = hasPermission(userPermissions, PERMISSIONS.EQUIPMENT_UPDATE);
 
   const columns: ColumnDef<Equipment>[] = [
     {

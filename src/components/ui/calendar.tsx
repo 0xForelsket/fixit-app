@@ -1,17 +1,39 @@
 "use client";
 
-import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Filter, Plus } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Plus,
+} from "lucide-react";
+import { useMemo } from "react";
 import { Button } from "./button";
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 const DAY_NAMES = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
 ];
 
 interface CalendarProps<T> {
@@ -38,11 +60,11 @@ export function Calendar<T>({
   isLoading,
 }: CalendarProps<T>) {
   const today = useMemo(() => new Date(), []);
-  
+
   const { daysInMonth, firstDayOfWeek, weeks } = useMemo(() => {
     const days = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
-    
+
     // Create an array of days [null, null, 1, 2, ..., 31, null] to fill the grid
     const grid = [];
     for (let i = 0; i < firstDay; i++) {
@@ -55,7 +77,7 @@ export function Calendar<T>({
     for (let i = 0; i < remaining; i++) {
       grid.push(null);
     }
-    
+
     return {
       daysInMonth: days,
       firstDayOfWeek: firstDay,
@@ -178,9 +200,9 @@ export function Calendar<T>({
                 day === today.getDate() &&
                 month === today.getMonth() &&
                 year === today.getFullYear();
-              
+
               const dayEvents = day ? eventsByDay.get(day) || [] : [];
-              
+
               return (
                 <div
                   key={i}
@@ -188,9 +210,13 @@ export function Calendar<T>({
                     "min-h-[160px] p-4 transition-all duration-300 relative group/cell",
                     "border-r border-b border-black/[0.08] dark:border-white/10", // Stronger borders
                     i % 7 === 6 && "border-r-0",
-                    Math.floor(i / 7) === Math.floor((weeks.length - 1) / 7) && "border-b-0",
-                    day ? "bg-card/60 hover:bg-muted/30" : "bg-zinc-900/[0.03] industrial-grid opacity-60",
-                    isToday && "bg-white/10 ring-2 ring-inset ring-primary/40 shadow-[inset_0_0_40px_rgba(var(--primary),0.08)]",
+                    Math.floor(i / 7) === Math.floor((weeks.length - 1) / 7) &&
+                      "border-b-0",
+                    day
+                      ? "bg-card/60 hover:bg-muted/30"
+                      : "bg-zinc-900/[0.03] industrial-grid opacity-60",
+                    isToday &&
+                      "bg-white/10 ring-2 ring-inset ring-primary/40 shadow-[inset_0_0_40px_rgba(var(--primary),0.08)]"
                   )}
                 >
                   {day && (
@@ -199,7 +225,9 @@ export function Calendar<T>({
                         <span
                           className={cn(
                             "text-sm font-black font-mono tracking-tighter transition-colors",
-                            isToday ? "text-primary brightness-125" : "text-zinc-600 dark:text-zinc-400 group-hover/cell:text-zinc-900 dark:group-hover/cell:text-zinc-100"
+                            isToday
+                              ? "text-primary brightness-125"
+                              : "text-zinc-600 dark:text-zinc-400 group-hover/cell:text-zinc-900 dark:group-hover/cell:text-zinc-100"
                           )}
                         >
                           {day.toString().padStart(2, "0")}
@@ -214,7 +242,11 @@ export function Calendar<T>({
 
                       <div className="space-y-1.5 overflow-y-auto max-h-[100px] custom-scrollbar pr-1">
                         {dayEvents.map((event, idx) => (
-                          <div key={idx} className="animate-in fade-in zoom-in-95 duration-200 fill-mode-both" style={{ animationDelay: `${idx * 50}ms` }}>
+                          <div
+                            key={idx}
+                            className="animate-in fade-in zoom-in-95 duration-200 fill-mode-both"
+                            style={{ animationDelay: `${idx * 50}ms` }}
+                          >
                             {renderDayEvent(event)}
                           </div>
                         ))}

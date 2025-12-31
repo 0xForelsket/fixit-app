@@ -133,7 +133,7 @@ export function CostByDepartmentChart({ data }: CostByDepartmentChartProps) {
                     fontWeight: 600,
                     fontFamily: "var(--font-sans)",
                   }}
-                  formatter={(value, entry: any) => {
+                  formatter={(value, _entry: any) => {
                     const item = chartData.find((d) => d.name === value);
                     const percentage =
                       item && total > 0

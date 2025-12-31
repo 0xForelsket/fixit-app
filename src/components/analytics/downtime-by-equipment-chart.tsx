@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Monitor } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -11,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Monitor } from "lucide-react";
 
 interface DowntimeByEquipment {
   id: number;

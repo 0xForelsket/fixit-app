@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import type * as React from "react";
 
 export interface SegmentedControlOption {
   label: string;
@@ -36,7 +35,7 @@ export function SegmentedControl({
     >
       {options.map((option) => {
         const isActive = selectedValue === option.value;
-        
+
         const content = (
           <>
             {option.icon}

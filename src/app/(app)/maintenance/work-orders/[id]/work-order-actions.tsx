@@ -190,9 +190,12 @@ function ActionButton({
   type?: "button" | "submit";
 }) {
   const styles = {
-    primary: "bg-success-600 border-success-700 text-white hover:bg-success-700 shadow-sm",
-    outline: "bg-card border-border text-foreground hover:bg-accent hover:border-accent hover:text-accent-foreground",
-    danger: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700 shadow-sm",
+    primary:
+      "bg-success-600 border-success-700 text-white hover:bg-success-700 shadow-sm",
+    outline:
+      "bg-card border-border text-foreground hover:bg-accent hover:border-accent hover:text-accent-foreground",
+    danger:
+      "bg-danger-600 border-danger-700 text-white hover:bg-danger-700 shadow-sm",
   };
 
   return (

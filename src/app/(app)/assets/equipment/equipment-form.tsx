@@ -155,8 +155,6 @@ export function EquipmentForm({
     }
   };
 
-
-
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {error && (
@@ -230,8 +228,14 @@ export function EquipmentForm({
               : "Precise classification for SAP PM alignment"
           }
         >
-          <Select value={typeId} onValueChange={setTypeId} disabled={!categoryId}>
-            <SelectTrigger className={cn(!categoryId && "bg-muted cursor-not-allowed")}>
+          <Select
+            value={typeId}
+            onValueChange={setTypeId}
+            disabled={!categoryId}
+          >
+            <SelectTrigger
+              className={cn(!categoryId && "bg-muted cursor-not-allowed")}
+            >
               <SelectValue placeholder="Select Type..." />
             </SelectTrigger>
             <SelectContent>

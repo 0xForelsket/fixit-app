@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { MonitorCog, Clock, Wrench, Settings, ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ArrowRight, Clock, MonitorCog, Settings, Wrench } from "lucide-react";
 import Link from "next/link";
 
 interface AgendaItemProps {

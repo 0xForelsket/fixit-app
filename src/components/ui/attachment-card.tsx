@@ -29,8 +29,8 @@ export function AttachmentCard({
 }: AttachmentCardProps) {
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [_isInView, setIsInView] = useState(false);
+  const [_isLoaded, _setIsLoaded] = useState(false);
 
   const isImage = file.mimeType.startsWith("image/");
   const isPdf = file.mimeType === "application/pdf";
@@ -51,13 +51,17 @@ export function AttachmentCard({
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!onDelete || isDeleting) return;
 
     if (!window.confirm("Are you sure you want to delete this file?")) {
       return;
     }
-    if (!window.confirm("This action cannot be undone. Do you really want to proceed?")) {
+    if (
+      !window.confirm(
+        "This action cannot be undone. Do you really want to proceed?"
+      )
+    ) {
       return;
     }
 
@@ -66,7 +70,7 @@ export function AttachmentCard({
       // @ts-ignore - id is optional in interface but required for db operations
       await onDelete(file.id);
     } catch (error) {
-        console.error("Delete failed", error);
+      console.error("Delete failed", error);
     } finally {
       setIsDeleting(false);
     }
@@ -82,17 +86,17 @@ export function AttachmentCard({
         )}
       >
         {onDelete && (
-           <button
-             onClick={handleDelete}
-             disabled={isDeleting}
-             className={cn(
-               "absolute top-2 right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-sm opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 hover:bg-red-700",
-               isDeleting && "opacity-100 cursor-not-allowed bg-red-400"
-             )}
-             title="Delete Attachment"
-           >
-             <X className="h-3.5 w-3.5" strokeWidth={3} />
-           </button>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className={cn(
+              "absolute top-2 right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-sm opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 hover:bg-red-700",
+              isDeleting && "opacity-100 cursor-not-allowed bg-red-400"
+            )}
+            title="Delete Attachment"
+          >
+            <X className="h-3.5 w-3.5" strokeWidth={3} />
+          </button>
         )}
 
         {isImage ? (
@@ -111,44 +115,56 @@ export function AttachmentCard({
             className="group/pdf relative aspect-video w-full overflow-hidden bg-zinc-900 flex items-center justify-center transition-all"
           >
             {/* Technical Blueprint Pattern */}
-            <div className="absolute inset-0 z-0 opacity-20" 
-                 style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #3b82f6 1px, transparent 0)', backgroundSize: '20px 20px' }} />
-            
-            <div className="absolute inset-0 z-0 opacity-10"
-                 style={{ backgroundImage: 'linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+            <div
+              className="absolute inset-0 z-0 opacity-20"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 1px 1px, #3b82f6 1px, transparent 0)",
+                backgroundSize: "20px 20px",
+              }}
+            />
+
+            <div
+              className="absolute inset-0 z-0 opacity-10"
+              style={{
+                backgroundImage:
+                  "linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px)",
+                backgroundSize: "80px 80px",
+              }}
+            />
 
             {/* Document Content Signature (Pseudo-Code/Bars) */}
             <div className="relative z-10 w-[80px] aspect-[1/1.4] bg-zinc-800 border-l-4 border-primary-500 shadow-2xl origin-center scale-[0.7] group-hover/pdf:scale-[0.75] transition-transform duration-500 flex flex-col p-2 gap-1.5 overflow-hidden">
-                {/* Header Block */}
-                <div className="h-2 w-full bg-zinc-700/50 rounded-sm mb-1" />
-                
-                {/* Simulated Content Bars */}
-                <div className="space-y-1">
-                  <div className="h-1 w-full bg-zinc-700/30 rounded-full" />
-                  <div className="h-1 w-5/6 bg-zinc-700/30 rounded-full" />
-                  <div className="h-1 w-full bg-zinc-700/30 rounded-full" />
-                </div>
+              {/* Header Block */}
+              <div className="h-2 w-full bg-zinc-700/50 rounded-sm mb-1" />
 
-                {/* Technical Drawing Element */}
-                <div className="mt-2 flex-1 border border-dashed border-zinc-700/50 rounded flex items-center justify-center">
-                   <div className="w-6 h-6 rounded-full border border-zinc-700 items-center justify-center flex">
-                      <div className="w-px h-full bg-zinc-700 absolute rotate-45" />
-                      <div className="w-px h-full bg-zinc-700 absolute -rotate-45" />
-                   </div>
-                </div>
+              {/* Simulated Content Bars */}
+              <div className="space-y-1">
+                <div className="h-1 w-full bg-zinc-700/30 rounded-full" />
+                <div className="h-1 w-5/6 bg-zinc-700/30 rounded-full" />
+                <div className="h-1 w-full bg-zinc-700/30 rounded-full" />
+              </div>
 
-                {/* Footer Metadata */}
-                <div className="mt-auto flex justify-between items-end">
-                   <div className="h-1.5 w-6 bg-primary-500/40 rounded-sm" />
-                   <div className="text-[5px] font-mono text-zinc-500 uppercase leading-none">
-                      v1.0
-                   </div>
+              {/* Technical Drawing Element */}
+              <div className="mt-2 flex-1 border border-dashed border-zinc-700/50 rounded flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full border border-zinc-700 items-center justify-center flex">
+                  <div className="w-px h-full bg-zinc-700 absolute rotate-45" />
+                  <div className="w-px h-full bg-zinc-700 absolute -rotate-45" />
                 </div>
+              </div>
+
+              {/* Footer Metadata */}
+              <div className="mt-auto flex justify-between items-end">
+                <div className="h-1.5 w-6 bg-primary-500/40 rounded-sm" />
+                <div className="text-[5px] font-mono text-zinc-500 uppercase leading-none">
+                  v1.0
+                </div>
+              </div>
             </div>
 
             {/* Blueprint "Stamp" */}
             <div className="absolute top-2 right-2 z-20 px-1 py-0.5 border border-primary-500/50 rounded text-[7px] font-mono text-primary-400 uppercase tracking-tighter bg-primary-500/5 backdrop-blur-sm">
-               Doc-Ref: {file.filename.slice(0, 4).toUpperCase()}
+              Doc-Ref: {file.filename.slice(0, 4).toUpperCase()}
             </div>
 
             {/* Industrial Overlay Icon */}
@@ -201,7 +217,6 @@ export function AttachmentCard({
         </div>
       </div>
 
-
       <PdfPreviewDialog
         isOpen={showPdfPreview}
         onClose={() => setShowPdfPreview(false)}
@@ -210,4 +225,3 @@ export function AttachmentCard({
     </>
   );
 }
-

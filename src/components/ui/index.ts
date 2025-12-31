@@ -19,4 +19,7 @@ export {
 } from "./skeleton";
 export { FieldGroup, FormGrid, FormSection } from "./form-layout";
 export { SelectionCard, SelectionGrid } from "./selection-cards";
-export { SegmentedControl, type SegmentedControlOption } from "./segmented-control";
+export {
+  SegmentedControl,
+  type SegmentedControlOption,
+} from "./segmented-control";

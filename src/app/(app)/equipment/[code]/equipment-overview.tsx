@@ -222,8 +222,10 @@ function QuickActionButton({
 }) {
   const styles = {
     danger: "bg-danger-600 border-danger-700 text-white hover:bg-danger-700",
-    primary: "bg-primary border-primary text-primary-foreground hover:bg-primary/90",
-    outline: "bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground shadow-sm",
+    primary:
+      "bg-primary border-primary text-primary-foreground hover:bg-primary/90",
+    outline:
+      "bg-card border-border text-foreground hover:bg-accent hover:text-accent-foreground shadow-sm",
   };
 
   if (disabled) {

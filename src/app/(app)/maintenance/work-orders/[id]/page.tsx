@@ -1,5 +1,12 @@
+import {
+  EntityDetailItem,
+  EntityDetailLayout,
+  EntityGrid,
+  EntityHeader,
+  EntityStatusCard,
+} from "@/components/layout/entity-detail";
 import { TimeLogger } from "@/components/time-logger";
-import { Badge } from "@/components/ui/badge";
+import { ActivityLog } from "@/components/ui/activity-log";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { WorkOrderAttachments } from "@/components/work-orders/work-order-attachments";
@@ -18,23 +25,17 @@ import {
 } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
-import { formatRelativeTime, cn } from "@/lib/utils";
+import { cn, formatRelativeTime } from "@/lib/utils";
 import { and, asc, desc, eq } from "drizzle-orm";
 import {
-  ArrowLeft,
+  AlertTriangle,
   CheckCircle2,
   ClipboardCheck,
   Clock,
-  MapPin,
-  MessageSquare,
-  Wrench,
-  AlertTriangle,
-  History,
   Info,
+  MessageSquare,
   User,
-  FileText,
-  Settings,
-  Printer,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -42,14 +43,6 @@ import { MobileWorkOrderView } from "./mobile-work-order-view";
 import { PrintWorkOrderButton } from "./print-work-order-button";
 import { WorkOrderActions } from "./work-order-actions";
 import { WorkOrderTabs } from "./work-order-tabs";
-import {
-  EntityDetailLayout,
-  EntityHeader,
-  EntityGrid,
-  EntityStatusCard,
-  EntityDetailItem,
-} from "@/components/layout/entity-detail";
-import { ActivityLog } from "@/components/ui/activity-log";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -126,7 +119,9 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       assignedRole: true,
     },
   });
-  const techs = allUsers.filter((u) => u.isActive && u.assignedRole?.name === "tech");
+  const techs = allUsers.filter(
+    (u) => u.isActive && u.assignedRole?.name === "tech"
+  );
 
   // Fetch labor logs for this work order
   const workOrderLaborLogs = await db.query.laborLogs.findMany({
@@ -200,33 +195,34 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       </div>
 
       <div className="pt-4 border-t border-zinc-100">
-        <WorkOrderAttachments 
-          attachments={workOrderAttachments} 
+        <WorkOrderAttachments
+          attachments={workOrderAttachments}
           workOrderId={workOrder.id}
         />
       </div>
     </div>
   );
 
-  const ProcedureContent = checklistItems.length > 0 ? (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
-        <ClipboardCheck className="h-3 w-3" />
-        Maintenance Checklist
+  const ProcedureContent =
+    checklistItems.length > 0 ? (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
+          <ClipboardCheck className="h-3 w-3" />
+          Maintenance Checklist
+        </div>
+        <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
       </div>
-      <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
-    </div>
-  ) : (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border-2 border-zinc-200">
-        <ClipboardCheck className="h-8 w-8 text-zinc-400" />
+    ) : (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border-2 border-zinc-200">
+          <ClipboardCheck className="h-8 w-8 text-zinc-400" />
+        </div>
+        <h3 className="mt-4 text-lg font-black text-zinc-900">No Procedure</h3>
+        <p className="mt-1 text-sm text-zinc-500 max-w-xs">
+          No maintenance checklist has been defined for this work order.
+        </p>
       </div>
-      <h3 className="mt-4 text-lg font-black text-zinc-900">No Procedure</h3>
-      <p className="mt-1 text-sm text-zinc-500 max-w-xs">
-        No maintenance checklist has been defined for this work order.
-      </p>
-    </div>
-  );
+    );
 
   const ActivityContent = (
     <div className="space-y-4">
@@ -268,7 +264,10 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   );
 
   // Status mapping for EntityStatusCard
-  const statusColorMap: Record<string, "zinc" | "blue" | "emerald" | "amber" | "red"> = {
+  const statusColorMap: Record<
+    string,
+    "zinc" | "blue" | "emerald" | "amber" | "red"
+  > = {
     open: "zinc",
     in_progress: "blue",
     completed: "emerald",
@@ -276,11 +275,13 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     cancelled: "red",
   };
   const statusColor = statusColorMap[workOrder.status] || "zinc";
-  
-  const StatusIcon = 
-    workOrder.status === "in_progress" ? Clock :
-    workOrder.status === "completed" ? CheckCircle2 :
-    AlertTriangle;
+
+  const StatusIcon =
+    workOrder.status === "in_progress"
+      ? Clock
+      : workOrder.status === "completed"
+        ? CheckCircle2
+        : AlertTriangle;
 
   return (
     <EntityDetailLayout>
@@ -346,32 +347,32 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
                 </EntityDetailItem>
 
                 <EntityDetailItem label="Equipment">
-                <Link
-                  href={`/assets/equipment/${workOrder.equipment.code}`}
-                  className="flex items-center gap-3 group rounded-lg border border-zinc-100 p-2 hover:border-primary-200 hover:bg-primary-50/50 transition-all bg-zinc-50/50"
-                >
-                  <div className="h-8 w-8 rounded-md bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                    <Wrench className="h-4 w-4 text-zinc-500 group-hover:text-primary-600" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-xs text-zinc-900 truncate group-hover:text-primary-700 transition-colors">
-                      {workOrder.equipment.name}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="font-mono text-[9px] font-bold text-zinc-400">
-                        {workOrder.equipment.code}
-                      </span>
-                      {workOrder.equipment.location && (
-                        <>
-                          <span className="text-zinc-300">•</span>
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider truncate">
-                            {workOrder.equipment.location.name}
-                          </span>
-                        </>
-                      )}
+                  <Link
+                    href={`/assets/equipment/${workOrder.equipment.code}`}
+                    className="flex items-center gap-3 group rounded-lg border border-zinc-100 p-2 hover:border-primary-200 hover:bg-primary-50/50 transition-all bg-zinc-50/50"
+                  >
+                    <div className="h-8 w-8 rounded-md bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                      <Wrench className="h-4 w-4 text-zinc-500 group-hover:text-primary-600" />
                     </div>
-                  </div>
-                </Link>
+                    <div className="min-w-0">
+                      <p className="font-bold text-xs text-zinc-900 truncate group-hover:text-primary-700 transition-colors">
+                        {workOrder.equipment.name}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="font-mono text-[9px] font-bold text-zinc-400">
+                          {workOrder.equipment.code}
+                        </span>
+                        {workOrder.equipment.location && (
+                          <>
+                            <span className="text-zinc-300">•</span>
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider truncate">
+                              {workOrder.equipment.location.name}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
                 </EntityDetailItem>
 
                 <EntityDetailItem label="Timeline">
@@ -387,7 +388,9 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
                     </div>
                     {workOrder.dueBy && (
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-zinc-500 font-medium">Due Date</span>
+                        <span className="text-zinc-500 font-medium">
+                          Due Date
+                        </span>
                         <span
                           className="font-mono font-bold text-danger-600"
                           suppressHydrationWarning
@@ -421,17 +424,24 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
         />
       </div>
 
-       <div className="lg:hidden">
+      <div className="lg:hidden">
         <MobileWorkOrderView
           infoTab={
             <div className="space-y-6">
               {/* Quick Info Cards */}
               <div className="grid grid-cols-2 gap-2">
                 <InfoCard label="Status" compact>
-                  <StatusBadge status={workOrder.status} showIcon className="font-black text-xs" />
+                  <StatusBadge
+                    status={workOrder.status}
+                    showIcon
+                    className="font-black text-xs"
+                  />
                 </InfoCard>
                 <InfoCard label="Priority" compact>
-                  <StatusBadge status={priority} className="font-black text-xs" />
+                  <StatusBadge
+                    status={priority}
+                    className="font-black text-xs"
+                  />
                 </InfoCard>
               </div>
 
@@ -451,7 +461,10 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
                 href={`/assets/equipment/${workOrder.equipment.code}`}
                 className="block"
               >
-                <InfoCard label="Equipment" className="hover:border-primary-300">
+                <InfoCard
+                  label="Equipment"
+                  className="hover:border-primary-300"
+                >
                   <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0">
                       <Wrench className="h-4 w-4 text-white" />
@@ -468,8 +481,8 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
                 </InfoCard>
               </Link>
 
-              <WorkOrderAttachments 
-                attachments={workOrderAttachments} 
+              <WorkOrderAttachments
+                attachments={workOrderAttachments}
                 workOrderId={workOrder.id}
               />
             </div>

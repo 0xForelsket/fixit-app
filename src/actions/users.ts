@@ -4,10 +4,10 @@ import { db } from "@/db";
 import { attachments, roles, users } from "@/db/schema";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
+import { deleteObject } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/types/actions";
 import { createUserSchema, updateUserSchema } from "@/lib/validations/users";
-import { deleteObject } from "@/lib/s3";
 import { and, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -25,7 +25,7 @@ export async function updateUserAvatar(rawData: {
   try {
     // Note: The attachment record is already created by the API during upload.
     // We just need to clean up any old avatars.
-    
+
     const oldAvatars = await db.query.attachments.findMany({
       where: and(
         eq(attachments.entityType, "user"),
@@ -38,14 +38,17 @@ export async function updateUserAvatar(rawData: {
     for (const oldAvatar of oldAvatars) {
       // Delete from DB
       await db.delete(attachments).where(eq(attachments.id, oldAvatar.id));
-      
+
       // Delete from S3 (optional, ignore errors)
       try {
         if (oldAvatar.s3Key) {
-            await deleteObject(oldAvatar.s3Key);
+          await deleteObject(oldAvatar.s3Key);
         }
       } catch (err) {
-        console.warn(`Failed to delete old avatar S3 object: ${oldAvatar.s3Key}`, err);
+        console.warn(
+          `Failed to delete old avatar S3 object: ${oldAvatar.s3Key}`,
+          err
+        );
       }
     }
 

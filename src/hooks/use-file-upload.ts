@@ -53,9 +53,9 @@ export function useFileUpload() {
           const json = await response.json();
           console.log("Upload response:", json);
           const { data } = json;
-          
+
           if (!data || !data.attachment) {
-             throw new Error("Invalid server response: missing attachment data");
+            throw new Error("Invalid server response: missing attachment data");
           }
 
           const { attachment, uploadUrl } = data;

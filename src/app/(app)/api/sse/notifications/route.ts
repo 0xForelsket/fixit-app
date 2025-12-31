@@ -91,5 +91,5 @@ function formatSSE(event: string, data: unknown): string {
     lines.push(`data: ${line}`);
   }
 
-  return lines.join("\n") + "\n\n";
+  return `${lines.join("\n")}\n\n`;
 }

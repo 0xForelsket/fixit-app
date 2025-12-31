@@ -2,6 +2,7 @@ import { QuickActions } from "@/components/home/quick-actions";
 import { RecentEquipment } from "@/components/home/recent-equipment";
 import { UserHeader } from "@/components/home/user-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { WorkOrderCard } from "@/components/work-orders/work-order-card";
 import { db } from "@/db";
 import { equipment, notifications, workOrders } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
@@ -10,7 +11,6 @@ import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, like, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { WorkOrderCard } from "@/components/work-orders/work-order-card";
 import { EquipmentGrid } from "./equipment-grid";
 import { EquipmentSearch } from "./equipment-search";
 
@@ -124,7 +124,10 @@ export default async function HomePage({ searchParams }: PageProps) {
             </div>
             <div className="space-y-4">
               {myWorkOrders.map((wo) => (
-                <div key={wo.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div
+                  key={wo.id}
+                  className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                >
                   <WorkOrderCard workOrder={wo} variant="compact" />
                 </div>
               ))}

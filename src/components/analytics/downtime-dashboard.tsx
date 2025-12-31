@@ -116,7 +116,7 @@ export function DowntimeDashboard() {
       } else if (!result.success) {
         setError(result.error || "Failed to load downtime data");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);

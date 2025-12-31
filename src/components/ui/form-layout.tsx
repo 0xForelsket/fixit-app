@@ -10,7 +10,10 @@ interface FieldGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const FieldGroup = React.forwardRef<HTMLDivElement, FieldGroupProps>(
-  ({ label, error, description, required, children, className, ...props }, ref) => {
+  (
+    { label, error, description, required, children, className, ...props },
+    ref
+  ) => {
     const id = React.useId();
     return (
       <div ref={ref} className={cn("space-y-2", className)} {...props}>
@@ -33,13 +36,18 @@ const FieldGroup = React.forwardRef<HTMLDivElement, FieldGroupProps>(
 );
 FieldGroup.displayName = "FieldGroup";
 
-const FormGrid = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <div className={cn("grid gap-6 md:grid-cols-2", className)}>
-    {children}
-  </div>
+const FormGrid = ({
+  children,
+  className,
+}: { children: React.ReactNode; className?: string }) => (
+  <div className={cn("grid gap-6 md:grid-cols-2", className)}>{children}</div>
 );
 
-const FormSection = ({ title, children, className }: { title?: string; children: React.ReactNode; className?: string }) => (
+const FormSection = ({
+  title,
+  children,
+  className,
+}: { title?: string; children: React.ReactNode; className?: string }) => (
   <div className={cn("space-y-4", className)}>
     {title && (
       <h3 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground/60 border-b border-border/50 pb-2">

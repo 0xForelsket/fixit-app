@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
@@ -6,12 +7,10 @@ import { WorkOrderCard } from "@/components/work-orders/work-order-card";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import { eq } from "drizzle-orm";
-import { CheckCircle2, History, Inbox, Plus, Timer } from "lucide-react";
+import { CheckCircle2, Inbox, Plus, Timer } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { SuccessToast } from "./success-toast";
 
 interface PageProps {
@@ -125,7 +124,10 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-300">
+            <TabsContent
+              value="active"
+              className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-300"
+            >
               {activeWorkOrders.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                   {activeWorkOrders.map((workOrder, index) => (
@@ -145,7 +147,10 @@ export default async function MyWorkOrdersPage({ searchParams }: PageProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="resolved" className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
+            <TabsContent
+              value="resolved"
+              className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300"
+            >
               {resolvedWorkOrders.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 opacity-90 grayscale-[0.2]">
                   {resolvedWorkOrders.map((workOrder, index) => (

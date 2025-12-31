@@ -1,7 +1,12 @@
 "use client";
 
-import { PillTabs, PillTabsContent, PillTabsList, PillTabsTrigger } from "@/components/ui/pill-tabs";
-import { ClipboardList, ClipboardCheck, History, Settings } from "lucide-react";
+import {
+  PillTabs,
+  PillTabsContent,
+  PillTabsList,
+  PillTabsTrigger,
+} from "@/components/ui/pill-tabs";
+import { ClipboardCheck, ClipboardList, History, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface WorkOrderTabsProps {
@@ -79,21 +84,13 @@ export function WorkOrderTabs({
         </PillTabsTrigger>
       </PillTabsList>
 
-      <PillTabsContent value="overview">
-        {overviewContent}
-      </PillTabsContent>
+      <PillTabsContent value="overview">{overviewContent}</PillTabsContent>
 
-      <PillTabsContent value="procedure">
-        {procedureContent}
-      </PillTabsContent>
+      <PillTabsContent value="procedure">{procedureContent}</PillTabsContent>
 
-      <PillTabsContent value="activity">
-        {activityContent}
-      </PillTabsContent>
+      <PillTabsContent value="activity">{activityContent}</PillTabsContent>
 
-      <PillTabsContent value="resources">
-        {resourcesContent}
-      </PillTabsContent>
+      <PillTabsContent value="resources">{resourcesContent}</PillTabsContent>
     </PillTabs>
   );
 }

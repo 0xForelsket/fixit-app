@@ -1,8 +1,7 @@
 "use client";
-
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -11,9 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 import Link from "next/link";
 
 interface RecentDowntimeEvent {
@@ -101,7 +99,7 @@ export function RecentDowntimeTable({ data }: RecentDowntimeTableProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((event, index) => (
+                {data.map((event, _index) => (
                   <TableRow
                     key={event.id}
                     className={cn(

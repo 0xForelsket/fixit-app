@@ -118,7 +118,7 @@ function formatSSEMessage(message: SSEMessage): string {
   }
 
   // Double newline signals end of message
-  return lines.join("\n") + "\n\n";
+  return `${lines.join("\n")}\n\n`;
 }
 
 /**

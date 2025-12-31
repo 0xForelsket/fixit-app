@@ -148,10 +148,7 @@ export function AddPartDialog({
                     </FormControl>
                     <SelectContent>
                       {allParts.map((part) => (
-                        <SelectItem
-                          key={part.id}
-                          value={part.id.toString()}
-                        >
+                        <SelectItem key={part.id} value={part.id.toString()}>
                           {part.name}{" "}
                           <span className="text-[10px] font-mono opacity-50 ml-1">
                             ({part.sku})
@@ -182,10 +179,7 @@ export function AddPartDialog({
                     </FormControl>
                     <SelectContent>
                       {locations.map((loc) => (
-                        <SelectItem
-                          key={loc.id}
-                          value={loc.id.toString()}
-                        >
+                        <SelectItem key={loc.id} value={loc.id.toString()}>
                           {loc.name}
                         </SelectItem>
                       ))}

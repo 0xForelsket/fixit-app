@@ -2,17 +2,17 @@
 
 import { db } from "@/db";
 import type { Attachment } from "@/db/schema";
-import { attachments, workOrders, equipment, users } from "@/db/schema";
+import { attachments, equipment, users, workOrders } from "@/db/schema";
+import { deleteObject, getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
+import type { ActionResult } from "@/lib/types/actions";
+import type { AttachmentWithUrl } from "@/lib/types/attachments";
 import {
   type UploadAttachmentInput,
   uploadAttachmentSchema,
 } from "@/lib/validations/attachments";
+import { and, eq, inArray, like } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, like, inArray } from "drizzle-orm";
-import type { ActionResult } from "@/lib/types/actions";
-import { getPresignedDownloadUrl, deleteObject } from "@/lib/s3";
-import type { AttachmentWithUrl } from "@/lib/types/attachments";
 
 export type CreateAttachmentInput = UploadAttachmentInput & { s3Key: string };
 
@@ -196,7 +196,9 @@ export async function deleteAttachment(
     // 3. Revalidate paths
     if (attachment.entityType === "work_order") {
       revalidatePath(`/maintenance/work-orders/${attachment.entityId}`);
-      revalidatePath(`/maintenance/work-orders/${attachment.entityId}/mobile-work-order-view`);
+      revalidatePath(
+        `/maintenance/work-orders/${attachment.entityId}/mobile-work-order-view`
+      );
     } else if (attachment.entityType === "equipment") {
       revalidatePath(`/assets/equipment/${attachment.entityId}`);
     }

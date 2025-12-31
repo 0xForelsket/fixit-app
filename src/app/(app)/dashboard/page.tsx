@@ -4,6 +4,7 @@ import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { db } from "@/db";
 import { workOrders } from "@/db/schema";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { and, eq, or, sql } from "drizzle-orm";
 import {
@@ -15,7 +16,6 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

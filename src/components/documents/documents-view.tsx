@@ -1,8 +1,6 @@
 "use client";
 import { AttachmentCard } from "@/components/ui/attachment-card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -13,7 +11,6 @@ import {
   File,
   FileImage,
   FileText,
-  Filter,
   Folder,
   Grid,
   LayoutGrid,
@@ -33,7 +30,11 @@ interface DocumentsViewProps {
   isUserAdmin?: boolean;
 }
 
-export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }: DocumentsViewProps) {
+export function DocumentsView({
+  initialAttachments,
+  currentUserId,
+  isUserAdmin,
+}: DocumentsViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -45,21 +46,21 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const handleDelete = async (attachmentId: number) => {
-      const result = await deleteAttachment(attachmentId);
-      if (result.success) {
-          toast({
-              title: "Success",
-              description: "File deleted successfully",
-          });
-          router.refresh();
-      } else {
-          toast({
-              title: "Error",
-              description: result.error || "Failed to delete file",
-              variant: "destructive",
-          });
-          throw new Error(result.error);
-      }
+    const result = await deleteAttachment(attachmentId);
+    if (result.success) {
+      toast({
+        title: "Success",
+        description: "File deleted successfully",
+      });
+      router.refresh();
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "Failed to delete file",
+        variant: "destructive",
+      });
+      throw new Error(result.error);
+    }
   };
 
   const handleFilter = (key: string, value: string | null) => {
@@ -83,8 +84,10 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
   };
 
   const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith("image/")) return <FileImage className="h-8 w-8 text-purple-500" />;
-    if (mimeType === "application/pdf") return <FileText className="h-8 w-8 text-red-500" />;
+    if (mimeType.startsWith("image/"))
+      return <FileImage className="h-8 w-8 text-purple-500" />;
+    if (mimeType === "application/pdf")
+      return <FileText className="h-8 w-8 text-red-500" />;
     return <File className="h-8 w-8 text-blue-500" />;
   };
 
@@ -93,16 +96,20 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
       {/* Sidebar */}
       <div className="w-full border-r bg-muted/10 lg:w-64">
         <div className="p-4">
-          <h2 className="mb-4 px-2 text-lg font-semibold tracking-tight">Library</h2>
+          <h2 className="mb-4 px-2 text-lg font-semibold tracking-tight">
+            Library
+          </h2>
           <div className="space-y-1">
             <Button
-              variant={(!currentEntityType && !currentMimeType) ? "secondary" : "ghost"}
+              variant={
+                !currentEntityType && !currentMimeType ? "secondary" : "ghost"
+              }
               className="w-full justify-start gap-2 cursor-pointer"
               onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.delete("entityType");
-                  params.delete("mimeType");
-                  router.replace(`${pathname}?${params.toString()}`);
+                const params = new URLSearchParams(searchParams);
+                params.delete("entityType");
+                params.delete("mimeType");
+                router.replace(`${pathname}?${params.toString()}`);
               }}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -112,10 +119,14 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
 
           <Separator className="my-4" />
 
-          <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">Folders</h3>
+          <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
+            Folders
+          </h3>
           <div className="space-y-1">
             <Button
-              variant={currentEntityType === "work_order" ? "secondary" : "ghost"}
+              variant={
+                currentEntityType === "work_order" ? "secondary" : "ghost"
+              }
               className="w-full justify-start gap-2 cursor-pointer"
               onClick={() => handleFilter("entityType", "work_order")}
             >
@@ -123,7 +134,9 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
               Work Orders
             </Button>
             <Button
-              variant={currentEntityType === "equipment" ? "secondary" : "ghost"}
+              variant={
+                currentEntityType === "equipment" ? "secondary" : "ghost"
+              }
               className="w-full justify-start gap-2 cursor-pointer"
               onClick={() => handleFilter("entityType", "equipment")}
             >
@@ -134,10 +147,14 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
 
           <Separator className="my-4" />
 
-          <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">Type</h3>
+          <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
+            Type
+          </h3>
           <div className="space-y-1">
-             <Button
-              variant={currentMimeType?.startsWith("image") ? "secondary" : "ghost"}
+            <Button
+              variant={
+                currentMimeType?.startsWith("image") ? "secondary" : "ghost"
+              }
               className="w-full justify-start gap-2 cursor-pointer"
               onClick={() => handleFilter("mimeType", "image")}
             >
@@ -145,7 +162,9 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
               Images
             </Button>
             <Button
-              variant={currentMimeType === "application/pdf" ? "secondary" : "ghost"}
+              variant={
+                currentMimeType === "application/pdf" ? "secondary" : "ghost"
+              }
               className="w-full justify-start gap-2 cursor-pointer"
               onClick={() => handleFilter("mimeType", "application/pdf")}
             >
@@ -174,7 +193,11 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
               variant="outline"
               size="icon"
               onClick={() => setViewMode("grid")}
-              className={cn("cursor-pointer", viewMode === "grid" && "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground")}
+              className={cn(
+                "cursor-pointer",
+                viewMode === "grid" &&
+                  "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
             >
               <Grid className="h-4 w-4" />
             </Button>
@@ -182,7 +205,11 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
               variant="outline"
               size="icon"
               onClick={() => setViewMode("list")}
-              className={cn("cursor-pointer", viewMode === "list" && "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground")}
+              className={cn(
+                "cursor-pointer",
+                viewMode === "list" &&
+                  "bg-accent text-accent-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -192,29 +219,34 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
         {/* File Grid/List */}
         <ScrollArea className="flex-1 p-4">
           {initialAttachments.length === 0 ? (
-             <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
-                <div className="rounded-full bg-muted p-6">
-                  <File className="h-10 w-10 text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">No documents found</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Try adjusting your filters or search query.
-                  </p>
-                </div>
-             </div>
+            <div className="flex h-[400px] flex-col items-center justify-center gap-4 text-center">
+              <div className="rounded-full bg-muted p-6">
+                <File className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">No documents found</h3>
+                <p className="text-sm text-muted-foreground">
+                  Try adjusting your filters or search query.
+                </p>
+              </div>
+            </div>
           ) : (
-            <div className={cn(
-              "grid gap-4",
-              viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"
-            )}>
-              {initialAttachments.map((file) => (
+            <div
+              className={cn(
+                "grid gap-4",
+                viewMode === "grid"
+                  ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                  : "grid-cols-1"
+              )}
+            >
+              {initialAttachments.map((file) =>
                 viewMode === "grid" ? (
-                  <AttachmentCard 
-                    key={file.id} 
-                    file={file} 
+                  <AttachmentCard
+                    key={file.id}
+                    file={file}
                     onDelete={
-                        (currentUserId && file.uploadedById === currentUserId) || isUserAdmin
+                      (currentUserId && file.uploadedById === currentUserId) ||
+                      isUserAdmin
                         ? handleDelete
                         : undefined
                     }
@@ -222,29 +254,35 @@ export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }
                 ) : (
                   <Link
                     key={file.id}
-                    href={file.url} 
+                    href={file.url}
                     target="_blank"
                     className="group relative flex cursor-pointer flex-row items-center overflow-hidden rounded-lg border bg-card p-3 transition-all hover:shadow-md"
                   >
                     <div className="mr-4 flex h-10 w-10 items-center justify-center rounded bg-muted/20">
-                        {getFileIcon(file.mimeType)}
+                      {getFileIcon(file.mimeType)}
                     </div>
                     <div className="flex flex-1 flex-col">
-                        <span className="text-sm font-medium">{file.filename}</span>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{formatBytes(file.sizeBytes)}</span>
-                          <span>•</span>
-                          <span className="uppercase">{file.entityType.replace("_", " ")}</span>
-                          <span>•</span>
-                          <span className="font-medium">{file.entityName || `#${file.entityId}`}</span>
-                        </div>
+                      <span className="text-sm font-medium">
+                        {file.filename}
+                      </span>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{formatBytes(file.sizeBytes)}</span>
+                        <span>•</span>
+                        <span className="uppercase">
+                          {file.entityType.replace("_", " ")}
+                        </span>
+                        <span>•</span>
+                        <span className="font-medium">
+                          {file.entityName || `#${file.entityId}`}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {new Date(file.createdAt).toLocaleDateString()}
                     </div>
                   </Link>
                 )
-              ))}
+              )}
             </div>
           )}
         </ScrollArea>

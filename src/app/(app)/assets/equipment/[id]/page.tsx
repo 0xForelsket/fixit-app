@@ -127,7 +127,7 @@ export default async function EquipmentDetailPage({
     statusConfigs[equipmentItem.status] || statusConfigs.operational;
   const StatusIcon = statusConfig.icon;
 
-  const OverviewHeader = (
+  const _OverviewHeader = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div className="flex items-center gap-4">
         <div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import {
   ClipboardCheck,
   Clock,
@@ -73,19 +72,34 @@ export function MobileWorkOrderView({
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 pb-32">
-          <TabsContent value="info" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="info"
+            className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
             {infoTab}
           </TabsContent>
-          <TabsContent value="checklist" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="checklist"
+            className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
             {checklistTab}
           </TabsContent>
-          <TabsContent value="comments" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="comments"
+            className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
             {commentsTab}
           </TabsContent>
-          <TabsContent value="inventory" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="inventory"
+            className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
             {inventoryTab}
           </TabsContent>
-          <TabsContent value="logs" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="logs"
+            className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
             {logsTab}
           </TabsContent>
         </div>

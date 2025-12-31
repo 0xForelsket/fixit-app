@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { TrendingDown } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -11,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { TrendingDown } from "lucide-react";
 
 interface DowntimeTrendPoint {
   month: string;

@@ -31,7 +31,7 @@ export function StatsTicker({
         // - lg: Flow columns (single row)
         // - gap-[1px] bg-border for grid dividers
         "lg:grid lg:grid-flow-col lg:auto-cols-fr lg:gap-[1px] lg:bg-border",
-        // Mobile/Tablet Layout: 
+        // Mobile/Tablet Layout:
         // - Flex row with horizontal scroll to save vertical space
         "flex lg:flex-none flex-nowrap overflow-x-auto scrollbar-none",
         className
@@ -54,7 +54,7 @@ export function StatsTicker({
               "p-2.5 sm:p-4 lg:p-6 flex flex-col justify-between gap-0.5 sm:gap-2 relative overflow-hidden group hover:bg-muted/50",
               // Borders for mobile
               "border-r border-border last:border-r-0 lg:border-none",
-              
+
               isCompact && "p-2 sm:p-3 lg:p-4",
               // Subtle colored backgrounds
               isDanger && "bg-rose-500/5 hover:bg-rose-500/10",
@@ -97,7 +97,7 @@ export function StatsTicker({
                   // Ultra compact text on mobile
                   "text-lg sm:text-2xl lg:text-3xl",
                   !isCompact && "lg:text-4xl",
-                  
+
                   isDanger
                     ? "text-rose-600"
                     : isWarning

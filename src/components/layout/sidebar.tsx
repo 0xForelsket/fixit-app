@@ -326,7 +326,7 @@ export function Sidebar({
                             isCollapsed ? "justify-center" : "gap-3 px-3",
                             isActive
                               ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
-                               : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
+                              : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
                           )}
                         >
                           <span

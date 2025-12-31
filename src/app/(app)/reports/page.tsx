@@ -1,8 +1,8 @@
+import { ReportsFilters } from "@/components/reports/reports-filters";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { ReportsFilters } from "@/components/reports/reports-filters";
 import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -23,6 +23,7 @@ import {
   workOrders,
 } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { getDateRangeStart } from "@/lib/utils/date-filters";
 import {
   aliasedTable,
   and,
@@ -48,7 +49,6 @@ import {
   Timer,
 } from "lucide-react";
 import Link from "next/link";
-import { getDateRangeStart } from "@/lib/utils/date-filters";
 
 type SearchParams = {
   status?: string;
@@ -115,7 +115,12 @@ async function getWorkOrders(params: SearchParams) {
     conditions.push(lte(workOrders.createdAt, toDate));
   }
 
-  if (!params.from && !params.to && params.dateRange && params.dateRange !== "all") {
+  if (
+    !params.from &&
+    !params.to &&
+    params.dateRange &&
+    params.dateRange !== "all"
+  ) {
     const dateStart = getDateRangeStart(params.dateRange);
     if (dateStart) {
       conditions.push(gte(workOrders.createdAt, dateStart));
@@ -235,7 +240,12 @@ async function getStats(params: SearchParams) {
     conditions.push(lte(workOrders.createdAt, toDate));
   }
 
-  if (!params.from && !params.to && params.dateRange && params.dateRange !== "all") {
+  if (
+    !params.from &&
+    !params.to &&
+    params.dateRange &&
+    params.dateRange !== "all"
+  ) {
     const dateStart = getDateRangeStart(params.dateRange);
     if (dateStart) {
       conditions.push(gte(workOrders.createdAt, dateStart));
@@ -380,7 +390,16 @@ export default async function ReportsPage({
       {/* Filters */}
       <ReportsFilters
         searchParams={params}
-        hasActiveFilters={!!(params.status && params.status !== "all" || params.priority && params.priority !== "all" || params.dateRange && params.dateRange !== "all" || params.search || params.from || params.to)}
+        hasActiveFilters={
+          !!(
+            (params.status && params.status !== "all") ||
+            (params.priority && params.priority !== "all") ||
+            (params.dateRange && params.dateRange !== "all") ||
+            params.search ||
+            params.from ||
+            params.to
+          )
+        }
       />
 
       {/* Work Orders Table */}

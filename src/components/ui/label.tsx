@@ -9,7 +9,8 @@ const labelVariants = cva(
     variants: {
       variant: {
         default: "",
-        industrial: "text-[11px] font-black uppercase tracking-widest text-muted-foreground",
+        industrial:
+          "text-[11px] font-black uppercase tracking-widest text-muted-foreground",
       },
     },
     defaultVariants: {

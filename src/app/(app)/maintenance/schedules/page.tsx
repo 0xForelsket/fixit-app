@@ -1,3 +1,4 @@
+import { SchedulesClient } from "@/components/maintenance/schedules-client";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
@@ -13,7 +14,6 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { SchedulesClient } from "@/components/maintenance/schedules-client";
 
 type SearchParams = {
   month?: string;

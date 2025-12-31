@@ -119,7 +119,7 @@ export function CostDashboard() {
       } else if (!result.success) {
         setError(result.error || "Failed to load cost data");
       }
-    } catch (err) {
+    } catch (_err) {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);

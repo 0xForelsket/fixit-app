@@ -15,13 +15,7 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { desc, eq } from "drizzle-orm";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  CheckCircle2,
-  MapPin,
-  Wrench,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, MapPin, Wrench } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EquipmentHistory } from "./equipment-history";
@@ -118,17 +112,22 @@ export default async function EquipmentPage({ params }: PageProps) {
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const hasDuePM = schedules.some((s) => s.nextDue <= sevenDaysFromNow);
 
-    const statusColorMap: Record<string, "zinc" | "blue" | "emerald" | "amber" | "red"> = {
+  const statusColorMap: Record<
+    string,
+    "zinc" | "blue" | "emerald" | "amber" | "red"
+  > = {
     operational: "emerald",
     maintenance: "amber",
     down: "red",
   };
   const statusColor = statusColorMap[equipmentItem.status] || "zinc";
-  
-  const StatusIcon = 
-    equipmentItem.status === "operational" ? CheckCircle2 :
-    equipmentItem.status === "maintenance" ? Wrench :
-    AlertTriangle;
+
+  const StatusIcon =
+    equipmentItem.status === "operational"
+      ? CheckCircle2
+      : equipmentItem.status === "maintenance"
+        ? Wrench
+        : AlertTriangle;
 
   return (
     <EntityDetailLayout>
@@ -172,24 +171,26 @@ export default async function EquipmentPage({ params }: PageProps) {
                   {equipmentItem.location?.name || "Unassigned"}
                 </div>
               </EntityDetailItem>
-              
+
               {equipmentItem.parent && (
-                 <EntityDetailItem label="Parent Asset">
-                    <Link
-                      href={`/assets/equipment/${equipmentItem.parent.code}`}
-                      className="group flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 hover:border-primary-200 hover:bg-primary-50 transition-all"
-                    >
-                      <div className="h-6 w-6 rounded bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-primary-600">
-                        <Wrench className="h-3 w-3" />
+                <EntityDetailItem label="Parent Asset">
+                  <Link
+                    href={`/assets/equipment/${equipmentItem.parent.code}`}
+                    className="group flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 p-2 hover:border-primary-200 hover:bg-primary-50 transition-all"
+                  >
+                    <div className="h-6 w-6 rounded bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-primary-600">
+                      <Wrench className="h-3 w-3" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-bold text-zinc-500 uppercase leading-none mb-0.5">
+                        Parent
                       </div>
-                      <div className="min-w-0">
-                        <div className="text-[10px] font-bold text-zinc-500 uppercase leading-none mb-0.5">Parent</div>
-                        <div className="text-xs font-bold text-zinc-900 truncate group-hover:text-primary-700">
-                          {equipmentItem.parent.name}
-                        </div>
+                      <div className="text-xs font-bold text-zinc-900 truncate group-hover:text-primary-700">
+                        {equipmentItem.parent.name}
                       </div>
-                    </Link>
-                 </EntityDetailItem>
+                    </div>
+                  </Link>
+                </EntityDetailItem>
               )}
             </EntityStatusCard>
           </div>
