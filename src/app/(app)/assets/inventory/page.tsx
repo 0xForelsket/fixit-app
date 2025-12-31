@@ -79,7 +79,7 @@ export default async function InventoryPage() {
               asChild
               className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
             >
-              <Link href="/admin/import">
+              <Link href="/assets/inventory/import">
                 <Upload className="mr-2 h-4 w-4" />
                 IMPORT DATA
               </Link>

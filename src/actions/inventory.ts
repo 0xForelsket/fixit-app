@@ -4,6 +4,7 @@ import { db } from "@/db";
 import {
   inventoryLevels,
   inventoryTransactions,
+  spareParts,
   workOrderParts,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
@@ -200,4 +201,188 @@ export async function consumeWorkOrderPartAction(input: ConsumePartInput) {
       error: error instanceof Error ? error.message : "Internal Server Error",
     };
   }
+}
+
+// ============ CSV Import Types ============
+
+export interface PartImportRow {
+  partNumber: string;
+  name: string;
+  description?: string;
+  quantity?: number;
+  minStock?: number;
+  unitCost?: number;
+  location?: string;
+  manufacturer?: string;
+}
+
+export interface PartImportRowResult {
+  row: number;
+  success: boolean;
+  partNumber: string;
+  error?: string;
+  partId?: number;
+}
+
+export interface PartImportResult {
+  success: boolean;
+  totalRows: number;
+  successCount: number;
+  failureCount: number;
+  results: PartImportRowResult[];
+  error?: string;
+}
+
+// ============ CSV Import Action ============
+
+export async function importPartsFromCSV(
+  rows: PartImportRow[]
+): Promise<PartImportResult> {
+  const user = await getCurrentUser();
+  if (!user || !userHasPermission(user, PERMISSIONS.INVENTORY_CREATE)) {
+    return {
+      success: false,
+      totalRows: rows.length,
+      successCount: 0,
+      failureCount: rows.length,
+      results: [],
+      error: "Unauthorized: You do not have permission to import parts",
+    };
+  }
+
+  const results: PartImportRowResult[] = [];
+  let successCount = 0;
+  let failureCount = 0;
+
+  // Get all locations for lookup
+  const allLocations = await db.query.locations.findMany();
+  const locationMap = new Map(
+    allLocations.map((loc) => [loc.name.toLowerCase(), loc.id])
+  );
+
+  // Also map by code
+  for (const loc of allLocations) {
+    locationMap.set(loc.code.toLowerCase(), loc.id);
+  }
+
+  // Get existing SKUs to check for duplicates
+  const existingParts = await db.query.spareParts.findMany({
+    columns: { sku: true },
+  });
+  const existingSkus = new Set(existingParts.map((p) => p.sku.toLowerCase()));
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const rowNum = i + 1;
+
+    try {
+      // Validate required fields
+      if (!row.partNumber || row.partNumber.trim() === "") {
+        throw new Error("Part number is required");
+      }
+
+      if (!row.name || row.name.trim() === "") {
+        throw new Error("Name is required");
+      }
+
+      const sku = row.partNumber.trim();
+
+      // Check for duplicate SKU
+      if (existingSkus.has(sku.toLowerCase())) {
+        throw new Error(`Part with SKU "${sku}" already exists`);
+      }
+
+      // Validate numeric fields
+      const quantity =
+        row.quantity !== undefined ? Number(row.quantity) : undefined;
+      const minStock =
+        row.minStock !== undefined ? Number(row.minStock) : undefined;
+      const unitCost =
+        row.unitCost !== undefined ? Number(row.unitCost) : undefined;
+
+      if (quantity !== undefined && (Number.isNaN(quantity) || quantity < 0)) {
+        throw new Error("Quantity must be a non-negative number");
+      }
+
+      if (minStock !== undefined && (Number.isNaN(minStock) || minStock < 0)) {
+        throw new Error("Min stock must be a non-negative number");
+      }
+
+      if (unitCost !== undefined && (Number.isNaN(unitCost) || unitCost < 0)) {
+        throw new Error("Unit cost must be a non-negative number");
+      }
+
+      // Lookup location if provided
+      let locationId: number | undefined;
+      if (row.location && row.location.trim() !== "") {
+        locationId = locationMap.get(row.location.trim().toLowerCase());
+        if (!locationId) {
+          throw new Error(`Location "${row.location}" not found`);
+        }
+      }
+
+      // Insert the part
+      const [insertedPart] = await db
+        .insert(spareParts)
+        .values({
+          sku: sku,
+          name: row.name.trim(),
+          description: row.description?.trim() || null,
+          category: "other", // Default category
+          reorderPoint: minStock ?? 0,
+          unitCost: unitCost ?? null,
+          isActive: true,
+        })
+        .returning({ id: spareParts.id });
+
+      // Add to existing SKUs set to prevent duplicates within same import
+      existingSkus.add(sku.toLowerCase());
+
+      // If quantity and location provided, create inventory level and transaction
+      if (quantity !== undefined && quantity > 0 && locationId) {
+        await db.insert(inventoryLevels).values({
+          partId: insertedPart.id,
+          locationId: locationId,
+          quantity: quantity,
+        });
+
+        await db.insert(inventoryTransactions).values({
+          partId: insertedPart.id,
+          locationId: locationId,
+          type: "in",
+          quantity: quantity,
+          reference: "CSV Import",
+          notes: `Initial stock from CSV import${row.manufacturer ? ` - Manufacturer: ${row.manufacturer}` : ""}`,
+          createdById: user.id,
+        });
+      }
+
+      results.push({
+        row: rowNum,
+        success: true,
+        partNumber: sku,
+        partId: insertedPart.id,
+      });
+      successCount++;
+    } catch (error) {
+      results.push({
+        row: rowNum,
+        success: false,
+        partNumber: row.partNumber || `(row ${rowNum})`,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      failureCount++;
+    }
+  }
+
+  revalidatePath("/assets/inventory");
+  revalidatePath("/assets/inventory/parts");
+
+  return {
+    success: failureCount === 0,
+    totalRows: rows.length,
+    successCount,
+    failureCount,
+    results,
+  };
 }

@@ -151,7 +151,7 @@ export default async function PartsPage({
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" asChild>
-            <Link href="/admin/import?type=spare-parts">
+            <Link href="/assets/inventory/import">
               <Upload className="mr-2 h-4 w-4" />
               BULK IMPORT
             </Link>
