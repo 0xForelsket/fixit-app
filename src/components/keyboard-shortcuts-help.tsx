@@ -116,7 +116,8 @@ export function KeyboardShortcutsHelp({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 hover:bg-muted transition-colors"
+              aria-label="Close keyboard shortcuts help"
+              className="rounded-lg p-2 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <X className="h-5 w-5" />
             </button>

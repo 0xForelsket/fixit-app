@@ -62,6 +62,7 @@ export function LaborHistory({ logs, onDelete }: LaborHistoryProps) {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={`Delete ${log.durationMinutes} minute labor entry`}
               className="h-8 w-8 text-zinc-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
               onClick={() => onDelete(log.id)}
             >

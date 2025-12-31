@@ -11,6 +11,7 @@ import {
   workOrderLogs,
   workOrders,
 } from "@/db/schema";
+import { logAudit } from "@/lib/audit";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { workOrderLogger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
@@ -178,6 +179,20 @@ export async function createWorkOrder(
       });
     }
 
+    // Audit log for work order creation
+    await logAudit({
+      entityType: "work_order",
+      entityId: workOrder.id,
+      action: "CREATE",
+      details: {
+        equipmentId,
+        type,
+        title,
+        priority,
+        reportedById: user.id,
+      },
+    });
+
     revalidatePath("/dashboard");
     revalidatePath("/maintenance/work-orders");
     revalidatePath("/my-work-orders");
@@ -302,6 +317,17 @@ export async function updateWorkOrder(
     }
   }
 
+  // Audit log for work order update
+  await logAudit({
+    entityType: "work_order",
+    entityId: workOrderId,
+    action: "UPDATE",
+    details: {
+      changes: result.data,
+      previousStatus: existingWorkOrder.status,
+    },
+  });
+
   revalidatePath(`/maintenance/work-orders/${workOrderId}`);
   revalidatePath("/maintenance/work-orders");
   revalidatePath("/dashboard");
@@ -371,6 +397,18 @@ export async function resolveWorkOrder(
       link: `/maintenance/work-orders/${workOrderId}`,
     });
   }
+
+  // Audit log for work order resolution
+  await logAudit({
+    entityType: "work_order",
+    entityId: workOrderId,
+    action: "UPDATE",
+    details: {
+      action: "resolved",
+      previousStatus: existingWorkOrder.status,
+      resolutionNotes: result.data.resolutionNotes,
+    },
+  });
 
   revalidatePath(`/maintenance/work-orders/${workOrderId}`);
   revalidatePath("/maintenance/work-orders");
@@ -584,6 +622,20 @@ export async function bulkUpdateWorkOrders(
     }
 
     const updated = validIds.length;
+
+    // Audit log for bulk update
+    if (updated > 0) {
+      await logAudit({
+        entityType: "work_order",
+        entityId: validIds[0], // Log with first ID, details contain all
+        action: "BULK_UPDATE",
+        details: {
+          workOrderIds: validIds,
+          changes: { status, priority, assignedToId },
+          count: updated,
+        },
+      });
+    }
 
     workOrderLogger.info(
       { userId: user.id, count: updated, action: "bulk_update" },

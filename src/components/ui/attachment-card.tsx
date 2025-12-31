@@ -11,7 +11,8 @@ export interface AttachmentFile {
   mimeType: string;
   sizeBytes: number;
   url: string;
-  id?: number | string;
+  /** Required for delete operations */
+  id?: number;
 }
 
 interface AttachmentCardProps {
@@ -52,7 +53,7 @@ export function AttachmentCard({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!onDelete || isDeleting) return;
+    if (!onDelete || isDeleting || file.id === undefined) return;
 
     if (!window.confirm("Are you sure you want to delete this file?")) {
       return;
@@ -67,7 +68,6 @@ export function AttachmentCard({
 
     setIsDeleting(true);
     try {
-      // @ts-ignore - id is optional in interface but required for db operations
       await onDelete(file.id);
     } catch (error) {
       console.error("Delete failed", error);
@@ -85,13 +85,14 @@ export function AttachmentCard({
           className
         )}
       >
-        {onDelete && (
+        {onDelete && file.id !== undefined && (
           <button
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
+            aria-label={`Delete ${file.filename}`}
             className={cn(
-              "absolute top-2 right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-sm opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 hover:bg-red-700",
+              "absolute top-2 right-2 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-sm opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 hover:bg-red-700",
               isDeleting && "opacity-100 cursor-not-allowed bg-red-400"
             )}
             title="Delete Attachment"
@@ -113,7 +114,8 @@ export function AttachmentCard({
           <button
             type="button"
             onClick={() => setShowPdfPreview(true)}
-            className="group/pdf relative aspect-video w-full overflow-hidden bg-zinc-900 flex items-center justify-center transition-all"
+            aria-label={`Preview ${file.filename}`}
+            className="group/pdf relative aspect-video w-full overflow-hidden bg-zinc-900 flex items-center justify-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
             {/* Technical Blueprint Pattern */}
             <div
@@ -186,7 +188,8 @@ export function AttachmentCard({
             href={file.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex aspect-video w-full items-center justify-center bg-muted text-muted-foreground hover:bg-muted/80 hover:text-primary transition-colors"
+            aria-label={`Open ${file.filename}`}
+            className="flex aspect-video w-full items-center justify-center bg-muted text-muted-foreground hover:bg-muted/80 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           >
             <FileText className="h-10 w-10" />
           </a>
@@ -209,7 +212,7 @@ export function AttachmentCard({
               href={file.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
+              className="text-muted-foreground hover:text-primary transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               aria-label={`Download ${file.filename}`}
             >
               <Download className="h-3.5 w-3.5" />

@@ -152,13 +152,14 @@ export function FilterBar({
             placeholder={searchPlaceholder}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-4 pr-11 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
+            className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-4 pr-11 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus-visible:border-primary/50 focus-visible:bg-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
           />
           {inputValue ? (
             <button
               type="button"
               onClick={handleClearSearch}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground/50 hover:text-danger transition-all active:scale-90"
+              aria-label="Clear search"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground/50 hover:text-danger transition-all active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <X className="h-3 w-3" />
             </button>
@@ -179,7 +180,7 @@ export function FilterBar({
                 type="date"
                 name="from"
                 defaultValue={searchParams.from}
-                className="h-10 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5"
+                className="h-10 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus-visible:border-primary/50 focus-visible:bg-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/5"
               />
             </div>
             <span className="text-[10px] font-black text-muted-foreground/40">
@@ -193,7 +194,7 @@ export function FilterBar({
                 type="date"
                 name="to"
                 defaultValue={searchParams.to}
-                className="h-10 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5"
+                className="h-10 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus-visible:border-primary/50 focus-visible:bg-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/5"
               />
             </div>
             <Button

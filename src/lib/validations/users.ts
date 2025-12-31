@@ -2,15 +2,19 @@ import { z } from "zod";
 
 export const userRoleSchema = z.enum(["operator", "tech", "admin"]);
 
+// PIN must be 4-20 digits only
+const pinSchema = z
+  .string()
+  .min(4, "PIN must be at least 4 digits")
+  .max(20, "PIN is too long")
+  .regex(/^\d+$/, "PIN must contain only digits");
+
 export const loginSchema = z.object({
   employeeId: z
     .string()
     .min(1, "Employee ID is required")
     .max(50, "Employee ID is too long"),
-  pin: z
-    .string()
-    .min(4, "PIN must be at least 4 characters")
-    .max(20, "PIN is too long"),
+  pin: pinSchema,
 });
 
 export const createUserSchema = z.object({
@@ -29,10 +33,7 @@ export const createUserSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  pin: z
-    .string()
-    .min(4, "PIN must be at least 4 characters")
-    .max(20, "PIN is too long"),
+  pin: pinSchema,
   role: userRoleSchema.default("operator"),
   roleId: z.coerce.number().int().positive("Role is required").optional(),
   isActive: z.boolean().default(true),
@@ -55,12 +56,7 @@ export const updateUserSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  pin: z
-    .string()
-    .min(4, "PIN must be at least 4 characters")
-    .max(20, "PIN is too long")
-    .optional()
-    .or(z.literal("")),
+  pin: pinSchema.optional().or(z.literal("")),
   role: userRoleSchema.optional(),
   roleId: z.coerce.number().int().positive().optional(),
   isActive: z.boolean().optional(),
@@ -72,10 +68,7 @@ export const updateUserSchema = z.object({
 });
 
 export const updatePinSchema = z.object({
-  pin: z
-    .string()
-    .min(4, "PIN must be at least 4 characters")
-    .max(20, "PIN is too long"),
+  pin: pinSchema,
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

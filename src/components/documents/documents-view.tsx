@@ -193,6 +193,8 @@ export function DocumentsView({
               variant="outline"
               size="icon"
               onClick={() => setViewMode("grid")}
+              aria-label="Grid view"
+              aria-pressed={viewMode === "grid"}
               className={cn(
                 "cursor-pointer",
                 viewMode === "grid" &&
@@ -205,6 +207,8 @@ export function DocumentsView({
               variant="outline"
               size="icon"
               onClick={() => setViewMode("list")}
+              aria-label="List view"
+              aria-pressed={viewMode === "list"}
               className={cn(
                 "cursor-pointer",
                 viewMode === "list" &&

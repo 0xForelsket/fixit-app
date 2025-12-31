@@ -41,6 +41,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "drizzle-orm": "^0.38.3",
+    "framer-motion": "^12.23.26",
     "html5-qrcode": "^2.3.8",
     "jose": "^6.1.3",
     "lucide-react": "^0.468.0",

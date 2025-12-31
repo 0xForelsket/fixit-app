@@ -224,6 +224,7 @@ export function BulkActionsBar({
             className="h-8 w-8 p-0 text-background/60 hover:text-background hover:bg-background/10"
             onClick={onClear}
             disabled={isPending}
+            aria-label="Clear selection"
           >
             <X className="h-4 w-4" />
           </Button>

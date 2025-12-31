@@ -22,7 +22,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="rounded-full" disabled>
+      <Button variant="ghost" size="icon" className="rounded-full" disabled aria-label="Loading theme">
         <Palette className="h-5 w-5 opacity-50" />
       </Button>
     );

@@ -128,6 +128,7 @@ export function Calendar<T>({
               variant="ghost"
               size="icon"
               onClick={handlePrevMonth}
+              aria-label="Previous month"
               className="h-12 w-16 rounded-l-full hover:bg-white/10 transition-colors"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -137,6 +138,7 @@ export function Calendar<T>({
               variant="ghost"
               size="icon"
               onClick={handleNextMonth}
+              aria-label="Next month"
               className="h-12 w-16 rounded-r-full hover:bg-white/10 transition-colors"
             >
               <ChevronRight className="h-5 w-5" />

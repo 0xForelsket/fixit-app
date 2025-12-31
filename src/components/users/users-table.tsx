@@ -153,7 +153,7 @@ export function UsersTable({ users, searchParams }: UsersTableProps) {
           asChild
           className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
         >
-          <Link href={`/admin/users/${row.id}`}>
+          <Link href={`/admin/users/${row.id}`} aria-label={`Edit ${row.name}`}>
             <Edit className="h-4 w-4" />
           </Link>
         </Button>

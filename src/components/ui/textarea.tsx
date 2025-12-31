@@ -10,7 +10,7 @@ const textareaVariants = cva(
         default:
           "min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         industrial:
-          "min-h-[100px] rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium placeholder:text-muted-foreground/60 focus:border-primary focus:ring-4 focus:ring-primary/10",
+          "min-h-[100px] rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10",
       },
     },
     defaultVariants: {

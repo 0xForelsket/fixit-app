@@ -96,6 +96,52 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   --radius-theme: var(--radius);
+
+  /* Custom Animations */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes reveal-right {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes scan {
+    0% {
+      top: -10%;
+    }
+    100% {
+      top: 110%;
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  --animation-fade-in-up: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animation-reveal-right: reveal-right 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  --animation-scan: scan 3s linear infinite;
+  --animation-float: float 6s ease-in-out infinite;
+  --animation-spin-slow: spin 12s linear infinite;
+  --animation-reverse-spin: spin 8s linear reverse infinite;
 }
 
 /* ============================================

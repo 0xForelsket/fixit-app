@@ -114,6 +114,7 @@ export function TimerDisplay({
                 <Button
                   variant="outline"
                   onClick={onToggleManual}
+                  aria-label="Add manual time entry"
                   className="h-14 flex-1 rounded-xl border-2 font-black uppercase tracking-widest active:scale-95"
                 >
                   <Plus className="h-6 w-6" />

@@ -106,6 +106,7 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
         size="icon"
         className="relative"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -230,7 +231,8 @@ function NotificationItem({
             e.stopPropagation();
             onMarkRead();
           }}
-          className="shrink-0 rounded-full p-1 hover:bg-muted-foreground/20"
+          aria-label="Mark as read"
+          className="shrink-0 rounded-full p-1 hover:bg-muted-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           title="Mark as read"
         >
           <Check className="h-4 w-4 text-muted-foreground" />

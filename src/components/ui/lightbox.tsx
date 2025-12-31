@@ -25,7 +25,7 @@ export function Lightbox({ src, alt, isOpen, onClose }: LightboxProps) {
         <div className="relative flex items-center justify-center w-full h-full">
           {/* Close button - custom positioned */}
           <DialogClose
-            className="absolute -top-12 right-0 z-50 rounded-full bg-black/50 p-2 text-white opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-white"
+            className="absolute -top-12 right-0 z-50 rounded-full bg-black/50 p-2 text-white opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             onClick={onClose}
           >
             <X className="h-6 w-6" />
@@ -66,7 +66,7 @@ export function LightboxImage({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className={cn("cursor-zoom-in", containerClassName)}
+        className={cn("cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md", containerClassName)}
         aria-label={`View ${alt} in full size`}
       >
         <img src={src} className={className} {...props} alt={alt} />

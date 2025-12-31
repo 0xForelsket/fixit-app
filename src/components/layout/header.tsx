@@ -31,6 +31,7 @@ export function Header({ title, userId, onMenuClick }: HeaderProps) {
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
+            aria-label="Toggle navigation menu"
             className="lg:hidden text-muted-foreground hover:text-primary hover:bg-muted"
           >
             <Menu className="h-5 w-5" />
@@ -69,6 +70,7 @@ export function Header({ title, userId, onMenuClick }: HeaderProps) {
           onClick={() =>
             document.dispatchEvent(new CustomEvent("toggle-command-menu"))
           }
+          aria-label="Open search"
           className="md:hidden text-muted-foreground hover:text-primary"
         >
           <Search className="h-5 w-5" />

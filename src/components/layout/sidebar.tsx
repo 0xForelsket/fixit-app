@@ -266,8 +266,9 @@ export function Sidebar({
           <button
             type="button"
             onClick={onToggleCollapse}
+            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             className={cn(
-              "rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer",
+              "rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               isCollapsed ? "flex" : "hidden lg:flex"
             )}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -282,7 +283,8 @@ export function Sidebar({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+            aria-label="Close sidebar"
+            className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <X className="h-5 w-5" />
           </button>

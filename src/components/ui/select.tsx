@@ -11,14 +11,14 @@ const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
 const selectTriggerVariants = cva(
-  "flex h-10 w-full items-center justify-between transition-all placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+  "flex h-10 w-full items-center justify-between transition-all placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
   {
     variants: {
       variant: {
         default:
-          "rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         industrial:
-          "h-12 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 active:scale-[0.98]",
+          "h-12 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10 active:scale-[0.98]",
       },
     },
     defaultVariants: {
@@ -134,7 +134,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-9 pr-3 text-[10px] font-bold uppercase tracking-wider outline-none transition-all focus:bg-primary/20 focus:text-primary active:scale-[0.98] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-9 pr-3 text-[10px] font-bold uppercase tracking-wider outline-none transition-all focus-visible:bg-primary/20 focus-visible:text-primary active:scale-[0.98] data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}
