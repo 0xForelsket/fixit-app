@@ -17,6 +17,7 @@ import {
   BarChart3,
   ChevronsUpDown,
   ClipboardList,
+  Clock,
   Cog,
   DollarSign,
   Download,
@@ -74,6 +75,12 @@ const navGroups: NavGroup[] = [
         label: "Cost Analytics",
         href: "/analytics/costs",
         icon: <DollarSign className="h-5 w-5" />,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+      {
+        label: "Downtime",
+        href: "/analytics/downtime",
+        icon: <Clock className="h-5 w-5" />,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {
