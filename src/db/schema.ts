@@ -607,6 +607,62 @@ export const laborLogs = sqliteTable(
   })
 );
 
+// User favorites (bookmarks for quick access)
+export const favoriteEntityTypes = ["equipment"] as const;
+export type FavoriteEntityType = (typeof favoriteEntityTypes)[number];
+
+export const userFavorites = sqliteTable(
+  "user_favorites",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .references(() => users.id)
+      .notNull(),
+    entityType: text("entity_type").notNull().$type<FavoriteEntityType>(),
+    entityId: integer("entity_id").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => ({
+    // Unique constraint to prevent duplicate favorites
+    uniqueFavorite: index("user_favorites_unique_idx").on(
+      table.userId,
+      table.entityType,
+      table.entityId
+    ),
+    userIdx: index("user_favorites_user_idx").on(table.userId),
+  })
+);
+
+// Work Order Templates
+export const workOrderTemplates = sqliteTable("work_order_templates", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: text("type", { enum: workOrderTypes }).notNull(),
+  priority: text("priority", { enum: workOrderPriorities })
+    .notNull()
+    .default("medium"),
+  defaultTitle: text("default_title"),
+  defaultDescription: text("default_description"),
+  defaultAssignedToId: integer("default_assigned_to_id").references(
+    () => users.id
+  ),
+  departmentId: integer("department_id").references(() => departments.id),
+  estimatedMinutes: integer("estimated_minutes"),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdById: integer("created_by_id")
+    .references(() => users.id)
+    .notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // System-wide audit logs
 export const auditLogs = sqliteTable(
   "audit_logs",
@@ -664,6 +720,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   attachments: many(attachments),
   notifications: many(notifications),
   equipmentStatusChanges: many(equipmentStatusLogs),
+  favorites: many(userFavorites),
 }));
 
 export const locationsRelations = relations(locations, ({ one, many }) => ({
@@ -940,6 +997,34 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   }),
 }));
 
+export const userFavoritesRelations = relations(userFavorites, ({ one }) => ({
+  user: one(users, {
+    fields: [userFavorites.userId],
+    references: [users.id],
+  }),
+}));
+
+// Work Order Templates relations
+export const workOrderTemplatesRelations = relations(
+  workOrderTemplates,
+  ({ one }) => ({
+    defaultAssignedTo: one(users, {
+      fields: [workOrderTemplates.defaultAssignedToId],
+      references: [users.id],
+      relationName: "templateDefaultAssignee",
+    }),
+    department: one(departments, {
+      fields: [workOrderTemplates.departmentId],
+      references: [departments.id],
+    }),
+    createdBy: one(users, {
+      fields: [workOrderTemplates.createdById],
+      references: [users.id],
+      relationName: "templateCreator",
+    }),
+  })
+);
+
 // ============ TYPE EXPORTS ============
 
 export type Role = typeof roles.$inferSelect;
@@ -1016,3 +1101,10 @@ export type NewDepartment = typeof departments.$inferInsert;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
+
+export type UserFavorite = typeof userFavorites.$inferSelect;
+export type NewUserFavorite = typeof userFavorites.$inferInsert;
+
+// Work Order Templates types
+export type WorkOrderTemplate = typeof workOrderTemplates.$inferSelect;
+export type NewWorkOrderTemplate = typeof workOrderTemplates.$inferInsert;

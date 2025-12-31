@@ -1,10 +1,11 @@
+import { getFavoriteIds } from "@/actions/favorites";
+import { EquipmentTable } from "@/components/equipment/equipment-table";
+import { EquipmentFilters } from "@/components/equipment/equipment-filters";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { EquipmentTable } from "@/components/equipment/equipment-table";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
@@ -16,7 +17,6 @@ import {
   Cuboid,
   MonitorCog,
   Plus,
-  Search,
   Upload,
   X,
 } from "lucide-react";
@@ -148,105 +148,76 @@ export default async function EquipmentPage({
   const equipmentList = await getEquipment(params, user);
   const stats = await getEquipmentStats(user);
 
+  const favoriteResult = await getFavoriteIds("equipment");
+  const favoriteIds = favoriteResult.success ? favoriteResult.data ?? [] : [];
+
   return (
-    <PageContainer id="equipment-page" className="space-y-10">
-      <PageHeader
-        title="Asset Inventory"
-        subtitle="Infrastructure Monitoring"
-        description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
-        bgSymbol="EQ"
-        actions={
-          <>
-            <ViewToggle />
-            <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-            <Button
-              variant="outline"
-              asChild
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/admin/import?type=equipment">
-                <Upload className="mr-2 h-4 w-4" />
-                Bulk Import
-              </Link>
-            </Button>
-            <Button
-              variant="outline"
-              asChild
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/assets/equipment/models">
-                <Cuboid className="mr-2 h-4 w-4" />
-                Models
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
-            >
-              <Link href="/assets/equipment/new">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Asset
-              </Link>
-            </Button>
-          </>
-        }
-      />
-
-      <StatsTicker
-        stats={[
-          {
-            label: "Total Inventory",
-            value: stats.total,
-            icon: MonitorCog,
-            variant: "default",
-          },
-          {
-            label: "Operational",
-            value: stats.operational,
-            icon: CheckCircle2,
-            variant: "success",
-          },
-          {
-            label: "Maintenance / Down",
-            value: stats.maintenance + stats.down,
-            icon: AlertCircle,
-            variant: "danger",
-          },
-        ]}
-      />
-
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm mb-6">
-        <form
-          className="w-full sm:max-w-md"
-          action="/assets/equipment"
-          method="get"
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              name="search"
-              placeholder="SEARCH BY NAME OR SERIAL..."
-              defaultValue={params.search}
-              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
-            />
-            {params.status && (
-              <input type="hidden" name="status" value={params.status} />
-            )}
-          </div>
-        </form>
-        {params.status && params.status !== "all" && (
-          <Link
-            href="/assets/equipment"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs font-bold hover:bg-muted-foreground/10 transition-colors text-muted-foreground"
+    <PageLayout
+      title="Asset Inventory"
+      subtitle="Infrastructure Monitoring"
+      description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
+      bgSymbol="EQ"
+      headerActions={
+        <>
+          <ViewToggle />
+          <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
           >
-            Status: {params.status}
-            <X className="h-3 w-3" />
-          </Link>
-        )}
-      </div>
-
+            <Link href="/admin/import?type=equipment">
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Import
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <Link href="/assets/equipment/models">
+              <Cuboid className="mr-2 h-4 w-4" />
+              Models
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+          >
+            <Link href="/assets/equipment/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Asset
+            </Link>
+          </Button>
+        </>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Inventory",
+              value: stats.total,
+              icon: MonitorCog,
+              variant: "default",
+            },
+            {
+              label: "Operational",
+              value: stats.operational,
+              icon: CheckCircle2,
+              variant: "success",
+            },
+            {
+              label: "Maintenance / Down",
+              value: stats.maintenance + stats.down,
+              icon: AlertCircle,
+              variant: "danger",
+            },
+          ]}
+        />
+      }
+      filters={<EquipmentFilters searchParams={params} />}
+    >
       {params.view === "tree" ? (
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-border/20 overflow-hidden">
           <Suspense
@@ -259,7 +230,6 @@ export default async function EquipmentPage({
         </div>
       ) : (
         <>
-          {/* Equipment Table */}
           {equipmentList.length === 0 ? (
             <EmptyState
               title="No assets identified"
@@ -280,10 +250,15 @@ export default async function EquipmentPage({
               )}
             </EmptyState>
           ) : (
-            <EquipmentTable equipment={equipmentList} searchParams={params} />
+            <EquipmentTable
+              equipment={equipmentList}
+              searchParams={params}
+              favoriteIds={favoriteIds}
+            />
           )}
         </>
       )}
-    </PageContainer>
+    </PageLayout>
   );
 }
+

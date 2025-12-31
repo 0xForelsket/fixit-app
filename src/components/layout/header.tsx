@@ -1,5 +1,6 @@
 "use client";
 
+import { FavoritesDropdown } from "@/components/favorites/favorites-dropdown";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Menu, Search } from "lucide-react";
@@ -72,6 +73,7 @@ export function Header({ title, userId, onMenuClick }: HeaderProps) {
         >
           <Search className="h-5 w-5" />
         </Button>
+        <FavoritesDropdown />
         <ThemeToggle />
         <NotificationBell userId={userId} />
       </div>

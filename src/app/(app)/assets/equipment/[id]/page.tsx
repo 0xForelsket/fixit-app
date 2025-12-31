@@ -1,4 +1,6 @@
+import { isFavorite } from "@/actions/favorites";
 import { AuditLogList } from "@/components/audit/audit-log-list";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -15,7 +17,7 @@ import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import {
   Activity,
   AlertCircle,
@@ -93,6 +95,10 @@ export default async function EquipmentDetailPage({
     notFound();
   }
 
+  // Check if this equipment is favorited by the current user
+  const favoriteResult = await isFavorite("equipment", equipmentId);
+  const isFavorited = favoriteResult.success && favoriteResult.data === true;
+
   const statusConfigs: Record<
     string,
     { icon: React.ElementType; color: string; bg: string; label: string }
@@ -128,7 +134,9 @@ export default async function EquipmentDetailPage({
           <h1 className="text-2xl font-bold tracking-tight">
             {equipmentItem.name}
           </h1>
-          <p className="text-muted-foreground font-mono">{equipmentItem.code}</p>
+          <p className="text-muted-foreground font-mono">
+            {equipmentItem.code}
+          </p>
         </div>
       </div>
       <Button
@@ -307,16 +315,27 @@ export default async function EquipmentDetailPage({
             <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{equipmentItem.name}</h1>
-            <p className="text-muted-foreground font-mono">{equipmentItem.code}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {equipmentItem.name}
+            </h1>
+            <p className="text-muted-foreground font-mono">
+              {equipmentItem.code}
+            </p>
           </div>
         </div>
-        <Button variant="outline" asChild className="hidden sm:flex">
-          <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <FavoriteButton
+            entityType="equipment"
+            entityId={equipmentItem.id}
+            isFavorited={isFavorited}
+          />
+          <Button variant="outline" asChild className="hidden sm:flex">
+            <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-6 lg:hidden">

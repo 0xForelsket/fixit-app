@@ -1,5 +1,6 @@
 "use client";
 
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { Button } from "@/components/ui/button";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -29,12 +30,15 @@ interface Equipment {
 interface EquipmentTableProps {
   equipment: Equipment[];
   searchParams?: Record<string, string | undefined>;
+  favoriteIds?: number[];
 }
 
 export function EquipmentTable({
   equipment,
   searchParams,
+  favoriteIds = [],
 }: EquipmentTableProps) {
+  const favoriteSet = new Set(favoriteIds);
   const columns: ColumnDef<Equipment>[] = [
     {
       id: "code",
@@ -131,11 +135,16 @@ export function EquipmentTable({
     {
       id: "actions",
       header: "",
-      width: "100px",
+      width: "140px",
       align: "right",
       resizable: false,
       cell: (row) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-1">
+          <FavoriteButton
+            entityType="equipment"
+            entityId={row.id}
+            isFavorited={favoriteSet.has(row.id)}
+          />
           <Button
             variant="ghost"
             size="icon"
