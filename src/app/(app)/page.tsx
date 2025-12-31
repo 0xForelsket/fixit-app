@@ -3,7 +3,7 @@ import { RecentEquipment } from "@/components/home/recent-equipment";
 import { UserHeader } from "@/components/home/user-header";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { db } from "@/db";
-import { equipment, notifications } from "@/db/schema";
+import { equipment, notifications, workOrders } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";

@@ -27,13 +27,13 @@ export function StatsTicker({
     <div
       className={cn(
         "w-full bg-card rounded-xl border shadow-sm overflow-hidden",
-        // Grid Layout Logic:
-        // - Mobile: 1 column
-        // - Tablet (sm): 2 columns
-        // - Desktop (lg): Flow columns (single row if possible)
-        "grid grid-cols-1 sm:grid-cols-2 lg:grid-flow-col lg:auto-cols-fr",
-        // divider implementation using gap and background color for "border" look
-        "gap-[1px] bg-border",
+        // Desktop Layout Logic:
+        // - lg: Flow columns (single row)
+        // - gap-[1px] bg-border for grid dividers
+        "lg:grid lg:grid-flow-col lg:auto-cols-fr lg:gap-[1px] lg:bg-border",
+        // Mobile/Tablet Layout: 
+        // - Flex row with horizontal scroll to save vertical space
+        "flex lg:flex-none flex-nowrap overflow-x-auto scrollbar-none",
         className
       )}
     >
@@ -48,9 +48,15 @@ export function StatsTicker({
           <div
             key={i}
             className={cn(
-              "bg-card p-5 lg:p-6 flex flex-col justify-between gap-3 relative overflow-hidden group hover:bg-muted/50 transition-colors",
-              isCompact && "p-4 gap-2",
-              // Subtle colored backgrounds for active states - ALWAYS VISIBLE
+              "bg-card transition-colors shrink-0",
+              // Mobile specific sizing: very compact
+              "w-[130px] sm:w-[150px] lg:w-auto",
+              "p-2.5 sm:p-4 lg:p-6 flex flex-col justify-between gap-0.5 sm:gap-2 relative overflow-hidden group hover:bg-muted/50",
+              // Borders for mobile
+              "border-r border-border last:border-r-0 lg:border-none",
+              
+              isCompact && "p-2 sm:p-3 lg:p-4",
+              // Subtle colored backgrounds
               isDanger && "bg-rose-500/5 hover:bg-rose-500/10",
               isWarning && "bg-amber-500/5 hover:bg-amber-500/10",
               isSuccess && "bg-emerald-500/5 hover:bg-emerald-500/10",
@@ -58,18 +64,18 @@ export function StatsTicker({
             )}
           >
             {/* Header: Label & Icon */}
-            <div className="flex items-center justify-between z-10">
+            <div className="flex items-center justify-between z-10 w-full mb-1 sm:mb-0">
               <span
                 className={cn(
-                  "text-[10px] font-bold text-muted-foreground uppercase tracking-widest",
-                  isCompact && "text-[9px]"
+                  "text-[8px] sm:text-[9px] font-black text-muted-foreground uppercase tracking-widest truncate",
+                  !isCompact && "lg:text-[10px]"
                 )}
               >
                 {stat.label}
               </span>
               <Icon
                 className={cn(
-                  "h-4 w-4 opacity-75 group-hover:opacity-100 transition-opacity",
+                  "h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4 opacity-75 group-hover:opacity-100 transition-opacity shrink-0",
                   isDanger
                     ? "text-rose-500"
                     : isWarning
@@ -84,12 +90,14 @@ export function StatsTicker({
             </div>
 
             {/* Value & Trend */}
-            <div className="flex items-end justify-between z-10 mt-1">
+            <div className="flex items-end justify-between z-10">
               <span
                 className={cn(
                   "font-mono font-black tracking-tighter tabular-nums leading-none",
-                  // Reduced text sizes for better density
-                  isCompact ? "text-2xl lg:text-3xl" : "text-3xl lg:text-4xl",
+                  // Ultra compact text on mobile
+                  "text-lg sm:text-2xl lg:text-3xl",
+                  !isCompact && "lg:text-4xl",
+                  
                   isDanger
                     ? "text-rose-600"
                     : isWarning
@@ -107,7 +115,7 @@ export function StatsTicker({
               {stat.trend !== undefined && (
                 <div
                   className={cn(
-                    "flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded",
+                    "flex items-center gap-0.5 sm:gap-1 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-1 sm:px-1.5 py-0.5 rounded",
                     stat.trend > 0
                       ? "text-emerald-700 bg-emerald-100"
                       : "text-rose-700 bg-rose-100"
@@ -118,7 +126,7 @@ export function StatsTicker({
               )}
             </div>
 
-            {/* Decorative bottom accent bar - ALWAYS VISIBLE with lower opacity, full opacity on hover */}
+            {/* Decorative bottom accent bar */}
             <div
               className={cn(
                 "absolute bottom-0 left-0 w-full h-0.5 opacity-40 group-hover:opacity-100 transition-opacity",

@@ -16,15 +16,19 @@ export type WorkOrderWithRelations = WorkOrder & {
 interface WorkOrderCardProps {
   workOrder: WorkOrderWithRelations;
   index?: number;
+  href?: string;
+  variant?: "default" | "compact";
 }
 
 export function WorkOrderCard({
   workOrder,
   variant = "default",
   index = 0,
-}: WorkOrderCardProps & { variant?: "default" | "compact" }) {
+  href,
+}: WorkOrderCardProps) {
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
+  const targetHref = href || `/maintenance/work-orders/${workOrder.id}`;
 
   const staggerClass =
     index < 5
@@ -42,7 +46,7 @@ export function WorkOrderCard({
 
     return (
       <Link
-        href={`/maintenance/work-orders/${workOrder.id}`}
+        href={targetHref}
         className={cn(
           "block relative overflow-hidden rounded-xl border border-border bg-card shadow-sm active:scale-[0.99] transition-all animate-in fade-in slide-in-from-bottom-1 hover:shadow-md",
           borderColorClass,
@@ -126,7 +130,7 @@ export function WorkOrderCard({
 
   return (
     <Link
-      href={`/maintenance/work-orders/${workOrder.id}`}
+      href={targetHref}
       className={cn(
         "block rounded-2xl border-2 bg-card p-4 shadow-sm hover:shadow-xl hover:border-border/80 transition-all active:scale-[0.98] animate-in fade-in slide-in-from-bottom-2",
         workOrder.priority === "critical"
