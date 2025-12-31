@@ -18,6 +18,7 @@ import {
   ChevronsUpDown,
   ClipboardList,
   Cog,
+  DollarSign,
   Download,
   Factory,
   FileText,
@@ -67,6 +68,12 @@ const navGroups: NavGroup[] = [
         label: "Analytics",
         href: "/analytics",
         icon: <BarChart3 className="h-5 w-5" />,
+        permission: PERMISSIONS.ANALYTICS_VIEW,
+      },
+      {
+        label: "Cost Analytics",
+        href: "/analytics/costs",
+        icon: <DollarSign className="h-5 w-5" />,
         permission: PERMISSIONS.ANALYTICS_VIEW,
       },
       {
