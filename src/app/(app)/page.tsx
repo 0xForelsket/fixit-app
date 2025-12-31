@@ -10,6 +10,7 @@ import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, like, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { WorkOrderCard } from "@/components/work-orders/work-order-card";
 import { EquipmentGrid } from "./equipment-grid";
 import { EquipmentSearch } from "./equipment-search";
 
@@ -81,21 +82,63 @@ export default async function HomePage({ searchParams }: PageProps) {
     )
     .then((rows) => rows.length);
 
+  // Fetch operator's active requests
+  const myWorkOrders = await db.query.workOrders.findMany({
+    where: and(
+      eq(workOrders.reportedById, user.id),
+      sql`${workOrders.status} != 'closed'`
+    ),
+    limit: 5,
+    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
+    with: {
+      equipment: {
+        with: {
+          location: true,
+        },
+      },
+      reportedBy: true,
+      assignedTo: true,
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background/50 industrial-grid pb-20 lg:pb-0 transition-colors duration-500">
       <UserHeader user={user} avatarUrl={avatarUrl} unreadCount={unreadCount} />
 
       {/* Main content */}
-      <main className="container mx-auto px-4 pt-4 pb-20 max-w-5xl space-y-6 animate-in">
+      <main className="container mx-auto px-4 pt-4 pb-20 max-w-5xl space-y-8 animate-in">
         <QuickActions />
+
+        {myWorkOrders.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">
+                My Active Requests
+              </h2>
+              <Link
+                href="/my-tickets"
+                className="text-[9px] font-bold text-primary hover:underline uppercase tracking-widest transition-colors"
+              >
+                View all
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {myWorkOrders.map((wo) => (
+                <div key={wo.id} className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <WorkOrderCard workOrder={wo} variant="compact" />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <RecentEquipment />
 
         {/* Equipment Search Section */}
-        <section className="space-y-3">
+        <section className="space-y-4 pt-4 border-t border-border/10">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-black text-muted-foreground/60 uppercase tracking-widest">
-              Monitor Assets
+            <h2 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">
+              Asset Directory
             </h2>
             <Link
               href="/assets/equipment"

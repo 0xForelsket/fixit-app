@@ -15,7 +15,9 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 interface Stats {
@@ -308,6 +310,16 @@ async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  // If user is not a technician/admin, redirect them to the operator home screen
+  // This helps ensure users end up on the correct mobile-optimized root page
+  if (!hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
+    redirect("/");
+  }
 
   return (
     <PageLayout

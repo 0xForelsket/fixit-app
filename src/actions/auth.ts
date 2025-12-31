@@ -33,16 +33,10 @@ export async function login(
     return { error: authResult.error };
   }
 
-  const hasTechPermissions = hasPermission(
-    authResult.user.permissions,
-    PERMISSIONS.TICKET_VIEW_ALL
-  );
-
-  if (hasTechPermissions) {
-    redirect("/dashboard");
-  } else {
-    redirect("/");
-  }
+  // Redirect all users to /dashboard initially.
+  // This ensures that if they are on the root domain, they get redirected to app.domain/dashboard.
+  // From there, we can further route operators if needed.
+  redirect("/dashboard");
 }
 
 export async function logout(): Promise<void> {
