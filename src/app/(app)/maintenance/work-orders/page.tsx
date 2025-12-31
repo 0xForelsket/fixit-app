@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { WorkOrderFilters } from "@/components/work-orders/work-order-filters";
 import { WorkOrderList } from "@/components/work-orders/work-order-list";
 import { db } from "@/db";
 import { roles, users, workOrders } from "@/db/schema";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
-import { cn } from "@/lib/utils";
 import {
   type SQL,
   and,
@@ -254,31 +254,22 @@ export default async function WorkOrdersPage({
       bgSymbol="WQ"
       headerActions={
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-border bg-card overflow-hidden h-9">
-            <Link
-              href="/maintenance/work-orders"
-              className={cn(
-                "px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all flex items-center",
-                !isMyWorkOrdersView
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              All
-            </Link>
-            <Link
-              href="/maintenance/work-orders?assigned=me"
-              className={cn(
-                "px-3 py-1.5 text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5",
-                isMyWorkOrdersView
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              )}
-            >
-              <UserIcon className="h-3 w-3" />
-              Mine
-            </Link>
-          </div>
+          <SegmentedControl
+            selectedValue={isMyWorkOrdersView ? "me" : "all"}
+            options={[
+              {
+                label: "All",
+                value: "all",
+                href: "/maintenance/work-orders",
+              },
+              {
+                label: "Mine",
+                value: "me",
+                icon: UserIcon,
+                href: "/maintenance/work-orders?assigned=me",
+              },
+            ]}
+          />
           <Button
             size="sm"
             className="h-9 text-[10px] font-black uppercase tracking-widest"
