@@ -162,7 +162,7 @@ export default async function EquipmentPage({
         <>
           <ViewToggle />
           <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-          {hasPermission(user.permissions, PERMISSIONS.EQUIPMENT_CREATE) && (
+          {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_CREATE) && (
             <Button
               variant="outline"
               asChild
@@ -175,7 +175,7 @@ export default async function EquipmentPage({
             </Button>
           )}
           {hasPermission(
-            user.permissions,
+            user?.permissions ?? [],
             PERMISSIONS.EQUIPMENT_MANAGE_MODELS
           ) && (
             <Button
@@ -189,7 +189,7 @@ export default async function EquipmentPage({
               </Link>
             </Button>
           )}
-          {hasPermission(user.permissions, PERMISSIONS.EQUIPMENT_CREATE) && (
+          {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_CREATE) && (
             <Button
               asChild
               className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"

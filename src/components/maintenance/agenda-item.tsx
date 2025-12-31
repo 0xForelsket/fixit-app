@@ -10,7 +10,7 @@ interface AgendaItemProps {
     id: number;
     title: string;
     type: string;
-    nextDue: Date | null;
+    nextDue: string | Date | null;
     equipment?: { name: string } | null;
   };
   today: Date;

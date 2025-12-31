@@ -10,10 +10,10 @@ interface Schedule {
   id: number;
   title: string;
   nextDue: string | Date | null;
-  type?: string;
+  type: string;
   equipment?: {
     name: string;
-  };
+  } | null;
 }
 
 interface SchedulesClientProps {
