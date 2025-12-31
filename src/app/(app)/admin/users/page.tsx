@@ -1,13 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { UsersTable } from "@/components/users/users-table";
+import { UserFilters } from "@/components/users/user-filters";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import { Plus, Search, Shield, Upload, User, Users, Wrench } from "lucide-react";
+import {
+  Plus,
+  Shield,
+  Upload,
+  User,
+  Users,
+  Wrench,
+} from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -106,88 +113,66 @@ export default async function UsersPage({
   const stats = await getUserStats();
 
   return (
-    <PageContainer className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="User Directory"
-        subtitle="Team Management"
-        description={`${stats.total} ACCOUNTS • ${stats.active} ACTIVE`}
-        bgSymbol="US"
-        actions={
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              asChild
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/admin/import?type=users">
-                <Upload className="mr-2 h-4 w-4" />
-                BULK IMPORT
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
-            >
-              <Link href="/admin/users/new">
-                <Plus className="mr-2 h-4 w-4" />
-                ADD USER
-              </Link>
-            </Button>
-          </div>
-        }
-      />
-
-      {/* Stats Ticker */}
-      <StatsTicker
-        stats={[
-          {
-            label: "All Users",
-            value: stats.total,
-            icon: Users,
-            variant: "default",
-          },
-          {
-            label: "Operators",
-            value: stats.operators,
-            icon: User,
-            variant: "default",
-          },
-          {
-            label: "Technicians",
-            value: stats.techs,
-            icon: Wrench,
-            variant: "primary",
-          },
-          {
-            label: "Admins",
-            value: stats.admins,
-            icon: Shield,
-            variant: "danger",
-          },
-        ]}
-      />
-
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <form className="flex-1 max-w-md" action="/admin/users" method="get">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              name="search"
-              placeholder="FILTER BY NAME OR ID..."
-              defaultValue={params.search}
-              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
-            />
-            {params.role && (
-              <input type="hidden" name="role" value={params.role} />
-            )}
-          </div>
-        </form>
-      </div>
-
-      {/* Users Table */}
+    <PageLayout
+      title="User Directory"
+      subtitle="Team Management"
+      description={`${stats.total} ACCOUNTS • ${stats.active} ACTIVE`}
+      bgSymbol="US"
+      headerActions={
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <Link href="/admin/import?type=users">
+              <Upload className="mr-2 h-4 w-4" />
+              BULK IMPORT
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+          >
+            <Link href="/admin/users/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD USER
+            </Link>
+          </Button>
+        </div>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "All Users",
+              value: stats.total,
+              icon: Users,
+              variant: "default",
+            },
+            {
+              label: "Operators",
+              value: stats.operators,
+              icon: User,
+              variant: "default",
+            },
+            {
+              label: "Technicians",
+              value: stats.techs,
+              icon: Wrench,
+              variant: "primary",
+            },
+            {
+              label: "Admins",
+              value: stats.admins,
+              icon: Shield,
+              variant: "danger",
+            },
+          ]}
+        />
+      }
+      filters={<UserFilters searchParams={params} />}
+    >
       {usersList.length === 0 ? (
         <EmptyState
           title="No users found"
@@ -201,6 +186,7 @@ export default async function UsersPage({
       ) : (
         <UsersTable users={usersList} searchParams={params} />
       )}
-    </PageContainer>
+    </PageLayout>
   );
 }
+

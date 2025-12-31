@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
+import { WorkOrderFilters } from "@/components/work-orders/work-order-filters";
 import { WorkOrderList } from "@/components/work-orders/work-order-list";
 import { db } from "@/db";
 import { roles, users, workOrders } from "@/db/schema";
@@ -21,11 +22,8 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
-  Filter,
   Plus,
-  Search,
   User as UserIcon,
-  X,
 } from "lucide-react";
 import { AlertTriangle, CheckCircle2, Inbox, Timer } from "lucide-react";
 import Link from "next/link";
@@ -245,6 +243,16 @@ async function getStats(user: SessionUser | null) {
   };
 }
 
+function buildSearchParams(params: SearchParams) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value && value !== "all") {
+      query.set(key, value);
+    }
+  });
+  return query.toString();
+}
+
 export default async function WorkOrdersPage({
   searchParams,
 }: {
@@ -355,93 +363,10 @@ export default async function WorkOrdersPage({
         />
       }
       filters={
-        <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-muted/30 p-4 rounded-xl border border-border/50">
-          <form
-            className="flex-1 relative"
-            action="/maintenance/work-orders"
-            method="get"
-          >
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              name="search"
-              placeholder="FILTER BY TITLE, DESCRIPTION OR ASSET..."
-              defaultValue={params.search}
-              className="w-full h-10 rounded-lg border border-border bg-card pl-10 pr-4 text-[11px] font-bold uppercase tracking-wider focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/50 transition-all"
-            />
-            {params.status && (
-              <input type="hidden" name="status" value={params.status} />
-            )}
-            {params.priority && (
-              <input type="hidden" name="priority" value={params.priority} />
-            )}
-            {params.assigned && (
-              <input type="hidden" name="assigned" value={params.assigned} />
-            )}
-            {params.overdue && (
-              <input type="hidden" name="overdue" value={params.overdue} />
-            )}
-            {params.dateRange && (
-              <input type="hidden" name="dateRange" value={params.dateRange} />
-            )}
-          </form>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <FilterSelect
-              name="status"
-              value={params.status || "all"}
-              options={[
-                { value: "all", label: "ANY STATUS" },
-                { value: "open", label: "OPEN" },
-                { value: "in_progress", label: "IN PROGRESS" },
-                { value: "resolved", label: "RESOLVED" },
-                { value: "closed", label: "CLOSED" },
-              ]}
-              searchParams={params}
-            />
-
-            <FilterSelect
-              name="priority"
-              value={params.priority || "all"}
-              options={[
-                { value: "all", label: "ANY PRIORITY" },
-                { value: "critical", label: "CRITICAL" },
-                { value: "high", label: "HIGH" },
-                { value: "medium", label: "MEDIUM" },
-                { value: "low", label: "LOW" },
-              ]}
-              searchParams={params}
-            />
-
-            <FilterSelect
-              name="dateRange"
-              value={params.dateRange || "all"}
-              options={[
-                { value: "all", label: "ANY TIME" },
-                { value: "today", label: "TODAY" },
-                { value: "last7days", label: "LAST 7 DAYS" },
-                { value: "last30days", label: "LAST 30 DAYS" },
-                { value: "thisMonth", label: "THIS MONTH" },
-                { value: "lastQuarter", label: "LAST QUARTER" },
-              ]}
-              searchParams={params}
-            />
-
-            {activeFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
-                asChild
-              >
-                <Link href="/maintenance/work-orders">
-                  <X className="mr-2 h-3.5 w-3.5" />
-                  RESET
-                </Link>
-              </Button>
-            )}
-          </div>
-        </div>
+        <WorkOrderFilters
+          searchParams={params}
+          hasActiveFilters={!!activeFilters}
+        />
       }
     >
       {/* Work Orders List */}
@@ -510,71 +435,5 @@ export default async function WorkOrdersPage({
         </div>
       )}
     </PageLayout>
-  );
-}
-
-function buildSearchParams(params: Record<string, string | undefined>): string {
-  const searchParams = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value && value !== "all") {
-      searchParams.set(key, value);
-    }
-  }
-  return searchParams.toString();
-}
-
-function FilterSelect({
-  name,
-  value,
-  options,
-  searchParams,
-}: {
-  name: string;
-  value: string;
-  options: { value: string; label: string }[];
-  searchParams: SearchParams;
-}) {
-  const buildUrl = (newValue: string) => {
-    const params: Record<string, string | undefined> = {
-      ...searchParams,
-      [name]: newValue === "all" ? undefined : newValue,
-      page: undefined,
-    };
-    const queryString = buildSearchParams(params);
-    return `/maintenance/work-orders${queryString ? `?${queryString}` : ""}`;
-  };
-
-  const currentOption =
-    options.find((o) => o.value === value)?.label || options[0].label;
-
-  return (
-    <div className="relative group flex-1 sm:flex-none">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between gap-2 appearance-none rounded-lg border border-border bg-card py-2.5 pl-3 pr-8 text-[10px] font-black uppercase tracking-wider hover:bg-muted focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all min-w-[140px]"
-      >
-        <span className="truncate text-muted-foreground group-hover:text-foreground transition-colors">
-          {currentOption}
-        </span>
-        <Filter className="absolute right-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
-      </button>
-      {/* Dropdown */}
-      <div className="hidden group-focus-within:block group-hover:block absolute top-full left-0 mt-1 z-20 min-w-[200px] rounded-xl border border-border bg-popover shadow-xl py-1 animate-in fade-in zoom-in-95 duration-200">
-        {options.map((option) => (
-          <Link
-            key={option.value}
-            href={buildUrl(option.value)}
-            className={cn(
-              "block px-4 py-2 text-[10px] font-bold uppercase tracking-wider hover:bg-muted transition-colors",
-              option.value === value
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {option.label}
-          </Link>
-        ))}
-      </div>
-    </div>
   );
 }

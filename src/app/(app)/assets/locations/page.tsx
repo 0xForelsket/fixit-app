@@ -1,14 +1,20 @@
+import { LocationsTable } from "@/components/locations/locations-table";
+import { LocationFilters } from "@/components/locations/location-filters";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { ViewToggle } from "@/components/ui/view-toggle";
-import { LocationsTable } from "@/components/locations/locations-table";
 import { db } from "@/db";
 import { locations } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import { Building, FolderTree, MapPin, Plus, Search, Upload } from "lucide-react";
+import {
+  Building,
+  FolderTree,
+  MapPin,
+  Plus,
+  Upload,
+} from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LocationTree } from "./location-tree";
@@ -100,84 +106,62 @@ export default async function LocationsPage({
   const stats = await getLocationStats();
 
   return (
-    <PageContainer className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="Facility Locations"
-        subtitle="Infrastructure Mapping"
-        description={`${stats.total} ZONES • ${stats.roots} ROOT AREAS`}
-        bgSymbol="LO"
-        actions={
-          <>
-            <ViewToggle />
-            <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-            <Button
-              variant="outline"
-              asChild
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/admin/import?type=locations">
-                <Upload className="mr-2 h-4 w-4" />
-                BULK IMPORT
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
-            >
-              <Link href="/assets/locations/new">
-                <Plus className="mr-2 h-4 w-4" />
-                ADD LOCATION
-              </Link>
-            </Button>
-          </>
-        }
-      />
-
-      {/* Stats Ticker */}
-      <StatsTicker
-        stats={[
-          {
-            label: "Total Locations",
-            value: stats.total,
-            icon: MapPin,
-            variant: "default",
-          },
-          {
-            label: "Root Areas",
-            value: stats.roots,
-            icon: Building,
-            variant: "default",
-          },
-          {
-            label: "Active Zones",
-            value: stats.active,
-            icon: FolderTree,
-            variant: "success",
-          },
-        ]}
-      />
-
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <form
-          className="flex-1 max-w-md"
-          action="/assets/locations"
-          method="get"
-        >
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              name="search"
-              placeholder="SEARCH BY NAME OR CODE..."
-              defaultValue={params.search}
-              className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-xs font-bold tracking-wider placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all uppercase"
-            />
-          </div>
-        </form>
-      </div>
-
+    <PageLayout
+      title="Facility Locations"
+      subtitle="Infrastructure Mapping"
+      description={`${stats.total} ZONES • ${stats.roots} ROOT AREAS`}
+      bgSymbol="LO"
+      headerActions={
+        <>
+          <ViewToggle />
+          <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <Link href="/admin/import?type=locations">
+              <Upload className="mr-2 h-4 w-4" />
+              BULK IMPORT
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+          >
+            <Link href="/assets/locations/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD LOCATION
+            </Link>
+          </Button>
+        </>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Locations",
+              value: stats.total,
+              icon: MapPin,
+              variant: "default",
+            },
+            {
+              label: "Root Areas",
+              value: stats.roots,
+              icon: Building,
+              variant: "default",
+            },
+            {
+              label: "Active Zones",
+              value: stats.active,
+              icon: FolderTree,
+              variant: "success",
+            },
+          ]}
+        />
+      }
+      filters={<LocationFilters searchParams={params} />}
+    >
       {params.view === "tree" ? (
         <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-xl shadow-border/20 overflow-hidden">
           <Suspense
@@ -190,7 +174,6 @@ export default async function LocationsPage({
         </div>
       ) : (
         <>
-          {/* Locations Table */}
           {locationsList.length === 0 ? (
             <EmptyState
               title="No locations found"
@@ -206,6 +189,7 @@ export default async function LocationsPage({
           )}
         </>
       )}
-    </PageContainer>
+    </PageLayout>
   );
 }
+
