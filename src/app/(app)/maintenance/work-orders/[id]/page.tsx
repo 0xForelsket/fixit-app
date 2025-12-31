@@ -49,6 +49,7 @@ import {
   EntityStatusCard,
   EntityDetailItem,
 } from "@/components/layout/entity-detail";
+import { ActivityLog } from "@/components/ui/activity-log";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -199,7 +200,10 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       </div>
 
       <div className="pt-4 border-t border-zinc-100">
-        <WorkOrderAttachments attachments={workOrderAttachments} />
+        <WorkOrderAttachments 
+          attachments={workOrderAttachments} 
+          workOrderId={workOrder.id}
+        />
       </div>
     </div>
   );
@@ -226,71 +230,21 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
 
   const ActivityContent = (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
+      <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-muted-foreground">
         <MessageSquare className="h-3 w-3" />
         Activity Log
       </div>
-      {workOrder.logs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border-2 border-zinc-200">
-            <History className="h-8 w-8 text-zinc-400" />
-          </div>
-          <h3 className="mt-4 text-lg font-black text-zinc-900">No Activity</h3>
-          <p className="mt-1 text-sm text-zinc-500 max-w-xs">
-            No activity has been recorded for this work order yet.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {workOrder.logs.map((log) => (
-            <div
-              key={log.id}
-              className="rounded-xl border border-zinc-200 bg-white p-3 flex gap-3 transition-all hover:border-zinc-300 hover:shadow-sm"
-            >
-              <div className="shrink-0">
-                {log.action === "comment" ? (
-                  <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
-                    <MessageSquare className="h-4 w-4" />
-                  </div>
-                ) : (
-                  <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-sm font-bold text-zinc-900 truncate">
-                    {log.createdBy.name}
-                  </span>
-                  <span
-                    className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider whitespace-nowrap"
-                    suppressHydrationWarning
-                  >
-                    {formatRelativeTime(log.createdAt)}
-                  </span>
-                </div>
-                {log.action === "comment" ? (
-                  <div className="text-sm text-zinc-700 bg-zinc-50 p-2 rounded-lg border border-zinc-100">
-                    {log.newValue}
-                  </div>
-                ) : (
-                  <p className="text-sm text-zinc-600">
-                    Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
-                    <span className="line-through opacity-70">
-                      {formatLogValue(log.action, log.oldValue)}
-                    </span>{" "}
-                    to{" "}
-                    <span className="font-bold text-zinc-900">
-                      {formatLogValue(log.action, log.newValue)}
-                    </span>
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <ActivityLog
+        logs={workOrder.logs.map((log) => ({
+          id: log.id,
+          actor: { name: log.createdBy.name },
+          action: log.action,
+          createdAt: log.createdAt,
+          oldValue: log.oldValue,
+          newValue: log.newValue,
+          formatValue: formatLogValue,
+        }))}
+      />
     </div>
   );
 
@@ -330,140 +284,142 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
 
   return (
     <EntityDetailLayout>
-      <EntityHeader
-        title={workOrder.title}
-        badge={`#${workOrder.id}`}
-        parentLink={{ href: "/maintenance/work-orders", label: "Back" }}
-        meta={
-          <>
-            <User className="h-3 w-3" />
-            Reported by {workOrder.reportedBy.name} •{" "}
-            <span suppressHydrationWarning>
-              {formatRelativeTime(workOrder.createdAt)}
-            </span>
-          </>
-        }
-        actions={<PrintWorkOrderButton />}
-        statusBadge={
-          <StatusBadge
-            status={workOrder.status}
-            showIcon
-            className="h-8 px-3 text-[11px] font-black rounded-lg border-zinc-200/50"
-          />
-        }
-      />
+      <div className="hidden lg:block space-y-6">
+        <EntityHeader
+          title={workOrder.title}
+          badge={`#${workOrder.id}`}
+          parentLink={{ href: "/maintenance/work-orders", label: "Back" }}
+          meta={
+            <>
+              <User className="h-3 w-3" />
+              Reported by {workOrder.reportedBy.name} •{" "}
+              <span suppressHydrationWarning>
+                {formatRelativeTime(workOrder.createdAt)}
+              </span>
+            </>
+          }
+          actions={<PrintWorkOrderButton />}
+          statusBadge={
+            <StatusBadge
+              status={workOrder.status}
+              showIcon
+              className="h-8 px-3 text-[11px] font-black rounded-lg border-zinc-200/50"
+            />
+          }
+        />
 
-      <EntityGrid
-        sidebar={
-          <div className="space-y-6">
-            <EntityStatusCard
-              statusColor={statusColor}
-              icon={StatusIcon}
-              statusBadge={
-                <StatusBadge
-                  status={workOrder.status}
-                  showIcon={false}
-                  className="h-7 px-3 text-xs justify-center"
-                />
-              }
-            >
-              <EntityDetailItem label="Priority">
-                <StatusBadge status={priority} className="h-6 text-[10px]" />
-              </EntityDetailItem>
-
-              <EntityDetailItem label="Assignee">
-                <div className="flex items-center gap-2">
-                  {workOrder.assignedTo ? (
-                    <>
-                      <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px]">
-                        {workOrder.assignedTo.name.charAt(0)}
-                      </div>
-                      <span className="text-xs font-bold text-zinc-900 truncate max-w-[100px]">
-                        {workOrder.assignedTo.name}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-xs font-bold text-zinc-400 italic">
-                      Unassigned
-                    </span>
-                  )}
-                </div>
-              </EntityDetailItem>
-
-              <EntityDetailItem label="Equipment">
-              <Link
-                href={`/assets/equipment/${workOrder.equipment.code}`}
-                className="flex items-center gap-3 group rounded-lg border border-zinc-100 p-2 hover:border-primary-200 hover:bg-primary-50/50 transition-all bg-zinc-50/50"
+        <EntityGrid
+          sidebar={
+            <div className="space-y-6">
+              <EntityStatusCard
+                statusColor={statusColor}
+                icon={StatusIcon}
+                statusBadge={
+                  <StatusBadge
+                    status={workOrder.status}
+                    showIcon={false}
+                    className="h-7 px-3 text-xs justify-center"
+                  />
+                }
               >
-                <div className="h-8 w-8 rounded-md bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                  <Wrench className="h-4 w-4 text-zinc-500 group-hover:text-primary-600" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-xs text-zinc-900 truncate group-hover:text-primary-700 transition-colors">
-                    {workOrder.equipment.name}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="font-mono text-[9px] font-bold text-zinc-400">
-                      {workOrder.equipment.code}
-                    </span>
-                    {workOrder.equipment.location && (
+                <EntityDetailItem label="Priority">
+                  <StatusBadge status={priority} className="h-6 text-[10px]" />
+                </EntityDetailItem>
+
+                <EntityDetailItem label="Assignee">
+                  <div className="flex items-center gap-2">
+                    {workOrder.assignedTo ? (
                       <>
-                        <span className="text-zinc-300">•</span>
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider truncate">
-                          {workOrder.equipment.location.name}
+                        <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px]">
+                          {workOrder.assignedTo.name.charAt(0)}
+                        </div>
+                        <span className="text-xs font-bold text-zinc-900 truncate max-w-[100px]">
+                          {workOrder.assignedTo.name}
                         </span>
                       </>
+                    ) : (
+                      <span className="text-xs font-bold text-zinc-400 italic">
+                        Unassigned
+                      </span>
                     )}
                   </div>
-                </div>
-              </Link>
-              </EntityDetailItem>
+                </EntityDetailItem>
 
-              <EntityDetailItem label="Timeline">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-500 font-medium">Created</span>
-                    <span
-                      className="font-mono font-bold text-zinc-700"
-                      suppressHydrationWarning
-                    >
-                      {new Date(workOrder.createdAt).toLocaleDateString()}
-                    </span>
+                <EntityDetailItem label="Equipment">
+                <Link
+                  href={`/assets/equipment/${workOrder.equipment.code}`}
+                  className="flex items-center gap-3 group rounded-lg border border-zinc-100 p-2 hover:border-primary-200 hover:bg-primary-50/50 transition-all bg-zinc-50/50"
+                >
+                  <div className="h-8 w-8 rounded-md bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <Wrench className="h-4 w-4 text-zinc-500 group-hover:text-primary-600" />
                   </div>
-                  {workOrder.dueBy && (
+                  <div className="min-w-0">
+                    <p className="font-bold text-xs text-zinc-900 truncate group-hover:text-primary-700 transition-colors">
+                      {workOrder.equipment.name}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="font-mono text-[9px] font-bold text-zinc-400">
+                        {workOrder.equipment.code}
+                      </span>
+                      {workOrder.equipment.location && (
+                        <>
+                          <span className="text-zinc-300">•</span>
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider truncate">
+                            {workOrder.equipment.location.name}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+                </EntityDetailItem>
+
+                <EntityDetailItem label="Timeline">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-zinc-500 font-medium">Due Date</span>
+                      <span className="text-zinc-500 font-medium">Created</span>
                       <span
-                        className="font-mono font-bold text-danger-600"
+                        className="font-mono font-bold text-zinc-700"
                         suppressHydrationWarning
                       >
-                        {new Date(workOrder.dueBy).toLocaleDateString()}
+                        {new Date(workOrder.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                  )}
-                </div>
-              </EntityDetailItem>
-            </EntityStatusCard>
+                    {workOrder.dueBy && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-zinc-500 font-medium">Due Date</span>
+                        <span
+                          className="font-mono font-bold text-danger-600"
+                          suppressHydrationWarning
+                        >
+                          {new Date(workOrder.dueBy).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </EntityDetailItem>
+              </EntityStatusCard>
 
-            <div className="space-y-2">
-              <WorkOrderActions
-                workOrder={workOrder}
-                currentUser={{ id: user.id, name: user.name }}
-                allTechs={techs}
-              />
+              <div className="space-y-2">
+                <WorkOrderActions
+                  workOrder={workOrder}
+                  currentUser={{ id: user.id, name: user.name }}
+                  allTechs={techs}
+                />
+              </div>
             </div>
-          </div>
-        }
-        content={
-          <WorkOrderTabs
-            workOrderId={workOrder.id}
-            overviewContent={OverviewContent}
-            procedureContent={ProcedureContent}
-            activityContent={ActivityContent}
-            resourcesContent={ResourcesContent}
-          />
-        }
-      />
+          }
+          content={
+            <WorkOrderTabs
+              workOrderId={workOrder.id}
+              overviewContent={OverviewContent}
+              procedureContent={ProcedureContent}
+              activityContent={ActivityContent}
+              resourcesContent={ResourcesContent}
+            />
+          }
+        />
+      </div>
 
        <div className="lg:hidden">
         <MobileWorkOrderView
@@ -512,7 +468,10 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
                 </InfoCard>
               </Link>
 
-              <WorkOrderAttachments attachments={workOrderAttachments} />
+              <WorkOrderAttachments 
+                attachments={workOrderAttachments} 
+                workOrderId={workOrder.id}
+              />
             </div>
           }
           checklistTab={<div className="pt-2">{ProcedureContent}</div>}

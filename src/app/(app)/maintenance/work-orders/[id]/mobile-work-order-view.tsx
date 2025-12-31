@@ -31,41 +31,41 @@ export function MobileWorkOrderView({
   const [activeTab, setActiveTab] = useState("info");
 
   return (
-    <div className="flex flex-col h-full lg:hidden bg-[#F2F1EA]">
+    <div className="flex flex-col h-full lg:hidden bg-background">
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
         className="flex-1 flex flex-col"
       >
-        <div className="px-4 sticky top-0 z-20 bg-[#F2F1EA]/95 backdrop-blur-md pt-2 pb-2 border-b border-[#E3E2DA]">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-white border-2 border-[#E3E2DA] shadow-sm rounded-xl p-1">
+        <div className="px-4 sticky top-0 z-20 bg-background/95 backdrop-blur-md pt-2 pb-2 border-b border-border">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-card border border-border shadow-sm rounded-xl p-1">
             <TabsTrigger
               value="info"
-              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+              className="gap-2 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-lg transition-all text-muted-foreground"
             >
               <Info className="h-5 w-5" />
             </TabsTrigger>
             <TabsTrigger
               value="checklist"
-              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+              className="gap-2 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-lg transition-all text-muted-foreground"
             >
               <ClipboardCheck className="h-5 w-5" />
             </TabsTrigger>
             <TabsTrigger
               value="comments"
-              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+              className="gap-2 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-lg transition-all text-muted-foreground"
             >
               <MessageSquare className="h-5 w-5" />
             </TabsTrigger>
             <TabsTrigger
               value="inventory"
-              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+              className="gap-2 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-lg transition-all text-muted-foreground"
             >
               <Package className="h-5 w-5" />
             </TabsTrigger>
             <TabsTrigger
               value="logs"
-              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+              className="gap-2 data-[state=active]:bg-muted data-[state=active]:text-foreground data-[state=active]:shadow-none rounded-lg transition-all text-muted-foreground"
             >
               <Clock className="h-5 w-5" />
             </TabsTrigger>
@@ -92,7 +92,7 @@ export function MobileWorkOrderView({
       </Tabs>
 
       {/* Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t-2 border-[#E3E2DA] z-30 flex gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-6 safe-area-bottom">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-card border-t border-border z-30 flex gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-6 safe-area-bottom">
         {actions}
       </div>
     </div>
