@@ -1,5 +1,4 @@
-"use client";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package } from "lucide-react";
 import { AddPartDialog } from "./parts/add-part-dialog";
 import { PartsList } from "./parts/parts-list";
@@ -39,25 +38,25 @@ export function WorkOrderPartsManager({
   locations,
 }: WorkOrderPartsManagerProps) {
   return (
-    <div className="rounded-2xl border-2 bg-white overflow-hidden shadow-sm">
-      <div className="bg-zinc-50 px-4 py-4 border-b flex items-center justify-between">
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between py-4">
         <div className="flex items-center gap-2">
           <Package className="h-4 w-4 text-zinc-400" />
-          <h3 className="font-black text-xs uppercase tracking-widest text-zinc-900">
+          <CardTitle className="font-black text-xs uppercase tracking-widest text-zinc-900">
             Parts & Materials
-          </h3>
+          </CardTitle>
         </div>
         <AddPartDialog
           workOrderId={workOrderId}
           allParts={allParts}
           locations={locations}
         />
-      </div>
+      </CardHeader>
 
-      <div className="p-4 space-y-4">
+      <CardContent className="p-4 space-y-4">
         <PartsList parts={parts} />
         <PartsSummary parts={parts} />
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

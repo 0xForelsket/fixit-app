@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { LaborLog, User } from "@/db/schema";
 import { Trash2 } from "lucide-react";
 
@@ -11,24 +12,24 @@ export function LaborHistory({ logs, onDelete }: LaborHistoryProps) {
   if (logs.length === 0) return null;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between px-1">
-        <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500">
+    <Card>
+      <CardHeader className="py-3 px-4 flex flex-row items-center justify-between space-y-0">
+        <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">
           History
-        </h4>
+        </CardTitle>
         <span className="text-[10px] font-bold text-zinc-400">
           {logs.length} Entries
         </span>
-      </div>
-      <div className="space-y-2">
+      </CardHeader>
+      <CardContent className="p-2 space-y-2">
         {logs.map((log) => (
           <div
             key={log.id}
-            className="group relative flex items-center justify-between rounded-xl border-2 bg-white p-3 shadow-sm transition-all hover:border-zinc-300"
+            className="group relative flex items-center justify-between rounded-lg border bg-muted/30 p-3 hover:bg-muted/50 transition-colors"
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <p className="font-black text-sm text-zinc-900">
+                <p className="font-black text-sm text-foreground">
                   {log.durationMinutes}m
                 </p>
                 {log.hourlyRate && (
@@ -41,19 +42,19 @@ export function LaborHistory({ logs, onDelete }: LaborHistoryProps) {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-tight">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
                 <span className="truncate max-w-[100px]">
                   {log.user?.name || "Unknown"}
                 </span>
                 <span>•</span>
-                <span>
+                <span suppressHydrationWarning>
                   {log.createdAt
                     ? new Date(log.createdAt).toLocaleDateString()
                     : ""}
                 </span>
               </div>
               {log.notes && (
-                <p className="mt-1 text-xs text-zinc-600 line-clamp-1 italic font-medium">
+                <p className="mt-1 text-xs text-muted-foreground line-clamp-1 italic font-medium">
                   "{log.notes}"
                 </p>
               )}
@@ -68,7 +69,7 @@ export function LaborHistory({ logs, onDelete }: LaborHistoryProps) {
             </Button>
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

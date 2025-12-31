@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Clock, Pause, Play, Plus } from "lucide-react";
 import { useState } from "react";
@@ -37,19 +38,19 @@ export function TimerDisplay({
   return (
     <div className="space-y-4">
       {/* Main Timer Card */}
-      <div
+      <Card
         className={cn(
-          "relative overflow-hidden rounded-2xl border-2 p-6 transition-all duration-500",
+          "relative overflow-hidden transition-all duration-500",
           isRunning
             ? "bg-primary-900 border-primary-500 shadow-xl shadow-primary-900/20"
-            : "bg-white border-zinc-200 shadow-sm"
+            : ""
         )}
       >
         {isRunning && (
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-transparent pointer-events-none animate-pulse" />
         )}
 
-        <div className="relative flex flex-col items-center justify-center gap-4">
+        <CardContent className="relative flex flex-col items-center justify-center gap-4 p-6">
           <div className="flex items-center gap-3">
             <div
               className={cn(
@@ -79,6 +80,7 @@ export function TimerDisplay({
                 "font-mono text-5xl font-black tracking-tighter sm:text-6xl",
                 isRunning ? "text-white" : "text-zinc-900"
               )}
+              suppressHydrationWarning
             >
               {formatTime(elapsedSeconds)}
             </p>
@@ -119,8 +121,8 @@ export function TimerDisplay({
               </>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Active Session Notes */}
       {isRunning && (
