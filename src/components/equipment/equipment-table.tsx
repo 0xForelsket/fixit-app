@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { Edit, Flag, MapPin, MonitorCog } from "lucide-react";
 import Link from "next/link";
 
@@ -31,14 +32,21 @@ interface EquipmentTableProps {
   equipment: Equipment[];
   searchParams?: Record<string, string | undefined>;
   favoriteIds?: number[];
+  userPermissions?: string[];
 }
 
 export function EquipmentTable({
   equipment,
   searchParams,
   favoriteIds = [],
+  userPermissions = [],
 }: EquipmentTableProps) {
   const favoriteSet = new Set(favoriteIds);
+  const canEdit = hasPermission(
+    userPermissions,
+    PERMISSIONS.EQUIPMENT_UPDATE
+  );
+
   const columns: ColumnDef<Equipment>[] = [
     {
       id: "code",
@@ -152,20 +160,22 @@ export function EquipmentTable({
             className="rounded-xl hover:bg-warning-500 hover:text-white transition-all text-muted-foreground"
             title="Report Issue"
           >
-            <Link href={`/maintenance/work-orders/new?equipmentId=${row.id}`}>
+            <Link href={`/equipment/${row.code}#report`}>
               <Flag className="h-4 w-4" />
             </Link>
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all transform group-hover:rotate-12 text-muted-foreground"
-          >
-            <Link href={`/assets/equipment/${row.id}/edit`}>
-              <Edit className="h-4 w-4" />
-            </Link>
-          </Button>
+          {canEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all transform group-hover:rotate-12 text-muted-foreground"
+            >
+              <Link href={`/assets/equipment/${row.id}/edit`}>
+                <Edit className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </div>
       ),
     },

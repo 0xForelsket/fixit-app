@@ -8,6 +8,10 @@ import { StatsTicker } from "@/components/ui/stats-ticker";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
+import {
+  PERMISSIONS,
+  hasPermission,
+} from "@/lib/permissions";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
 import { desc } from "drizzle-orm";
 import { and, eq } from "drizzle-orm";
@@ -161,35 +165,44 @@ export default async function EquipmentPage({
         <>
           <ViewToggle />
           <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-          <Button
-            variant="outline"
-            asChild
-            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-          >
-            <Link href="/admin/import?type=equipment">
-              <Upload className="mr-2 h-4 w-4" />
-              Bulk Import
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            asChild
-            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-          >
-            <Link href="/assets/equipment/models">
-              <Cuboid className="mr-2 h-4 w-4" />
-              Models
-            </Link>
-          </Button>
-          <Button
-            asChild
-            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
-          >
-            <Link href="/assets/equipment/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Asset
-            </Link>
-          </Button>
+          {hasPermission(user.permissions, PERMISSIONS.EQUIPMENT_CREATE) && (
+            <Button
+              variant="outline"
+              asChild
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
+              <Link href="/admin/import?type=equipment">
+                <Upload className="mr-2 h-4 w-4" />
+                Bulk Import
+              </Link>
+            </Button>
+          )}
+          {hasPermission(
+            user.permissions,
+            PERMISSIONS.EQUIPMENT_MANAGE_MODELS
+          ) && (
+            <Button
+              variant="outline"
+              asChild
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
+              <Link href="/assets/equipment/models">
+                <Cuboid className="mr-2 h-4 w-4" />
+                Models
+              </Link>
+            </Button>
+          )}
+          {hasPermission(user.permissions, PERMISSIONS.EQUIPMENT_CREATE) && (
+            <Button
+              asChild
+              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+            >
+              <Link href="/assets/equipment/new">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Asset
+              </Link>
+            </Button>
+          )}
         </>
       }
       stats={
@@ -254,6 +267,7 @@ export default async function EquipmentPage({
               equipment={equipmentList}
               searchParams={params}
               favoriteIds={favoriteIds}
+              userPermissions={user?.permissions}
             />
           )}
         </>

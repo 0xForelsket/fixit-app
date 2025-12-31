@@ -229,7 +229,7 @@ export function Sidebar({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[60] bg-black/50 lg:hidden"
           onClick={onClose}
           onKeyDown={(e) => e.key === "Escape" && onClose?.()}
         />
@@ -237,7 +237,7 @@ export function Sidebar({
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none print:hidden",
+          "fixed inset-y-0 left-0 z-[70] flex h-screen flex-col border-r border-border bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 lg:shadow-none print:hidden",
           isCollapsed ? "w-16" : "w-64 overflow-hidden",
           isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
@@ -326,7 +326,7 @@ export function Sidebar({
                             isCollapsed ? "justify-center" : "gap-3 px-3",
                             isActive
                               ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
-                              : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
+                               : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
                           )}
                         >
                           <span
@@ -369,7 +369,7 @@ export function Sidebar({
               )}
             >
               <Link
-                href="/"
+                href="/report"
                 onClick={handleNavClick}
                 // title={isCollapsed ? "Report Equipment Issue" : undefined}
 
@@ -394,7 +394,7 @@ export function Sidebar({
           )}
         </nav>
 
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] lg:pb-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -440,7 +440,7 @@ export function Sidebar({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-56"
+              className="w-56 z-[100]"
               side={isCollapsed ? "right" : "top"}
               align="end"
               sideOffset={8}

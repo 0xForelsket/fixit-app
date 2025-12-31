@@ -275,7 +275,7 @@ export default async function WorkOrdersPage({
             className="h-9 text-[10px] font-black uppercase tracking-widest"
             asChild
           >
-            <Link href="/">
+            <Link href="/report">
               <Plus className="mr-2 h-3.5 w-3.5" />
               NEW TICKET
             </Link>
