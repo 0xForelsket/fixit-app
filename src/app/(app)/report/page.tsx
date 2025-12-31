@@ -2,7 +2,7 @@ import { EquipmentGrid } from "@/app/(app)/equipment-grid";
 import { EquipmentSearch } from "@/app/(app)/equipment-search";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, eq, like, sql } from "drizzle-orm";
 
 interface ReportPageProps {
   searchParams: Promise<{ search?: string; location?: string }>;
@@ -17,7 +17,7 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
 
   if (search) {
     conditions.push(
-      sql`(${ilike(equipment.name, `%${search}%`)} OR ${ilike(equipment.code, `%${search}%`)})`
+      sql`(${like(equipment.name, `%${search}%`)} OR ${like(equipment.code, `%${search}%`)})`
     );
   }
 

@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { FieldGroup } from "@/components/ui/form-layout";
+import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -40,27 +42,30 @@ export function ManualEntryForm({
           </h4>
         </div>
         <div className="flex gap-2">
-          <div className="relative flex-1">
-            <input
-              type="number"
-              value={manualMinutes}
-              onChange={(e) => setManualMinutes(e.target.value)}
-              placeholder="Min"
-              min="1"
-              className="w-full rounded-xl border-2 bg-zinc-50 px-4 py-3 text-lg font-black text-zinc-900 focus:border-primary-500 focus:outline-none"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-zinc-400">
-              Minutes
-            </span>
-          </div>
+          <FieldGroup label="Duration" className="flex-1">
+            <div className="relative">
+              <Input
+                type="number"
+                value={manualMinutes}
+                onChange={(e) => setManualMinutes(e.target.value)}
+                placeholder="Min"
+                min="1"
+                className="pr-16"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-zinc-400">
+                Minutes
+              </span>
+            </div>
+          </FieldGroup>
         </div>
-        <input
-          type="text"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Notes (optional)"
-          className="w-full rounded-xl border-2 bg-zinc-50 px-4 py-3 text-sm font-bold focus:border-primary-500 focus:outline-none"
-        />
+        <FieldGroup label="Notes (Optional)">
+          <Input
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g., Completed inspection..."
+          />
+        </FieldGroup>
         <Button
           onClick={handleSubmit}
           disabled={!manualMinutes || saving}

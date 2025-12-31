@@ -15,7 +15,7 @@ import {
   desc,
   eq,
   gte,
-  ilike,
+  like,
   lt,
   or,
 } from "drizzle-orm";
@@ -72,8 +72,8 @@ async function getWorkOrders(params: SearchParams, user: SessionUser | null) {
   if (params.search) {
     conditions.push(
       or(
-        ilike(workOrders.title, `%${params.search}%`),
-        ilike(workOrders.description, `%${params.search}%`)
+        like(workOrders.title, `%${params.search}%`),
+        like(workOrders.description, `%${params.search}%`)
       )
     );
   }

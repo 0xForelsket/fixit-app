@@ -1,9 +1,19 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FieldGroup, FormGrid } from "@/components/ui/form-layout";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SelectionCard, SelectionGrid } from "@/components/ui/selection-cards";
 import type { EquipmentCategory, EquipmentType } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { Check, Loader2, Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -145,13 +155,7 @@ export function EquipmentForm({
     }
   };
 
-  // Shared input class for consistency
-  const inputClass =
-    "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all";
-  const selectClass =
-    "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all";
-  const labelClass =
-    "text-[11px] font-black uppercase tracking-widest text-muted-foreground";
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -161,29 +165,26 @@ export function EquipmentForm({
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <FormGrid>
         {/* Equipment Name */}
-        <div className="space-y-2">
-          <label htmlFor="name" className={labelClass}>
-            Equipment Name
-          </label>
-          <input
+        <FieldGroup label="Equipment Name" required>
+          <Input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
             placeholder="e.g., CNC Machine 01"
-            className={inputClass}
           />
-        </div>
+        </FieldGroup>
 
         {/* Asset Code */}
-        <div className="space-y-2">
-          <label htmlFor="code" className={labelClass}>
-            Asset Code
-          </label>
-          <input
+        <FieldGroup
+          label="Asset Code"
+          required
+          description={!isNew ? "Asset code cannot be changed" : undefined}
+        >
+          <Input
             id="code"
             type="text"
             value={code}
@@ -192,158 +193,130 @@ export function EquipmentForm({
             disabled={!isNew}
             placeholder="e.g., CNC-001"
             className={cn(
-              inputClass,
               "uppercase tracking-wider font-bold",
               !isNew && "bg-muted cursor-not-allowed"
             )}
           />
-          {!isNew && (
-            <p className="text-[10px] text-muted-foreground">
-              Asset code cannot be changed
-            </p>
-          )}
-        </div>
+        </FieldGroup>
 
         {/* Equipment Category */}
-        <div className="space-y-2">
-          <label htmlFor="category" className={labelClass}>
-            Equipment Category
-          </label>
-          <select
-            id="category"
+        <FieldGroup label="Equipment Category">
+          <Select
             value={categoryId}
-            onChange={(e) => {
-              setCategoryId(e.target.value);
+            onValueChange={(val) => {
+              setCategoryId(val);
               setTypeId("");
             }}
-            className={selectClass}
           >
-            <option value="">Select Category...</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.label} ({cat.name})
-              </option>
-            ))}
-          </select>
-        </div>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Category..." />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id.toString()}>
+                  {cat.label} ({cat.name})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
         {/* Equipment Type */}
-        <div className="space-y-2">
-          <label htmlFor="type" className={labelClass}>
-            Equipment Type
-          </label>
-          <select
-            id="type"
-            value={typeId}
-            onChange={(e) => setTypeId(e.target.value)}
-            disabled={!categoryId}
-            className={cn(
-              selectClass,
-              !categoryId && "bg-muted cursor-not-allowed"
-            )}
-          >
-            <option value="">Select Type...</option>
-            {filteredTypes.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name} ({t.code})
-              </option>
-            ))}
-          </select>
-          <p className="text-[10px] text-muted-foreground">
-            {!categoryId
+        <FieldGroup
+          label="Equipment Type"
+          description={
+            !categoryId
               ? "Select a category first"
-              : "Precise classification for SAP PM alignment"}
-          </p>
-        </div>
+              : "Precise classification for SAP PM alignment"
+          }
+        >
+          <Select value={typeId} onValueChange={setTypeId} disabled={!categoryId}>
+            <SelectTrigger className={cn(!categoryId && "bg-muted cursor-not-allowed")}>
+              <SelectValue placeholder="Select Type..." />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredTypes.map((t) => (
+                <SelectItem key={t.id} value={t.id.toString()}>
+                  {t.name} ({t.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
         {/* Equipment Model */}
-        <div className="space-y-2">
-          <label htmlFor="model" className={cn(labelClass)}>
-            Equipment Model (Optional)
-          </label>
-          <select
-            id="model"
-            value={modelId}
-            onChange={(e) => setModelId(e.target.value)}
-            className={selectClass}
-          >
-            <option value="">Select a model...</option>
-            {models.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-          <p className="text-[10px] text-muted-foreground">
-            Linking a model enables BOM and spare parts tracking
-          </p>
-        </div>
+        <FieldGroup
+          label="Equipment Model (Optional)"
+          description="Linking a model enables BOM and spare parts tracking"
+        >
+          <Select value={modelId} onValueChange={setModelId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a model..." />
+            </SelectTrigger>
+            <SelectContent>
+              {models.map((m) => (
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
         {/* Department */}
-        <div className="space-y-2">
-          <label htmlFor="department" className={labelClass}>
-            Responsible Department
-          </label>
-          <select
-            id="department"
-            value={departmentId}
-            onChange={(e) => setDepartmentId(e.target.value)}
-            required
-            className={selectClass}
-          >
-            <option value="">Select Department...</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FieldGroup label="Responsible Department" required>
+          <Select value={departmentId} onValueChange={setDepartmentId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Department..." />
+            </SelectTrigger>
+            <SelectContent>
+              {departments.map((dept) => (
+                <SelectItem key={dept.id} value={dept.id.toString()}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
         {/* Location */}
-        <div className="space-y-2">
-          <label htmlFor="location" className={labelClass}>
-            Location
-          </label>
-          <select
-            id="location"
-            value={locationId}
-            onChange={(e) => setLocationId(e.target.value)}
-            required
-            className={selectClass}
-          >
-            <option value="">Select a location...</option>
-            {locations.map((loc) => (
-              <option key={loc.id} value={loc.id}>
-                {loc.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FieldGroup label="Location" required>
+          <Select value={locationId} onValueChange={setLocationId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a location..." />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map((loc) => (
+                <SelectItem key={loc.id} value={loc.id.toString()}>
+                  {loc.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
         {/* Owner */}
-        <div className="space-y-2">
-          <label htmlFor="owner" className={labelClass}>
-            Owner (Optional)
-          </label>
-          <select
-            id="owner"
-            value={ownerId}
-            onChange={(e) => setOwnerId(e.target.value)}
-            className={selectClass}
-          >
-            <option value="">Select an owner...</option>
-            {users.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FieldGroup label="Owner (Optional)">
+          <Select value={ownerId} onValueChange={setOwnerId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select an owner..." />
+            </SelectTrigger>
+            <SelectContent>
+              {users.map((user) => (
+                <SelectItem key={user.id} value={user.id.toString()}>
+                  {user.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
         {/* Parent Asset */}
-        <div className="space-y-2 md:col-span-2">
-          <label className={labelClass}>Parent Asset (Optional)</label>
+        <FieldGroup
+          label="Parent Asset (Optional)"
+          description="Linking establishes a nested relationship in the asset registry"
+          className="md:col-span-2"
+        >
           <div className="space-y-2">
             {activeParent && (
               <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
@@ -374,12 +347,12 @@ export function EquipmentForm({
               <div className="space-y-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input
+                  <Input
                     type="text"
                     placeholder="Search to find parent asset..."
                     value={parentSearch}
                     onChange={(e) => setParentSearch(e.target.value)}
-                    className={cn(inputClass, "pl-10")}
+                    className="pl-10"
                   />
                 </div>
 
@@ -412,50 +385,26 @@ export function EquipmentForm({
               </div>
             )}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Linking establishes a nested relationship in the asset registry
-          </p>
-        </div>
-      </div>
+        </FieldGroup>
+      </FormGrid>
 
       {/* Status Selection */}
-      <fieldset className="space-y-4">
-        <legend className={labelClass}>Equipment Status</legend>
-        <div className="grid gap-3 md:grid-cols-3">
+      <div className="space-y-4">
+        <h3 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+          Equipment Status
+        </h3>
+        <SelectionGrid>
           {STATUS_OPTIONS.map((option) => (
-            <button
+            <SelectionCard
               key={option.value}
-              type="button"
+              label={option.label}
+              description={option.description}
+              selected={status === option.value}
               onClick={() => setStatus(option.value)}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border p-4 text-left transition-all",
-                status === option.value
-                  ? "border-primary bg-primary/5 ring-2 ring-primary"
-                  : "border-border bg-card hover:border-primary/50"
-              )}
-            >
-              <div
-                className={cn(
-                  "flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors",
-                  status === option.value
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-muted-foreground/30"
-                )}
-              >
-                {status === option.value && <Check className="h-3 w-3" />}
-              </div>
-              <div>
-                <p className="font-bold text-sm uppercase tracking-wide">
-                  {option.label}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {option.description}
-                </p>
-              </div>
-            </button>
+            />
           ))}
-        </div>
-      </fieldset>
+        </SelectionGrid>
+      </div>
 
       {/* Footer Actions */}
       <div className="flex items-center justify-end gap-3 border-t border-border pt-6">

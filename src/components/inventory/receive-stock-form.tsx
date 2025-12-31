@@ -2,6 +2,7 @@
 
 import { createTransactionAction } from "@/actions/inventory";
 import { Button } from "@/components/ui/button";
+import { FormGrid } from "@/components/ui/form-layout";
 import {
   Form,
   FormControl,
@@ -90,7 +91,7 @@ export function ReceiveStockForm({ parts, locations }: ReceiveStockFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
+        <FormGrid>
           <FormField
             control={form.control}
             name="partId"
@@ -146,7 +147,7 @@ export function ReceiveStockForm({ parts, locations }: ReceiveStockFormProps) {
               </FormItem>
             )}
           />
-        </div>
+        </FormGrid>
 
         <FormField
           control={form.control}

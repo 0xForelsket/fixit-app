@@ -7,7 +7,7 @@ import { equipment, notifications } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { getUserAvatarUrl } from "@/lib/users";
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, eq, like, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EquipmentGrid } from "./equipment-grid";
@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   if (search) {
     conditions.push(
-      sql`(${ilike(equipment.name, `%${search}%`)} OR ${ilike(equipment.code, `%${search}%`)})`
+      sql`(${like(equipment.name, `%${search}%`)} OR ${like(equipment.code, `%${search}%`)})`
     );
   }
 

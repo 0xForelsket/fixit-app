@@ -136,24 +136,21 @@ export function AddPartDialog({
               name="partId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
-                    Part Selection
-                  </FormLabel>
+                  <FormLabel>Part Selection</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="h-12 rounded-xl border-2 bg-zinc-50 font-bold focus:ring-primary-500/10">
+                      <SelectTrigger>
                         <SelectValue placeholder="Select a part" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="rounded-xl border-2 shadow-xl">
+                    <SelectContent>
                       {allParts.map((part) => (
                         <SelectItem
                           key={part.id}
                           value={part.id.toString()}
-                          className="py-3 font-medium"
                         >
                           {part.name}{" "}
                           <span className="text-[10px] font-mono opacity-50 ml-1">
@@ -173,24 +170,21 @@ export function AddPartDialog({
               name="locationId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
-                    Source Location
-                  </FormLabel>
+                  <FormLabel>Source Location</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className="h-12 rounded-xl border-2 bg-zinc-50 font-bold focus:ring-primary-500/10">
+                      <SelectTrigger>
                         <SelectValue placeholder="Select location" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="rounded-xl border-2 shadow-xl">
+                    <SelectContent>
                       {locations.map((loc) => (
                         <SelectItem
                           key={loc.id}
                           value={loc.id.toString()}
-                          className="py-3 font-medium"
                         >
                           {loc.name}
                         </SelectItem>
@@ -207,16 +201,14 @@ export function AddPartDialog({
               name="quantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
-                    Quantity Used
-                  </FormLabel>
+                  <FormLabel>Quantity Used</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type="number"
                         min="1"
                         {...field}
-                        className="h-12 rounded-xl border-2 bg-zinc-50 font-black text-lg focus:ring-primary-500/10 pl-4 pr-12"
+                        className="pr-12"
                       />
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-zinc-400">
                         UNITS
