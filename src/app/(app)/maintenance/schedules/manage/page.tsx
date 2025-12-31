@@ -189,7 +189,7 @@ export default async function SchedulesPage({
       {/* Filters */}
       <div className="flex flex-wrap gap-4">
         <form
-          action="/maintenance/schedules"
+          action="/maintenance/schedules/manage"
           className="relative flex-1 md:max-w-sm"
         >
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -203,19 +203,19 @@ export default async function SchedulesPage({
         </form>
         <div className="flex gap-2">
           <FilterLink
-            href="/maintenance/schedules"
+            href="/maintenance/schedules/manage"
             active={!params.type || params.type === "all"}
           >
             All
           </FilterLink>
           <FilterLink
-            href="/maintenance/schedules?type=maintenance"
+            href="/maintenance/schedules/manage?type=maintenance"
             active={params.type === "maintenance"}
           >
             Maintenance
           </FilterLink>
           <FilterLink
-            href="/maintenance/schedules?type=calibration"
+            href="/maintenance/schedules/manage?type=calibration"
             active={params.type === "calibration"}
           >
             Calibration
