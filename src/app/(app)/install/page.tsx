@@ -1,11 +1,11 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { Download, Smartphone, Monitor } from "lucide-react";
+import { Monitor, Smartphone } from "lucide-react";
 
 export default function InstallPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <PageHeader title="Install Application" subtitle="Get Started" />
-      
+
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-3">
@@ -19,9 +19,23 @@ export default function InstallPage() {
           </p>
           <ol className="list-decimal pl-5 space-y-2 text-sm">
             <li>Open the app in Chrome or Edge.</li>
-            <li>Look for the <strong className="font-medium text-foreground">Install</strong> icon in the address bar (usually on the right).</li>
-            <li>Click <strong className="font-medium text-foreground">Install</strong> and follow the prompts.</li>
-            <li>Alternatively, click the browser menu (⋮) and select <strong className="font-medium text-foreground">Install FixIt</strong>.</li>
+            <li>
+              Look for the{" "}
+              <strong className="font-medium text-foreground">Install</strong>{" "}
+              icon in the address bar (usually on the right).
+            </li>
+            <li>
+              Click{" "}
+              <strong className="font-medium text-foreground">Install</strong>{" "}
+              and follow the prompts.
+            </li>
+            <li>
+              Alternatively, click the browser menu (⋮) and select{" "}
+              <strong className="font-medium text-foreground">
+                Install FixIt
+              </strong>
+              .
+            </li>
           </ol>
         </div>
 
@@ -39,16 +53,44 @@ export default function InstallPage() {
             <div>
               <h3 className="mb-2 font-semibold">iOS (Safari)</h3>
               <ol className="list-decimal pl-5 space-y-2 text-sm">
-                <li>Tap the <strong className="font-medium text-foreground">Share</strong> button at the bottom.</li>
-                <li>Scroll down and tap <strong className="font-medium text-foreground">Add to Home Screen</strong>.</li>
-                <li>Tap <strong className="font-medium text-foreground">Add</strong> to confirm.</li>
+                <li>
+                  Tap the{" "}
+                  <strong className="font-medium text-foreground">Share</strong>{" "}
+                  button at the bottom.
+                </li>
+                <li>
+                  Scroll down and tap{" "}
+                  <strong className="font-medium text-foreground">
+                    Add to Home Screen
+                  </strong>
+                  .
+                </li>
+                <li>
+                  Tap{" "}
+                  <strong className="font-medium text-foreground">Add</strong>{" "}
+                  to confirm.
+                </li>
               </ol>
             </div>
             <div>
               <h3 className="mb-2 font-semibold">Android (Chrome)</h3>
               <ol className="list-decimal pl-5 space-y-2 text-sm">
-                <li>Tap the <strong className="font-medium text-foreground">Menu</strong> button (⋮).</li>
-                <li>Tap <strong className="font-medium text-foreground">Install App</strong> or <strong className="font-medium text-foreground">Add to Home Screen</strong>.</li>
+                <li>
+                  Tap the{" "}
+                  <strong className="font-medium text-foreground">Menu</strong>{" "}
+                  button (⋮).
+                </li>
+                <li>
+                  Tap{" "}
+                  <strong className="font-medium text-foreground">
+                    Install App
+                  </strong>{" "}
+                  or{" "}
+                  <strong className="font-medium text-foreground">
+                    Add to Home Screen
+                  </strong>
+                  .
+                </li>
                 <li>Follow the on-screen instructions.</li>
               </ol>
             </div>

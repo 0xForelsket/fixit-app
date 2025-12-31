@@ -116,8 +116,10 @@ export default async function TransactionsPage(props: {
         </div>
       </div>
 
-      <TransactionsTable transactions={transactions} searchParams={searchParams} />
+      <TransactionsTable
+        transactions={transactions}
+        searchParams={searchParams}
+      />
     </div>
   );
 }
-

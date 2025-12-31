@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { cn } from "@/lib/utils";
 import * as React from "react";
@@ -73,7 +73,10 @@ const TableHead = React.forwardRef<
 >(({ className, resizable = true, children, ...props }, ref) => {
   const internalRef = React.useRef<HTMLTableCellElement>(null);
 
-  React.useImperativeHandle(ref, () => internalRef.current as HTMLTableCellElement);
+  React.useImperativeHandle(
+    ref,
+    () => internalRef.current as HTMLTableCellElement
+  );
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,7 +89,7 @@ const TableHead = React.forwardRef<
     const onMouseMove = (moveEvent: MouseEvent) => {
       const newWidth = Math.max(50, startWidth + (moveEvent.pageX - startX)); // Min width 50px
       th.style.width = `${newWidth}px`;
-      
+
       // Also set min-width to ensure it sticks
       th.style.minWidth = `${newWidth}px`;
     };

@@ -36,7 +36,10 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
       <CardContent className="pt-6">
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <AreaChart
+              data={data}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#ea580c" stopOpacity={0.2} />
@@ -79,11 +82,11 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
                     return (
                       <div className="rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5">
                         <p className="mb-2 font-mono text-xs text-zinc-500">
-                          {new Date(label).toLocaleDateString(undefined, {
+                          {label ? new Date(label).toLocaleDateString(undefined, {
                             weekday: "short",
                             month: "short",
                             day: "numeric",
-                          })}
+                          }) : ""}
                         </p>
                         <div className="space-y-1">
                           {payload.map((entry: any) => (

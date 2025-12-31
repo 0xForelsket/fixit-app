@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { auditLogs, entityTypes } from "@/db/schema";
+import { auditLogs, type entityTypes } from "@/db/schema";
 import { requirePermission } from "@/lib/session";
 import { and, desc, eq, gte, like, lte, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";

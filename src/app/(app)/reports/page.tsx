@@ -9,11 +9,18 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { db } from "@/db";
+import {
+  type WorkOrderPriority,
+  type WorkOrderStatus,
+  equipment,
+  locations,
+  users,
+  workOrders,
+} from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   aliasedTable,
@@ -25,16 +32,7 @@ import {
   gte,
   inArray,
   lte,
-  sql,
 } from "drizzle-orm";
-import {
-  equipment,
-  locations,
-  users,
-  type WorkOrderPriority,
-  type WorkOrderStatus,
-  workOrders,
-} from "@/db/schema";
 import {
   AlertTriangle,
   ArrowLeft,

@@ -59,12 +59,12 @@ export function PageLayout({
       )}
 
       {filters && (
-        <section className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200 fill-mode-both">
+        <section className="relative z-[100] animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200 fill-mode-both">
           {filters}
         </section>
       )}
 
-      <div className="animate-in fade-in slide-in-from-bottom-3 duration-500 delay-300 fill-mode-both">
+      <div className="relative z-0 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-300 fill-mode-both">
         {children}
       </div>
     </PageContainer>

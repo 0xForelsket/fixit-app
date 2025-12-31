@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { AuditLog, EntityType, User } from "@/db/schema";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   Activity,
   ChevronLeft,
@@ -94,7 +94,13 @@ export function AuditLogTable({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showFilters, setShowFilters] = useState(
-    !!(params.action || params.entityType || params.userId || params.from || params.to)
+    !!(
+      params.action ||
+      params.entityType ||
+      params.userId ||
+      params.from ||
+      params.to
+    )
   );
   const [expandedLog, setExpandedLog] = useState<number | null>(null);
 
@@ -348,7 +354,8 @@ export function AuditLogTable({
                       <Badge
                         className={cn(
                           "font-bold text-[10px] uppercase tracking-wider gap-1",
-                          actionColors[log.action] || "bg-slate-100 text-slate-700"
+                          actionColors[log.action] ||
+                            "bg-slate-100 text-slate-700"
                         )}
                       >
                         {actionIcons[log.action]}
@@ -375,13 +382,17 @@ export function AuditLogTable({
                     <td className="py-3 px-4">
                       {log.user ? (
                         <div>
-                          <div className="text-xs font-medium">{log.user.name}</div>
+                          <div className="text-xs font-medium">
+                            {log.user.name}
+                          </div>
                           <div className="text-[10px] text-muted-foreground">
                             {log.user.employeeId}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">System</span>
+                        <span className="text-xs text-muted-foreground">
+                          System
+                        </span>
                       )}
                     </td>
                     <td className="py-3 px-4">
@@ -393,7 +404,9 @@ export function AuditLogTable({
                             </pre>
                           ) : (
                             <span className="text-xs text-muted-foreground truncate block">
-                              {Object.keys(parsedDetails).slice(0, 3).join(", ")}
+                              {Object.keys(parsedDetails)
+                                .slice(0, 3)
+                                .join(", ")}
                               {Object.keys(parsedDetails).length > 3 && "..."}
                             </span>
                           )}

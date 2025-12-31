@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { ArrowDown, ArrowUp, ArrowUpDown, Inbox } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import * as React from "react";
+import type * as React from "react";
 import {
   Table,
   TableBody,
@@ -345,11 +345,7 @@ interface EmptyStateProps {
   colSpan: number;
 }
 
-function EmptyState({
-  message,
-  icon: Icon = Inbox,
-  colSpan,
-}: EmptyStateProps) {
+function EmptyState({ message, icon: Icon = Inbox, colSpan }: EmptyStateProps) {
   return (
     <TableRow>
       <TableCell colSpan={colSpan} className="h-48">

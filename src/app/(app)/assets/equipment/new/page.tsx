@@ -47,16 +47,16 @@ export default async function NewEquipmentPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">New Equipment</h1>
-          <p className="text-muted-foreground">Add a new asset to the registry</p>
+          <p className="text-muted-foreground">
+            Add a new asset to the registry
+          </p>
         </div>
       </div>
 
       {/* Form Card */}
       <div className="rounded-xl border border-border bg-card p-6">
         <Suspense
-          fallback={
-            <div className="h-96 rounded-xl bg-muted animate-pulse" />
-          }
+          fallback={<div className="h-96 rounded-xl bg-muted animate-pulse" />}
         >
           <EquipmentForm
             locations={locationsList}
@@ -73,4 +73,3 @@ export default async function NewEquipmentPage() {
     </div>
   );
 }
-

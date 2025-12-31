@@ -1,12 +1,12 @@
-import { User } from "lucide-react";
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
+import { User } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { PageHeader } from "@/components/ui/page-header";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
-import { PageHeader } from "@/components/ui/page-header";
 import { AvatarUpload } from "./avatar-upload";
 import { ProfileForm } from "./settings/profile-form";
 
@@ -16,8 +16,6 @@ export default async function ProfilePage() {
   if (!user) {
     redirect("/dashboard");
   }
-
-
 
   // Fetch current avatar
   const avatar = await db.query.attachments.findFirst({
@@ -60,13 +58,13 @@ export default async function ProfilePage() {
             <div className="mt-3 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary uppercase tracking-wider">
               {user.roleName}
             </div>
-            
+
             <div className="mt-6 border-t border-border pt-6 text-left">
-               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">
                 Update Photo
               </h3>
               <AvatarUpload userId={user.id} />
-             </div>
+            </div>
           </div>
         </div>
 
@@ -74,10 +72,14 @@ export default async function ProfilePage() {
           {/* Profile Form Card */}
           <div className="card-premium rounded-xl p-8">
             <div className="mb-6">
-              <h2 className="text-2xl font-serif-brand font-bold mb-1">Profile</h2>
-              <p className="text-muted-foreground">Update your personal information.</p>
+              <h2 className="text-2xl font-serif-brand font-bold mb-1">
+                Profile
+              </h2>
+              <p className="text-muted-foreground">
+                Update your personal information.
+              </p>
             </div>
-             <ProfileForm initialName={user.name} initialEmail={""} />
+            <ProfileForm initialName={user.name} initialEmail={""} />
           </div>
         </div>
       </div>

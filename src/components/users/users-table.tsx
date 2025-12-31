@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { Edit, Shield, User, Wrench } from "lucide-react";
-import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 interface UserWithRole {
   id: number;

@@ -5,7 +5,9 @@ export default function DocsPage() {
     <div className="flex flex-col gap-6 p-6">
       <PageHeader title="Documentation" subtitle="Resource Center" />
       <div className="rounded-lg border bg-card p-6">
-        <p className="text-muted-foreground">Documentation is currently under development.</p>
+        <p className="text-muted-foreground">
+          Documentation is currently under development.
+        </p>
       </div>
     </div>
   );

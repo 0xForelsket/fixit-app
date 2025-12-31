@@ -5,18 +5,8 @@ import { StatsTicker } from "@/components/ui/stats-ticker";
 import { db } from "@/db";
 import { auditLogs, entityTypes, users } from "@/db/schema";
 import { requirePermission } from "@/lib/session";
-import { and, count, desc, eq, gte, like, lte, or, sql } from "drizzle-orm";
-import {
-  Activity,
-  Calendar,
-  Download,
-  FileText,
-  LogIn,
-  Pencil,
-  Plus,
-  Trash2,
-  User,
-} from "lucide-react";
+import { and, count, desc, eq, gte, like, lte, or } from "drizzle-orm";
+import { Calendar, Download, LogIn, Pencil, Plus, Trash2 } from "lucide-react";
 import { AuditLogTable } from "./audit-log-table";
 
 type SearchParams = {
@@ -42,7 +32,12 @@ async function getAuditLogs(params: SearchParams) {
   }
 
   if (params.entityType && params.entityType !== "all") {
-    conditions.push(eq(auditLogs.entityType, params.entityType as typeof entityTypes[number]));
+    conditions.push(
+      eq(
+        auditLogs.entityType,
+        params.entityType as (typeof entityTypes)[number]
+      )
+    );
   }
 
   if (params.userId && params.userId !== "all") {
@@ -81,10 +76,7 @@ async function getAuditLogs(params: SearchParams) {
       limit: ITEMS_PER_PAGE,
       offset,
     }),
-    db
-      .select({ count: count() })
-      .from(auditLogs)
-      .where(whereClause),
+    db.select({ count: count() }).from(auditLogs).where(whereClause),
   ]);
 
   const total = totalResult[0]?.count || 0;
@@ -106,24 +98,25 @@ async function getAuditStats() {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [totalResult, todayResult, weekResult, actionCounts] = await Promise.all([
-    db.select({ count: count() }).from(auditLogs),
-    db
-      .select({ count: count() })
-      .from(auditLogs)
-      .where(gte(auditLogs.createdAt, today)),
-    db
-      .select({ count: count() })
-      .from(auditLogs)
-      .where(gte(auditLogs.createdAt, weekAgo)),
-    db
-      .select({
-        action: auditLogs.action,
-        count: count(),
-      })
-      .from(auditLogs)
-      .groupBy(auditLogs.action),
-  ]);
+  const [totalResult, todayResult, weekResult, actionCounts] =
+    await Promise.all([
+      db.select({ count: count() }).from(auditLogs),
+      db
+        .select({ count: count() })
+        .from(auditLogs)
+        .where(gte(auditLogs.createdAt, today)),
+      db
+        .select({ count: count() })
+        .from(auditLogs)
+        .where(gte(auditLogs.createdAt, weekAgo)),
+      db
+        .select({
+          action: auditLogs.action,
+          count: count(),
+        })
+        .from(auditLogs)
+        .groupBy(auditLogs.action),
+    ]);
 
   const actionMap = Object.fromEntries(
     actionCounts.map((a) => [a.action, a.count])
@@ -179,7 +172,10 @@ export default async function AuditLogPage({
           >
             <a
               href={`/api/audit/export?${new URLSearchParams(
-                Object.entries(params).filter(([_, v]) => v) as [string, string][]
+                Object.entries(params).filter(([_, v]) => v) as [
+                  string,
+                  string,
+                ][]
               ).toString()}`}
               download
             >

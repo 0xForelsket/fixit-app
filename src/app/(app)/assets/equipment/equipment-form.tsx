@@ -34,8 +34,16 @@ interface EquipmentFormProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: "operational", label: "Operational", description: "Equipment is running normally" },
-  { value: "maintenance", label: "Maintenance", description: "Scheduled maintenance in progress" },
+  {
+    value: "operational",
+    label: "Operational",
+    description: "Equipment is running normally",
+  },
+  {
+    value: "maintenance",
+    label: "Maintenance",
+    description: "Scheduled maintenance in progress",
+  },
   { value: "down", label: "Down", description: "Equipment is non-functional" },
 ];
 
@@ -138,9 +146,12 @@ export function EquipmentForm({
   };
 
   // Shared input class for consistency
-  const inputClass = "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all";
-  const selectClass = "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all";
-  const labelClass = "text-[11px] font-black uppercase tracking-widest text-muted-foreground";
+  const inputClass =
+    "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all";
+  const selectClass =
+    "w-full rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all";
+  const labelClass =
+    "text-[11px] font-black uppercase tracking-widest text-muted-foreground";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -226,7 +237,10 @@ export function EquipmentForm({
             value={typeId}
             onChange={(e) => setTypeId(e.target.value)}
             disabled={!categoryId}
-            className={cn(selectClass, !categoryId && "bg-muted cursor-not-allowed")}
+            className={cn(
+              selectClass,
+              !categoryId && "bg-muted cursor-not-allowed"
+            )}
           >
             <option value="">Select Type...</option>
             {filteredTypes.map((t) => (
@@ -236,7 +250,9 @@ export function EquipmentForm({
             ))}
           </select>
           <p className="text-[10px] text-muted-foreground">
-            {!categoryId ? "Select a category first" : "Precise classification for SAP PM alignment"}
+            {!categoryId
+              ? "Select a category first"
+              : "Precise classification for SAP PM alignment"}
           </p>
         </div>
 
@@ -327,9 +343,7 @@ export function EquipmentForm({
 
         {/* Parent Asset */}
         <div className="space-y-2 md:col-span-2">
-          <label className={labelClass}>
-            Parent Asset (Optional)
-          </label>
+          <label className={labelClass}>Parent Asset (Optional)</label>
           <div className="space-y-2">
             {activeParent && (
               <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
@@ -382,9 +396,7 @@ export function EquipmentForm({
                           }}
                           className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center justify-between group transition-colors"
                         >
-                          <span className="font-medium">
-                            {e.name}
-                          </span>
+                          <span className="font-medium">{e.name}</span>
                           <span className="text-[10px] font-mono text-muted-foreground group-hover:text-primary">
                             {e.code}
                           </span>
@@ -408,9 +420,7 @@ export function EquipmentForm({
 
       {/* Status Selection */}
       <fieldset className="space-y-4">
-        <legend className={labelClass}>
-          Equipment Status
-        </legend>
+        <legend className={labelClass}>Equipment Status</legend>
         <div className="grid gap-3 md:grid-cols-3">
           {STATUS_OPTIONS.map((option) => (
             <button
@@ -464,4 +474,3 @@ export function EquipmentForm({
     </form>
   );
 }
-

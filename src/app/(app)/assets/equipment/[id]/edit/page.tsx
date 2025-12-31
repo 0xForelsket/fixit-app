@@ -71,19 +71,24 @@ export default async function EditEquipmentPage({
             <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{equipmentItem.name}</h1>
-            <p className="text-muted-foreground font-mono">{equipmentItem.code}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {equipmentItem.name}
+            </h1>
+            <p className="text-muted-foreground font-mono">
+              {equipmentItem.code}
+            </p>
           </div>
         </div>
-        <DeleteEquipmentButton equipmentId={equipmentItem.id} equipmentName={equipmentItem.name} />
+        <DeleteEquipmentButton
+          equipmentId={equipmentItem.id}
+          equipmentName={equipmentItem.name}
+        />
       </div>
 
       {/* Form Card */}
       <div className="rounded-xl border border-border bg-card p-6">
         <Suspense
-          fallback={
-            <div className="h-96 rounded-xl bg-muted animate-pulse" />
-          }
+          fallback={<div className="h-96 rounded-xl bg-muted animate-pulse" />}
         >
           <EquipmentForm
             equipment={equipmentItem}

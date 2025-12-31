@@ -14,7 +14,7 @@ import { db } from "@/db";
 import { maintenanceSchedules } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
-import { asc, desc } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import {
   ArrowLeft,
   Calendar,

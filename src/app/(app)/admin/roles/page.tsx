@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
-import { StatsTicker } from "@/components/ui/stats-ticker";
 import { SortHeader } from "@/components/ui/sort-header";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import {
   Table,
   TableBody,
