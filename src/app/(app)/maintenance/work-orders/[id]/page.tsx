@@ -106,14 +106,13 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     }))
   );
 
-  // Fetch all techs for assignment dropdown
+  // Fetch all users for assignment dropdown and log resolution
   const allUsers = await db.query.users.findMany({
-    where: eq(users.isActive, true),
     with: {
       assignedRole: true,
     },
   });
-  const techs = allUsers.filter((u) => u.assignedRole?.name === "tech");
+  const techs = allUsers.filter((u) => u.isActive && u.assignedRole?.name === "tech");
 
   // Fetch labor logs for this work order
   const workOrderLaborLogs = await db.query.laborLogs.findMany({
@@ -293,6 +292,19 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     </div>
   );
 
+  // Create User Map for Activity Log Resolution
+  const userMap = new Map(
+    allUsers.map((u) => [u.id.toString(), `${u.name} (${u.employeeId})`])
+  );
+
+  const formatLogValue = (action: string, value: string | null) => {
+    if (!value) return "none";
+    if (action === "assignment") {
+      return userMap.get(value) || `User #${value}`;
+    }
+    return value;
+  };
+
   const ActivityLogSection = (
     <div className="space-y-4">
       <div className="flex items-center gap-2 px-1">
@@ -333,11 +345,11 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
                   <p className="text-sm text-muted-foreground">
                     Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
                     <span className="line-through opacity-70">
-                      {log.oldValue || "none"}
+                      {formatLogValue(log.action, log.oldValue)}
                     </span>{" "}
                     to{" "}
                     <span className="font-medium text-foreground">
-                      {log.newValue}
+                      {formatLogValue(log.action, log.newValue)}
                     </span>
                   </p>
                 )}

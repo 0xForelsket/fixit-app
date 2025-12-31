@@ -2,14 +2,14 @@
 
 import { db } from "@/db";
 import type { Attachment } from "@/db/schema";
-import { attachments } from "@/db/schema";
+import { attachments, workOrders, equipment } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import {
   type UploadAttachmentInput,
   uploadAttachmentSchema,
 } from "@/lib/validations/attachments";
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, like } from "drizzle-orm";
+import { and, desc, eq, like, inArray } from "drizzle-orm";
 import type { ActionResult } from "@/lib/types/actions";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import type { AttachmentWithUrl } from "@/lib/types/attachments";
@@ -49,10 +49,47 @@ export async function getAllAttachments(
     orderBy: (attachments, { desc }) => [desc(attachments.createdAt)],
   });
 
+  // Extract Entity IDs to fetch names in bulk
+  const workOrderIds = new Set<number>();
+  const equipmentIds = new Set<number>();
+
+  data.forEach((file) => {
+    if (file.entityType === "work_order") {
+      workOrderIds.add(file.entityId);
+    } else if (file.entityType === "equipment") {
+      equipmentIds.add(file.entityId);
+    }
+  });
+
+  const entityNames = new Map<string, string>();
+
+  // Fetch Work Order Titles
+  if (workOrderIds.size > 0) {
+    const wos = await db.query.workOrders.findMany({
+      where: inArray(workOrders.id, Array.from(workOrderIds)),
+      columns: { id: true, title: true },
+    });
+    wos.forEach((wo) => {
+      entityNames.set(`work_order-${wo.id}`, wo.title);
+    });
+  }
+
+  // Fetch Equipment Names
+  if (equipmentIds.size > 0) {
+    const eqs = await db.query.equipment.findMany({
+      where: inArray(equipment.id, Array.from(equipmentIds)),
+      columns: { id: true, name: true },
+    });
+    eqs.forEach((eq) => {
+      entityNames.set(`equipment-${eq.id}`, eq.name);
+    });
+  }
+
   const dataWithUrls = await Promise.all(
     data.map(async (file) => ({
       ...file,
       url: await getPresignedDownloadUrl(file.s3Key),
+      entityName: entityNames.get(`${file.entityType}-${file.entityId}`),
     }))
   );
 

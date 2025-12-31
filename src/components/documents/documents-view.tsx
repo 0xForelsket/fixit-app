@@ -201,9 +201,11 @@ export function DocumentsView({ initialAttachments }: DocumentsViewProps) {
                       </div>
                       <div className="flex flex-col p-3">
                          <span className="truncate text-sm font-medium leading-none mb-1">{file.filename}</span>
-                         <div className="flex justify-between text-xs text-muted-foreground">
+                           <div className="flex justify-between text-xs text-muted-foreground">
                            <span>{formatBytes(file.sizeBytes)}</span>
-                           <span className="uppercase">{file.entityType.replace("_", " ")}</span>
+                           <span className="max-w-[100px] truncate" title={file.entityName || `#${file.entityId}`}>
+                             {file.entityName || `#${file.entityId}`}
+                           </span>
                          </div>
                       </div>
                     </>
@@ -217,7 +219,9 @@ export function DocumentsView({ initialAttachments }: DocumentsViewProps) {
                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
                            <span>{formatBytes(file.sizeBytes)}</span>
                            <span>•</span>
-                           <span className="uppercase">{file.entityType.replace("_", " ")} #{file.entityId}</span>
+                           <span className="uppercase">{file.entityType.replace("_", " ")}</span>
+                           <span>•</span>
+                           <span className="font-medium">{file.entityName || `#${file.entityId}`}</span>
                          </div>
                       </div>
                       <div className="text-xs text-muted-foreground">
