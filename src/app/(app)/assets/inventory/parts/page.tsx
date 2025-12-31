@@ -1,6 +1,10 @@
+import { PartsFilters } from "@/components/inventory/parts-filters";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageLayout } from "@/components/ui/page-layout";
 import { SortHeader } from "@/components/ui/sort-header";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import {
   Table,
   TableBody,
@@ -11,16 +15,8 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
-import { cn } from "@/lib/utils";
 import { desc } from "drizzle-orm";
-import {
-  ArrowLeft,
-  ChevronRight,
-  Package,
-  Plus,
-  Search,
-  Upload,
-} from "lucide-react";
+import { Box, ChevronRight, Package, Plus, Upload } from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -94,17 +90,16 @@ async function getParts(params: SearchParams) {
   return allParts;
 }
 
-const categories = [
-  "electrical",
-  "mechanical",
-  "hydraulic",
-  "pneumatic",
-  "consumable",
-  "safety",
-  "tooling",
-  "other",
-  "cleaning",
-];
+async function getPartStats() {
+  const allParts = await db.query.spareParts.findMany();
+  const activeParts = allParts.filter((p) => p.isActive);
+  const totalValue = allParts.reduce((sum, p) => sum + (p.unitCost || 0), 0);
+  return {
+    total: allParts.length,
+    active: activeParts.length,
+    totalValue,
+  };
+}
 
 export default async function PartsPage({
   searchParams,
@@ -113,113 +108,65 @@ export default async function PartsPage({
 }) {
   const params = await searchParams;
   const parts = await getParts(params);
-
-  // Stats
-  const totalParts = parts.length;
-  const categoryCounts = categories.reduce(
-    (acc, cat) => {
-      acc[cat] = parts.filter((p) => p.category === cat).length;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const stats = await getPartStats();
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-8">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="text-muted-foreground hover:text-primary"
-          >
-            <Link href="/assets/inventory">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-foreground uppercase font-serif-brand">
-              Parts <span className="text-primary">Catalog</span>
-            </h1>
-            <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-              <Package className="h-3.5 w-3.5" />
-              {totalParts} REGISTERED MODULES
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
+    <PageLayout
+      title="Parts Catalog"
+      subtitle="Inventory Management"
+      description={`${stats.total} REGISTERED MODULES • ${stats.active} ACTIVE`}
+      bgSymbol="PT"
+      headerActions={
+        <>
           <Button variant="outline" asChild>
             <Link href="/assets/inventory/import">
               <Upload className="mr-2 h-4 w-4" />
               BULK IMPORT
             </Link>
           </Button>
-          <Button asChild>
+          <Button
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+          >
             <Link href="/assets/inventory/parts/new">
               <Plus className="mr-2 h-4 w-4" />
               ADD PART
             </Link>
           </Button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4">
-        <form
-          action="/assets/inventory/parts"
-          className="relative flex-1 md:max-w-sm"
-        >
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            name="search"
-            placeholder="Search parts by name, SKU, or barcode..."
-            defaultValue={params.search}
-            className="w-full rounded-lg border border-border bg-card py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </form>
-        <div className="flex flex-wrap gap-2">
-          <FilterLink
-            href="/assets/inventory/parts"
-            active={!params.category || params.category === "all"}
-          >
-            All
-          </FilterLink>
-          {categories.map((cat) => (
-            <FilterLink
-              key={cat}
-              href={`/assets/inventory/parts?category=${cat}`}
-              active={params.category === cat}
-            >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}{" "}
-              {categoryCounts[cat] > 0 && (
-                <span className="text-[10px] opacity-70 ml-1">
-                  {categoryCounts[cat]}
-                </span>
-              )}
-            </FilterLink>
-          ))}
-        </div>
-      </div>
-
-      {/* Parts List */}
+        </>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Parts",
+              value: stats.total,
+              icon: Package,
+              variant: "default",
+            },
+            {
+              label: "Active SKUs",
+              value: stats.active,
+              icon: Box,
+              variant: "success",
+            },
+          ]}
+        />
+      }
+      filters={<PartsFilters searchParams={params} />}
+    >
       {parts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-12 text-center bg-card shadow-sm shadow-border/10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted border border-border shadow-inner">
-            <Package className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <h3 className="mt-4 text-lg font-black uppercase tracking-tight text-foreground">
-            No parts found
-          </h3>
-          <p className="text-sm text-muted-foreground font-medium font-mono">
-            {params.search || params.category
-              ? "ADJUST FILTERS AND RETRY"
-              : "COMMENCE CATALOGING"}
-          </p>
+        <EmptyState
+          title="No parts found"
+          description={
+            params.search || params.category
+              ? "Adjust filters and retry"
+              : "Commence cataloging"
+          }
+          icon={Package}
+        >
           <Button
-            className="mt-6 rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95"
+            className="rounded-xl font-black uppercase tracking-widest shadow-lg active:scale-95"
             asChild
           >
             <Link href="/assets/inventory/parts/new">
@@ -227,7 +174,7 @@ export default async function PartsPage({
               Initial Entry
             </Link>
           </Button>
-        </div>
+        </EmptyState>
       ) : (
         <>
           {/* Desktop Table View */}
@@ -403,30 +350,6 @@ export default async function PartsPage({
           </div>
         </>
       )}
-    </div>
-  );
-}
-
-function FilterLink({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "rounded-lg px-3 py-2 text-xs font-black uppercase tracking-widest transition-all",
-        active
-          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-      )}
-    >
-      {children}
-    </Link>
+    </PageLayout>
   );
 }

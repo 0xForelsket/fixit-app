@@ -11,17 +11,14 @@ import { DowntimeByReasonChart } from "@/components/analytics/downtime-by-reason
 import { DowntimeTrendChart } from "@/components/analytics/downtime-trend-chart";
 import { RecentDowntimeTable } from "@/components/analytics/recent-downtime-table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  FilterToolbar,
+  FilterToolbarGroup,
+} from "@/components/ui/filter-toolbar";
+import { ResetFilterButton } from "@/components/ui/reset-filter-button";
 import { StatsCard } from "@/components/ui/stats-card";
+import { StyledSelect } from "@/components/ui/styled-select";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -29,7 +26,7 @@ import {
   RefreshCw,
   TrendingDown,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface FilterOption {
   id: number;
@@ -51,6 +48,15 @@ function formatPercentage(value: number): string {
   return `${value.toFixed(1)}%`;
 }
 
+const DATE_RANGE_OPTIONS = [
+  { value: "all", label: "ALL TIME" },
+  { value: "7d", label: "LAST 7 DAYS" },
+  { value: "30d", label: "LAST 30 DAYS" },
+  { value: "90d", label: "LAST 90 DAYS" },
+  { value: "1y", label: "LAST YEAR" },
+  { value: "ytd", label: "YEAR TO DATE" },
+];
+
 export function DowntimeDashboard() {
   const [downtimeData, setDowntimeData] = useState<DowntimeSummary | null>(
     null
@@ -62,6 +68,18 @@ export function DowntimeDashboard() {
   const [departmentList, setDepartmentList] = useState<FilterOption[]>([]);
   const [filters, setFilters] = useState<DowntimeFilters>({});
   const [dateRange, setDateRange] = useState<string>("30d");
+
+  // Memoized options for StyledSelect
+  const departmentOptions = useMemo(
+    () => [
+      { value: "all", label: "ALL DEPARTMENTS" },
+      ...departmentList.map((d) => ({
+        value: d.id.toString(),
+        label: d.name.toUpperCase(),
+      })),
+    ],
+    [departmentList]
+  );
 
   // Load filter options
   useEffect(() => {
@@ -186,62 +204,25 @@ export function DowntimeDashboard() {
   return (
     <div className="space-y-8">
       {/* Filters */}
-      <Card className="card-industrial border-zinc-200 shadow-sm">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-                Date Range
-              </Label>
-              <Select value={dateRange} onValueChange={handleDateRangeChange}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Last 30 Days" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Time</SelectItem>
-                  <SelectItem value="7d">Last 7 Days</SelectItem>
-                  <SelectItem value="30d">Last 30 Days</SelectItem>
-                  <SelectItem value="90d">Last 90 Days</SelectItem>
-                  <SelectItem value="1y">Last Year</SelectItem>
-                  <SelectItem value="ytd">Year to Date</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
-                Department
-              </Label>
-              <Select
-                value={filters.departmentId?.toString() || "all"}
-                onValueChange={handleDepartmentChange}
-              >
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="All Departments" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {departmentList.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id.toString()}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReset}
-              className="ml-auto"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reset
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <FilterToolbar>
+        <FilterToolbarGroup>
+          <StyledSelect
+            label="Date Range"
+            value={dateRange}
+            onValueChange={handleDateRangeChange}
+            options={DATE_RANGE_OPTIONS}
+            minWidth="150px"
+          />
+          <StyledSelect
+            label="Department"
+            value={filters.departmentId?.toString() || "all"}
+            onValueChange={handleDepartmentChange}
+            options={departmentOptions}
+            minWidth="170px"
+          />
+        </FilterToolbarGroup>
+        <ResetFilterButton onClick={handleReset} />
+      </FilterToolbar>
 
       {/* Summary KPIs */}
       <ErrorBoundary fallback={<div>Failed to load downtime summary</div>}>

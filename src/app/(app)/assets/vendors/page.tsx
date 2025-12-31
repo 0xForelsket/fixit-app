@@ -1,21 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
+import { StatsTicker } from "@/components/ui/stats-ticker";
+import { VendorFilters } from "@/components/vendors/vendor-filters";
 import { VendorsTable } from "@/components/vendors/vendors-table";
 import { db } from "@/db";
 import { vendors } from "@/db/schema";
 import { asc, desc, like, or } from "drizzle-orm";
-import { Factory, Plus, Search } from "lucide-react";
+import { Building, Factory, Plus, Users } from "lucide-react";
 import Link from "next/link";
+
+type SearchParams = {
+  q?: string;
+  sort?: "name" | "code" | "contactPerson" | "phone" | "email";
+  dir?: "asc" | "desc";
+};
+
+async function getVendorStats() {
+  const allVendors = await db.query.vendors.findMany();
+  const activeVendors = allVendors.filter((v) => v.isActive);
+  return {
+    total: allVendors.length,
+    active: activeVendors.length,
+  };
+}
 
 export default async function VendorsPage({
   searchParams,
 }: {
-  searchParams: Promise<{
-    q?: string;
-    sort?: "name" | "code" | "contactPerson" | "phone" | "email";
-    dir?: "asc" | "desc";
-  }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
   const query = params.q;
@@ -54,37 +67,45 @@ export default async function VendorsPage({
     orderBy,
   });
 
+  const stats = await getVendorStats();
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Vendors"
-        subtitle="Assets"
-        description="Manage suppliers and service providers."
-        actions={
-          <Button asChild>
-            <Link href="/assets/vendors/new">
-              <Plus className="mr-2 h-4 w-4" />
-              New Vendor
-            </Link>
-          </Button>
-        }
-      />
-
-      {/* Simple Search */}
-      <div className="flex items-center gap-2 max-w-sm">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <form>
-            <input
-              name="q"
-              placeholder="Search vendors..."
-              defaultValue={query}
-              className="w-full rounded-lg border bg-white pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </form>
-        </div>
-      </div>
-
+    <PageLayout
+      title="Vendor Registry"
+      subtitle="Supply Chain"
+      description={`${stats.total} VENDORS • ${stats.active} ACTIVE`}
+      bgSymbol="VN"
+      headerActions={
+        <Button
+          asChild
+          className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+        >
+          <Link href="/assets/vendors/new">
+            <Plus className="mr-2 h-4 w-4" />
+            ADD VENDOR
+          </Link>
+        </Button>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Vendors",
+              value: stats.total,
+              icon: Building,
+              variant: "default",
+            },
+            {
+              label: "Active Partners",
+              value: stats.active,
+              icon: Users,
+              variant: "success",
+            },
+          ]}
+        />
+      }
+      filters={<VendorFilters searchParams={params} />}
+    >
       {vendorList.length === 0 ? (
         <EmptyState
           title="No vendors found"
@@ -101,6 +122,6 @@ export default async function VendorsPage({
       ) : (
         <VendorsTable vendors={vendorList} searchParams={params} />
       )}
-    </div>
+    </PageLayout>
   );
 }
