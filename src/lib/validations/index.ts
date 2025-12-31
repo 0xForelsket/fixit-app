@@ -6,6 +6,7 @@ export * from "./equipment";
 export * from "./workOrders";
 export * from "./attachments";
 export * from "./schedules";
+export * from "./workOrderTemplates";
 
 // Common validation helpers
 import { z } from "zod";
