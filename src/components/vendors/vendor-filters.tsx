@@ -2,18 +2,19 @@
 
 import { FilterBar } from "@/components/ui/filter-bar";
 
-interface LocationFiltersProps {
+interface VendorFiltersProps {
   searchParams: {
-    search?: string;
+    q?: string;
   };
 }
 
-export function LocationFilters({ searchParams }: LocationFiltersProps) {
+export function VendorFilters({ searchParams }: VendorFiltersProps) {
   return (
     <FilterBar
-      basePath="/assets/locations"
+      basePath="/assets/vendors"
       searchParams={searchParams}
       searchPlaceholder="SEARCH BY NAME OR CODE..."
+      searchParamName="q"
     />
   );
 }
