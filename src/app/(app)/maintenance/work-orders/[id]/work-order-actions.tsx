@@ -2,6 +2,7 @@
 
 import {
   addWorkOrderComment,
+  duplicateWorkOrder,
   resolveWorkOrder,
   updateWorkOrder,
 } from "@/actions/workOrders";
@@ -12,6 +13,7 @@ import type { User, WorkOrder } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2,
+  Copy,
   MessageSquare,
   Send,
   User as UserIcon,
@@ -30,8 +32,9 @@ export function WorkOrderActions({
   currentUser,
   allTechs: _allTechs,
 }: WorkOrderActionsProps) {
-  const _router = useRouter();
+  const router = useRouter();
   const [isResolving, setIsResolving] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   // Status/Assign actions
   const [_assignState, assignAction, isAssignPending] = useActionState(
@@ -52,6 +55,18 @@ export function WorkOrderActions({
   );
 
   const isAssignedToMe = workOrder.assignedToId === currentUser.id;
+
+  const handleDuplicate = async () => {
+    setIsDuplicating(true);
+    try {
+      const result = await duplicateWorkOrder(workOrder.id);
+      if (result.success && result.data) {
+        router.push(`/maintenance/work-orders/${result.data.id}`);
+      }
+    } finally {
+      setIsDuplicating(false);
+    }
+  };
 
   return (
     <div className="space-y-6 print:hidden">
@@ -123,6 +138,17 @@ export function WorkOrderActions({
               </Button>
             </form>
           )}
+
+          {/* Duplicate Button */}
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2"
+            onClick={handleDuplicate}
+            disabled={isDuplicating}
+          >
+            <Copy className="h-4 w-4" />
+            {isDuplicating ? "Duplicating..." : "Duplicate Work Order"}
+          </Button>
         </CardContent>
       </Card>
 

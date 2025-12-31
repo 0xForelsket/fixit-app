@@ -464,7 +464,10 @@ export async function bulkUpdateWorkOrders(
   }
 
   if (ids.length > 100) {
-    return { success: false, error: "Maximum 100 work orders can be updated at once" };
+    return {
+      success: false,
+      error: "Maximum 100 work orders can be updated at once",
+    };
   }
 
   // Build update data
@@ -492,10 +495,7 @@ export async function bulkUpdateWorkOrders(
 
       if (!existing) continue;
 
-      await db
-        .update(workOrders)
-        .set(updateData)
-        .where(eq(workOrders.id, id));
+      await db.update(workOrders).set(updateData).where(eq(workOrders.id, id));
 
       updated++;
 
@@ -511,7 +511,10 @@ export async function bulkUpdateWorkOrders(
       }
 
       // Log assignment changes and notify
-      if (assignedToId !== undefined && assignedToId !== existing.assignedToId) {
+      if (
+        assignedToId !== undefined &&
+        assignedToId !== existing.assignedToId
+      ) {
         await db.insert(workOrderLogs).values({
           workOrderId: id,
           action: "assignment",
@@ -550,6 +553,76 @@ export async function bulkUpdateWorkOrders(
     return {
       success: false,
       error: "Failed to update work orders. Please try again.",
+    };
+  }
+}
+
+export async function duplicateWorkOrder(
+  workOrderId: number
+): Promise<ActionResult<{ id: number }>> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: "You must be logged in" };
+  }
+
+  if (!userHasPermission(user, PERMISSIONS.TICKET_CREATE)) {
+    return {
+      success: false,
+      error: "You don't have permission to create work orders",
+    };
+  }
+
+  try {
+    // Fetch the original work order
+    const originalWorkOrder = await db.query.workOrders.findFirst({
+      where: eq(workOrders.id, workOrderId),
+      with: {
+        equipment: true,
+      },
+    });
+
+    if (!originalWorkOrder) {
+      return { success: false, error: "Work order not found" };
+    }
+
+    // Calculate SLA due date for the new work order
+    const dueBy = calculateDueBy(originalWorkOrder.priority);
+
+    // Create the duplicate work order
+    const [newWorkOrder] = await db
+      .insert(workOrders)
+      .values({
+        equipmentId: originalWorkOrder.equipmentId,
+        type: originalWorkOrder.type,
+        title: `Copy of ${originalWorkOrder.title}`,
+        description: originalWorkOrder.description,
+        priority: originalWorkOrder.priority,
+        reportedById: user.id,
+        departmentId: originalWorkOrder.departmentId,
+        status: "open",
+        assignedToId: null,
+        dueBy,
+      })
+      .returning();
+
+    workOrderLogger.info(
+      { userId: user.id, originalId: workOrderId, newId: newWorkOrder.id },
+      "Duplicated work order"
+    );
+
+    revalidatePath("/dashboard");
+    revalidatePath("/maintenance/work-orders");
+    revalidatePath("/my-work-orders");
+
+    return { success: true, data: { id: newWorkOrder.id } };
+  } catch (error) {
+    workOrderLogger.error(
+      { error, userId: user.id, workOrderId },
+      "Failed to duplicate work order"
+    );
+    return {
+      success: false,
+      error: "Failed to duplicate work order. Please try again.",
     };
   }
 }
