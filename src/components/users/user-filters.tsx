@@ -15,6 +15,7 @@ export function UserFilters({ searchParams }: UserFiltersProps) {
       basePath="/admin/users"
       searchParams={searchParams}
       searchPlaceholder="FILTER BY NAME OR ID..."
+      enableRealtimeSearch={true}
       filters={[
         {
           name: "role",

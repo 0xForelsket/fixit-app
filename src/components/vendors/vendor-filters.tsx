@@ -15,6 +15,7 @@ export function VendorFilters({ searchParams }: VendorFiltersProps) {
       searchParams={searchParams}
       searchPlaceholder="SEARCH BY NAME OR CODE..."
       searchParamName="q"
+      enableRealtimeSearch={true}
     />
   );
 }

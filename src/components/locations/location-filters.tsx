@@ -14,6 +14,7 @@ export function LocationFilters({ searchParams }: LocationFiltersProps) {
       basePath="/assets/locations"
       searchParams={searchParams}
       searchPlaceholder="SEARCH BY NAME OR CODE..."
+      enableRealtimeSearch={true}
     />
   );
 }

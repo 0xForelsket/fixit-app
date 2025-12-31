@@ -29,6 +29,7 @@ export function PartsFilters({ searchParams }: PartsFiltersProps) {
       basePath="/assets/inventory/parts"
       searchParams={searchParams}
       searchPlaceholder="SEARCH BY NAME, SKU, OR BARCODE..."
+      enableRealtimeSearch={true}
       filters={[
         {
           name: "category",
