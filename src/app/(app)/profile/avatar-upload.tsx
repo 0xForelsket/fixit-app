@@ -28,6 +28,7 @@ export function AvatarUpload({ userId }: { userId: number }) {
         label="Select a new photo"
         accept="image/*"
         maxSizeMB={5}
+        attachmentType="avatar"
       />
     </div>
   );
