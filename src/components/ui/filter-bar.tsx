@@ -28,8 +28,8 @@ export interface FilterBarProps {
   searchParamName?: string;
   /** Filter dropdown configurations */
   filters?: FilterConfig[];
-  /** Override hasActiveFilters calculation (useful for complex cases like WorkOrderFilters) */
-  hasActiveFilters?: boolean;
+  /** Whether to show custom date range (from/to) inputs */
+  enableCustomDateRange?: boolean;
   /** Additional class name for the container */
   className?: string;
 }
@@ -41,6 +41,7 @@ export function FilterBar({
   searchParamName = "search",
   filters = [],
   hasActiveFilters: hasActiveFiltersOverride,
+  enableCustomDateRange = false,
   className,
 }: FilterBarProps) {
   const router = useRouter();
@@ -51,6 +52,8 @@ export function FilterBar({
     hasActiveFiltersOverride ??
     !!(
       searchValue ||
+      searchParams.from ||
+      searchParams.to ||
       filters.some((filter) => {
         const value = searchParams[filter.name];
         return value && value !== "all";
@@ -64,6 +67,13 @@ export function FilterBar({
 
     const params = new URLSearchParams();
     if (search) params.set(searchParamName, search);
+
+    if (enableCustomDateRange) {
+      const from = formData.get("from") as string;
+      const to = formData.get("to") as string;
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+    }
 
     for (const filter of filters) {
       const value = searchParams[filter.name];
@@ -89,25 +99,67 @@ export function FilterBar({
         "flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between bg-muted/40 p-4 rounded-xl border border-border/60 backdrop-blur-sm shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] ring-1 ring-black/5"
       }
     >
-      <form className="flex-1 relative group" onSubmit={handleSearchSubmit}>
-        <input
-          type="text"
-          name={searchParamName}
-          placeholder={searchPlaceholder}
-          defaultValue={searchValue}
-          className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-4 pr-11 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
-        />
-        {searchValue ? (
-          <button
-            type="button"
-            onClick={handleClearSearch}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground/50 hover:text-danger transition-all active:scale-90"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        ) : (
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-transform duration-200 group-focus-within:scale-110">
-            <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
+      <form
+        className="flex-1 flex flex-col md:flex-row items-stretch md:items-center gap-2 relative group"
+        onSubmit={handleSearchSubmit}
+      >
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            name={searchParamName}
+            placeholder={searchPlaceholder}
+            defaultValue={searchValue}
+            className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-4 pr-11 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
+          />
+          {searchValue ? (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground/50 hover:text-danger transition-all active:scale-90"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          ) : (
+            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-transform duration-200 group-focus-within:scale-110">
+              <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
+            </div>
+          )}
+        </div>
+
+        {enableCustomDateRange && (
+          <div className="flex items-center gap-2">
+            <div className="relative group/date">
+              <span className="absolute -top-2 left-2 px-1 bg-muted/40 text-[8px] font-black text-muted-foreground/60 tracking-tighter transition-colors group-focus-within/date:text-primary">
+                FROM
+              </span>
+              <input
+                type="date"
+                name="from"
+                defaultValue={searchParams.from}
+                className="h-10 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5"
+              />
+            </div>
+            <span className="text-[10px] font-black text-muted-foreground/40">
+              —
+            </span>
+            <div className="relative group/date">
+              <span className="absolute -top-2 left-2 px-1 bg-muted/40 text-[8px] font-black text-muted-foreground/60 tracking-tighter transition-colors group-focus-within/date:text-primary">
+                TO
+              </span>
+              <input
+                type="date"
+                name="to"
+                defaultValue={searchParams.to}
+                className="h-10 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="sm"
+              className="h-10 px-4 rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95"
+            >
+              APPLY
+            </Button>
           </div>
         )}
       </form>

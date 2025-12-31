@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
+import { ReportsFilters } from "@/components/reports/reports-filters";
 import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -30,8 +31,10 @@ import {
   desc,
   eq,
   gte,
+  ilike,
   inArray,
   lte,
+  or,
 } from "drizzle-orm";
 import {
   AlertTriangle,
@@ -40,16 +43,18 @@ import {
   CheckCircle2,
   Download,
   FileText,
-  Filter,
   Inbox,
   MapPin,
   Timer,
 } from "lucide-react";
 import Link from "next/link";
+import { getDateRangeStart } from "@/lib/utils/date-filters";
 
 type SearchParams = {
   status?: string;
   priority?: string;
+  search?: string;
+  dateRange?: string;
   from?: string;
   to?: string;
   page?: string;
@@ -90,6 +95,15 @@ async function getWorkOrders(params: SearchParams) {
     );
   }
 
+  if (params.search) {
+    conditions.push(
+      or(
+        ilike(workOrders.title, `%${params.search}%`),
+        ilike(workOrders.description, `%${params.search}%`)
+      )
+    );
+  }
+
   if (params.from) {
     const fromDate = new Date(params.from);
     conditions.push(gte(workOrders.createdAt, fromDate));
@@ -99,6 +113,13 @@ async function getWorkOrders(params: SearchParams) {
     const toDate = new Date(params.to);
     toDate.setHours(23, 59, 59, 999);
     conditions.push(lte(workOrders.createdAt, toDate));
+  }
+
+  if (!params.from && !params.to && params.dateRange && params.dateRange !== "all") {
+    const dateStart = getDateRangeStart(params.dateRange);
+    if (dateStart) {
+      conditions.push(gte(workOrders.createdAt, dateStart));
+    }
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -214,6 +235,13 @@ async function getStats(params: SearchParams) {
     conditions.push(lte(workOrders.createdAt, toDate));
   }
 
+  if (!params.from && !params.to && params.dateRange && params.dateRange !== "all") {
+    const dateStart = getDateRangeStart(params.dateRange);
+    if (dateStart) {
+      conditions.push(gte(workOrders.createdAt, dateStart));
+    }
+  }
+
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
   const allWorkOrders = await db.query.workOrders.findMany({
@@ -273,7 +301,10 @@ export default async function ReportsPage({
   const stats = await getStats(params);
 
   const hasFilters =
-    params.status || params.priority || params.from || params.to;
+    (params.status && params.status !== "all") ||
+    (params.priority && params.priority !== "all") ||
+    (params.dateRange && params.dateRange !== "all") ||
+    params.search;
 
   // Build CSV export URL
   const csvParams = new URLSearchParams();
@@ -281,8 +312,11 @@ export default async function ReportsPage({
     csvParams.set("status", params.status);
   if (params.priority && params.priority !== "all")
     csvParams.set("priority", params.priority);
+  if (params.dateRange && params.dateRange !== "all")
+    csvParams.set("dateRange", params.dateRange);
   if (params.from) csvParams.set("from", params.from);
   if (params.to) csvParams.set("to", params.to);
+  if (params.search) csvParams.set("search", params.search);
   const csvUrl = `/api/reports/export?${csvParams.toString()}`;
 
   return (
@@ -344,100 +378,10 @@ export default async function ReportsPage({
       />
 
       {/* Filters */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <form
-          action="/reports"
-          method="get"
-          className="flex flex-wrap items-end gap-4"
-        >
-          <div className="space-y-1">
-            <label
-              htmlFor="from-date"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-            >
-              From Date
-            </label>
-            <input
-              type="date"
-              id="from-date"
-              name="from"
-              defaultValue={params.from}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-            />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="to-date"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-            >
-              To Date
-            </label>
-            <input
-              type="date"
-              id="to-date"
-              name="to"
-              defaultValue={params.to}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-            />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="status-filter"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-            >
-              Status
-            </label>
-            <select
-              id="status-filter"
-              name="status"
-              defaultValue={params.status || "all"}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-            >
-              <option value="all">All Status</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="priority-filter"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-            >
-              Priority
-            </label>
-            <select
-              id="priority-filter"
-              name="priority"
-              defaultValue={params.priority || "all"}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-            >
-              <option value="all">All Priority</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-          <Button
-            type="submit"
-            className="rounded-lg font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all"
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Apply Filters
-          </Button>
-          {hasFilters && (
-            <Button
-              variant="ghost"
-              asChild
-              className="font-bold text-muted-foreground hover:text-foreground"
-            >
-              <Link href="/reports">Clear</Link>
-            </Button>
-          )}
-        </form>
-      </div>
+      <ReportsFilters
+        searchParams={params}
+        hasActiveFilters={!!(params.status && params.status !== "all" || params.priority && params.priority !== "all" || params.dateRange && params.dateRange !== "all" || params.search || params.from || params.to)}
+      />
 
       {/* Work Orders Table */}
       {workOrdersList.length === 0 ? (

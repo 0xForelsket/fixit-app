@@ -22,6 +22,7 @@ import {
 import { ArrowLeft, ArrowRight, Plus, User as UserIcon } from "lucide-react";
 import { AlertTriangle, CheckCircle2, Inbox, Timer } from "lucide-react";
 import Link from "next/link";
+import { getDateRangeStart } from "@/lib/utils/date-filters";
 
 type SearchParams = {
   status?: string;
@@ -34,42 +35,6 @@ type SearchParams = {
   sort?: "id" | "title" | "priority" | "status" | "createdAt" | "dueBy";
   dir?: "asc" | "desc";
 };
-
-function getDateRangeStart(dateRange: string): Date | null {
-  const now = new Date();
-  switch (dateRange) {
-    case "today": {
-      const start = new Date(now);
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-    case "last7days": {
-      const start = new Date(now);
-      start.setDate(start.getDate() - 7);
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-    case "last30days": {
-      const start = new Date(now);
-      start.setDate(start.getDate() - 30);
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-    case "thisMonth": {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-    case "lastQuarter": {
-      const start = new Date(now);
-      start.setMonth(start.getMonth() - 3);
-      start.setHours(0, 0, 0, 0);
-      return start;
-    }
-    default:
-      return null;
-  }
-}
 
 const PAGE_SIZE = 10;
 
