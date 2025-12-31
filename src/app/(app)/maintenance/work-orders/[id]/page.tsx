@@ -1,6 +1,11 @@
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageContainer } from "@/components/ui/page-container";
+import { PageHeader } from "@/components/ui/page-header";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { WorkOrderAttachments } from "@/components/work-orders/work-order-attachments";
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
@@ -18,11 +23,9 @@ import {
 } from "@/db/schema";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
-import { cn, formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime, cn } from "@/lib/utils";
 import { and, asc, desc, eq } from "drizzle-orm";
-import type { LucideIcon } from "lucide-react";
 import {
-  AlertTriangle,
   ArrowLeft,
   CheckCircle2,
   ClipboardCheck,
@@ -30,6 +33,12 @@ import {
   MapPin,
   MessageSquare,
   Wrench,
+  CircleDashed,
+  Hammer,
+  AlertCircle,
+  History,
+  Info,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -129,6 +138,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     with: {
       part: true,
       addedBy: true,
+      // location: true, // If we need location details
     },
     orderBy: desc(workOrderParts.addedAt),
   });
@@ -144,153 +154,9 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     columns: { id: true, name: true },
   });
 
-  // Status Configuration
-  const statusConfigs: Record<
-    string,
-    {
-      label: string;
-      icon: LucideIcon;
-      color: string;
-      bg: string;
-      border: string;
-    }
-  > = {
-    open: {
-      label: "Open",
-      icon: AlertTriangle,
-      color: "text-primary-700",
-      bg: "bg-primary-50",
-      border: "border-primary-200",
-    },
-    in_progress: {
-      label: "In Progress",
-      icon: Wrench,
-      color: "text-amber-700",
-      bg: "bg-amber-50",
-      border: "border-amber-200",
-    },
-    resolved: {
-      label: "Resolved",
-      icon: CheckCircle2,
-      color: "text-emerald-700",
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
-    },
-    closed: {
-      label: "Closed",
-      icon: CheckCircle2,
-      color: "text-slate-700",
-      bg: "bg-slate-50",
-      border: "border-slate-200",
-    },
-  };
-  const statusConfig =
-    statusConfigs[workOrder.status as string] || statusConfigs.open;
-
-  const priorityConfigs: Record<string, { color: string; label: string }> = {
-    low: { color: "bg-slate-500", label: "Low" },
-    medium: { color: "bg-primary-500", label: "Medium" },
-    high: { color: "bg-amber-500", label: "High" },
-    critical: { color: "bg-rose-600", label: "Critical" },
-  };
-  const priorityConfig =
-    priorityConfigs[workOrder.priority as string] || priorityConfigs.medium;
-
-  const StatusIcon = statusConfig.icon;
-
-  const DetailHeader = (
-    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div
-        className={cn(
-          "flex items-center justify-between border-b px-6 py-4",
-          statusConfig.bg,
-          statusConfig.border
-        )}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm",
-              statusConfig.color
-            )}
-          >
-            <StatusIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <p
-              className={cn(
-                "text-xs font-bold uppercase tracking-wider opacity-70",
-                statusConfig.color
-              )}
-            >
-              Status
-            </p>
-            <p
-              className={cn(
-                "text-lg font-bold leading-none",
-                statusConfig.color
-              )}
-            >
-              {statusConfig.label}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Priority
-            </p>
-            <div className="flex items-center gap-2 justify-end">
-              <span
-                className={cn("h-2.5 w-2.5 rounded-full", priorityConfig.color)}
-              />
-              <span className="font-bold text-foreground">
-                {priorityConfig.label}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="p-6">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="font-mono text-xs">
-              #{workOrder.id}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              Reported {formatRelativeTime(workOrder.createdAt)}
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-            {workOrder.title}
-          </h1>
-        </div>
-      </div>
-    </div>
-  );
-
-  const DescriptionSection = (
-    <div className="rounded-xl border bg-card p-6 shadow-sm">
-      <h2 className="text-lg font-semibold mb-4">Description</h2>
-      <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-        {workOrder.description}
-      </p>
-    </div>
-  );
-
-  const AttachmentsSection = (
-    <WorkOrderAttachments attachments={workOrderAttachments} />
-  );
-
-  const ProcedureSection = checklistItems.length > 0 && (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 px-1">
-        <ClipboardCheck className="h-5 w-5 text-primary-600" />
-        <h2 className="text-lg font-bold">Maintenance Procedure</h2>
-      </div>
-      <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
-    </div>
-  );
+  // Map priorities to StatusBadge compatible values or handle manually if needed
+  // StatusBadge handles "critical", "high", "medium", "low" mapped to variants
+  const priority = workOrder.priority as string;
 
   // Create User Map for Activity Log Resolution
   const userMap = new Map(
@@ -305,147 +171,316 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     return value;
   };
 
+  const DescriptionSection = (
+    <Card>
+      <CardHeader>
+        <CardTitle>Description</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+          {workOrder.description}
+        </p>
+      </CardContent>
+    </Card>
+  );
+
+  const AttachmentsSection = (
+    <WorkOrderAttachments attachments={workOrderAttachments} />
+  );
+
+  const ProcedureSection = checklistItems.length > 0 && (
+    <Card>
+        <CardHeader className="flex flex-row items-center gap-2 space-y-0">
+            <ClipboardCheck className="h-5 w-5 text-primary-600" />
+            <CardTitle>Maintenance Procedure</CardTitle>
+        </CardHeader>
+        <CardContent>
+             <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
+        </CardContent>
+    </Card>
+  );
+
   const ActivityLogSection = (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 px-1">
+     <Card>
+      <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4">
         <MessageSquare className="h-5 w-5 text-blue-600" />
-        <h2 className="text-lg font-bold">Activity Log</h2>
-      </div>
-      <div className="rounded-xl border bg-card shadow-sm divide-y">
-        {workOrder.logs.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            No activity yet.
-          </div>
-        ) : (
-          workOrder.logs.map((log) => (
-            <div key={log.id} className="p-4 flex gap-4">
-              <div className="mt-1">
-                {log.action === "comment" ? (
-                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                    <MessageSquare className="h-4 w-4" />
-                  </div>
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">{log.createdBy.name}</p>
-                  <span className="text-xs text-muted-foreground">
-                    {formatRelativeTime(log.createdAt)}
-                  </span>
-                </div>
-                {log.action === "comment" ? (
-                  <p className="text-sm text-foreground bg-slate-50 p-3 rounded-lg border">
-                    {log.newValue}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
-                    <span className="line-through opacity-70">
-                      {formatLogValue(log.action, log.oldValue)}
-                    </span>{" "}
-                    to{" "}
-                    <span className="font-medium text-foreground">
-                      {formatLogValue(log.action, log.newValue)}
-                    </span>
-                  </p>
-                )}
-              </div>
+        <CardTitle>Activity Log</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="divide-y relative">
+            {/* Timeline connector line could be added here for extra polish */}
+          {workOrder.logs.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No activity yet.
             </div>
-          ))
-        )}
-      </div>
-    </div>
+          ) : (
+            workOrder.logs.map((log) => (
+              <div key={log.id} className="p-4 flex gap-4 hover:bg-slate-50/50 transition-colors">
+                <div className="mt-1 shrink-0">
+                  {log.action === "comment" ? (
+                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 ring-4 ring-white">
+                      <MessageSquare className="h-4 w-4" />
+                    </div>
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 ring-4 ring-white">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 space-y-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold truncate">{log.createdBy.name}</p>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
+                      {formatRelativeTime(log.createdAt)}
+                    </span>
+                  </div>
+                  {log.action === "comment" ? (
+                    <div className="text-sm text-foreground bg-slate-50 p-3 rounded-lg border">
+                      {log.newValue}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground break-words">
+                      Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
+                      <span className="line-through opacity-70">
+                        {formatLogValue(log.action, log.oldValue)}
+                      </span>{" "}
+                      to{" "}
+                      <span className="font-medium text-foreground">
+                        {formatLogValue(log.action, log.newValue)}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 
   const EquipmentInfoSection = (
-    <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
-      <div className="bg-slate-50 px-4 py-3 border-b">
-        <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+    <Card className="overflow-hidden">
+      <div className="bg-muted/50 px-4 py-3 border-b">
+        <h3 className="font-mono font-bold text-xs uppercase tracking-wider text-muted-foreground">
           Equipment
         </h3>
       </div>
-      <div className="p-4 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center">
+      <CardContent className="p-4 space-y-4">
+        <div className="flex items-start gap-4">
+          <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
             <Wrench className="h-5 w-5 text-slate-500" />
           </div>
-          <div>
-            <p className="font-bold text-foreground">
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-foreground truncate">
               {workOrder.equipment.name}
             </p>
-            <Badge variant="secondary" className="font-mono text-[10px]">
+            <Badge variant="secondary" className="font-mono text-[10px] mt-1">
               {workOrder.equipment.code}
             </Badge>
           </div>
         </div>
         {workOrder.equipment.location && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            {workOrder.equipment.location.name}
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span className="truncate">{workOrder.equipment.location.name}</span>
           </div>
         )}
+      </CardContent>
+    </Card>
+  );
+
+  // Custom Status Config for the "Big Icon" look
+  const statusConfigs: Record<
+      string,
+      { icon: React.ElementType; color: string; bg: string; label: string }
+  > = {
+      open: {
+          icon: CircleDashed,
+          color: "text-blue-700",
+          bg: "bg-blue-50 border-blue-200",
+          label: "Open",
+      },
+      in_progress: {
+          icon: Hammer,
+          color: "text-amber-700",
+          bg: "bg-amber-50 border-amber-200",
+          label: "In Progress",
+      },
+      completed: {
+          icon: CheckCircle2,
+          color: "text-emerald-700",
+          bg: "bg-emerald-50 border-emerald-200",
+          label: "Completed",
+      },
+      cancelled: {
+          icon: AlertCircle,
+          color: "text-slate-700",
+          bg: "bg-slate-50 border-slate-200",
+          label: "Cancelled",
+      },
+      on_hold: {
+          icon: Clock,
+          color: "text-orange-700",
+          bg: "bg-orange-50 border-orange-200",
+          label: "On Hold",
+      },
+  };
+
+  const statusConfig = statusConfigs[workOrder.status] || statusConfigs.open;
+  const StatusIcon = statusConfig.icon;
+
+   const StatusSection = (
+    <Card className="rounded-xl border border-border bg-card p-6 shadow-sm">
+      <div className="mb-6 flex justify-center">
+        <div
+          className={cn(
+            "inline-flex h-24 w-24 items-center justify-center rounded-full border-4",
+            statusConfig.bg,
+            statusConfig.color
+          )}
+        >
+          <StatusIcon className="h-10 w-10" />
+        </div>
       </div>
-    </div>
+      <div className="space-y-4">
+        <div className="flex justify-between border-b pb-2 text-sm">
+          <span className="text-muted-foreground">Status</span>
+          <StatusBadge status={workOrder.status} />
+        </div>
+        <div className="flex justify-between border-b pb-2 text-sm">
+          <span className="text-muted-foreground">Priority</span>
+           <StatusBadge status={priority} />
+        </div>
+        <div className="flex justify-between border-b pb-2 text-sm">
+          <span className="text-muted-foreground">Assignee</span>
+          <span className="font-medium flex items-center gap-1">
+             <User className="h-3 w-3" />
+            {workOrder.assignedTo?.name || "Unassigned"}
+          </span>
+        </div>
+        <div className="flex justify-between border-b pb-2 text-sm">
+            <span className="text-muted-foreground">Location</span>
+            <span className="font-medium flex items-center gap-1 align-right">
+                <MapPin className="h-3 w-3" />
+                {workOrder.equipment?.location?.name || "N/A"}
+            </span>
+        </div>
+      </div>
+    </Card>
   );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 pb-20 lg:pb-12">
-      {/* Navigation - Desktop Only */}
-      <div className="hidden lg:flex items-center justify-between print:hidden">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/dashboard" className="gap-2 text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-        <PrintWorkOrderButton />
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden lg:block space-y-6">
-        {DetailHeader}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            {DescriptionSection}
-            {ProcedureSection}
-            {AttachmentsSection}
-            {workOrder.resolutionNotes && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-2 text-emerald-800">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <h2 className="font-bold">Resolution Notes</h2>
+    <PageContainer>
+        {/* Navigation - Desktop Only */}
+        <div className="hidden lg:flex items-center justify-between print:hidden mb-6">
+            <div className="flex items-center gap-4">
+                 <Button variant="ghost" size="icon" asChild className="h-10 w-10 rounded-xl border border-border bg-card transition-colors hover:bg-muted">
+                    <Link href="/dashboard">
+                        <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+                    </Link>
+                </Button>
+                 <div>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {workOrder.title}
+                    </h1>
+                    <div className="flex items-center gap-2 text-muted-foreground font-mono text-sm">
+                         <span>#{workOrder.id}</span>
+                         <span>•</span>
+                         <span>Reported by {workOrder.reportedBy.name}</span>
+                         <span>•</span>
+                         <span suppressHydrationWarning>{formatRelativeTime(workOrder.createdAt)}</span>
+                    </div>
                 </div>
-                <p className="text-emerald-900/80 whitespace-pre-wrap">
-                  {workOrder.resolutionNotes}
-                </p>
-              </div>
-            )}
-            {ActivityLogSection}
-          </div>
-          <div className="space-y-6">
-            <WorkOrderActions
-              workOrder={workOrder}
-              currentUser={{ id: user.id, name: user.name }}
-              allTechs={techs}
-            />
-            {EquipmentInfoSection}
-            <TimeLogger
-              workOrderId={workOrder.id}
-              userId={user.id}
-              userHourlyRate={user.hourlyRate}
-              existingLogs={workOrderLaborLogs}
-            />
-            <WorkOrderPartsManager
-              workOrderId={workOrder.id}
-              parts={consumedParts}
-              allParts={allParts}
-              locations={activeLocations}
-            />
-          </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                 <PrintWorkOrderButton />
+                 <WorkOrderActions
+                    workOrder={workOrder}
+                    currentUser={{ id: user.id, name: user.name }}
+                    allTechs={techs}
+               />
+            </div>
+        </div>
+
+      {/* Desktop Grid Layout */}
+      <div className="hidden lg:grid grid-cols-12 gap-8">
+        {/* Sidebar */}
+        <div className="col-span-4 space-y-6">
+           {StatusSection}
+           {EquipmentInfoSection}
+
+           <Card className="rounded-xl border border-border bg-card p-4 shadow-sm">
+               <CardHeader className="p-0 pb-4">
+                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Metrics</CardTitle>
+               </CardHeader>
+               <CardContent className="p-0 space-y-4">
+                   <div>
+                       <div className="text-xs text-muted-foreground mb-1">Created At</div>
+                       <div className="font-mono text-sm" suppressHydrationWarning>{new Date(workOrder.createdAt).toLocaleString()}</div>
+                   </div>
+                   {workOrder.dueBy && (
+                       <div>
+                           <div className="text-xs text-muted-foreground mb-1">Due By</div>
+                           <div className="font-mono text-sm" suppressHydrationWarning>{new Date(workOrder.dueBy).toLocaleString()}</div>
+                       </div>
+                   )}
+               </CardContent>
+           </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="col-span-8 space-y-6">
+           <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-xl">
+              <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
+              <TabsTrigger value="procedure" className="rounded-lg">Procedure</TabsTrigger>
+              <TabsTrigger value="activity" className="rounded-lg">Activity</TabsTrigger>
+              <TabsTrigger value="resources" className="rounded-lg">Resources</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6 mt-6 focus-visible:outline-none">
+                 {DescriptionSection}
+                 {workOrder.resolutionNotes && (
+                  <Card className="border-emerald-200 bg-emerald-50/50">
+                      <CardHeader className="flex flex-row items-center gap-2 space-y-0 text-emerald-800 pb-2">
+                           <CheckCircle2 className="h-5 w-5" />
+                           <CardTitle>Resolution Notes</CardTitle>
+                      </CardHeader>
+                    <CardContent>
+                        <p className="text-emerald-900/80 whitespace-pre-wrap">
+                        {workOrder.resolutionNotes}
+                        </p>
+                    </CardContent>
+                  </Card>
+                )}
+                 {AttachmentsSection}
+            </TabsContent>
+
+            <TabsContent value="procedure" className="mt-6 focus-visible:outline-none">
+                {ProcedureSection || <div className="text-muted-foreground text-center py-8">No procedure checklist defined.</div>}
+            </TabsContent>
+
+            <TabsContent value="activity" className="mt-6 focus-visible:outline-none">
+                {ActivityLogSection}
+            </TabsContent>
+
+            <TabsContent value="resources" className="space-y-6 mt-6 focus-visible:outline-none">
+                 <TimeLogger
+                  workOrderId={workOrder.id}
+                  userId={user.id}
+                  userHourlyRate={user.hourlyRate}
+                  existingLogs={workOrderLaborLogs}
+                />
+                <WorkOrderPartsManager
+                  workOrderId={workOrder.id}
+                  parts={consumedParts}
+                  allParts={allParts}
+                  locations={activeLocations}
+                />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
@@ -453,7 +488,9 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       <MobileWorkOrderView
         infoTab={
           <div className="space-y-6">
-            {DetailHeader}
+            <div className="lg:hidden">
+              {StatusSection}
+            </div>
             {DescriptionSection}
             {EquipmentInfoSection}
             {AttachmentsSection}
@@ -482,7 +519,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
           </div>
         }
         actions={
-          <>
+          <div className="flex gap-2 w-full">
             <Button className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold h-12 rounded-xl">
               <CheckCircle2 className="mr-2 h-5 w-5" />
               Update Status
@@ -494,9 +531,9 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
               <MessageSquare className="mr-2 h-5 w-5" />
               Add Comment
             </Button>
-          </>
+          </div>
         }
       />
-    </div>
+    </PageContainer>
   );
 }

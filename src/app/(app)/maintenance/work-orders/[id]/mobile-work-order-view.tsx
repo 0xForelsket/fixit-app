@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import {
   ClipboardCheck,
   Clock,
@@ -30,53 +31,68 @@ export function MobileWorkOrderView({
   const [activeTab, setActiveTab] = useState("info");
 
   return (
-    <div className="flex flex-col h-full lg:hidden">
+    <div className="flex flex-col h-full lg:hidden bg-[#F2F1EA]">
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
         className="flex-1 flex flex-col"
       >
-        <div className="px-4 sticky top-0 z-20 bg-zinc-50/80 backdrop-blur-md pt-2">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-white/50 border shadow-sm">
-            <TabsTrigger value="info" className="gap-2">
-              <Info className="h-4 w-4" />
+        <div className="px-4 sticky top-0 z-20 bg-[#F2F1EA]/95 backdrop-blur-md pt-2 pb-2 border-b border-[#E3E2DA]">
+          <TabsList className="grid w-full grid-cols-5 h-12 bg-white border-2 border-[#E3E2DA] shadow-sm rounded-xl p-1">
+            <TabsTrigger
+              value="info"
+              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+            >
+              <Info className="h-5 w-5" />
             </TabsTrigger>
-            <TabsTrigger value="checklist" className="gap-2">
-              <ClipboardCheck className="h-4 w-4" />
+            <TabsTrigger
+              value="checklist"
+              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+            >
+              <ClipboardCheck className="h-5 w-5" />
             </TabsTrigger>
-            <TabsTrigger value="comments" className="gap-2">
-              <MessageSquare className="h-4 w-4" />
+            <TabsTrigger
+              value="comments"
+              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+            >
+              <MessageSquare className="h-5 w-5" />
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="gap-2">
-              <Package className="h-4 w-4" />
+            <TabsTrigger
+              value="inventory"
+              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+            >
+              <Package className="h-5 w-5" />
             </TabsTrigger>
-            <TabsTrigger value="logs" className="gap-2">
-              <Clock className="h-4 w-4" />
+            <TabsTrigger
+              value="logs"
+              className="gap-2 data-[state=active]:bg-[#F2F1EA] data-[state=active]:text-primary-900 data-[state=active]:shadow-none rounded-lg transition-all"
+            >
+              <Clock className="h-5 w-5" />
             </TabsTrigger>
           </TabsList>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-4 pb-32">
-          <TabsContent value="info" className="mt-0 space-y-6">
+          <TabsContent value="info" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {infoTab}
           </TabsContent>
-          <TabsContent value="checklist" className="mt-0">
+          <TabsContent value="checklist" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {checklistTab}
           </TabsContent>
-          <TabsContent value="comments" className="mt-0">
+          <TabsContent value="comments" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {commentsTab}
           </TabsContent>
-          <TabsContent value="inventory" className="mt-0">
+          <TabsContent value="inventory" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {inventoryTab}
           </TabsContent>
-          <TabsContent value="logs" className="mt-0">
+          <TabsContent value="logs" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
             {logsTab}
           </TabsContent>
         </div>
       </Tabs>
 
       {/* Sticky Action Bar */}
-      <div className="fixed bottom-16 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t z-30 flex gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t-2 border-[#E3E2DA] z-30 flex gap-3 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-6 safe-area-bottom">
         {actions}
       </div>
     </div>
