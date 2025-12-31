@@ -90,24 +90,25 @@ export function FilterBar({
       }
     >
       <form className="flex-1 relative group" onSubmit={handleSearchSubmit}>
-        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-transform duration-200 group-focus-within:scale-110">
-          <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
-        </div>
         <input
           type="text"
           name={searchParamName}
           placeholder={searchPlaceholder}
           defaultValue={searchValue}
-          className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-11 pr-4 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
+          className="w-full h-10 rounded-lg border-2 border-border/50 bg-card/80 pl-4 pr-11 text-[11px] font-bold uppercase tracking-[0.05em] transition-all placeholder:text-muted-foreground/40 focus:border-primary/50 focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/5 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)]"
         />
-        {searchValue && (
+        {searchValue ? (
           <button
             type="button"
             onClick={handleClearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground/50 hover:text-danger transition-all active:scale-90"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center hover:bg-muted text-muted-foreground/50 hover:text-danger transition-all active:scale-90"
           >
             <X className="h-3 w-3" />
           </button>
+        ) : (
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-transform duration-200 group-focus-within:scale-110">
+            <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-focus-within:text-primary transition-colors" />
+          </div>
         )}
       </form>
 
