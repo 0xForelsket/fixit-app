@@ -265,7 +265,7 @@ export default async function WorkOrdersPage({
               {
                 label: "Mine",
                 value: "me",
-                icon: UserIcon,
+                icon: <UserIcon className="h-3 w-3 shrink-0" />,
                 href: "/maintenance/work-orders?assigned=me",
               },
             ]}

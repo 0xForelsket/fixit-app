@@ -8,7 +8,7 @@ import { LucideIcon } from "lucide-react";
 export interface SegmentedControlOption {
   label: string;
   value: string;
-  icon?: LucideIcon;
+  icon?: React.ReactNode;
   href?: string;
   onClick?: () => void;
 }
@@ -36,18 +36,10 @@ export function SegmentedControl({
     >
       {options.map((option) => {
         const isActive = selectedValue === option.value;
-        const Icon = option.icon;
-
+        
         const content = (
           <>
-            {Icon && (
-              <Icon
-                className={cn(
-                  "shrink-0",
-                  size === "md" ? "h-3 w-3" : "h-2.5 w-2.5"
-                )}
-              />
-            )}
+            {option.icon}
             <span>{option.label}</span>
           </>
         );

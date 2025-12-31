@@ -22,13 +22,13 @@ export function ViewToggle() {
         {
           label: "List",
           value: "list",
-          icon: LayoutList,
+          icon: <LayoutList className="h-3 w-3 shrink-0" />,
           href: `${pathname}?${createQueryString("view", "list")}`,
         },
         {
           label: "Hierarchy",
           value: "tree",
-          icon: Layers,
+          icon: <Layers className="h-3 w-3 shrink-0" />,
           href: `${pathname}?${createQueryString("view", "tree")}`,
         },
       ]}
