@@ -25,6 +25,7 @@ export function ReportsFilters({
       searchPlaceholder="SEARCH BY TITLE, ID OR DESCRIPTION..."
       hasActiveFilters={hasActiveFilters}
       enableCustomDateRange
+      enableRealtimeSearch={true}
       filters={[
         {
           name: "status",

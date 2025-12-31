@@ -16,6 +16,7 @@ export function EquipmentFilters({ searchParams }: EquipmentFiltersProps) {
       basePath="/assets/equipment"
       searchParams={searchParams}
       searchPlaceholder="SEARCH BY NAME OR SERIAL..."
+      enableRealtimeSearch={true}
       filters={[
         {
           name: "status",

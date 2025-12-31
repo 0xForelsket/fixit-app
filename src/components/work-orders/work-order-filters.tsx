@@ -24,6 +24,7 @@ export function WorkOrderFilters({
       searchParams={searchParams}
       searchPlaceholder="FILTER BY TITLE, DESCRIPTION OR ASSET..."
       hasActiveFilters={hasActiveFilters}
+      enableRealtimeSearch={true}
       filters={[
         {
           name: "status",
