@@ -502,14 +502,14 @@
   }
 
   /* Hide navigation elements */
-  .print\\:hidden,
+  [class*="print:hidden"],
   nav,
   header,
   aside,
   [data-sidebar],
   [data-bottom-nav],
   .bottom-nav,
-  button:not(.print\\:block),
+  button:not([class*="print:block"]),
   form,
   textarea,
   input,
@@ -524,7 +524,7 @@
     overflow: visible !important;
   }
 
-  .print\\:block {
+  [class*="print:block"] {
     display: block !important;
   }
 
@@ -558,15 +558,15 @@
   }
 
   /* Page break controls */
-  .print\\:page-break-before {
+  [class*="print:page-break-before"] {
     page-break-before: always;
   }
 
-  .print\\:page-break-after {
+  [class*="print:page-break-after"] {
     page-break-after: always;
   }
 
-  .print\\:avoid-break {
+  [class*="print:avoid-break"] {
     page-break-inside: avoid;
   }
 
@@ -585,12 +585,12 @@
   }
 
   /* Hide mobile-specific elements */
-  .lg\\:hidden {
+  [class*="lg:hidden"] {
     display: none !important;
   }
 
   /* Show desktop content */
-  .hidden.lg\\:block {
+  .hidden[class*="lg:block"] {
     display: block !important;
   }
 
