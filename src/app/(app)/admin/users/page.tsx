@@ -2,19 +2,12 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
-import { UsersTable } from "@/components/users/users-table";
 import { UserFilters } from "@/components/users/user-filters";
+import { UsersTable } from "@/components/users/users-table";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import {
-  Plus,
-  Shield,
-  Upload,
-  User,
-  Users,
-  Wrench,
-} from "lucide-react";
+import { Plus, Shield, Upload, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
 type SearchParams = {
@@ -189,4 +182,3 @@ export default async function UsersPage({
     </PageLayout>
   );
 }
-

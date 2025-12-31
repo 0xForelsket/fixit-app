@@ -273,7 +273,9 @@ export async function createWorkOrderFromTemplate(
         equipmentId,
         type: template.type,
         title: template.defaultTitle || template.name,
-        description: template.defaultDescription || `Created from template: ${template.name}`,
+        description:
+          template.defaultDescription ||
+          `Created from template: ${template.name}`,
         priority: template.priority,
         reportedById: user.id,
         assignedToId: template.defaultAssignedToId,

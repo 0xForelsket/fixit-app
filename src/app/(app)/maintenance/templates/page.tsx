@@ -64,7 +64,10 @@ const typeConfig: Record<
 
 const priorityConfig: Record<
   string,
-  { label: string; variant: "default" | "secondary" | "warning" | "destructive" }
+  {
+    label: string;
+    variant: "default" | "secondary" | "warning" | "destructive";
+  }
 > = {
   low: { label: "Low", variant: "secondary" },
   medium: { label: "Medium", variant: "default" },
@@ -249,8 +252,12 @@ export default async function TemplatesPage({
                 <TableHead className="p-3">Template</TableHead>
                 <TableHead className="p-3 hidden md:table-cell">Type</TableHead>
                 <TableHead className="p-3">Priority</TableHead>
-                <TableHead className="p-3 hidden lg:table-cell">Department</TableHead>
-                <TableHead className="p-3 hidden xl:table-cell">Est. Time</TableHead>
+                <TableHead className="p-3 hidden lg:table-cell">
+                  Department
+                </TableHead>
+                <TableHead className="p-3 hidden xl:table-cell">
+                  Est. Time
+                </TableHead>
                 <TableHead className="p-3 w-10" />
               </TableRow>
             </TableHeader>

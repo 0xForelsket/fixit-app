@@ -1,16 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useTransition } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "./select";
 
 export interface FilterOption {
   value: string;
@@ -88,8 +81,8 @@ export function FilterSelect({
       <SelectTrigger
         className={cn(
           "group relative flex items-center justify-between gap-4 rounded-lg border-2 py-2.5 pl-3 pr-3 text-[10px] font-black uppercase tracking-wider transition-all h-10 w-full md:w-auto active:scale-[0.97]",
-          isFiltered 
-            ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/10" 
+          isFiltered
+            ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/10"
             : "border-border/40 bg-card hover:border-border/80 hover:bg-muted text-muted-foreground",
           isPending && "opacity-70 cursor-wait",
           className
@@ -100,10 +93,14 @@ export function FilterSelect({
           {isFiltered && (
             <span className="flex h-1.5 w-1.5 shrink-0 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
           )}
-          <span className={cn(
-            "truncate transition-colors",
-            isFiltered ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-          )}>
+          <span
+            className={cn(
+              "truncate transition-colors",
+              isFiltered
+                ? "text-foreground"
+                : "text-muted-foreground group-hover:text-foreground"
+            )}
+          >
             {displayLabel}
           </span>
         </div>

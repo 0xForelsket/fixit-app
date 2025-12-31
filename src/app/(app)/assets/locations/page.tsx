@@ -1,5 +1,5 @@
-import { LocationsTable } from "@/components/locations/locations-table";
 import { LocationFilters } from "@/components/locations/location-filters";
+import { LocationsTable } from "@/components/locations/locations-table";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -8,13 +8,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { db } from "@/db";
 import { locations } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import {
-  Building,
-  FolderTree,
-  MapPin,
-  Plus,
-  Upload,
-} from "lucide-react";
+import { Building, FolderTree, MapPin, Plus, Upload } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LocationTree } from "./location-tree";
@@ -192,4 +186,3 @@ export default async function LocationsPage({
     </PageLayout>
   );
 }
-

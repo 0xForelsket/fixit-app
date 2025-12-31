@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 interface CostByDepartment {
   id: number;
@@ -83,9 +90,10 @@ export function CostByDepartmentChart({ data }: CostByDepartmentChartProps) {
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       const item = payload[0]?.payload;
-                      const percentage = total > 0
-                        ? ((item.totalCost / total) * 100).toFixed(1)
-                        : 0;
+                      const percentage =
+                        total > 0
+                          ? ((item.totalCost / total) * 100).toFixed(1)
+                          : 0;
                       return (
                         <div className="rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5">
                           <div className="flex items-center gap-2">
@@ -127,9 +135,10 @@ export function CostByDepartmentChart({ data }: CostByDepartmentChartProps) {
                   }}
                   formatter={(value, entry: any) => {
                     const item = chartData.find((d) => d.name === value);
-                    const percentage = item && total > 0
-                      ? ((item.totalCost / total) * 100).toFixed(0)
-                      : 0;
+                    const percentage =
+                      item && total > 0
+                        ? ((item.totalCost / total) * 100).toFixed(0)
+                        : 0;
                     return (
                       <span className="text-zinc-600">
                         {value} ({percentage}%)

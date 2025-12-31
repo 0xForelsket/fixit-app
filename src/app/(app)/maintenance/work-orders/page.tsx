@@ -19,12 +19,7 @@ import {
   lt,
   or,
 } from "drizzle-orm";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Plus,
-  User as UserIcon,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, User as UserIcon } from "lucide-react";
 import { AlertTriangle, CheckCircle2, Inbox, Timer } from "lucide-react";
 import Link from "next/link";
 

@@ -6,11 +6,7 @@ import {
   updateWorkOrderTemplate,
 } from "@/actions/workOrderTemplates";
 import { Button } from "@/components/ui/button";
-import type {
-  Department,
-  User,
-  WorkOrderTemplate,
-} from "@/db/schema";
+import type { Department, User, WorkOrderTemplate } from "@/db/schema";
 import { workOrderPriorities, workOrderTypes } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { createWorkOrderTemplateSchema } from "@/lib/validations";
@@ -152,7 +148,10 @@ export function TemplateForm({
       if (data.defaultDescription)
         formData.set("defaultDescription", data.defaultDescription);
       if (data.defaultAssignedToId)
-        formData.set("defaultAssignedToId", data.defaultAssignedToId.toString());
+        formData.set(
+          "defaultAssignedToId",
+          data.defaultAssignedToId.toString()
+        );
       if (data.departmentId)
         formData.set("departmentId", data.departmentId.toString());
       if (data.estimatedMinutes)
@@ -217,9 +216,7 @@ export function TemplateForm({
               {isNew ? "New Template" : "Edit Template"}
             </h1>
             <p className="text-muted-foreground">
-              {isNew
-                ? "Create a reusable work order template"
-                : template?.name}
+              {isNew ? "Create a reusable work order template" : template?.name}
             </p>
           </div>
         </div>

@@ -1,11 +1,11 @@
 "use client";
 
 import {
+  type CostFilters,
+  type CostSummary,
   getCostSummary,
   getDepartmentsForFilter,
   getEquipmentForFilter,
-  type CostFilters,
-  type CostSummary,
 } from "@/actions/costs";
 import { CostByDepartmentChart } from "@/components/analytics/cost-by-department-chart";
 import { CostByEquipmentChart } from "@/components/analytics/cost-by-equipment-chart";
@@ -14,6 +14,7 @@ import { CostTrendChart } from "@/components/analytics/cost-trend-chart";
 import { CostlyWorkOrdersTable } from "@/components/analytics/costly-work-orders-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -23,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatsCard } from "@/components/ui/stats-card";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
 import {
   Calculator,
   DollarSign,

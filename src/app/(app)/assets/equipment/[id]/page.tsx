@@ -17,7 +17,7 @@ import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   Activity,
   AlertCircle,

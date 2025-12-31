@@ -49,8 +49,12 @@ export function FavoriteButton({
             : "text-muted-foreground hover:text-yellow-500 hover:bg-muted",
           className
         )}
-        title={optimisticFavorited ? "Remove from favorites" : "Add to favorites"}
-        aria-label={optimisticFavorited ? "Remove from favorites" : "Add to favorites"}
+        title={
+          optimisticFavorited ? "Remove from favorites" : "Add to favorites"
+        }
+        aria-label={
+          optimisticFavorited ? "Remove from favorites" : "Add to favorites"
+        }
       >
         <Star
           className={cn(

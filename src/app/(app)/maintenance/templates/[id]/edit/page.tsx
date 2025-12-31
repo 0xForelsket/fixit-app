@@ -40,10 +40,6 @@ export default async function EditTemplatePage({
   }
 
   return (
-    <TemplateForm
-      template={template}
-      departments={departments}
-      users={users}
-    />
+    <TemplateForm template={template} departments={departments} users={users} />
   );
 }

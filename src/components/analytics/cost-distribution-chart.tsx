@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 interface CostDistributionChartProps {
   laborCost: number;
@@ -67,7 +74,9 @@ export function CostDistributionChart({
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       const item = payload[0]?.payload;
-                      const percentage = ((item.value / total) * 100).toFixed(1);
+                      const percentage = ((item.value / total) * 100).toFixed(
+                        1
+                      );
                       return (
                         <div className="rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5">
                           <div className="flex items-center gap-2">

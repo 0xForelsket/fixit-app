@@ -1,6 +1,6 @@
 import { getFavoriteIds } from "@/actions/favorites";
-import { EquipmentTable } from "@/components/equipment/equipment-table";
 import { EquipmentFilters } from "@/components/equipment/equipment-filters";
+import { EquipmentTable } from "@/components/equipment/equipment-table";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -149,7 +149,7 @@ export default async function EquipmentPage({
   const stats = await getEquipmentStats(user);
 
   const favoriteResult = await getFavoriteIds("equipment");
-  const favoriteIds = favoriteResult.success ? favoriteResult.data ?? [] : [];
+  const favoriteIds = favoriteResult.success ? (favoriteResult.data ?? []) : [];
 
   return (
     <PageLayout
@@ -261,4 +261,3 @@ export default async function EquipmentPage({
     </PageLayout>
   );
 }
-

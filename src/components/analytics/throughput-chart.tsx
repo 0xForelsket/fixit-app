@@ -82,11 +82,13 @@ export function ThroughputChart({ data }: ThroughputChartProps) {
                     return (
                       <div className="rounded-lg border bg-white p-3 shadow-lg ring-1 ring-black/5">
                         <p className="mb-2 font-mono text-xs text-zinc-500">
-                          {label ? new Date(label).toLocaleDateString(undefined, {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          }) : ""}
+                          {label
+                            ? new Date(label).toLocaleDateString(undefined, {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : ""}
                         </p>
                         <div className="space-y-1">
                           {payload.map((entry: any) => (

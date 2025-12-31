@@ -1,11 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import {
-  equipment,
-  userFavorites,
-  type FavoriteEntityType,
-} from "@/db/schema";
+import { type FavoriteEntityType, userFavorites } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/types/actions";
 import { and, eq } from "drizzle-orm";
@@ -71,7 +67,9 @@ export async function getUserFavorites(): Promise<
     entityId: f.entityId,
     createdAt: f.createdAt,
     equipment:
-      f.entityType === "equipment" ? equipmentMap.get(f.entityId) ?? null : null,
+      f.entityType === "equipment"
+        ? (equipmentMap.get(f.entityId) ?? null)
+        : null,
   }));
 
   return { success: true, data: favoritesWithDetails };

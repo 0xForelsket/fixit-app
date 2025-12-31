@@ -1,6 +1,9 @@
 "use client";
 
-import { getUserFavorites, type FavoriteWithEquipment } from "@/actions/favorites";
+import {
+  type FavoriteWithEquipment,
+  getUserFavorites,
+} from "@/actions/favorites";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -86,7 +89,11 @@ export function FavoritesDropdown({ className }: FavoritesDropdownProps) {
         ) : (
           <div className="max-h-[300px] overflow-y-auto">
             {equipmentFavorites.map((favorite) => (
-              <DropdownMenuItem key={favorite.id} asChild className="cursor-pointer">
+              <DropdownMenuItem
+                key={favorite.id}
+                asChild
+                className="cursor-pointer"
+              >
                 <Link
                   href={`/assets/equipment/${favorite.entityId}`}
                   className="flex items-start gap-3 p-3"

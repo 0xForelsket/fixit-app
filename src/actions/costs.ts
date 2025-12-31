@@ -13,7 +13,7 @@ import {
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/types/actions";
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 
 // Types for cost summary data
 export interface CostByEquipment {
@@ -271,7 +271,10 @@ export async function getCostSummary(
     const departmentMap = new Map(departmentData.map((d) => [d.id, d]));
 
     // Build cost by department
-    const departmentCostMap = new Map<number, { labor: number; parts: number }>();
+    const departmentCostMap = new Map<
+      number,
+      { labor: number; parts: number }
+    >();
     for (const wo of filteredWorkOrders) {
       if (wo.departmentId) {
         if (!departmentCostMap.has(wo.departmentId)) {
