@@ -1,10 +1,6 @@
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { WorkOrderAttachments } from "@/components/work-orders/work-order-attachments";
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
@@ -16,7 +12,6 @@ import {
   laborLogs,
   locations,
   spareParts,
-  users,
   workOrderLogs,
   workOrderParts,
   workOrders,
@@ -33,18 +28,27 @@ import {
   MapPin,
   MessageSquare,
   Wrench,
-  CircleDashed,
-  Hammer,
-  AlertCircle,
+  AlertTriangle,
   History,
   Info,
   User,
+  FileText,
+  Settings,
+  Printer,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MobileWorkOrderView } from "./mobile-work-order-view";
 import { PrintWorkOrderButton } from "./print-work-order-button";
 import { WorkOrderActions } from "./work-order-actions";
+import { WorkOrderTabs } from "./work-order-tabs";
+import {
+  EntityDetailLayout,
+  EntityHeader,
+  EntityGrid,
+  EntityStatusCard,
+  EntityDetailItem,
+} from "@/components/layout/entity-detail";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -138,7 +142,6 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     with: {
       part: true,
       addedBy: true,
-      // location: true, // If we need location details
     },
     orderBy: desc(workOrderParts.addedAt),
   });
@@ -154,8 +157,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     columns: { id: true, name: true },
   });
 
-  // Map priorities to StatusBadge compatible values or handle manually if needed
-  // StatusBadge handles "critical", "high", "medium", "low" mapped to variants
+  // Map priorities to StatusBadge compatible values
   const priority = workOrder.priority as string;
 
   // Create User Map for Activity Log Resolution
@@ -171,369 +173,410 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     return value;
   };
 
-  const DescriptionSection = (
-    <Card>
-      <CardHeader>
-        <CardTitle>Description</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+  // --- Tab Content ---
+  const OverviewContent = (
+    <div className="space-y-6">
+      {workOrder.resolutionNotes && (
+        <div className="rounded-xl border border-success-200 bg-success-50/50 p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-success-700 mb-3 font-black uppercase tracking-wider text-[10px]">
+            <CheckCircle2 className="h-4 w-4" />
+            Resolution Notes
+          </div>
+          <p className="text-success-900/80 whitespace-pre-wrap leading-relaxed text-sm">
+            {workOrder.resolutionNotes}
+          </p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
+          <Info className="h-3 w-3" />
+          Problem Description
+        </div>
+        <p className="text-zinc-700 whitespace-pre-wrap leading-relaxed">
           {workOrder.description}
         </p>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="pt-4 border-t border-zinc-100">
+        <WorkOrderAttachments attachments={workOrderAttachments} />
+      </div>
+    </div>
   );
 
-  const AttachmentsSection = (
-    <WorkOrderAttachments attachments={workOrderAttachments} />
+  const ProcedureContent = checklistItems.length > 0 ? (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
+        <ClipboardCheck className="h-3 w-3" />
+        Maintenance Checklist
+      </div>
+      <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
+    </div>
+  ) : (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border-2 border-zinc-200">
+        <ClipboardCheck className="h-8 w-8 text-zinc-400" />
+      </div>
+      <h3 className="mt-4 text-lg font-black text-zinc-900">No Procedure</h3>
+      <p className="mt-1 text-sm text-zinc-500 max-w-xs">
+        No maintenance checklist has been defined for this work order.
+      </p>
+    </div>
   );
 
-  const ProcedureSection = checklistItems.length > 0 && (
-    <Card>
-        <CardHeader className="flex flex-row items-center gap-2 space-y-0">
-            <ClipboardCheck className="h-5 w-5 text-primary-600" />
-            <CardTitle>Maintenance Procedure</CardTitle>
-        </CardHeader>
-        <CardContent>
-             <WorkOrderChecklist workOrderId={workOrderId} items={checklistItems} />
-        </CardContent>
-    </Card>
-  );
-
-  const ActivityLogSection = (
-     <Card>
-      <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4">
-        <MessageSquare className="h-5 w-5 text-blue-600" />
-        <CardTitle>Activity Log</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y relative">
-            {/* Timeline connector line could be added here for extra polish */}
-          {workOrder.logs.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              No activity yet.
-            </div>
-          ) : (
-            workOrder.logs.map((log) => (
-              <div key={log.id} className="p-4 flex gap-4 hover:bg-slate-50/50 transition-colors">
-                <div className="mt-1 shrink-0">
-                  {log.action === "comment" ? (
-                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 ring-4 ring-white">
-                      <MessageSquare className="h-4 w-4" />
-                    </div>
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 ring-4 ring-white">
-                      <Clock className="h-4 w-4" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 space-y-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold truncate">{log.createdBy.name}</p>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap" suppressHydrationWarning>
-                      {formatRelativeTime(log.createdAt)}
-                    </span>
+  const ActivityContent = (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
+        <MessageSquare className="h-3 w-3" />
+        Activity Log
+      </div>
+      {workOrder.logs.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border-2 border-zinc-200">
+            <History className="h-8 w-8 text-zinc-400" />
+          </div>
+          <h3 className="mt-4 text-lg font-black text-zinc-900">No Activity</h3>
+          <p className="mt-1 text-sm text-zinc-500 max-w-xs">
+            No activity has been recorded for this work order yet.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {workOrder.logs.map((log) => (
+            <div
+              key={log.id}
+              className="rounded-xl border border-zinc-200 bg-white p-3 flex gap-3 transition-all hover:border-zinc-300 hover:shadow-sm"
+            >
+              <div className="shrink-0">
+                {log.action === "comment" ? (
+                  <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                    <MessageSquare className="h-4 w-4" />
                   </div>
-                  {log.action === "comment" ? (
-                    <div className="text-sm text-foreground bg-slate-50 p-3 rounded-lg border">
-                      {log.newValue}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground break-words">
-                      Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
-                      <span className="line-through opacity-70">
-                        {formatLogValue(log.action, log.oldValue)}
-                      </span>{" "}
-                      to{" "}
-                      <span className="font-medium text-foreground">
-                        {formatLogValue(log.action, log.newValue)}
-                      </span>
-                    </p>
-                  )}
-                </div>
+                ) : (
+                  <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500">
+                    <Clock className="h-4 w-4" />
+                  </div>
+                )}
               </div>
-            ))
-          )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-sm font-bold text-zinc-900 truncate">
+                    {log.createdBy.name}
+                  </span>
+                  <span
+                    className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider whitespace-nowrap"
+                    suppressHydrationWarning
+                  >
+                    {formatRelativeTime(log.createdAt)}
+                  </span>
+                </div>
+                {log.action === "comment" ? (
+                  <div className="text-sm text-zinc-700 bg-zinc-50 p-2 rounded-lg border border-zinc-100">
+                    {log.newValue}
+                  </div>
+                ) : (
+                  <p className="text-sm text-zinc-600">
+                    Changed <strong>{log.action.replace("_", " ")}</strong> from{" "}
+                    <span className="line-through opacity-70">
+                      {formatLogValue(log.action, log.oldValue)}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-bold text-zinc-900">
+                      {formatLogValue(log.action, log.newValue)}
+                    </span>
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 
-  const EquipmentInfoSection = (
-    <Card className="overflow-hidden">
-      <div className="bg-muted/50 px-4 py-3 border-b">
-        <h3 className="font-mono font-bold text-xs uppercase tracking-wider text-muted-foreground">
-          Equipment
-        </h3>
+  const ResourcesContent = (
+    <div className="space-y-6">
+      <TimeLogger
+        workOrderId={workOrder.id}
+        userId={user.id}
+        userHourlyRate={user.hourlyRate}
+        existingLogs={workOrderLaborLogs}
+      />
+      <div className="pt-4 border-t border-zinc-100">
+        <WorkOrderPartsManager
+          workOrderId={workOrder.id}
+          parts={consumedParts}
+          allParts={allParts}
+          locations={activeLocations}
+        />
       </div>
-      <CardContent className="p-4 space-y-4">
-        <div className="flex items-start gap-4">
-          <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-            <Wrench className="h-5 w-5 text-slate-500" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-bold text-foreground truncate">
-              {workOrder.equipment.name}
-            </p>
-            <Badge variant="secondary" className="font-mono text-[10px] mt-1">
-              {workOrder.equipment.code}
-            </Badge>
-          </div>
-        </div>
-        {workOrder.equipment.location && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{workOrder.equipment.location.name}</span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    </div>
   );
 
-  // Custom Status Config for the "Big Icon" look
-  const statusConfigs: Record<
-      string,
-      { icon: React.ElementType; color: string; bg: string; label: string }
-  > = {
-      open: {
-          icon: CircleDashed,
-          color: "text-blue-700",
-          bg: "bg-blue-50 border-blue-200",
-          label: "Open",
-      },
-      in_progress: {
-          icon: Hammer,
-          color: "text-amber-700",
-          bg: "bg-amber-50 border-amber-200",
-          label: "In Progress",
-      },
-      completed: {
-          icon: CheckCircle2,
-          color: "text-emerald-700",
-          bg: "bg-emerald-50 border-emerald-200",
-          label: "Completed",
-      },
-      cancelled: {
-          icon: AlertCircle,
-          color: "text-slate-700",
-          bg: "bg-slate-50 border-slate-200",
-          label: "Cancelled",
-      },
-      on_hold: {
-          icon: Clock,
-          color: "text-orange-700",
-          bg: "bg-orange-50 border-orange-200",
-          label: "On Hold",
-      },
+  // Status mapping for EntityStatusCard
+  const statusColorMap: Record<string, "zinc" | "blue" | "emerald" | "amber" | "red"> = {
+    open: "zinc",
+    in_progress: "blue",
+    completed: "emerald",
+    on_hold: "amber",
+    cancelled: "red",
   };
-
-  const statusConfig = statusConfigs[workOrder.status] || statusConfigs.open;
-  const StatusIcon = statusConfig.icon;
-
-   const StatusSection = (
-    <Card className="rounded-xl border border-border bg-card p-6 shadow-sm">
-      <div className="mb-6 flex justify-center">
-        <div
-          className={cn(
-            "inline-flex h-24 w-24 items-center justify-center rounded-full border-4",
-            statusConfig.bg,
-            statusConfig.color
-          )}
-        >
-          <StatusIcon className="h-10 w-10" />
-        </div>
-      </div>
-      <div className="space-y-4">
-        <div className="flex justify-between border-b pb-2 text-sm">
-          <span className="text-muted-foreground">Status</span>
-          <StatusBadge status={workOrder.status} />
-        </div>
-        <div className="flex justify-between border-b pb-2 text-sm">
-          <span className="text-muted-foreground">Priority</span>
-           <StatusBadge status={priority} />
-        </div>
-        <div className="flex justify-between border-b pb-2 text-sm">
-          <span className="text-muted-foreground">Assignee</span>
-          <span className="font-medium flex items-center gap-1">
-             <User className="h-3 w-3" />
-            {workOrder.assignedTo?.name || "Unassigned"}
-          </span>
-        </div>
-        <div className="flex justify-between border-b pb-2 text-sm">
-            <span className="text-muted-foreground">Location</span>
-            <span className="font-medium flex items-center gap-1 align-right">
-                <MapPin className="h-3 w-3" />
-                {workOrder.equipment?.location?.name || "N/A"}
-            </span>
-        </div>
-      </div>
-    </Card>
-  );
+  const statusColor = statusColorMap[workOrder.status] || "zinc";
+  
+  const StatusIcon = 
+    workOrder.status === "in_progress" ? Clock :
+    workOrder.status === "completed" ? CheckCircle2 :
+    AlertTriangle;
 
   return (
-    <PageContainer>
-        {/* Navigation - Desktop Only */}
-        <div className="hidden lg:flex items-center justify-between print:hidden mb-6">
-            <div className="flex items-center gap-4">
-                 <Button variant="ghost" size="icon" asChild className="h-10 w-10 rounded-xl border border-border bg-card transition-colors hover:bg-muted">
-                    <Link href="/dashboard">
-                        <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                    </Link>
-                </Button>
-                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">
-                        {workOrder.title}
-                    </h1>
-                    <div className="flex items-center gap-2 text-muted-foreground font-mono text-sm">
-                         <span>#{workOrder.id}</span>
-                         <span>•</span>
-                         <span>Reported by {workOrder.reportedBy.name}</span>
-                         <span>•</span>
-                         <span suppressHydrationWarning>{formatRelativeTime(workOrder.createdAt)}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-                 <PrintWorkOrderButton />
-                 <WorkOrderActions
-                    workOrder={workOrder}
-                    currentUser={{ id: user.id, name: user.name }}
-                    allTechs={techs}
-               />
-            </div>
-        </div>
-
-      {/* Desktop Grid Layout */}
-      <div className="hidden lg:grid grid-cols-12 gap-8">
-        {/* Sidebar */}
-        <div className="col-span-4 space-y-6">
-           {StatusSection}
-           {EquipmentInfoSection}
-
-           <Card className="rounded-xl border border-border bg-card p-4 shadow-sm">
-               <CardHeader className="p-0 pb-4">
-                   <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Metrics</CardTitle>
-               </CardHeader>
-               <CardContent className="p-0 space-y-4">
-                   <div>
-                       <div className="text-xs text-muted-foreground mb-1">Created At</div>
-                       <div className="font-mono text-sm" suppressHydrationWarning>{new Date(workOrder.createdAt).toLocaleString()}</div>
-                   </div>
-                   {workOrder.dueBy && (
-                       <div>
-                           <div className="text-xs text-muted-foreground mb-1">Due By</div>
-                           <div className="font-mono text-sm" suppressHydrationWarning>{new Date(workOrder.dueBy).toLocaleString()}</div>
-                       </div>
-                   )}
-               </CardContent>
-           </Card>
-        </div>
-
-        {/* Main Content */}
-        <div className="col-span-8 space-y-6">
-           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-xl">
-              <TabsTrigger value="overview" className="rounded-lg">Overview</TabsTrigger>
-              <TabsTrigger value="procedure" className="rounded-lg">Procedure</TabsTrigger>
-              <TabsTrigger value="activity" className="rounded-lg">Activity</TabsTrigger>
-              <TabsTrigger value="resources" className="rounded-lg">Resources</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6 mt-6 focus-visible:outline-none">
-                 {DescriptionSection}
-                 {workOrder.resolutionNotes && (
-                  <Card className="border-emerald-200 bg-emerald-50/50">
-                      <CardHeader className="flex flex-row items-center gap-2 space-y-0 text-emerald-800 pb-2">
-                           <CheckCircle2 className="h-5 w-5" />
-                           <CardTitle>Resolution Notes</CardTitle>
-                      </CardHeader>
-                    <CardContent>
-                        <p className="text-emerald-900/80 whitespace-pre-wrap">
-                        {workOrder.resolutionNotes}
-                        </p>
-                    </CardContent>
-                  </Card>
-                )}
-                 {AttachmentsSection}
-            </TabsContent>
-
-            <TabsContent value="procedure" className="mt-6 focus-visible:outline-none">
-                {ProcedureSection || <div className="text-muted-foreground text-center py-8">No procedure checklist defined.</div>}
-            </TabsContent>
-
-            <TabsContent value="activity" className="mt-6 focus-visible:outline-none">
-                {ActivityLogSection}
-            </TabsContent>
-
-            <TabsContent value="resources" className="space-y-6 mt-6 focus-visible:outline-none">
-                 <TimeLogger
-                  workOrderId={workOrder.id}
-                  userId={user.id}
-                  userHourlyRate={user.hourlyRate}
-                  existingLogs={workOrderLaborLogs}
-                />
-                <WorkOrderPartsManager
-                  workOrderId={workOrder.id}
-                  parts={consumedParts}
-                  allParts={allParts}
-                  locations={activeLocations}
-                />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-
-      {/* Mobile View */}
-      <MobileWorkOrderView
-        infoTab={
-          <div className="space-y-6">
-            <div className="lg:hidden">
-              {StatusSection}
-            </div>
-            {DescriptionSection}
-            {EquipmentInfoSection}
-            {AttachmentsSection}
-          </div>
+    <EntityDetailLayout>
+      <EntityHeader
+        title={workOrder.title}
+        badge={`#${workOrder.id}`}
+        parentLink={{ href: "/maintenance/work-orders", label: "Back" }}
+        meta={
+          <>
+            <User className="h-3 w-3" />
+            Reported by {workOrder.reportedBy.name} •{" "}
+            <span suppressHydrationWarning>
+              {formatRelativeTime(workOrder.createdAt)}
+            </span>
+          </>
         }
-        checklistTab={<div className="space-y-6 pt-2">{ProcedureSection}</div>}
-        commentsTab={ActivityLogSection}
-        inventoryTab={
-          <div className="space-y-6">
-            <WorkOrderPartsManager
-              workOrderId={workOrder.id}
-              parts={consumedParts}
-              allParts={allParts}
-              locations={activeLocations}
-            />
-          </div>
-        }
-        logsTab={
-          <div className="space-y-6">
-            <TimeLogger
-              workOrderId={workOrder.id}
-              userId={user.id}
-              userHourlyRate={user.hourlyRate}
-              existingLogs={workOrderLaborLogs}
-            />
-          </div>
-        }
-        actions={
-          <div className="flex gap-2 w-full">
-            <Button className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold h-12 rounded-xl">
-              <CheckCircle2 className="mr-2 h-5 w-5" />
-              Update Status
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 font-bold h-12 rounded-xl border-2"
-            >
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Add Comment
-            </Button>
-          </div>
+        actions={<PrintWorkOrderButton />}
+        statusBadge={
+          <StatusBadge
+            status={workOrder.status}
+            showIcon
+            className="h-8 px-3 text-[11px] font-black rounded-lg border-zinc-200/50"
+          />
         }
       />
-    </PageContainer>
+
+      <EntityGrid
+        sidebar={
+          <div className="space-y-6">
+            <EntityStatusCard
+              status={workOrder.status.replace("_", " ")}
+              statusColor={statusColor}
+              icon={StatusIcon}
+            >
+              <EntityDetailItem label="Priority">
+                <StatusBadge status={priority} className="h-6 text-[10px]" />
+              </EntityDetailItem>
+
+              <EntityDetailItem label="Assignee">
+                <div className="flex items-center gap-2">
+                  {workOrder.assignedTo ? (
+                    <>
+                      <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10px]">
+                        {workOrder.assignedTo.name.charAt(0)}
+                      </div>
+                      <span className="text-xs font-bold text-zinc-900 truncate max-w-[100px]">
+                        {workOrder.assignedTo.name}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-xs font-bold text-zinc-400 italic">
+                      Unassigned
+                    </span>
+                  )}
+                </div>
+              </EntityDetailItem>
+
+              <EntityDetailItem label="Equipment">
+              <Link
+                href={`/assets/equipment/${workOrder.equipment.code}`}
+                className="flex items-center gap-3 group rounded-lg border border-zinc-100 p-2 hover:border-primary-200 hover:bg-primary-50/50 transition-all bg-zinc-50/50"
+              >
+                <div className="h-8 w-8 rounded-md bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                  <Wrench className="h-4 w-4 text-zinc-500 group-hover:text-primary-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-xs text-zinc-900 truncate group-hover:text-primary-700 transition-colors">
+                    {workOrder.equipment.name}
+                  </p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="font-mono text-[9px] font-bold text-zinc-400">
+                      {workOrder.equipment.code}
+                    </span>
+                    {workOrder.equipment.location && (
+                      <>
+                        <span className="text-zinc-300">•</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider truncate">
+                          {workOrder.equipment.location.name}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Link>
+              </EntityDetailItem>
+
+              <EntityDetailItem label="Timeline">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-zinc-500 font-medium">Created</span>
+                    <span
+                      className="font-mono font-bold text-zinc-700"
+                      suppressHydrationWarning
+                    >
+                      {new Date(workOrder.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {workOrder.dueBy && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-500 font-medium">Due Date</span>
+                      <span
+                        className="font-mono font-bold text-danger-600"
+                        suppressHydrationWarning
+                      >
+                        {new Date(workOrder.dueBy).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </EntityDetailItem>
+            </EntityStatusCard>
+
+            <div className="space-y-2">
+              <WorkOrderActions
+                workOrder={workOrder}
+                currentUser={{ id: user.id, name: user.name }}
+                allTechs={techs}
+              />
+            </div>
+          </div>
+        }
+        content={
+          <WorkOrderTabs
+            workOrderId={workOrder.id}
+            overviewContent={OverviewContent}
+            procedureContent={ProcedureContent}
+            activityContent={ActivityContent}
+            resourcesContent={ResourcesContent}
+          />
+        }
+      />
+
+       <div className="lg:hidden">
+        <MobileWorkOrderView
+          infoTab={
+            <div className="space-y-6">
+              {/* Quick Info Cards */}
+              <div className="grid grid-cols-2 gap-2">
+                <InfoCard label="Status" compact>
+                  <StatusBadge status={workOrder.status} showIcon className="font-black text-xs" />
+                </InfoCard>
+                <InfoCard label="Priority" compact>
+                  <StatusBadge status={priority} className="font-black text-xs" />
+                </InfoCard>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] text-zinc-400">
+                  <Info className="h-3 w-3" />
+                  Description
+                </div>
+                <p className="text-zinc-700 whitespace-pre-wrap leading-relaxed text-sm">
+                  {workOrder.description}
+                </p>
+              </div>
+
+              {/* Equipment Link */}
+              <Link
+                href={`/assets/equipment/${workOrder.equipment.code}`}
+                className="block"
+              >
+                <InfoCard label="Equipment" className="hover:border-primary-300">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0">
+                      <Wrench className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-zinc-900 truncate">
+                        {workOrder.equipment.name}
+                      </p>
+                      <span className="font-mono text-[9px] font-bold text-zinc-400">
+                        {workOrder.equipment.code}
+                      </span>
+                    </div>
+                  </div>
+                </InfoCard>
+              </Link>
+
+              <WorkOrderAttachments attachments={workOrderAttachments} />
+            </div>
+          }
+          checklistTab={<div className="pt-2">{ProcedureContent}</div>}
+          commentsTab={ActivityContent}
+          inventoryTab={
+            <div className="space-y-6">
+              <WorkOrderPartsManager
+                workOrderId={workOrder.id}
+                parts={consumedParts}
+                allParts={allParts}
+                locations={activeLocations}
+              />
+            </div>
+          }
+          logsTab={
+            <div className="space-y-6">
+              <TimeLogger
+                workOrderId={workOrder.id}
+                userId={user.id}
+                userHourlyRate={user.hourlyRate}
+                existingLogs={workOrderLaborLogs}
+              />
+            </div>
+          }
+          actions={
+            <div className="flex gap-2 w-full">
+              <Button className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-bold h-12 rounded-xl">
+                <CheckCircle2 className="mr-2 h-5 w-5" />
+                Update Status
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 font-bold h-12 rounded-xl border-2"
+              >
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Add Comment
+              </Button>
+            </div>
+          }
+        />
+      </div>
+    </EntityDetailLayout>
+  );
+}
+
+// Reusable Info Card Component - matches equipment page styling
+function InfoCard({
+  label,
+  children,
+  className,
+  compact = false,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden",
+        className
+      )}
+    >
+      <div className={cn("px-3", compact ? "py-2" : "py-3")}>
+        <div className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-2">
+          {label}
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }

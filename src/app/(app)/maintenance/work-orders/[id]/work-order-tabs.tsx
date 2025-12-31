@@ -1,31 +1,31 @@
 "use client";
 
 import { PillTabs, PillTabsContent, PillTabsList, PillTabsTrigger } from "@/components/ui/pill-tabs";
-import { AlertTriangle, Calendar, ClipboardList, History } from "lucide-react";
+import { ClipboardList, ClipboardCheck, History, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface EquipmentTabsProps {
-  equipmentId: number;
+interface WorkOrderTabsProps {
+  workOrderId: number;
   overviewContent: React.ReactNode;
-  historyContent: React.ReactNode;
-  maintenanceContent: React.ReactNode;
-  reportContent: React.ReactNode;
+  procedureContent: React.ReactNode;
+  activityContent: React.ReactNode;
+  resourcesContent: React.ReactNode;
   defaultTab?: string;
 }
 
-export function EquipmentTabs({
+export function WorkOrderTabs({
   overviewContent,
-  historyContent,
-  maintenanceContent,
-  reportContent,
+  procedureContent,
+  activityContent,
+  resourcesContent,
   defaultTab = "overview",
-}: EquipmentTabsProps) {
+}: WorkOrderTabsProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace("#", "");
-      if (["overview", "history", "maintenance", "report"].includes(hash)) {
+      if (["overview", "procedure", "activity", "resources"].includes(hash)) {
         setActiveTab(hash);
       }
     };
@@ -51,34 +51,31 @@ export function EquipmentTabs({
           <span className="hidden sm:inline">Overview</span>
         </PillTabsTrigger>
         <PillTabsTrigger
-          value="history"
+          value="procedure"
           onClick={() => {
-            window.location.hash = "history";
+            window.location.hash = "procedure";
+          }}
+        >
+          <ClipboardCheck className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Procedure</span>
+        </PillTabsTrigger>
+        <PillTabsTrigger
+          value="activity"
+          onClick={() => {
+            window.location.hash = "activity";
           }}
         >
           <History className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">History</span>
+          <span className="hidden sm:inline">Activity</span>
         </PillTabsTrigger>
         <PillTabsTrigger
-          value="maintenance"
+          value="resources"
           onClick={() => {
-            window.location.hash = "maintenance";
+            window.location.hash = "resources";
           }}
         >
-          <Calendar className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">PM</span>
-          <span className="sm:hidden">PM</span>
-        </PillTabsTrigger>
-        <PillTabsTrigger
-          value="report"
-          onClick={() => {
-            window.location.hash = "report";
-          }}
-          className="data-[state=active]:text-danger-600 hover:text-danger-600 text-zinc-500"
-        >
-          <AlertTriangle className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Report</span>
-          <span className="sm:hidden">Report</span>
+          <Settings className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Resources</span>
         </PillTabsTrigger>
       </PillTabsList>
 
@@ -86,16 +83,16 @@ export function EquipmentTabs({
         {overviewContent}
       </PillTabsContent>
 
-      <PillTabsContent value="history">
-        {historyContent}
+      <PillTabsContent value="procedure">
+        {procedureContent}
       </PillTabsContent>
 
-      <PillTabsContent value="maintenance">
-        {maintenanceContent}
+      <PillTabsContent value="activity">
+        {activityContent}
       </PillTabsContent>
 
-      <PillTabsContent value="report">
-        {reportContent}
+      <PillTabsContent value="resources">
+        {resourcesContent}
       </PillTabsContent>
     </PillTabs>
   );
