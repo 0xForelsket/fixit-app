@@ -18,6 +18,7 @@ interface FileUploadProps {
   maxSizeMB?: number;
   variant?: "default" | "compact";
   hidePreviews?: boolean;
+  attachmentType?: "photo" | "document" | "avatar";
 }
 
 export function FileUpload({
@@ -29,6 +30,7 @@ export function FileUpload({
   maxSizeMB = 10,
   variant = "default",
   hidePreviews = false,
+  attachmentType,
 }: FileUploadProps) {
   const { uploadFiles, isUploading, error: uploadError } = useFileUpload();
   const [previews, setPreviews] = useState<
@@ -69,6 +71,7 @@ export function FileUpload({
         entityType,
         entityId,
         maxSizeMB,
+        attachmentType,
         onUploadComplete: handleUploadSuccess,
       });
 

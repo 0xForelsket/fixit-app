@@ -1,5 +1,5 @@
 "use client";
-
+import { AttachmentCard } from "@/components/ui/attachment-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,19 +24,43 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { deleteAttachment } from "@/actions/attachments";
+import { useToast } from "@/components/ui/use-toast";
+
 interface DocumentsViewProps {
   initialAttachments: AttachmentWithUrl[];
+  currentUserId?: number;
+  isUserAdmin?: boolean;
 }
 
-export function DocumentsView({ initialAttachments }: DocumentsViewProps) {
+export function DocumentsView({ initialAttachments, currentUserId, isUserAdmin }: DocumentsViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { toast } = useToast();
 
   const currentEntityType = searchParams.get("entityType");
   const currentMimeType = searchParams.get("mimeType");
   const searchQuery = searchParams.get("search") || "";
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const handleDelete = async (attachmentId: number) => {
+      const result = await deleteAttachment(attachmentId);
+      if (result.success) {
+          toast({
+              title: "Success",
+              description: "File deleted successfully",
+          });
+          router.refresh();
+      } else {
+          toast({
+              title: "Error",
+              description: result.error || "Failed to delete file",
+              variant: "destructive",
+          });
+          throw new Error(result.error);
+      }
+  };
 
   const handleFilter = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams);
@@ -185,51 +209,41 @@ export function DocumentsView({ initialAttachments }: DocumentsViewProps) {
               viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"
             )}>
               {initialAttachments.map((file) => (
-                <Link
-                  key={file.id}
-                  href={file.url} 
-                  target="_blank"
-                  className={cn(
-                    "group relative flex cursor-pointer flex-col overflow-hidden rounded-lg border bg-card transition-all hover:shadow-md",
-                     viewMode === "list" && "flex-row items-center p-3"
-                  )}
-                >
-                  {viewMode === "grid" ? (
-                    <>
-                      <div className="flex aspect-square items-center justify-center bg-muted/20 p-6 group-hover:bg-muted/40 transition-colors">
+                viewMode === "grid" ? (
+                  <AttachmentCard 
+                    key={file.id} 
+                    file={file} 
+                    onDelete={
+                        (currentUserId && file.uploadedById === currentUserId) || isUserAdmin
+                        ? handleDelete
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <Link
+                    key={file.id}
+                    href={file.url} 
+                    target="_blank"
+                    className="group relative flex cursor-pointer flex-row items-center overflow-hidden rounded-lg border bg-card p-3 transition-all hover:shadow-md"
+                  >
+                    <div className="mr-4 flex h-10 w-10 items-center justify-center rounded bg-muted/20">
                         {getFileIcon(file.mimeType)}
-                      </div>
-                      <div className="flex flex-col p-3">
-                         <span className="truncate text-sm font-medium leading-none mb-1">{file.filename}</span>
-                           <div className="flex justify-between text-xs text-muted-foreground">
-                           <span>{formatBytes(file.sizeBytes)}</span>
-                           <span className="max-w-[100px] truncate" title={file.entityName || `#${file.entityId}`}>
-                             {file.entityName || `#${file.entityId}`}
-                           </span>
-                         </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="mr-4 flex h-10 w-10 items-center justify-center rounded bg-muted/20">
-                         {getFileIcon(file.mimeType)}
-                      </div>
-                      <div className="flex flex-1 flex-col">
-                         <span className="text-sm font-medium">{file.filename}</span>
-                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                           <span>{formatBytes(file.sizeBytes)}</span>
-                           <span>•</span>
-                           <span className="uppercase">{file.entityType.replace("_", " ")}</span>
-                           <span>•</span>
-                           <span className="font-medium">{file.entityName || `#${file.entityId}`}</span>
-                         </div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(file.createdAt).toLocaleDateString()}
-                      </div>
-                    </>
-                  )}
-                </Link>
+                    </div>
+                    <div className="flex flex-1 flex-col">
+                        <span className="text-sm font-medium">{file.filename}</span>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{formatBytes(file.sizeBytes)}</span>
+                          <span>•</span>
+                          <span className="uppercase">{file.entityType.replace("_", " ")}</span>
+                          <span>•</span>
+                          <span className="font-medium">{file.entityName || `#${file.entityId}`}</span>
+                        </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(file.createdAt).toLocaleDateString()}
+                    </div>
+                  </Link>
+                )
               ))}
             </div>
           )}

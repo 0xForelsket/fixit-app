@@ -125,8 +125,14 @@ export async function POST(request: NextRequest) {
     // Generate presigned upload URL
     const uploadUrl = await getPresignedUploadUrl(s3Key, mimeType);
 
+    // Construct the final attachment object manually to ensure all fields are present
+    const finalAttachment = {
+      ...attachment,
+      s3Key, // key is now set
+    };
+
     return apiSuccess({
-      attachment: { ...attachment, s3Key },
+      attachment: finalAttachment,
       uploadUrl,
     });
   } catch (error) {

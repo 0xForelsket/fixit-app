@@ -4,6 +4,7 @@ interface UploadOptions {
   entityType: "user" | "equipment" | "work_order" | "location";
   entityId: number;
   maxSizeMB?: number;
+  attachmentType?: "photo" | "document" | "avatar";
   onUploadComplete: (attachment: {
     s3Key: string;
     filename: string;
@@ -31,21 +32,33 @@ export function useFileUpload() {
         }
 
         try {
-          // 1. Get presigned URL
-          const response = await fetch("/api/attachments/presigned-url", {
+          // 1. Create attachment record & Get presigned URL
+          const response = await fetch("/api/attachments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               filename: file.name,
               mimeType: file.type,
+              sizeBytes: file.size,
               entityType: options.entityType,
               entityId: options.entityId,
+              attachmentType:
+                options.attachmentType ||
+                (file.type.startsWith("image/") ? "photo" : "document"),
             }),
           });
 
           if (!response.ok) throw new Error("Failed to get upload URL");
 
-          const { uploadUrl, s3Key } = await response.json();
+          const json = await response.json();
+          console.log("Upload response:", json);
+          const { data } = json;
+          
+          if (!data || !data.attachment) {
+             throw new Error("Invalid server response: missing attachment data");
+          }
+
+          const { attachment, uploadUrl } = data;
 
           // 2. Upload to S3
           const uploadResponse = await fetch(uploadUrl, {
@@ -61,10 +74,10 @@ export function useFileUpload() {
 
           // 3. Notify parent
           options.onUploadComplete({
-            s3Key,
-            filename: file.name,
-            mimeType: file.type,
-            sizeBytes: file.size,
+            s3Key: attachment.s3Key,
+            filename: attachment.filename,
+            mimeType: attachment.mimeType,
+            sizeBytes: attachment.sizeBytes,
           });
         } catch (err) {
           console.error("Upload error:", err);

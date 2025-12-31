@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import type { Attachment } from "@/db/schema";
-import { attachments, workOrders, equipment } from "@/db/schema";
+import { attachments, workOrders, equipment, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
 import {
   type UploadAttachmentInput,
@@ -11,7 +11,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { and, desc, eq, like, inArray } from "drizzle-orm";
 import type { ActionResult } from "@/lib/types/actions";
-import { getPresignedDownloadUrl } from "@/lib/s3";
+import { getPresignedDownloadUrl, deleteObject } from "@/lib/s3";
 import type { AttachmentWithUrl } from "@/lib/types/attachments";
 
 export type CreateAttachmentInput = UploadAttachmentInput & { s3Key: string };
@@ -149,5 +149,62 @@ export async function createAttachment(
   } catch (error) {
     console.error("Failed to create attachment:", error);
     return { error: "Database error" };
+  }
+}
+
+export async function deleteAttachment(
+  attachmentId: number
+): Promise<ActionResult<void>> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const attachment = await db.query.attachments.findFirst({
+    where: eq(attachments.id, attachmentId),
+  });
+
+  if (!attachment) {
+    return { success: false, error: "Attachment not found" };
+  }
+
+  // Check permissions
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.id, user.id),
+    with: {
+      assignedRole: true,
+    },
+  });
+
+  const isAdmin = dbUser?.assignedRole?.name === "admin";
+  const isOwner = attachment.uploadedById === user.id;
+
+  if (!isOwner && !isAdmin) {
+    return {
+      success: false,
+      error: "Forbidden: You can only delete your own uploads",
+    };
+  }
+
+  try {
+    // 1. Delete from S3
+    await deleteObject(attachment.s3Key);
+
+    // 2. Delete from DB
+    await db.delete(attachments).where(eq(attachments.id, attachmentId));
+
+    // 3. Revalidate paths
+    if (attachment.entityType === "work_order") {
+      revalidatePath(`/maintenance/work-orders/${attachment.entityId}`);
+      revalidatePath(`/maintenance/work-orders/${attachment.entityId}/mobile-work-order-view`);
+    } else if (attachment.entityType === "equipment") {
+      revalidatePath(`/assets/equipment/${attachment.entityId}`);
+    }
+    revalidatePath("/documents");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete attachment:", error);
+    return { success: false, error: "Failed to delete attachment" };
   }
 }
