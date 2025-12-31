@@ -1,6 +1,7 @@
 "use client";
 
 import { GlobalSearch } from "@/components/global-search";
+import { KeyboardShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -95,6 +96,7 @@ export function DashboardShell({
         <BottomNav permissions={user.permissions} />
       </div>
       <GlobalSearch />
+      <KeyboardShortcutsProvider />
     </div>
   );
 }
