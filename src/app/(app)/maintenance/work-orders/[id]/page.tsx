@@ -1,6 +1,7 @@
 import { TimeLogger } from "@/components/time-logger";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { WorkOrderAttachments } from "@/components/work-orders/work-order-attachments";
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
 import { db } from "@/db";
@@ -26,8 +27,6 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Clock,
-  Download,
-  FileText,
   MapPin,
   MessageSquare,
   Wrench,
@@ -280,46 +279,8 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     </div>
   );
 
-  const AttachmentsSection = workOrderAttachments.length > 0 && (
-    <div className="rounded-xl border bg-card p-6 shadow-sm">
-      <h2 className="text-lg font-semibold mb-4">Attachments</h2>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {workOrderAttachments.map((file) => (
-          <a
-            key={file.id}
-            href={file.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative flex flex-col overflow-hidden rounded-lg border bg-slate-50 transition-all hover:border-primary-300 hover:shadow-md"
-          >
-            {file.mimeType.startsWith("image/") ? (
-              <div className="aspect-video w-full overflow-hidden bg-slate-100">
-                <img
-                  src={file.url}
-                  alt={file.filename}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-            ) : (
-              <div className="flex aspect-video w-full items-center justify-center bg-slate-100 text-slate-400">
-                <FileText className="h-10 w-10" />
-              </div>
-            )}
-            <div className="flex items-center justify-between p-3">
-              <div className="flex-1 overflow-hidden">
-                <p className="truncate text-xs font-medium text-foreground">
-                  {file.filename}
-                </p>
-                <p className="text-[10px] text-muted-foreground uppercase">
-                  {(file.sizeBytes / 1024).toFixed(0)} KB
-                </p>
-              </div>
-              <Download className="h-4 w-4 text-muted-foreground group-hover:text-primary-600" />
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
+  const AttachmentsSection = (
+    <WorkOrderAttachments attachments={workOrderAttachments} />
   );
 
   const ProcedureSection = checklistItems.length > 0 && (
