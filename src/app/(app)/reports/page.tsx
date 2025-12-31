@@ -31,8 +31,8 @@ import {
   desc,
   eq,
   gte,
-  ilike,
   inArray,
+  like,
   lte,
   or,
 } from "drizzle-orm";
@@ -98,8 +98,8 @@ async function getWorkOrders(params: SearchParams) {
   if (params.search) {
     conditions.push(
       or(
-        ilike(workOrders.title, `%${params.search}%`),
-        ilike(workOrders.description, `%${params.search}%`)
+        like(workOrders.title, `%${params.search}%`),
+        like(workOrders.description, `%${params.search}%`)
       )
     );
   }

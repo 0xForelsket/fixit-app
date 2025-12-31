@@ -3,7 +3,7 @@ import { equipment, spareParts, workOrders } from "@/db/schema";
 import { ApiErrors } from "@/lib/api-error";
 import { generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
-import { eq, ilike, or } from "drizzle-orm";
+import { eq, like, or } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export type SearchResult = {
@@ -124,8 +124,8 @@ export async function GET(request: Request) {
     // Search work orders by title
     const workOrderResults = await db.query.workOrders.findMany({
       where: or(
-        ilike(workOrders.title, searchPattern),
-        ilike(workOrders.description, searchPattern)
+        like(workOrders.title, searchPattern),
+        like(workOrders.description, searchPattern)
       ),
       columns: { id: true, title: true, status: true },
       limit: 5,
@@ -147,8 +147,8 @@ export async function GET(request: Request) {
     // Search equipment by name or code
     const equipmentResults = await db.query.equipment.findMany({
       where: or(
-        ilike(equipment.name, searchPattern),
-        ilike(equipment.code, searchPattern)
+        like(equipment.name, searchPattern),
+        like(equipment.code, searchPattern)
       ),
       columns: { id: true, name: true, code: true, status: true },
       limit: 5,
@@ -167,8 +167,8 @@ export async function GET(request: Request) {
     // Search spare parts by name or SKU
     const partResults = await db.query.spareParts.findMany({
       where: or(
-        ilike(spareParts.name, searchPattern),
-        ilike(spareParts.sku, searchPattern)
+        like(spareParts.name, searchPattern),
+        like(spareParts.sku, searchPattern)
       ),
       columns: { id: true, name: true, sku: true },
       limit: 5,

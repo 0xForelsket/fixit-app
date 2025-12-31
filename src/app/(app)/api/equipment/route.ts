@@ -6,7 +6,7 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf, requirePermission } from "@/lib/session";
 import { createEquipmentSchema, paginationSchema } from "@/lib/validations";
-import { and, eq, ilike, sql } from "drizzle-orm";
+import { and, eq, like, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 
     if (search) {
       conditions.push(
-        sql`(${ilike(equipmentTable.name, `%${search}%`)} OR ${ilike(equipmentTable.code, `%${search}%`)})`
+        sql`(${like(equipmentTable.name, `%${search}%`)} OR ${like(equipmentTable.code, `%${search}%`)})`
       );
     }
 
