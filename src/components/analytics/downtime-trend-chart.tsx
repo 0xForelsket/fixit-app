@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Area,
   AreaChart,
@@ -10,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TrendingDown } from "lucide-react";
 
 interface DowntimeTrendPoint {
   month: string;
@@ -51,9 +53,12 @@ export function DowntimeTrendChart({ data }: DowntimeTrendChartProps) {
       <CardContent className="pt-6">
         <div className="h-[300px]">
           {data.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              No downtime data available for the selected period
-            </div>
+            <EmptyState
+              title="No trend data available"
+              description="Not enough downtime events found for the selected period to generate a trend."
+              icon={TrendingDown}
+              className="border-none bg-transparent py-12"
+            />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart

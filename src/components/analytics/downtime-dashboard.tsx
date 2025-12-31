@@ -17,7 +17,7 @@ import {
   FilterToolbarGroup,
 } from "@/components/ui/filter-toolbar";
 import { ResetFilterButton } from "@/components/ui/reset-filter-button";
-import { StatsCard } from "@/components/ui/stats-card";
+import { StatsTicker } from "@/components/ui/stats-ticker";
 import { StyledSelect } from "@/components/ui/styled-select";
 import {
   AlertTriangle,
@@ -226,38 +226,36 @@ export function DowntimeDashboard() {
 
       {/* Summary KPIs */}
       <ErrorBoundary fallback={<div>Failed to load downtime summary</div>}>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Total Downtime"
-            value={formatHours(downtimeData?.totalDowntimeHours || 0)}
-            description="Cumulative downtime"
-            icon={Clock}
-            variant="danger"
-          />
-          <StatsCard
-            title="Availability"
-            value={formatPercentage(
-              downtimeData?.availabilityPercentage || 100
-            )}
-            description="Equipment uptime"
-            icon={CheckCircle2}
-            variant="success"
-          />
-          <StatsCard
-            title="Incidents"
-            value={String(downtimeData?.incidentCount || 0)}
-            description="Downtime events"
-            icon={AlertTriangle}
-            variant="warning"
-          />
-          <StatsCard
-            title="Avg per Incident"
-            value={formatHours(downtimeData?.averageDowntimePerIncident || 0)}
-            description="Mean time to repair"
-            icon={TrendingDown}
-            variant="secondary"
-          />
-        </div>
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Downtime",
+              value: formatHours(downtimeData?.totalDowntimeHours || 0),
+              icon: Clock,
+              variant: "danger",
+            },
+            {
+              label: "Availability",
+              value: formatPercentage(
+                downtimeData?.availabilityPercentage ?? 100
+              ),
+              icon: CheckCircle2,
+              variant: "success",
+            },
+            {
+              label: "Incidents",
+              value: String(downtimeData?.incidentCount || 0).padStart(2, "0"),
+              icon: AlertTriangle,
+              variant: "warning",
+            },
+            {
+              label: "Avg per Incident",
+              value: formatHours(downtimeData?.averageDowntimePerIncident || 0),
+              icon: TrendingDown,
+              variant: "default",
+            },
+          ]}
+        />
       </ErrorBoundary>
 
       {/* Charts Row 1: Trend and Equipment */}

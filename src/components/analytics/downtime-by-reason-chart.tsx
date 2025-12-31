@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Cell,
   Legend,
@@ -9,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { PieChart as PieChartIcon } from "lucide-react";
 
 interface DowntimeByReason {
   reason: string;
@@ -51,9 +53,12 @@ export function DowntimeByReasonChart({ data }: DowntimeByReasonChartProps) {
       <CardContent className="pt-6">
         <div className="h-[300px]">
           {data.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              No downtime data available
-            </div>
+            <EmptyState
+              title="No reason data"
+              description="No downtime reasons recorded for the selected period."
+              icon={PieChartIcon}
+              className="border-none bg-transparent py-12"
+            />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

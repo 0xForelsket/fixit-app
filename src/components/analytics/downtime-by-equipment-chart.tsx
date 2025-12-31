@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Bar,
   BarChart,
@@ -10,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Monitor } from "lucide-react";
 
 interface DowntimeByEquipment {
   id: number;
@@ -46,9 +48,12 @@ export function DowntimeByEquipmentChart({
       <CardContent className="pt-6">
         <div className="h-[300px]">
           {data.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              No equipment downtime data available
-            </div>
+            <EmptyState
+              title="No equipment data"
+              description="No equipment downtime recorded for the selected period."
+              icon={Monitor}
+              className="border-none bg-transparent py-12"
+            />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
