@@ -51,7 +51,7 @@ export function MarketingNav() {
           ))}
           <div className="h-4 w-[1px] bg-border mx-2" />
           <Link
-            href="http://app.localhost:3000/login"
+            href="/login"
             className="font-mono text-xs uppercase tracking-widest hover:text-primary transition-colors"
           >
             Demo
@@ -106,7 +106,7 @@ export function MarketingNav() {
               ))}
               <hr className="border-border" />
               <Link
-                href="http://app.localhost:3000/login"
+                href="/login"
                 className="font-mono text-lg uppercase tracking-widest text-foreground"
               >
                 Demo Portal
