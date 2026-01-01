@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Wrench } from "lucide-react";
+import Link from "next/link";
 
 export function MarketingFooter() {
   return (
@@ -25,17 +25,26 @@ export function MarketingFooter() {
             </h4>
             <ul className="space-y-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
               <li>
-                <Link href="https://github.com/0xForelsket/fixit-app" className="hover:text-primary transition-colors">
+                <Link
+                  href="https://github.com/0xForelsket/fixit-app"
+                  className="hover:text-primary transition-colors"
+                >
                   GitHub
                 </Link>
               </li>
               <li>
-                <Link href="/features" className="hover:text-primary transition-colors">
+                <Link
+                  href="/features"
+                  className="hover:text-primary transition-colors"
+                >
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/deploy" className="hover:text-primary transition-colors">
+                <Link
+                  href="/deploy"
+                  className="hover:text-primary transition-colors"
+                >
                   Deployment
                 </Link>
               </li>
@@ -47,17 +56,26 @@ export function MarketingFooter() {
             </h4>
             <ul className="space-y-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
               <li>
-                <Link href="/enterprise" className="hover:text-primary transition-colors">
+                <Link
+                  href="/enterprise"
+                  className="hover:text-primary transition-colors"
+                >
                   Enterprise
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="hover:text-primary transition-colors">
+                <Link
+                  href="/pricing"
+                  className="hover:text-primary transition-colors"
+                >
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/compare" className="hover:text-primary transition-colors">
+                <Link
+                  href="/compare"
+                  className="hover:text-primary transition-colors"
+                >
                   Comparison
                 </Link>
               </li>

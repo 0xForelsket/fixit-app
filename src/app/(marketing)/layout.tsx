@@ -1,6 +1,6 @@
-import { MarketingNav } from "@/components/marketing/nav";
 import { BackToTop } from "@/components/marketing/back-to-top";
 import { MarketingFooter } from "@/components/marketing/footer";
+import { MarketingNav } from "@/components/marketing/nav";
 
 export default function MarketingV2Layout({
   children,

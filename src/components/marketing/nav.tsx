@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Wrench, Github, Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, Github, Menu, Wrench, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
 const navLinks = [
   { href: "/features", label: "Features", mobile: true },
@@ -25,7 +25,11 @@ export function MarketingNav() {
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/70 backdrop-blur-md">
       <div className="flex items-center justify-between px-6 py-4 md:px-12 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 group" aria-label="FixIt Home">
+          <Link
+            href="/"
+            className="flex items-center gap-2 group"
+            aria-label="FixIt Home"
+          >
             <div className="bg-primary p-1.5 rounded-md group-hover:opacity-90 transition-opacity">
               <Wrench className="h-5 w-5 text-primary-foreground" />
             </div>
@@ -43,7 +47,9 @@ export function MarketingNav() {
               href={link.href}
               className={cn(
                 "font-mono text-xs uppercase tracking-widest transition-colors hover:text-primary",
-                pathname === link.href ? "text-primary underline underline-offset-4" : "text-foreground"
+                pathname === link.href
+                  ? "text-primary underline underline-offset-4"
+                  : "text-foreground"
               )}
             >
               {link.label}
@@ -61,7 +67,10 @@ export function MarketingNav() {
             size="sm"
             className="bg-primary text-primary-foreground hover:opacity-90 rounded-md px-5 h-9 font-bold text-xs uppercase tracking-wider"
           >
-            <Link href="https://github.com/0xForelsket/fixit-app" aria-label="Star on GitHub">
+            <Link
+              href="https://github.com/0xForelsket/fixit-app"
+              aria-label="Star on GitHub"
+            >
               <Github className="mr-2 h-4 w-4" /> STAR
             </Link>
           </Button>
@@ -69,7 +78,7 @@ export function MarketingNav() {
 
         {/* Mobile Toggle */}
         <div className="lg:hidden flex items-center gap-4">
-           <Button
+          <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsOpen(!isOpen)}
@@ -90,20 +99,24 @@ export function MarketingNav() {
             className="lg:hidden border-b border-border bg-background overflow-hidden"
           >
             <div className="flex flex-col p-6 gap-6">
-              {navLinks.filter(l => l.mobile).map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "font-mono text-lg uppercase tracking-widest transition-colors flex justify-between items-center group",
-                    pathname === link.href ? "text-primary" : "text-foreground"
-                  )}
-                >
-                  {link.label}
-                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Link>
-              ))}
+              {navLinks
+                .filter((l) => l.mobile)
+                .map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "font-mono text-lg uppercase tracking-widest transition-colors flex justify-between items-center group",
+                      pathname === link.href
+                        ? "text-primary"
+                        : "text-foreground"
+                    )}
+                  >
+                    {link.label}
+                    <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </Link>
+                ))}
               <hr className="border-border" />
               <Link
                 href="/login"
@@ -111,7 +124,10 @@ export function MarketingNav() {
               >
                 Demo Portal
               </Link>
-              <Button asChild className="w-full h-14 rounded-none font-black uppercase tracking-widest text-xs">
+              <Button
+                asChild
+                className="w-full h-14 rounded-none font-black uppercase tracking-widest text-xs"
+              >
                 <Link href="https://github.com/0xForelsket/fixit-app">
                   Initialize Protocol
                 </Link>

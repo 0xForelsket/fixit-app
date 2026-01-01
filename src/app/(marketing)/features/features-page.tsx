@@ -1,152 +1,162 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { 
-  Wrench, 
-  Calendar, 
-  Box, 
-  ClipboardList, 
-  Clock, 
-  BarChart3, 
-  Smartphone, 
-  ShieldCheck, 
-  History, 
-  Paperclip,
+import {
   ArrowRight,
-  ChevronRight
+  BarChart3,
+  Box,
+  Calendar,
+  ChevronRight,
+  ClipboardList,
+  Clock,
+  History,
+  Paperclip,
+  ShieldCheck,
+  Smartphone,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 const features = [
   {
     id: "work-orders",
     name: "Work Order Management",
-    description: "The heart of your maintenance operations. Create, assign, and track work orders with sub-second latency.",
+    description:
+      "The heart of your maintenance operations. Create, assign, and track work orders with sub-second latency.",
     icon: Wrench,
     points: [
       "Real-time status tracking",
       "Priority-based dispatching",
       "Custom fields and procedures",
-      "Direct asset association"
-    ]
+      "Direct asset association",
+    ],
   },
   {
     id: "preventive-maintenance",
     name: "Preventive Maintenance",
-    description: "Stop reacting. Start predicting. Schedule recurring maintenance based on time intervals or meter readings.",
+    description:
+      "Stop reacting. Start predicting. Schedule recurring maintenance based on time intervals or meter readings.",
     icon: Calendar,
     points: [
       "Calendar and meter triggers",
       "Automated WO generation",
       "Maintenance compliance tracking",
-      "Seasonal task scheduling"
-    ]
+      "Seasonal task scheduling",
+    ],
   },
   {
     id: "assets",
     name: "Equipment Registry",
-    description: "A digital twin for every asset. Track lifecycle, documentation, and maintenance history in one central vault.",
+    description:
+      "A digital twin for every asset. Track lifecycle, documentation, and maintenance history in one central vault.",
     icon: Box,
     points: [
       "Hierarchy & location mapping",
       "QR code identification",
       "Warranty tracking",
-      "Downtime analytics per asset"
-    ]
+      "Downtime analytics per asset",
+    ],
   },
   {
     id: "inventory",
     name: "Inventory & Spare Parts",
-    description: "Never run out of critical spares. Manage stock levels, vendors, and automatic reorder points.",
+    description:
+      "Never run out of critical spares. Manage stock levels, vendors, and automatic reorder points.",
     icon: ClipboardList,
     points: [
       "Multi-warehouse support",
       "Automatic stock depletion",
       "Vendor catalog management",
-      "Low-stock notifications"
-    ]
+      "Low-stock notifications",
+    ],
   },
   {
     id: "labor",
     name: "Labor Time Tracking",
-    description: "Measure what matters. Track technician hours, performance metrics, and labor costs accurately.",
+    description:
+      "Measure what matters. Track technician hours, performance metrics, and labor costs accurately.",
     icon: Clock,
     points: [
       "Technician time logs",
       "Work order cost calculation",
       "Performance benchmarks",
-      "Overtime monitoring"
-    ]
+      "Overtime monitoring",
+    ],
   },
   {
     id: "analytics",
     name: "Analytics & Reporting",
-    description: "Turn data into decisions. High-density dashboards providing deep insights into your operational efficiency.",
+    description:
+      "Turn data into decisions. High-density dashboards providing deep insights into your operational efficiency.",
     icon: BarChart3,
     points: [
       "MTTR & MTBF metrics",
       "Maintenance spend analysis",
       "Resource utilization reports",
-      "Custom PDF exports"
-    ]
+      "Custom PDF exports",
+    ],
   },
   {
     id: "mobile",
     name: "Mobile-First Interface",
-    description: "Empower your crew on the floor. A fully responsive interface designed for gloved hands and high-glare environments.",
+    description:
+      "Empower your crew on the floor. A fully responsive interface designed for gloved hands and high-glare environments.",
     icon: Smartphone,
     points: [
       "PWA offline capability",
       "Direct photo uploads",
       "Barcode scanning",
-      "Push notification alerts"
-    ]
+      "Push notification alerts",
+    ],
   },
   {
     id: "permissions",
     name: "Roles & Permissions",
-    description: "Enterprise-grade security. Control exactly who can see and do what across your entire organization.",
+    description:
+      "Enterprise-grade security. Control exactly who can see and do what across your entire organization.",
     icon: ShieldCheck,
     points: [
       "Granular RBAC",
       "SAML/SSO integration",
       "Audit trail per user",
-      "Department isolation"
-    ]
+      "Department isolation",
+    ],
   },
   {
     id: "audit",
     name: "Audit Logging",
-    description: "Unmatched transparency. Every change, every login, and every status update is cryptographically logged.",
+    description:
+      "Unmatched transparency. Every change, every login, and every status update is cryptographically logged.",
     icon: History,
     points: [
       "Regulatory compliance ready",
       "Change history per record",
       "Exportable logs for inspectors",
-      "Immutable history"
-    ]
+      "Immutable history",
+    ],
   },
   {
     id: "attachments",
     name: "File Attachments",
-    description: "Ditch the paper binders. Attach manuals, safety sheets, and completion photos directly to any record.",
+    description:
+      "Ditch the paper binders. Attach manuals, safety sheets, and completion photos directly to any record.",
     icon: Paperclip,
     points: [
       "Unlimited file storage",
       "Versioned documentation",
       "Mobile camera integration",
-      "PDF/CAD viewer"
-    ]
-  }
+      "PDF/CAD viewer",
+    ],
+  },
 ];
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+    transition: { staggerChildren: 0.1 },
+  },
 };
 
 const itemVariants = {
@@ -154,8 +164,8 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const }
-  }
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const },
+  },
 };
 
 export default function FeaturesPage() {
@@ -179,7 +189,9 @@ export default function FeaturesPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl font-light">
-              FixIt is engineered for high-density operations. No fluff, no legacy bloat—just the features required to run a world-class maintenance department.
+              FixIt is engineered for high-density operations. No fluff, no
+              legacy bloat—just the features required to run a world-class
+              maintenance department.
             </p>
           </motion.div>
         </header>
@@ -188,13 +200,27 @@ export default function FeaturesPage() {
         <div className="hidden lg:block sticky top-24 z-40 mb-16 px-4 py-3 bg-secondary/50 border border-border rounded-full backdrop-blur">
           <div className="flex justify-between items-center text-[10px] font-mono font-bold uppercase tracking-[0.2em]">
             {features.slice(0, 6).map((f) => (
-              <a key={f.id} href={`#${f.id}`} className="hover:text-primary transition-colors hover:bg-muted/50 px-3 py-1.5 rounded-full">
+              <a
+                key={f.id}
+                href={`#${f.id}`}
+                className="hover:text-primary transition-colors hover:bg-muted/50 px-3 py-1.5 rounded-full"
+              >
                 {f.name.split(" ")[0]}
               </a>
             ))}
             <span className="text-muted-foreground/30">|</span>
-            <a href="#mobile" className="hover:text-primary transition-colors px-3 py-1.5 rounded-full">Mobile</a>
-            <a href="#security" className="hover:text-primary transition-colors px-3 py-1.5 rounded-full">Security</a>
+            <a
+              href="#mobile"
+              className="hover:text-primary transition-colors px-3 py-1.5 rounded-full"
+            >
+              Mobile
+            </a>
+            <a
+              href="#security"
+              className="hover:text-primary transition-colors px-3 py-1.5 rounded-full"
+            >
+              Security
+            </a>
           </div>
         </div>
 
@@ -211,13 +237,15 @@ export default function FeaturesPage() {
             >
               <div className={`${idx % 2 === 0 ? "" : "md:order-2"}`}>
                 <div className="flex items-center gap-4 mb-6">
-                  <motion.div 
+                  <motion.div
                     whileHover={{ rotate: 15, scale: 1.1 }}
                     className="bg-primary/10 p-3 rounded-lg"
                   >
                     <feature.icon className="h-8 w-8 text-primary" />
                   </motion.div>
-                  <h2 className="text-3xl font-serif font-black tracking-tight">{feature.name}</h2>
+                  <h2 className="text-3xl font-serif font-black tracking-tight">
+                    {feature.name}
+                  </h2>
                 </div>
                 <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                   {feature.description}
@@ -226,20 +254,31 @@ export default function FeaturesPage() {
                   {feature.points.map((point) => (
                     <li key={point} className="flex items-start gap-3">
                       <ChevronRight className="h-4 w-4 mt-1 text-primary shrink-0" />
-                      <span className="text-sm font-mono font-bold uppercase tracking-wider">{point}</span>
+                      <span className="text-sm font-mono font-bold uppercase tracking-wider">
+                        {point}
+                      </span>
                     </li>
                   ))}
                 </ul>
                 <div className="mt-10">
-                  <Button variant="outline" size="sm" className="group uppercase font-black text-[10px] tracking-widest px-6 h-10" asChild>
-                    <Link href={`/deploy`} aria-label={`Learn about setup for ${feature.name}`}>
-                      Technical Guide <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="group uppercase font-black text-[10px] tracking-widest px-6 h-10"
+                    asChild
+                  >
+                    <Link
+                      href={`/deploy`}
+                      aria-label={`Learn about setup for ${feature.name}`}
+                    >
+                      Technical Guide{" "}
+                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>
                 </div>
               </div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] as const }}
                 className={`aspect-video bg-card border border-border rounded-2xl overflow-hidden relative shadow-2xl group ${idx % 2 === 0 ? "" : "md:order-1"}`}
@@ -253,8 +292,12 @@ export default function FeaturesPage() {
                 <div className="h-full w-full flex items-center justify-center p-8">
                   <div className="text-center space-y-3 opacity-30 group-hover:opacity-50 transition-opacity">
                     <feature.icon className="h-16 w-16 mx-auto mb-2" />
-                    <p className="font-mono text-[10px] uppercase font-bold tracking-widest">Screenshot Placeholder</p>
-                    <p className="text-[8px] max-w-[200px]">{feature.name} interface visual would be rendered here.</p>
+                    <p className="font-mono text-[10px] uppercase font-bold tracking-widest">
+                      Screenshot Placeholder
+                    </p>
+                    <p className="text-[8px] max-w-[200px]">
+                      {feature.name} interface visual would be rendered here.
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -268,13 +311,22 @@ export default function FeaturesPage() {
             <div className="relative z-10 space-y-8">
               <h2 className="text-4xl md:text-6xl font-serif font-black tracking-tight leading-none">
                 BUILT FOR POWER USERS. <br />
-                <span className="italic font-light opacity-70">Scale your operations instantly.</span>
+                <span className="italic font-light opacity-70">
+                  Scale your operations instantly.
+                </span>
               </h2>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-                <Button size="lg" className="bg-primary-foreground text-primary hover:bg-muted font-black px-12 h-16 rounded-none uppercase tracking-widest">
+                <Button
+                  size="lg"
+                  className="bg-primary-foreground text-primary hover:bg-muted font-black px-12 h-16 rounded-none uppercase tracking-widest"
+                >
                   Deploy Now
                 </Button>
-                <Button size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 font-black px-12 h-16 rounded-none uppercase tracking-widest">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 font-black px-12 h-16 rounded-none uppercase tracking-widest"
+                >
                   Launch Demo
                 </Button>
               </div>

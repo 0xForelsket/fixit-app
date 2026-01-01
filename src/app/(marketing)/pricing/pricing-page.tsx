@@ -1,32 +1,32 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { 
-  Check, 
-  HelpCircle, 
-  ArrowRight, 
-  Wrench,
-  Github,
-  Building2,
-  Users2,
-  ShieldCheck,
-  Cloud
-} from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Building2,
+  Check,
+  Cloud,
+  Github,
+  HelpCircle,
+  ShieldCheck,
+  Users2,
+} from "lucide-react";
+import Link from "next/link";
 
 const plans = [
   {
     name: "Community",
     price: "FREE",
     period: "FOREVER",
-    description: "Ideal for growing maintenance teams and enthusiasts who demand total control.",
+    description:
+      "Ideal for growing maintenance teams and enthusiasts who demand total control.",
     cta: "Initialize Deployment",
     href: "https://github.com/0xForelsket/fixit-app",
     icon: Github,
@@ -36,15 +36,16 @@ const plans = [
       "Unlimited users & admins",
       "Self-hosted infrastructure",
       "Open source codebase",
-      "Community-driven support"
+      "Community-driven support",
     ],
-    highlight: false
+    highlight: false,
   },
   {
     name: "Enterprise",
     price: "CONTACT",
     period: "PER FACILITY",
-    description: "Tailored for multi-site organizations requiring compliance and priority support.",
+    description:
+      "Tailored for multi-site organizations requiring compliance and priority support.",
     cta: "Talk to Sales",
     href: "/contact",
     icon: Building2,
@@ -55,33 +56,33 @@ const plans = [
       "Multi-site aggregation",
       "Dedicated account manager",
       "Priority SLA support",
-      "Custom training programs"
+      "Custom training programs",
     ],
-    highlight: true
-  }
+    highlight: true,
+  },
 ];
 
 const faqs = [
   {
     q: "Is it really free?",
-    a: "Yes. The core FixIt CMMS is open-source and free to use forever. You can self-host it on your own infrastructure without paying a single license fee."
+    a: "Yes. The core FixIt CMMS is open-source and free to use forever. You can self-host it on your own infrastructure without paying a single license fee.",
   },
   {
     q: "What's the catch?",
-    a: "No catch. We believe maintenance software should be utility-grade. We make money by offering enterprise support, hosting services, and custom integrations for large organizations."
+    a: "No catch. We believe maintenance software should be utility-grade. We make money by offering enterprise support, hosting services, and custom integrations for large organizations.",
   },
   {
     q: "Can I migrate from UpKeep/Fiix?",
-    a: "Absolutely. We have import scripts for major SaaS providers. Head over to our compare page or documentation to see how the migration protocol works."
+    a: "Absolutely. We have import scripts for major SaaS providers. Head over to our compare page or documentation to see how the migration protocol works.",
   },
   {
     q: "Do you offer a cloud version?",
-    a: "Soon. We're working on 'FixIt Cloud'—a managed version of the core platform for teams who want the benefits of FixIt without the server management. Sign up for the waiting list!"
+    a: "Soon. We're working on 'FixIt Cloud'—a managed version of the core platform for teams who want the benefits of FixIt without the server management. Sign up for the waiting list!",
   },
   {
     q: "Is it secure?",
-    a: "By design. Because you self-host, you control the data residency and firewall rules. Our codebase is open for audit by anyone."
-  }
+    a: "By design. Because you self-host, you control the data residency and firewall rules. Our codebase is open for audit by anyone.",
+  },
 ];
 
 export default function PricingPage() {
@@ -97,10 +98,13 @@ export default function PricingPage() {
           >
             <h1 className="text-5xl md:text-8xl font-serif font-black tracking-tight leading-[0.9]">
               FIXIT PRICING. <br />
-              <span className="text-muted-foreground italic font-light font-sans">Simple logic.</span>
+              <span className="text-muted-foreground italic font-light font-sans">
+                Simple logic.
+              </span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed">
-              No hidden fees, no per-user scaling taxes, no vendor lock-in. Just powerful maintenance software at whichever scale you operate.
+              No hidden fees, no per-user scaling taxes, no vendor lock-in. Just
+              powerful maintenance software at whichever scale you operate.
             </p>
           </motion.div>
         </header>
@@ -112,24 +116,32 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className={`relative flex flex-col p-8 md:p-12 rounded-3xl border ${plan.highlight ? 'border-primary ring-1 ring-primary shadow-2xl shadow-primary/10' : 'border-border'}`}
+              className={`relative flex flex-col p-8 md:p-12 rounded-3xl border ${plan.highlight ? "border-primary ring-1 ring-primary shadow-2xl shadow-primary/10" : "border-border"}`}
             >
               {plan.highlight && (
                 <div className="absolute top-0 right-12 -translate-y-1/2 bg-primary text-primary-foreground text-[10px] font-mono font-black uppercase tracking-widest px-4 py-2 rounded-full">
                   Recommended for Teams
                 </div>
               )}
-              
+
               <div className="flex justify-between items-start mb-12">
                 <div className="space-y-2">
-                  <div className={`p-3 rounded-xl w-fit ${plan.highlight ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
+                  <div
+                    className={`p-3 rounded-xl w-fit ${plan.highlight ? "bg-primary text-primary-foreground" : "bg-secondary"}`}
+                  >
                     <plan.icon className="h-6 w-6" />
                   </div>
-                  <h2 className="text-3xl font-black font-mono tracking-tighter uppercase">{plan.name}</h2>
+                  <h2 className="text-3xl font-black font-mono tracking-tighter uppercase">
+                    {plan.name}
+                  </h2>
                 </div>
                 <div className="text-right">
-                  <div className="text-4xl font-serif font-black">{plan.price}</div>
-                  <div className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">{plan.period}</div>
+                  <div className="text-4xl font-serif font-black">
+                    {plan.price}
+                  </div>
+                  <div className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest">
+                    {plan.period}
+                  </div>
                 </div>
               </div>
 
@@ -140,20 +152,25 @@ export default function PricingPage() {
               <div className="space-y-6 mb-12 flex-grow">
                 {plan.features.map((feature) => (
                   <div key={feature} className="flex items-center gap-3">
-                    <Check className={`h-4 w-4 shrink-0 ${plan.highlight ? 'text-primary' : 'text-muted-foreground'}`} />
-                    <span className="text-xs font-mono font-black uppercase tracking-wide">{feature}</span>
+                    <Check
+                      className={`h-4 w-4 shrink-0 ${plan.highlight ? "text-primary" : "text-muted-foreground"}`}
+                    />
+                    <span className="text-xs font-mono font-black uppercase tracking-wide">
+                      {feature}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              <Button 
-                asChild 
-                size="lg" 
-                variant={plan.highlight ? 'default' : 'outline'}
+              <Button
+                asChild
+                size="lg"
+                variant={plan.highlight ? "default" : "outline"}
                 className="w-full h-16 rounded-none font-black uppercase tracking-widest text-[10px] group"
               >
                 <Link href={plan.href}>
-                  {plan.cta} <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  {plan.cta}{" "}
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
             </motion.div>
@@ -166,17 +183,28 @@ export default function PricingPage() {
             <div className="space-y-4">
               <Users2 className="h-8 w-8 text-primary" />
               <h3 className="font-serif font-black text-xl">Unlimited Scale</h3>
-              <p className="text-sm text-muted-foreground font-light">Whether you have 5 assets or 50,000, FixIt handles high-density data without slowing down.</p>
+              <p className="text-sm text-muted-foreground font-light">
+                Whether you have 5 assets or 50,000, FixIt handles high-density
+                data without slowing down.
+              </p>
             </div>
             <div className="space-y-4">
               <ShieldCheck className="h-8 w-8 text-primary" />
-              <h3 className="font-serif font-black text-xl">Total Sovereignty</h3>
-              <p className="text-sm text-muted-foreground font-light">Your data never leaves your environment. Perfect for SOC2/GDPR compliance requirements.</p>
+              <h3 className="font-serif font-black text-xl">
+                Total Sovereignty
+              </h3>
+              <p className="text-sm text-muted-foreground font-light">
+                Your data never leaves your environment. Perfect for SOC2/GDPR
+                compliance requirements.
+              </p>
             </div>
             <div className="space-y-4">
               <Cloud className="h-8 w-8 text-primary" />
               <h3 className="font-serif font-black text-xl">Modern Stack</h3>
-              <p className="text-sm text-muted-foreground font-light">Built with Next.js 15, Drizzle ORM, and Tailwind. Fast, reliable, and easily extensible.</p>
+              <p className="text-sm text-muted-foreground font-light">
+                Built with Next.js 15, Drizzle ORM, and Tailwind. Fast,
+                reliable, and easily extensible.
+              </p>
             </div>
           </div>
         </section>
@@ -185,11 +213,17 @@ export default function PricingPage() {
         <section className="max-w-3xl mx-auto mb-24">
           <div className="text-center mb-16 space-y-4">
             <HelpCircle className="h-8 w-8 mx-auto text-primary" />
-            <h2 className="text-3xl font-serif font-black tracking-tight uppercase">Common Queries</h2>
+            <h2 className="text-3xl font-serif font-black tracking-tight uppercase">
+              Common Queries
+            </h2>
           </div>
           <Accordion type="single" collapsible className="w-full space-y-4">
             {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="border border-border rounded-xl px-4 overflow-hidden">
+              <AccordionItem
+                key={i}
+                value={`item-${i}`}
+                className="border border-border rounded-xl px-4 overflow-hidden"
+              >
                 <AccordionTrigger className="hover:no-underline font-mono text-[10px] font-black uppercase tracking-widest py-6">
                   {faq.q}
                 </AccordionTrigger>
@@ -211,7 +245,10 @@ export default function PricingPage() {
               Check our technical blueprint or join the community.
             </p>
             <div className="flex justify-center gap-4">
-              <Button variant="outline" className="rounded-none uppercase font-black px-8 h-12 text-[10px] tracking-widest">
+              <Button
+                variant="outline"
+                className="rounded-none uppercase font-black px-8 h-12 text-[10px] tracking-widest"
+              >
                 Read Blueprint
               </Button>
               <Button className="rounded-none uppercase font-black px-8 h-12 text-[10px] tracking-widest">

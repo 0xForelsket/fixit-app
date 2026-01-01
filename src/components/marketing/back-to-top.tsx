@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowUp } from "lucide-react";
+import * as React from "react";
 
 export function BackToTop() {
   const [isVisible, setIsVisible] = React.useState(false);

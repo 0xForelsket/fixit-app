@@ -3,10 +3,12 @@ import MarketingPageV2 from "./marketing-page";
 
 export const metadata: Metadata = {
   title: "FixIt | Industrial Intelligence. Open Source.",
-  description: "The high-density CMMS for modern operations. Built for speed, scalability, and total data sovereignty. Open Source, Self-Hosted, No Vendor Lock-in.",
+  description:
+    "The high-density CMMS for modern operations. Built for speed, scalability, and total data sovereignty. Open Source, Self-Hosted, No Vendor Lock-in.",
   openGraph: {
     title: "FixIt | Industrial Intelligence. Open Source.",
-    description: "The high-density CMMS for modern operations. Built for speed, scalability, and total data sovereignty.",
+    description:
+      "The high-density CMMS for modern operations. Built for speed, scalability, and total data sovereignty.",
     url: "https://fixit.io",
     siteName: "FixIt CMMS",
     images: [
@@ -23,7 +25,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "FixIt | Industrial Intelligence. Open Source.",
-    description: "The high-density CMMS for modern operations. Built for speed, scalability, and total data sovereignty.",
+    description:
+      "The high-density CMMS for modern operations. Built for speed, scalability, and total data sovereignty.",
     creator: "@fixit_cmms",
     images: ["/og-image.png"],
   },
@@ -33,16 +36,17 @@ export default function Page() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "FixIt CMMS",
-    "operatingSystem": "Linux, Windows, macOS",
-    "applicationCategory": "BusinessApplication",
-    "offers": {
+    name: "FixIt CMMS",
+    operatingSystem: "Linux, Windows, macOS",
+    applicationCategory: "BusinessApplication",
+    offers: {
       "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
+      price: "0",
+      priceCurrency: "USD",
     },
-    "description": "The high-density open-source CMMS for modern industrial operations.",
-    "softwareVersion": "1.2.0"
+    description:
+      "The high-density open-source CMMS for modern industrial operations.",
+    softwareVersion: "1.2.0",
   };
 
   return (

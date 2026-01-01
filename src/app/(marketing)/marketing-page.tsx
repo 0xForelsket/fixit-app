@@ -1,33 +1,31 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StatsTicker } from "@/components/ui/stats-ticker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
   Box,
+  Building,
+  Check,
   Code2,
+  Copy,
   Cpu,
   Database,
+  GitFork,
   Github,
   Laptop,
   Search,
   Server,
   ShieldCheck,
-  Wrench,
-  Zap,
-  GitFork,
   Users,
-  Building,
-  Terminal,
-  Copy,
-  Check,
+  Zap,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useState } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -84,7 +82,7 @@ export default function MarketingPageV2() {
     <>
       <main className="px-6 md:px-12 max-w-7xl mx-auto pt-16 md:pt-24 pb-20">
         {/* Hero Section */}
-        <motion.div 
+        <motion.div
           id="hero"
           initial="hidden"
           animate="visible"
@@ -92,14 +90,20 @@ export default function MarketingPageV2() {
           className="grid md:grid-cols-2 gap-12 md:gap-24 items-center scroll-mt-24"
         >
           <div className="space-y-8">
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 bg-secondary border border-border px-3 py-1 rounded-full">
+            <motion.div
+              variants={itemVariants}
+              className="inline-flex items-center gap-2 bg-secondary border border-border px-3 py-1 rounded-full"
+            >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
                 v1.2.0 Stable Release
               </span>
             </motion.div>
-            
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl font-serif font-black leading-[0.95] tracking-tighter text-foreground">
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-5xl md:text-7xl font-serif font-black leading-[0.95] tracking-tighter text-foreground"
+            >
               INDUSTRIAL <br />
               <span className="text-muted-foreground font-sans italic font-light">
                 intelligence.
@@ -107,13 +111,19 @@ export default function MarketingPageV2() {
               <br />
               OPEN SOURCE.
             </motion.h1>
-            
-            <motion.p variants={itemVariants} className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-lg font-light">
+
+            <motion.p
+              variants={itemVariants}
+              className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-lg font-light"
+            >
               The high-density CMMS for modern operations. Built for speed,
               scalability, and total data sovereignty.
             </motion.p>
-            
-            <motion.div variants={itemVariants} className="pt-4 flex flex-wrap gap-4">
+
+            <motion.div
+              variants={itemVariants}
+              className="pt-4 flex flex-wrap gap-4"
+            >
               <Button
                 asChild
                 size="lg"
@@ -135,20 +145,20 @@ export default function MarketingPageV2() {
             </motion.div>
           </div>
 
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="relative h-[400px] md:h-[600px] w-full"
           >
             <div className="absolute inset-0 bg-primary/5 rounded-[40px] rotate-3 blur-3xl" />
             <div className="absolute inset-0 bg-secondary/20 rounded-[40px] -rotate-3 blur-2xl" />
             <motion.div
-              animate={{ 
+              animate={{
                 y: [0, -10, 0],
               }}
-              transition={{ 
+              transition={{
                 duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut"
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
               }}
               className="relative h-full w-full flex items-center justify-center"
             >
@@ -172,18 +182,41 @@ export default function MarketingPageV2() {
         {/* Product Showcase Tabs */}
         <section id="platform" className="py-24 space-y-12 scroll-mt-24">
           <div className="space-y-4 max-w-3xl">
-            <h2 className="text-sm font-mono font-bold uppercase tracking-[0.3em] text-primary">Command Center</h2>
+            <h2 className="text-sm font-mono font-bold uppercase tracking-[0.3em] text-primary">
+              Command Center
+            </h2>
             <p className="text-4xl md:text-6xl font-serif font-black tracking-tight leading-none">
-              DENSITY WITHOUT <br />THE CLUTTER.
+              DENSITY WITHOUT <br />
+              THE CLUTTER.
             </p>
           </div>
 
           <Tabs defaultValue="dashboard" className="w-full">
             <TabsList className="bg-secondary/50 p-1 border border-border rounded-xl mb-8 flex-wrap h-auto">
-              <TabsTrigger value="dashboard" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Dashboard</TabsTrigger>
-              <TabsTrigger value="work-orders" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Work Orders</TabsTrigger>
-              <TabsTrigger value="equipment" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Equipment</TabsTrigger>
-              <TabsTrigger value="analytics" className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm">Analytics</TabsTrigger>
+              <TabsTrigger
+                value="dashboard"
+                className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger
+                value="work-orders"
+                className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Work Orders
+              </TabsTrigger>
+              <TabsTrigger
+                value="equipment"
+                className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Equipment
+              </TabsTrigger>
+              <TabsTrigger
+                value="analytics"
+                className="rounded-lg px-6 py-2 text-xs font-mono font-bold uppercase tracking-widest data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Analytics
+              </TabsTrigger>
             </TabsList>
             <div className="aspect-video w-full bg-card border border-border rounded-[32px] overflow-hidden relative group">
               <div className="absolute inset-0 industrial-grid opacity-10" />
@@ -193,9 +226,12 @@ export default function MarketingPageV2() {
                 <div className="w-3 h-3 rounded-full bg-emerald-500/20" />
                 <div className="ml-4 h-4 w-48 bg-muted/50 rounded-full" />
               </div>
-              
-              <TabsContent value="dashboard" className="h-full mt-0 focus-visible:outline-none relative">
-                 <Image
+
+              <TabsContent
+                value="dashboard"
+                className="h-full mt-0 focus-visible:outline-none relative"
+              >
+                <Image
                   src="/screenshots/dashboard-preview.png"
                   alt="Industrial Dashboard Interface"
                   fill
@@ -203,24 +239,40 @@ export default function MarketingPageV2() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
                 <div className="absolute bottom-0 left-0 p-8">
-                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Executive Overview</h3>
-                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">A high-fidelity cockpit showing real-time MTTR, downtime alerts, and technician utilization.</p>
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">
+                    Executive Overview
+                  </h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">
+                    A high-fidelity cockpit showing real-time MTTR, downtime
+                    alerts, and technician utilization.
+                  </p>
                 </div>
               </TabsContent>
-              <TabsContent value="work-orders" className="h-full mt-0 focus-visible:outline-none relative">
+              <TabsContent
+                value="work-orders"
+                className="h-full mt-0 focus-visible:outline-none relative"
+              >
                 <Image
                   src="/screenshots/work-orders-preview.png"
                   alt="Work Order Management Interface"
                   fill
                   className="object-cover object-top"
                 />
-                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
-                 <div className="absolute bottom-0 left-0 p-8">
-                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Active Protocol Tracking</h3>
-                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">Rapid-fire work order management with sub-second status updates.</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">
+                    Active Protocol Tracking
+                  </h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">
+                    Rapid-fire work order management with sub-second status
+                    updates.
+                  </p>
                 </div>
               </TabsContent>
-              <TabsContent value="equipment" className="h-full mt-0 focus-visible:outline-none relative">
+              <TabsContent
+                value="equipment"
+                className="h-full mt-0 focus-visible:outline-none relative"
+              >
                 <Image
                   src="/screenshots/equipment-preview.png"
                   alt="Equipment Inventory Interface"
@@ -229,11 +281,18 @@ export default function MarketingPageV2() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
                 <div className="absolute bottom-0 left-0 p-8">
-                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Asset Vault</h3>
-                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">Complete digital history for every piece of equipment.</p>
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">
+                    Asset Vault
+                  </h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">
+                    Complete digital history for every piece of equipment.
+                  </p>
                 </div>
               </TabsContent>
-              <TabsContent value="analytics" className="h-full mt-0 focus-visible:outline-none relative">
+              <TabsContent
+                value="analytics"
+                className="h-full mt-0 focus-visible:outline-none relative"
+              >
                 <Image
                   src="/screenshots/analytics-preview.png"
                   alt="Maintenance Analytics Interface"
@@ -242,8 +301,12 @@ export default function MarketingPageV2() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-50" />
                 <div className="absolute bottom-0 left-0 p-8">
-                   <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">Deep Intelligence</h3>
-                   <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">Turn historical noise into actionable insights.</p>
+                  <h3 className="text-xl font-bold uppercase tracking-tight text-foreground shadow-black drop-shadow-md">
+                    Deep Intelligence
+                  </h3>
+                  <p className="text-sm text-foreground/80 font-medium leading-relaxed max-w-md shadow-black drop-shadow-sm">
+                    Turn historical noise into actionable insights.
+                  </p>
                 </div>
               </TabsContent>
             </div>
@@ -252,7 +315,7 @@ export default function MarketingPageV2() {
 
         {/* Feature Grid */}
         <div className="mt-32 space-y-12">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -269,7 +332,7 @@ export default function MarketingPageV2() {
             </Link>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -298,7 +361,7 @@ export default function MarketingPageV2() {
 
           {/* Social Proof */}
           <section id="stats" className="py-32 scroll-mt-24">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -312,12 +375,19 @@ export default function MarketingPageV2() {
                   { icon: Users, label: "Users", value: "10k+" },
                   { icon: Building, label: "Sites", value: "850+" },
                 ].map((stat, i) => (
-                  <div key={i} className="flex flex-col items-center justify-center gap-2 text-center group cursor-default">
+                  <div
+                    key={i}
+                    className="flex flex-col items-center justify-center gap-2 text-center group cursor-default"
+                  >
                     <div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
                       <stat.icon className="w-5 h-5" />
-                      <span className="text-xs font-mono font-bold uppercase tracking-widest">{stat.label}</span>
+                      <span className="text-xs font-mono font-bold uppercase tracking-widest">
+                        {stat.label}
+                      </span>
                     </div>
-                    <span className="text-3xl md:text-4xl font-serif font-black tracking-tighter">{stat.value}</span>
+                    <span className="text-3xl md:text-4xl font-serif font-black tracking-tighter">
+                      {stat.value}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -325,7 +395,7 @@ export default function MarketingPageV2() {
           </section>
 
           {/* CTA Box */}
-          <motion.div 
+          <motion.div
             id="open-source"
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -334,7 +404,7 @@ export default function MarketingPageV2() {
             className="bg-primary rounded-[40px] p-8 md:p-16 mt-32 overflow-hidden relative group/cta shadow-2xl shadow-primary/20 scroll-mt-24"
           >
             <div className="absolute inset-0 industrial-grid opacity-5 invert pointer-events-none" />
-            
+
             {/* Focal glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-foreground/10 blur-[120px] rounded-full group-hover/cta:bg-primary-foreground/20 transition-colors pointer-events-none" />
 
@@ -353,13 +423,19 @@ export default function MarketingPageV2() {
                 </p>
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <div className="flex items-center gap-3 text-[10px] font-mono font-bold text-primary-foreground/60 uppercase tracking-widest hover:text-primary-foreground transition-colors group/item">
-                    <motion.div whileHover={{ rotate: 180 }} transition={{ duration: 0.5 }}>
+                    <motion.div
+                      whileHover={{ rotate: 180 }}
+                      transition={{ duration: 0.5 }}
+                    >
                       <Cpu className="h-4 w-4" />
-                    </motion.div> 
+                    </motion.div>
                     Next.js 15+
                   </div>
                   <div className="flex items-center gap-3 text-[10px] font-mono font-bold text-primary-foreground/60 uppercase tracking-widest hover:text-primary-foreground transition-colors group/item">
-                    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      transition={{ duration: 0.2 }}
+                    >
                       <Database className="h-4 w-4" />
                     </motion.div>
                     Drizzle ORM
@@ -371,7 +447,13 @@ export default function MarketingPageV2() {
                     Auth.js v5
                   </div>
                   <div className="flex items-center gap-3 text-[10px] font-mono font-bold text-primary-foreground/60 uppercase tracking-widest hover:text-primary-foreground transition-colors group/item">
-                    <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                    <motion.div
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Number.POSITIVE_INFINITY,
+                      }}
+                    >
                       <Code2 className="h-4 w-4" />
                     </motion.div>
                     TypeScript
@@ -393,7 +475,7 @@ export default function MarketingPageV2() {
 
           {/* Quick Deploy Section */}
           <div id="deploy" className="pt-16 scroll-mt-24">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -408,35 +490,46 @@ export default function MarketingPageV2() {
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              <DeployCard 
-                title="Docker" 
+              <DeployCard
+                title="Docker"
                 icon={Box}
                 description="The standard for self-hosting. Production ready."
               >
                 <CodeBlock code="docker compose up -d" />
               </DeployCard>
-              
-              <DeployCard 
-                title="Vercel" 
+
+              <DeployCard
+                title="Vercel"
                 icon={Zap}
                 description="One-click serverless deployment with global edge network."
               >
-                 <Button className="w-full bg-foreground text-background hover:opacity-90 font-bold uppercase tracking-wide h-10" asChild>
-                   <Link href="/deploy">
-                    <svg className="mr-2 h-3 w-3" viewBox="0 0 1155 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <Button
+                  className="w-full bg-foreground text-background hover:opacity-90 font-bold uppercase tracking-wide h-10"
+                  asChild
+                >
+                  <Link href="/deploy">
+                    <svg
+                      className="mr-2 h-3 w-3"
+                      viewBox="0 0 1155 1000"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
                       <path d="M577.344 0L1154.69 1000H0L577.344 0Z" />
                     </svg>
                     Deploy to Vercel
-                   </Link>
-                 </Button>
+                  </Link>
+                </Button>
               </DeployCard>
 
-              <DeployCard 
-                title="Railway" 
+              <DeployCard
+                title="Railway"
                 icon={Server}
                 description="Full stack infrastructure. Database included."
               >
-                <Button className="w-full bg-[#a855f7] text-white hover:opacity-90 font-bold uppercase tracking-wide h-10" asChild>
+                <Button
+                  className="w-full bg-[#a855f7] text-white hover:opacity-90 font-bold uppercase tracking-wide h-10"
+                  asChild
+                >
                   <Link href="/deploy">
                     <span className="mr-2"></span>
                     Deploy to Railway
@@ -463,7 +556,7 @@ function FeatureCard({
   tag: string;
 }) {
   return (
-    <motion.div 
+    <motion.div
       variants={itemVariants}
       className="bg-card border border-border p-8 rounded-xl flex flex-col justify-between h-full min-h-[320px] group transition-all hover:border-primary hover:shadow-2xl hover:shadow-primary/10 relative overflow-hidden"
     >
@@ -490,9 +583,13 @@ function FeatureCard({
       </div>
 
       {/* Decorative background accent */}
-      <motion.div 
+      <motion.div
         animate={{ rotate: [0, 5, -5, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        transition={{
+          duration: 10,
+          repeat: Number.POSITIVE_INFINITY,
+          ease: "easeInOut",
+        }}
         className="absolute -bottom-12 -right-12 opacity-[0.03] group-hover:opacity-[0.1] transition-opacity pointer-events-none"
       >
         <Icon className="w-64 h-64" />
@@ -501,7 +598,17 @@ function FeatureCard({
   );
 }
 
-function DeployCard({ title, icon: Icon, description, children }: { title: string, icon: any, description: string, children: React.ReactNode }) {
+function DeployCard({
+  title,
+  icon: Icon,
+  description,
+  children,
+}: {
+  title: string;
+  icon: any;
+  description: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-card border border-border p-6 rounded-xl flex flex-col justify-between h-full group hover:border-primary/50 transition-colors">
       <div className="mb-6">
@@ -515,11 +622,9 @@ function DeployCard({ title, icon: Icon, description, children }: { title: strin
           {description}
         </p>
       </div>
-      <div>
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
-  )
+  );
 }
 
 function CodeBlock({ code }: { code: string }) {
@@ -536,11 +641,15 @@ function CodeBlock({ code }: { code: string }) {
       <code className="font-mono text-xs text-foreground font-bold">
         {code}
       </code>
-      <button 
+      <button
         onClick={copy}
         className="text-muted-foreground hover:text-foreground transition-colors p-1"
       >
-        {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+        {copied ? (
+          <Check className="h-3 w-3 text-emerald-500" />
+        ) : (
+          <Copy className="h-3 w-3" />
+        )}
       </button>
     </div>
   );
