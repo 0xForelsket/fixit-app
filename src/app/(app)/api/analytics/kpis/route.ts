@@ -15,87 +15,62 @@ export async function GET() {
   }
 
   try {
-    // 1. Open Work Orders (Backlog)
-    // Count work orders where status is 'open' or 'in_progress'
-    const backlogResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(workOrders)
-      .where(
-        sql`${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress'`
-      );
-    const openWorkOrders = Number(backlogResult[0].count);
+    // Calculate all KPIs in a single efficient SQL query
+    const result = await db.execute(sql`
+      SELECT
+        -- 1. Open Work Orders (Backlog)
+        COUNT(*) FILTER (WHERE ${workOrders.status} IN ('open', 'in_progress'))::int as open_count,
+        
+        -- 2. Critical/High Priority Open
+        COUNT(*) FILTER (WHERE 
+          ${workOrders.status} IN ('open', 'in_progress') AND 
+          ${workOrders.priority} IN ('critical', 'high')
+        )::int as high_priority_count,
+        
+        -- 3. MTTR (Mean Time To Repair) - Last 30 days
+        -- COALESCE to 0 to handle case with no resolved tickets
+        COALESCE(
+          AVG(
+            EXTRACT(EPOCH FROM (${workOrders.resolvedAt} - ${workOrders.createdAt}))
+          ) FILTER (
+            WHERE ${workOrders.status} = 'resolved' 
+            AND ${workOrders.resolvedAt} > NOW() - INTERVAL '30 days'
+          ), 
+          0
+        ) as avg_resolution_seconds,
+        
+        -- 4. SLA Compliance Rate data
+        -- Count resolved in last 30d
+        COUNT(*) FILTER (
+          WHERE ${workOrders.status} = 'resolved' 
+          AND ${workOrders.resolvedAt} > NOW() - INTERVAL '30 days'
+        )::int as resolved_30d_count,
+        
+        -- Count compliant in last 30d (resolved <= dueBy or dueBy is null)
+        COUNT(*) FILTER (
+          WHERE ${workOrders.status} = 'resolved' 
+          AND ${workOrders.resolvedAt} > NOW() - INTERVAL '30 days'
+          AND (${workOrders.resolvedAt} <= ${workOrders.dueBy} OR ${workOrders.dueBy} IS NULL)
+        )::int as sla_compliant_count
 
-    // 2. Critical/High Priority Open
-    const priorityResult = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(workOrders)
-      .where(
-        and(
-          sql`${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress'`,
-          sql`${workOrders.priority} = 'critical' OR ${workOrders.priority} = 'high'`
-        )
-      );
-    const highPriorityOpen = Number(priorityResult[0].count);
+      FROM ${workOrders}
+    `);
 
-    // 3. MTTR (Mean Time To Repair) - Last 30 days
-    // Avg(resolvedAt - createdAt) where status is resolved/closed
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const row = result[0]; // Postgres-js returns array of rows
 
-    const resolvedWorkOrders = await db
-      .select({
-        created: workOrders.createdAt,
-        resolved: workOrders.resolvedAt,
-      })
-      .from(workOrders)
-      .where(
-        and(
-          isNotNull(workOrders.resolvedAt),
-          gt(workOrders.resolvedAt, thirtyDaysAgo)
-        )
-      );
-
-    let mttrHours = 0;
-    if (resolvedWorkOrders.length > 0) {
-      const totalDurationMs = resolvedWorkOrders.reduce((acc, t) => {
-        return acc + (t.resolved!.getTime() - t.created.getTime());
-      }, 0);
-      mttrHours = Math.round(
-        totalDurationMs / (1000 * 60 * 60) / resolvedWorkOrders.length
-      );
-    }
-
-    // 4. SLA Compliance Rate
-    // % of resolved work orders (last 30 days) where resolvedAt <= dueBy
-
-    // Let's re-fetch with dueBy
-    const resolvedWithDue = await db
-      .select({
-        created: workOrders.createdAt,
-        resolved: workOrders.resolvedAt,
-        dueBy: workOrders.dueBy,
-      })
-      .from(workOrders)
-      .where(
-        and(
-          isNotNull(workOrders.resolvedAt),
-          gt(workOrders.resolvedAt, thirtyDaysAgo)
-        )
-      );
-
-    const slaCompliantCount = resolvedWithDue.filter((t) => {
-      if (!t.dueBy) return true; // Default to compliant if no due date
-      return t.resolved! <= t.dueBy;
-    }).length;
-
-    const slaRate =
-      resolvedWithDue.length > 0
-        ? Math.round((slaCompliantCount / resolvedWithDue.length) * 100)
-        : 100;
+    // Process results
+    const mttrHours = Math.round(Number(row.avg_resolution_seconds) / 3600);
+    
+    const resolvedCount = Number(row.resolved_30d_count);
+    const compliantCount = Number(row.sla_compliant_count);
+    
+    const slaRate = resolvedCount > 0 
+      ? Math.round((compliantCount / resolvedCount) * 100) 
+      : 100;
 
     return apiSuccess({
-      openWorkOrders,
-      highPriorityOpen,
+      openWorkOrders: Number(row.open_count),
+      highPriorityOpen: Number(row.high_priority_count),
       mttrHours,
       slaRate,
       period: "30d",

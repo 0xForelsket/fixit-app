@@ -3,7 +3,7 @@ import { equipment, spareParts, workOrders } from "@/db/schema";
 import { ApiErrors } from "@/lib/api-error";
 import { generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
-import { eq, like, or } from "drizzle-orm";
+import { eq, like, or, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export type SearchResult = {
@@ -121,12 +121,9 @@ export async function GET(request: Request) {
       }
     }
 
-    // Search work orders by title
+    // Search work orders using Full Text Search
     const workOrderResults = await db.query.workOrders.findMany({
-      where: or(
-        like(workOrders.title, searchPattern),
-        like(workOrders.description, searchPattern)
-      ),
+      where: sql`to_tsvector('english', ${workOrders.title} || ' ' || ${workOrders.description}) @@ plainto_tsquery('english', ${query})`,
       columns: { id: true, displayId: true, title: true, status: true },
       limit: 5,
     });
@@ -144,12 +141,9 @@ export async function GET(request: Request) {
       }
     }
 
-    // Search equipment by name or code
+    // Search equipment using Full Text Search
     const equipmentResults = await db.query.equipment.findMany({
-      where: or(
-        like(equipment.name, searchPattern),
-        like(equipment.code, searchPattern)
-      ),
+      where: sql`to_tsvector('english', ${equipment.name} || ' ' || ${equipment.code}) @@ plainto_tsquery('english', ${query})`,
       columns: { id: true, name: true, code: true, status: true },
       limit: 5,
     });
