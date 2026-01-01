@@ -11,7 +11,7 @@ vi.mock("@/db", () => ({
     },
     delete: vi.fn(() => ({
       where: vi.fn(() => ({
-        returning: vi.fn(),
+        returning: vi.fn().mockResolvedValue([]),
       })),
     })),
   },
@@ -68,7 +68,7 @@ describe("GET /api/labor/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when labor log not found", async () => {
@@ -125,7 +125,7 @@ describe("GET /api/labor/[id]", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.id).toBe(1);
+    expect(data.data.id).toBe("1");
     expect(data.data.durationMinutes).toBe(60);
     expect(data.data.user.name).toBe("Tech User");
     expect(data.data.workOrder.title).toBe("Work Order 1");
@@ -168,7 +168,7 @@ describe("DELETE /api/labor/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when labor log not found", async () => {

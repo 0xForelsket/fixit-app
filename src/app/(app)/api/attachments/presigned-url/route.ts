@@ -7,7 +7,7 @@ const requestSchema = z.object({
   filename: z.string().min(1),
   mimeType: z.string().min(1),
   entityType: z.string().min(1),
-  entityId: z.number().int().positive(),
+  entityId: z.string(),
 });
 
 export async function POST(request: Request) {

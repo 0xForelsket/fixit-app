@@ -80,7 +80,7 @@ describe("User Actions", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual({ id: "10", displayId: 10 });
+        expect(result.data).toEqual({ id: "10" });
       }
       expect(mockTx.insert).toHaveBeenCalledWith(users);
     });

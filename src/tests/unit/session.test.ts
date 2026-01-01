@@ -37,6 +37,11 @@ vi.mock("@/lib/permissions", () => ({
   hasAnyPermission: vi.fn(),
 }));
 
+// Mock session-validator
+vi.mock("@/lib/session-validator", () => ({
+  isSessionVersionValid: vi.fn(() => Promise.resolve(true)),
+}));
+
 // Set environment variable
 process.env.SESSION_SECRET =
   "test-secret-key-that-is-at-least-32-characters-long";

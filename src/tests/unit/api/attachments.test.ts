@@ -211,7 +211,7 @@ describe("GET /api/attachments", () => {
 
     const response = await GET(request);
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(200);
   });
 
   it("returns attachments list", async () => {
@@ -476,7 +476,7 @@ describe("GET /api/attachments/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when attachment not found", async () => {

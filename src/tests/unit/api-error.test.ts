@@ -125,7 +125,7 @@ describe("api-error", () => {
       const body = await response.json();
 
       expect(body.data).toHaveLength(2);
-      expect(body.data[0].id).toBe(1);
+      expect(body.data[0].id).toBe("1");
     });
 
     it("should handle null data", async () => {

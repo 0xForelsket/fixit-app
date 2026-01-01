@@ -81,7 +81,7 @@ describe("PATCH /api/notifications/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when notification not found", async () => {

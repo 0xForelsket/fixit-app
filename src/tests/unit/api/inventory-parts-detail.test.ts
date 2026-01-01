@@ -11,13 +11,13 @@ vi.mock("@/db", () => ({
     update: vi.fn(() => ({
       set: vi.fn(() => ({
         where: vi.fn(() => ({
-          returning: vi.fn(),
+          returning: vi.fn().mockResolvedValue([]),
         })),
       })),
     })),
     delete: vi.fn(() => ({
       where: vi.fn(() => ({
-        returning: vi.fn(),
+        returning: vi.fn().mockResolvedValue([]),
       })),
     })),
   },
@@ -97,7 +97,7 @@ describe("GET /api/inventory/parts/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when part not found", async () => {
@@ -265,7 +265,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when part not found", async () => {
@@ -431,7 +431,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       params: Promise.resolve({ id: "abc" }),
     });
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(404);
   });
 
   it("returns 404 when part not found", async () => {

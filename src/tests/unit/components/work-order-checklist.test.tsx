@@ -59,7 +59,7 @@ describe("WorkOrderChecklist", () => {
     // Click the first item (pending -> completed)
     fireEvent.click(buttons[0]);
 
-    expect(actions.updateChecklistItem).toHaveBeenCalledWith(1, 123, {
+    expect(actions.updateChecklistItem).toHaveBeenCalledWith("1", "123", {
       status: "completed",
     });
   });

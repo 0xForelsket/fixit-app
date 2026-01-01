@@ -123,7 +123,7 @@ describe("roles actions", () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data?.id).toBe(5);
+        expect(result.data?.id).toBe("5");
       }
     });
   });

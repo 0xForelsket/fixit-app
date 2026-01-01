@@ -96,7 +96,7 @@ describe("createWorkOrder action", () => {
     });
 
     const formData = new FormData();
-    formData.set("equipmentId", "invalid"); // not a number
+    formData.set("equipmentId", ""); // empty string (invalid)
     formData.set("type", "breakdown");
     formData.set("title", "");
     formData.set("description", "Test");
