@@ -13,7 +13,7 @@ export async function logAudit({
 }: {
   entityType: EntityType;
   entityId: number;
-  action: "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "BULK_UPDATE";
+  action: "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "LOGOUT_ALL" | "BULK_UPDATE";
   details?: Record<string, unknown>;
 }) {
   try {

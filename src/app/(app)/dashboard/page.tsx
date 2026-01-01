@@ -92,44 +92,14 @@ async function getMyWorkOrders(userId: number) {
     ),
     limit: 7,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
-    columns: {
-      id: true,
-      title: true,
-      status: true,
-      priority: true,
-      createdAt: true,
-      equipmentId: true,
-      reportedById: true,
-      assignedToId: true,
-    },
     with: {
       equipment: {
-        columns: {
-          id: true,
-          name: true,
-          locationId: true,
-        },
         with: {
-          location: {
-            columns: {
-              id: true,
-              name: true,
-            },
-          },
+          location: true,
         },
       },
-      reportedBy: {
-        columns: {
-          id: true,
-          name: true,
-        },
-      },
-      assignedTo: {
-        columns: {
-          id: true,
-          name: true,
-        },
-      },
+      reportedBy: true,
+      assignedTo: true,
     },
   });
 }
@@ -145,44 +115,14 @@ async function getRecentWorkOrders(user: SessionUser | null) {
     where: and(...conditions),
     limit: 7,
     orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
-    columns: {
-      id: true,
-      title: true,
-      status: true,
-      priority: true,
-      createdAt: true,
-      equipmentId: true,
-      reportedById: true,
-      assignedToId: true,
-    },
     with: {
       equipment: {
-        columns: {
-          id: true,
-          name: true,
-          locationId: true,
-        },
         with: {
-          location: {
-            columns: {
-              id: true,
-              name: true,
-            },
-          },
+          location: true,
         },
       },
-      reportedBy: {
-        columns: {
-          id: true,
-          name: true,
-        },
-      },
-      assignedTo: {
-        columns: {
-          id: true,
-          name: true,
-        },
-      },
+      reportedBy: true,
+      assignedTo: true,
     },
   });
 }

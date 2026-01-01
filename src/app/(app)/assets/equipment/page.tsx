@@ -94,6 +94,7 @@ async function getEquipment(params: SearchParams, user: SessionUser | null) {
       name: true,
       status: true,
       createdAt: true,
+      parentId: true,
       locationId: true,
       ownerId: true,
       typeId: true,

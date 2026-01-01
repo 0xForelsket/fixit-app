@@ -60,21 +60,8 @@ export default async function HomePage({ searchParams }: PageProps) {
     db.query.equipment.findMany({
       where: whereClause,
       orderBy: (equipment, { asc }) => [asc(equipment.name)],
-      columns: {
-        id: true,
-        name: true,
-        code: true,
-        status: true,
-        parentId: true,
-        locationId: true,
-      },
       with: {
-        location: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
+        location: true,
         children: {
           columns: { id: true },
         },
@@ -82,10 +69,6 @@ export default async function HomePage({ searchParams }: PageProps) {
     }),
     db.query.locations.findMany({
       orderBy: (locations, { asc }) => [asc(locations.name)],
-      columns: {
-        id: true,
-        name: true,
-      },
     }),
     db.select({ count: sql<number>`count(*)` })
       .from(notifications)
@@ -97,44 +80,14 @@ export default async function HomePage({ searchParams }: PageProps) {
       ),
       limit: 5,
       orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
-      columns: {
-        id: true,
-        title: true,
-        status: true,
-        priority: true,
-        createdAt: true,
-        equipmentId: true,
-        reportedById: true,
-        assignedToId: true,
-      },
       with: {
         equipment: {
-          columns: {
-            id: true,
-            name: true,
-            locationId: true,
-          },
           with: {
-            location: {
-              columns: {
-                id: true,
-                name: true,
-              },
-            },
+            location: true,
           },
         },
-        reportedBy: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-        assignedTo: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
+        reportedBy: true,
+        assignedTo: true,
       },
     }),
   ]);
