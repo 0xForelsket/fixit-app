@@ -2,10 +2,11 @@ import { db } from "@/db";
 import {
   type InAppNotificationPreferences,
   type NotificationType,
+  type UserPreferences,
   notifications,
   users,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { sendToUser } from "./sse";
 
 /**
@@ -83,7 +84,27 @@ export async function createNotification(
 }
 
 /**
+ * Helper function to check if a user should receive a notification based on preferences.
+ */
+function shouldReceiveNotification(
+  prefs: UserPreferences | null | undefined,
+  type: NotificationType
+): boolean {
+  const prefKey = NOTIFICATION_TYPE_TO_PREF_KEY[type];
+
+  // Default to true (enabled) if preferences are not set
+  if (!prefs?.notifications?.inApp || !prefKey) {
+    return true;
+  }
+
+  const isEnabled = prefs.notifications.inApp[prefKey];
+  // Only skip if explicitly set to false
+  return isEnabled !== false;
+}
+
+/**
  * Creates notifications for multiple users, respecting each user's preferences.
+ * Optimized to batch fetch user preferences and batch insert notifications.
  * Returns the number of notifications actually created.
  */
 export async function createNotificationsForUsers(
@@ -95,18 +116,46 @@ export async function createNotificationsForUsers(
 ): Promise<number> {
   if (userIds.length === 0) return 0;
 
-  let created = 0;
-  for (const userId of userIds) {
-    const wasCreated = await createNotification({
-      userId,
-      type,
-      title,
-      message,
-      link,
+  // Batch fetch all user preferences in a single query
+  const userPrefs = await db.query.users.findMany({
+    where: inArray(users.id, userIds),
+    columns: { id: true, preferences: true },
+  });
+
+  // Create a map for quick lookup
+  const prefsMap = new Map(userPrefs.map((u) => [u.id, u.preferences]));
+
+  // Filter users who should receive this notification type
+  const eligibleUserIds = userIds.filter((userId) => {
+    const prefs = prefsMap.get(userId);
+    return shouldReceiveNotification(prefs, type);
+  });
+
+  if (eligibleUserIds.length === 0) return 0;
+
+  // Batch insert all notifications in a single query
+  const notificationsToInsert = eligibleUserIds.map((userId) => ({
+    userId,
+    type,
+    title,
+    message,
+    link: link ?? null,
+  }));
+
+  const inserted = await db
+    .insert(notifications)
+    .values(notificationsToInsert)
+    .returning();
+
+  // Push to connected SSE clients in real-time
+  for (const notification of inserted) {
+    sendToUser(notification.userId, {
+      event: "notification",
+      data: notification,
     });
-    if (wasCreated) created++;
   }
-  return created;
+
+  return inserted.length;
 }
 
 /**

@@ -599,27 +599,34 @@ export async function bulkUpdateWorkOrders(
       }
     }
 
-    // Execute batch update using a single SQL statement with IN clause
-    if (validIds.length > 0) {
-      await db
-        .update(workOrders)
-        .set(updateData)
-        .where(inArray(workOrders.id, validIds));
-    }
+    /**
+     * Execute all database operations within a transaction for atomicity.
+     * This ensures that work order updates, logs, and notifications are
+     * all committed together or all rolled back on failure.
+     */
+    await db.transaction(async (tx) => {
+      // Execute batch update using a single SQL statement with IN clause
+      if (validIds.length > 0) {
+        await tx
+          .update(workOrders)
+          .set(updateData)
+          .where(inArray(workOrders.id, validIds));
+      }
 
-    // Batch insert logs
-    if (statusLogs.length > 0) {
-      await db.insert(workOrderLogs).values(statusLogs);
-    }
+      // Batch insert logs
+      if (statusLogs.length > 0) {
+        await tx.insert(workOrderLogs).values(statusLogs);
+      }
 
-    if (assignmentLogs.length > 0) {
-      await db.insert(workOrderLogs).values(assignmentLogs);
-    }
+      if (assignmentLogs.length > 0) {
+        await tx.insert(workOrderLogs).values(assignmentLogs);
+      }
 
-    // Batch insert notifications
-    if (assignmentNotifications.length > 0) {
-      await db.insert(notifications).values(assignmentNotifications);
-    }
+      // Batch insert notifications
+      if (assignmentNotifications.length > 0) {
+        await tx.insert(notifications).values(assignmentNotifications);
+      }
+    });
 
     const updated = validIds.length;
 

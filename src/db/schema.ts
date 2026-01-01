@@ -290,6 +290,8 @@ export const equipment = pgTable(
       table.locationId,
       table.status
     ),
+    // Equipment owner-status filtering (for owner's equipment list)
+    ownerStatusIdx: index("eq_owner_status_idx").on(table.ownerId, table.status),
     // Full Text Search Index
     searchIdx: index("eq_search_idx").using(
       "gin",
@@ -350,6 +352,11 @@ export const workOrders = pgTable(
       table.equipmentId,
       table.createdAt
     ),
+    // Work orders by equipment + status (equipment detail page)
+    equipmentStatusIdx: index("wo_equipment_status_idx").on(
+      table.equipmentId,
+      table.status
+    ),
     // Performance: Filter by Priority + Status (Dashboard)
     priorityStatusIdx: index("wo_priority_status_idx").on(
       table.priority,
@@ -364,22 +371,34 @@ export const workOrders = pgTable(
 );
 
 // Maintenance schedules table
-export const maintenanceSchedules = pgTable("maintenance_schedules", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
-  displayId: serial("display_id").notNull(),
-  equipmentId: text("equipment_id")
-    .references(() => equipment.id)
-    .notNull(),
-  title: text("title").notNull(),
-  type: text("type", { enum: scheduleTypes }).notNull(),
-  frequencyDays: integer("frequency_days").notNull(),
-  lastGenerated: timestamp("last_generated"),
-  nextDue: timestamp("next_due").notNull(),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-});
+export const maintenanceSchedules = pgTable(
+  "maintenance_schedules",
+  {
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    displayId: serial("display_id").notNull(),
+    equipmentId: text("equipment_id")
+      .references(() => equipment.id)
+      .notNull(),
+    title: text("title").notNull(),
+    type: text("type", { enum: scheduleTypes }).notNull(),
+    frequencyDays: integer("frequency_days").notNull(),
+    lastGenerated: timestamp("last_generated"),
+    nextDue: timestamp("next_due").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at")
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    // Active schedules by next due date (for scheduler queries)
+    activeNextDueIdx: index("ms_active_nextdue_idx").on(
+      table.isActive,
+      table.nextDue
+    ),
+    // Equipment's maintenance schedules
+    equipmentIdx: index("ms_equipment_idx").on(table.equipmentId),
+  })
+);
 
 // Work Order logs table (audit trail)
 export const workOrderLogs = pgTable("work_order_logs", {
@@ -576,6 +595,8 @@ export const inventoryLevels = pgTable(
       table.partId,
       table.locationId
     ),
+    // Low stock alerts (quantity below reorder point)
+    lowStockIdx: index("inv_low_stock_idx").on(table.quantity, table.partId),
   })
 );
 
