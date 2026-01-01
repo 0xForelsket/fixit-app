@@ -115,9 +115,9 @@ PLANT-B,Plant B,Secondary facility,`,
     icon: Users,
     endpoint: "/api/import/users",
     sampleCsv: `employee_id,name,email,pin,role_name,hourly_rate
-TECH-NEW-001,John Smith,john@company.com,1234,tech,45.00
-OP-NEW-001,Jane Doe,jane@company.com,5678,operator,
-ADMIN-NEW-001,Bob Admin,bob@company.com,9999,admin,75.00`,
+TECH-NEW-001,John Smith,john@company.com,123456,tech,45.00
+OP-NEW-001,Jane Doe,jane@company.com,567890,operator,
+ADMIN-NEW-001,Bob Admin,bob@company.com,999999,admin,75.00`,
     sampleFilename: "users-import-template.csv",
     requiredColumns: [
       { name: "employee_id", required: true },

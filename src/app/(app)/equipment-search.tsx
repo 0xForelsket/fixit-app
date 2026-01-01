@@ -67,17 +67,17 @@ export function EquipmentSearch({
           placeholder="Scan or type equipment..."
           value={search}
           onChange={(e) => updateSearch(e.target.value)}
-          className="pl-10 h-10 border-zinc-200 focus-visible:ring-primary-500 rounded-lg bg-zinc-50/50 group-focus-within:bg-white group-focus-within:shadow-sm transition-all"
+          className="pl-10 h-10 border-border focus-visible:ring-primary rounded-lg bg-muted/50 group-focus-within:bg-background group-focus-within:shadow-sm transition-all"
         />
         <Search
-          className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400 group-focus-within:text-primary-500 transition-colors"
+          className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors"
           aria-hidden="true"
         />
         {search && (
           <button
             type="button"
             onClick={clearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-zinc-200 rounded-full text-zinc-400 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -93,8 +93,8 @@ export function EquipmentSearch({
           className={cn(
             "h-7 px-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0 rounded-full transition-all",
             currentLocation === ""
-              ? "bg-zinc-900 border-zinc-900 text-white shadow-sm"
-              : "text-zinc-500 border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900"
+              ? "bg-primary border-primary text-primary-foreground shadow-sm"
+              : "text-muted-foreground border-border bg-card hover:bg-muted hover:text-foreground"
           )}
         >
           All
@@ -110,8 +110,8 @@ export function EquipmentSearch({
             className={cn(
               "h-7 px-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap shrink-0 rounded-full transition-all",
               currentLocation === location.id.toString()
-                ? "bg-zinc-900 border-zinc-900 text-white shadow-sm"
-                : "text-zinc-500 border-zinc-200 bg-white hover:bg-zinc-50 hover:text-zinc-900"
+                ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground border-border bg-card hover:bg-muted hover:text-foreground"
             )}
           >
             {location.name}

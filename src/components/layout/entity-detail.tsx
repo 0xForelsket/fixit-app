@@ -12,10 +12,10 @@ export function EntityDetailLayout({
 }) {
   return (
     <div className={cn("min-h-screen pb-24 lg:pb-8", className)}>
-      <div className="hidden lg:block">
+      <div className="hidden lg:block print:block">
         <div className="mx-auto max-w-6xl px-6 py-6 space-y-6">{children}</div>
       </div>
-      <div className="lg:hidden">{children}</div>
+      <div className="lg:hidden print:hidden">{children}</div>
     </div>
   );
 }

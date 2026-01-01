@@ -22,7 +22,8 @@ const categories: ShortcutCategory[] = [
   {
     title: "Global",
     shortcuts: [
-      { keys: ["⌘", "K"], description: "Open search" },
+      { keys: ["⌘", "K"], description: "Open command menu" },
+      { keys: ["Ctrl", "/"], description: "Focus search" },
       { keys: ["?"], description: "Show this help" },
       { keys: ["Esc"], description: "Close dialogs" },
     ],
@@ -41,8 +42,10 @@ const categories: ShortcutCategory[] = [
     ],
   },
   {
-    title: "Quick Navigation",
+    title: "Navigation",
     shortcuts: [
+      { keys: ["J"], description: "Next list item" },
+      { keys: ["K"], description: "Previous list item" },
       { keys: ["⇧", "H"], description: "Go to Dashboard" },
       { keys: ["⇧", "W"], description: "Go to Work Orders" },
       { keys: ["⇧", "E"], description: "Go to Equipment" },
@@ -55,6 +58,7 @@ const categories: ShortcutCategory[] = [
     shortcuts: [
       { keys: ["N"], description: "New work order" },
       { keys: ["R"], description: "Report issue" },
+      { keys: ["Ctrl", "P"], description: "Print page" },
     ],
   },
 ];

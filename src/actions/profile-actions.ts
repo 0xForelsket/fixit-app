@@ -19,9 +19,9 @@ const updateProfileSchema = z.object({
 
 const changePinSchema = z
   .object({
-    currentPin: z.string().length(4, "PIN must be 4 digits"),
-    newPin: z.string().length(4, "PIN must be 4 digits"),
-    confirmPin: z.string().length(4, "PIN must be 4 digits"),
+    currentPin: z.string().min(4, "PIN must be at least 4 digits").regex(/^\d+$/, "PIN must contain only digits"),
+    newPin: z.string().min(6, "New PIN must be at least 6 digits").regex(/^\d+$/, "PIN must contain only digits"),
+    confirmPin: z.string().min(6, "PIN must be at least 6 digits").regex(/^\d+$/, "PIN must contain only digits"),
   })
   .refine((data) => data.newPin === data.confirmPin, {
     message: "New PINs don't match",
@@ -118,10 +118,10 @@ export async function changePin(
   }
 
   try {
-    // Fetch user with current PIN hash
+    // Fetch user with current PIN hash and session version
     const userRecord = await db.query.users.findFirst({
       where: eq(users.id, sessionUser.id),
-      columns: { pin: true },
+      columns: { pin: true, sessionVersion: true },
     });
 
     if (!userRecord) {
@@ -134,12 +134,14 @@ export async function changePin(
       return { success: false, error: "Current PIN is incorrect" };
     }
 
-    // Hash and save new PIN
+    // Hash and save new PIN, increment sessionVersion to invalidate all existing sessions
     const newPinHash = await hashPin(result.data.newPin);
+    const newSessionVersion = (userRecord.sessionVersion ?? 1) + 1;
     await db
       .update(users)
       .set({
         pin: newPinHash,
+        sessionVersion: newSessionVersion,
         updatedAt: new Date(),
       })
       .where(eq(users.id, sessionUser.id));

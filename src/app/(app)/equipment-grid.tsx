@@ -72,30 +72,30 @@ function EquipmentCard({
         });
       }}
       className={cn(
-        "group flex items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white p-2.5 shadow-sm transition-all hover:bg-zinc-50 hover:border-zinc-300 active:scale-[0.98] cursor-pointer",
+        "group flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-2.5 shadow-sm transition-all hover:bg-muted/50 hover:border-border/80 active:scale-[0.98] cursor-pointer",
         staggerClass
       )}
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 mb-0.5">
-          <h3 className="font-bold text-sm text-zinc-900 leading-tight truncate">
+          <h3 className="font-bold text-sm text-foreground leading-tight truncate">
             {equipment.name}
           </h3>
-          <span className="inline-flex shrink-0 items-center rounded bg-zinc-100 px-1 py-0.5 text-[9px] font-mono font-bold text-zinc-500 uppercase">
+          <span className="inline-flex shrink-0 items-center rounded bg-muted px-1 py-0.5 text-[9px] font-mono font-bold text-muted-foreground uppercase">
             {equipment.code}
           </span>
           {equipment.parentId && (
-            <span className="inline-flex shrink-0 items-center rounded bg-zinc-50 border border-zinc-200 px-1 py-0.5 text-[8px] font-black text-zinc-400 uppercase tracking-tighter">
+            <span className="inline-flex shrink-0 items-center rounded bg-muted/30 border border-border px-1 py-0.5 text-[8px] font-black text-muted-foreground/50 uppercase tracking-tighter">
               Sub-asset
             </span>
           )}
           {equipment.children && equipment.children.length > 0 && (
-            <Layers className="h-3 w-3 text-primary-500/50" />
+            <Layers className="h-3 w-3 text-primary/50" />
           )}
         </div>
 
         {equipment.location && (
-          <div className="flex items-center gap-1 text-[11px] text-zinc-500">
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <MapPin className="h-2.5 w-2.5 shrink-0 opacity-70" />
             <span className="truncate">{equipment.location.name}</span>
           </div>
@@ -107,7 +107,7 @@ function EquipmentCard({
           status={equipment.status}
           className="scale-90 origin-right"
         />
-        <ArrowRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-zinc-500 transition-colors" />
+        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
       </div>
     </Link>
   );

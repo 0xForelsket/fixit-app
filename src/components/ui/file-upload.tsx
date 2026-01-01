@@ -94,7 +94,7 @@ export function FileUpload({
   if (variant === "compact") {
     return (
       <div className="flex flex-col gap-2 w-full">
-        <label className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50/50 text-[11px] font-bold text-zinc-600 transition-all hover:bg-zinc-100 active:scale-95">
+        <label className="relative flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 text-[11px] font-bold text-muted-foreground transition-all hover:bg-muted active:scale-95">
           <input
             type="file"
             multiple
@@ -111,7 +111,7 @@ export function FileUpload({
           {isUploading ? "Uploading..." : label || "Upload File"}
         </label>
         {uploadError && (
-          <p className="text-[10px] font-bold text-danger-600">{uploadError}</p>
+          <p className="text-[10px] font-bold text-danger">{uploadError}</p>
         )}
         {!hidePreviews && (
           <PreviewList previews={previews} onRemove={removePreview} />
@@ -143,21 +143,21 @@ export function FileUpload({
               "flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all",
               isUploading
                 ? "bg-muted animate-pulse"
-                : "hover:bg-primary-50/50 hover:border-primary-300 bg-white"
+                : "hover:bg-primary/5 hover:border-primary/30 bg-card border-border"
             )}
           >
             {isUploading ? (
-              <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             ) : (
               <div className="flex flex-col items-center gap-2 text-center">
-                <div className="rounded-full bg-primary-100 p-3">
-                  <ImageIcon className="h-6 w-6 text-primary-600" />
+                <div className="rounded-full bg-primary/10 p-3">
+                  <ImageIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-900">
+                  <p className="font-bold text-foreground">
                     Click to upload or drag and drop
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     PNG, JPG or PDF up to {maxSizeMB}MB
                   </p>
                 </div>
@@ -191,7 +191,7 @@ function PreviewList({
       {previews.map((file) => (
         <div
           key={file.id}
-          className="group relative overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-md"
+          className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
         >
           {file.type.startsWith("image/") ? (
             <img
@@ -200,9 +200,9 @@ function PreviewList({
               className="h-32 w-full object-cover"
             />
           ) : (
-            <div className="flex h-32 flex-col items-center justify-center bg-slate-50">
-              <FileIcon className="h-10 w-10 text-slate-400" />
-              <p className="mt-2 px-2 text-center text-[10px] font-medium text-slate-600 truncate w-full">
+            <div className="flex h-32 flex-col items-center justify-center bg-muted/50">
+              <FileIcon className="h-10 w-10 text-muted-foreground" />
+              <p className="mt-2 px-2 text-center text-[10px] font-medium text-muted-foreground truncate w-full">
                 {file.name}
               </p>
             </div>
@@ -211,7 +211,7 @@ function PreviewList({
           <button
             type="button"
             onClick={() => onRemove(file.id)}
-            className="absolute right-2 top-2 rounded-full bg-white/90 p-1.5 text-rose-600 opacity-0 shadow-sm transition-all hover:bg-white group-hover:opacity-100"
+            className="absolute right-2 top-2 rounded-full bg-background/90 p-1.5 text-danger opacity-0 shadow-sm transition-all hover:bg-background group-hover:opacity-100"
           >
             <Trash2 className="h-4 w-4" />
           </button>

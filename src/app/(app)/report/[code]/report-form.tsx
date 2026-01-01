@@ -70,30 +70,30 @@ const priorityConfig: Record<
 > = {
   low: {
     label: "Low",
-    color: "text-primary-700",
-    bg: "bg-primary-50",
-    border: "border-primary-200",
+    color: "text-muted-foreground",
+    bg: "bg-muted/30",
+    border: "border-border",
     description: "Cosmetic or non-urgent issue",
   },
   medium: {
     label: "Medium",
-    color: "text-primary-900",
-    bg: "bg-white",
-    border: "border-primary-300",
+    color: "text-foreground",
+    bg: "bg-card",
+    border: "border-border",
     description: "Needs attention within shift",
   },
   high: {
     label: "High",
-    color: "text-warning-800",
-    bg: "bg-warning-50",
-    border: "border-warning-300",
+    color: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning/30",
     description: "Machine degraded, urgent fix",
   },
   critical: {
     label: "Critical",
-    color: "text-white",
-    bg: "bg-danger-600",
-    border: "border-danger-700",
+    color: "text-danger-foreground",
+    bg: "bg-danger",
+    border: "border-danger",
     description: "MACHINE STOPPED / Safety risk",
   },
 };
@@ -185,7 +185,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       {/* Error display */}
       {state && !state.success && state.error && (
-        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-danger-700 font-medium flex items-center gap-3">
+        <div className="rounded-xl border border-danger/20 bg-danger/10 p-4 text-danger font-medium flex items-center gap-3">
           <ShieldAlert className="h-5 w-5" />
           {state.error}
         </div>
@@ -193,7 +193,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       {/* Ticket Type */}
       <div className="space-y-4">
-        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
+        <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">
           What type of issue is it?
         </Label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -203,7 +203,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
             return (
               <label
                 key={type}
-                className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 bg-white p-4 text-center transition-all hover:border-primary-300 hover:bg-primary-50/50 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50 has-[:checked]:shadow-sm active:scale-[0.98]"
+                className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 bg-card p-4 text-center transition-all hover:border-primary/30 hover:bg-muted/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:shadow-sm active:scale-[0.98]"
               >
                 <input
                   type="radio"
@@ -212,11 +212,11 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   className="sr-only"
                   required
                 />
-                <Icon className="mb-3 h-8 w-8 text-zinc-400 transition-colors group-has-[:checked]:text-primary-600" />
-                <span className="font-bold text-foreground group-has-[:checked]:text-primary-700">
+                <Icon className="mb-3 h-8 w-8 text-muted-foreground/60 transition-colors group-has-[:checked]:text-primary" />
+                <span className="font-bold text-foreground group-has-[:checked]:text-primary">
                   {config.label}
                 </span>
-                <span className="text-xs text-zinc-500 mt-1">
+                <span className="text-xs text-muted-foreground mt-1">
                   {config.description}
                 </span>
               </label>
@@ -227,7 +227,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       {/* Priority */}
       <div className="space-y-4">
-        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
+        <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">
           How urgent is this?
         </Label>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -262,8 +262,8 @@ export function ReportForm({ equipment }: ReportFormProps) {
                     className={cn(
                       "text-xs block mt-0.5",
                       priority === "critical"
-                        ? "text-danger-100"
-                        : "text-zinc-500"
+                        ? "text-danger-foreground/70"
+                        : "text-muted-foreground"
                     )}
                   >
                     {config.description}
@@ -271,11 +271,11 @@ export function ReportForm({ equipment }: ReportFormProps) {
                 </div>
                 <div
                   className={cn(
-                    "h-5 w-5 rounded-full border-2 border-zinc-300 flex items-center justify-center p-0.5 group-has-[:checked]:border-primary-600",
-                    priority === "critical" && "border-danger-300"
+                    "h-5 w-5 rounded-full border-2 border-border flex items-center justify-center p-0.5 group-has-[:checked]:border-primary",
+                    priority === "critical" && "border-danger-foreground/50"
                   )}
                 >
-                  <div className="h-full w-full rounded-full bg-primary-600 opacity-0 group-has-[:checked]:opacity-100 transition-opacity" />
+                  <div className="h-full w-full rounded-full bg-primary opacity-0 group-has-[:checked]:opacity-100 transition-opacity" />
                 </div>
               </label>
             );
@@ -287,7 +287,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
       <div className="space-y-3">
         <Label
           htmlFor="title"
-          className="text-sm font-black uppercase tracking-widest text-zinc-500"
+          className="text-sm font-black uppercase tracking-widest text-muted-foreground"
         >
           Short description
         </Label>
@@ -297,7 +297,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
           placeholder={"e.g., Leaking oil, Strange noise..."}
           required
           maxLength={200}
-          className="h-14 text-lg px-4 rounded-xl border-2 bg-zinc-50 focus-visible:ring-primary-500"
+          className="h-14 text-lg px-4 rounded-xl border-2 bg-muted/30 focus-visible:ring-primary"
         />
       </div>
 
@@ -305,7 +305,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
       <div className="space-y-3">
         <Label
           htmlFor="description"
-          className="text-sm font-black uppercase tracking-widest text-zinc-500"
+          className="text-sm font-black uppercase tracking-widest text-muted-foreground"
         >
           Additional Details
         </Label>
@@ -315,13 +315,13 @@ export function ReportForm({ equipment }: ReportFormProps) {
           placeholder="Describe the issue in detail. What happened? Any error codes?"
           required
           rows={5}
-          className="w-full rounded-xl border-2 bg-zinc-50 px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 resize-none"
+          className="w-full rounded-xl border-2 bg-muted/30 px-4 py-3 text-base placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 resize-none"
         />
       </div>
 
       {/* Attachments Section */}
       <div className="space-y-4">
-        <Label className="text-sm font-black uppercase tracking-widest text-zinc-500">
+        <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">
           Attach Photos
         </Label>
 
@@ -331,11 +331,11 @@ export function ReportForm({ equipment }: ReportFormProps) {
             variant="outline"
             onClick={() => setIsCameraOpen(true)}
             disabled={isUploadingPhoto}
-            className="flex-1 h-14 rounded-xl border-2 border-dashed border-primary-300 bg-primary-50/50 hover:bg-primary-100 hover:border-primary-400 text-primary-700 font-semibold"
+            className="flex-1 h-14 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 text-primary font-semibold"
           >
             {isUploadingPhoto ? (
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-300 border-t-primary-600" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
                 Uploading...
               </div>
             ) : (
@@ -353,7 +353,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
             {attachments.map((file, idx) => (
               <div
                 key={idx}
-                className="relative aspect-square rounded-lg overflow-hidden border bg-zinc-100 group"
+                className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted group"
               >
                 <img
                   src={`/api/attachments/preview?key=${file.s3Key}`}
@@ -394,7 +394,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
           type="button"
           variant="outline"
           size="lg"
-          className="flex-1 h-14 text-base font-bold rounded-xl border-2 border-zinc-200"
+          className="flex-1 h-14 text-base font-bold rounded-xl border-2 border-border"
           onClick={() => router.back()}
         >
           Cancel

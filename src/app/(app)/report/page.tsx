@@ -47,15 +47,15 @@ export default async function ReportPage({ searchParams }: ReportPageProps) {
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black text-zinc-900 uppercase tracking-tight">
+        <h1 className="text-3xl font-black text-foreground uppercase tracking-tight">
           Report Issue
         </h1>
-        <p className="text-zinc-500 font-medium">
+        <p className="text-muted-foreground font-medium">
           Select an asset to submit a work request.
         </p>
       </div>
 
-      <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+      <div className="bg-card p-4 rounded-2xl border border-border shadow-sm">
         <EquipmentSearch locations={locationList} initialSearch={search} />
       </div>
 

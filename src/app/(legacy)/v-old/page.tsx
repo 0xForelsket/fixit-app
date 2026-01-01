@@ -36,7 +36,7 @@ export default function MarketingPage() {
           </Link>
           <div className="h-4 w-[1px] bg-black/10 hidden md:block" />
           <Link
-            href="http://app.localhost:3000/login"
+            href="/login"
             className="hover:opacity-70 transition-opacity"
           >
             Live Demo

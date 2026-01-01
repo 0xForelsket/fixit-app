@@ -27,6 +27,7 @@ import {
   Globe,
   HelpCircle,
   Home,
+  Keyboard,
   LogOut,
   MapPin,
   MonitorCog,
@@ -486,6 +487,20 @@ export function Sidebar({
                     <HelpCircle className="mr-2 h-4 w-4" />
                     <span>Get help</span>
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    document.dispatchEvent(
+                      new CustomEvent("toggle-keyboard-shortcuts")
+                    )
+                  }
+                  className="cursor-pointer"
+                >
+                  <Keyboard className="mr-2 h-4 w-4" />
+                  <span>Keyboard Shortcuts</span>
+                  <span className="ml-auto text-xs text-muted-foreground opacity-70">
+                    ?
+                  </span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />

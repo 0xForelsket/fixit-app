@@ -32,7 +32,7 @@ export function useKeyboardShortcuts(
       {
         key: "k",
         modifiers: ["meta"],
-        description: "Open search",
+        description: "Open command menu",
         action: () => {
           document.dispatchEvent(new CustomEvent("toggle-command-menu"));
         },
@@ -41,9 +41,28 @@ export function useKeyboardShortcuts(
       {
         key: "k",
         modifiers: ["ctrl"],
-        description: "Open search",
+        description: "Open command menu",
         action: () => {
           document.dispatchEvent(new CustomEvent("toggle-command-menu"));
+        },
+        category: "global",
+      },
+      {
+        key: "/",
+        modifiers: ["ctrl"],
+        description: "Focus search",
+        action: () => {
+          // Try to find and focus a search input
+          const searchInput = document.querySelector<HTMLInputElement>(
+            'input[type="search"], input[placeholder*="Search"], input[aria-label*="Search"], [data-search-input]'
+          );
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          } else {
+            // Fallback to command menu
+            document.dispatchEvent(new CustomEvent("toggle-command-menu"));
+          }
         },
         category: "global",
       },
@@ -63,7 +82,7 @@ export function useKeyboardShortcuts(
       // Navigation
       {
         key: "g",
-        description: "Go to Dashboard (press twice)",
+        description: "Go to... (press then d/w/e/i/a/s/l/p)",
         action: () => {},
         category: "navigation",
       },
@@ -102,17 +121,55 @@ export function useKeyboardShortcuts(
         action: () => router.push("/analytics"),
         category: "navigation",
       },
+      // List navigation
+      {
+        key: "j",
+        description: "Next item in list",
+        action: () => {
+          document.dispatchEvent(new CustomEvent("list-navigate", { detail: { direction: "down" } }));
+        },
+        category: "navigation",
+      },
+      {
+        key: "k",
+        description: "Previous item in list",
+        action: () => {
+          document.dispatchEvent(new CustomEvent("list-navigate", { detail: { direction: "up" } }));
+        },
+        category: "navigation",
+      },
       // Actions
       {
         key: "n",
+        modifiers: ["ctrl"],
         description: "New work order",
-        action: () => router.push("/"),
+        action: () => router.push("/report"),
+        category: "actions",
+      },
+      {
+        key: "n",
+        modifiers: ["meta"],
+        description: "New work order",
+        action: () => router.push("/report"),
+        category: "actions",
+      },
+      {
+        key: "n",
+        description: "New work order (no modifier)",
+        action: () => router.push("/report"),
         category: "actions",
       },
       {
         key: "r",
-        description: "Report issue (same as N)",
-        action: () => router.push("/"),
+        description: "Report issue",
+        action: () => router.push("/report"),
+        category: "actions",
+      },
+      {
+        key: "p",
+        modifiers: ["ctrl"],
+        description: "Print current page",
+        action: () => window.print(),
         category: "actions",
       },
     ],
@@ -216,8 +273,14 @@ export function useKeyboardShortcuts(
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
+    
+    // Listen for custom event to toggle help
+    const handleToggleKey = () => setHelpOpen((prev) => !prev);
+    document.addEventListener("toggle-keyboard-shortcuts", handleToggleKey);
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("toggle-keyboard-shortcuts", handleToggleKey);
       if (goToTimeout) clearTimeout(goToTimeout);
     };
   }, [handleKeyDown, goToTimeout]);
