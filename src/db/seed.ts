@@ -120,9 +120,10 @@ async function seed() {
 
   // Create users
   console.log("Creating users...");
-  const adminPin = await hashPin("1234");
-  const techPin = await hashPin("5678");
-  const operatorPin = await hashPin("0000");
+  // 6-digit PINs for improved security (1 million combinations vs 10,000 for 4-digit)
+  const adminPin = await hashPin("123456");
+  const techPin = await hashPin("567890");
+  const operatorPin = await hashPin("000000");
 
   await db.insert(schema.users).values({
     employeeId: "ADMIN-001",
@@ -280,6 +281,54 @@ async function seed() {
       isActive: true,
     })
     .returning();
+
+  // More operators for different departments
+  const [operator3] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "OP-003",
+      name: "Carlos Rodriguez",
+      email: null,
+      pin: operatorPin,
+      roleId: operatorRole.id,
+      departmentId: deptMold.id,
+      isActive: true,
+    })
+    .returning();
+
+  const [operator4] = await db
+    .insert(schema.users)
+    .values({
+      employeeId: "OP-004",
+      name: "Jennifer Lee",
+      email: null,
+      pin: operatorPin,
+      roleId: operatorRole.id,
+      departmentId: deptWhse.id,
+      isActive: true,
+    })
+    .returning();
+
+  await db.insert(schema.users).values([
+    {
+      employeeId: "OP-005",
+      name: "Marcus Thompson",
+      email: null,
+      pin: operatorPin,
+      roleId: operatorRole.id,
+      departmentId: deptAssy.id,
+      isActive: true,
+    },
+    {
+      employeeId: "OP-006",
+      name: "Amanda Chen",
+      email: null,
+      pin: operatorPin,
+      roleId: operatorRole.id,
+      departmentId: deptFclt.id,
+      isActive: true,
+    },
+  ]);
 
   // Update department managers
   await db
@@ -644,7 +693,114 @@ async function seed() {
     },
   ]);
 
-  console.log(`Created ${4} work orders`);
+  // Add resolved and closed work orders for historical data
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  await db.insert(schema.workOrders).values([
+    {
+      equipmentId: equipment1.id,
+      type: "maintenance",
+      reportedById: operator2.id,
+      assignedToId: techMold1.id,
+      departmentId: deptMold.id,
+      title: "Hydraulic fluid change",
+      description:
+        "Scheduled hydraulic fluid replacement as per maintenance schedule.",
+      priority: "medium",
+      status: "resolved",
+      resolutionNotes: "Drained old fluid, replaced filter, refilled with ISO 46 hydraulic oil.",
+      dueBy: oneDayAgo,
+      resolvedAt: new Date(oneDayAgo.getTime() - 2 * 60 * 60 * 1000),
+      createdAt: twoDaysAgo,
+      updatedAt: oneDayAgo,
+    },
+    {
+      equipmentId: equipment2.id,
+      type: "breakdown",
+      reportedById: operator3.id,
+      assignedToId: techMold1.id,
+      departmentId: deptMold.id,
+      title: "Mold ejector pin jammed",
+      description:
+        "Ejector pins not retracting properly. Parts getting stuck in mold.",
+      priority: "high",
+      status: "closed",
+      resolutionNotes: "Replaced worn ejector pins and lubricated guide bushings. Tested 50 cycles successfully.",
+      dueBy: threeDaysAgo,
+      resolvedAt: new Date(threeDaysAgo.getTime() + 4 * 60 * 60 * 1000),
+      createdAt: threeDaysAgo,
+      updatedAt: twoDaysAgo,
+    },
+    {
+      equipmentId: equipment3.id,
+      type: "breakdown",
+      reportedById: operator1.id,
+      assignedToId: techAssy1.id,
+      departmentId: deptAssy.id,
+      title: "Conveyor belt slipping",
+      description:
+        "Belt is slipping under load. Products not moving at correct speed.",
+      priority: "high",
+      status: "closed",
+      resolutionNotes: "Increased belt tension and replaced worn drive roller. Belt tracking adjusted.",
+      dueBy: oneWeekAgo,
+      resolvedAt: new Date(oneWeekAgo.getTime() + 3 * 60 * 60 * 1000),
+      createdAt: oneWeekAgo,
+      updatedAt: new Date(oneWeekAgo.getTime() + 24 * 60 * 60 * 1000),
+    },
+    {
+      equipmentId: equipment4.id,
+      type: "upgrade",
+      reportedById: assyManager.id,
+      assignedToId: techAssy1.id,
+      departmentId: deptAssy.id,
+      title: "Gripper sensor upgrade",
+      description:
+        "Install new optical sensors on gripper to improve pick accuracy.",
+      priority: "low",
+      status: "open",
+      dueBy: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+      createdAt: oneDayAgo,
+      updatedAt: oneDayAgo,
+    },
+    {
+      equipmentId: equipment5.id,
+      type: "calibration",
+      reportedById: operator1.id,
+      assignedToId: techAssy1.id,
+      departmentId: deptAssy.id,
+      title: "Spindle alignment check",
+      description:
+        "Routine spindle alignment verification for precision machining.",
+      priority: "medium",
+      status: "resolved",
+      resolutionNotes: "Runout measured at 0.0004\". Within specification. No adjustment needed.",
+      dueBy: twoDaysAgo,
+      resolvedAt: twoDaysAgo,
+      createdAt: threeDaysAgo,
+      updatedAt: twoDaysAgo,
+    },
+    {
+      equipmentId: equipment2.id,
+      type: "maintenance",
+      reportedById: operator3.id,
+      assignedToId: null,
+      departmentId: deptMold.id,
+      title: "Cooling channel inspection",
+      description:
+        "Check cooling channels for blockage. Cycle times increasing.",
+      priority: "medium",
+      status: "open",
+      dueBy: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
+      createdAt: now,
+      updatedAt: now,
+    },
+  ]);
+
+  console.log(`Created ${10} work orders`);
 
   // Create maintenance schedules
   console.log("Creating maintenance schedules...");
@@ -745,6 +901,82 @@ async function seed() {
 
   console.log(`Created ${2} equipment status logs`);
 
+  // Create vendors
+  console.log("Creating vendors...");
+  const [vendor1] = await db
+    .insert(schema.vendors)
+    .values({
+      name: "BearingWorld Inc.",
+      code: "BWI",
+      contactPerson: "Steve Martinez",
+      email: "sales@bearingworld.com",
+      phone: "+1-555-0101",
+      website: "https://bearingworld.com",
+      address: "123 Industrial Ave, Chicago, IL 60601",
+      notes: "Primary bearing supplier. Fast shipping.",
+      isActive: true,
+    })
+    .returning();
+
+  const [vendor2] = await db
+    .insert(schema.vendors)
+    .values({
+      name: "HydroTech Solutions",
+      code: "HTS",
+      contactPerson: "Patricia Wong",
+      email: "orders@hydrotech.com",
+      phone: "+1-555-0202",
+      website: "https://hydrotechsolutions.com",
+      address: "456 Fluid Dr, Houston, TX 77001",
+      notes: "Hydraulic components and filters. 30-day terms.",
+      isActive: true,
+    })
+    .returning();
+
+  const [vendor3] = await db
+    .insert(schema.vendors)
+    .values({
+      name: "Industrial Belts & Drives",
+      code: "IBD",
+      contactPerson: "Michael Davis",
+      email: "info@industrialbelts.net",
+      phone: "+1-555-0303",
+      website: "https://industrialbelts.net",
+      address: "789 Power Blvd, Detroit, MI 48201",
+      notes: "Belt and chain supplier. Bulk discounts available.",
+      isActive: true,
+    })
+    .returning();
+
+  const [vendor4] = await db
+    .insert(schema.vendors)
+    .values({
+      name: "SafetyFirst Equipment",
+      code: "SFE",
+      contactPerson: "Rachel Green",
+      email: "safety@safetyfirst.com",
+      phone: "+1-555-0404",
+      website: "https://safetyfirst.com",
+      address: "321 Guard St, Columbus, OH 43201",
+      notes: "Safety equipment and PPE. Emergency orders accepted.",
+      isActive: true,
+    })
+    .returning();
+
+  await db.insert(schema.vendors).values({
+    name: "MRO Supplies Co.",
+    code: "MRO",
+    contactPerson: "Tom Johnson",
+    email: "orders@mrosupplies.com",
+    phone: "+1-555-0505",
+    website: "https://mrosupplies.com",
+    address: "555 Maintenance Way, Cleveland, OH 44101",
+    notes: "General MRO supplies. Weekly delivery.",
+    isActive: true,
+  });
+
+  console.log(`Created ${5} vendors`);
+
   // Create spare parts (using valid partCategories enum values)
   console.log("Creating spare parts...");
   const [part1] = await db
@@ -754,8 +986,10 @@ async function seed() {
       name: "Ball Bearing 6205",
       description: "Deep groove ball bearing for motors",
       category: "mechanical",
+      vendorId: vendor1.id,
       unitCost: 12.5,
       reorderPoint: 10,
+      leadTimeDays: 3,
     })
     .returning();
 
@@ -766,8 +1000,10 @@ async function seed() {
       name: "Hydraulic Filter",
       description: "Replacement hydraulic filter for injection molders",
       category: "hydraulic",
+      vendorId: vendor2.id,
       unitCost: 45.0,
       reorderPoint: 5,
+      leadTimeDays: 7,
     })
     .returning();
 
@@ -778,8 +1014,10 @@ async function seed() {
       name: "V-Belt 38 inch",
       description: "Industrial V-belt for conveyors",
       category: "mechanical",
+      vendorId: vendor3.id,
       unitCost: 18.75,
       reorderPoint: 8,
+      leadTimeDays: 5,
     })
     .returning();
 
@@ -792,10 +1030,74 @@ async function seed() {
       category: "consumable",
       unitCost: 8.99,
       reorderPoint: 20,
+      leadTimeDays: 2,
     })
     .returning();
 
-  console.log(`Created ${4} spare parts`);
+  // Additional spare parts
+  await db.insert(schema.spareParts).values([
+    {
+      sku: "MTR-230V-1HP",
+      name: "Electric Motor 1HP 230V",
+      description: "Single phase electric motor for conveyors",
+      category: "electrical",
+      vendorId: vendor1.id,
+      unitCost: 285.0,
+      reorderPoint: 2,
+      leadTimeDays: 14,
+    },
+    {
+      sku: "SEAL-HYD-50",
+      name: "Hydraulic Seal Kit 50mm",
+      description: "Complete seal kit for 50mm hydraulic cylinders",
+      category: "hydraulic",
+      vendorId: vendor2.id,
+      unitCost: 67.5,
+      reorderPoint: 4,
+      leadTimeDays: 10,
+    },
+    {
+      sku: "GLOVES-CUT-L",
+      name: "Cut Resistant Gloves (Large)",
+      description: "Level A4 cut resistant work gloves",
+      category: "safety",
+      vendorId: vendor4.id,
+      unitCost: 15.99,
+      reorderPoint: 24,
+      leadTimeDays: 3,
+    },
+    {
+      sku: "SENS-PROX-12",
+      name: "Proximity Sensor 12mm",
+      description: "Inductive proximity sensor for automation",
+      category: "electrical",
+      unitCost: 42.0,
+      reorderPoint: 6,
+      leadTimeDays: 5,
+    },
+    {
+      sku: "CHAIN-40-10",
+      name: "Roller Chain #40 10ft",
+      description: "Standard roller chain for power transmission",
+      category: "mechanical",
+      vendorId: vendor3.id,
+      unitCost: 35.0,
+      reorderPoint: 3,
+      leadTimeDays: 4,
+    },
+    {
+      sku: "OIL-HYD-5GAL",
+      name: "Hydraulic Oil AW46 5gal",
+      description: "Anti-wear hydraulic fluid ISO 46",
+      category: "consumable",
+      vendorId: vendor2.id,
+      unitCost: 89.99,
+      reorderPoint: 4,
+      leadTimeDays: 2,
+    },
+  ]);
+
+  console.log(`Created ${10} spare parts`);
 
   // Create inventory levels
   console.log("Creating inventory levels...");
@@ -1021,12 +1323,36 @@ async function seed() {
 
   console.log("\n✅ Database seeded successfully!");
   console.log(
-    "\n📋 Default credentials (PIN: 1234 for admin/mgt, 5678 for tech, 0000 for ops):"
+    "\n📋 Default credentials (6-digit PINs for security):"
   );
-  console.log("  Molding Mgt:    MGT-MOLD");
-  console.log("  Assembly Tech:  TECH-ASSY-01");
-  console.log("  Operator:       OP-001");
-  console.log("\n  (Multiple other accounts created for each department)");
+  console.log("  ─────────────────────────────────────────────────");
+  console.log("  Role          Employee ID      PIN");
+  console.log("  ─────────────────────────────────────────────────");
+  console.log("  Admin/Mgt     ADMIN-001        123456");
+  console.log("  Admin/Mgt     MGT-MOLD         123456");
+  console.log("  Admin/Mgt     MGT-ASSY         123456");
+  console.log("  Admin/Mgt     MGT-WHSE         123456");
+  console.log("  Admin/Mgt     MGT-FCLT         123456");
+  console.log("  ─────────────────────────────────────────────────");
+  console.log("  Tech          TECH-MOLD-01     567890");
+  console.log("  Tech          TECH-MOLD-02     567890");
+  console.log("  Tech          TECH-ASSY-01     567890");
+  console.log("  Tech          TECH-WHSE-01     567890");
+  console.log("  Tech          TECH-FCLT-01     567890");
+  console.log("  ─────────────────────────────────────────────────");
+  console.log("  Operator      OP-001           000000");
+  console.log("  Operator      OP-002           000000");
+  console.log("  Operator      OP-003           000000");
+  console.log("  Operator      OP-004           000000");
+  console.log("  Operator      OP-005           000000");
+  console.log("  Operator      OP-006           000000");
+  console.log("  ─────────────────────────────────────────────────");
+  console.log("\n📊 Seeded data summary:");
+  console.log("  • 3 roles, 4 departments, 16 users");
+  console.log("  • 6 locations, 9 equipment (with sub-assets)");
+  console.log("  • 10 work orders (open, in_progress, resolved, closed)");
+  console.log("  • 5 vendors, 10 spare parts");
+  console.log("  • Maintenance schedules, checklists, inventory levels");
 }
 
 seed()
