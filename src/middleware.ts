@@ -114,10 +114,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(appUrl);
   }
 
-  // Rewrite root / to /home to serve the marketing page
-  if (pathname === "/") {
-    return NextResponse.rewrite(new URL("/home", request.url));
-  }
+
 
   return NextResponse.next();
 }

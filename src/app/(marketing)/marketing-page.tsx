@@ -119,7 +119,7 @@ export default function MarketingPageV2() {
                 size="lg"
                 className="bg-primary text-primary-foreground hover:opacity-90 rounded-none px-8 h-14 text-sm font-black uppercase tracking-widest group shadow-lg shadow-primary/10 transition-all hover:shadow-primary/20 hover:-translate-y-0.5"
               >
-                <Link href="/v2/deploy">
+                <Link href="/deploy">
                   Initialize Deployment
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
@@ -130,7 +130,7 @@ export default function MarketingPageV2() {
                 className="rounded-none px-8 h-14 text-sm font-black uppercase tracking-widest border-2 hover:bg-secondary/50 transition-colors"
                 asChild
               >
-                <Link href="/v2/features">Explore Platform</Link>
+                <Link href="/features">Explore Platform</Link>
               </Button>
             </motion.div>
           </div>
@@ -262,7 +262,7 @@ export default function MarketingPageV2() {
               Architecture & Strategy
             </h2>
             <Link
-              href="/v2/features"
+              href="/features"
               className="hidden md:flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest hover:opacity-70 transition-opacity"
             >
               Blueprint Reference <ArrowRight className="h-4 w-4" />
@@ -422,7 +422,7 @@ export default function MarketingPageV2() {
                 description="One-click serverless deployment with global edge network."
               >
                  <Button className="w-full bg-foreground text-background hover:opacity-90 font-bold uppercase tracking-wide h-10" asChild>
-                   <Link href="/v2/deploy">
+                   <Link href="/deploy">
                     <svg className="mr-2 h-3 w-3" viewBox="0 0 1155 1000" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path d="M577.344 0L1154.69 1000H0L577.344 0Z" />
                     </svg>
@@ -437,7 +437,7 @@ export default function MarketingPageV2() {
                 description="Full stack infrastructure. Database included."
               >
                 <Button className="w-full bg-[#a855f7] text-white hover:opacity-90 font-bold uppercase tracking-wide h-10" asChild>
-                  <Link href="/v2/deploy">
+                  <Link href="/deploy">
                     <span className="mr-2"></span>
                     Deploy to Railway
                   </Link>

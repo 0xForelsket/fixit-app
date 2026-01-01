@@ -232,7 +232,7 @@ export default function FeaturesPage() {
                 </ul>
                 <div className="mt-10">
                   <Button variant="outline" size="sm" className="group uppercase font-black text-[10px] tracking-widest px-6 h-10" asChild>
-                    <Link href={`/v2/deploy`} aria-label={`Learn about setup for ${feature.name}`}>
+                    <Link href={`/deploy`} aria-label={`Learn about setup for ${feature.name}`}>
                       Technical Guide <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>

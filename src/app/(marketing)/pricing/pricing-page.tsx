@@ -46,7 +46,7 @@ const plans = [
     period: "PER FACILITY",
     description: "Tailored for multi-site organizations requiring compliance and priority support.",
     cta: "Talk to Sales",
-    href: "/v2/contact",
+    href: "/contact",
     icon: Building2,
     features: [
       "Everything in Community",

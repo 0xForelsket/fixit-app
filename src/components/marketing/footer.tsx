@@ -30,12 +30,12 @@ export function MarketingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/v2/features" className="hover:text-primary transition-colors">
+                <Link href="/features" className="hover:text-primary transition-colors">
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/v2/deploy" className="hover:text-primary transition-colors">
+                <Link href="/deploy" className="hover:text-primary transition-colors">
                   Deployment
                 </Link>
               </li>
@@ -47,17 +47,17 @@ export function MarketingFooter() {
             </h4>
             <ul className="space-y-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
               <li>
-                <Link href="/v2/enterprise" className="hover:text-primary transition-colors">
+                <Link href="/enterprise" className="hover:text-primary transition-colors">
                   Enterprise
                 </Link>
               </li>
               <li>
-                <Link href="/v2/pricing" className="hover:text-primary transition-colors">
+                <Link href="/pricing" className="hover:text-primary transition-colors">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/v2/compare" className="hover:text-primary transition-colors">
+                <Link href="/compare" className="hover:text-primary transition-colors">
                   Comparison
                 </Link>
               </li>

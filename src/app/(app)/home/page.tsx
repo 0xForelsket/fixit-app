@@ -11,8 +11,8 @@ import { getUserAvatarUrl } from "@/lib/users";
 import { and, eq, like, sql } from "drizzle-orm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EquipmentGrid } from "./equipment-grid";
-import { EquipmentSearch } from "./equipment-search";
+import { EquipmentGrid } from "../equipment-grid";
+import { EquipmentSearch } from "../equipment-search";
 
 interface PageProps {
   searchParams: Promise<{ search?: string; location?: string }>;

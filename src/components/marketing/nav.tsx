@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/v2/features", label: "Features", mobile: true },
-  { href: "/v2/compare", label: "Compare", mobile: true },
-  { href: "/v2/pricing", label: "Pricing", mobile: true },
-  { href: "/v2/deploy", label: "Deploy", mobile: true },
-  { href: "/v2/enterprise", label: "Enterprise", mobile: true },
-  { href: "/v2/architecture", label: "Architecture", mobile: false },
+  { href: "/features", label: "Features", mobile: true },
+  { href: "/compare", label: "Compare", mobile: true },
+  { href: "/pricing", label: "Pricing", mobile: true },
+  { href: "/deploy", label: "Deploy", mobile: true },
+  { href: "/enterprise", label: "Enterprise", mobile: true },
+  { href: "/architecture", label: "Architecture", mobile: false },
 ];
 
 export function MarketingNav() {
@@ -25,7 +25,7 @@ export function MarketingNav() {
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/70 backdrop-blur-md">
       <div className="flex items-center justify-between px-6 py-4 md:px-12 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <Link href="/v2" className="flex items-center gap-2 group" aria-label="FixIt Home">
+          <Link href="/" className="flex items-center gap-2 group" aria-label="FixIt Home">
             <div className="bg-primary p-1.5 rounded-md group-hover:opacity-90 transition-opacity">
               <Wrench className="h-5 w-5 text-primary-foreground" />
             </div>
