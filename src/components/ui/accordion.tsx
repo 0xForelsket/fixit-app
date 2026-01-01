@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import * as React from "react";
 
 interface AccordionProps {
   children: React.ReactNode;
@@ -17,7 +17,12 @@ const AccordionContext = React.createContext<{
   toggleItem: (value: string) => void;
 } | null>(null);
 
-export function Accordion({ children, className, type = "single", collapsible = true }: AccordionProps) {
+export function Accordion({
+  children,
+  className,
+  type = "single",
+  collapsible = true,
+}: AccordionProps) {
   const [activeItems, setActiveItems] = React.useState<string[]>([]);
 
   const toggleItem = (value: string) => {
@@ -43,12 +48,23 @@ export function Accordion({ children, className, type = "single", collapsible = 
   );
 }
 
-export function AccordionItem({ value, children, className }: { value: string; children: React.ReactNode; className?: string }) {
+export function AccordionItem({
+  value,
+  children,
+  className,
+}: { value: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("border border-border rounded-xl overflow-hidden", className)}>
+    <div
+      className={cn(
+        "border border-border rounded-xl overflow-hidden",
+        className
+      )}
+    >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
-          return React.cloneElement(child as React.ReactElement<any>, { value });
+          return React.cloneElement(child as React.ReactElement<any>, {
+            value,
+          });
         }
         return child;
       })}
@@ -56,9 +72,14 @@ export function AccordionItem({ value, children, className }: { value: string; c
   );
 }
 
-export function AccordionTrigger({ children, className, value }: { children: React.ReactNode; className?: string; value?: string }) {
+export function AccordionTrigger({
+  children,
+  className,
+  value,
+}: { children: React.ReactNode; className?: string; value?: string }) {
   const context = React.useContext(AccordionContext);
-  if (!context) throw new Error("AccordionTrigger must be used within Accordion");
+  if (!context)
+    throw new Error("AccordionTrigger must be used within Accordion");
 
   const isActive = context.activeItems.includes(value!);
   const id = React.useId();
@@ -85,9 +106,14 @@ export function AccordionTrigger({ children, className, value }: { children: Rea
   );
 }
 
-export function AccordionContent({ children, className, value }: { children: React.ReactNode; className?: string; value?: string }) {
+export function AccordionContent({
+  children,
+  className,
+  value,
+}: { children: React.ReactNode; className?: string; value?: string }) {
   const context = React.useContext(AccordionContext);
-  if (!context) throw new Error("AccordionContent must be used within Accordion");
+  if (!context)
+    throw new Error("AccordionContent must be used within Accordion");
 
   const isActive = context.activeItems.includes(value!);
   // Note: ideally we'd pass the ID from trigger to content via context or prop
@@ -103,7 +129,9 @@ export function AccordionContent({ children, className, value }: { children: Rea
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           role="region"
         >
-          <div className={cn("px-6 pb-6 pt-0 text-muted-foreground", className)}>
+          <div
+            className={cn("px-6 pb-6 pt-0 text-muted-foreground", className)}
+          >
             {children}
           </div>
         </motion.div>

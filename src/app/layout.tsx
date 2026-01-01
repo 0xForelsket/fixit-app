@@ -37,9 +37,10 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
   title: "FixIt - CMMS Lite",
   description:
     "Lightweight maintenance management system for tracking equipment maintenance requests",

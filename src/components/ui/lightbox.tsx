@@ -66,7 +66,10 @@ export function LightboxImage({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className={cn("cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md", containerClassName)}
+        className={cn(
+          "cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md",
+          containerClassName
+        )}
         aria-label={`View ${alt} in full size`}
       >
         <img src={src} className={className} {...props} alt={alt} />
