@@ -121,13 +121,32 @@ export async function GET(request: Request) {
       }
     }
 
-    // Search work orders using Full Text Search
-    const workOrderResults = await db.query.workOrders.findMany({
-      where: sql`to_tsvector('english', ${workOrders.title} || ' ' || ${workOrders.description}) @@ plainto_tsquery('english', ${query})`,
-      columns: { id: true, displayId: true, title: true, status: true },
-      limit: 5,
-    });
+    // Execute database searches in parallel
+    const [workOrderResults, equipmentResults, partResults] = await Promise.all([
+      // Search work orders
+      db.query.workOrders.findMany({
+        where: sql`to_tsvector('english', ${workOrders.title} || ' ' || ${workOrders.description}) @@ plainto_tsquery('english', ${query})`,
+        columns: { id: true, displayId: true, title: true, status: true },
+        limit: 5,
+      }),
+      // Search equipment
+      db.query.equipment.findMany({
+        where: sql`to_tsvector('english', ${equipment.name} || ' ' || ${equipment.code}) @@ plainto_tsquery('english', ${query})`,
+        columns: { id: true, name: true, code: true, status: true },
+        limit: 5,
+      }),
+      // Search spare parts
+      db.query.spareParts.findMany({
+        where: or(
+          like(spareParts.name, searchPattern),
+          like(spareParts.sku, searchPattern)
+        ),
+        columns: { id: true, name: true, sku: true },
+        limit: 5,
+      }),
+    ]);
 
+    // Process Work Order Results
     for (const wo of workOrderResults) {
       // Avoid duplicates if we already found by ID
       if (!results.some((r) => r.id === `wo-${wo.id}`)) {
@@ -141,13 +160,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // Search equipment using Full Text Search
-    const equipmentResults = await db.query.equipment.findMany({
-      where: sql`to_tsvector('english', ${equipment.name} || ' ' || ${equipment.code}) @@ plainto_tsquery('english', ${query})`,
-      columns: { id: true, name: true, code: true, status: true },
-      limit: 5,
-    });
-
+    // Process Equipment Results
     for (const eq of equipmentResults) {
       results.push({
         id: `eq-${eq.id}`,
@@ -158,16 +171,7 @@ export async function GET(request: Request) {
       });
     }
 
-    // Search spare parts by name or SKU
-    const partResults = await db.query.spareParts.findMany({
-      where: or(
-        like(spareParts.name, searchPattern),
-        like(spareParts.sku, searchPattern)
-      ),
-      columns: { id: true, name: true, sku: true },
-      limit: 5,
-    });
-
+    // Process Part Results
     for (const part of partResults) {
       results.push({
         id: `part-${part.id}`,

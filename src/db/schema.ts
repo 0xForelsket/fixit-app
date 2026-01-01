@@ -201,7 +201,9 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at")
     .notNull()
     .defaultNow(),
-});
+}, (table) => ({
+  deptRoleIdx: index("users_dept_role_idx").on(table.departmentId, table.roleId),
+}));
 
 // Locations table (hierarchical)
 export const locations = pgTable("locations", {
@@ -284,6 +286,10 @@ export const equipment = pgTable(
     codeIdx: index("eq_code_idx").on(table.code),
     statusIdx: index("eq_status_idx").on(table.status),
     deptIdx: index("eq_dept_idx").on(table.departmentId),
+    locationStatusIdx: index("eq_location_status_idx").on(
+      table.locationId,
+      table.status
+    ),
     // Full Text Search Index
     searchIdx: index("eq_search_idx").using(
       "gin",
@@ -343,6 +349,11 @@ export const workOrders = pgTable(
     equipmentHistoryIdx: index("wo_equipment_history_idx").on(
       table.equipmentId,
       table.createdAt
+    ),
+    // Performance: Filter by Priority + Status (Dashboard)
+    priorityStatusIdx: index("wo_priority_status_idx").on(
+      table.priority,
+      table.status
     ),
     // Full Text Search Index
     searchIdx: index("wo_search_idx").using(

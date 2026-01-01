@@ -2,6 +2,7 @@
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { cn } from "@/lib/utils";
 import { FileIcon, ImageIcon, Loader2, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useState } from "react";
 
 interface FileUploadProps {
@@ -191,13 +192,15 @@ function PreviewList({
       {previews.map((file) => (
         <div
           key={file.id}
-          className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
+          className="group relative h-32 overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md"
         >
           {file.type.startsWith("image/") ? (
-            <img
+            <Image
               src={file.url}
               alt={file.name}
-              className="h-32 w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
             <div className="flex h-32 flex-col items-center justify-center bg-muted/50">
