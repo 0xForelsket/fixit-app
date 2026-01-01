@@ -48,7 +48,7 @@ describe("User Actions", () => {
     roleId: 1,
     roleName: "admin",
     departmentId: 1,
-    permissions: ["*"],
+    sessionVersion: 1, permissions: ["*"],
     hourlyRate: 50.0,
   };
 

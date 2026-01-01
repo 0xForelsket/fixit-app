@@ -61,7 +61,7 @@ describe("GET /api/analytics/kpis", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
     });
     vi.mocked(userHasPermission).mockReturnValue(false);
 
@@ -77,7 +77,7 @@ describe("GET /api/analytics/kpis", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(userHasPermission).mockReturnValue(true);
 
@@ -97,7 +97,7 @@ describe("GET /api/analytics/kpis", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(userHasPermission).mockReturnValue(true);
 
@@ -113,7 +113,7 @@ describe("GET /api/analytics/kpis", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(userHasPermission).mockReturnValue(true);
 

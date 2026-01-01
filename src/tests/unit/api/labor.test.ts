@@ -62,7 +62,7 @@ describe("GET /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const mockLogs = [
@@ -100,7 +100,7 @@ describe("GET /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     vi.mocked(db.query.laborLogs.findMany).mockResolvedValue([]);
@@ -143,7 +143,7 @@ describe("POST /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const request = new Request("http://localhost/api/labor", {
@@ -169,7 +169,7 @@ describe("POST /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const mockLog = {
@@ -217,7 +217,7 @@ describe("POST /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     let capturedValues: unknown;

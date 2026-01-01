@@ -121,7 +121,7 @@ describe("POST /api/scheduler/run", () => {
       roleName: "admin",
       roleId: 3,
       departmentId: 1,
-      permissions: ["system:scheduler"],
+      sessionVersion: 1, permissions: ["system:scheduler"],
       hourlyRate: 50.0,
     });
 
@@ -153,7 +153,7 @@ describe("POST /api/scheduler/run", () => {
       roleName: "admin",
       roleId: 3,
       departmentId: 1,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
       hourlyRate: 50.0,
     });
 
@@ -183,7 +183,7 @@ describe("POST /api/scheduler/run", () => {
       roleName: "tech",
       roleId: 2,
       departmentId: 1,
-      permissions: ["ticket:view", "equipment:view"],
+      sessionVersion: 1, permissions: ["ticket:view", "equipment:view"],
       hourlyRate: 25.0,
     });
 

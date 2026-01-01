@@ -65,7 +65,7 @@ describe("PATCH /api/notifications/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const request = new Request("http://localhost/api/notifications/abc", {
@@ -88,7 +88,7 @@ describe("PATCH /api/notifications/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue(undefined);
 
@@ -112,7 +112,7 @@ describe("PATCH /api/notifications/[id]", () => {
       name: "Other Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
       id: 1,
@@ -145,7 +145,7 @@ describe("PATCH /api/notifications/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
       id: 1,
@@ -181,7 +181,7 @@ describe("PATCH /api/notifications/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
       id: 1,
@@ -230,7 +230,7 @@ describe("POST /api/notifications/read-all", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const response = await POST_READ_ALL();
@@ -248,7 +248,7 @@ describe("POST /api/notifications/read-all", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.update).mockImplementation(() => {
       throw new Error("Database error");

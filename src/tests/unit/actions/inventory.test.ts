@@ -62,7 +62,7 @@ describe("Inventory Actions", () => {
     name: "Test User",
     employeeId: "TECH-001",
     roleName: "tech",
-    permissions: ["inventory:receive_stock", "inventory:use_parts"],
+    sessionVersion: 1, permissions: ["inventory:receive_stock", "inventory:use_parts"],
     roleId: 1,
     hourlyRate: 25,
   };

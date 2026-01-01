@@ -88,7 +88,7 @@ describe("GET /api/equipment/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
@@ -107,7 +107,7 @@ describe("GET /api/equipment/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const mockEquipment = {
@@ -220,7 +220,7 @@ describe("PATCH /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
@@ -249,7 +249,7 @@ describe("PATCH /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
 
     const existingEquipment = {
@@ -319,7 +319,7 @@ describe("PATCH /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
 
     const request = new Request("http://localhost/api/equipment/1", {
@@ -375,7 +375,7 @@ describe("DELETE /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
@@ -397,7 +397,7 @@ describe("DELETE /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
@@ -436,7 +436,7 @@ describe("DELETE /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,
@@ -475,7 +475,7 @@ describe("DELETE /api/equipment/[id]", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
       id: 1,

@@ -59,7 +59,7 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     const request = new Request(
@@ -88,7 +88,7 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockResolvedValue(
@@ -127,7 +127,7 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockResolvedValue(
@@ -162,7 +162,7 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockRejectedValue(
@@ -197,7 +197,7 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockResolvedValue(

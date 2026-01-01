@@ -43,7 +43,7 @@ describe("GET /api/reports/export", () => {
     name: "Admin User",
     roleName: "admin",
     roleId: 1,
-    permissions: ["*"],
+    sessionVersion: 1, permissions: ["*"],
   };
 
   const mockWorkOrders = [

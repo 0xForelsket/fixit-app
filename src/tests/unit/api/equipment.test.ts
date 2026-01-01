@@ -371,7 +371,7 @@ describe("POST /api/equipment", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
 
     const request = new Request("http://localhost/api/equipment", {
@@ -400,7 +400,7 @@ describe("POST /api/equipment", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: ["*"],
+      sessionVersion: 1, permissions: ["*"],
     });
 
     const mockEquipment = {

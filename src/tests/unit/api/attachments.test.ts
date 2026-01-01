@@ -615,7 +615,7 @@ describe("DELETE /api/attachments/[id]", () => {
       name: "Other Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
     });
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
       id: 1,

@@ -61,7 +61,7 @@ describe("Maintenance Actions", () => {
     name: "Tech User",
     employeeId: "TECH-001",
     roleName: "tech",
-    permissions: [
+    sessionVersion: 1, permissions: [
       "maintenance:create",
       "maintenance:update",
       "maintenance:delete",

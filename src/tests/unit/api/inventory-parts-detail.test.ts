@@ -377,7 +377,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       roleName: "tech",
       roleId: 2,
       departmentId: 1,
-      permissions: ["ticket:view", "equipment:view"],
+      sessionVersion: 1, permissions: ["ticket:view", "equipment:view"],
       hourlyRate: 25.0,
     });
 

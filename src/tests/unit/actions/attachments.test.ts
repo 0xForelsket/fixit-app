@@ -50,7 +50,7 @@ describe("attachments actions", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: ["ticket:view"],
+        sessionVersion: 1, permissions: ["ticket:view"],
       });
 
       const result = await createAttachment({
@@ -73,7 +73,7 @@ describe("attachments actions", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: ["ticket:view"],
+        sessionVersion: 1, permissions: ["ticket:view"],
       });
 
       const result = await createAttachment({
@@ -96,7 +96,7 @@ describe("attachments actions", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: ["ticket:view"],
+        sessionVersion: 1, permissions: ["ticket:view"],
       });
 
       const mockAttachment = {
@@ -139,7 +139,7 @@ describe("attachments actions", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: ["equipment:view"],
+        sessionVersion: 1, permissions: ["equipment:view"],
       });
 
       const mockAttachment = {
@@ -182,7 +182,7 @@ describe("attachments actions", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: ["ticket:view"],
+        sessionVersion: 1, permissions: ["ticket:view"],
       });
 
       vi.mocked(db.insert).mockReturnValue({
@@ -214,7 +214,7 @@ describe("attachments actions", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: ["ticket:view"],
+        sessionVersion: 1, permissions: ["ticket:view"],
       });
 
       const attachmentTypes = ["photo", "document", "before", "after"] as const;
