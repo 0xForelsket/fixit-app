@@ -1,6 +1,7 @@
+import { getSystemSetting } from "@/actions/settings";
 import type { WorkOrderPriority } from "@/db/schema";
 
-// SLA configuration (in hours)
+// SLA configuration (in hours) - default fallback values
 export const DEFAULT_SLA_HOURS: Record<WorkOrderPriority, number> = {
   critical: 2,
   high: 8,
@@ -8,9 +9,22 @@ export const DEFAULT_SLA_HOURS: Record<WorkOrderPriority, number> = {
   low: 72,
 };
 
-// Get SLA hours for a priority
+// Get SLA hours for a priority (sync version - uses defaults)
 export function getSlaHours(priority: WorkOrderPriority): number {
   return DEFAULT_SLA_HOURS[priority];
+}
+
+// Get SLA hours for a priority (async version - uses persisted settings)
+export async function getSlaHoursFromSettings(
+  priority: WorkOrderPriority
+): Promise<number> {
+  try {
+    const slaSettings = await getSystemSetting("sla");
+    return slaSettings[priority] ?? DEFAULT_SLA_HOURS[priority];
+  } catch {
+    // Fallback to defaults if settings can't be fetched
+    return DEFAULT_SLA_HOURS[priority];
+  }
 }
 
 // Calculate due date based on priority and creation time

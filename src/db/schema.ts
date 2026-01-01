@@ -734,6 +734,16 @@ export const workOrderTemplates = pgTable("work_order_templates", {
     .defaultNow(),
 });
 
+// System Settings table for persistent configuration
+export const systemSettings = pgTable("system_settings", {
+  key: text("key").primaryKey(),
+  value: jsonb("value").notNull(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow(),
+  updatedById: text("updated_by_id").references(() => users.id),
+});
+
 // System-wide audit logs
 export const auditLogs = pgTable(
   "audit_logs",
@@ -1179,3 +1189,26 @@ export type NewUserFavorite = typeof userFavorites.$inferInsert;
 // Work Order Templates types
 export type WorkOrderTemplate = typeof workOrderTemplates.$inferSelect;
 export type NewWorkOrderTemplate = typeof workOrderTemplates.$inferInsert;
+
+// System Settings types
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type NewSystemSetting = typeof systemSettings.$inferInsert;
+
+// System settings interface for type-safe access
+export interface SystemSettingsConfig {
+  sla: {
+    critical: number; // hours
+    high: number;
+    medium: number;
+    low: number;
+  };
+  session: {
+    idleTimeout: number; // hours
+    maxDuration: number; // hours
+  };
+  notifications: {
+    emailEnabled: boolean;
+    escalationAlerts: boolean;
+    dailySummary: boolean;
+  };
+}
