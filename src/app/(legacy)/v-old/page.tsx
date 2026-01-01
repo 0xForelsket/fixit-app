@@ -35,10 +35,7 @@ export default function MarketingPage() {
             Documentation
           </Link>
           <div className="h-4 w-[1px] bg-black/10 hidden md:block" />
-          <Link
-            href="/login"
-            className="hover:opacity-70 transition-opacity"
-          >
+          <Link href="/login" className="hover:opacity-70 transition-opacity">
             Live Demo
           </Link>
           <Button

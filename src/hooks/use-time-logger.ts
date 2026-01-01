@@ -1,5 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import type { LaborLog, User } from "@/db/schema";
+import { api } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -74,22 +75,16 @@ export function useTimeLogger({
           Math.ceil((endTime.getTime() - startTime.getTime()) / 60000)
         );
 
-        const res = await fetch("/api/labor", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            workOrderId,
-            userId,
-            startTime: startTime.toISOString(),
-            endTime: endTime.toISOString(),
-            durationMinutes,
-            hourlyRate: userHourlyRate,
-            notes,
-            isBillable: true,
-          }),
+        await api.post("/api/labor", {
+          workOrderId,
+          userId,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+          durationMinutes,
+          hourlyRate: userHourlyRate,
+          notes,
+          isBillable: true,
         });
-
-        if (!res.ok) throw new Error("Failed to save time entry");
 
         localStorage.removeItem(`timer-${workOrderId}`);
         setIsRunning(false);
@@ -119,22 +114,16 @@ export function useTimeLogger({
       setSaving(true);
       try {
         const now = new Date();
-        const res = await fetch("/api/labor", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            workOrderId,
-            userId,
-            startTime: now.toISOString(),
-            endTime: now.toISOString(),
-            durationMinutes: minutes,
-            hourlyRate: userHourlyRate,
-            notes,
-            isBillable: true,
-          }),
+        await api.post("/api/labor", {
+          workOrderId,
+          userId,
+          startTime: now.toISOString(),
+          endTime: now.toISOString(),
+          durationMinutes: minutes,
+          hourlyRate: userHourlyRate,
+          notes,
+          isBillable: true,
         });
-
-        if (!res.ok) throw new Error("Failed to save time entry");
 
         router.refresh();
         toast({
@@ -162,8 +151,7 @@ export function useTimeLogger({
       if (!confirm("Delete this time entry?")) return;
 
       try {
-        const res = await fetch(`/api/labor/${logId}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Failed to delete");
+        await api.delete(`/api/labor/${logId}`);
         router.refresh();
         toast({
           title: "Entry Deleted",

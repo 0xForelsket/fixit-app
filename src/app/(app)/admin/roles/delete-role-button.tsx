@@ -43,7 +43,11 @@ export function DeleteRoleButton({
       size="icon"
       onClick={handleDelete}
       disabled={disabled || isDeleting}
-      aria-label={disabled ? `Cannot delete ${roleName}: users are assigned` : `Delete ${roleName} role`}
+      aria-label={
+        disabled
+          ? `Cannot delete ${roleName}: users are assigned`
+          : `Delete ${roleName} role`
+      }
       className="rounded-xl hover:bg-danger-500 hover:text-white transition-all disabled:opacity-50"
       title={
         disabled

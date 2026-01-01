@@ -711,7 +711,8 @@ async function seed() {
         "Scheduled hydraulic fluid replacement as per maintenance schedule.",
       priority: "medium",
       status: "resolved",
-      resolutionNotes: "Drained old fluid, replaced filter, refilled with ISO 46 hydraulic oil.",
+      resolutionNotes:
+        "Drained old fluid, replaced filter, refilled with ISO 46 hydraulic oil.",
       dueBy: oneDayAgo,
       resolvedAt: new Date(oneDayAgo.getTime() - 2 * 60 * 60 * 1000),
       createdAt: twoDaysAgo,
@@ -728,7 +729,8 @@ async function seed() {
         "Ejector pins not retracting properly. Parts getting stuck in mold.",
       priority: "high",
       status: "closed",
-      resolutionNotes: "Replaced worn ejector pins and lubricated guide bushings. Tested 50 cycles successfully.",
+      resolutionNotes:
+        "Replaced worn ejector pins and lubricated guide bushings. Tested 50 cycles successfully.",
       dueBy: threeDaysAgo,
       resolvedAt: new Date(threeDaysAgo.getTime() + 4 * 60 * 60 * 1000),
       createdAt: threeDaysAgo,
@@ -745,7 +747,8 @@ async function seed() {
         "Belt is slipping under load. Products not moving at correct speed.",
       priority: "high",
       status: "closed",
-      resolutionNotes: "Increased belt tension and replaced worn drive roller. Belt tracking adjusted.",
+      resolutionNotes:
+        "Increased belt tension and replaced worn drive roller. Belt tracking adjusted.",
       dueBy: oneWeekAgo,
       resolvedAt: new Date(oneWeekAgo.getTime() + 3 * 60 * 60 * 1000),
       createdAt: oneWeekAgo,
@@ -777,7 +780,8 @@ async function seed() {
         "Routine spindle alignment verification for precision machining.",
       priority: "medium",
       status: "resolved",
-      resolutionNotes: "Runout measured at 0.0004\". Within specification. No adjustment needed.",
+      resolutionNotes:
+        'Runout measured at 0.0004". Within specification. No adjustment needed.',
       dueBy: twoDaysAgo,
       resolvedAt: twoDaysAgo,
       createdAt: threeDaysAgo,
@@ -1322,9 +1326,7 @@ async function seed() {
   console.log(`Created ${3} work order logs`);
 
   console.log("\n✅ Database seeded successfully!");
-  console.log(
-    "\n📋 Default credentials (6-digit PINs for security):"
-  );
+  console.log("\n📋 Default credentials (6-digit PINs for security):");
   console.log("  ─────────────────────────────────────────────────");
   console.log("  Role          Employee ID      PIN");
   console.log("  ─────────────────────────────────────────────────");

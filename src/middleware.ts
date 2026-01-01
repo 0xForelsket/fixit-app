@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { type NextRequest, NextResponse } from "next/server";
 
 async function getRoleFromSession(token: string): Promise<string | null> {
   const secret = process.env.SESSION_SECRET;
@@ -87,15 +87,28 @@ export async function middleware(request: NextRequest) {
   // Root domain vs App Subdomain logic
   const isAppSubdomain = hostname.startsWith("app.");
   const isTunnel = hostname.endsWith(".trycloudflare.com");
+  const isLocalhost =
+    hostname.startsWith("localhost:") || hostname === "localhost";
 
   // Marketing paths that should be served from the root domain
-  const MARKETING_PATHS = ["/", "/features", "/pricing", "/deploy", "/enterprise", "/architecture"];
+  const MARKETING_PATHS = [
+    "/",
+    "/features",
+    "/pricing",
+    "/deploy",
+    "/enterprise",
+    "/architecture",
+  ];
   const isMarketingPath = MARKETING_PATHS.includes(pathname);
 
   // Consider it "App Context" if:
   // 1. We're on the app. subdomain
   // 2. We're on a tunnel AND it's not a marketing path
-  const isAppContext = isAppSubdomain || (isTunnel && !isMarketingPath);
+  // 3. We're on localhost AND it's not a marketing path (for E2E tests)
+  const isAppContext =
+    isAppSubdomain ||
+    (isTunnel && !isMarketingPath) ||
+    (isLocalhost && !isMarketingPath);
 
   // public/static files bypass
   if (
@@ -113,11 +126,15 @@ export async function middleware(request: NextRequest) {
 
     // If on app subdomain, / redirects to /dashboard (or /login)
     // If on tunnel, we're only in this block if pathname !== "/" (due to isAppContext logic)
-    if (pathname === "/" || pathname === "/login" || pathname === "/dashboard") {
+    if (
+      pathname === "/" ||
+      pathname === "/login" ||
+      pathname === "/dashboard"
+    ) {
       if (hasValidSession) {
         let targetPath = "/dashboard";
         const sessionToken = request.cookies.get(SESSION_COOKIE)?.value;
-        
+
         if (sessionToken) {
           const role = await getRoleFromSession(sessionToken);
           if (role === "admin") {
@@ -149,7 +166,11 @@ export async function middleware(request: NextRequest) {
 
   // Marketing Context (isAppContext is false)
   // Only handle redirects if accessed via standard localhost root
-  if (!isTunnel && (pathname === "/login" || pathname === "/dashboard")) {
+  if (
+    !isTunnel &&
+    !isLocalhost &&
+    (pathname === "/login" || pathname === "/dashboard")
+  ) {
     const appUrl = request.nextUrl.clone();
     appUrl.hostname = `app.${hostname.split(":")[0]}`;
     if (hostname.includes(":")) {

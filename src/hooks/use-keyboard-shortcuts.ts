@@ -126,7 +126,9 @@ export function useKeyboardShortcuts(
         key: "j",
         description: "Next item in list",
         action: () => {
-          document.dispatchEvent(new CustomEvent("list-navigate", { detail: { direction: "down" } }));
+          document.dispatchEvent(
+            new CustomEvent("list-navigate", { detail: { direction: "down" } })
+          );
         },
         category: "navigation",
       },
@@ -134,7 +136,9 @@ export function useKeyboardShortcuts(
         key: "k",
         description: "Previous item in list",
         action: () => {
-          document.dispatchEvent(new CustomEvent("list-navigate", { detail: { direction: "up" } }));
+          document.dispatchEvent(
+            new CustomEvent("list-navigate", { detail: { direction: "up" } })
+          );
         },
         category: "navigation",
       },
@@ -273,14 +277,17 @@ export function useKeyboardShortcuts(
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
-    
+
     // Listen for custom event to toggle help
     const handleToggleKey = () => setHelpOpen((prev) => !prev);
     document.addEventListener("toggle-keyboard-shortcuts", handleToggleKey);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("toggle-keyboard-shortcuts", handleToggleKey);
+      document.removeEventListener(
+        "toggle-keyboard-shortcuts",
+        handleToggleKey
+      );
       if (goToTimeout) clearTimeout(goToTimeout);
     };
   }, [handleKeyDown, goToTimeout]);

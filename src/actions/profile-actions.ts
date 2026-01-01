@@ -19,9 +19,18 @@ const updateProfileSchema = z.object({
 
 const changePinSchema = z
   .object({
-    currentPin: z.string().min(4, "PIN must be at least 4 digits").regex(/^\d+$/, "PIN must contain only digits"),
-    newPin: z.string().min(6, "New PIN must be at least 6 digits").regex(/^\d+$/, "PIN must contain only digits"),
-    confirmPin: z.string().min(6, "PIN must be at least 6 digits").regex(/^\d+$/, "PIN must contain only digits"),
+    currentPin: z
+      .string()
+      .min(4, "PIN must be at least 4 digits")
+      .regex(/^\d+$/, "PIN must contain only digits"),
+    newPin: z
+      .string()
+      .min(6, "New PIN must be at least 6 digits")
+      .regex(/^\d+$/, "PIN must contain only digits"),
+    confirmPin: z
+      .string()
+      .min(6, "PIN must be at least 6 digits")
+      .regex(/^\d+$/, "PIN must contain only digits"),
   })
   .refine((data) => data.newPin === data.confirmPin, {
     message: "New PINs don't match",

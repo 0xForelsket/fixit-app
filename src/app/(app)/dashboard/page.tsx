@@ -318,7 +318,7 @@ export default async function DashboardPage() {
   // If user is not a technician/admin, redirect them to the operator home screen
   // This helps ensure users end up on the correct mobile-optimized root page
   if (!hasPermission(user.permissions, PERMISSIONS.TICKET_VIEW_ALL)) {
-    redirect("/");
+    redirect("/home");
   }
 
   return (

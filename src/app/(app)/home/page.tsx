@@ -55,42 +55,49 @@ export default async function HomePage({ searchParams }: PageProps) {
       : undefined;
 
   // Parallelize all data fetching
-  const [avatarUrl, equipmentList, locationList, unreadResult, myWorkOrders] = await Promise.all([
-    getUserAvatarUrl(user.id),
-    db.query.equipment.findMany({
-      where: whereClause,
-      orderBy: (equipment, { asc }) => [asc(equipment.name)],
-      with: {
-        location: true,
-        children: {
-          columns: { id: true },
-        },
-      },
-    }),
-    db.query.locations.findMany({
-      orderBy: (locations, { asc }) => [asc(locations.name)],
-    }),
-    db.select({ count: sql<number>`count(*)` })
-      .from(notifications)
-      .where(and(eq(notifications.userId, user.id), eq(notifications.isRead, false))),
-    db.query.workOrders.findMany({
-      where: and(
-        eq(workOrders.reportedById, user.id),
-        sql`${workOrders.status} != 'closed'`
-      ),
-      limit: 5,
-      orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
-      with: {
-        equipment: {
-          with: {
-            location: true,
+  const [avatarUrl, equipmentList, locationList, unreadResult, myWorkOrders] =
+    await Promise.all([
+      getUserAvatarUrl(user.id),
+      db.query.equipment.findMany({
+        where: whereClause,
+        orderBy: (equipment, { asc }) => [asc(equipment.name)],
+        with: {
+          location: true,
+          children: {
+            columns: { id: true },
           },
         },
-        reportedBy: true,
-        assignedTo: true,
-      },
-    }),
-  ]);
+      }),
+      db.query.locations.findMany({
+        orderBy: (locations, { asc }) => [asc(locations.name)],
+      }),
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(notifications)
+        .where(
+          and(
+            eq(notifications.userId, user.id),
+            eq(notifications.isRead, false)
+          )
+        ),
+      db.query.workOrders.findMany({
+        where: and(
+          eq(workOrders.reportedById, user.id),
+          sql`${workOrders.status} != 'closed'`
+        ),
+        limit: 5,
+        orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
+        with: {
+          equipment: {
+            with: {
+              location: true,
+            },
+          },
+          reportedBy: true,
+          assignedTo: true,
+        },
+      }),
+    ]);
 
   const unreadCount = Number(unreadResult[0]?.count || 0);
 
