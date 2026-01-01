@@ -1,3 +1,4 @@
+import { type BreadcrumbItem, Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -29,6 +30,7 @@ interface EntityHeaderProps {
     href: string;
     label?: string; // e.g., "Back to Work Orders"
   };
+  breadcrumbs?: BreadcrumbItem[];
   meta?: ReactNode;
   actions?: ReactNode;
 }
@@ -39,45 +41,50 @@ export function EntityHeader({
   badge,
   statusBadge,
   parentLink,
+  breadcrumbs,
   meta,
   actions,
 }: EntityHeaderProps) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex items-center gap-3 min-w-0">
-        <Link
-          href={parentLink.href}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-primary hover:border-primary/50 transition-all shadow-sm active:scale-95"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-foreground truncate font-serif-brand">
-              {title}
-            </h1>
-            {badge && (
-              <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground">
-                {badge}
-              </span>
-            )}
-            {subtitle && (
-              <span className="text-lg text-muted-foreground/70 font-bold ml-2 hidden sm:inline-block">
-                {subtitle}
-              </span>
+    <div className="space-y-2">
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <Breadcrumbs items={breadcrumbs} />
+      )}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link
+            href={parentLink.href}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground hover:text-primary hover:border-primary/50 transition-all shadow-sm active:scale-95"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-black tracking-tight text-foreground truncate font-serif-brand">
+                {title}
+              </h1>
+              {badge && (
+                <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground">
+                  {badge}
+                </span>
+              )}
+              {subtitle && (
+                <span className="text-lg text-muted-foreground/70 font-bold ml-2 hidden sm:inline-block">
+                  {subtitle}
+                </span>
+              )}
+            </div>
+            {meta && (
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                {meta}
+              </div>
             )}
           </div>
-          {meta && (
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              {meta}
-            </div>
-          )}
         </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {actions}
-        {statusBadge}
+        <div className="flex items-center gap-2">
+          {actions}
+          {statusBadge}
+        </div>
       </div>
     </div>
   );

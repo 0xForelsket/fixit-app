@@ -5,6 +5,7 @@ import {
   deleteWorkOrderTemplate,
   updateWorkOrderTemplate,
 } from "@/actions/workOrderTemplates";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import type { Department, User, WorkOrderTemplate } from "@/db/schema";
 import { workOrderPriorities, workOrderTypes } from "@/db/schema";
@@ -204,38 +205,48 @@ export function TemplateForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button type="button" variant="ghost" size="icon" asChild>
-            <Link href="/maintenance/templates">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {isNew ? "New Template" : "Edit Template"}
-            </h1>
-            <p className="text-muted-foreground">
-              {isNew ? "Create a reusable work order template" : template?.name}
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {!isNew && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={saving}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+      <div className="space-y-2">
+        <Breadcrumbs
+          items={[
+            { label: "Templates", href: "/maintenance/templates" },
+            { label: isNew ? "New" : template?.name || "Edit" },
+          ]}
+        />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button type="button" variant="ghost" size="icon" asChild>
+              <Link href="/maintenance/templates">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
             </Button>
-          )}
-          <Button type="submit" disabled={saving}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save Template"}
-          </Button>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                {isNew ? "New Template" : "Edit Template"}
+              </h1>
+              <p className="text-muted-foreground">
+                {isNew
+                  ? "Create a reusable work order template"
+                  : template?.name}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {!isNew && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={saving}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            )}
+            <Button type="submit" disabled={saving}>
+              <Save className="mr-2 h-4 w-4" />
+              {saving ? "Saving..." : "Save Template"}
+            </Button>
+          </div>
         </div>
       </div>
 

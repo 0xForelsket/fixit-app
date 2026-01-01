@@ -9,6 +9,7 @@ import { TimeLogger } from "@/components/time-logger";
 import { ActivityLog } from "@/components/ui/activity-log";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { PrintButton } from "@/components/work-orders/print-button";
 import { WorkOrderAttachments } from "@/components/work-orders/work-order-attachments";
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { WorkOrderPartsManager } from "@/components/work-orders/work-order-parts-manager";
@@ -40,7 +41,6 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MobileWorkOrderView } from "./mobile-work-order-view";
-import { PrintButton } from "@/components/work-orders/print-button";
 import { WorkOrderActions } from "./work-order-actions";
 import { WorkOrderTabs } from "./work-order-tabs";
 
@@ -293,6 +293,10 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
           title={workOrder.title}
           badge={`#${workOrder.id}`}
           parentLink={{ href: "/maintenance/work-orders", label: "Back" }}
+          breadcrumbs={[
+            { label: "Work Orders", href: "/maintenance/work-orders" },
+            { label: `#${workOrder.id}` },
+          ]}
           meta={
             <>
               <User className="h-3 w-3" />

@@ -135,6 +135,18 @@ export default async function EquipmentPage({ params }: PageProps) {
         title={equipmentItem.name}
         badge={equipmentItem.code}
         parentLink={{ href: "/assets/equipment", label: "Back to Equipment" }}
+        breadcrumbs={[
+          { label: "Equipment", href: "/assets/equipment" },
+          ...(equipmentItem.parent
+            ? [
+                {
+                  label: equipmentItem.parent.name,
+                  href: `/equipment/${equipmentItem.parent.code}`,
+                },
+              ]
+            : []),
+          { label: equipmentItem.name },
+        ]}
         meta={
           <>
             <MapPin className="h-3 w-3" />
