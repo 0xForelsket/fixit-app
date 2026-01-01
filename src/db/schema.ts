@@ -185,6 +185,8 @@ export const users = sqliteTable("users", {
   preferences: text("preferences", { mode: "json" }).$type<UserPreferences>(),
   failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
   lockedUntil: integer("locked_until", { mode: "timestamp" }),
+  // Session version - increment when PIN changes to invalidate all existing sessions
+  sessionVersion: integer("session_version").notNull().default(1),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

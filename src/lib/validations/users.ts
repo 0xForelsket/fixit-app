@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const userRoleSchema = z.enum(["operator", "tech", "admin"]);
 
-// PIN must be 4-20 digits only
+// PIN must be 6-20 digits only (6 digits = 1,000,000 combinations for brute-force protection)
 const pinSchema = z
   .string()
-  .min(4, "PIN must be at least 4 digits")
+  .min(6, "PIN must be at least 6 digits")
   .max(20, "PIN is too long")
   .regex(/^\d+$/, "PIN must contain only digits");
 
