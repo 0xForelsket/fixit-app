@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import type { ChecklistItemStatus } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Clock, Info } from "lucide-react";
-import { useState } from "react";
+import { startTransition, useOptimistic } from "react";
 
 interface ChecklistItem {
   id: number;
@@ -27,31 +27,39 @@ interface WorkOrderChecklistProps {
 
 export function WorkOrderChecklist({
   workOrderId,
-  items: initialItems,
+  items,
 }: WorkOrderChecklistProps) {
-  const [items, setItems] = useState(initialItems);
-  const [updating, setUpdating] = useState<number | null>(null);
+  const [optimisticItems, setOptimisticItem] = useOptimistic(
+    items,
+    (state, updatedItem: { id: number; status: ChecklistItemStatus }) =>
+      state.map((item) =>
+        item.id === updatedItem.id
+          ? { ...item, status: updatedItem.status }
+          : item
+      )
+  );
   const { toast } = useToast();
 
-  const totalSteps = items.length;
-  const completedSteps = items.filter((i) => i.status === "completed").length;
+  const totalSteps = optimisticItems.length;
+  const completedSteps = optimisticItems.filter(
+    (i) => i.status === "completed"
+  ).length;
   const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
 
   const toggleItem = async (item: ChecklistItem) => {
     const newStatus: ChecklistItemStatus =
       item.status === "completed" ? "pending" : "completed";
 
-    setUpdating(item.id);
+    startTransition(() => {
+      setOptimisticItem({ id: item.id, status: newStatus });
+    });
+
     try {
       const result = await updateChecklistItem(item.id, workOrderId, {
         status: newStatus,
       });
 
-      if (result.success) {
-        setItems((prev) =>
-          prev.map((i) => (i.id === item.id ? { ...i, status: newStatus } : i))
-        );
-      } else {
+      if (!result.success) {
         toast({
           title: "Update failed",
           description: result.error || "Could not update checklist item",
@@ -64,8 +72,6 @@ export function WorkOrderChecklist({
         description: "Network error occurred",
         variant: "destructive",
       });
-    } finally {
-      setUpdating(null);
     }
   };
 
@@ -103,7 +109,7 @@ export function WorkOrderChecklist({
 
       {/* Checklist Items */}
       <div className="rounded-xl border bg-card shadow-sm divide-y">
-        {items.map((item) => (
+        {optimisticItems.map((item) => (
           <div
             key={item.id}
             className={cn(
@@ -116,14 +122,12 @@ export function WorkOrderChecklist({
             <div className="pt-1">
               <button
                 type="button"
-                disabled={updating === item.id}
                 onClick={() => toggleItem(item)}
                 className={cn(
                   "h-6 w-6 rounded-lg border-2 flex items-center justify-center transition-all",
                   item.status === "completed"
                     ? "bg-primary-500 border-primary-500 text-white"
-                    : "border-slate-300 bg-white hover:border-primary-500",
-                  updating === item.id && "opacity-50 cursor-wait"
+                    : "border-slate-300 bg-white hover:border-primary-500"
                 )}
               >
                 {item.status === "completed" ? (

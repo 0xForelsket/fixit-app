@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Loader2, Printer } from "lucide-react";
-import { useState } from "react";
 // Remove static imports to avoid SSR/Turbopack issues
 import QRCode from "qrcode";
+import { useState } from "react";
 
 interface PrintButtonProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

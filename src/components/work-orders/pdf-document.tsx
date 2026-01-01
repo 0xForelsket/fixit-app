@@ -1,6 +1,13 @@
 "use client";
 
-import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import {
+  Document,
+  Image,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   page: {
@@ -172,7 +179,12 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f1f1f4",
   },
   partText: { flex: 1, fontSize: 9 },
-  partQty: { width: 60, fontSize: 9, textAlign: "right", fontFamily: "Helvetica-Bold" },
+  partQty: {
+    width: 60,
+    fontSize: 9,
+    textAlign: "right",
+    fontFamily: "Helvetica-Bold",
+  },
   footer: {
     position: "absolute",
     bottom: 30,
@@ -243,7 +255,15 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
         <View style={styles.infoGrid}>
           <View style={styles.gridBox}>
             <Text style={styles.boxLabel}>Priority</Text>
-            <Text style={[styles.boxValue, { color: workOrder.priority === 'critical' ? '#ef4444' : '#09090b' }]}>
+            <Text
+              style={[
+                styles.boxValue,
+                {
+                  color:
+                    workOrder.priority === "critical" ? "#ef4444" : "#09090b",
+                },
+              ]}
+            >
               {workOrder.priority}
             </Text>
           </View>
@@ -253,20 +273,28 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
           </View>
           <View style={[styles.gridBox, styles.gridBoxLast]}>
             <Text style={styles.boxLabel}>Department</Text>
-            <Text style={styles.boxValue}>{workOrder.department?.name || "General"}</Text>
+            <Text style={styles.boxValue}>
+              {workOrder.department?.name || "General"}
+            </Text>
           </View>
 
           <View style={styles.gridBox}>
             <Text style={styles.boxLabel}>Reported By</Text>
-            <Text style={styles.boxValue}>{workOrder.reportedBy?.name || "Unknown"}</Text>
+            <Text style={styles.boxValue}>
+              {workOrder.reportedBy?.name || "Unknown"}
+            </Text>
           </View>
           <View style={styles.gridBox}>
             <Text style={styles.boxLabel}>Assigned To</Text>
-            <Text style={styles.boxValue}>{workOrder.assignedTo?.name || "Unassigned"}</Text>
+            <Text style={styles.boxValue}>
+              {workOrder.assignedTo?.name || "Unassigned"}
+            </Text>
           </View>
           <View style={[styles.gridBox, styles.gridBoxLast]}>
             <Text style={styles.boxLabel}>Target Date</Text>
-            <Text style={styles.boxValue}>{formatDate(workOrder.dueBy) || "No deadline"}</Text>
+            <Text style={styles.boxValue}>
+              {formatDate(workOrder.dueBy) || "No deadline"}
+            </Text>
           </View>
 
           <View style={styles.gridBoxWide}>
@@ -294,8 +322,16 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
             <Text style={styles.sectionTitle}>Safety & Task Checklist</Text>
             {workOrder.checklistItems.map((item: any, i: number) => (
               <View key={i} style={styles.checklistRow}>
-                <Text style={[styles.checkIcon, { color: item.status === 'completed' ? '#10b981' : '#d4d4d8' }]}>
-                  {item.status === 'completed' ? "[X]" : "[ ]"}
+                <Text
+                  style={[
+                    styles.checkIcon,
+                    {
+                      color:
+                        item.status === "completed" ? "#10b981" : "#d4d4d8",
+                    },
+                  ]}
+                >
+                  {item.status === "completed" ? "[X]" : "[ ]"}
                 </Text>
                 <Text style={styles.checkText}>{item.description}</Text>
                 <View style={styles.checkStatus}>
@@ -328,10 +364,12 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
         )}
 
         {/* Resolution */}
-        {workOrder.status === 'resolved' && workOrder.resolutionNotes && (
+        {workOrder.status === "resolved" && workOrder.resolutionNotes && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Resolution Log</Text>
-            <View style={[styles.descriptionBox, { borderLeftColor: "#10b981" }]}>
+            <View
+              style={[styles.descriptionBox, { borderLeftColor: "#10b981" }]}
+            >
               <Text style={{ fontSize: 10 }}>{workOrder.resolutionNotes}</Text>
               <Text style={{ fontSize: 7, color: "#71717a", marginTop: 5 }}>
                 Closed at: {formatDate(workOrder.resolvedAt)}
@@ -343,7 +381,11 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
         {/* Footer */}
         <View style={styles.footer}>
           <Text>Official Document - FixIt System</Text>
-          <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+          <Text
+            render={({ pageNumber, totalPages }) =>
+              `Page ${pageNumber} of ${totalPages}`
+            }
+          />
           <Text>Printed: {formatDate(new Date())}</Text>
         </View>
       </Page>
