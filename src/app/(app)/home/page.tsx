@@ -29,9 +29,6 @@ export default async function HomePage({ searchParams }: PageProps) {
     redirect("/dashboard");
   }
 
-  // Get avatar URL
-  const avatarUrl = await getUserAvatarUrl(user.id);
-
   // Operator interface logic
   const params = await searchParams;
   const search = params.search || "";
@@ -57,49 +54,92 @@ export default async function HomePage({ searchParams }: PageProps) {
         : conditions[0]
       : undefined;
 
-  const equipmentList = await db.query.equipment.findMany({
-    where: whereClause,
-    orderBy: (equipment, { asc }) => [asc(equipment.name)],
-    with: {
-      location: true,
-      children: {
-        columns: { id: true },
+  // Parallelize all data fetching
+  const [avatarUrl, equipmentList, locationList, unreadResult, myWorkOrders] = await Promise.all([
+    getUserAvatarUrl(user.id),
+    db.query.equipment.findMany({
+      where: whereClause,
+      orderBy: (equipment, { asc }) => [asc(equipment.name)],
+      columns: {
+        id: true,
+        name: true,
+        code: true,
+        status: true,
+        parentId: true,
+        locationId: true,
       },
-    },
-  });
-
-  // Get location list for filtering
-  const locationList = await db.query.locations.findMany({
-    orderBy: (locations, { asc }) => [asc(locations.name)],
-  });
-
-  // Get unread notification count
-  const unreadCount = await db
-    .select({ count: notifications.id })
-    .from(notifications)
-    .where(
-      and(eq(notifications.userId, user.id), eq(notifications.isRead, false))
-    )
-    .then((rows) => rows.length);
-
-  // Fetch operator's active requests
-  const myWorkOrders = await db.query.workOrders.findMany({
-    where: and(
-      eq(workOrders.reportedById, user.id),
-      sql`${workOrders.status} != 'closed'`
-    ),
-    limit: 5,
-    orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
-    with: {
-      equipment: {
-        with: {
-          location: true,
+      with: {
+        location: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        children: {
+          columns: { id: true },
         },
       },
-      reportedBy: true,
-      assignedTo: true,
-    },
-  });
+    }),
+    db.query.locations.findMany({
+      orderBy: (locations, { asc }) => [asc(locations.name)],
+      columns: {
+        id: true,
+        name: true,
+      },
+    }),
+    db.select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(eq(notifications.userId, user.id), eq(notifications.isRead, false))),
+    db.query.workOrders.findMany({
+      where: and(
+        eq(workOrders.reportedById, user.id),
+        sql`${workOrders.status} != 'closed'`
+      ),
+      limit: 5,
+      orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
+      columns: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        createdAt: true,
+        equipmentId: true,
+        reportedById: true,
+        assignedToId: true,
+      },
+      with: {
+        equipment: {
+          columns: {
+            id: true,
+            name: true,
+            locationId: true,
+          },
+          with: {
+            location: {
+              columns: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        reportedBy: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+        assignedTo: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  const unreadCount = Number(unreadResult[0]?.count || 0);
 
   return (
     <div className="min-h-screen bg-background/50 industrial-grid pb-20 lg:pb-0 transition-colors duration-500">

@@ -88,8 +88,24 @@ async function getEquipment(params: SearchParams, user: SessionUser | null) {
   return db.query.equipment.findMany({
     where: conditions.length > 0 ? and(...conditions) : undefined,
     orderBy: [orderBy],
+    columns: {
+      id: true,
+      code: true,
+      name: true,
+      status: true,
+      createdAt: true,
+      locationId: true,
+      ownerId: true,
+      typeId: true,
+      departmentId: true,
+    },
     with: {
-      location: true,
+      location: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
       owner: {
         columns: {
           id: true,
@@ -97,8 +113,18 @@ async function getEquipment(params: SearchParams, user: SessionUser | null) {
         },
       },
       type: {
+        columns: {
+          id: true,
+          name: true,
+          categoryId: true,
+        },
         with: {
-          category: true,
+          category: {
+            columns: {
+              id: true,
+              label: true,
+            },
+          },
         },
       },
     },

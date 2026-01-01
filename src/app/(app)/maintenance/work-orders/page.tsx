@@ -123,14 +123,45 @@ async function getWorkOrders(params: SearchParams, user: SessionUser | null) {
     limit: PAGE_SIZE,
     offset,
     orderBy: orderBy,
+    columns: {
+      id: true,
+      title: true,
+      status: true,
+      priority: true,
+      createdAt: true,
+      dueBy: true,
+      equipmentId: true,
+      reportedById: true,
+      assignedToId: true,
+    },
     with: {
       equipment: {
+        columns: {
+          id: true,
+          name: true,
+          locationId: true,
+        },
         with: {
-          location: true,
+          location: {
+            columns: {
+              id: true,
+              name: true,
+            },
+          },
         },
       },
-      reportedBy: true,
-      assignedTo: true,
+      reportedBy: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
+      assignedTo: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
