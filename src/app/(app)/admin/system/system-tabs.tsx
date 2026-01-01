@@ -9,8 +9,9 @@ import {
   PillTabsTrigger,
 } from "@/components/ui/pill-tabs";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
-import { Cog, QrCode, Shield, Upload, Users } from "lucide-react";
+import { Building2, Cog, QrCode, Shield, Upload, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { DepartmentsTab } from "./tabs/departments-tab";
 import { ImportTab } from "./tabs/import-tab";
 import { QrCodesTab } from "./tabs/qr-codes-tab";
 import { RolesTab } from "./tabs/roles-tab";
@@ -47,6 +48,22 @@ interface Equipment {
   owner: { name: string; employeeId: string } | null;
 }
 
+interface Department {
+  id: number;
+  name: string;
+  code: string;
+  description: string | null;
+  managerId: number | null;
+  managerName: string | null;
+  memberCount: number;
+  equipmentCount: number;
+}
+
+interface UserForSelect {
+  id: number;
+  name: string;
+}
+
 interface SystemTabsProps {
   users: User[];
   userStats: {
@@ -64,6 +81,9 @@ interface SystemTabsProps {
   };
   equipment: Equipment[];
   baseUrl: string;
+  departments: Department[];
+  usersForSelect: UserForSelect[];
+  canEditDepartments: boolean;
 }
 
 export function SystemTabs({
@@ -73,6 +93,9 @@ export function SystemTabs({
   roleStats,
   equipment,
   baseUrl,
+  departments,
+  usersForSelect,
+  canEditDepartments,
 }: SystemTabsProps) {
   const [activeTab, setActiveTab] = useState("users");
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
@@ -86,7 +109,14 @@ export function SystemTabs({
     const hash = window.location.hash.slice(1);
     if (
       hash &&
-      ["users", "roles", "settings", "qr-codes", "import"].includes(hash)
+      [
+        "users",
+        "roles",
+        "departments",
+        "settings",
+        "qr-codes",
+        "import",
+      ].includes(hash)
     ) {
       setActiveTab(hash);
     }
@@ -115,9 +145,20 @@ export function SystemTabs({
     PERMISSIONS.EQUIPMENT_CREATE
   );
 
+  const canViewDepartments = hasPermission(
+    userPermissions,
+    PERMISSIONS.USER_VIEW
+  );
+
   const tabs = [
     { id: "users", label: "Users", icon: Users, visible: canViewUsers },
     { id: "roles", label: "Roles", icon: Shield, visible: canViewRoles },
+    {
+      id: "departments",
+      label: "Departments",
+      icon: Building2,
+      visible: canViewDepartments,
+    },
     { id: "settings", label: "Settings", icon: Cog, visible: canViewSettings },
     {
       id: "qr-codes",
@@ -155,6 +196,14 @@ export function SystemTabs({
 
         <PillTabsContent value="roles">
           <RolesTab roles={roles} stats={roleStats} />
+        </PillTabsContent>
+
+        <PillTabsContent value="departments">
+          <DepartmentsTab
+            departments={departments}
+            users={usersForSelect}
+            canEdit={canEditDepartments}
+          />
         </PillTabsContent>
 
         <PillTabsContent value="settings">

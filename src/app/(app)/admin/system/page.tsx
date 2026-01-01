@@ -1,8 +1,9 @@
+import { getDepartments } from "@/actions/departments";
 import { getRoles } from "@/actions/roles";
 import { db } from "@/db";
 import { equipment, users } from "@/db/schema";
-import { PERMISSIONS } from "@/lib/permissions";
-import { requireAnyPermission } from "@/lib/session";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { getCurrentUser, requireAnyPermission } from "@/lib/session";
 import { desc } from "drizzle-orm";
 import { headers } from "next/headers";
 import { SystemTabs } from "./system-tabs";
@@ -26,8 +27,17 @@ async function getEquipment() {
   });
 }
 
+async function getUsersForSelect() {
+  return db.query.users.findMany({
+    columns: { id: true, name: true },
+    where: (users, { eq }) => eq(users.isActive, true),
+    orderBy: [desc(users.name)],
+  });
+}
+
 export default async function SystemPage() {
   // Check if user has any admin-related permission
+  const currentUser = await getCurrentUser();
   await requireAnyPermission([
     PERMISSIONS.USER_VIEW,
     PERMISSIONS.SYSTEM_SETTINGS,
@@ -35,12 +45,20 @@ export default async function SystemPage() {
     PERMISSIONS.SYSTEM_QR_CODES,
   ]);
 
+  // Check if user can edit departments (admin only)
+  const canEditDepartments = currentUser
+    ? hasPermission(currentUser.permissions, PERMISSIONS.SYSTEM_SETTINGS)
+    : false;
+
   // Fetch all data in parallel
-  const [usersList, roles, equipmentList] = await Promise.all([
-    getUsers(),
-    getRoles({}),
-    getEquipment(),
-  ]);
+  const [usersList, roles, equipmentList, departmentsList, usersForSelect] =
+    await Promise.all([
+      getUsers(),
+      getRoles({}),
+      getEquipment(),
+      getDepartments({}),
+      getUsersForSelect(),
+    ]);
 
   // Get base URL for QR codes
   const headersList = await headers();
@@ -72,6 +90,9 @@ export default async function SystemPage() {
       roleStats={roleStats}
       equipment={equipmentList}
       baseUrl={baseUrl}
+      departments={departmentsList}
+      usersForSelect={usersForSelect}
+      canEditDepartments={canEditDepartments}
     />
   );
 }
