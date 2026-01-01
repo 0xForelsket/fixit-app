@@ -14,6 +14,7 @@ export const createMockUser = (
   departmentId: 1,
   permissions: ["ticket:create", "ticket:view"],
   hourlyRate: 25.0,
+  sessionVersion: 1,
   ...overrides,
 });
 
