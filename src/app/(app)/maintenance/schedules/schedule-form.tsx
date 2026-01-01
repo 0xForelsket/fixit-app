@@ -2,10 +2,18 @@
 
 import {
   createScheduleAction,
-  deleteScheduleAction,
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { Button } from "@/components/ui/button";
+import { FieldGroup, FormGrid, FormSection } from "@/components/ui/form-layout";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   Equipment,
   MaintenanceChecklist,
@@ -14,8 +22,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { insertMaintenanceScheduleSchema } from "@/lib/validations/schedules";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Check, GripVertical, Save, Trash2, X } from "lucide-react";
-import Link from "next/link";
+import { Check, GripVertical, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -69,6 +76,7 @@ export function ScheduleForm({
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = form;
 
   const { fields, append, remove, update } = useFieldArray({
@@ -115,210 +123,191 @@ export function ScheduleForm({
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this schedule?")) return;
-
-    if (!schedule?.id) return;
-
-    setSaving(true);
-    setDeleteError(null);
-    try {
-      const result = await deleteScheduleAction(schedule.id);
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      // Action handles revalidate, client router ensures we go back to list
-      router.push("/maintenance/schedules");
-      router.refresh();
-    } catch (err) {
-      setDeleteError(
-        err instanceof Error ? err.message : "Something went wrong"
-      );
-      setSaving(false);
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button type="button" variant="ghost" size="icon" asChild>
-            <Link href="/maintenance/schedules">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {isNew ? "New Schedule" : "Edit Schedule"}
-            </h1>
-            <p className="text-muted-foreground">
-              {isNew ? "Create a new maintenance schedule" : schedule?.title}
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {!isNew && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={saving}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          )}
-          <Button type="submit" disabled={saving}>
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Saving..." : "Save Schedule"}
-          </Button>
-        </div>
-      </div>
-
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Global Error Banner (Root or Delete) */}
       {(errors.root || deleteError) && (
-        <div className="rounded-lg bg-rose-50 p-4 text-sm text-rose-600">
+        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
           {errors.root?.message || deleteError}
         </div>
       )}
 
-      {/* Schedule Details */}
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-4 font-semibold">Schedule Details</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label htmlFor="title" className="mb-1 block text-sm font-medium">
-              Title
-            </label>
-            <input
-              id="title"
-              type="text"
-              {...register("title")}
-              placeholder="e.g., Monthly Inspection"
-              className={cn(
-                "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                errors.title
-                  ? "border-rose-500 focus:ring-rose-200"
-                  : "focus:border-primary-500 focus:ring-primary-500/20"
-              )}
-            />
-            {errors.title && (
-              <p className="mt-1 text-xs text-rose-500">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
+      <FormGrid>
+        <FieldGroup label="Title" required error={errors.title?.message}>
+          <Input
+            id="title"
+            {...register("title")}
+            placeholder="e.g., Monthly Inspection"
+            className={cn(errors.title && "border-danger-500")}
+          />
+        </FieldGroup>
 
-          <div>
-            <label
-              htmlFor="equipment"
-              className="mb-1 block text-sm font-medium"
+        <FieldGroup
+          label="Equipment"
+          required
+          error={errors.equipmentId?.message}
+        >
+          <Select
+            value={watch("equipmentId")?.toString()}
+            onValueChange={(val) => setValue("equipmentId", Number(val))}
+          >
+            <SelectTrigger
+              className={cn(errors.equipmentId && "border-danger-500")}
             >
-              Equipment
-            </label>
-            <select
-              id="equipment"
-              {...register("equipmentId")}
-              className={cn(
-                "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                errors.equipmentId
-                  ? "border-rose-500 focus:ring-rose-200"
-                  : "focus:border-primary-500 focus:ring-primary-500/20"
-              )}
-            >
-              <option value="">Select equipment...</option>
-              {equipment.map((equipment) => (
-                <option key={equipment.id} value={equipment.id}>
-                  {equipment.name} ({equipment.code})
-                </option>
+              <SelectValue placeholder="Select equipment..." />
+            </SelectTrigger>
+            <SelectContent>
+              {equipment.map((item) => (
+                <SelectItem key={item.id} value={item.id.toString()}>
+                  {item.name} ({item.code})
+                </SelectItem>
               ))}
-            </select>
-            {errors.equipmentId && (
-              <p className="mt-1 text-xs text-rose-500">
-                {errors.equipmentId.message}
-              </p>
-            )}
-          </div>
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
-          <div>
-            <label htmlFor="type" className="mb-1 block text-sm font-medium">
-              Type
-            </label>
-            <select
-              id="type"
-              {...register("type")}
-              className="w-full rounded-lg border px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-            >
-              <option value="maintenance">Maintenance</option>
-              <option value="calibration">Calibration</option>
-            </select>
-            {errors.type && (
-              <p className="mt-1 text-xs text-rose-500">
-                {errors.type.message}
-              </p>
-            )}
-          </div>
+        <FieldGroup label="Type" error={errors.type?.message}>
+          <Select
+            value={watch("type")}
+            onValueChange={(val) =>
+              setValue("type", val as "maintenance" | "calibration")
+            }
+          >
+            <SelectTrigger className={cn(errors.type && "border-danger-500")}>
+              <SelectValue placeholder="Select type..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="maintenance">Maintenance</SelectItem>
+              <SelectItem value="calibration">Calibration</SelectItem>
+            </SelectContent>
+          </Select>
+        </FieldGroup>
 
-          <div>
-            <label
-              htmlFor="frequency"
-              className="mb-1 block text-sm font-medium"
-            >
-              Frequency (days)
-            </label>
-            <input
-              id="frequency"
-              type="number"
-              min="1"
-              {...register("frequencyDays")}
-              className={cn(
-                "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                errors.frequencyDays
-                  ? "border-rose-500 focus:ring-rose-200"
-                  : "focus:border-primary-500 focus:ring-primary-500/20"
-              )}
-            />
-            {errors.frequencyDays && (
-              <p className="mt-1 text-xs text-rose-500">
-                {errors.frequencyDays.message}
-              </p>
-            )}
-          </div>
+        <FieldGroup
+          label="Frequency (days)"
+          error={errors.frequencyDays?.message}
+        >
+          <Input
+            type="number"
+            min="1"
+            {...register("frequencyDays", { valueAsNumber: true })}
+            className={cn(errors.frequencyDays && "border-danger-500")}
+          />
+        </FieldGroup>
 
-          <div className="flex items-center gap-3 md:col-span-2">
-            <button
-              type="button"
-              onClick={() => {
-                const current = form.getValues("isActive");
-                form.setValue("isActive", !current, { shouldDirty: true });
-              }}
-              className={cn(
-                "flex h-6 w-11 items-center rounded-full p-1 transition-colors",
-                watch("isActive") ? "bg-primary-600" : "bg-slate-200"
-              )}
-            >
-              <span
-                className={cn(
-                  "h-4 w-4 rounded-full bg-white shadow transition-transform",
-                  watch("isActive") && "translate-x-5"
-                )}
-              />
-            </button>
-            <span className="text-sm font-medium">Active</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Checklist */}
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-semibold">Checklist Steps</h2>
+        <div className="flex items-center gap-3 md:col-span-2 pt-2">
           <button
             type="button"
-            className="rounded-lg border border-primary-600 px-3 py-1 text-sm text-primary-600 hover:bg-primary-50"
+            onClick={() => {
+              const current = form.getValues("isActive");
+              form.setValue("isActive", !current, { shouldDirty: true });
+            }}
+            className={cn(
+              "flex h-6 w-11 items-center rounded-full p-1 transition-colors",
+              watch("isActive") ? "bg-primary-600" : "bg-zinc-200"
+            )}
+          >
+            <span
+              className={cn(
+                "h-4 w-4 rounded-full bg-white shadow transition-transform",
+                watch("isActive") && "translate-x-5"
+              )}
+            />
+          </button>
+          <span className="text-sm font-medium">Active Schedule</span>
+        </div>
+      </FormGrid>
+
+      <FormSection title="Procedure Checklist">
+        <div className="space-y-3">
+          {fields.map((field, index) => (
+            <div
+              key={field.id}
+              className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 shadow-sm hover:border-primary/20 transition-all"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground/40 cursor-grab active:cursor-grabbing">
+                <GripVertical className="h-5 w-5" />
+              </div>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-bold text-muted-foreground">
+                {index + 1}
+              </div>
+              <div className="flex-1 space-y-3">
+                <Input
+                  {...register(`checklists.${index}.description`)}
+                  placeholder="Describe this step..."
+                  className={cn(
+                    "bg-transparent border-0 border-b border-border rounded-none px-0 focus-visible:ring-0 focus-visible:border-primary shadow-none",
+                    errors.checklists?.[index]?.description &&
+                      "border-danger-500"
+                  )}
+                />
+                {errors.checklists?.[index]?.description && (
+                  <p className="text-xs text-danger-500">
+                    {errors.checklists[index]?.description?.message}
+                  </p>
+                )}
+
+                <div className="flex items-center gap-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const currentItem = watchedChecklists?.[index];
+                      if (!currentItem) return;
+                      const current = currentItem.isRequired ?? true;
+                      update(index, {
+                        ...currentItem,
+                        isRequired: !current,
+                      });
+                    }}
+                    className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <div
+                      className={cn(
+                        "flex h-4 w-4 items-center justify-center rounded border transition-colors",
+                        watchedChecklists?.[index]?.isRequired
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-muted-foreground/30"
+                      )}
+                    >
+                      {watchedChecklists?.[index]?.isRequired && (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </div>
+                    Required
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min="0"
+                      {...register(`checklists.${index}.estimatedMinutes`, {
+                        valueAsNumber: true,
+                      })}
+                      placeholder="0"
+                      className="w-16 h-7 text-xs text-center"
+                    />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                      Mins
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0 text-muted-foreground hover:bg-danger-50 hover:text-danger-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => remove(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
             onClick={() => {
               append({
                 stepNumber: fields.length + 1,
@@ -327,186 +316,39 @@ export function ScheduleForm({
                 estimatedMinutes: null,
               });
             }}
+            className="w-full border-dashed text-muted-foreground hover:text-primary hover:border-primary/50"
           >
-            Add Step
-          </button>
+            + Add Step
+          </Button>
         </div>
 
-        {fields.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              No checklist steps yet. Add steps to create a maintenance
-              procedure.
-            </p>
-            <button
-              type="button"
-              className="mt-4 rounded-lg border border-primary-600 px-4 py-2 text-primary-600 hover:bg-primary-50"
-              onClick={() => {
-                append({
-                  stepNumber: 1,
-                  description: "",
-                  isRequired: true,
-                  estimatedMinutes: null,
-                });
-              }}
-            >
-              Add First Step
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="flex items-start gap-3 rounded-lg border bg-slate-50 p-3"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">
-                  <GripVertical className="h-4 w-4" />
-                </div>
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-medium">
-                  {index + 1}
-                </div>
-                <div className="flex-1 space-y-2">
-                  <input
-                    type="text"
-                    {...register(`checklists.${index}.description`)}
-                    placeholder="Step description..."
-                    className={cn(
-                      "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2",
-                      errors.checklists?.[index]?.description
-                        ? "border-rose-500 focus:ring-rose-200"
-                        : "focus:border-primary-500 bg-white focus:ring-primary-500/20"
-                    )}
-                  />
-                  {errors.checklists?.[index]?.description && (
-                    <p className="text-xs text-rose-500">
-                      {errors.checklists[index]?.description?.message}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      {/* 
-              <FormField
-                control={form.control}
-                name="equipmentId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Equipment</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select equipment..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {equipment.map((item) => (
-                          <SelectItem key={item.id} value={item.id.toString()}>
-                            {item.name} ({item.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="maintenance">Maintenance</SelectItem>
-                        <SelectItem value="calibration">Calibration</SelectItem>
-                        <SelectItem value="inspection">Inspection</SelectItem>
-                        <SelectItem value="repair">Repair</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-*/}{" "}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const currentItem = watchedChecklists?.[index];
-                          if (!currentItem) return;
-                          const current = currentItem.isRequired ?? true;
-                          update(index, {
-                            ...currentItem,
-                            isRequired: !current,
-                          });
-                        }}
-                        className={cn(
-                          "flex h-5 w-5 items-center justify-center rounded border",
-                          watchedChecklists?.[index]?.isRequired
-                            ? "border-primary-600 bg-primary-600 text-white"
-                            : "border-slate-300 bg-white"
-                        )}
-                      >
-                        {watchedChecklists?.[index]?.isRequired && (
-                          <Check className="h-3 w-3" />
-                        )}
-                      </button>
-                      Required
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        {...register(`checklists.${index}.estimatedMinutes`, {
-                          valueAsNumber: true,
-                        })}
-                        placeholder="Est. min"
-                        className="w-20 rounded border bg-white px-2 py-1 text-sm"
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        minutes
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 text-muted-foreground hover:text-rose-600"
-                  onClick={() => remove(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
-
         {fields.length > 0 && (
-          <div className="mt-4 text-sm text-muted-foreground">
+          <div className="mt-4 text-xs font-medium text-muted-foreground text-right border-t pt-4">
             Total estimated time:{" "}
-            <span className="font-medium">
+            <span className="text-foreground">
               {(watchedChecklists || []).reduce(
                 (sum, item) => sum + (Number(item?.estimatedMinutes) || 0),
                 0
               )}{" "}
-              minutes
+              min
             </span>
           </div>
         )}
+      </FormSection>
+
+      {/* Footer Actions */}
+      <div className="flex items-center justify-end gap-3 border-t border-border pt-6">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.push("/maintenance/schedules")}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={saving}>
+          {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isNew ? "Create Schedule" : "Save Changes"}
+        </Button>
       </div>
     </form>
   );
