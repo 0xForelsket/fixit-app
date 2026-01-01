@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   BarChart3,
+  ChevronDown,
+  ChevronRight,
   ChevronsUpDown,
   ClipboardList,
   Clock,
@@ -34,26 +36,26 @@ import {
   Package,
   PanelLeftClose,
   PanelLeftOpen,
-  QrCode,
-  Shield,
-  Upload,
+  Settings2,
   User,
-  Users,
   Wrench,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { NavTooltip } from "./nav-tooltip";
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
   permission: Permission;
+  children?: NavItem[];
 }
 
 interface NavGroup {
-  label?: string;
+  label: string;
   items: NavItem[];
 }
 
@@ -72,18 +74,26 @@ const navGroups: NavGroup[] = [
         href: "/analytics",
         icon: <BarChart3 className="h-5 w-5" />,
         permission: PERMISSIONS.ANALYTICS_VIEW,
-      },
-      {
-        label: "Cost Analytics",
-        href: "/analytics/costs",
-        icon: <DollarSign className="h-5 w-5" />,
-        permission: PERMISSIONS.ANALYTICS_VIEW,
-      },
-      {
-        label: "Downtime",
-        href: "/analytics/downtime",
-        icon: <Clock className="h-5 w-5" />,
-        permission: PERMISSIONS.ANALYTICS_VIEW,
+        children: [
+          {
+            label: "Overview",
+            href: "/analytics",
+            icon: <BarChart3 className="h-4 w-4" />,
+            permission: PERMISSIONS.ANALYTICS_VIEW,
+          },
+          {
+            label: "Costs",
+            href: "/analytics/costs",
+            icon: <DollarSign className="h-4 w-4" />,
+            permission: PERMISSIONS.ANALYTICS_VIEW,
+          },
+          {
+            label: "Downtime",
+            href: "/analytics/downtime",
+            icon: <Clock className="h-4 w-4" />,
+            permission: PERMISSIONS.ANALYTICS_VIEW,
+          },
+        ],
       },
       {
         label: "Reports",
@@ -95,7 +105,7 @@ const navGroups: NavGroup[] = [
         label: "Documents",
         href: "/documents",
         icon: <Folder className="h-5 w-5" />,
-        permission: PERMISSIONS.TICKET_VIEW_ALL, // Using basic permission for now
+        permission: PERMISSIONS.TICKET_VIEW_ALL,
       },
     ],
   },
@@ -143,44 +153,23 @@ const navGroups: NavGroup[] = [
         icon: <Factory className="h-5 w-5" />,
         permission: PERMISSIONS.INVENTORY_VIEW,
       },
-      {
-        label: "QR Codes",
-        href: "/assets/qr-codes",
-        icon: <QrCode className="h-5 w-5" />,
-        permission: PERMISSIONS.SYSTEM_QR_CODES,
-      },
     ],
   },
   {
     label: "Administration",
     items: [
       {
-        label: "Users",
-        href: "/admin/users",
-        icon: <Users className="h-5 w-5" />,
+        label: "System",
+        href: "/admin/system",
+        icon: <Settings2 className="h-5 w-5" />,
         permission: PERMISSIONS.USER_VIEW,
-      },
-      {
-        label: "Roles",
-        href: "/admin/roles",
-        icon: <Shield className="h-5 w-5" />,
-        permission: PERMISSIONS.SYSTEM_SETTINGS,
-      },
-      {
-        label: "Import",
-        href: "/admin/import",
-        icon: <Upload className="h-5 w-5" />,
-        permission: PERMISSIONS.EQUIPMENT_CREATE,
-      },
-      {
-        label: "Settings",
-        href: "/admin/settings",
-        icon: <Cog className="h-5 w-5" />,
-        permission: PERMISSIONS.SYSTEM_SETTINGS,
       },
     ],
   },
 ];
+
+const COLLAPSED_SECTIONS_KEY = "sidebar-collapsed-sections";
+const EXPANDED_SUBMENUS_KEY = "sidebar-expanded-submenus";
 
 interface SidebarProps {
   user: {
@@ -205,13 +194,74 @@ export function Sidebar({
   onToggleCollapse,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set()
+  );
+  const [expandedSubmenus, setExpandedSubmenus] = useState<Set<string>>(
+    new Set()
+  );
+
+  // Load collapsed sections and expanded submenus from localStorage
+  useEffect(() => {
+    try {
+      const savedSections = localStorage.getItem(COLLAPSED_SECTIONS_KEY);
+      if (savedSections) {
+        setCollapsedSections(new Set(JSON.parse(savedSections)));
+      }
+      const savedSubmenus = localStorage.getItem(EXPANDED_SUBMENUS_KEY);
+      if (savedSubmenus) {
+        setExpandedSubmenus(new Set(JSON.parse(savedSubmenus)));
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
+
+  const toggleSection = useCallback((label: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      try {
+        localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify([...next]));
+      } catch {
+        // Ignore localStorage errors
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSubmenu = useCallback((href: string) => {
+    setExpandedSubmenus((prev) => {
+      const next = new Set(prev);
+      if (next.has(href)) {
+        next.delete(href);
+      } else {
+        next.add(href);
+      }
+      try {
+        localStorage.setItem(EXPANDED_SUBMENUS_KEY, JSON.stringify([...next]));
+      } catch {
+        // Ignore localStorage errors
+      }
+      return next;
+    });
+  }, []);
 
   const filteredGroups = navGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) =>
-        hasPermission(user.permissions, item.permission)
-      ),
+      items: group.items
+        .filter((item) => hasPermission(user.permissions, item.permission))
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) =>
+            hasPermission(user.permissions, child.permission)
+          ),
+        })),
     }))
     .filter((group) => group.items.length > 0);
 
@@ -225,6 +275,27 @@ export function Sidebar({
     user.permissions,
     PERMISSIONS.TICKET_CREATE
   );
+
+  const isItemActive = (item: NavItem): boolean => {
+    if (pathname === item.href) return true;
+    if (item.href !== "/dashboard" && pathname.startsWith(item.href)) {
+      // Don't mark parent as active if we're in a child route and parent has children
+      if (item.children && item.children.some((c) => pathname === c.href)) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  };
+
+  const isSubmenuActive = (item: NavItem): boolean => {
+    if (!item.children) return false;
+    return item.children.some(
+      (child) =>
+        pathname === child.href ||
+        (child.href !== "/dashboard" && pathname.startsWith(child.href))
+    );
+  };
 
   return (
     <>
@@ -299,69 +370,185 @@ export function Sidebar({
               : "overflow-y-auto overflow-x-hidden"
           )}
         >
-          <div className="space-y-6">
-            {filteredGroups.map((group, groupIndex) => (
-              <div key={groupIndex}>
-                {group.label && !isCollapsed && (
-                  <h3 className="mb-2 px-3 text-[10px] font-black uppercase tracking-[0.15em] text-foreground/40 whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
-                    {group.label}
-                  </h3>
-                )}
-                {isCollapsed && group.label && (
-                  <div className="h-px bg-border/50 mx-2 mb-4" />
-                )}
-                <ul className="space-y-1">
-                  {group.items.map((item) => {
-                    const isActive =
-                      pathname === item.href ||
-                      (item.href !== "/dashboard" &&
-                        pathname.startsWith(item.href));
+          <div className="space-y-2">
+            {filteredGroups.map((group) => {
+              const isSectionCollapsed = collapsedSections.has(group.label);
 
-                    return (
-                      <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          onClick={handleNavClick}
-                          // Removed title to use custom tooltip below
+              return (
+                <div key={group.label}>
+                  {!isCollapsed ? (
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(group.label)}
+                      className="mb-2 px-3 flex items-center justify-between w-full text-left group cursor-pointer"
+                    >
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground/40 whitespace-nowrap overflow-hidden">
+                        {group.label}
+                      </h3>
+                      <ChevronDown
+                        className={cn(
+                          "h-3 w-3 text-foreground/30 transition-transform duration-200",
+                          isSectionCollapsed && "-rotate-90"
+                        )}
+                      />
+                    </button>
+                  ) : (
+                    <div className="h-px bg-border/50 mx-2 mb-4" />
+                  )}
 
-                          className={cn(
-                            "flex items-center rounded-xl p-2.5 text-sm font-semibold transition-all group relative",
-                            isCollapsed ? "justify-center" : "gap-3 px-3",
-                            isActive
-                              ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
-                              : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "shrink-0 transition-colors",
-                              isActive
-                                ? "text-primary"
-                                : "text-foreground/40 group-hover:text-primary"
+                  <div
+                    className={cn(
+                      "space-y-1 overflow-hidden transition-all duration-200",
+                      isSectionCollapsed && !isCollapsed
+                        ? "max-h-0 opacity-0"
+                        : "max-h-[1000px] opacity-100"
+                    )}
+                  >
+                    <ul className="space-y-1">
+                      {group.items.map((item) => {
+                        const isActive = isItemActive(item);
+                        const hasChildren =
+                          item.children && item.children.length > 0;
+                        const isSubmenuExpanded =
+                          expandedSubmenus.has(item.href) ||
+                          isSubmenuActive(item);
+
+                        return (
+                          <li key={item.href}>
+                            {hasChildren ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSubmenu(item.href)}
+                                  className={cn(
+                                    "flex items-center rounded-xl p-2.5 text-sm font-semibold transition-all group relative w-full cursor-pointer",
+                                    isCollapsed
+                                      ? "justify-center"
+                                      : "gap-3 px-3",
+                                    isSubmenuActive(item)
+                                      ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
+                                      : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
+                                  )}
+                                >
+                                  <span
+                                    className={cn(
+                                      "shrink-0 transition-colors",
+                                      isSubmenuActive(item)
+                                        ? "text-primary"
+                                        : "text-foreground/40 group-hover:text-primary"
+                                    )}
+                                  >
+                                    {item.icon}
+                                  </span>
+                                  {!isCollapsed && (
+                                    <>
+                                      <span className="whitespace-nowrap overflow-hidden flex-1 text-left">
+                                        {item.label}
+                                      </span>
+                                      <ChevronRight
+                                        className={cn(
+                                          "h-4 w-4 text-foreground/40 transition-transform duration-200",
+                                          isSubmenuExpanded && "rotate-90"
+                                        )}
+                                      />
+                                    </>
+                                  )}
+                                  <NavTooltip
+                                    label={item.label}
+                                    show={!!isCollapsed}
+                                  />
+                                  {isCollapsed && isSubmenuActive(item) && (
+                                    <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
+                                  )}
+                                </button>
+                                {!isCollapsed && (
+                                  <div
+                                    className={cn(
+                                      "overflow-hidden transition-all duration-200",
+                                      isSubmenuExpanded
+                                        ? "max-h-[500px] opacity-100"
+                                        : "max-h-0 opacity-0"
+                                    )}
+                                  >
+                                    <ul className="ml-4 mt-1 space-y-1 border-l border-border/50 pl-3">
+                                      {item.children?.map((child) => {
+                                        const isChildActive =
+                                          pathname === child.href;
+                                        return (
+                                          <li key={child.href}>
+                                            <Link
+                                              href={child.href}
+                                              onClick={handleNavClick}
+                                              className={cn(
+                                                "flex items-center gap-2 rounded-lg p-2 text-sm font-medium transition-all group",
+                                                isChildActive
+                                                  ? "bg-primary/10 text-primary"
+                                                  : "text-foreground/50 hover:bg-foreground/5 hover:text-foreground"
+                                              )}
+                                            >
+                                              <span
+                                                className={cn(
+                                                  "shrink-0 transition-colors",
+                                                  isChildActive
+                                                    ? "text-primary"
+                                                    : "text-foreground/30 group-hover:text-primary"
+                                                )}
+                                              >
+                                                {child.icon}
+                                              </span>
+                                              <span>{child.label}</span>
+                                            </Link>
+                                          </li>
+                                        );
+                                      })}
+                                    </ul>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <Link
+                                href={item.href}
+                                onClick={handleNavClick}
+                                className={cn(
+                                  "flex items-center rounded-xl p-2.5 text-sm font-semibold transition-all group relative",
+                                  isCollapsed ? "justify-center" : "gap-3 px-3",
+                                  isActive
+                                    ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20"
+                                    : "text-foreground/60 hover:bg-foreground/10 hover:text-foreground"
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "shrink-0 transition-colors",
+                                    isActive
+                                      ? "text-primary"
+                                      : "text-foreground/40 group-hover:text-primary"
+                                  )}
+                                >
+                                  {item.icon}
+                                </span>
+                                {!isCollapsed && (
+                                  <span className="whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
+                                    {item.label}
+                                  </span>
+                                )}
+                                <NavTooltip
+                                  label={item.label}
+                                  show={!!isCollapsed}
+                                />
+                                {isCollapsed && isActive && (
+                                  <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
+                                )}
+                              </Link>
                             )}
-                          >
-                            {item.icon}
-                          </span>
-                          {!isCollapsed && (
-                            <span className="whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
-                              {item.label}
-                            </span>
-                          )}
-                          {isCollapsed && (
-                            <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
-                              {item.label}
-                            </div>
-                          )}
-                          {isCollapsed && isActive && (
-                            <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
-                          )}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {canCreateTicket && (
@@ -374,8 +561,6 @@ export function Sidebar({
               <Link
                 href="/report"
                 onClick={handleNavClick}
-                // title={isCollapsed ? "Report Equipment Issue" : undefined}
-
                 className={cn(
                   "flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors group relative",
                   isCollapsed ? "w-10 h-10 justify-center px-0 py-0" : "px-3"
@@ -387,11 +572,7 @@ export function Sidebar({
                     Report Issue
                   </span>
                 )}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
-                    Report Issue
-                  </div>
-                )}
+                <NavTooltip label="Report Issue" show={!!isCollapsed} />
               </Link>
             </div>
           )}
@@ -435,11 +616,7 @@ export function Sidebar({
                     <ChevronsUpDown className="ml-auto h-4 w-4 text-muted-foreground/50" />
                   </>
                 )}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-[-4px] group-hover:translate-x-0 pointer-events-none whitespace-nowrap z-[100] shadow-xl ring-1 ring-white/10">
-                    {user.name}
-                  </div>
-                )}
+                <NavTooltip label={user.name} show={!!isCollapsed} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
