@@ -5,7 +5,7 @@ export default function EquipmentLoading() {
   return (
     <div className="space-y-10 animate-in">
       <PageHeader
-        title="Equipment"
+        title="Equipment List"
         subtitle="Asset Registry"
         description="SCANNING ASSET REGISTRY..."
         bgSymbol="EQ"

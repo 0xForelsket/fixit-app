@@ -157,7 +157,10 @@ export function EquipmentTable({
             className="rounded-xl hover:bg-warning-500 hover:text-white transition-all text-muted-foreground"
             title="Report Issue"
           >
-            <Link href={`/equipment/${row.code}#report`} aria-label={`Report issue for ${row.name}`}>
+            <Link
+              href={`/equipment/${row.code}#report`}
+              aria-label={`Report issue for ${row.name}`}
+            >
               <Flag className="h-4 w-4" />
             </Link>
           </Button>
@@ -168,7 +171,10 @@ export function EquipmentTable({
               asChild
               className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all transform group-hover:rotate-12 text-muted-foreground"
             >
-              <Link href={`/assets/equipment/${row.id}/edit`} aria-label={`Edit ${row.name}`}>
+              <Link
+                href={`/assets/equipment/${row.id}/edit`}
+                aria-label={`Edit ${row.name}`}
+              >
                 <Edit className="h-4 w-4" />
               </Link>
             </Button>

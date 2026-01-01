@@ -15,6 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { eq } from "drizzle-orm";
@@ -145,16 +146,18 @@ export default async function EquipmentDetailPage({
           </p>
         </div>
       </div>
-      <Button
-        variant="outline"
-        asChild
-        className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold"
-      >
-        <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
-          <Edit className="mr-2 h-4 w-4" />
-          EDIT EQUIPMENT
-        </Link>
-      </Button>
+      {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_UPDATE) && (
+        <Button
+          variant="outline"
+          asChild
+          className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold"
+        >
+          <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+            <Edit className="mr-2 h-4 w-4" />
+            EDIT EQUIPMENT
+          </Link>
+        </Button>
+      )}
     </div>
   );
 
@@ -335,12 +338,17 @@ export default async function EquipmentDetailPage({
             entityId={equipmentItem.id}
             isFavorited={isFavorited}
           />
-          <Button variant="outline" asChild className="hidden sm:flex">
-            <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Link>
-          </Button>
+          {hasPermission(
+            user?.permissions ?? [],
+            PERMISSIONS.EQUIPMENT_UPDATE
+          ) && (
+            <Button variant="outline" asChild className="hidden sm:flex">
+              <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -571,14 +579,16 @@ export default async function EquipmentDetailPage({
       </div>
 
       {/* Fixed Mobile Bottom Action */}
-      <div className="fixed bottom-16 left-0 right-0 p-4 bg-card/80 backdrop-blur-lg border-t border-border lg:hidden z-30">
-        <Button asChild size="lg" className="w-full">
-          <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Equipment
-          </Link>
-        </Button>
-      </div>
+      {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_UPDATE) && (
+        <div className="fixed bottom-16 left-0 right-0 p-4 bg-card/80 backdrop-blur-lg border-t border-border lg:hidden z-30">
+          <Button asChild size="lg" className="w-full">
+            <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Equipment
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

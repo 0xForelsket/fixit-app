@@ -115,7 +115,10 @@ export function LocationsTable({
           asChild
           className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all text-muted-foreground"
         >
-          <Link href={`/assets/locations/${row.id}`} aria-label={`Edit ${row.name}`}>
+          <Link
+            href={`/assets/locations/${row.id}`}
+            aria-label={`Edit ${row.name}`}
+          >
             <Edit className="h-4 w-4" />
           </Link>
         </Button>

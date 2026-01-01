@@ -6,7 +6,7 @@ import type { Location } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 interface EquipmentSearchProps {
   locations: Location[];

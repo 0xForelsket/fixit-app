@@ -9,7 +9,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
-import { type SessionUser, getCurrentUser } from "@/lib/session";
+import { getCurrentUser } from "@/lib/session";
 import { and, asc, desc, eq, like, or, sql } from "drizzle-orm";
 import {
   AlertCircle,
@@ -43,7 +43,7 @@ async function getEquipment(params: SearchParams, conditions: any[]) {
   // Handle sorting in SQL
   let orderBy;
   const sortDir = params.dir === "desc" ? desc : asc;
-  
+
   switch (params.sort) {
     case "name":
       orderBy = sortDir(equipmentTable.name);
@@ -132,7 +132,7 @@ export default async function EquipmentPage({
 }) {
   const params = await searchParams;
   const user = await getCurrentUser();
-  
+
   // Build conditions for both list and stats
   const departmentId = user?.departmentId;
   const isTech = user?.roleName === "tech";
@@ -171,7 +171,7 @@ export default async function EquipmentPage({
 
   return (
     <PageLayout
-      title="Asset Inventory"
+      title="Equipment List"
       subtitle="Infrastructure Monitoring"
       description={`${stats.total} REGISTERED UNITS | ${stats.operational} ONLINE`}
       bgSymbol="EQ"
@@ -179,7 +179,10 @@ export default async function EquipmentPage({
         <>
           <ViewToggle />
           <div className="w-px h-8 bg-border mx-2 hidden lg:block" />
-          {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_CREATE) && (
+          {hasPermission(
+            user?.permissions ?? [],
+            PERMISSIONS.EQUIPMENT_CREATE
+          ) && (
             <Button
               variant="outline"
               asChild
@@ -206,7 +209,10 @@ export default async function EquipmentPage({
               </Link>
             </Button>
           )}
-          {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_CREATE) && (
+          {hasPermission(
+            user?.permissions ?? [],
+            PERMISSIONS.EQUIPMENT_CREATE
+          ) && (
             <Button
               asChild
               className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"

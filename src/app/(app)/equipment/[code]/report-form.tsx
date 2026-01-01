@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { workOrderPriorities, workOrderTypes } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { createWorkOrderSchema } from "@/lib/validations/workOrders";
+import type { CreateWorkOrderInput } from "@/lib/validations/workOrders";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowUpCircle,
   Camera,
@@ -19,7 +22,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 
 interface ReportFormProps {
   equipment: {
@@ -91,21 +95,27 @@ const priorityConfig: Record<
 
 export function ReportForm({ equipment }: ReportFormProps) {
   const router = useRouter();
-  const [attachments, setAttachments] = useState<
-    { filename: string; s3Key: string; mimeType: string; sizeBytes: number }[]
-  >([]);
-  const [state, formAction, isPending] = useActionState(
-    createWorkOrder,
-    undefined
-  );
+  const [isPending, startTransition] = useTransition();
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/my-work-orders?created=true");
-    }
-  }, [state?.success, router]);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    setError,
+    formState: { errors },
+  } = useForm<CreateWorkOrderInput>({
+    resolver: zodResolver(createWorkOrderSchema),
+    defaultValues: {
+      equipmentId: equipment.id,
+      priority: "medium",
+      attachments: [],
+    },
+  });
+
+  const attachments = watch("attachments") || [];
 
   const handleUploadComplete = (attachment: {
     filename: string;
@@ -113,13 +123,12 @@ export function ReportForm({ equipment }: ReportFormProps) {
     mimeType: string;
     sizeBytes: number;
   }) => {
-    setAttachments((prev) => [...prev, attachment]);
+    setValue("attachments", [...attachments, attachment]);
   };
 
   const handleCameraCapture = async (blob: Blob, filename: string) => {
     setIsUploadingPhoto(true);
     try {
-      // Get presigned URL
       const response = await fetch("/api/attachments/presigned-url", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -135,7 +144,6 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       const { uploadUrl, s3Key } = await response.json();
 
-      // Upload to S3
       const uploadResponse = await fetch(uploadUrl, {
         method: "PUT",
         body: blob,
@@ -144,9 +152,8 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
       if (!uploadResponse.ok) throw new Error("Failed to upload photo");
 
-      // Add to attachments
-      setAttachments((prev) => [
-        ...prev,
+      setValue("attachments", [
+        ...attachments,
         {
           s3Key,
           filename,
@@ -161,20 +168,46 @@ export function ReportForm({ equipment }: ReportFormProps) {
     }
   };
 
-  return (
-    <form action={formAction} className="space-y-6">
-      <input type="hidden" name="equipmentId" value={equipment.id} />
-      <input
-        type="hidden"
-        name="attachments"
-        value={JSON.stringify(attachments)}
-      />
+  const onSubmit = (data: CreateWorkOrderInput) => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append("equipmentId", data.equipmentId.toString());
+      formData.append("type", data.type);
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("priority", data.priority);
+      if (data.attachments) {
+        formData.append("attachments", JSON.stringify(data.attachments));
+      }
 
+      const result = await createWorkOrder(undefined, formData);
+
+      if (result.success) {
+        router.push("/my-tickets?created=true");
+      } else {
+        setError("root", {
+          message:
+            typeof result.error === "string"
+              ? result.error
+              : "Failed to create work order",
+        });
+      }
+    });
+  };
+
+  const handleRemoveAttachment = (idx: number) => {
+    const newAttachments = [...attachments];
+    newAttachments.splice(idx, 1);
+    setValue("attachments", newAttachments);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Error display */}
-      {state && !state.success && state.error && (
+      {errors.root && (
         <div className="rounded-xl border border-danger-200 bg-danger-50 p-3 text-danger-700 text-xs font-bold flex items-center gap-2">
           <ShieldAlert className="h-4 w-4" />
-          {state.error}
+          {errors.root.message}
         </div>
       )}
 
@@ -194,10 +227,9 @@ export function ReportForm({ equipment }: ReportFormProps) {
               >
                 <input
                   type="radio"
-                  name="type"
                   value={type}
                   className="sr-only"
-                  required
+                  {...register("type")}
                 />
                 <Icon className="mb-2 h-5 w-5 text-zinc-400 transition-colors group-has-[:checked]:text-white" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-zinc-600 group-has-[:checked]:text-white">
@@ -207,6 +239,9 @@ export function ReportForm({ equipment }: ReportFormProps) {
             );
           })}
         </div>
+        {errors.type && (
+          <p className="text-xs text-danger-500">{errors.type.message}</p>
+        )}
       </div>
 
       {/* Priority */}
@@ -220,33 +255,39 @@ export function ReportForm({ equipment }: ReportFormProps) {
             return (
               <label
                 key={priority}
-                className={cn(
-                  "relative flex cursor-pointer flex-col items-center justify-center rounded-lg border px-2 py-2 text-center transition-all hover:opacity-90 active:scale-[0.95]",
-                  config.bg,
-                  config.border
-                )}
+                className="relative cursor-pointer" // Wrapper for label styling if needed
               >
                 <input
                   type="radio"
-                  name="priority"
                   value={priority}
-                  defaultChecked={priority === "medium"}
-                  className="sr-only"
+                  className="peer sr-only"
+                  {...register("priority")}
                 />
-                <span
+                <div
                   className={cn(
-                    "text-[10px] font-black uppercase tracking-widest",
-                    config.color.includes("text-white")
-                      ? "text-white"
-                      : config.color
+                    "flex flex-col items-center justify-center rounded-lg border px-2 py-2 text-center transition-all hover:opacity-90 active:scale-[0.95] peer-checked:ring-4 peer-checked:ring-offset-2 peer-checked:ring-zinc-900 peer-checked:scale-105 peer-checked:shadow-lg peer-checked:z-10", // Stronger highlight
+                    config.bg,
+                    config.border
                   )}
                 >
-                  {priority}
-                </span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-widest",
+                      config.color.includes("text-white")
+                        ? "text-white"
+                        : config.color
+                    )}
+                  >
+                    {priority}
+                  </span>
+                </div>
               </label>
             );
           })}
         </div>
+        {errors.priority && (
+          <p className="text-xs text-danger-500">{errors.priority.message}</p>
+        )}
       </div>
 
       {/* Details */}
@@ -260,12 +301,17 @@ export function ReportForm({ equipment }: ReportFormProps) {
           </Label>
           <Input
             id="title"
-            name="title"
             placeholder="e.g., Leaking oil, Strange noise..."
-            required
             maxLength={200}
-            className="h-10 text-sm px-3 rounded-lg border-zinc-200 bg-zinc-50/50 focus-visible:ring-zinc-900"
+            className={cn(
+              "h-10 text-sm px-3 rounded-lg border-zinc-200 bg-zinc-50/50 focus-visible:ring-zinc-900",
+              errors.title && "border-danger-500 focus-visible:ring-danger-500"
+            )}
+            {...register("title")}
           />
+          {errors.title && (
+            <p className="text-xs text-danger-500">{errors.title.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -277,12 +323,19 @@ export function ReportForm({ equipment }: ReportFormProps) {
           </Label>
           <textarea
             id="description"
-            name="description"
             placeholder="Describe the issue. What happened? Any error codes?"
-            required
             rows={3}
-            className="w-full rounded-lg border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-900 resize-none"
+            className={cn(
+              "w-full rounded-lg border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-900 resize-none",
+              errors.description && "border-danger-500 focus:ring-danger-500"
+            )}
+            {...register("description")}
           />
+          {errors.description && (
+            <p className="text-xs text-danger-500">
+              {errors.description.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -337,9 +390,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setAttachments((prev) => prev.filter((_, i) => i !== idx))
-                    }
+                    onClick={() => handleRemoveAttachment(idx)}
                     className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <Trash2 className="h-3 w-3" />
