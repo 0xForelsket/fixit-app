@@ -1,61 +1,74 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useState } from "react";
+import { Loader2, Printer } from "lucide-react";
+import { useState } from "react";
+// Remove static imports to avoid SSR/Turbopack issues
+import QRCode from "qrcode";
 
-export function PrintButton() {
-  const [ticketUrl, setTicketUrl] = useState("");
+interface PrintButtonProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  workOrder?: any;
+}
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setTicketUrl(window.location.href.split("?")[0]);
+export function PrintButton({ workOrder }: PrintButtonProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handlePrint = async () => {
+    // If no workOrder data is passed (legacy mode), fallback to window.print()
+    if (!workOrder) {
+      window.print();
+      return;
     }
-  }, []);
 
-  const handlePrint = () => {
-    // Dynamically add print styles for line-clamp
-    const style = document.createElement("style");
-    style.innerHTML = `
-      /* Show full text in line-clamp elements */
-      @media print {
-        .line-clamp-1, .line-clamp-2, .line-clamp-3, .line-clamp-4 {
-          display: block !important;
-          -webkit-line-clamp: none !important;
-          line-clamp: none !important;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    window.print();
-    // Remove the style after printing to avoid side effects
-    document.head.removeChild(style);
+    try {
+      setIsGenerating(true);
+
+      // Dynamically import heavy PDF libraries only when needed
+      const { pdf } = await import("@react-pdf/renderer");
+      const { WorkOrderPDF } = await import("./pdf-document");
+
+      // Generate QR Code URL
+      const ticketUrl = window.location.href;
+      const qrCodeUrl = await QRCode.toDataURL(ticketUrl, {
+        width: 120,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      });
+
+      // Generate PDF
+      const blob = await pdf(
+        <WorkOrderPDF workOrder={workOrder} qrCodeUrl={qrCodeUrl} />
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (error) {
+      console.error("PDF Generation failed:", error);
+      // Fallback
+      window.print();
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
-    <div className="flex gap-2 no-print">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handlePrint}
-        className="font-bold border-2"
-      >
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handlePrint}
+      disabled={isGenerating}
+      className="font-bold border-2"
+    >
+      {isGenerating ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
         <Printer className="mr-2 h-4 w-4" />
-        PRINT / PDF
-      </Button>
-
-      {/* Hidden QR Code for print view */}
-      <div className="hidden print:block fixed top-0 right-0 p-4 text-center">
-        {ticketUrl && (
-          <div className="flex flex-col items-center gap-1">
-            <QRCodeSVG value={ticketUrl} size={80} marginSize={2} />
-            <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-tighter">
-              Verify Digital Copy
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+      {isGenerating ? "GENERATING..." : "DOWNLOAD PDF"}
+    </Button>
   );
 }

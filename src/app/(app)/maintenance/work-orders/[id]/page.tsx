@@ -40,7 +40,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MobileWorkOrderView } from "./mobile-work-order-view";
-import { PrintWorkOrderButton } from "./print-work-order-button";
+import { PrintButton } from "@/components/work-orders/print-button";
 import { WorkOrderActions } from "./work-order-actions";
 import { WorkOrderTabs } from "./work-order-tabs";
 
@@ -60,6 +60,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   const workOrder = await db.query.workOrders.findFirst({
     where: eq(workOrders.id, workOrderId),
     with: {
+      department: true,
       equipment: {
         with: {
           location: true,
@@ -301,7 +302,17 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
               </span>
             </>
           }
-          actions={<PrintWorkOrderButton />}
+          actions={
+            <PrintButton
+              workOrder={JSON.parse(
+                JSON.stringify({
+                  ...workOrder,
+                  checklistItems,
+                  consumedParts,
+                })
+              )}
+            />
+          }
           statusBadge={
             <StatusBadge
               status={workOrder.status}
@@ -493,6 +504,14 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
           commentsTab={ActivityContent}
           inventoryTab={
             <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <PrintButton />
+                <WorkOrderActions
+                  workOrder={workOrder}
+                  currentUser={{ id: user.id, name: user.name }}
+                  allTechs={techs}
+                />
+              </div>
               <WorkOrderPartsManager
                 workOrderId={workOrder.id}
                 parts={consumedParts}
