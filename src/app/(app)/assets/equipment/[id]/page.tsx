@@ -34,20 +34,9 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function EquipmentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const equipmentId = Number.parseInt(id);
-
-  if (Number.isNaN(equipmentId)) {
-    notFound();
-  }
-
-  const equipmentItem = await db.query.equipment.findFirst({
-    where: eq(equipmentTable.id, equipmentId),
+async function getEquipmentItem(id: number) {
+  return db.query.equipment.findFirst({
+    where: eq(equipmentTable.id, id),
     with: {
       type: {
         with: {
@@ -79,13 +68,32 @@ export default async function EquipmentDetailPage({
       maintenanceSchedules: true,
     },
   });
+}
+
+export default async function EquipmentDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const equipmentId = Number.parseInt(id);
+
+  if (Number.isNaN(equipmentId)) {
+    notFound();
+  }
+
+  // Parallelize all initial data fetching
+  const [equipmentItem, user, favoriteResult] = await Promise.all([
+    getEquipmentItem(equipmentId),
+    getCurrentUser(),
+    isFavorite("equipment", equipmentId),
+  ]);
 
   if (!equipmentItem) {
     notFound();
   }
 
   // Security Audit: Technicians only allowed in their department
-  const user = await getCurrentUser();
   if (
     user?.roleName === "tech" &&
     user.departmentId &&
@@ -95,8 +103,6 @@ export default async function EquipmentDetailPage({
     notFound();
   }
 
-  // Check if this equipment is favorited by the current user
-  const favoriteResult = await isFavorite("equipment", equipmentId);
   const isFavorited = favoriteResult.success && favoriteResult.data === true;
 
   const statusConfigs: Record<

@@ -167,39 +167,28 @@ async function getStats(user: SessionUser | null) {
   const departmentId = user?.departmentId;
   const isTech = user?.roleName === "tech";
 
-  const runCountQuery = async (...extraConditions: (SQL | undefined)[]) => {
-    const conditions = extraConditions.filter((c): c is SQL => c !== undefined);
+  const conditions = [];
+  if (isTech && departmentId) {
+    conditions.push(eq(workOrders.departmentId, departmentId));
+  }
 
-    if (isTech && departmentId) {
-      conditions.push(eq(workOrders.departmentId, departmentId));
-    }
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [result] = await db
-      .select({ count: count() })
-      .from(workOrders)
-      .where(conditions.length > 0 ? and(...conditions) : undefined);
-
-    return result?.count || 0;
-  };
-
-  const openCount = await runCountQuery(eq(workOrders.status, "open"));
-
-  const inProgressCount = await runCountQuery(
-    eq(workOrders.status, "in_progress")
-  );
-
-  const resolvedCount = await runCountQuery(eq(workOrders.status, "resolved"));
-
-  const criticalCount = await runCountQuery(
-    eq(workOrders.priority, "critical"),
-    eq(workOrders.status, "open")
-  );
+  const [stats] = await db
+    .select({
+      open: sql<number>`count(case when ${workOrders.status} = 'open' then 1 end)`,
+      inProgress: sql<number>`count(case when ${workOrders.status} = 'in_progress' then 1 end)`,
+      resolved: sql<number>`count(case when ${workOrders.status} = 'resolved' then 1 end)`,
+      critical: sql<number>`count(case when ${workOrders.priority} = 'critical' and ${workOrders.status} = 'open' then 1 end)`,
+    })
+    .from(workOrders)
+    .where(where);
 
   return {
-    open: openCount,
-    inProgress: inProgressCount,
-    resolved: resolvedCount,
-    critical: criticalCount,
+    open: Number(stats?.open || 0),
+    inProgress: Number(stats?.inProgress || 0),
+    resolved: Number(stats?.resolved || 0),
+    critical: Number(stats?.critical || 0),
   };
 }
 

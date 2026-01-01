@@ -6,7 +6,7 @@ import type { Location } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 
 interface EquipmentSearchProps {
   locations: Location[];
@@ -21,29 +21,28 @@ export function EquipmentSearch({
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState(initialSearch);
-
-  // Get current location from URL or default to empty (All)
   const currentLocation = searchParams.get("location") || "";
 
-  const updateSearch = useCallback(
-    (value: string) => {
-      setSearch(value);
+  useEffect(() => {
+    if (search === initialSearch) return;
 
+    const timeoutId = setTimeout(() => {
       startTransition(() => {
         const params = new URLSearchParams(searchParams.toString());
-        if (value) {
-          params.set("search", value);
+        if (search) {
+          params.set("search", search);
         } else {
           params.delete("search");
         }
-        router.push(`?${params.toString()}`);
+        router.replace(`?${params.toString()}`, { scroll: false });
       });
-    },
-    [router, searchParams]
-  );
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [search, router, searchParams, initialSearch]);
 
   const clearSearch = () => {
-    updateSearch("");
+    setSearch("");
   };
 
   const handleLocationClick = (locationId: string) => {
@@ -66,7 +65,7 @@ export function EquipmentSearch({
           type="search"
           placeholder="Scan or type equipment..."
           value={search}
-          onChange={(e) => updateSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className="pl-10 h-10 border-border focus-visible:ring-primary rounded-lg bg-muted/50 group-focus-within:bg-background group-focus-within:shadow-sm transition-all"
         />
         <Search

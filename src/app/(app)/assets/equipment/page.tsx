@@ -10,8 +10,7 @@ import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { type SessionUser, getCurrentUser } from "@/lib/session";
-import { desc } from "drizzle-orm";
-import { and, eq } from "drizzle-orm";
+import { and, asc, desc, eq, like, or, sql } from "drizzle-orm";
 import {
   AlertCircle,
   CheckCircle2,
@@ -50,12 +49,53 @@ async function getEquipment(params: SearchParams, user: SessionUser | null) {
     conditions.push(eq(equipmentTable.departmentId, departmentId));
   }
 
-  const equipmentList = await db.query.equipment.findMany({
+  if (params.status && params.status !== "all") {
+    conditions.push(eq(equipmentTable.status, params.status as any));
+  }
+
+  if (params.search) {
+    const searchPattern = `%${params.search}%`;
+    conditions.push(
+      or(
+        like(equipmentTable.name, searchPattern),
+        like(equipmentTable.code, searchPattern)
+      )
+    );
+  }
+
+  if (params.location) {
+    conditions.push(eq(equipmentTable.locationId, Number(params.location)));
+  }
+
+  // Handle sorting in SQL
+  let orderBy;
+  const sortDir = params.dir === "desc" ? desc : asc;
+  
+  switch (params.sort) {
+    case "name":
+      orderBy = sortDir(equipmentTable.name);
+      break;
+    case "code":
+      orderBy = sortDir(equipmentTable.code);
+      break;
+    case "status":
+      orderBy = sortDir(equipmentTable.status);
+      break;
+    default:
+      orderBy = desc(equipmentTable.createdAt);
+  }
+
+  return db.query.equipment.findMany({
     where: conditions.length > 0 ? and(...conditions) : undefined,
-    orderBy: [desc(equipmentTable.createdAt)],
+    orderBy: [orderBy],
     with: {
       location: true,
-      owner: true,
+      owner: {
+        columns: {
+          id: true,
+          name: true,
+        },
+      },
       type: {
         with: {
           category: true,
@@ -63,60 +103,6 @@ async function getEquipment(params: SearchParams, user: SessionUser | null) {
       },
     },
   });
-
-  let filtered = equipmentList;
-
-  if (params.status && params.status !== "all") {
-    filtered = filtered.filter((m) => m.status === params.status);
-  }
-
-  if (params.search) {
-    filtered = filtered.filter(
-      (m) =>
-        m.name.toLowerCase().includes(params.search!.toLowerCase()) ||
-        m.code.toLowerCase().includes(params.search!.toLowerCase())
-    );
-  }
-
-  if (params.sort) {
-    filtered.sort((a, b) => {
-      let valA = "";
-      let valB = "";
-
-      switch (params.sort) {
-        case "name":
-          valA = a.name.toLowerCase();
-          valB = b.name.toLowerCase();
-          break;
-        case "code":
-          valA = a.code.toLowerCase();
-          valB = b.code.toLowerCase();
-          break;
-        case "status":
-          valA = a.status;
-          valB = b.status;
-          break;
-        case "location":
-          valA = a.location?.name.toLowerCase() || "";
-          valB = b.location?.name.toLowerCase() || "";
-          break;
-        case "classification":
-          valA = a.type?.name.toLowerCase() || "";
-          valB = b.type?.name.toLowerCase() || "";
-          break;
-        case "responsible":
-          valA = a.owner?.name.toLowerCase() || "";
-          valB = b.owner?.name.toLowerCase() || "";
-          break;
-      }
-
-      if (valA < valB) return params.dir === "desc" ? 1 : -1;
-      if (valA > valB) return params.dir === "desc" ? -1 : 1;
-      return 0;
-    });
-  }
-
-  return filtered;
 }
 
 async function getEquipmentStats(user: SessionUser | null) {
@@ -128,14 +114,24 @@ async function getEquipmentStats(user: SessionUser | null) {
     conditions.push(eq(equipmentTable.departmentId, departmentId));
   }
 
-  const allEquipment = await db.query.equipment.findMany({
-    where: conditions.length > 0 ? and(...conditions) : undefined,
-  });
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  // Optimized parallel count query using SQL aggregations
+  const [stats] = await db
+    .select({
+      total: sql<number>`count(*)`,
+      operational: sql<number>`count(case when ${equipmentTable.status} = 'operational' then 1 end)`,
+      down: sql<number>`count(case when ${equipmentTable.status} = 'down' then 1 end)`,
+      maintenance: sql<number>`count(case when ${equipmentTable.status} = 'maintenance' then 1 end)`,
+    })
+    .from(equipmentTable)
+    .where(where);
+
   return {
-    total: allEquipment.length,
-    operational: allEquipment.filter((m) => m.status === "operational").length,
-    down: allEquipment.filter((m) => m.status === "down").length,
-    maintenance: allEquipment.filter((m) => m.status === "maintenance").length,
+    total: Number(stats?.total || 0),
+    operational: Number(stats?.operational || 0),
+    down: Number(stats?.down || 0),
+    maintenance: Number(stats?.maintenance || 0),
   };
 }
 
@@ -145,11 +141,16 @@ export default async function EquipmentPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
+  
   const user = await getCurrentUser();
-  const equipmentList = await getEquipment(params, user);
-  const stats = await getEquipmentStats(user);
+  
+  // Parallelize remaining data fetching
+  const [equipmentList, stats, favoriteResult] = await Promise.all([
+    getEquipment(params, user),
+    getEquipmentStats(user),
+    getFavoriteIds("equipment"),
+  ]);
 
-  const favoriteResult = await getFavoriteIds("equipment");
   const favoriteIds = favoriteResult.success ? (favoriteResult.data ?? []) : [];
 
   return (

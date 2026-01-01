@@ -239,7 +239,32 @@ export async function revokeAllSessions(): Promise<ActionResult<null>> {
   }
 
   try {
+    // Increment session version to invalidate all active JWTs globally
+    const userRecord = await db.query.users.findFirst({
+      where: eq(users.id, user.id),
+      columns: { sessionVersion: true },
+    });
+
+    const newVersion = (userRecord?.sessionVersion ?? 1) + 1;
+
+    await db
+      .update(users)
+      .set({
+        sessionVersion: newVersion,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, user.id));
+
+    await logAudit({
+      entityType: "user",
+      entityId: user.id,
+      action: "LOGOUT_ALL",
+      details: { reason: "User requested global session revocation" },
+    });
+
+    // Clear local session cookies
     await deleteSession();
+
     return { success: true, data: null };
   } catch (error) {
     console.error("Failed to revoke sessions:", error);

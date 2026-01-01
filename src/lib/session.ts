@@ -137,7 +137,9 @@ export async function deleteSession(): Promise<void> {
   cookieStore.delete(CSRF_COOKIE_NAME);
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+import { cache } from "react";
+
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const session = await getSession();
   if (!session?.user) {
     return null;
@@ -146,7 +148,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   // Validate session version hasn't changed (PIN change invalidates sessions)
   const { isSessionVersionValid } = await import("./session-validator");
   const isValid = await isSessionVersionValid(session.user);
-  
+
   if (!isValid) {
     // Session is invalidated - clear cookies
     await deleteSession();
@@ -154,7 +156,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   }
 
   return session.user;
-}
+});
 
 export async function requireAuth(): Promise<SessionUser> {
   const user = await getCurrentUser();
