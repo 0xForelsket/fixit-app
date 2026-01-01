@@ -135,7 +135,8 @@ describe("POST /api/work-orders", () => {
       roleId: 2,
       roleName: "tech",
       departmentId: 1,
-      sessionVersion: 1, permissions: ["ticket:create", "ticket:view"],
+      sessionVersion: 1,
+      permissions: ["ticket:create", "ticket:view"],
       hourlyRate: 25.0,
     };
     vi.mocked(requireAuth).mockResolvedValue(mockUser);

@@ -91,7 +91,8 @@ describe("createWorkOrder action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -115,7 +116,8 @@ describe("createWorkOrder action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const mockWorkOrder = {
@@ -189,7 +191,8 @@ describe("createWorkOrder action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const mockWorkOrder = {
@@ -248,7 +251,7 @@ describe("createWorkOrder action", () => {
       id: 2,
       name: "tech",
       description: "Maintenance technician",
-      sessionVersion: 1, permissions: ["ticket:view", "ticket:update"],
+      permissions: ["ticket:view", "ticket:update"],
       isSystemRole: true,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -268,6 +271,7 @@ describe("createWorkOrder action", () => {
         email: null,
         departmentId: null,
         preferences: null,
+        sessionVersion: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -313,7 +317,8 @@ describe("updateWorkOrder action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -336,7 +341,8 @@ describe("updateWorkOrder action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.workOrders.findFirst).mockResolvedValue(undefined);
@@ -359,7 +365,8 @@ describe("updateWorkOrder action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -406,7 +413,8 @@ describe("updateWorkOrder action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -471,7 +479,8 @@ describe("resolveWorkOrder action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -494,7 +503,8 @@ describe("resolveWorkOrder action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -515,7 +525,8 @@ describe("resolveWorkOrder action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -582,7 +593,8 @@ describe("addWorkOrderComment action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -603,7 +615,8 @@ describe("addWorkOrderComment action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
@@ -626,7 +639,8 @@ describe("addWorkOrderComment action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     let capturedValues: unknown;
@@ -679,7 +693,8 @@ describe("Notification triggers", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -730,7 +745,8 @@ describe("Notification triggers", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -782,7 +798,8 @@ describe("Notification triggers", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -833,7 +850,8 @@ describe("Notification triggers", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -880,7 +898,8 @@ describe("Notification triggers", () => {
         name: "Admin",
         roleName: "admin",
         roleId: 1,
-        permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -934,7 +953,8 @@ describe("Notification triggers", () => {
         name: "Operator",
         roleName: "operator",
         roleId: 1,
-        permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -982,7 +1002,8 @@ describe("Notification triggers", () => {
         name: "Admin",
         roleName: "admin",
         roleId: 1,
-        permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
@@ -1030,7 +1051,8 @@ describe("Notification triggers", () => {
         name: "Tech",
         roleName: "tech",
         roleId: 2,
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       });
 
       vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({

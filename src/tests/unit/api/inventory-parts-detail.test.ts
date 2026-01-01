@@ -26,6 +26,7 @@ vi.mock("@/db", () => ({
 // Mock session
 vi.mock("@/lib/session", () => ({
   getCurrentUser: vi.fn(),
+  requireCsrf: vi.fn().mockResolvedValue(true),
 }));
 
 // Mock logger
@@ -38,15 +39,26 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
+// Mock auth
+vi.mock("@/lib/auth", () => ({
+  userHasPermission: vi.fn(),
+  PERMISSIONS: {
+    INVENTORY_VIEW: "inventory:view",
+    INVENTORY_UPDATE: "inventory:update",
+    INVENTORY_DELETE: "inventory:delete",
+  },
+}));
+
 import { DELETE, GET, PATCH } from "@/app/(app)/api/inventory/parts/[id]/route";
 import { db } from "@/db";
+import { userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 
-describe("GET /api/inventory/parts/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
+describe("GET /api/inventory/parts/[id]", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
@@ -171,10 +183,6 @@ describe("GET /api/inventory/parts/[id]", () => {
 });
 
 describe("PATCH /api/inventory/parts/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
@@ -191,6 +199,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("returns 401 when user lacks permission", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(false);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Operator",
@@ -225,6 +234,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("returns 400 for invalid part ID", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Admin",
@@ -259,6 +269,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("returns 404 when part not found", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Admin",
@@ -300,6 +311,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("updates part successfully", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Admin",
@@ -352,10 +364,6 @@ describe("PATCH /api/inventory/parts/[id]", () => {
 });
 
 describe("DELETE /api/inventory/parts/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
@@ -370,6 +378,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("returns 401 when user lacks permission", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(false);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       employeeId: "TECH-001",
@@ -377,7 +386,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       roleName: "tech",
       roleId: 2,
       departmentId: 1,
-      sessionVersion: 1, permissions: ["ticket:view", "equipment:view"],
+      sessionVersion: 1,
+      permissions: ["ticket:view", "equipment:view"],
       hourlyRate: 25.0,
     });
 
@@ -392,6 +402,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("returns 400 for invalid part ID", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Admin",
@@ -424,6 +435,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("returns 404 when part not found", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Admin",
@@ -461,6 +473,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("deletes part successfully", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 1,
       name: "Admin",

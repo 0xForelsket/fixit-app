@@ -12,7 +12,7 @@ describe("loginSchema", () => {
   it("should validate correct login credentials", () => {
     const result = loginSchema.safeParse({
       employeeId: "TECH-001",
-      pin: "1234",
+      pin: "123456",
     });
     expect(result.success).toBe(true);
   });
@@ -20,23 +20,23 @@ describe("loginSchema", () => {
   it("should reject empty employee ID", () => {
     const result = loginSchema.safeParse({
       employeeId: "",
-      pin: "1234",
+      pin: "123456",
     });
     expect(result.success).toBe(false);
   });
 
-  it("should reject PIN shorter than 4 characters", () => {
+  it("should reject PIN shorter than 6 characters", () => {
     const result = loginSchema.safeParse({
       employeeId: "TECH-001",
-      pin: "123",
+      pin: "12345",
     });
     expect(result.success).toBe(false);
   });
 
-  it("should accept PIN with 4 characters", () => {
+  it("should accept PIN with 6 characters", () => {
     const result = loginSchema.safeParse({
       employeeId: "TECH-001",
-      pin: "1234",
+      pin: "123456",
     });
     expect(result.success).toBe(true);
   });
@@ -48,7 +48,7 @@ describe("createUserSchema", () => {
       employeeId: "EMP-001",
       name: "John Smith",
       email: "john@example.com",
-      pin: "1234",
+      pin: "123456",
       role: "operator",
     });
     expect(result.success).toBe(true);
@@ -58,7 +58,7 @@ describe("createUserSchema", () => {
     const result = createUserSchema.safeParse({
       employeeId: "EMP 001", // space not allowed
       name: "John Smith",
-      pin: "1234",
+      pin: "123456",
     });
     expect(result.success).toBe(false);
   });
@@ -67,7 +67,7 @@ describe("createUserSchema", () => {
     const result = createUserSchema.safeParse({
       employeeId: "EMP-001-A",
       name: "John Smith",
-      pin: "1234",
+      pin: "123456",
     });
     expect(result.success).toBe(true);
   });
@@ -76,7 +76,7 @@ describe("createUserSchema", () => {
     const result = createUserSchema.safeParse({
       employeeId: "EMP-001",
       name: "John Smith",
-      pin: "1234",
+      pin: "123456",
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -89,7 +89,7 @@ describe("createUserSchema", () => {
       const result = createUserSchema.safeParse({
         employeeId: "EMP-001",
         name: "John Smith",
-        pin: "1234",
+        pin: "123456",
         role,
       });
       expect(result.success).toBe(true);
@@ -100,7 +100,7 @@ describe("createUserSchema", () => {
     const result = createUserSchema.safeParse({
       employeeId: "EMP-001",
       name: "John Smith",
-      pin: "1234",
+      pin: "123456",
       role: "superadmin",
     });
     expect(result.success).toBe(false);
@@ -110,7 +110,7 @@ describe("createUserSchema", () => {
     const result = createUserSchema.safeParse({
       employeeId: "EMP-001",
       name: "John Smith",
-      pin: "1234",
+      pin: "123456",
       email: null,
     });
     expect(result.success).toBe(true);
@@ -120,7 +120,7 @@ describe("createUserSchema", () => {
     const result = createUserSchema.safeParse({
       employeeId: "EMP-001",
       name: "John Smith",
-      pin: "1234",
+      pin: "123456",
       email: "",
     });
     expect(result.success).toBe(true);

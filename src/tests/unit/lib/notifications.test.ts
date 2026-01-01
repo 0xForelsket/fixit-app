@@ -9,7 +9,9 @@ vi.mock("@/db", () => ({
       },
     },
     insert: vi.fn(() => ({
-      values: vi.fn(),
+      values: vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+      })),
     })),
   },
 }));
@@ -30,7 +32,7 @@ describe("notifications helper", () => {
     it("creates notification when user has no preferences set", async () => {
       vi.mocked(db.query.users.findFirst).mockResolvedValue({
         preferences: null,
-      });
+      } as any);
 
       const result = await createNotification({
         userId: 1,
@@ -51,7 +53,7 @@ describe("notifications helper", () => {
           density: "comfortable",
           notifications: { email: true },
         },
-      });
+      } as any);
 
       const result = await createNotification({
         userId: 1,
@@ -82,7 +84,7 @@ describe("notifications helper", () => {
             },
           },
         },
-      });
+      } as any);
 
       const result = await createNotification({
         userId: 1,
@@ -114,7 +116,7 @@ describe("notifications helper", () => {
             },
           },
         },
-      });
+      } as any);
 
       const result = await createNotification({
         userId: 1,
@@ -145,7 +147,7 @@ describe("notifications helper", () => {
             },
           },
         },
-      });
+      } as any);
 
       const result = await createNotification({
         userId: 1,
@@ -161,7 +163,7 @@ describe("notifications helper", () => {
     it("creates notification without link when not provided", async () => {
       vi.mocked(db.query.users.findFirst).mockResolvedValue({
         preferences: null,
-      });
+      } as any);
 
       await createNotification({
         userId: 1,
@@ -197,7 +199,7 @@ describe("notifications helper", () => {
     it("creates notifications for multiple users", async () => {
       vi.mocked(db.query.users.findFirst).mockResolvedValue({
         preferences: null,
-      });
+      } as any);
 
       const result = await createNotificationsForUsers(
         [1, 2, 3],
@@ -213,7 +215,7 @@ describe("notifications helper", () => {
 
     it("respects each user preferences individually", async () => {
       vi.mocked(db.query.users.findFirst)
-        .mockResolvedValueOnce({ preferences: null }) // User 1: no prefs, create
+        .mockResolvedValueOnce({ preferences: null } as any) // User 1: no prefs, create
         .mockResolvedValueOnce({
           // User 2: disabled, skip
           preferences: {
@@ -232,8 +234,8 @@ describe("notifications helper", () => {
               },
             },
           },
-        })
-        .mockResolvedValueOnce({ preferences: null }); // User 3: no prefs, create
+        } as any)
+        .mockResolvedValueOnce({ preferences: null } as any); // User 3: no prefs, create
 
       const result = await createNotificationsForUsers(
         [1, 2, 3],

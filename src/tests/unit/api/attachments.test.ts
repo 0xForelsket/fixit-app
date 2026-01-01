@@ -29,6 +29,7 @@ vi.mock("@/db", () => ({
 // Mock session
 vi.mock("@/lib/session", () => ({
   getCurrentUser: vi.fn(),
+  requireCsrf: vi.fn().mockResolvedValue(true),
 }));
 
 // Mock rate limit
@@ -64,21 +65,31 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
+// Mock auth
+vi.mock("@/lib/auth", () => ({
+  userHasPermission: vi.fn(),
+  PERMISSIONS: {
+    ALL: "*",
+  },
+}));
+
 import {
   DELETE,
   GET as GET_BY_ID,
 } from "@/app/(app)/api/attachments/[id]/route";
 import { GET, POST } from "@/app/(app)/api/attachments/route";
 import { db } from "@/db";
+import { userHasPermission } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { deleteObject } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 
-describe("GET /api/attachments", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(userHasPermission).mockReturnValue(true);
+});
 
+describe("GET /api/attachments", () => {
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
@@ -258,10 +269,6 @@ describe("GET /api/attachments", () => {
 });
 
 describe("POST /api/attachments", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 429 when rate limited", async () => {
     vi.mocked(checkRateLimit).mockReturnValue({
       success: false,
@@ -417,10 +424,6 @@ describe("POST /api/attachments", () => {
 });
 
 describe("GET /api/attachments/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
@@ -556,10 +559,6 @@ describe("GET /api/attachments/[id]", () => {
 });
 
 describe("DELETE /api/attachments/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
@@ -609,13 +608,15 @@ describe("DELETE /api/attachments/[id]", () => {
   });
 
   it("returns 403 when user is not owner and not admin", async () => {
+    vi.mocked(userHasPermission).mockReturnValue(false);
     vi.mocked(getCurrentUser).mockResolvedValue({
       id: 2, // Different user
       employeeId: "TECH-002",
       name: "Other Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
       id: 1,

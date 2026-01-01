@@ -46,7 +46,8 @@ describe("GET /api/auth/me", () => {
       name: "Tech User",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     };
     vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
 
@@ -64,7 +65,8 @@ describe("GET /api/auth/me", () => {
       name: "Admin User",
       roleName: "admin",
       roleId: 3,
-      sessionVersion: 1, permissions: ["*"],
+      sessionVersion: 1,
+      permissions: ["*"],
     };
     vi.mocked(getCurrentUser).mockResolvedValue(mockAdmin);
 

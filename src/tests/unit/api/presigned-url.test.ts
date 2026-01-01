@@ -59,7 +59,8 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const request = new Request(
@@ -78,7 +79,7 @@ describe("POST /api/attachments/presigned-url", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error).toContain("Missing required fields");
+    expect(data.error).toBe("Invalid request data");
   });
 
   it("returns presigned URL and s3Key on success", async () => {
@@ -88,7 +89,8 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockResolvedValue(
@@ -113,11 +115,9 @@ describe("POST /api/attachments/presigned-url", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.uploadUrl).toBe(
-      "https://s3.example.com/upload?signed=true"
-    );
-    expect(data.data.s3Key).toContain("work_orders/5/");
-    expect(data.data.s3Key).toContain(".jpg");
+    expect(data.uploadUrl).toBe("https://s3.example.com/upload?signed=true");
+    expect(data.s3Key).toContain("work_orders/5/");
+    expect(data.s3Key).toContain(".jpg");
   });
 
   it("generates correct s3Key format for different entity types", async () => {
@@ -127,7 +127,8 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockResolvedValue(
@@ -151,8 +152,8 @@ describe("POST /api/attachments/presigned-url", () => {
     const response = await POST(request);
     const data = await response.json();
 
-    expect(data.data.s3Key).toContain("equipments/10/");
-    expect(data.data.s3Key).toContain(".pdf");
+    expect(data.s3Key).toContain("equipments/10/");
+    expect(data.s3Key).toContain(".pdf");
   });
 
   it("handles S3 errors gracefully", async () => {
@@ -162,7 +163,8 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockRejectedValue(
@@ -197,7 +199,8 @@ describe("POST /api/attachments/presigned-url", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(getPresignedUploadUrl).mockResolvedValue(
@@ -221,6 +224,6 @@ describe("POST /api/attachments/presigned-url", () => {
     const response = await POST(request);
     const data = await response.json();
 
-    expect(data.data.s3Key).toMatch(/\.png$/);
+    expect(data.s3Key).toMatch(/\.png$/);
   });
 });

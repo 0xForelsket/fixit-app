@@ -118,10 +118,9 @@ describe("Textarea", () => {
     const textarea = screen.getByTestId("textarea");
     expect(textarea).toHaveClass("flex");
     expect(textarea).toHaveClass("w-full");
-    expect(textarea).toHaveClass("rounded-md");
+    expect(textarea).toHaveClass("rounded-xl");
     expect(textarea).toHaveClass("border");
   });
-
   it("handles defaultValue prop", () => {
     render(<Textarea defaultValue="Default text" data-testid="textarea" />);
     expect(screen.getByTestId("textarea")).toHaveValue("Default text");

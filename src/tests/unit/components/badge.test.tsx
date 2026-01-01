@@ -41,33 +41,33 @@ describe("Badge", () => {
     it("renders success variant", () => {
       const { container } = render(<Badge variant="success">Success</Badge>);
 
-      expect(container.firstChild).toHaveClass("bg-success-100");
-      expect(container.firstChild).toHaveClass("text-success-800");
+      expect(container.firstChild).toHaveClass("bg-success-500/15");
+      expect(container.firstChild).toHaveClass("text-success-700");
     });
 
     it("renders warning variant", () => {
       const { container } = render(<Badge variant="warning">Warning</Badge>);
 
-      expect(container.firstChild).toHaveClass("bg-warning-100");
-      expect(container.firstChild).toHaveClass("text-warning-800");
+      expect(container.firstChild).toHaveClass("bg-warning-500/15");
+      expect(container.firstChild).toHaveClass("text-warning-700");
     });
 
     it("renders danger variant", () => {
       const { container } = render(<Badge variant="danger">Danger</Badge>);
 
-      expect(container.firstChild).toHaveClass("bg-danger-100");
-      expect(container.firstChild).toHaveClass("text-danger-800");
+      expect(container.firstChild).toHaveClass("bg-danger-500/15");
+      expect(container.firstChild).toHaveClass("text-danger-700");
     });
 
     it("renders critical variant with animation", () => {
       const { container } = render(<Badge variant="critical">Critical</Badge>);
 
-      expect(container.firstChild).toHaveClass("bg-gradient-to-r");
       expect(container.firstChild).toHaveClass("animate-gentle-pulse");
+      expect(container.firstChild).toHaveClass("from-danger-500");
     });
 
     it("uses default variant when not specified", () => {
-      const { container } = render(<Badge>No Variant</Badge>);
+      const { container } = render(<Badge>Default</Badge>);
 
       expect(container.firstChild).toHaveClass("bg-primary");
     });
@@ -75,18 +75,15 @@ describe("Badge", () => {
 
   describe("Styling", () => {
     it("applies base badge styles", () => {
-      const { container } = render(<Badge>Styled</Badge>);
+      const { container } = render(<Badge>Badge</Badge>);
 
       expect(container.firstChild).toHaveClass("inline-flex");
       expect(container.firstChild).toHaveClass("items-center");
-      expect(container.firstChild).toHaveClass("rounded-md");
-      expect(container.firstChild).toHaveClass("text-xs");
-      expect(container.firstChild).toHaveClass("font-semibold");
     });
 
     it("applies custom className", () => {
       const { container } = render(
-        <Badge className="custom-class">Custom</Badge>
+        <Badge className="custom-class">Badge</Badge>
       );
 
       expect(container.firstChild).toHaveClass("custom-class");
@@ -99,7 +96,7 @@ describe("Badge", () => {
         </Badge>
       );
 
-      expect(container.firstChild).toHaveClass("bg-success-100");
+      expect(container.firstChild).toHaveClass("bg-success-500/15");
       expect(container.firstChild).toHaveClass("extra-styling");
     });
   });

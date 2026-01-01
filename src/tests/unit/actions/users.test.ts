@@ -12,6 +12,7 @@ vi.mock("@/lib/session", () => ({
 
 vi.mock("@/lib/auth", () => ({
   requirePermission: vi.fn(),
+  hashPin: vi.fn((pin) => Promise.resolve(`hashed_${pin}`)),
 }));
 
 vi.mock("next/cache", () => ({
@@ -48,7 +49,8 @@ describe("User Actions", () => {
     roleId: 1,
     roleName: "admin",
     departmentId: 1,
-    sessionVersion: 1, permissions: ["*"],
+    sessionVersion: 1,
+    permissions: ["*"],
     hourlyRate: 50.0,
   };
 
@@ -62,7 +64,7 @@ describe("User Actions", () => {
     const validFormData = new FormData();
     validFormData.append("employeeId", "TEST-001");
     validFormData.append("name", "Test User");
-    validFormData.append("pin", "1234");
+    validFormData.append("pin", "123456");
     validFormData.append("roleId", "2");
     validFormData.append("isActive", "true");
 
@@ -70,7 +72,7 @@ describe("User Actions", () => {
       // Mock role check
       mockTx.query.roles.findFirst.mockResolvedValue({ id: 2, name: "tech" });
       // Mock duplicate check
-      mockTx.query.users.findFirst.mockResolvedValue(null);
+      mockTx.query.users.findFirst.mockResolvedValue(undefined);
       // Mock insert return
       mockTx.returning.mockResolvedValue([{ id: 10 }]);
 
@@ -95,10 +97,10 @@ describe("User Actions", () => {
     });
 
     it("should fail if role does not exist", async () => {
-      // First check (duplicate user) returns null
-      mockTx.query.users.findFirst.mockResolvedValue(null);
-      // Role check returns null
-      mockTx.query.roles.findFirst.mockResolvedValue(null);
+      // First check (duplicate user) returns undefined
+      mockTx.query.users.findFirst.mockResolvedValue(undefined);
+      // Role check returns undefined
+      mockTx.query.roles.findFirst.mockResolvedValue(undefined);
 
       const result = await createUser(validFormData);
 
@@ -130,7 +132,7 @@ describe("User Actions", () => {
     });
 
     it("should fail if user not found", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue(null);
+      mockTx.query.users.findFirst.mockResolvedValue(undefined);
 
       const result = await updateUser(userId, updateFormData);
 

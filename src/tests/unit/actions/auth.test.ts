@@ -36,7 +36,7 @@ describe("login action", () => {
 
     const formData = new FormData();
     formData.set("employeeId", "UNKNOWN-001");
-    formData.set("pin", "1234");
+    formData.set("pin", "123456");
 
     const result = await login({}, formData);
 
@@ -51,7 +51,7 @@ describe("login action", () => {
 
     const formData = new FormData();
     formData.set("employeeId", "TECH-001");
-    formData.set("pin", "1234");
+    formData.set("pin", "123456");
 
     const result = await login({}, formData);
 
@@ -68,7 +68,7 @@ describe("login action", () => {
 
     const formData = new FormData();
     formData.set("employeeId", "TECH-001");
-    formData.set("pin", "1234");
+    formData.set("pin", "123456");
 
     const result = await login({}, formData);
 
@@ -83,7 +83,7 @@ describe("login action", () => {
 
     const formData = new FormData();
     formData.set("employeeId", "TECH-001");
-    formData.set("pin", "wrong");
+    formData.set("pin", "654321");
 
     const result = await login({}, formData);
 
@@ -98,7 +98,7 @@ describe("login action", () => {
 
     const formData = new FormData();
     formData.set("employeeId", "TECH-001");
-    formData.set("pin", "wrong");
+    formData.set("pin", "654321");
 
     const result = await login({}, formData);
 
@@ -115,14 +115,15 @@ describe("login action", () => {
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       },
       csrfToken: "csrf-token",
     });
 
     const formData = new FormData();
     formData.set("employeeId", "TECH-001");
-    formData.set("pin", "1234");
+    formData.set("pin", "123456");
 
     try {
       await login({}, formData);
@@ -139,14 +140,15 @@ describe("login action", () => {
         employeeId: "ADMIN-001",
         name: "Admin User",
         roleName: "admin",
-        permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+        sessionVersion: 1,
       },
       csrfToken: "csrf-token",
     });
 
     const formData = new FormData();
     formData.set("employeeId", "ADMIN-001");
-    formData.set("pin", "1234");
+    formData.set("pin", "123456");
 
     try {
       await login({}, formData);
@@ -163,19 +165,20 @@ describe("login action", () => {
         employeeId: "OP-001",
         name: "Operator User",
         roleName: "operator",
-        permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        sessionVersion: 1,
       },
       csrfToken: "csrf-token",
     });
 
     const formData = new FormData();
     formData.set("employeeId", "OP-001");
-    formData.set("pin", "1234");
+    formData.set("pin", "123456");
 
     try {
       await login({}, formData);
     } catch {}
 
-    expect(redirect).toHaveBeenCalledWith("/");
+    expect(redirect).toHaveBeenCalledWith("/dashboard");
   });
 });

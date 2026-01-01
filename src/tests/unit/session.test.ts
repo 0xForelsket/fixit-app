@@ -27,6 +27,12 @@ vi.mock("jose", () => ({
 
 // Mock permissions
 vi.mock("@/lib/permissions", () => ({
+  PERMISSIONS: {
+    MAINTENANCE_VIEW: "maintenance:view",
+    SYSTEM_SETTINGS: "system:settings",
+    TICKET_VIEW: "ticket:view",
+    USER_CREATE: "user:create",
+  },
   hasPermission: vi.fn(),
   hasAnyPermission: vi.fn(),
 }));
@@ -63,7 +69,8 @@ describe("Session Utilities", () => {
     roleName: "operator",
     roleId: 1,
     departmentId: 1,
-    sessionVersion: 1, permissions: [PERMISSIONS.MAINTENANCE_VIEW],
+    sessionVersion: 1,
+    permissions: [PERMISSIONS.MAINTENANCE_VIEW],
     hourlyRate: 20.0,
   };
 

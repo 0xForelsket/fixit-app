@@ -52,6 +52,7 @@ describe("roles actions", () => {
     departmentId: 1,
     permissions: ["*"],
     hourlyRate: 50.0,
+    sessionVersion: 1,
   };
 
   beforeEach(() => {
@@ -312,6 +313,7 @@ describe("roles actions", () => {
         email: null,
         departmentId: null,
         preferences: null,
+        sessionVersion: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
       });

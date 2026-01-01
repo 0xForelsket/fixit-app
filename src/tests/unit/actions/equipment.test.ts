@@ -68,7 +68,8 @@ describe("createEquipment action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -88,7 +89,8 @@ describe("createEquipment action", () => {
       name: "Operator",
       roleName: "operator",
       roleId: 1,
-      permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -108,7 +110,8 @@ describe("createEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -128,7 +131,8 @@ describe("createEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     const mockEquipment = {
@@ -171,7 +175,8 @@ describe("createEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
@@ -219,7 +224,8 @@ describe("updateEquipment action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const formData = new FormData();
@@ -237,7 +243,8 @@ describe("updateEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
@@ -257,7 +264,8 @@ describe("updateEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -295,7 +303,8 @@ describe("updateEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -337,7 +346,8 @@ describe("updateEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -394,7 +404,8 @@ describe("deleteEquipment action", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const result = await deleteEquipment(1);
@@ -409,7 +420,8 @@ describe("deleteEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
@@ -426,7 +438,8 @@ describe("deleteEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
@@ -455,7 +468,8 @@ describe("deleteEquipment action", () => {
       name: "Admin",
       roleName: "admin",
       roleId: 3,
-      permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({

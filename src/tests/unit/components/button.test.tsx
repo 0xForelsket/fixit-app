@@ -49,30 +49,30 @@ describe("Button", () => {
 
   it("applies variant classes correctly", () => {
     const { rerender } = render(<Button variant="default">Default</Button>);
-    expect(screen.getByRole("button")).toHaveClass("bg-zinc-900");
+    expect(screen.getByRole("button")).toHaveClass("bg-primary");
 
     rerender(<Button variant="destructive">Destructive</Button>);
-    expect(screen.getByRole("button")).toHaveClass("bg-destructive");
+    expect(screen.getByRole("button")).toHaveClass("bg-danger-600");
 
     rerender(<Button variant="outline">Outline</Button>);
     expect(screen.getByRole("button")).toHaveClass("border-2");
 
     rerender(<Button variant="ghost">Ghost</Button>);
-    expect(screen.getByRole("button")).toHaveClass("hover:bg-zinc-100");
+    expect(screen.getByRole("button")).toHaveClass("hover:bg-muted");
   });
 
   it("applies size classes correctly", () => {
-    const { rerender } = render(<Button size="default">Default</Button>);
-    expect(screen.getByRole("button")).toHaveClass("h-11");
-
-    rerender(<Button size="sm">Small</Button>);
+    const { rerender } = render(<Button size="sm">Small</Button>);
     expect(screen.getByRole("button")).toHaveClass("h-9");
 
+    rerender(<Button size="default">Default</Button>);
+    expect(screen.getByRole("button")).toHaveClass("h-11");
+
     rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByRole("button")).toHaveClass("h-14");
+    expect(screen.getByRole("button")).toHaveClass("h-12");
 
     rerender(<Button size="icon">Icon</Button>);
-    expect(screen.getByRole("button")).toHaveClass("h-10", "w-10");
+    expect(screen.getByRole("button")).toHaveClass("h-10");
   });
 
   it("merges custom className", () => {

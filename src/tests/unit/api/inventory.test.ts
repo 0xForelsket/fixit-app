@@ -19,6 +19,7 @@ vi.mock("@/db", () => ({
 // Mock session
 vi.mock("@/lib/session", () => ({
   getCurrentUser: vi.fn(),
+  requireCsrf: vi.fn().mockResolvedValue(true),
 }));
 
 // Mock auth

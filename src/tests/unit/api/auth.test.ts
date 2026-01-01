@@ -39,7 +39,7 @@ describe("POST /api/auth/login", () => {
     const request = new Request("http://localhost/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "TEST-001", pin: "1234" }),
+      body: JSON.stringify({ employeeId: "TEST-001", pin: "123456" }),
     });
 
     const response = await POST(request);
@@ -52,7 +52,7 @@ describe("POST /api/auth/login", () => {
     const request = new Request("http://localhost/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "", pin: "12" }),
+      body: JSON.stringify({ employeeId: "", pin: "12345" }),
     });
 
     const response = await POST(request);
@@ -72,7 +72,7 @@ describe("POST /api/auth/login", () => {
     const request = new Request("http://localhost/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "TEST-001", pin: "1234" }),
+      body: JSON.stringify({ employeeId: "TEST-001", pin: "123456" }),
     });
 
     const response = await POST(request);
@@ -92,7 +92,7 @@ describe("POST /api/auth/login", () => {
     const request = new Request("http://localhost/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "TEST-001", pin: "1234" }),
+      body: JSON.stringify({ employeeId: "TEST-001", pin: "123456" }),
     });
 
     const response = await POST(request);
@@ -110,7 +110,8 @@ describe("POST /api/auth/login", () => {
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
       },
       csrfToken: "csrf-token-123",
     });
@@ -118,7 +119,7 @@ describe("POST /api/auth/login", () => {
     const request = new Request("http://localhost/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ employeeId: "TECH-001", pin: "1234" }),
+      body: JSON.stringify({ employeeId: "TECH-001", pin: "123456" }),
     });
 
     const response = await POST(request);

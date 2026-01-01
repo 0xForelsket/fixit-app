@@ -51,7 +51,8 @@ describe("GET /api/notifications", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const mockNotifications = [
@@ -96,7 +97,8 @@ describe("GET /api/notifications", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.notifications.findMany).mockResolvedValue([]);
@@ -115,7 +117,8 @@ describe("GET /api/notifications", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.notifications.findMany).mockRejectedValue(

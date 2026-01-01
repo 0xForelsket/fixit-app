@@ -1,6 +1,6 @@
 import { StatsCard } from "@/components/ui/stats-card";
 import { render, screen } from "@testing-library/react";
-import { AlertTriangle, Clock, Inbox } from "lucide-react";
+import { Activity, AlertTriangle, Clock, Inbox } from "lucide-react";
 import { describe, expect, it } from "vitest";
 
 describe("StatsCard", () => {
@@ -52,55 +52,59 @@ describe("StatsCard", () => {
   describe("Variants", () => {
     it("applies default variant styles", () => {
       const { container } = render(
-        <StatsCard {...defaultProps} variant="default" />
+        <StatsCard title="Test" value={10} icon={Activity} />
       );
 
-      expect(container.firstChild).toHaveClass("bg-white");
+      expect(container.firstChild).toHaveClass("bg-card");
     });
 
     it("applies primary variant styles", () => {
       const { container } = render(
-        <StatsCard {...defaultProps} variant="primary" />
+        <StatsCard title="Test" value={10} icon={Activity} variant="primary" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-primary-50/50");
+      expect(container.firstChild).toHaveClass("bg-primary/10");
     });
 
     it("applies success variant styles", () => {
       const { container } = render(
-        <StatsCard {...defaultProps} variant="success" />
+        <StatsCard title="Test" value={10} icon={Activity} variant="success" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-success-50/50");
+      expect(container.firstChild).toHaveClass("bg-success-500/15");
     });
 
     it("applies warning variant styles", () => {
       const { container } = render(
-        <StatsCard {...defaultProps} variant="warning" />
+        <StatsCard title="Test" value={10} icon={Activity} variant="warning" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-warning-50/50");
+      expect(container.firstChild).toHaveClass("bg-warning-500/15");
     });
 
     it("applies danger variant styles", () => {
       const { container } = render(
-        <StatsCard {...defaultProps} variant="danger" />
+        <StatsCard title="Test" value={10} icon={Activity} variant="danger" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-danger-50/50");
+      expect(container.firstChild).toHaveClass("bg-danger-500/15");
     });
   });
 
   describe("Active State", () => {
     it("shows active indicator when active is true", () => {
-      const { container } = render(<StatsCard {...defaultProps} active />);
+      const { container } = render(
+        <StatsCard title="Test" value={10} icon={Activity} active={true} />
+      );
 
       // Active state should have special styling
-      expect(container.firstChild).toHaveClass("border-primary-400");
+      expect(container.firstChild).toHaveClass("border-primary/40");
     });
 
     it("shows pulse animation when active", () => {
-      const { container } = render(<StatsCard {...defaultProps} active />);
+      const { container } = render(
+        <StatsCard title="Test" value={10} icon={Activity} active={true} />
+      );
 
       expect(container.querySelector(".animate-pulse")).toBeInTheDocument();
     });
@@ -109,45 +113,67 @@ describe("StatsCard", () => {
   describe("Trend Display", () => {
     it("renders positive trend", () => {
       render(
-        <StatsCard {...defaultProps} trend={{ value: 15, positive: true }} />
+        <StatsCard
+          title="Test"
+          value={10}
+          icon={Activity}
+          trend={{ value: 10, positive: true }}
+        />
       );
 
-      expect(screen.getByText("+15%")).toBeInTheDocument();
+      expect(screen.getByText("+10%")).toBeInTheDocument();
     });
 
     it("renders negative trend", () => {
       render(
-        <StatsCard {...defaultProps} trend={{ value: 10, positive: false }} />
+        <StatsCard
+          title="Test"
+          value={10}
+          icon={Activity}
+          trend={{ value: 5, positive: false }}
+        />
       );
 
-      expect(screen.getByText("10%")).toBeInTheDocument();
+      expect(screen.getByText("5%")).toBeInTheDocument();
     });
 
     it("renders trend with label", () => {
       render(
         <StatsCard
-          {...defaultProps}
-          trend={{ value: 5, positive: true, label: "vs last week" }}
+          title="Test"
+          value={10}
+          icon={Activity}
+          trend={{ value: 10, positive: true, label: "vs last month" }}
         />
       );
 
-      expect(screen.getByText("vs last week")).toBeInTheDocument();
+      expect(screen.getByText("vs last month")).toBeInTheDocument();
     });
 
     it("applies correct color for positive trend", () => {
-      const { container } = render(
-        <StatsCard {...defaultProps} trend={{ value: 10, positive: true }} />
+      render(
+        <StatsCard
+          title="Test"
+          value={10}
+          icon={Activity}
+          trend={{ value: 10, positive: true }}
+        />
       );
 
-      expect(container.querySelector(".bg-success-100")).toBeInTheDocument();
+      expect(screen.getByText("+10%")).toHaveClass("bg-success-500/10");
     });
 
     it("applies correct color for negative trend", () => {
-      const { container } = render(
-        <StatsCard {...defaultProps} trend={{ value: 10, positive: false }} />
+      render(
+        <StatsCard
+          title="Test"
+          value={10}
+          icon={Activity}
+          trend={{ value: 10, positive: false }}
+        />
       );
 
-      expect(container.querySelector(".bg-danger-100")).toBeInTheDocument();
+      expect(screen.getByText("10%")).toHaveClass("bg-destructive/10");
     });
   });
 

@@ -59,10 +59,9 @@ describe("Label", () => {
   it("has default styling classes", () => {
     render(<Label data-testid="label">Label</Label>);
     const label = screen.getByTestId("label");
-    expect(label).toHaveClass("text-sm");
-    expect(label).toHaveClass("font-medium");
+    expect(label).toHaveClass("text-[11px]");
+    expect(label).toHaveClass("font-black");
   });
-
   it("renders with complex children", () => {
     render(
       <Label>

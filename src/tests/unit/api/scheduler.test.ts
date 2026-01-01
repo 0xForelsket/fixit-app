@@ -37,10 +37,16 @@ vi.mock("@/db", () => ({
 // Mock session
 vi.mock("@/lib/session", () => ({
   getCurrentUser: vi.fn(),
+  requireCsrf: vi.fn().mockResolvedValue(true),
 }));
 
 // Mock logger
 vi.mock("@/lib/logger", () => ({
+  apiLogger: {
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
+  },
   schedulerLogger: {
     error: vi.fn(),
     warn: vi.fn(),
@@ -94,7 +100,7 @@ describe("POST /api/scheduler/run", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -121,7 +127,8 @@ describe("POST /api/scheduler/run", () => {
       roleName: "admin",
       roleId: 3,
       departmentId: 1,
-      sessionVersion: 1, permissions: ["system:scheduler"],
+      sessionVersion: 1,
+      permissions: ["system:scheduler"],
       hourlyRate: 50.0,
     });
 
@@ -131,7 +138,7 @@ describe("POST /api/scheduler/run", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -153,7 +160,8 @@ describe("POST /api/scheduler/run", () => {
       roleName: "admin",
       roleId: 3,
       departmentId: 1,
-      sessionVersion: 1, permissions: ["*"],
+      sessionVersion: 1,
+      permissions: ["*"],
       hourlyRate: 50.0,
     });
 
@@ -163,7 +171,7 @@ describe("POST /api/scheduler/run", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -183,7 +191,8 @@ describe("POST /api/scheduler/run", () => {
       roleName: "tech",
       roleId: 2,
       departmentId: 1,
-      sessionVersion: 1, permissions: ["ticket:view", "equipment:view"],
+      sessionVersion: 1,
+      permissions: ["ticket:view", "equipment:view"],
       hourlyRate: 25.0,
     });
 
@@ -233,7 +242,7 @@ describe("POST /api/scheduler/run", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
 
     // Mock the transaction
     vi.mocked(db.transaction).mockImplementation(async (callback) => {
@@ -307,7 +316,7 @@ describe("POST /api/scheduler/run", () => {
       })),
     } as unknown as ReturnType<typeof db.select>);
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
     vi.mocked(db.transaction).mockRejectedValue(
       new Error("Transaction failed")
     );
@@ -358,14 +367,14 @@ describe("POST /api/scheduler/run", () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
         id: 1,
         name: "admin",
-      });
+      } as any);
       vi.mocked(db.query.users.findMany).mockResolvedValue([
         { id: 2, name: "Admin User" },
-      ]);
+      ] as any[]);
       vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
         id: 10,
         name: "Machine A",
-      });
+      } as any);
 
       const request = new Request("http://localhost/api/scheduler/run", {
         method: "POST",
@@ -412,7 +421,7 @@ describe("POST /api/scheduler/run", () => {
         })),
       } as unknown as ReturnType<typeof db.select>);
 
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(null);
+      vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
 
       const request = new Request("http://localhost/api/scheduler/run", {
         method: "POST",
@@ -458,15 +467,15 @@ describe("POST /api/scheduler/run", () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
         id: 1,
         name: "admin",
-      });
+      } as any);
       vi.mocked(db.query.users.findMany).mockResolvedValue([
         { id: 2, name: "Admin 1" },
         { id: 3, name: "Admin 2" },
-      ]);
+      ] as any[]);
       vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
         id: 10,
         name: "Equipment X",
-      });
+      } as any);
 
       const request = new Request("http://localhost/api/scheduler/run", {
         method: "POST",
@@ -514,8 +523,8 @@ describe("POST /api/scheduler/run", () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
         id: 1,
         name: "admin",
-      });
-      vi.mocked(db.query.users.findMany).mockResolvedValue([]);
+      } as any);
+      vi.mocked(db.query.users.findMany).mockResolvedValue([] as any[]);
 
       // Make update fail
       vi.mocked(db.update).mockReturnValue({

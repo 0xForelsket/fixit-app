@@ -20,6 +20,7 @@ vi.mock("@/db", () => ({
 // Mock session
 vi.mock("@/lib/session", () => ({
   getCurrentUser: vi.fn(),
+  requireCsrf: vi.fn().mockResolvedValue(true),
 }));
 
 // Mock logger
@@ -62,7 +63,8 @@ describe("GET /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const mockLogs = [
@@ -100,7 +102,8 @@ describe("GET /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     vi.mocked(db.query.laborLogs.findMany).mockResolvedValue([]);
@@ -143,7 +146,8 @@ describe("POST /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const request = new Request("http://localhost/api/labor", {
@@ -169,7 +173,8 @@ describe("POST /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const mockLog = {
@@ -217,7 +222,8 @@ describe("POST /api/labor", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     let capturedValues: unknown;

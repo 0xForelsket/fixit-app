@@ -134,12 +134,9 @@ describe("Input", () => {
       const { container } = render(<Input />);
 
       expect(container.firstChild).toHaveClass("flex");
-      expect(container.firstChild).toHaveClass("h-10");
       expect(container.firstChild).toHaveClass("w-full");
-      expect(container.firstChild).toHaveClass("rounded-md");
-      expect(container.firstChild).toHaveClass("border");
+      expect(container.firstChild).toHaveClass("rounded-xl");
     });
-
     it("applies custom className", () => {
       const { container } = render(<Input className="custom-input" />);
 

@@ -59,7 +59,8 @@ describe("GET /api/labor/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const request = new Request("http://localhost/api/labor/abc");
@@ -77,7 +78,8 @@ describe("GET /api/labor/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
     vi.mocked(db.query.laborLogs.findFirst).mockResolvedValue(undefined);
 
@@ -96,7 +98,8 @@ describe("GET /api/labor/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const mockLaborLog = {
@@ -154,7 +157,8 @@ describe("DELETE /api/labor/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
 
     const request = new Request("http://localhost/api/labor/abc", {
@@ -174,7 +178,8 @@ describe("DELETE /api/labor/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(() => ({
@@ -199,7 +204,8 @@ describe("DELETE /api/labor/[id]", () => {
       name: "Tech",
       roleName: "tech",
       roleId: 2,
-      permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
+      permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+      sessionVersion: 1,
     });
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(() => ({

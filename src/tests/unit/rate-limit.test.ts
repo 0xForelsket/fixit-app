@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Reset module state between tests
 beforeEach(() => {
@@ -114,6 +114,14 @@ describe("rate-limit", () => {
   });
 
   describe("getClientIp", () => {
+    beforeEach(() => {
+      process.env.VERCEL = "1";
+    });
+
+    afterEach(() => {
+      delete process.env.VERCEL;
+    });
+
     it("should extract IP from X-Forwarded-For header", async () => {
       const { getClientIp } = await import("@/lib/rate-limit");
 
@@ -147,12 +155,12 @@ describe("rate-limit", () => {
       expect(getClientIp(request)).toBe("192.168.1.1");
     });
 
-    it("should return localhost when no headers present", async () => {
+    it("should return fingerprint when no headers present", async () => {
       const { getClientIp } = await import("@/lib/rate-limit");
 
       const request = new Request("http://localhost");
 
-      expect(getClientIp(request)).toBe("127.0.0.1");
+      expect(getClientIp(request)).toContain("fingerprint:");
     });
 
     it("should trim whitespace from IP", async () => {

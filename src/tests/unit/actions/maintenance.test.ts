@@ -49,6 +49,7 @@ const mockTx = vi.hoisted(() => ({
   set: mockSet,
   where: mockWhere,
   delete: vi.fn(() => ({ where: mockWhere, returning: mockReturning })),
+  transaction: vi.fn((callback) => callback(mockTx)),
 }));
 
 vi.mock("@/db", () => ({
@@ -61,7 +62,8 @@ describe("Maintenance Actions", () => {
     name: "Tech User",
     employeeId: "TECH-001",
     roleName: "tech",
-    sessionVersion: 1, permissions: [
+    sessionVersion: 1,
+    permissions: [
       "maintenance:create",
       "maintenance:update",
       "maintenance:delete",

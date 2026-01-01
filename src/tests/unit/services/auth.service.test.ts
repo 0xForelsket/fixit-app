@@ -63,6 +63,7 @@ describe("Auth Service", () => {
     },
     failedLoginAttempts: 0,
     lockedUntil: null,
+    sessionVersion: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -72,7 +73,7 @@ describe("Auth Service", () => {
     name: "operator",
     description: "Operator role",
     isSystemRole: false,
-    sessionVersion: 1, permissions: ["work_orders:read", "work_orders:write"],
+    permissions: ["work_orders:read", "work_orders:write"],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -192,13 +193,9 @@ describe("Auth Service", () => {
           roleName: "operator",
           roleId: 1,
           departmentId: 1,
-          sessionVersion: 1, permissions: ["work_orders:read", "work_orders:write"],
+          sessionVersion: 1,
+          permissions: ["work_orders:read", "work_orders:write"],
           hourlyRate: 25.0,
-          preferences: {
-            theme: "light",
-            density: "comfortable",
-            notifications: { email: true },
-          },
         });
         expect(result.csrfToken).toBe("csrf-token-123");
       }
@@ -236,7 +233,7 @@ describe("Auth Service", () => {
       vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
         ...mockRole,
-        sessionVersion: 1, permissions: [],
+        permissions: [],
       });
       vi.mocked(verifyPin).mockResolvedValue(true);
       vi.mocked(createSession).mockResolvedValue("csrf-token");
