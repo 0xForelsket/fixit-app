@@ -1,7 +1,3 @@
-/* TRI-THEME DESIGN SYSTEM: ELEGANT | INDUSTRIAL | DARK */
-@import url("https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -91,9 +87,9 @@
   --color-danger-900: var(--danger-900);
   --color-danger-950: var(--danger-950);
 
-  --font-sans: "Inter", "Google Sans Flex", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Fraunces", ui-serif, Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: var(--font-inter), var(--font-google-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
 
   --radius-theme: var(--radius);
 
@@ -128,7 +124,8 @@
   }
 
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0);
     }
     50% {
@@ -137,7 +134,8 @@
   }
 
   --animation-fade-in-up: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animation-reveal-right: reveal-right 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  --animation-reveal-right: reveal-right 1.2s cubic-bezier(0.77, 0, 0.175, 1)
+    forwards;
   --animation-scan: scan 3s linear infinite;
   --animation-float: float 6s ease-in-out infinite;
   --animation-spin-slow: spin 12s linear infinite;
