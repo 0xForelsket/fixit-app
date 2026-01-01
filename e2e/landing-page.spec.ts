@@ -10,7 +10,7 @@ test.describe("Marketing Landing Page", () => {
     const navBrand = page.locator('nav span:has-text("FIXIT")');
     await expect(navBrand).toBeVisible();
     // Check for hero content
-    await expect(page.locator("h1")).toContainText("Maintenance");
+    await expect(page.locator("h1")).toContainText("INDUSTRIAL");
   });
 
   test("should have CTA buttons pointing to app subdomain", async ({
@@ -18,12 +18,14 @@ test.describe("Marketing Landing Page", () => {
   }) => {
     await page.goto("/");
 
-    // Check for "Get Started" and "Start Managing" buttons
-    const getStartedBtn = page.getByRole("link", { name: /Get Started/i });
+    // Check for "Initialize Deployment" and "Explore Platform" buttons
+    const getStartedBtn = page.getByRole("link", {
+      name: /Initialize Deployment/i,
+    });
     await expect(getStartedBtn).toBeVisible();
 
     const startManagingBtn = page.getByRole("link", {
-      name: /Start Managing/i,
+      name: /Explore Platform/i,
     });
     await expect(startManagingBtn).toBeVisible();
   });
@@ -32,7 +34,11 @@ test.describe("Marketing Landing Page", () => {
     await page.goto("/");
 
     // Check for feature cards
-    await expect(page.locator("text=Asset Intelligence")).toBeVisible();
-    await expect(page.locator("text=Preventative Scheduling")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Data Sovereignty" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "High-Density UI" })
+    ).toBeVisible();
   });
 });

@@ -11,16 +11,14 @@ test.describe("Technician - Work Orders", () => {
       page.getByRole("heading", { name: /Work Order Queue/i })
     ).toBeVisible();
 
-    // Verify stats cards are visible (target links specifically)
+    // Check for stats
+    await expect(page.getByText("Open", { exact: true }).first()).toBeVisible();
     await expect(
-      page.getByRole("link", { name: /Open/i }).first()
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: /In Progress/i }).first()
+      page.getByText("In Progress", { exact: true }).first()
     ).toBeVisible();
 
     // Basic search functionality
-    const searchInput = page.getByPlaceholder("Search work orders...");
+    const searchInput = page.getByPlaceholder(/FILTER BY TITLE/i);
     await searchInput.fill("Maintenance");
     await page.keyboard.press("Enter");
 
@@ -84,9 +82,11 @@ test.describe("Technician - Work Orders", () => {
 
   test("Tech can log time using the timer", async ({ page }) => {
     await page.goto("/maintenance/work-orders");
-    const workOrderRow = page.locator("tr").nth(1); // Click first data row
-    await workOrderRow.click();
+    await page.locator("tr").nth(1).click();
     await page.waitForURL(/\/maintenance\/work-orders\/\d+/);
+
+    // Switch to Resources tab
+    await page.getByRole("tab", { name: "Resources" }).click();
 
     // Find Start Timer button
     const startButton = page.getByRole("button", { name: /Start Timer/i });
@@ -119,27 +119,28 @@ test.describe("Technician - Work Orders", () => {
     await page.reload();
 
     // Check labor log section for the note we entered
-    await expect(page.getByText(uniqueNote)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(uniqueNote).first()).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("Tech can add manual labor entry", async ({ page }) => {
     await page.goto("/maintenance/work-orders");
-    const workOrderRow = page.locator("tr").nth(1);
-    await workOrderRow.click();
+    await page.locator("tr").nth(1).click();
     await page.waitForURL(/\/maintenance\/work-orders\/\d+/);
 
-    // Click the "+" button for manual entry
-    // It is a button next to "Start Timer" in the labor section
-    const manualBtn = page
-      .locator("button")
-      .filter({ has: page.locator("svg.lucide-plus") })
-      .first();
-    await manualBtn.click();
+    // Switch to Resources tab
+    await page.getByRole("tab", { name: "Resources" }).click();
+
+    // Toggle manual entry form
+    await page.getByLabel("Add manual time entry").first().click();
 
     // Fill manual entry form
     const uniqueNote = `Manual E2E Entry ${Math.floor(Math.random() * 10000)}`;
     await page.getByPlaceholder("Min").fill("45");
-    await page.getByPlaceholder(/Notes/i).fill(uniqueNote);
+    await page
+      .getByPlaceholder("e.g., Completed inspection...")
+      .fill(uniqueNote);
 
     const responsePromise = page.waitForResponse(
       (res) => res.url().includes("/api/labor") && res.status() === 201
@@ -151,9 +152,17 @@ test.describe("Technician - Work Orders", () => {
     await page.reload();
 
     // Verify entry in history
-    await expect(page.getByText(uniqueNote)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(uniqueNote).first()).toBeVisible({
+      timeout: 10000,
+    });
     await expect(
-      page.getByText(uniqueNote).locator("..").locator("..").getByText("45m")
+      page
+        .getByText(uniqueNote)
+        .first()
+        .locator("..")
+        .locator("..")
+        .getByText("45m")
+        .first()
     ).toBeVisible();
   });
 
@@ -162,7 +171,7 @@ test.describe("Technician - Work Orders", () => {
   }) => {
     await page.goto("/maintenance/work-orders?status=open");
 
-    const openRow = page.locator("tr").nth(1);
+    const openRow = page.locator("tr").filter({ hasText: "Open" }).first();
     const isVisible = await openRow.isVisible().catch(() => false);
     if (!isVisible) {
       console.log("No open work orders found for status transition test");
@@ -173,30 +182,34 @@ test.describe("Technician - Work Orders", () => {
     await page.waitForURL(/\/maintenance\/work-orders\/\d+/);
 
     // Add a comment
-    const commentArea = page.getByPlaceholder("Type your comment here...");
+    await page.getByRole("button", { name: "Comment" }).click();
+    const commentArea = page.getByPlaceholder("Type your comment...");
     await commentArea.fill("E2E Test Comment");
-    await page.getByRole("button", { name: /Post Comment/i }).click();
+    await page.getByRole("button", { name: "Post" }).click();
 
     // Comment should appear in activity log
-    await expect(page.getByText("E2E Test Comment")).toBeVisible();
+    await page.getByRole("tab", { name: "Activity" }).click();
+    await expect(page.getByText("E2E Test Comment").first()).toBeVisible();
 
     // Resolve Work Order
     const resolveBtn = page.getByRole("button", {
-      name: /Resolve Work Order/i,
+      name: /^Resolve$/i,
     });
     if (await resolveBtn.isVisible()) {
       await resolveBtn.click();
 
-      const notesArea = page.getByPlaceholder(
-        "What was done to fix the issue?"
-      );
+      const notesArea = page.getByPlaceholder("What was done?");
       await notesArea.fill("Fixed via E2E test");
 
-      await page.getByRole("button", { name: /Confirm Resolution/i }).click();
+      await page.getByRole("button", { name: /Confirm|Resolve/i }).click();
+
+      // Wait for navigation or reload
+      await page.waitForTimeout(2000); // Give time for server action
+      await page.reload();
 
       // Status should update to Resolved
       await expect(page.getByText(/Resolved/i).first()).toBeVisible();
-      await expect(page.getByText("Fixed via E2E test")).toBeVisible();
+      await expect(page.getByText("Fixed via E2E test").first()).toBeVisible();
     }
   });
 });

@@ -3,9 +3,9 @@ import { test as base, expect } from "@playwright/test";
 /**
  * Extended test fixtures with authentication helpers.
  * Credentials match seed.ts:
- *   Admin:    ADMIN-001     / 1234
- *   Tech:     TECH-ASSY-01  / 5678
- *   Operator: OP-001        / 0000
+ *   Admin:    ADMIN-001     / 123456
+ *   Tech:     TECH-ASSY-01  / 567890
+ *   Operator: OP-001        / 000000
  */
 export const test = base.extend<{
   loginAsAdmin: () => Promise<void>;
@@ -16,7 +16,7 @@ export const test = base.extend<{
     const login = async () => {
       await page.goto("/login");
       await page.fill('input[name="employeeId"]', "ADMIN-001");
-      await page.fill('input[name="pin"]', "1234");
+      await page.fill('input[name="pin"]', "123456");
       await page.click('button[type="submit"]');
       // Wait for redirect away from login
       await page.waitForURL((url) => !url.pathname.includes("/login"), {
@@ -30,7 +30,7 @@ export const test = base.extend<{
     const login = async () => {
       await page.goto("/login");
       await page.fill('input[name="employeeId"]', "TECH-ASSY-01");
-      await page.fill('input[name="pin"]', "5678");
+      await page.fill('input[name="pin"]', "567890");
       await page.click('button[type="submit"]');
       // Wait for redirect away from login
       await page.waitForURL((url) => !url.pathname.includes("/login"), {
@@ -44,7 +44,7 @@ export const test = base.extend<{
     const login = async () => {
       await page.goto("/login");
       await page.fill('input[name="employeeId"]', "OP-001");
-      await page.fill('input[name="pin"]', "0000");
+      await page.fill('input[name="pin"]', "000000");
       await page.click('button[type="submit"]');
       // Wait for redirect away from login
       await page.waitForURL((url) => !url.pathname.includes("/login"), {

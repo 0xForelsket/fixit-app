@@ -25,6 +25,14 @@ test.describe("Maintenance Automation & Checklists", () => {
       await page.waitForTimeout(2000);
     }
 
+    // Logout Admin
+    await page
+      .locator("aside")
+      .getByRole("button", { name: "System Admin" })
+      .click();
+    await page.getByRole("menuitem", { name: "Log out" }).click();
+    await page.waitForURL(/\/login/);
+
     // 3. Tech checks work orders
     await loginAsTech();
     await page.goto("/maintenance/work-orders");

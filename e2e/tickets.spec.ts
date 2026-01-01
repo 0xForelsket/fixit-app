@@ -35,7 +35,7 @@ test.describe("Ticket Management", () => {
     loginAsOperator,
   }) => {
     await loginAsOperator();
-    // Successfully logged in - operator goes to / with equipment
-    await expect(page).toHaveURL("/");
+    // Successfully logged in - operator goes to /dashboard with equipment
+    await expect(page).toHaveURL("/dashboard");
   });
 });
