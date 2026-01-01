@@ -4,8 +4,48 @@ import type { NextConfig } from "next";
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   register: true,
-  skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
+  extendDefaultRuntimeCaching: true,
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        urlPattern: /^https?:\/\/.*\/api\/work-orders.*/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "work-orders-api",
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 60 * 60 * 24, // 1 day
+          },
+          networkTimeoutSeconds: 10,
+        },
+      },
+      {
+        urlPattern: /^https?:\/\/.*\/api\/equipment.*/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "equipment-api",
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24, // 1 day
+          },
+          networkTimeoutSeconds: 10,
+        },
+      },
+      {
+        urlPattern: /^https?:\/\/.*\/api\/inventory\/parts.*/,
+        handler: "NetworkFirst",
+        options: {
+          cacheName: "inventory-api",
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 60 * 60 * 24, // 1 day
+          },
+          networkTimeoutSeconds: 10,
+        },
+      },
+    ],
+  },
 });
 
 const securityHeaders = [
