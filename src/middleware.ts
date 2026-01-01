@@ -25,6 +25,7 @@ const PUBLIC_PATHS = [
   "/api/auth/me",
   "/api/health",
   "/design-system",
+  "/compare",
 ];
 
 /**

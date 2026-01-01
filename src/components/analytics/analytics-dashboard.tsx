@@ -2,10 +2,43 @@
 
 import { AnalyticsKPIs } from "@/components/analytics/analytics-kpis";
 import { EquipmentHealthTable } from "@/components/analytics/equipment-health-table";
-import { TechnicianChart } from "@/components/analytics/technician-chart";
-import { ThroughputChart } from "@/components/analytics/throughput-chart";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+
+const ThroughputChart = dynamic(
+  () =>
+    import("@/components/analytics/throughput-chart").then(
+      (mod) => mod.ThroughputChart
+    ),
+  {
+    loading: () => (
+      <div className="h-[400px] w-full bg-zinc-50 animate-pulse rounded-xl border border-zinc-100 flex items-center justify-center">
+        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          Loading Chart Engine...
+        </p>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const TechnicianChart = dynamic(
+  () =>
+    import("@/components/analytics/technician-chart").then(
+      (mod) => mod.TechnicianChart
+    ),
+  {
+    loading: () => (
+      <div className="h-[400px] w-full bg-zinc-50 animate-pulse rounded-xl border border-zinc-100 flex items-center justify-center">
+        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+          Syncing Technician Data...
+        </p>
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 interface KPIs {
   openTickets: number;

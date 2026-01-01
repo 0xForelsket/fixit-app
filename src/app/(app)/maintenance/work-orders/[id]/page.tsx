@@ -57,25 +57,78 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
 
   if (Number.isNaN(workOrderId)) notFound();
 
-  const workOrder = await db.query.workOrders.findFirst({
-    where: eq(workOrders.id, workOrderId),
-    with: {
-      department: true,
-      equipment: {
-        with: {
-          location: true,
+  // Parallelize all data fetching
+  const [
+    workOrder,
+    checklistItems,
+    rawAttachments,
+    allUsers,
+    workOrderLaborLogs,
+    consumedParts,
+    allParts,
+    activeLocations,
+  ] = await Promise.all([
+    db.query.workOrders.findFirst({
+      where: eq(workOrders.id, workOrderId),
+      with: {
+        department: true,
+        equipment: {
+          with: {
+            location: true,
+          },
+        },
+        reportedBy: true,
+        assignedTo: true,
+        logs: {
+          with: {
+            createdBy: true,
+          },
+          orderBy: desc(workOrderLogs.createdAt),
         },
       },
-      reportedBy: true,
-      assignedTo: true,
-      logs: {
-        with: {
-          createdBy: true,
-        },
-        orderBy: desc(workOrderLogs.createdAt),
+    }),
+    db.query.checklistCompletions.findMany({
+      where: eq(checklistCompletions.workOrderId, workOrderId),
+      with: {
+        checklist: true,
       },
-    },
-  });
+      orderBy: asc(checklistCompletions.id),
+    }),
+    db.query.attachments.findMany({
+      where: and(
+        eq(attachments.entityType, "work_order"),
+        eq(attachments.entityId, workOrderId)
+      ),
+    }),
+    db.query.users.findMany({
+      with: {
+        assignedRole: true,
+      },
+    }),
+    db.query.laborLogs.findMany({
+      where: eq(laborLogs.workOrderId, workOrderId),
+      with: {
+        user: true,
+      },
+      orderBy: desc(laborLogs.createdAt),
+    }),
+    db.query.workOrderParts.findMany({
+      where: eq(workOrderParts.workOrderId, workOrderId),
+      with: {
+        part: true,
+        addedBy: true,
+      },
+      orderBy: desc(workOrderParts.addedAt),
+    }),
+    db.query.spareParts.findMany({
+      where: eq(spareParts.isActive, true),
+      columns: { id: true, name: true, sku: true },
+    }),
+    db.query.locations.findMany({
+      where: eq(locations.isActive, true),
+      columns: { id: true, name: true },
+    }),
+  ]);
 
   if (!workOrder) notFound();
 
@@ -89,23 +142,6 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch checklist items
-  const checklistItems = await db.query.checklistCompletions.findMany({
-    where: eq(checklistCompletions.workOrderId, workOrderId),
-    with: {
-      checklist: true,
-    },
-    orderBy: asc(checklistCompletions.id),
-  });
-
-  // Fetch attachments
-  const rawAttachments = await db.query.attachments.findMany({
-    where: and(
-      eq(attachments.entityType, "work_order"),
-      eq(attachments.entityId, workOrderId)
-    ),
-  });
-
   // Generate presigned URLs
   const workOrderAttachments = await Promise.all(
     rawAttachments.map(async (att) => ({
@@ -114,45 +150,9 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     }))
   );
 
-  // Fetch all users for assignment dropdown and log resolution
-  const allUsers = await db.query.users.findMany({
-    with: {
-      assignedRole: true,
-    },
-  });
   const techs = allUsers.filter(
     (u) => u.isActive && u.assignedRole?.name === "tech"
   );
-
-  // Fetch labor logs for this work order
-  const workOrderLaborLogs = await db.query.laborLogs.findMany({
-    where: eq(laborLogs.workOrderId, workOrderId),
-    with: {
-      user: true,
-    },
-    orderBy: desc(laborLogs.createdAt),
-  });
-
-  // Fetch work order parts
-  const consumedParts = await db.query.workOrderParts.findMany({
-    where: eq(workOrderParts.workOrderId, workOrderId),
-    with: {
-      part: true,
-      addedBy: true,
-    },
-    orderBy: desc(workOrderParts.addedAt),
-  });
-
-  // Fetch all parts and locations for the manager
-  const allParts = await db.query.spareParts.findMany({
-    where: eq(spareParts.isActive, true),
-    columns: { id: true, name: true, sku: true },
-  });
-
-  const activeLocations = await db.query.locations.findMany({
-    where: eq(locations.isActive, true),
-    columns: { id: true, name: true },
-  });
 
   // Map priorities to StatusBadge compatible values
   const priority = workOrder.priority as string;

@@ -39,34 +39,7 @@ type SearchParams = {
   view?: "list" | "tree";
 };
 
-async function getEquipment(params: SearchParams, user: SessionUser | null) {
-  const departmentId = user?.departmentId;
-  const isTech = user?.roleName === "tech";
-
-  const conditions = [];
-
-  if (isTech && departmentId) {
-    conditions.push(eq(equipmentTable.departmentId, departmentId));
-  }
-
-  if (params.status && params.status !== "all") {
-    conditions.push(eq(equipmentTable.status, params.status as any));
-  }
-
-  if (params.search) {
-    const searchPattern = `%${params.search}%`;
-    conditions.push(
-      or(
-        like(equipmentTable.name, searchPattern),
-        like(equipmentTable.code, searchPattern)
-      )
-    );
-  }
-
-  if (params.location) {
-    conditions.push(eq(equipmentTable.locationId, Number(params.location)));
-  }
-
+async function getEquipment(params: SearchParams, conditions: any[]) {
   // Handle sorting in SQL
   let orderBy;
   const sortDir = params.dir === "desc" ? desc : asc;
@@ -132,19 +105,9 @@ async function getEquipment(params: SearchParams, user: SessionUser | null) {
   });
 }
 
-async function getEquipmentStats(user: SessionUser | null) {
-  const departmentId = user?.departmentId;
-  const isTech = user?.roleName === "tech";
-
-  const conditions = [];
-  if (isTech && departmentId) {
-    conditions.push(eq(equipmentTable.departmentId, departmentId));
-  }
-
-  const where = conditions.length > 0 ? and(...conditions) : undefined;
-
-  // Optimized parallel count query using SQL aggregations
-  const [stats] = await db
+// Stats aggregation in a single query
+async function getEquipmentStats(conditions: any[]) {
+  const [result] = await db
     .select({
       total: sql<number>`count(*)`,
       operational: sql<number>`count(case when ${equipmentTable.status} = 'operational' then 1 end)`,
@@ -152,13 +115,13 @@ async function getEquipmentStats(user: SessionUser | null) {
       maintenance: sql<number>`count(case when ${equipmentTable.status} = 'maintenance' then 1 end)`,
     })
     .from(equipmentTable)
-    .where(where);
+    .where(conditions.length > 0 ? and(...conditions) : undefined);
 
   return {
-    total: Number(stats?.total || 0),
-    operational: Number(stats?.operational || 0),
-    down: Number(stats?.down || 0),
-    maintenance: Number(stats?.maintenance || 0),
+    total: Number(result?.total || 0),
+    operational: Number(result?.operational || 0),
+    down: Number(result?.down || 0),
+    maintenance: Number(result?.maintenance || 0),
   };
 }
 
@@ -168,13 +131,39 @@ export default async function EquipmentPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  
   const user = await getCurrentUser();
   
+  // Build conditions for both list and stats
+  const departmentId = user?.departmentId;
+  const isTech = user?.roleName === "tech";
+  const conditions = [];
+
+  if (isTech && departmentId) {
+    conditions.push(eq(equipmentTable.departmentId, departmentId));
+  }
+
+  if (params.status && params.status !== "all") {
+    conditions.push(eq(equipmentTable.status, params.status as any));
+  }
+
+  if (params.search) {
+    const searchPattern = `%${params.search}%`;
+    conditions.push(
+      or(
+        like(equipmentTable.name, searchPattern),
+        like(equipmentTable.code, searchPattern)
+      )
+    );
+  }
+
+  if (params.location) {
+    conditions.push(eq(equipmentTable.locationId, Number(params.location)));
+  }
+
   // Parallelize remaining data fetching
   const [equipmentList, stats, favoriteResult] = await Promise.all([
-    getEquipment(params, user),
-    getEquipmentStats(user),
+    getEquipment(params, conditions),
+    getEquipmentStats(conditions),
     getFavoriteIds("equipment"),
   ]);
 
