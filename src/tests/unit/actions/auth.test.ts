@@ -115,7 +115,7 @@ describe("login action", () => {
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech, sessionVersion: 1,
       },
       csrfToken: "csrf-token",
     });
@@ -139,7 +139,7 @@ describe("login action", () => {
         employeeId: "ADMIN-001",
         name: "Admin User",
         roleName: "admin",
-        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
+        permissions: DEFAULT_ROLE_PERMISSIONS.admin, sessionVersion: 1,
       },
       csrfToken: "csrf-token",
     });
@@ -163,7 +163,7 @@ describe("login action", () => {
         employeeId: "OP-001",
         name: "Operator User",
         roleName: "operator",
-        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator, sessionVersion: 1,
       },
       csrfToken: "csrf-token",
     });

@@ -63,7 +63,7 @@ describe("Session Utilities", () => {
     roleName: "operator",
     roleId: 1,
     departmentId: 1,
-    permissions: [PERMISSIONS.MAINTENANCE_VIEW],
+    sessionVersion: 1, permissions: [PERMISSIONS.MAINTENANCE_VIEW],
     hourlyRate: 20.0,
   };
 

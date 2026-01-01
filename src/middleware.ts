@@ -1,4 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
+
+async function getRoleFromSession(token: string): Promise<string | null> {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) return null;
+  try {
+    const secretKey = new TextEncoder().encode(secret);
+    const { payload } = await jwtVerify(token, secretKey);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (payload as any).user?.roleName || null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Public paths that don't require authentication.
@@ -63,15 +77,24 @@ function isSessionValid(request: NextRequest): boolean {
  * since Edge Runtime has limited crypto capabilities for full JWT verification.
  * The session is fully verified server-side in requireAuth/getCurrentUser.
  */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get("host") || "";
 
-  // Define allowed domains (localhost for dev, actual domain for prod)
-  // Adjust this logic based on your actual domain setup
-  const isAppSubdomain = hostname.startsWith("app.");
-
   const { pathname } = url;
+
+  // Root domain vs App Subdomain logic
+  const isAppSubdomain = hostname.startsWith("app.");
+  const isTunnel = hostname.endsWith(".trycloudflare.com");
+
+  // Marketing paths that should be served from the root domain
+  const MARKETING_PATHS = ["/", "/features", "/pricing", "/deploy", "/enterprise", "/architecture"];
+  const isMarketingPath = MARKETING_PATHS.includes(pathname);
+
+  // Consider it "App Context" if:
+  // 1. We're on the app. subdomain
+  // 2. We're on a tunnel AND it's not a marketing path
+  const isAppContext = isAppSubdomain || (isTunnel && !isMarketingPath);
 
   // public/static files bypass
   if (
@@ -83,12 +106,34 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle subdomain routing
-  if (isAppSubdomain) {
-    if (!isSessionValid(request)) {
-      // If trying to access a protected route without session
-      // Redirect to login (on the same subdomain)
-      if (!PUBLIC_PATHS.some((path) => pathname.startsWith(path))) {
+  // Handle application routing (Dashboard, Login, Maintenance, etc.)
+  if (isAppContext) {
+    const hasValidSession = isSessionValid(request);
+
+    // If on app subdomain, / redirects to /dashboard (or /login)
+    // If on tunnel, we're only in this block if pathname !== "/" (due to isAppContext logic)
+    if (pathname === "/" || pathname === "/login" || pathname === "/dashboard") {
+      if (hasValidSession) {
+        let targetPath = "/dashboard";
+        const sessionToken = request.cookies.get(SESSION_COOKIE)?.value;
+        
+        if (sessionToken) {
+          const role = await getRoleFromSession(sessionToken);
+          if (role === "admin") {
+            targetPath = "/analytics";
+          }
+        }
+
+        if (pathname !== targetPath) {
+          return NextResponse.redirect(new URL(targetPath, request.url));
+        }
+      } else if (pathname === "/") {
+        return NextResponse.redirect(new URL("/login", request.url));
+      }
+    }
+
+    if (!hasValidSession) {
+      if (!PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
         const loginUrl = new URL("/login", request.url);
         loginUrl.searchParams.set("redirect", pathname);
         const response = NextResponse.redirect(loginUrl);
@@ -98,23 +143,19 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    // Valid session or public path on app subdomain
     return NextResponse.next();
   }
 
-  // Root domain (Marketing) - only reached if isAppSubdomain is false
-  // Specific redirects from root to app
-  if (pathname === "/login" || pathname === "/dashboard") {
+  // Marketing Context (isAppContext is false)
+  // Only handle redirects if accessed via standard localhost root
+  if (!isTunnel && (pathname === "/login" || pathname === "/dashboard")) {
     const appUrl = request.nextUrl.clone();
-    appUrl.hostname = `app.${hostname.split(":")[0]}`; // Strip port for hostname if needed
-    // Keep port in URL if present
+    appUrl.hostname = `app.${hostname.split(":")[0]}`;
     if (hostname.includes(":")) {
       appUrl.port = hostname.split(":")[1];
     }
     return NextResponse.redirect(appUrl);
   }
-
-
 
   return NextResponse.next();
 }

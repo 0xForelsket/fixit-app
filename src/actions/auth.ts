@@ -31,9 +31,9 @@ export async function login(
     return { error: authResult.error };
   }
 
-  // Redirect all users to /dashboard initially.
-  // This ensures that if they are on the root domain, they get redirected to app.domain/dashboard.
-  // From there, we can further route operators if needed.
+  // Redirect to /dashboard. Middleware will handle:
+  // 1. Root domain -> App subdomain redirect
+  // 2. App subdomain -> Admin check -> Analytics redirect
   redirect("/dashboard");
 }
 

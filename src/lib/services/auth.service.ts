@@ -117,6 +117,7 @@ export async function authenticateUser(
     departmentId: user.departmentId,
     permissions,
     hourlyRate: user.hourlyRate,
+    sessionVersion: user.sessionVersion ?? 1,
   };
 
   authLogger.info({ employeeId, role: roleName }, "Successful login");

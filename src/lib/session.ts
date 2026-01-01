@@ -15,6 +15,7 @@ export interface SessionUser {
   departmentId?: number | null;
   permissions: string[];
   hourlyRate?: number | null;
+  sessionVersion: number; // Incremented when PIN changes to invalidate sessions
 }
 
 export interface SessionPayload {
@@ -138,7 +139,21 @@ export async function deleteSession(): Promise<void> {
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await getSession();
-  return session?.user || null;
+  if (!session?.user) {
+    return null;
+  }
+
+  // Validate session version hasn't changed (PIN change invalidates sessions)
+  const { isSessionVersionValid } = await import("./session-validator");
+  const isValid = await isSessionVersionValid(session.user);
+  
+  if (!isValid) {
+    // Session is invalidated - clear cookies
+    await deleteSession();
+    return null;
+  }
+
+  return session.user;
 }
 
 export async function requireAuth(): Promise<SessionUser> {

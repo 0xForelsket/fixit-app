@@ -23,10 +23,10 @@ export default function LoginPage() {
   const demoAccounts =
     process.env.NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS === "true"
       ? [
-          { role: "System Admin", id: "ADMIN-001", pin: "1234" },
-          { role: "Molding Manager", id: "MGT-MOLD", pin: "1234" },
-          { role: "Molding Tech", id: "TECH-MOLD-01", pin: "5678" },
-          { role: "Operator", id: "OP-001", pin: "0000" },
+          { role: "System Admin", id: "ADMIN-001", pin: "123456" },
+          { role: "Molding Manager", id: "MGT-MOLD", pin: "123456" },
+          { role: "Molding Tech", id: "TECH-MOLD-01", pin: "567890" },
+          { role: "Operator", id: "OP-001", pin: "000000" },
         ]
       : [];
 
