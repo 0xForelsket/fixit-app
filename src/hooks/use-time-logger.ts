@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 interface UseTimeLoggerProps {
-  workOrderId: number;
-  userId: number;
+  workOrderId: string;
+  userId: string;
   userHourlyRate?: number | null;
   existingLogs?: (LaborLog & { user?: User })[];
 }
@@ -147,7 +147,7 @@ export function useTimeLogger({
   );
 
   const deleteLog = useCallback(
-    async (logId: number) => {
+    async (logId: string) => {
       if (!confirm("Delete this time entry?")) return;
 
       try {

@@ -6,7 +6,7 @@ import { Activity, Clock, User } from "lucide-react";
 
 interface AuditLogListProps {
   entityType: EntityType;
-  entityId: number;
+  entityId: string;
 }
 
 export async function AuditLogList({

@@ -76,7 +76,7 @@ export async function getUsers() {
   return usersList;
 }
 
-export async function getUserById(id: number) {
+export async function getUserById(id: string) {
   await requirePermission(PERMISSIONS.USER_VIEW);
 
   const user = await db.query.users.findFirst({
@@ -101,7 +101,7 @@ export async function getAllRoles() {
 
 export async function createUser(
   formData: FormData
-): Promise<ActionResult<{ id: number }>> {
+): Promise<ActionResult<{ id: string }>> {
   await requirePermission(PERMISSIONS.USER_CREATE);
 
   const rawData = {
@@ -172,7 +172,7 @@ export async function createUser(
 }
 
 export async function updateUser(
-  id: number,
+  id: string,
   formData: FormData
 ): Promise<ActionResult> {
   await requirePermission(PERMISSIONS.USER_UPDATE);
@@ -250,7 +250,7 @@ export async function updateUser(
   return { success: true };
 }
 
-export async function deleteUser(id: number): Promise<ActionResult> {
+export async function deleteUser(id: string): Promise<ActionResult> {
   await requirePermission(PERMISSIONS.USER_DELETE);
 
   const user = await db.query.users.findFirst({

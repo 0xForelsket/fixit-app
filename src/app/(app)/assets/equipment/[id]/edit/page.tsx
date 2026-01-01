@@ -17,12 +17,7 @@ export default async function EditEquipmentPage({
 }) {
   await requirePermission(PERMISSIONS.EQUIPMENT_UPDATE);
 
-  const { id } = await params;
-  const equipmentId = Number.parseInt(id);
-
-  if (Number.isNaN(equipmentId)) {
-    notFound();
-  }
+  const { id: equipmentId } = await params;
 
   const [
     equipmentItem,

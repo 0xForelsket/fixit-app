@@ -60,7 +60,7 @@ export async function getRoles(params?: {
   return rolesList;
 }
 
-export async function getRole(id: number) {
+export async function getRole(id: string) {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
 
   const role = await db.query.roles.findFirst({
@@ -72,7 +72,7 @@ export async function getRole(id: number) {
 
 export async function createRole(
   formData: FormData
-): Promise<ActionResult<{ id: number }>> {
+): Promise<ActionResult<{ id: string }>> {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
 
   const rawData = {
@@ -110,7 +110,7 @@ export async function createRole(
 }
 
 export async function updateRole(
-  id: number,
+  id: string,
   formData: FormData
 ): Promise<ActionResult> {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
@@ -169,7 +169,7 @@ export async function updateRole(
   return { success: true };
 }
 
-export async function deleteRole(id: number): Promise<ActionResult> {
+export async function deleteRole(id: string): Promise<ActionResult> {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
 
   const role = await db.query.roles.findFirst({

@@ -31,7 +31,7 @@ describe("attachments actions", () => {
 
       const result = await createAttachment({
         entityType: "work_order",
-        entityId: 1,
+        entityId: "1",
         type: "photo",
         filename: "test.jpg",
         mimeType: "image/jpeg",
@@ -45,18 +45,18 @@ describe("attachments actions", () => {
 
     it("should return error for invalid data", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
-        roleId: 2,
+        roleId: "2",
         sessionVersion: 1,
         permissions: ["ticket:view"],
       });
 
       const result = await createAttachment({
         entityType: "invalid_type" as "work_order",
-        entityId: 1,
+        entityId: "1",
         type: "photo",
         filename: "test.jpg",
         mimeType: "image/jpeg",
@@ -69,18 +69,18 @@ describe("attachments actions", () => {
 
     it("should return error when s3Key is missing", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
-        roleId: 2,
+        roleId: "2",
         sessionVersion: 1,
         permissions: ["ticket:view"],
       });
 
       const result = await createAttachment({
         entityType: "work_order",
-        entityId: 1,
+        entityId: "1",
         type: "photo",
         filename: "test.jpg",
         mimeType: "image/jpeg",
@@ -93,25 +93,25 @@ describe("attachments actions", () => {
 
     it("should create attachment successfully for work order", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
-        roleId: 2,
+        roleId: "2",
         sessionVersion: 1,
         permissions: ["ticket:view"],
       });
 
       const mockAttachment = {
-        id: 1,
+        id: "1", displayId: 1,
         entityType: "work_order",
-        entityId: 5,
+        entityId: "5",
         type: "photo",
         filename: "issue.jpg",
         s3Key: "uploads/issue.jpg",
         mimeType: "image/jpeg",
         sizeBytes: 2048,
-        uploadedById: 1,
+        uploadedById: "1",
         createdAt: new Date(),
       };
 
@@ -123,7 +123,7 @@ describe("attachments actions", () => {
 
       const result = await createAttachment({
         entityType: "work_order",
-        entityId: 5,
+        entityId: "5",
         type: "photo",
         filename: "issue.jpg",
         mimeType: "image/jpeg",
@@ -137,25 +137,25 @@ describe("attachments actions", () => {
 
     it("should create attachment successfully for equipment", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
-        roleId: 2,
+        roleId: "2",
         sessionVersion: 1,
         permissions: ["equipment:view"],
       });
 
       const mockAttachment = {
-        id: 2,
+        id: "2", displayId: 2,
         entityType: "equipment",
-        entityId: 10,
+        entityId: "10",
         type: "document",
         filename: "manual.pdf",
         s3Key: "uploads/manual.pdf",
         mimeType: "application/pdf",
         sizeBytes: 50000,
-        uploadedById: 1,
+        uploadedById: "1",
         createdAt: new Date(),
       };
 
@@ -167,7 +167,7 @@ describe("attachments actions", () => {
 
       const result = await createAttachment({
         entityType: "equipment",
-        entityId: 10,
+        entityId: "10",
         type: "document",
         filename: "manual.pdf",
         mimeType: "application/pdf",
@@ -181,11 +181,11 @@ describe("attachments actions", () => {
 
     it("should handle database errors gracefully", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
-        roleId: 2,
+        roleId: "2",
         sessionVersion: 1,
         permissions: ["ticket:view"],
       });
@@ -200,7 +200,7 @@ describe("attachments actions", () => {
 
       const result = await createAttachment({
         entityType: "work_order",
-        entityId: 1,
+        entityId: "1",
         type: "photo",
         filename: "test.jpg",
         mimeType: "image/jpeg",
@@ -214,11 +214,11 @@ describe("attachments actions", () => {
 
     it("should accept different attachment types", async () => {
       vi.mocked(getCurrentUser).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
-        roleId: 2,
+        roleId: "2",
         sessionVersion: 1,
         permissions: ["ticket:view"],
       });
@@ -230,15 +230,15 @@ describe("attachments actions", () => {
           values: vi.fn(() => ({
             returning: vi.fn().mockResolvedValue([
               {
-                id: 1,
+                id: "1", displayId: 1,
                 entityType: "work_order",
-                entityId: 1,
+                entityId: "1",
                 type,
                 filename: "test.jpg",
                 s3Key: "uploads/test.jpg",
                 mimeType: "image/jpeg",
                 sizeBytes: 1024,
-                uploadedById: 1,
+                uploadedById: "1",
                 createdAt: new Date(),
               },
             ]),
@@ -247,7 +247,7 @@ describe("attachments actions", () => {
 
         const result = await createAttachment({
           entityType: "work_order",
-          entityId: 1,
+          entityId: "1",
           type,
           filename: "test.jpg",
           mimeType: "image/jpeg",

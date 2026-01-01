@@ -110,6 +110,7 @@ export async function authenticateUser(
 
   const sessionUser: SessionUser = {
     id: user.id,
+    displayId: user.displayId,
     employeeId: user.employeeId,
     name: user.name,
     roleName: roleName,

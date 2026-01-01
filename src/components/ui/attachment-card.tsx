@@ -12,14 +12,14 @@ export interface AttachmentFile {
   sizeBytes: number;
   url: string;
   /** Required for delete operations */
-  id?: number;
+  id?: string;
 }
 
 interface AttachmentCardProps {
   file: AttachmentFile;
   className?: string;
   showDownload?: boolean;
-  onDelete?: (attachmentId: number) => Promise<void>;
+  onDelete?: (attachmentId: string) => Promise<void>;
 }
 
 export function AttachmentCard({

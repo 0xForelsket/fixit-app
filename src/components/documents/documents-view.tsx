@@ -26,7 +26,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface DocumentsViewProps {
   initialAttachments: AttachmentWithUrl[];
-  currentUserId?: number;
+  currentUserId?: string;
   isUserAdmin?: boolean;
 }
 
@@ -45,7 +45,7 @@ export function DocumentsView({
   const searchQuery = searchParams.get("search") || "";
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const handleDelete = async (attachmentId: number) => {
+  const handleDelete = async (attachmentId: string) => {
     const result = await deleteAttachment(attachmentId);
     if (result.success) {
       toast({

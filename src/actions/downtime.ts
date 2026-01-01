@@ -14,7 +14,7 @@ import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 
 // Types for downtime summary data
 export interface DowntimeByEquipment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   downtimeHours: number;
@@ -35,14 +35,14 @@ export interface DowntimeByMonth {
 }
 
 export interface RecentDowntimeEvent {
-  id: number;
-  equipmentId: number;
+  id: string;
+  equipmentId: string;
   equipmentName: string;
   equipmentCode: string;
   startTime: Date;
   endTime: Date | null;
   downtimeHours: number;
-  workOrderId: number | null;
+  workOrderId: string | null;
   workOrderTitle: string | null;
   workOrderType: string | null;
 }
@@ -61,7 +61,7 @@ export interface DowntimeSummary {
 export interface DowntimeFilters {
   startDate?: Date;
   endDate?: Date;
-  departmentId?: number;
+  departmentId?: string;
 }
 
 // Helper to calculate downtime duration between two dates
@@ -164,18 +164,18 @@ export async function getDowntimeSummary(
     // A downtime period starts when status changes TO "down"
     // and ends when status changes FROM "down"
     interface DowntimePeriod {
-      equipmentId: number;
+      equipmentId: string;
       startTime: Date;
       endTime: Date | null;
       downtimeHours: number;
     }
 
     const downtimePeriods: DowntimePeriod[] = [];
-    const currentDowntime = new Map<number, Date>(); // equipmentId -> startTime
+    const currentDowntime = new Map<string, Date>(); // equipmentId -> startTime
 
     // Sort logs by equipment and time
     const sortedLogs = [...statusLogs].sort((a, b) => {
-      if (a.equipmentId !== b.equipmentId) return a.equipmentId - b.equipmentId;
+      if (a.equipmentId !== b.equipmentId) return a.equipmentId.localeCompare(b.equipmentId);
       return a.changedAt.getTime() - b.changedAt.getTime();
     });
 
@@ -240,7 +240,7 @@ export async function getDowntimeSummary(
 
     // Calculate downtime by equipment (top 5)
     const equipmentDowntimeMap = new Map<
-      number,
+      string,
       { hours: number; count: number }
     >();
     for (const period of downtimePeriods) {
@@ -300,8 +300,8 @@ export async function getDowntimeSummary(
     // Map downtime periods to work orders/reasons
     const reasonMap = new Map<string, { hours: number; count: number }>();
     const periodWorkOrders = new Map<
-      number,
-      { workOrderId: number; title: string; type: string }
+      string,
+      { workOrderId: string; title: string; type: string }
     >();
 
     for (const period of downtimePeriods) {
@@ -323,7 +323,7 @@ export async function getDowntimeSummary(
       if (matchingWO) {
         // Store for recent events table using a unique key
         const periodKey = `${period.equipmentId}-${period.startTime.getTime()}`;
-        periodWorkOrders.set(Number(periodKey.slice(-10)), {
+        periodWorkOrders.set(periodKey, {
           workOrderId: matchingWO.id,
           title: matchingWO.title,
           type: matchingWO.type,
@@ -379,7 +379,7 @@ export async function getDowntimeSummary(
         );
 
         return {
-          id: index + 1,
+          id: `downtime-${index + 1}`,
           equipmentId: period.equipmentId,
           equipmentName: eq?.name || "Unknown",
           equipmentCode: eq?.code || "",
@@ -430,7 +430,7 @@ function formatReasonLabel(reason: string): string {
 
 // Helper function to get department list for filter dropdown
 export async function getDepartmentsForDowntimeFilter(): Promise<
-  ActionResult<Array<{ id: number; name: string; code: string }>>
+  ActionResult<Array<{ id: string; name: string; code: string }>>
 > {
   const user = await getCurrentUser();
   if (!user) {

@@ -7,13 +7,13 @@ import { ChevronRight, Edit, MapPin } from "lucide-react";
 import Link from "next/link";
 
 interface Location {
-  id: number;
+  id: string;
   code: string;
   name: string;
   description: string | null;
   isActive: boolean;
   createdAt: Date;
-  parent: { id: number; name: string } | null;
+  parent: { id: string; name: string } | null;
 }
 
 interface LocationsTableProps {

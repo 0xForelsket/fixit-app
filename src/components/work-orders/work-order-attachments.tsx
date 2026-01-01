@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface Attachment {
-  id: number;
+  id: string;
   filename: string;
   mimeType: string;
   sizeBytes: number;
@@ -26,7 +26,7 @@ interface Attachment {
 
 interface WorkOrderAttachmentsProps {
   attachments: Attachment[];
-  workOrderId: number;
+  workOrderId: string;
   className?: string;
 }
 

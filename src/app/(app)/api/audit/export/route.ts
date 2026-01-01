@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (userId && userId !== "all") {
-      conditions.push(eq(auditLogs.userId, Number.parseInt(userId, 10)));
+      conditions.push(eq(auditLogs.userId, userId));
     }
 
     if (search) {

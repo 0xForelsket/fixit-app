@@ -16,7 +16,7 @@ import { Edit, Plus, Shield, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 
 interface Role {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   permissions: string[];

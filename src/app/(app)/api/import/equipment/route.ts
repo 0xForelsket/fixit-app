@@ -130,21 +130,21 @@ export async function POST(request: Request) {
     const toInsert: Array<{
       name: string;
       code: string;
-      locationId: number;
-      modelId?: number;
-      typeId?: number;
-      ownerId?: number;
+      locationId: string;
+      modelId?: string;
+      typeId?: string;
+      ownerId?: string;
       status: "operational" | "down" | "maintenance";
     }> = [];
 
     const toUpdate: Array<{
-      id: number;
+      id: string;
       name: string;
       code: string;
-      locationId: number;
-      modelId?: number;
-      typeId?: number;
-      ownerId?: number;
+      locationId: string;
+      modelId?: string;
+      typeId?: string;
+      ownerId?: string;
       status: "operational" | "down" | "maintenance";
     }> = [];
 
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
         continue;
       }
 
-      let modelId: number | undefined;
+      let modelId: string | undefined;
       if (data.model_name) {
         modelId = modelMap.get(data.model_name.toLowerCase());
         if (!modelId) {
@@ -188,7 +188,7 @@ export async function POST(request: Request) {
         }
       }
 
-      let typeId: number | undefined;
+      let typeId: string | undefined;
       if (data.type_code) {
         typeId = typeMap.get(data.type_code.toLowerCase());
         if (!typeId) {
@@ -200,7 +200,7 @@ export async function POST(request: Request) {
         }
       }
 
-      let ownerId: number | undefined;
+      let ownerId: string | undefined;
       if (data.owner_employee_id) {
         ownerId = userMap.get(data.owner_employee_id.toLowerCase());
         if (!ownerId) {

@@ -148,8 +148,8 @@ export function ScheduleForm({
           error={errors.equipmentId?.message}
         >
           <Select
-            value={watch("equipmentId")?.toString()}
-            onValueChange={(val) => setValue("equipmentId", Number(val))}
+            value={watch("equipmentId")}
+            onValueChange={(val) => setValue("equipmentId", val)}
           >
             <SelectTrigger
               className={cn(errors.equipmentId && "border-danger-500")}
@@ -158,7 +158,7 @@ export function ScheduleForm({
             </SelectTrigger>
             <SelectContent>
               {equipment.map((item) => (
-                <SelectItem key={item.id} value={item.id.toString()}>
+                <SelectItem key={item.id} value={item.id}>
                   {item.name} ({item.code})
                 </SelectItem>
               ))}

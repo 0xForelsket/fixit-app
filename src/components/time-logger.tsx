@@ -9,8 +9,8 @@ import { ManualEntryForm } from "./time-logger/manual-entry-form";
 import { TimerDisplay } from "./time-logger/timer-display";
 
 interface TimeLoggerProps {
-  workOrderId: number;
-  userId: number;
+  workOrderId: string;
+  userId: string;
   userHourlyRate?: number | null;
   existingLogs?: (LaborLog & { user?: User })[];
 }

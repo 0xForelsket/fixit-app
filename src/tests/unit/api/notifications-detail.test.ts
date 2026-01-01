@@ -61,11 +61,12 @@ describe("PATCH /api/notifications/[id]", () => {
 
   it("returns 400 for invalid notification ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -85,11 +86,12 @@ describe("PATCH /api/notifications/[id]", () => {
 
   it("returns 404 when notification not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -110,17 +112,19 @@ describe("PATCH /api/notifications/[id]", () => {
 
   it("returns 403 when notification belongs to different user", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 2, // Different user
+      displayId: 2,
+      id: "2", // Different user
       employeeId: "TECH-002",
       name: "Other Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
-      id: 1,
-      userId: 1, // Belongs to user 1
+      id: "1",
+      
+      userId: "1", // Belongs to user 1
       type: "work_order_created" as const,
       title: "New Work Order",
       message: "A new work order has been created",
@@ -144,17 +148,19 @@ describe("PATCH /api/notifications/[id]", () => {
 
   it("updates notification successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
-      id: 1,
-      userId: 1, // Same user
+      id: "1",
+      
+      userId: "1", // Same user
       type: "work_order_created" as const,
       title: "New Work Order",
       message: "A new work order has been created",
@@ -181,17 +187,19 @@ describe("PATCH /api/notifications/[id]", () => {
 
   it("can mark notification as unread", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
     vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
-      id: 1,
-      userId: 1,
+      id: "1",
+      
+      userId: "1",
       type: "work_order_created" as const,
       title: "New Work Order",
       message: "A new work order has been created",
@@ -231,11 +239,12 @@ describe("POST /api/notifications/read-all", () => {
 
   it("marks all notifications as read", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -250,11 +259,12 @@ describe("POST /api/notifications/read-all", () => {
 
   it("handles errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });

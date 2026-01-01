@@ -32,7 +32,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   // Operator interface logic
   const params = await searchParams;
   const search = params.search || "";
-  const locationId = params.location ? Number(params.location) : undefined;
+  const locationId = params.location || undefined;
 
   // Fetch equipment with location info
   const conditions = [];

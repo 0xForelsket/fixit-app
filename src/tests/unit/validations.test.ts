@@ -156,7 +156,7 @@ describe("createLocationSchema", () => {
     const result = createLocationSchema.safeParse({
       name: "Sub Area",
       code: "SUB-01",
-      parentId: 1,
+      parentId: "1",
     });
     expect(result.success).toBe(true);
   });
@@ -167,8 +167,8 @@ describe("createEquipmentSchema", () => {
     const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
-      locationId: 1,
-      departmentId: 1,
+      locationId: "1",
+      departmentId: "1",
     });
     expect(result.success).toBe(true);
   });
@@ -177,7 +177,7 @@ describe("createEquipmentSchema", () => {
     const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
-      departmentId: 1,
+      departmentId: "1",
     });
     expect(result.success).toBe(false);
   });
@@ -186,7 +186,7 @@ describe("createEquipmentSchema", () => {
     const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
-      locationId: 1,
+      locationId: "1",
     });
     expect(result.success).toBe(false);
   });
@@ -195,8 +195,8 @@ describe("createEquipmentSchema", () => {
     const result = createEquipmentSchema.safeParse({
       name: "Injection Molder A",
       code: "IM-001",
-      locationId: 1,
-      departmentId: 1,
+      locationId: "1",
+      departmentId: "1",
     });
     expect(result.success).toBe(true);
     if (result.success) {
@@ -209,8 +209,8 @@ describe("createEquipmentSchema", () => {
       const result = createEquipmentSchema.safeParse({
         name: "Equipment",
         code: "M-001",
-        locationId: 1,
-        departmentId: 1,
+        locationId: "1",
+        departmentId: "1",
         status,
       });
       expect(result.success).toBe(true);
@@ -221,9 +221,9 @@ describe("createEquipmentSchema", () => {
     const result = createEquipmentSchema.safeParse({
       name: "Equipment",
       code: "M-001",
-      locationId: 1,
-      departmentId: 1,
-      ownerId: 5,
+      locationId: "1",
+      departmentId: "1",
+      ownerId: "5",
     });
     expect(result.success).toBe(true);
   });
@@ -232,7 +232,7 @@ describe("createEquipmentSchema", () => {
 describe("createWorkOrderSchema", () => {
   it("should validate correct work order data", () => {
     const result = createWorkOrderSchema.safeParse({
-      equipmentId: 1,
+      equipmentId: "1",
       type: "breakdown",
       title: "Equipment not working",
       description: "The equipment stopped working after the power outage.",
@@ -242,7 +242,7 @@ describe("createWorkOrderSchema", () => {
 
   it("should require all fields", () => {
     const result = createWorkOrderSchema.safeParse({
-      equipmentId: 1,
+      equipmentId: "1",
       type: "breakdown",
       title: "Equipment not working",
       // missing description
@@ -260,7 +260,7 @@ describe("createWorkOrderSchema", () => {
     ];
     for (const type of types) {
       const result = createWorkOrderSchema.safeParse({
-        equipmentId: 1,
+        equipmentId: "1",
         type,
         title: "Test work order",
         description: "Test description",
@@ -271,7 +271,7 @@ describe("createWorkOrderSchema", () => {
 
   it("should default priority to medium", () => {
     const result = createWorkOrderSchema.safeParse({
-      equipmentId: 1,
+      equipmentId: "1",
       type: "breakdown",
       title: "Test",
       description: "Test",
@@ -286,7 +286,7 @@ describe("createWorkOrderSchema", () => {
     const priorities = ["low", "medium", "high", "critical"];
     for (const priority of priorities) {
       const result = createWorkOrderSchema.safeParse({
-        equipmentId: 1,
+        equipmentId: "1",
         type: "breakdown",
         title: "Test",
         description: "Test",
@@ -298,7 +298,7 @@ describe("createWorkOrderSchema", () => {
 
   it("should reject title over 200 characters", () => {
     const result = createWorkOrderSchema.safeParse({
-      equipmentId: 1,
+      equipmentId: "1",
       type: "breakdown",
       title: "A".repeat(201),
       description: "Test",

@@ -35,18 +35,18 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 interface Part {
-  id: number;
+  id: string;
   name: string;
   sku: string;
 }
 
 interface Location {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface AddPartDialogProps {
-  workOrderId: number;
+  workOrderId: string;
   allParts: Part[];
   locations: Location[];
 }
@@ -78,8 +78,8 @@ export function AddPartDialog({
     try {
       const result = await consumeWorkOrderPartAction({
         workOrderId,
-        partId: Number.parseInt(values.partId),
-        locationId: Number.parseInt(values.locationId),
+        partId: values.partId,
+        locationId: values.locationId,
         quantity: values.quantity,
       });
 

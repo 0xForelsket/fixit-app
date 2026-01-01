@@ -43,7 +43,7 @@ const STATIC_PAGES: SearchResult[] = [
     type: "page",
     title: "Inventory",
     subtitle: "Spare parts",
-    href: "/inventory/parts",
+    href: "/assets/inventory/parts",
   },
   {
     id: "page-analytics",
@@ -105,16 +105,16 @@ export async function GET(request: Request) {
     // Check if query looks like a work order ID (e.g., #123 or just 123)
     const workOrderIdMatch = query.match(/^#?(\d+)$/);
     if (workOrderIdMatch) {
-      const woId = Number(workOrderIdMatch[1]);
+      const woDisplayId = Number(workOrderIdMatch[1]);
       const workOrder = await db.query.workOrders.findFirst({
-        where: eq(workOrders.id, woId),
-        columns: { id: true, title: true, status: true },
+        where: eq(workOrders.displayId, woDisplayId),
+        columns: { id: true, displayId: true, title: true, status: true },
       });
       if (workOrder) {
         results.push({
           id: `wo-${workOrder.id}`,
           type: "work_order",
-          title: `#${workOrder.id}: ${workOrder.title}`,
+          title: `#${workOrder.displayId}: ${workOrder.title}`,
           subtitle: `Work Order - ${workOrder.status}`,
           href: `/maintenance/work-orders/${workOrder.id}`,
         });
@@ -127,7 +127,7 @@ export async function GET(request: Request) {
         like(workOrders.title, searchPattern),
         like(workOrders.description, searchPattern)
       ),
-      columns: { id: true, title: true, status: true },
+      columns: { id: true, displayId: true, title: true, status: true },
       limit: 5,
     });
 
@@ -137,7 +137,7 @@ export async function GET(request: Request) {
         results.push({
           id: `wo-${wo.id}`,
           type: "work_order",
-          title: `#${wo.id}: ${wo.title}`,
+          title: `#${wo.displayId}: ${wo.title}`,
           subtitle: `Work Order - ${wo.status}`,
           href: `/maintenance/work-orders/${wo.id}`,
         });
@@ -180,7 +180,7 @@ export async function GET(request: Request) {
         type: "part",
         title: part.name,
         subtitle: part.sku ?? "No SKU",
-        href: `/inventory/parts/${part.id}`,
+        href: `/assets/inventory/parts/${part.id}`,
       });
     }
 

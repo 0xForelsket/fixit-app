@@ -9,7 +9,7 @@ import { useOptimistic, useTransition } from "react";
 
 interface FavoriteButtonProps {
   entityType: FavoriteEntityType;
-  entityId: number;
+  entityId: string;
   isFavorited: boolean;
   variant?: "icon" | "default";
   className?: string;

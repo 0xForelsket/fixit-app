@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     ];
 
     const rows = workOrdersList.map((workOrder) => [
-      workOrder.id,
+      workOrder.displayId,
       escapeCSV(workOrder.title),
       escapeCSV(workOrder.description),
       escapeCSV(workOrder.equipment?.name || ""),

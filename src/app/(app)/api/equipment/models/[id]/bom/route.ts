@@ -21,8 +21,7 @@ export async function POST(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id: modelIdStr } = await params;
-    const modelId = Number.parseInt(modelIdStr);
+    const { id: modelId } = await params;
 
     const body = await request.json();
     const { partId, quantityRequired, notes } = body;

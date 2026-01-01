@@ -8,12 +8,12 @@ import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export interface FavoriteWithEquipment {
-  id: number;
+  id: string;
   entityType: FavoriteEntityType;
-  entityId: number;
+  entityId: string;
   createdAt: Date;
   equipment: {
-    id: number;
+    id: string;
     name: string;
     code: string;
     status: string;
@@ -81,7 +81,7 @@ export async function getUserFavorites(): Promise<
  */
 export async function toggleFavorite(
   entityType: FavoriteEntityType,
-  entityId: number
+  entityId: string
 ): Promise<ActionResult<{ isFavorited: boolean }>> {
   const user = await getCurrentUser();
   if (!user) {
@@ -127,7 +127,7 @@ export async function toggleFavorite(
  */
 export async function isFavorite(
   entityType: FavoriteEntityType,
-  entityId: number
+  entityId: string
 ): Promise<ActionResult<boolean>> {
   const user = await getCurrentUser();
   if (!user) {
@@ -150,7 +150,7 @@ export async function isFavorite(
  */
 export async function getFavoriteIds(
   entityType: FavoriteEntityType
-): Promise<ActionResult<number[]>> {
+): Promise<ActionResult<string[]>> {
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "Unauthorized" };

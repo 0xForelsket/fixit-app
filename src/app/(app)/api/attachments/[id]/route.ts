@@ -21,11 +21,7 @@ export async function GET(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const attachmentId = Number.parseInt(id, 10);
-    if (Number.isNaN(attachmentId)) {
-      return ApiErrors.badRequest("Invalid attachment ID", requestId);
-    }
+    const { id: attachmentId } = await params;
 
     const attachment = await db.query.attachments.findFirst({
       where: eq(attachments.id, attachmentId),
@@ -60,11 +56,7 @@ export async function DELETE(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const attachmentId = Number.parseInt(id, 10);
-    if (Number.isNaN(attachmentId)) {
-      return ApiErrors.badRequest("Invalid attachment ID", requestId);
-    }
+    const { id: attachmentId } = await params;
 
     const attachment = await db.query.attachments.findFirst({
       where: eq(attachments.id, attachmentId),

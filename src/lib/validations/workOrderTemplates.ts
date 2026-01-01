@@ -23,8 +23,8 @@ export const createWorkOrderTemplateSchema = z.object({
     .max(5000, "Default description must be at most 5000 characters")
     .optional()
     .nullable(),
-  defaultAssignedToId: z.number().int().positive().optional().nullable(),
-  departmentId: z.number().int().positive().optional().nullable(),
+  defaultAssignedToId: z.string().min(1).optional().nullable(),
+  departmentId: z.string().min(1).optional().nullable(),
   estimatedMinutes: z.number().int().positive().optional().nullable(),
   isActive: z.boolean().default(true),
 });

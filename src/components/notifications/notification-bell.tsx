@@ -27,7 +27,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface NotificationBellProps {
-  userId: number;
+  userId: string;
 }
 
 export function NotificationBell({ userId: _userId }: NotificationBellProps) {
@@ -69,7 +69,7 @@ export function NotificationBell({ userId: _userId }: NotificationBellProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleMarkAsRead = async (id: number) => {
+  const handleMarkAsRead = async (id: string) => {
     await markAsRead(id);
   };
 

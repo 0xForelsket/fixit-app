@@ -6,12 +6,13 @@ import { vi } from "vitest";
 export const createMockUser = (
   overrides: Partial<SessionUser> = {}
 ): SessionUser => ({
-  id: 1,
+  id: "user-1",
+  displayId: 1,
   employeeId: "TEST-001",
   name: "Test User",
-  roleId: 2,
+  roleId: "role-2",
   roleName: "tech",
-  departmentId: 1,
+  departmentId: "dept-1",
   permissions: ["ticket:create", "ticket:view"],
   hourlyRate: 25.0,
   sessionVersion: 1,
@@ -21,7 +22,7 @@ export const createMockUser = (
 export const mockAdminUser: SessionUser = createMockUser({
   employeeId: "ADMIN-001",
   name: "Admin User",
-  roleId: 1,
+  roleId: "1",
   roleName: "admin",
   permissions: ["*"],
   hourlyRate: 50.0,
@@ -30,7 +31,7 @@ export const mockAdminUser: SessionUser = createMockUser({
 export const mockTechUser: SessionUser = createMockUser({
   employeeId: "TECH-001",
   name: "Tech User",
-  roleId: 2,
+  roleId: "2",
   roleName: "tech",
   permissions: ["ticket:create", "ticket:view", "ticket:update"],
 });

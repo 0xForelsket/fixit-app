@@ -7,12 +7,13 @@ import {
 } from "./permissions";
 
 export interface SessionUser {
-  id: number;
+  id: string;
+  displayId: number;
   employeeId: string;
   name: string;
   roleName: string;
-  roleId?: number | null;
-  departmentId?: number | null;
+  roleId?: string | null;
+  departmentId?: string | null;
   permissions: string[];
   hourlyRate?: number | null;
   sessionVersion: number; // Incremented when PIN changes to invalidate sessions

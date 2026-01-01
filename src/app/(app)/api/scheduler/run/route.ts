@@ -84,7 +84,7 @@ export async function POST(request: Request) {
           const systemUser = allUsers.find(
             (u) => u.assignedRole?.name === "admin"
           );
-          const reportedById = systemUser?.id || 1;
+          const reportedById = systemUser?.id || "00000000-0000-0000-0000-000000000000";
 
           // A. Create Work Order
           const [newWorkOrder] = await tx

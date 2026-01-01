@@ -10,7 +10,7 @@ vi.mock("@/db", () => ({
     },
     insert: vi.fn(() => ({
       values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+        returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
       })),
     })),
   },
@@ -35,7 +35,7 @@ describe("notifications helper", () => {
       } as any);
 
       const result = await createNotification({
-        userId: 1,
+        userId: "1",
         type: "work_order_assigned",
         title: "Test Title",
         message: "Test Message",
@@ -56,7 +56,7 @@ describe("notifications helper", () => {
       } as any);
 
       const result = await createNotification({
-        userId: 1,
+        userId: "1",
         type: "work_order_resolved",
         title: "Resolved",
         message: "Your work order was resolved",
@@ -87,7 +87,7 @@ describe("notifications helper", () => {
       } as any);
 
       const result = await createNotification({
-        userId: 1,
+        userId: "1",
         type: "work_order_commented",
         title: "New Comment",
         message: "Someone commented",
@@ -119,7 +119,7 @@ describe("notifications helper", () => {
       } as any);
 
       const result = await createNotification({
-        userId: 1,
+        userId: "1",
         type: "work_order_commented",
         title: "New Comment",
         message: "Someone commented",
@@ -150,7 +150,7 @@ describe("notifications helper", () => {
       } as any);
 
       const result = await createNotification({
-        userId: 1,
+        userId: "1",
         type: "work_order_escalated",
         title: "Escalated",
         message: "SLA breached",
@@ -166,7 +166,7 @@ describe("notifications helper", () => {
       } as any);
 
       await createNotification({
-        userId: 1,
+        userId: "1",
         type: "maintenance_due",
         title: "Maintenance Due",
         message: "Check equipment",
@@ -202,7 +202,7 @@ describe("notifications helper", () => {
       } as any);
 
       const result = await createNotificationsForUsers(
-        [1, 2, 3],
+        ["1", "2", "3"],
         "work_order_assigned",
         "Assigned",
         "You were assigned",
@@ -238,7 +238,7 @@ describe("notifications helper", () => {
         .mockResolvedValueOnce({ preferences: null } as any); // User 3: no prefs, create
 
       const result = await createNotificationsForUsers(
-        [1, 2, 3],
+        ["1", "2", "3"],
         "work_order_assigned",
         "Assigned",
         "You were assigned"
@@ -253,7 +253,7 @@ describe("notifications helper", () => {
     it("creates notification without checking preferences", async () => {
       // Note: createCriticalNotification doesn't check preferences
       await createCriticalNotification({
-        userId: 1,
+        userId: "1",
         type: "work_order_escalated",
         title: "Critical Alert",
         message: "System down",

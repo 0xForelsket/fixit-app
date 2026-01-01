@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface DeleteRoleButtonProps {
-  roleId: number;
+  roleId: string;
   roleName: string;
   disabled?: boolean;
 }

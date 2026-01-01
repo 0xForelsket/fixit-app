@@ -16,24 +16,24 @@ import Link from "next/link";
 
 interface EquipmentOverviewProps {
   equipment: {
-    id: number;
+    id: string;
     name: string;
     code: string;
     status: "operational" | "down" | "maintenance";
     parent?: {
-      id: number;
+      id: string;
       name: string;
       code: string;
     } | null;
     children?:
       | {
-          id: number;
+          id: string;
           name: string;
           code: string;
           status: "operational" | "down" | "maintenance";
         }[]
       | null;
-    locationId: number;
+    locationId: string;
   };
   hasDuePM: boolean;
   openWorkOrderCount: number;

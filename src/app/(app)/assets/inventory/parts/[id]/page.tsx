@@ -10,7 +10,7 @@ import { History, Info } from "lucide-react";
 import { notFound } from "next/navigation";
 import { PartForm } from "../part-form";
 
-async function getPart(id: number) {
+async function getPart(id: string) {
   return db.query.spareParts.findFirst({
     where: eq(spareParts.id, id),
   });
@@ -23,12 +23,7 @@ export default async function EditPartPage({
 }) {
   await requirePermission(PERMISSIONS.INVENTORY_UPDATE);
 
-  const { id } = await params;
-  const partId = Number.parseInt(id);
-
-  if (Number.isNaN(partId)) {
-    notFound();
-  }
+  const { id: partId } = await params;
 
   const [part, vendors] = await Promise.all([getPart(partId), getVendors()]);
 

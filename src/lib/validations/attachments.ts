@@ -17,7 +17,7 @@ export const attachmentTypeSchema = z.enum([
 
 export const uploadAttachmentSchema = z.object({
   entityType: entityTypeSchema,
-  entityId: z.number().int().positive("Entity ID is required"),
+  entityId: z.string().min(1, "Entity ID is required"),
   type: attachmentTypeSchema,
   filename: z
     .string()
@@ -36,7 +36,7 @@ export const uploadAttachmentSchema = z.object({
 
 export const listAttachmentsSchema = z.object({
   entityType: entityTypeSchema,
-  entityId: z.number().int().positive(),
+  entityId: z.string().min(1),
 });
 
 // Allowed MIME types for uploads

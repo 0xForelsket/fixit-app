@@ -7,7 +7,7 @@ import { and, eq } from "drizzle-orm";
  * Fetches the latest avatar URL for a given user.
  * Returns null if the user has no avatar.
  */
-export async function getUserAvatarUrl(userId: number): Promise<string | null> {
+export async function getUserAvatarUrl(userId: string): Promise<string | null> {
   const avatar = await db.query.attachments.findFirst({
     where: and(
       eq(attachments.entityType, "user"),

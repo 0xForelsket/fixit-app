@@ -63,11 +63,11 @@ describe("createEquipment action", () => {
 
   it("should reject non-admin users", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -84,11 +84,11 @@ describe("createEquipment action", () => {
 
   it("should reject operator users", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
-      roleId: 1,
+      roleId: "1",
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
       sessionVersion: 1,
     });
@@ -105,11 +105,11 @@ describe("createEquipment action", () => {
 
   it("should return error for invalid input", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
@@ -126,25 +126,25 @@ describe("createEquipment action", () => {
 
   it("should create equipment successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     const mockEquipment = {
-      id: 1,
+      id: "1", displayId: 1,
       name: "Test Equipment",
       code: "TM-001",
-      locationId: 1,
+      locationId: "1",
       status: "operational",
       ownerId: null,
       typeId: null,
       modelId: null,
-      departmentId: 1,
+      departmentId: "1",
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -170,11 +170,11 @@ describe("createEquipment action", () => {
 
   it("should handle duplicate code error", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
@@ -212,18 +212,18 @@ describe("updateEquipment action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateEquipment(1, {}, formData);
+    const result = await updateEquipment("1", {}, formData);
 
     expect(result.error).toBe("You must be logged in");
   });
 
   it("should reject non-admin users", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -231,18 +231,18 @@ describe("updateEquipment action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateEquipment(1, {}, formData);
+    const result = await updateEquipment("1", {}, formData);
 
     expect(result.error).toBe("You don't have permission to update equipment");
   });
 
   it("should return error for non-existent equipment", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
@@ -252,32 +252,32 @@ describe("updateEquipment action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateEquipment(999, {}, formData);
+    const result = await updateEquipment("999", {}, formData);
 
     expect(result.error).toBe("Equipment not found");
   });
 
   it("should update equipment successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Old Name",
       code: "TM-001",
-      locationId: 1,
+      locationId: "1",
       status: "operational" as const,
       ownerId: null,
       typeId: null,
       modelId: null,
-      departmentId: 1,
+      departmentId: "1",
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -290,7 +290,7 @@ describe("updateEquipment action", () => {
     const formData = new FormData();
     formData.set("name", "Updated Name");
 
-    const result = await updateEquipment(1, {}, formData);
+    const result = await updateEquipment("1", {}, formData);
 
     expect(result.success).toBe(true);
     expect(db.update).toHaveBeenCalled();
@@ -298,25 +298,25 @@ describe("updateEquipment action", () => {
 
   it("should log status change", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
-      locationId: 1,
+      locationId: "1",
       status: "operational",
       ownerId: null,
       typeId: null,
       modelId: null,
-      departmentId: 1,
+      departmentId: "1",
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -333,7 +333,7 @@ describe("updateEquipment action", () => {
     const formData = new FormData();
     formData.set("status", "down");
 
-    const result = await updateEquipment(1, {}, formData);
+    const result = await updateEquipment("1", {}, formData);
 
     expect(result.success).toBe(true);
     expect(db.insert).toHaveBeenCalled(); // For status change log
@@ -341,25 +341,25 @@ describe("updateEquipment action", () => {
 
   it("should handle duplicate code error on update", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
-      locationId: 1,
+      locationId: "1",
       status: "operational",
       ownerId: null,
       typeId: null,
       modelId: null,
-      departmentId: 1,
+      departmentId: "1",
       parentId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -378,7 +378,7 @@ describe("updateEquipment action", () => {
     const formData = new FormData();
     formData.set("code", "EXISTING-CODE");
 
-    const result = await updateEquipment(1, {}, formData);
+    const result = await updateEquipment("1", {}, formData);
 
     expect(result.error).toBe("A equipment with this code already exists");
   });
@@ -392,69 +392,69 @@ describe("deleteEquipment action", () => {
   it("should return error when not logged in", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
-    const result = await deleteEquipment(1);
+    const result = await deleteEquipment("1");
 
     expect(result.error).toBe("You must be logged in");
   });
 
   it("should reject non-admin users", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
 
-    const result = await deleteEquipment(1);
+    const result = await deleteEquipment("1");
 
     expect(result.error).toBe("You don't have permission to delete equipment");
   });
 
   it("should return error for non-existent equipment", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
 
-    const result = await deleteEquipment(999);
+    const result = await deleteEquipment("999");
 
     expect(result.error).toBe("Equipment not found");
   });
 
   it("should prevent deletion of equipment with tickets", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
-      locationId: 1,
+      locationId: "1",
       status: "operational",
       ownerId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
-      workOrders: [{ id: 1 }], // Has work orders
+      workOrders: [{ id: "1", displayId: 1 }], // Has work orders
     } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
-    const result = await deleteEquipment(1);
+    const result = await deleteEquipment("1");
 
     expect(result.error).toBe(
       "Cannot delete equipment with existing work orders"
@@ -463,20 +463,20 @@ describe("deleteEquipment action", () => {
 
   it("should delete equipment successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       permissions: DEFAULT_ROLE_PERMISSIONS.admin,
       sessionVersion: 1,
     });
 
     vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
-      locationId: 1,
+      locationId: "1",
       status: "operational",
       ownerId: null,
       createdAt: new Date(),
@@ -488,7 +488,7 @@ describe("deleteEquipment action", () => {
       where: vi.fn(),
     } as unknown);
 
-    const result = await deleteEquipment(1);
+    const result = await deleteEquipment("1");
 
     expect(result.success).toBe(true);
     expect(db.delete).toHaveBeenCalled();

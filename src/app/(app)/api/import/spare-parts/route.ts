@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     }> = [];
 
     const toUpdate: Array<{
-      id: number;
+      id: string;
       name: string;
       sku: string;
       category:

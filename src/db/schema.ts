@@ -1,12 +1,17 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
+  jsonb,
+  pgTable,
   real,
-  sqliteTable,
+  serial,
   text,
+  timestamp,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
+} from "drizzle-orm/pg-core";
+import { uuidv7 } from "uuidv7";
 
 // Enums as const objects for type safety
 export const userRoles = ["operator", "tech", "admin"] as const;
@@ -137,92 +142,96 @@ export interface UserPreferences {
 
 // ============ TABLES ============
 
-export const roles = sqliteTable("roles", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const roles = pgTable("roles", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   name: text("name").unique().notNull(),
   description: text("description"),
-  permissions: text("permissions", { mode: "json" })
+  permissions: jsonb("permissions")
     .notNull()
     .$type<string[]>()
     .default([]),
-  isSystemRole: integer("is_system_role", { mode: "boolean" })
+  isSystemRole: boolean("is_system_role")
     .notNull()
     .default(false),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
-export const departments = sqliteTable("departments", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const departments = pgTable("departments", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   name: text("name").unique().notNull(), // e.g., "Electrical", "Mechanical", "Facilities"
   code: text("code").unique().notNull(), // e.g., "ELEC", "MECH"
   description: text("description"),
-  managerId: integer("manager_id"), // Dept Manager - removed explicit .references() to avoid circularity
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  managerId: text("manager_id"), // Dept Manager - removed explicit .references() to avoid circularity
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Users table
-export const users = sqliteTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const users = pgTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   employeeId: text("employee_id").unique().notNull(),
   name: text("name").notNull(),
   email: text("email").unique(),
   pin: text("pin").notNull(),
-  roleId: integer("role_id").references(() => roles.id),
-  departmentId: integer("department_id").references(() => departments.id),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  roleId: text("role_id").references(() => roles.id),
+  departmentId: text("department_id").references(() => departments.id),
+  isActive: boolean("is_active").notNull().default(true),
   hourlyRate: real("hourly_rate"), // For labor cost tracking
-  preferences: text("preferences", { mode: "json" }).$type<UserPreferences>(),
+  preferences: jsonb("preferences").$type<UserPreferences>(),
   failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
-  lockedUntil: integer("locked_until", { mode: "timestamp" }),
+  lockedUntil: timestamp("locked_until"),
   // Session version - increment when PIN changes to invalidate all existing sessions
   sessionVersion: integer("session_version").notNull().default(1),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Locations table (hierarchical)
-export const locations = sqliteTable("locations", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const locations = pgTable("locations", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   code: text("code").unique().notNull(),
   description: text("description"),
-  parentId: integer("parent_id"), // Self-reference handled in relations
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  parentId: text("parent_id"), // Self-reference handled in relations
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // SAP-style Equipment Categories (e.g., Mechanical, Electrical)
-export const equipmentCategories = sqliteTable("equipment_categories", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const equipmentCategories = pgTable("equipment_categories", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
   name: text("name").notNull(), // e.g., "M"
   label: text("label").notNull(), // e.g., "Mechanical"
   description: text("description"),
 });
 
 // SAP-style Object Types (e.g., Pump, Motor)
-export const equipmentTypes = sqliteTable("equipment_types", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  categoryId: integer("category_id")
+export const equipmentTypes = pgTable("equipment_types", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  categoryId: text("category_id")
     .references(() => equipmentCategories.id)
     .notNull(),
   name: text("name").notNull(), // e.g., "Pump"
@@ -231,44 +240,45 @@ export const equipmentTypes = sqliteTable("equipment_types", {
 });
 
 // Equipment Models table
-export const equipmentModels = sqliteTable("equipment_models", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const equipmentModels = pgTable("equipment_models", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
   name: text("name").notNull(),
   manufacturer: text("manufacturer"),
   description: text("description"),
   manualUrl: text("manual_url"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Equipment table (formerly Equipment)
-export const equipment = sqliteTable(
+export const equipment = pgTable(
   "equipment",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    displayId: serial("display_id").notNull(),
     name: text("name").notNull(),
     code: text("code").unique().notNull(), // For QR codes
-    modelId: integer("model_id").references(() => equipmentModels.id),
-    typeId: integer("type_id").references(() => equipmentTypes.id),
-    locationId: integer("location_id")
+    modelId: text("model_id").references(() => equipmentModels.id),
+    typeId: text("type_id").references(() => equipmentTypes.id),
+    locationId: text("location_id")
       .references(() => locations.id)
       .notNull(),
-    ownerId: integer("owner_id").references(() => users.id), // Owner
-    departmentId: integer("department_id").references(() => departments.id), // Responsible Department
-    parentId: integer("parent_id"), // Self-reference for hierarchy (Station -> Machine -> Component)
+    ownerId: text("owner_id").references(() => users.id), // Owner
+    departmentId: text("department_id").references(() => departments.id), // Responsible Department
+    parentId: text("parent_id"), // Self-reference for hierarchy (Station -> Machine -> Component)
     status: text("status", { enum: equipmentStatuses })
       .notNull()
       .default("operational"),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: timestamp("created_at")
       .notNull()
-      .default(sql`(unixepoch())`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .defaultNow(),
+    updatedAt: timestamp("updated_at")
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (table) => ({
     codeIdx: index("eq_code_idx").on(table.code),
@@ -278,19 +288,20 @@ export const equipment = sqliteTable(
 );
 
 // Work Orders table
-export const workOrders = sqliteTable(
+export const workOrders = pgTable(
   "work_orders",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    equipmentId: integer("equipment_id")
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    displayId: serial("display_id").notNull(),
+    equipmentId: text("equipment_id")
       .references(() => equipment.id)
       .notNull(),
     type: text("type", { enum: workOrderTypes }).notNull(),
-    reportedById: integer("reported_by_id")
+    reportedById: text("reported_by_id")
       .references(() => users.id)
       .notNull(),
-    assignedToId: integer("assigned_to_id").references(() => users.id),
-    departmentId: integer("department_id").references(() => departments.id),
+    assignedToId: text("assigned_to_id").references(() => users.id),
+    departmentId: text("department_id").references(() => departments.id),
     title: text("title").notNull(),
     description: text("description").notNull(),
     priority: text("priority", { enum: workOrderPriorities })
@@ -300,15 +311,15 @@ export const workOrders = sqliteTable(
       .notNull()
       .default("open"),
     resolutionNotes: text("resolution_notes"),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: timestamp("created_at")
       .notNull()
-      .default(sql`(unixepoch())`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .defaultNow(),
+    updatedAt: timestamp("updated_at")
       .notNull()
-      .default(sql`(unixepoch())`),
-    resolvedAt: integer("resolved_at", { mode: "timestamp" }),
-    escalatedAt: integer("escalated_at", { mode: "timestamp" }),
-    dueBy: integer("due_by", { mode: "timestamp" }),
+      .defaultNow(),
+    resolvedAt: timestamp("resolved_at"),
+    escalatedAt: timestamp("escalated_at"),
+    dueBy: timestamp("due_by"),
   },
   (table) => ({
     statusIdx: index("wo_status_idx").on(table.status),
@@ -332,73 +343,74 @@ export const workOrders = sqliteTable(
 );
 
 // Maintenance schedules table
-export const maintenanceSchedules = sqliteTable("maintenance_schedules", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  equipmentId: integer("equipment_id")
+export const maintenanceSchedules = pgTable("maintenance_schedules", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
+  equipmentId: text("equipment_id")
     .references(() => equipment.id)
     .notNull(),
   title: text("title").notNull(),
   type: text("type", { enum: scheduleTypes }).notNull(),
   frequencyDays: integer("frequency_days").notNull(),
-  lastGenerated: integer("last_generated", { mode: "timestamp" }),
-  nextDue: integer("next_due", { mode: "timestamp" }).notNull(),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  lastGenerated: timestamp("last_generated"),
+  nextDue: timestamp("next_due").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Work Order logs table (audit trail)
-export const workOrderLogs = sqliteTable("work_order_logs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  workOrderId: integer("work_order_id")
+export const workOrderLogs = pgTable("work_order_logs", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  workOrderId: text("work_order_id")
     .references(() => workOrders.id)
     .notNull(),
   action: text("action", { enum: workOrderLogActions }).notNull(),
   oldValue: text("old_value"),
   newValue: text("new_value").notNull(),
-  createdById: integer("created_by_id")
+  createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Attachments table (polymorphic)
-export const attachments = sqliteTable("attachments", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const attachments = pgTable("attachments", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
   entityType: text("entity_type", { enum: entityTypes }).notNull(),
-  entityId: integer("entity_id").notNull(),
+  entityId: text("entity_id").notNull(),
   type: text("type", { enum: attachmentTypes }).notNull(),
   filename: text("filename").notNull(),
   s3Key: text("s3_key").notNull(),
   mimeType: text("mime_type").notNull(),
   sizeBytes: integer("size_bytes").notNull(),
-  uploadedById: integer("uploaded_by_id")
+  uploadedById: text("uploaded_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Notifications table
-export const notifications = sqliteTable(
+export const notifications = pgTable(
   "notifications",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id")
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    userId: text("user_id")
       .references(() => users.id)
       .notNull(),
     type: text("type", { enum: notificationTypes }).notNull(),
     title: text("title").notNull(),
     message: text("message").notNull(),
     link: text("link"),
-    isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    isRead: boolean("is_read").notNull().default(false),
+    createdAt: timestamp("created_at")
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (table) => ({
     userIdIdx: index("notif_user_idx").on(table.userId),
@@ -411,77 +423,78 @@ export const notifications = sqliteTable(
 );
 
 // Equipment status logs table (for downtime tracking)
-export const equipmentStatusLogs = sqliteTable("equipment_status_logs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  equipmentId: integer("equipment_id")
+export const equipmentStatusLogs = pgTable("equipment_status_logs", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  equipmentId: text("equipment_id")
     .references(() => equipment.id)
     .notNull(),
   oldStatus: text("old_status", { enum: equipmentStatuses }).notNull(),
   newStatus: text("new_status", { enum: equipmentStatuses }).notNull(),
-  changedById: integer("changed_by_id").references(() => users.id),
-  changedAt: integer("changed_at", { mode: "timestamp" })
+  changedById: text("changed_by_id").references(() => users.id),
+  changedAt: timestamp("changed_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Bill of Materials (BOM) linking models to parts
-export const equipmentBoms = sqliteTable("equipment_boms", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  modelId: integer("model_id")
+export const equipmentBoms = pgTable("equipment_boms", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  modelId: text("model_id")
     .references(() => equipmentModels.id)
     .notNull(),
-  partId: integer("part_id")
+  partId: text("part_id")
     .references(() => spareParts.id)
     .notNull(),
   quantityRequired: integer("quantity_required").notNull().default(1),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // ============ PHASE 10: MAINTENANCE CHECKLISTS ============
 
 // Checklist templates linked to maintenance schedules
-export const maintenanceChecklists = sqliteTable("maintenance_checklists", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  scheduleId: integer("schedule_id")
+export const maintenanceChecklists = pgTable("maintenance_checklists", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  scheduleId: text("schedule_id")
     .references(() => maintenanceSchedules.id)
     .notNull(),
   stepNumber: integer("step_number").notNull(),
   description: text("description").notNull(),
-  isRequired: integer("is_required", { mode: "boolean" })
+  isRequired: boolean("is_required")
     .notNull()
     .default(true),
   estimatedMinutes: integer("estimated_minutes"),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Completed checklist items per work order
-export const checklistCompletions = sqliteTable("checklist_completions", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  checklistId: integer("checklist_id")
+export const checklistCompletions = pgTable("checklist_completions", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  checklistId: text("checklist_id")
     .references(() => maintenanceChecklists.id)
     .notNull(),
-  workOrderId: integer("work_order_id")
+  workOrderId: text("work_order_id")
     .references(() => workOrders.id)
     .notNull(),
   status: text("status", { enum: checklistItemStatuses })
     .notNull()
     .default("pending"),
-  completedById: integer("completed_by_id").references(() => users.id),
+  completedById: text("completed_by_id").references(() => users.id),
   notes: text("notes"),
-  completedAt: integer("completed_at", { mode: "timestamp" }),
+  completedAt: timestamp("completed_at"),
 });
 
 // ============ PHASE 12: INVENTORY MANAGEMENT ============
 
 // Spare parts catalog
 // Vendors (suppliers for parts and services)
-export const vendors = sqliteTable("vendors", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const vendors = pgTable("vendors", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   code: text("code").unique().notNull(), // Short code like "ACME"
   contactPerson: text("contact_person"),
@@ -490,50 +503,51 @@ export const vendors = sqliteTable("vendors", {
   website: text("website"),
   address: text("address"),
   notes: text("notes"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
-export const spareParts = sqliteTable("spare_parts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const spareParts = pgTable("spare_parts", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   sku: text("sku").unique().notNull(),
   barcode: text("barcode"),
   description: text("description"),
   category: text("category", { enum: partCategories }).notNull(),
-  vendorId: integer("vendor_id").references(() => vendors.id),
+  vendorId: text("vendor_id").references(() => vendors.id),
   unitCost: real("unit_cost"),
   reorderPoint: integer("reorder_point").notNull().default(0),
   leadTimeDays: integer("lead_time_days"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Stock levels per location
-export const inventoryLevels = sqliteTable(
+export const inventoryLevels = pgTable(
   "inventory_levels",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    partId: integer("part_id")
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    partId: text("part_id")
       .references(() => spareParts.id)
       .notNull(),
-    locationId: integer("location_id")
+    locationId: text("location_id")
       .references(() => locations.id)
       .notNull(),
     quantity: integer("quantity").notNull().default(0),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: timestamp("updated_at")
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (table) => ({
     // Unique constraint to prevent duplicate inventory levels for same part+location
@@ -545,71 +559,72 @@ export const inventoryLevels = sqliteTable(
 );
 
 // Inventory transactions (stock movements)
-export const inventoryTransactions = sqliteTable("inventory_transactions", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  partId: integer("part_id")
+export const inventoryTransactions = pgTable("inventory_transactions", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
+  partId: text("part_id")
     .references(() => spareParts.id)
     .notNull(),
-  locationId: integer("location_id")
+  locationId: text("location_id")
     .references(() => locations.id)
     .notNull(),
-  workOrderId: integer("work_order_id").references(() => workOrders.id),
+  workOrderId: text("work_order_id").references(() => workOrders.id),
   type: text("type", { enum: transactionTypes }).notNull(),
   quantity: integer("quantity").notNull(),
-  toLocationId: integer("to_location_id").references(() => locations.id),
+  toLocationId: text("to_location_id").references(() => locations.id),
   reference: text("reference"),
   notes: text("notes"),
-  createdById: integer("created_by_id")
+  createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // Parts used on work orders
-export const workOrderParts = sqliteTable("work_order_parts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  workOrderId: integer("work_order_id")
+export const workOrderParts = pgTable("work_order_parts", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  workOrderId: text("work_order_id")
     .references(() => workOrders.id)
     .notNull(),
-  partId: integer("part_id")
+  partId: text("part_id")
     .references(() => spareParts.id)
     .notNull(),
   quantity: integer("quantity").notNull(),
   unitCost: real("unit_cost"),
-  addedById: integer("added_by_id")
+  addedById: text("added_by_id")
     .references(() => users.id)
     .notNull(),
-  addedAt: integer("added_at", { mode: "timestamp" })
+  addedAt: timestamp("added_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // ============ PHASE 13: LABOR TRACKING ============
 
 // Labor/time logs
-export const laborLogs = sqliteTable(
+export const laborLogs = pgTable(
   "labor_logs",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    workOrderId: integer("work_order_id")
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    workOrderId: text("work_order_id")
       .references(() => workOrders.id)
       .notNull(),
-    userId: integer("user_id")
+    userId: text("user_id")
       .references(() => users.id)
       .notNull(),
-    startTime: integer("start_time", { mode: "timestamp" }).notNull(),
-    endTime: integer("end_time", { mode: "timestamp" }),
+    startTime: timestamp("start_time").notNull(),
+    endTime: timestamp("end_time"),
     durationMinutes: integer("duration_minutes"),
     hourlyRate: real("hourly_rate"),
-    isBillable: integer("is_billable", { mode: "boolean" })
+    isBillable: boolean("is_billable")
       .notNull()
       .default(true),
     notes: text("notes"),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: timestamp("created_at")
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (table) => ({
     // Composite index for time tracking aggregations
@@ -624,18 +639,18 @@ export const laborLogs = sqliteTable(
 export const favoriteEntityTypes = ["equipment"] as const;
 export type FavoriteEntityType = (typeof favoriteEntityTypes)[number];
 
-export const userFavorites = sqliteTable(
+export const userFavorites = pgTable(
   "user_favorites",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id")
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    userId: text("user_id")
       .references(() => users.id)
       .notNull(),
     entityType: text("entity_type").notNull().$type<FavoriteEntityType>(),
-    entityId: integer("entity_id").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    entityId: text("entity_id").notNull(),
+    createdAt: timestamp("created_at")
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (table) => ({
     // Unique constraint to prevent duplicate favorites
@@ -649,8 +664,9 @@ export const userFavorites = sqliteTable(
 );
 
 // Work Order Templates
-export const workOrderTemplates = sqliteTable("work_order_templates", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const workOrderTemplates = pgTable("work_order_templates", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   type: text("type", { enum: workOrderTypes }).notNull(),
@@ -659,36 +675,36 @@ export const workOrderTemplates = sqliteTable("work_order_templates", {
     .default("medium"),
   defaultTitle: text("default_title"),
   defaultDescription: text("default_description"),
-  defaultAssignedToId: integer("default_assigned_to_id").references(
+  defaultAssignedToId: text("default_assigned_to_id").references(
     () => users.id
   ),
-  departmentId: integer("department_id").references(() => departments.id),
+  departmentId: text("department_id").references(() => departments.id),
   estimatedMinutes: integer("estimated_minutes"),
-  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
-  createdById: integer("created_by_id")
+  isActive: boolean("is_active").notNull().default(true),
+  createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: timestamp("created_at")
     .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .default(sql`(unixepoch())`),
+    .defaultNow(),
 });
 
 // System-wide audit logs
-export const auditLogs = sqliteTable(
+export const auditLogs = pgTable(
   "audit_logs",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
     entityType: text("entity_type", { enum: entityTypes }).notNull(),
-    entityId: integer("entity_id").notNull(),
+    entityId: text("entity_id").notNull(),
     action: text("action").notNull(), // "CREATE", "UPDATE", "DELETE", "LOGIN", etc.
-    details: text("details", { mode: "json" }), // JSON description of what changed
-    userId: integer("user_id").references(() => users.id),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    details: jsonb("details"), // JSON description of what changed
+    userId: text("user_id").references(() => users.id),
+    createdAt: timestamp("created_at")
       .notNull()
-      .default(sql`(unixepoch())`),
+      .defaultNow(),
   },
   (table) => ({
     entityIdx: index("audit_entity_idx").on(table.entityType, table.entityId),

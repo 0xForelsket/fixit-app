@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface SimpleEquipment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   locationName?: string;

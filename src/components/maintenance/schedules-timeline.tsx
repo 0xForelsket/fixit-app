@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface Schedule {
-  id: number;
+  id: string;
   title: string;
   type: string;
   nextDue: string | Date | null;

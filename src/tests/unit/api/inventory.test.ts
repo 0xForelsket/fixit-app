@@ -63,12 +63,12 @@ describe("GET /api/inventory/parts", () => {
 
   it("returns parts list when authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -85,13 +85,13 @@ describe("GET /api/inventory/parts", () => {
 
     const mockParts = [
       {
-        id: 1,
+        id: "1", displayId: 1,
         name: "Bearing",
         sku: "BRG-001",
         barcode: null,
         description: "Standard ball bearing",
         category: "mechanical" as const,
-        vendorId: 1,
+        vendorId: "1",
         unitCost: 25.99,
         reorderPoint: 10,
         leadTimeDays: 7,
@@ -100,13 +100,13 @@ describe("GET /api/inventory/parts", () => {
         updatedAt: new Date(),
       },
       {
-        id: 2,
+        id: "2", displayId: 2,
         name: "Motor",
         sku: "MTR-001",
         barcode: null,
         description: "Replacement motor",
         category: "electrical" as const,
-        vendorId: 2,
+        vendorId: "2",
         unitCost: 150.0,
         reorderPoint: 5,
         leadTimeDays: 14,
@@ -128,12 +128,12 @@ describe("GET /api/inventory/parts", () => {
 
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -188,13 +188,13 @@ describe("POST /api/inventory/parts", () => {
 
   it("returns 401 when lacking permission", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Operator",
       employeeId: "OP-001",
       email: "op@example.com",
       pin: "hashed",
-      roleId: 1,
-      departmentId: 1,
+      roleId: "1",
+      departmentId: "1",
       isActive: true,
       hourlyRate: 20.0,
       preferences: {
@@ -226,13 +226,13 @@ describe("POST /api/inventory/parts", () => {
 
   it("returns 400 when missing required fields", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       hourlyRate: 50.0,
       preferences: {
@@ -265,13 +265,13 @@ describe("POST /api/inventory/parts", () => {
 
   it("creates part successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       hourlyRate: 50.0,
       preferences: {
@@ -287,13 +287,13 @@ describe("POST /api/inventory/parts", () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
 
     const mockPart = {
-      id: 5,
+      id: "5", displayId: 5,
       name: "New Bearing",
       sku: "NB-001",
       barcode: null,
       description: "Standard ball bearing",
       category: "mechanical" as const,
-      vendorId: 1,
+      vendorId: "1",
       unitCost: 35.0,
       reorderPoint: 10,
       leadTimeDays: 7,
@@ -330,13 +330,13 @@ describe("POST /api/inventory/parts", () => {
 
   it("sets default values for optional fields", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       hourlyRate: 50.0,
       preferences: {
@@ -352,7 +352,7 @@ describe("POST /api/inventory/parts", () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
 
     const mockPart = {
-      id: 6,
+      id: "6", displayId: 6,
       name: "Basic Part",
       sku: "BP-001",
       barcode: null,
@@ -396,13 +396,13 @@ describe("POST /api/inventory/parts", () => {
 
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       hourlyRate: 50.0,
       preferences: {

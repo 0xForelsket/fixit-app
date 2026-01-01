@@ -22,7 +22,7 @@ import { useActionState, useEffect, useState } from "react";
 
 interface ReportFormProps {
   equipment: {
-    id: number;
+    id: string;
     name: string;
   };
 }
@@ -112,7 +112,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
 
   useEffect(() => {
     if (state?.success) {
-      const data = state.data as { id: number } | undefined;
+      const data = state.data as { id: string } | undefined;
       if (data?.id) {
         // Redirect to confirmation screen (Issue #1.4)
         router.push(`/my-tickets/${data.id}?success=true`);

@@ -17,7 +17,7 @@ const createDepartmentSchema = z.object({
     .max(10)
     .regex(/^[A-Z0-9]+$/, "Code must be uppercase letters and numbers only"),
   description: z.string().max(500).optional(),
-  managerId: z.coerce.number().optional(),
+  managerId: z.string().optional(),
 });
 
 const updateDepartmentSchema = createDepartmentSchema.partial();
@@ -68,7 +68,7 @@ export async function getDepartments(params?: {
   // Get manager names
   const managerIds = departmentsList
     .map((d) => d.managerId)
-    .filter((id): id is number => id !== null);
+    .filter((id): id is string => id !== null);
 
   const managers =
     managerIds.length > 0
@@ -86,7 +86,7 @@ export async function getDepartments(params?: {
   }));
 }
 
-export async function getDepartment(id: number) {
+export async function getDepartment(id: string) {
   const department = await db.query.departments.findFirst({
     where: eq(departments.id, id),
     with: {
@@ -101,7 +101,7 @@ export async function getDepartment(id: number) {
 
 export async function createDepartment(
   formData: FormData
-): Promise<ActionResult<{ id: number }>> {
+): Promise<ActionResult<{ id: string }>> {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
 
   const rawData = {
@@ -144,7 +144,7 @@ export async function createDepartment(
       name: parsed.data.name,
       code: parsed.data.code,
       description: parsed.data.description ?? null,
-      managerId: parsed.data.managerId ?? null,
+      managerId: parsed.data.managerId || null,
     })
     .returning({ id: departments.id });
 
@@ -154,7 +154,7 @@ export async function createDepartment(
 }
 
 export async function updateDepartment(
-  id: number,
+  id: string,
   formData: FormData
 ): Promise<ActionResult> {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
@@ -225,7 +225,7 @@ export async function updateDepartment(
   return { success: true };
 }
 
-export async function deleteDepartment(id: number): Promise<ActionResult> {
+export async function deleteDepartment(id: string): Promise<ActionResult> {
   await requirePermission(PERMISSIONS.SYSTEM_SETTINGS);
 
   const department = await db.query.departments.findFirst({

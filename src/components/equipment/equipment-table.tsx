@@ -10,28 +10,28 @@ import { Edit, Flag, MapPin, MonitorCog } from "lucide-react";
 import Link from "next/link";
 
 interface EquipmentType {
-  id: number;
+  id: string;
   name: string;
   category: {
-    id: number;
+    id: string;
     label: string;
   };
 }
 
 interface Equipment {
-  id: number;
+  id: string;
   code: string;
   name: string;
   status: string;
-  location: { id: number; name: string } | null;
-  owner: { id: number; name: string } | null;
+  location: { id: string; name: string } | null;
+  owner: { id: string; name: string } | null;
   type: EquipmentType | null;
 }
 
 interface EquipmentTableProps {
   equipment: Equipment[];
   searchParams?: Record<string, string | undefined>;
-  favoriteIds?: number[];
+  favoriteIds?: string[];
   userPermissions?: string[];
 }
 

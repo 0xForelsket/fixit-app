@@ -10,12 +10,7 @@ export default async function EditUserPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const userId = Number.parseInt(id, 10);
-
-  if (Number.isNaN(userId)) {
-    notFound();
-  }
+  const { id: userId } = await params;
 
   const [user, roles] = await Promise.all([getUserById(userId), getAllRoles()]);
 

@@ -10,7 +10,7 @@ import { SchedulesTable } from "./schedules-table";
 import { SchedulesTimeline } from "./schedules-timeline";
 
 interface Schedule {
-  id: number;
+  id: string;
   title: string;
   nextDue: string | Date | null;
   type: string;

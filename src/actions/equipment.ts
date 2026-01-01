@@ -34,13 +34,11 @@ export async function createEquipment(
   const rawData = {
     name: formData.get("name"),
     code: formData.get("code")?.toString().toUpperCase(),
-    locationId: Number(formData.get("locationId")),
-    departmentId: Number(formData.get("departmentId")),
-    ownerId: formData.get("ownerId") ? Number(formData.get("ownerId")) : null,
-    typeId: formData.get("typeId") ? Number(formData.get("typeId")) : null,
-    parentId: formData.get("parentId")
-      ? Number(formData.get("parentId"))
-      : null,
+    locationId: formData.get("locationId")?.toString(),
+    departmentId: formData.get("departmentId")?.toString(),
+    ownerId: formData.get("ownerId")?.toString() || null,
+    typeId: formData.get("typeId")?.toString() || null,
+    parentId: formData.get("parentId")?.toString() || null,
     status: formData.get("status") || "operational",
   };
 
@@ -78,7 +76,7 @@ export async function createEquipment(
 }
 
 export async function updateEquipment(
-  equipmentId: number,
+  equipmentId: string,
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
@@ -109,17 +107,16 @@ export async function updateEquipment(
 
   if (name) rawData.name = name;
   if (code) rawData.code = code.toString().toUpperCase();
-  if (locationId) rawData.locationId = Number(locationId);
+  if (locationId) rawData.locationId = locationId.toString();
   if (ownerId !== null) {
-    rawData.ownerId = ownerId ? Number(ownerId) : null;
+    rawData.ownerId = ownerId ? ownerId.toString() : null;
   }
   if (typeId !== null) {
-    rawData.typeId = typeId ? Number(typeId) : null;
+    rawData.typeId = typeId ? typeId.toString() : null;
   }
   if (formData.get("parentId") !== null) {
-    rawData.parentId = formData.get("parentId")
-      ? Number(formData.get("parentId"))
-      : null;
+    const parentId = formData.get("parentId");
+    rawData.parentId = parentId ? parentId.toString() : null;
   }
   if (status) rawData.status = status;
 
@@ -169,7 +166,7 @@ export async function updateEquipment(
 }
 
 export async function deleteEquipment(
-  equipmentId: number
+  equipmentId: string
 ): Promise<ActionState> {
   const user = await getCurrentUser();
   if (!user) {

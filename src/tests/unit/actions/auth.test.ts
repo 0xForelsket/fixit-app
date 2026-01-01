@@ -111,7 +111,7 @@ describe("login action", () => {
     vi.mocked(authenticateUser).mockResolvedValue({
       success: true,
       user: {
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",
@@ -136,7 +136,7 @@ describe("login action", () => {
     vi.mocked(authenticateUser).mockResolvedValue({
       success: true,
       user: {
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "ADMIN-001",
         name: "Admin User",
         roleName: "admin",
@@ -161,7 +161,7 @@ describe("login action", () => {
     vi.mocked(authenticateUser).mockResolvedValue({
       success: true,
       user: {
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "OP-001",
         name: "Operator User",
         roleName: "operator",

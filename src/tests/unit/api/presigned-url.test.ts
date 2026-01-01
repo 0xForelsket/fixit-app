@@ -42,7 +42,7 @@ describe("POST /api/attachments/presigned-url", () => {
           filename: "photo.jpg",
           mimeType: "image/jpeg",
           entityType: "work_order",
-          entityId: 1,
+          entityId: "1",
         }),
       }
     );
@@ -54,11 +54,11 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("returns 400 when missing required fields", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -84,11 +84,11 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("returns presigned URL and s3Key on success", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -106,7 +106,7 @@ describe("POST /api/attachments/presigned-url", () => {
           filename: "photo.jpg",
           mimeType: "image/jpeg",
           entityType: "work_order",
-          entityId: 5,
+          entityId: "5",
         }),
       }
     );
@@ -122,11 +122,11 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("generates correct s3Key format for different entity types", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -144,7 +144,7 @@ describe("POST /api/attachments/presigned-url", () => {
           filename: "manual.pdf",
           mimeType: "application/pdf",
           entityType: "equipment",
-          entityId: 10,
+          entityId: "10",
         }),
       }
     );
@@ -158,11 +158,11 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("handles S3 errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -180,7 +180,7 @@ describe("POST /api/attachments/presigned-url", () => {
           filename: "photo.jpg",
           mimeType: "image/jpeg",
           entityType: "work_order",
-          entityId: 1,
+          entityId: "1",
         }),
       }
     );
@@ -194,11 +194,11 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("preserves file extension from filename", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -216,7 +216,7 @@ describe("POST /api/attachments/presigned-url", () => {
           filename: "document.with.dots.png",
           mimeType: "image/png",
           entityType: "work_order",
-          entityId: 1,
+          entityId: "1",
         }),
       }
     );

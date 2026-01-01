@@ -29,8 +29,8 @@ export const s3Client = new S3Client({
 // Generate S3 key based on entity type and ID
 export function generateS3Key(
   entityType: EntityType,
-  entityId: number,
-  attachmentId: number,
+  entityId: string,
+  attachmentId: string,
   filename: string
 ): string {
   const ext = filename.split(".").pop() || "bin";
@@ -38,7 +38,7 @@ export function generateS3Key(
 }
 
 // Generate S3 key for avatars
-export function generateAvatarKey(userId: number, filename: string): string {
+export function generateAvatarKey(userId: string, filename: string): string {
   const ext = filename.split(".").pop() || "jpg";
   return `users/${userId}/avatar.${ext}`;
 }

@@ -8,13 +8,13 @@ import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 interface UserWithRole {
-  id: number;
+  id: string;
   name: string;
   employeeId: string;
   email: string | null;
   isActive: boolean;
   createdAt: Date;
-  assignedRole: { id: number; name: string } | null;
+  assignedRole: { id: string; name: string } | null;
 }
 
 interface UsersTableProps {

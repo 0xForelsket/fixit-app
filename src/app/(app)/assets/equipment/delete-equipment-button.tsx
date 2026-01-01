@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface DeleteEquipmentButtonProps {
-  equipmentId: number;
+  equipmentId: string;
   equipmentName: string;
 }
 

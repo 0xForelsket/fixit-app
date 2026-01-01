@@ -44,12 +44,12 @@ import { requirePermission } from "@/lib/auth";
 
 describe("roles actions", () => {
   const mockUser: SessionUser = {
-    id: 1,
+    id: "1", displayId: 1,
     name: "Admin",
     employeeId: "ADMIN-001",
-    roleId: 3,
+    roleId: "3",
     roleName: "admin",
-    departmentId: 1,
+    departmentId: "1",
     permissions: ["*"],
     hourlyRate: 50.0,
     sessionVersion: 1,
@@ -84,7 +84,7 @@ describe("roles actions", () => {
 
     it("should reject duplicate role name", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         name: "existing-role",
         description: null,
         permissions: [],
@@ -109,7 +109,7 @@ describe("roles actions", () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
       vi.mocked(db.insert).mockReturnValue({
         values: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([{ id: 5 }]),
+          returning: vi.fn().mockResolvedValue([{ id: "5", displayId: 5 }]),
         })),
       } as unknown as ReturnType<typeof db.insert>);
 
@@ -135,7 +135,7 @@ describe("roles actions", () => {
       const formData = new FormData();
       formData.set("name", "Updated Name");
 
-      const result = await updateRole(999, formData);
+      const result = await updateRole("999", formData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -145,7 +145,7 @@ describe("roles actions", () => {
 
     it("should reject updates to system roles", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         name: "admin",
         description: "System administrator",
         permissions: ["*"],
@@ -157,7 +157,7 @@ describe("roles actions", () => {
       const formData = new FormData();
       formData.set("name", "hacked-admin");
 
-      const result = await updateRole(1, formData);
+      const result = await updateRole("1", formData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -169,7 +169,7 @@ describe("roles actions", () => {
       // First call: find the role being updated
       vi.mocked(db.query.roles.findFirst)
         .mockResolvedValueOnce({
-          id: 5,
+          id: "5", displayId: 5,
           name: "custom-role",
           description: null,
           permissions: ["ticket:view"],
@@ -179,7 +179,7 @@ describe("roles actions", () => {
         })
         // Second call: check for existing role with new name
         .mockResolvedValueOnce({
-          id: 6,
+          id: "6", displayId: 6,
           name: "existing-role",
           description: null,
           permissions: [],
@@ -191,7 +191,7 @@ describe("roles actions", () => {
       const formData = new FormData();
       formData.set("name", "existing-role");
 
-      const result = await updateRole(5, formData);
+      const result = await updateRole("5", formData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -202,7 +202,7 @@ describe("roles actions", () => {
     it("should update role successfully", async () => {
       vi.mocked(db.query.roles.findFirst)
         .mockResolvedValueOnce({
-          id: 5,
+          id: "5", displayId: 5,
           name: "custom-role",
           description: null,
           permissions: ["ticket:view"],
@@ -224,7 +224,7 @@ describe("roles actions", () => {
       formData.append("permissions", "ticket:view");
       formData.append("permissions", "ticket:update");
 
-      const result = await updateRole(5, formData);
+      const result = await updateRole("5", formData);
 
       expect(result.success).toBe(true);
       expect(db.update).toHaveBeenCalled();
@@ -232,7 +232,7 @@ describe("roles actions", () => {
 
     it("should allow updating same name (no rename)", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValueOnce({
-        id: 5,
+        id: "5", displayId: 5,
         name: "custom-role",
         description: null,
         permissions: ["ticket:view"],
@@ -252,7 +252,7 @@ describe("roles actions", () => {
       formData.append("permissions", "ticket:view");
       formData.append("permissions", "ticket:create");
 
-      const result = await updateRole(5, formData);
+      const result = await updateRole("5", formData);
 
       expect(result.success).toBe(true);
     });
@@ -262,7 +262,7 @@ describe("roles actions", () => {
     it("should return error for non-existent role", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
 
-      const result = await deleteRole(999);
+      const result = await deleteRole("999");
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -272,7 +272,7 @@ describe("roles actions", () => {
 
     it("should reject deletion of system roles", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         name: "admin",
         description: "System administrator",
         permissions: ["*"],
@@ -281,7 +281,7 @@ describe("roles actions", () => {
         updatedAt: new Date(),
       });
 
-      const result = await deleteRole(1);
+      const result = await deleteRole("1");
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -291,7 +291,7 @@ describe("roles actions", () => {
 
     it("should reject deletion when users are assigned", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValueOnce({
-        id: 5,
+        id: "5", displayId: 5,
         name: "custom-role",
         description: null,
         permissions: ["ticket:view"],
@@ -301,11 +301,11 @@ describe("roles actions", () => {
       });
 
       vi.mocked(db.query.users.findFirst).mockResolvedValue({
-        id: 10,
+        id: "10", displayId: 10,
         employeeId: "EMP-001",
         name: "Test User",
         pin: "hashed",
-        roleId: 5,
+        roleId: "5",
         isActive: true,
         hourlyRate: null,
         failedLoginAttempts: 0,
@@ -318,7 +318,7 @@ describe("roles actions", () => {
         updatedAt: new Date(),
       });
 
-      const result = await deleteRole(5);
+      const result = await deleteRole("5");
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -328,7 +328,7 @@ describe("roles actions", () => {
 
     it("should delete role successfully when no users assigned", async () => {
       vi.mocked(db.query.roles.findFirst).mockResolvedValueOnce({
-        id: 5,
+        id: "5", displayId: 5,
         name: "unused-role",
         description: null,
         permissions: ["ticket:view"],
@@ -343,7 +343,7 @@ describe("roles actions", () => {
         where: vi.fn().mockResolvedValue(undefined),
       } as unknown as ReturnType<typeof db.delete>);
 
-      const result = await deleteRole(5);
+      const result = await deleteRole("5");
 
       expect(result.success).toBe(true);
       expect(db.delete).toHaveBeenCalled();

@@ -38,57 +38,57 @@ describe("S3 Utilities", () => {
 
   describe("generateS3Key", () => {
     it("generates correct key for work_order entity", () => {
-      const key = generateS3Key("work_order", 123, 456, "document.pdf");
+      const key = generateS3Key("work_order", "123", "456", "document.pdf");
       expect(key).toBe("work_orders/123/456.pdf");
     });
 
     it("generates correct key for equipment entity", () => {
-      const key = generateS3Key("equipment", 42, 99, "photo.jpg");
+      const key = generateS3Key("equipment", "42", "99", "photo.jpg");
       expect(key).toBe("equipments/42/99.jpg");
     });
 
     it("generates correct key for spare_part entity", () => {
-      const key = generateS3Key("spare_part", 10, 20, "specs.docx");
+      const key = generateS3Key("spare_part", "10", "20", "specs.docx");
       expect(key).toBe("spare_parts/10/20.docx");
     });
 
     it("extracts extension from filename", () => {
-      const key = generateS3Key("work_order", 1, 1, "report.final.xlsx");
+      const key = generateS3Key("work_order", "1", "1", "report.final.xlsx");
       expect(key).toBe("work_orders/1/1.xlsx");
     });
 
     it("uses filename as extension when no dot present", () => {
       // When there's no dot, split(".").pop() returns the whole filename
-      const key = generateS3Key("work_order", 1, 1, "noextension");
+      const key = generateS3Key("work_order", "1", "1", "noextension");
       expect(key).toBe("work_orders/1/1.noextension");
     });
 
     it("uses bin extension for empty filename", () => {
       // Empty string split(".").pop() returns "", which is falsy, so "bin" is used
-      const key = generateS3Key("work_order", 1, 1, "");
+      const key = generateS3Key("work_order", "1", "1", "");
       expect(key).toBe("work_orders/1/1.bin");
     });
   });
 
   describe("generateAvatarKey", () => {
     it("generates correct key for user avatar", () => {
-      const key = generateAvatarKey(42, "profile.jpg");
+      const key = generateAvatarKey("42", "profile.jpg");
       expect(key).toBe("users/42/avatar.jpg");
     });
 
     it("extracts extension from filename", () => {
-      const key = generateAvatarKey(1, "photo.png");
+      const key = generateAvatarKey("1", "photo.png");
       expect(key).toBe("users/1/avatar.png");
     });
 
     it("uses filename as extension when no dot present", () => {
       // When there's no dot, split(".").pop() returns the whole filename
-      const key = generateAvatarKey(1, "avatar");
+      const key = generateAvatarKey("1", "avatar");
       expect(key).toBe("users/1/avatar.avatar");
     });
 
     it("handles files with multiple dots", () => {
-      const key = generateAvatarKey(1, "my.profile.photo.webp");
+      const key = generateAvatarKey("1", "my.profile.photo.webp");
       expect(key).toBe("users/1/avatar.webp");
     });
   });

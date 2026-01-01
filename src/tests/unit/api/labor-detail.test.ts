@@ -46,7 +46,7 @@ describe("GET /api/labor/[id]", () => {
 
     const request = new Request("http://localhost/api/labor/1");
     const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -54,11 +54,11 @@ describe("GET /api/labor/[id]", () => {
 
   it("returns 400 for invalid labor log ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -73,11 +73,11 @@ describe("GET /api/labor/[id]", () => {
 
   it("returns 404 when labor log not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -85,7 +85,7 @@ describe("GET /api/labor/[id]", () => {
 
     const request = new Request("http://localhost/api/labor/999");
     const response = await GET(request, {
-      params: Promise.resolve({ id: "999" }),
+      params: Promise.resolve({ id: "999", displayId: 999 }),
     });
 
     expect(response.status).toBe(404);
@@ -93,19 +93,19 @@ describe("GET /api/labor/[id]", () => {
 
   it("returns labor log with related data", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
 
     const mockLaborLog = {
-      id: 1,
-      userId: 1,
-      workOrderId: 1,
+      id: "1", displayId: 1,
+      userId: "1",
+      workOrderId: "1",
       startTime: new Date(),
       endTime: new Date(),
       durationMinutes: 60,
@@ -113,14 +113,14 @@ describe("GET /api/labor/[id]", () => {
       isBillable: true,
       notes: "Maintenance work",
       createdAt: new Date(),
-      user: { id: 1, name: "Tech User" },
-      workOrder: { id: 1, title: "Work Order 1" },
+      user: { id: "1", displayId: 1, name: "Tech User" },
+      workOrder: { id: "1", displayId: 1, title: "Work Order 1" },
     };
     vi.mocked(db.query.laborLogs.findFirst).mockResolvedValue(mockLaborLog);
 
     const request = new Request("http://localhost/api/labor/1");
     const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
     const data = await response.json();
 
@@ -144,7 +144,7 @@ describe("DELETE /api/labor/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -152,11 +152,11 @@ describe("DELETE /api/labor/[id]", () => {
 
   it("returns 400 for invalid labor log ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -173,11 +173,11 @@ describe("DELETE /api/labor/[id]", () => {
 
   it("returns 404 when labor log not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -191,7 +191,7 @@ describe("DELETE /api/labor/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "999" }),
+      params: Promise.resolve({ id: "999", displayId: 999 }),
     });
 
     expect(response.status).toBe(404);
@@ -199,17 +199,17 @@ describe("DELETE /api/labor/[id]", () => {
 
   it("deletes labor log successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+        returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
       })),
     } as unknown as ReturnType<typeof db.delete>);
 
@@ -217,7 +217,7 @@ describe("DELETE /api/labor/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
     const data = await response.json();
 

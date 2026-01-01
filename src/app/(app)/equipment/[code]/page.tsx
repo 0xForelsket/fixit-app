@@ -88,6 +88,7 @@ export default async function EquipmentPage({ params }: PageProps) {
     limit: 10,
     columns: {
       id: true,
+      displayId: true,
       title: true,
       status: true,
       priority: true,

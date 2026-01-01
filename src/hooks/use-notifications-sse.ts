@@ -4,7 +4,7 @@ import type { NotificationType } from "@/db/schema";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface Notification {
-  id: number;
+  id: string;
   type: NotificationType;
   title: string;
   message: string;
@@ -24,7 +24,7 @@ interface UseNotificationsSSEReturn {
   isConnected: boolean;
   isLoading: boolean;
   error: string | null;
-  markAsRead: (id: number) => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   refetch: () => Promise<void>;
 }
@@ -143,7 +143,7 @@ export function useNotificationsSSE(
   }, [connect]);
 
   // Mark single notification as read
-  const markAsRead = useCallback(async (id: number) => {
+  const markAsRead = useCallback(async (id: string) => {
     // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))

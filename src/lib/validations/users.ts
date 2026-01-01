@@ -35,7 +35,7 @@ export const createUserSchema = z.object({
     .or(z.literal("")),
   pin: pinSchema,
   role: userRoleSchema.default("operator"),
-  roleId: z.coerce.number().int().positive("Role is required").optional(),
+  roleId: z.string().min(1, "Role is required").optional(),
   isActive: z.boolean().default(true),
   hourlyRate: z.coerce
     .number()
@@ -58,7 +58,7 @@ export const updateUserSchema = z.object({
     .or(z.literal("")),
   pin: pinSchema.optional().or(z.literal("")),
   role: userRoleSchema.optional(),
-  roleId: z.coerce.number().int().positive().optional(),
+  roleId: z.string().min(1).optional(),
   isActive: z.boolean().optional(),
   hourlyRate: z.coerce
     .number()

@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 
 interface DashboardShellProps {
   user: {
-    id: number;
+    id: string;
     name: string;
     roleName: string;
     employeeId: string;

@@ -41,11 +41,11 @@ describe("GET /api/auth/me", () => {
 
   it("returns user when authenticated", async () => {
     const mockUser = {
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech User",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     };
@@ -60,11 +60,11 @@ describe("GET /api/auth/me", () => {
 
   it("returns admin user with full permissions", async () => {
     const mockAdmin = {
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin User",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       sessionVersion: 1,
       permissions: ["*"],
     };

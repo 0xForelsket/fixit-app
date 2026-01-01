@@ -13,12 +13,7 @@ export default async function EditVendorPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const vendorId = Number.parseInt(id);
-
-  if (Number.isNaN(vendorId)) {
-    notFound();
-  }
+  const { id: vendorId } = await params;
 
   const vendor = await db.query.vendors.findFirst({
     where: eq(vendors.id, vendorId),

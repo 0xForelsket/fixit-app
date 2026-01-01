@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fixit-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: fixit
+      POSTGRES_PASSWORD: fixitpassword
+      POSTGRES_DB: fixit
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   minio:
     image: minio/minio:latest
     container_name: fixit-minio
@@ -18,4 +35,5 @@ services:
       retries: 5
 
 volumes:
+  postgres_data:
   minio_data:

@@ -7,7 +7,7 @@ import { Building, MapPin, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 
 interface Location extends BaseTreeItem {
-  id: number;
+  id: string;
   name: string;
   code: string;
   isActive: boolean;

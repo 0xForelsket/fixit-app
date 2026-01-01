@@ -46,18 +46,18 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 interface Department {
-  id: number;
+  id: string;
   name: string;
   code: string;
   description: string | null;
-  managerId: number | null;
+  managerId: string | null;
   managerName: string | null;
   memberCount: number;
   equipmentCount: number;
 }
 
 interface User {
-  id: number;
+  id: string;
   name: string;
 }
 

@@ -15,11 +15,11 @@ export async function GET() {
   }
 
   try {
-    const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60;
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
     const trendResult = await db
       .select({
-        day: sql<string>`date(${workOrders.createdAt}, 'unixepoch')`.as("day"),
+        day: sql<string>`to_char(${workOrders.createdAt}, 'YYYY-MM-DD')`.as("day"),
         created_count: sql<number>`count(*)`,
         resolved_count: sql<number>`count(CASE WHEN ${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed' THEN 1 END)`,
       })

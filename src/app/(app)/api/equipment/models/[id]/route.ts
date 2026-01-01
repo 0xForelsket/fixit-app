@@ -20,7 +20,7 @@ export async function GET(
 
     const { id } = await params;
     const model = await db.query.equipmentModels.findFirst({
-      where: eq(equipmentModels.id, Number.parseInt(id)),
+      where: eq(equipmentModels.id, id),
       with: {
         bom: {
           with: {
@@ -70,7 +70,7 @@ export async function PATCH(
         manualUrl,
         updatedAt: new Date(),
       })
-      .where(eq(equipmentModels.id, Number.parseInt(id)))
+      .where(eq(equipmentModels.id, id))
       .returning();
 
     return apiSuccess(updated);
@@ -99,7 +99,7 @@ export async function DELETE(
 
     // Check if in use by equipment
     const equipmentUsing = await db.query.equipment.findFirst({
-      where: (equipment, { eq }) => eq(equipment.modelId, Number.parseInt(id)),
+      where: (equipment, { eq }) => eq(equipment.modelId, id),
     });
 
     if (equipmentUsing) {
@@ -111,7 +111,7 @@ export async function DELETE(
 
     await db
       .delete(equipmentModels)
-      .where(eq(equipmentModels.id, Number.parseInt(id)));
+      .where(eq(equipmentModels.id, id));
 
     return apiSuccess({ success: true });
   } catch (error) {

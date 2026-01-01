@@ -31,7 +31,7 @@ export async function getWorkOrderTemplates() {
   return templates;
 }
 
-export async function getWorkOrderTemplateById(id: number) {
+export async function getWorkOrderTemplateById(id: string) {
   const template = await db.query.workOrderTemplates.findFirst({
     where: eq(workOrderTemplates.id, id),
     with: {
@@ -45,9 +45,9 @@ export async function getWorkOrderTemplateById(id: number) {
 }
 
 export async function createWorkOrderTemplate(
-  _prevState: ActionResult<{ id: number }> | undefined,
+  _prevState: ActionResult<{ id: string }> | undefined,
   formData: FormData
-): Promise<ActionResult<{ id: number }>> {
+): Promise<ActionResult<{ id: string }>> {
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in" };
@@ -68,10 +68,10 @@ export async function createWorkOrderTemplate(
     defaultTitle: formData.get("defaultTitle") || null,
     defaultDescription: formData.get("defaultDescription") || null,
     defaultAssignedToId: formData.get("defaultAssignedToId")
-      ? Number(formData.get("defaultAssignedToId"))
+      ? String(formData.get("defaultAssignedToId"))
       : null,
     departmentId: formData.get("departmentId")
-      ? Number(formData.get("departmentId"))
+      ? String(formData.get("departmentId"))
       : null,
     estimatedMinutes: formData.get("estimatedMinutes")
       ? Number(formData.get("estimatedMinutes"))
@@ -108,7 +108,7 @@ export async function createWorkOrderTemplate(
 }
 
 export async function updateWorkOrderTemplate(
-  id: number,
+  id: string,
   _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
@@ -140,10 +140,10 @@ export async function updateWorkOrderTemplate(
     defaultTitle: formData.get("defaultTitle") || null,
     defaultDescription: formData.get("defaultDescription") || null,
     defaultAssignedToId: formData.get("defaultAssignedToId")
-      ? Number(formData.get("defaultAssignedToId"))
+      ? String(formData.get("defaultAssignedToId"))
       : null,
     departmentId: formData.get("departmentId")
-      ? Number(formData.get("departmentId"))
+      ? String(formData.get("departmentId"))
       : null,
     estimatedMinutes: formData.get("estimatedMinutes")
       ? Number(formData.get("estimatedMinutes"))
@@ -181,7 +181,7 @@ export async function updateWorkOrderTemplate(
 }
 
 export async function deleteWorkOrderTemplate(
-  id: number
+  id: string
 ): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
   if (!user) {
@@ -226,9 +226,9 @@ export async function deleteWorkOrderTemplate(
 }
 
 export async function createWorkOrderFromTemplate(
-  templateId: number,
-  equipmentId: number
-): Promise<ActionResult<{ id: number }>> {
+  templateId: string,
+  equipmentId: string
+): Promise<ActionResult<{ id: string }>> {
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in" };

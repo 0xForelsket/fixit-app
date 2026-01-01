@@ -35,7 +35,7 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-async function getEquipmentItem(id: number) {
+async function getEquipmentItem(id: string) {
   return db.query.equipment.findFirst({
     where: eq(equipmentTable.id, id),
     with: {
@@ -76,12 +76,7 @@ export default async function EquipmentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const equipmentId = Number.parseInt(id);
-
-  if (Number.isNaN(equipmentId)) {
-    notFound();
-  }
+  const { id: equipmentId } = await params;
 
   // Parallelize all initial data fetching
   const [equipmentItem, user, favoriteResult] = await Promise.all([

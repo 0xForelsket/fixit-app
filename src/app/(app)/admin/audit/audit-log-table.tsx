@@ -44,7 +44,7 @@ interface AuditLogTableProps {
     from?: string;
     to?: string;
   };
-  users: { id: number; name: string; employeeId: string }[];
+  users: { id: string; name: string; employeeId: string }[];
   actions: string[];
   entityTypes: EntityType[];
 }
@@ -102,7 +102,7 @@ export function AuditLogTable({
       params.to
     )
   );
-  const [expandedLog, setExpandedLog] = useState<number | null>(null);
+  const [expandedLog, setExpandedLog] = useState<string | null>(null);
 
   const updateParams = useCallback(
     (updates: Record<string, string | undefined>) => {

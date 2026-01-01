@@ -12,7 +12,7 @@ export async function logAudit({
   details,
 }: {
   entityType: EntityType;
-  entityId: number;
+  entityId: string;
   action:
     | "CREATE"
     | "UPDATE"

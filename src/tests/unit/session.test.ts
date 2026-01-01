@@ -63,12 +63,13 @@ import { jwtVerify } from "jose";
 
 describe("Session Utilities", () => {
   const mockUser: SessionUser = {
-    id: 1,
+    id: "user-1",
+    displayId: 1,
     employeeId: "EMP-001",
     name: "Test User",
     roleName: "operator",
-    roleId: 1,
-    departmentId: 1,
+    roleId: "role-1",
+    departmentId: "dept-1",
     sessionVersion: 1,
     permissions: [PERMISSIONS.MAINTENANCE_VIEW],
     hourlyRate: 20.0,

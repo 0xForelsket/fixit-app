@@ -7,7 +7,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useRef, useState } from "react";
 
 interface Equipment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   location: { name: string } | null;
@@ -20,12 +20,12 @@ interface QrCodesTabProps {
 }
 
 export function QrCodesTab({ equipment, baseUrl }: QrCodesTabProps) {
-  const [selectedEquipment, setSelectedEquipment] = useState<Set<number>>(
+  const [selectedEquipment, setSelectedEquipment] = useState<Set<string>>(
     new Set()
   );
   const printRef = useRef<HTMLDivElement>(null);
 
-  const toggleEquipment = (id: number) => {
+  const toggleEquipment = (id: string) => {
     setSelectedEquipment((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {

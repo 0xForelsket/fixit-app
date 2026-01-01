@@ -3,12 +3,12 @@ import { AlertTriangle, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 
 interface MaintenanceScheduleItem {
-  id: number;
+  id: string;
   name: string;
   type: string;
   nextDueDate: Date;
   frequencyDays: number;
-  workOrderId: number | null;
+  workOrderId: string | null;
 }
 
 interface EquipmentMaintenanceProps {

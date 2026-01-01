@@ -5,7 +5,7 @@ import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import Link from "next/link";
 
 interface Vendor {
-  id: number;
+  id: string;
   code: string;
   name: string;
   contactPerson: string | null;

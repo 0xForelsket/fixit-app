@@ -41,7 +41,7 @@ async function getAuditLogs(params: SearchParams) {
   }
 
   if (params.userId && params.userId !== "all") {
-    conditions.push(eq(auditLogs.userId, Number.parseInt(params.userId, 10)));
+    conditions.push(eq(auditLogs.userId, params.userId));
   }
 
   if (params.search) {

@@ -31,7 +31,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface FilterOption {
-  id: number;
+  id: string;
   name: string;
   code: string;
 }
@@ -166,14 +166,14 @@ export function CostDashboard() {
   const handleEquipmentChange = (value: string) => {
     setFilters((prev) => ({
       ...prev,
-      equipmentId: value === "all" ? undefined : Number(value),
+      equipmentId: value === "all" ? undefined : value,
     }));
   };
 
   const handleDepartmentChange = (value: string) => {
     setFilters((prev) => ({
       ...prev,
-      departmentId: value === "all" ? undefined : Number(value),
+      departmentId: value === "all" ? undefined : value,
     }));
   };
 

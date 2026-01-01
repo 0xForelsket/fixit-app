@@ -88,17 +88,17 @@ export async function POST(request: Request) {
       name: string;
       email?: string;
       pin: string;
-      roleId: number;
+      roleId: string;
       hourlyRate?: number;
     }> = [];
 
     const toUpdate: Array<{
-      id: number;
+      id: string;
       employeeId: string;
       name: string;
       email?: string;
       pin: string;
-      roleId: number;
+      roleId: string;
       hourlyRate?: number;
     }> = [];
 

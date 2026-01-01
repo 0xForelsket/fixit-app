@@ -129,12 +129,12 @@ describe("POST /api/work-orders", () => {
     });
     vi.mocked(requireCsrf).mockResolvedValue(undefined);
     const mockUser: SessionUser = {
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Test User",
-      roleId: 2,
+      roleId: "2",
       roleName: "tech",
-      departmentId: 1,
+      departmentId: "1",
       sessionVersion: 1,
       permissions: ["ticket:create", "ticket:view"],
       hourlyRate: 25.0,

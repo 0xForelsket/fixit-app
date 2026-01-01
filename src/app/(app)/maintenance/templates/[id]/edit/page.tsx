@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { TemplateForm } from "../../template-form";
 
-async function getData(id: number) {
+async function getData(id: string) {
   const [template, allDepartments, allUsers] = await Promise.all([
     getWorkOrderTemplateById(id),
     db.query.departments.findMany({
@@ -26,12 +26,7 @@ export default async function EditTemplatePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const templateId = Number.parseInt(id, 10);
-
-  if (Number.isNaN(templateId)) {
-    notFound();
-  }
+  const { id: templateId } = await params;
 
   const { template, departments, users } = await getData(templateId);
 

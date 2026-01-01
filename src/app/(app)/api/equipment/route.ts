@@ -29,11 +29,11 @@ export async function GET(request: Request) {
     const conditions = [];
 
     if (locationId) {
-      conditions.push(eq(equipmentTable.locationId, Number(locationId)));
+      conditions.push(eq(equipmentTable.locationId, locationId));
     }
 
     if (departmentId) {
-      conditions.push(eq(equipmentTable.departmentId, Number(departmentId)));
+      conditions.push(eq(equipmentTable.departmentId, departmentId));
     }
 
     if (status) {

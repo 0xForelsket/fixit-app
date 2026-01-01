@@ -16,14 +16,14 @@ import { Edit, Plus, Shield, User, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
 interface UserData {
-  id: number;
+  id: string;
   employeeId: string;
   name: string;
   email: string | null;
   isActive: boolean;
   createdAt: Date;
   assignedRole: {
-    id: number;
+    id: string;
     name: string;
   } | null;
 }

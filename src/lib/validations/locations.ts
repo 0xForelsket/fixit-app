@@ -15,7 +15,7 @@ export const createLocationSchema = z.object({
     .max(500, "Description is too long")
     .optional()
     .nullable(),
-  parentId: z.number().int().positive().optional().nullable(),
+  parentId: z.string().min(1).optional().nullable(),
   isActive: z.boolean().default(true),
 });
 
@@ -39,7 +39,7 @@ export const updateLocationSchema = z.object({
     .max(500, "Description is too long")
     .optional()
     .nullable(),
-  parentId: z.number().int().positive().optional().nullable(),
+  parentId: z.string().min(1).optional().nullable(),
   isActive: z.boolean().optional(),
 });
 

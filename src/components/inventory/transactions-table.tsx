@@ -6,7 +6,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { MoveDown, MoveUp, RefreshCw, RotateCcw } from "lucide-react";
 
 interface Transaction {
-  id: number;
+  id: string;
   type: string;
   quantity: number;
   reference: string | null;
@@ -16,7 +16,7 @@ interface Transaction {
   locationName: string | null;
   toLocationName: string | null;
   userName: string | null;
-  workOrderId: number | null;
+  workOrderId: string | null;
 }
 
 interface TransactionsTableProps {

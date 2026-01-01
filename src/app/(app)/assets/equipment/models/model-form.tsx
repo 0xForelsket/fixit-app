@@ -8,7 +8,7 @@ import { useState } from "react";
 
 interface ModelFormProps {
   model?: {
-    id: number;
+    id: string;
     name: string;
     manufacturer: string | null;
     description: string | null;

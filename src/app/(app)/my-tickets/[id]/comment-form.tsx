@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useActionState, useRef } from "react";
 
 interface CommentFormProps {
-  workOrderId: number;
+  workOrderId: string;
 }
 
 export function CommentForm({ workOrderId }: CommentFormProps) {

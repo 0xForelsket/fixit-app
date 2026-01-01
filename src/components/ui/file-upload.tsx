@@ -12,7 +12,7 @@ interface FileUploadProps {
     sizeBytes: number;
   }) => void;
   entityType: "user" | "equipment" | "work_order" | "location";
-  entityId: number;
+  entityId: string;
   label?: string;
   accept?: string;
   maxSizeMB?: number;

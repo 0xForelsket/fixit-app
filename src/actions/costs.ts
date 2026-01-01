@@ -17,7 +17,7 @@ import { and, eq, gte, lte, sql } from "drizzle-orm";
 
 // Types for cost summary data
 export interface CostByEquipment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   laborCost: number;
@@ -27,7 +27,7 @@ export interface CostByEquipment {
 }
 
 export interface CostByDepartment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   laborCost: number;
@@ -43,7 +43,7 @@ export interface CostByMonth {
 }
 
 export interface TopCostlyWorkOrder {
-  id: number;
+  id: string;
   title: string;
   equipmentName: string;
   equipmentCode: string;
@@ -69,8 +69,8 @@ export interface CostSummary {
 export interface CostFilters {
   startDate?: Date;
   endDate?: Date;
-  equipmentId?: number;
-  departmentId?: number;
+  equipmentId?: string;
+  departmentId?: string;
 }
 
 export async function getCostSummary(
@@ -176,7 +176,7 @@ export async function getCostSummary(
       );
 
     // Build cost maps by work order
-    const laborCostByWO = new Map<number, number>();
+    const laborCostByWO = new Map<string, number>();
     for (const row of laborData) {
       if (row.workOrderId && row.durationMinutes) {
         const rate = row.hourlyRate ?? row.userHourlyRate ?? 0;
@@ -188,7 +188,7 @@ export async function getCostSummary(
       }
     }
 
-    const partsCostByWO = new Map<number, number>();
+    const partsCostByWO = new Map<string, number>();
     for (const row of partsData) {
       if (row.workOrderId && row.quantity) {
         const cost = row.quantity * (row.unitCost ?? row.partUnitCost ?? 0);
@@ -228,7 +228,7 @@ export async function getCostSummary(
 
     // Build cost by equipment
     const equipmentCostMap = new Map<
-      number,
+      string,
       { labor: number; parts: number; count: number }
     >();
     for (const wo of filteredWorkOrders) {
@@ -272,7 +272,7 @@ export async function getCostSummary(
 
     // Build cost by department
     const departmentCostMap = new Map<
-      number,
+      string,
       { labor: number; parts: number }
     >();
     for (const wo of filteredWorkOrders) {
@@ -371,7 +371,7 @@ export async function getCostSummary(
 
 // Helper function to get equipment list for filter dropdown
 export async function getEquipmentForFilter(): Promise<
-  ActionResult<Array<{ id: number; name: string; code: string }>>
+  ActionResult<Array<{ id: string; name: string; code: string }>>
 > {
   const user = await getCurrentUser();
   if (!user) {
@@ -397,7 +397,7 @@ export async function getEquipmentForFilter(): Promise<
 
 // Helper function to get department list for filter dropdown
 export async function getDepartmentsForFilter(): Promise<
-  ActionResult<Array<{ id: number; name: string; code: string }>>
+  ActionResult<Array<{ id: string; name: string; code: string }>>
 > {
   const user = await getCurrentUser();
   if (!user) {

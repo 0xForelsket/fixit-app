@@ -11,7 +11,7 @@ interface ReportPageProps {
 export default async function ReportPage({ searchParams }: ReportPageProps) {
   const params = await searchParams;
   const search = params.search || "";
-  const locationId = params.location ? Number(params.location) : undefined;
+  const locationId = params.location || undefined;
 
   const conditions = [];
 

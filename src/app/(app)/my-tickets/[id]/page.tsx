@@ -36,13 +36,8 @@ export default async function WorkOrderDetailPage({
     redirect("/login");
   }
 
-  const { id } = await params;
+  const { id: workOrderId } = await params;
   const { success } = await searchParams;
-  const workOrderId = Number.parseInt(id, 10);
-
-  if (Number.isNaN(workOrderId)) {
-    notFound();
-  }
 
   // ... rest of data fetching ...
   const workOrder = await db.query.workOrders.findFirst({
@@ -123,7 +118,7 @@ export default async function WorkOrderDetailPage({
             My Tickets
           </Link>
           <span className="text-zinc-300">/</span>
-          <span className="text-zinc-900">#{workOrder.id}</span>
+          <span className="text-zinc-900">#{workOrder.displayId}</span>
         </nav>
 
         <PrintButton />
@@ -138,7 +133,7 @@ export default async function WorkOrderDetailPage({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs font-black text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded uppercase">
-                  Ticket #{workOrder.id}
+                  Ticket #{workOrder.displayId}
                 </span>
                 <StatusBadge status={workOrder.status} showIcon />
               </div>
@@ -332,12 +327,12 @@ export default async function WorkOrderDetailPage({
 }
 
 interface ActivityLog {
-  id: number;
+  id: string;
   action: string;
   oldValue: string | null;
   newValue: string;
   createdAt: Date;
-  createdBy: { id: number; name: string } | null;
+  createdBy: { id: string; name: string } | null;
 }
 
 function ActivityItem({ log }: { log: ActivityLog }) {

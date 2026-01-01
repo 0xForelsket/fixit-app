@@ -54,11 +54,11 @@ export async function GET(request: Request) {
     }
 
     if (equipmentId) {
-      conditions.push(eq(workOrders.equipmentId, Number(equipmentId)));
+      conditions.push(eq(workOrders.equipmentId, equipmentId));
     }
 
     if (assignedToId) {
-      conditions.push(eq(workOrders.assignedToId, Number(assignedToId)));
+      conditions.push(eq(workOrders.assignedToId, assignedToId));
     }
 
     // Users without TICKET_VIEW_ALL can only see their own work orders

@@ -49,7 +49,7 @@ export async function createWorkOrder(
   );
 
   const rawData = {
-    equipmentId: Number(formData.get("equipmentId")),
+    equipmentId: formData.get("equipmentId")?.toString(),
     type: formData.get("type"),
     title: formData.get("title"),
     description: formData.get("description"),
@@ -212,7 +212,7 @@ export async function createWorkOrder(
 }
 
 export async function updateWorkOrder(
-  workOrderId: number,
+  workOrderId: string,
   _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
@@ -236,7 +236,7 @@ export async function updateWorkOrder(
 
   if (status) rawData.status = status;
   if (priority) rawData.priority = priority;
-  if (assignedToId) rawData.assignedToId = Number(assignedToId) || null;
+  if (assignedToId) rawData.assignedToId = assignedToId.toString() || null;
   if (resolutionNotes) rawData.resolutionNotes = resolutionNotes;
 
   const result = updateWorkOrderSchema.safeParse(rawData);
@@ -336,7 +336,7 @@ export async function updateWorkOrder(
 }
 
 export async function resolveWorkOrder(
-  workOrderId: number,
+  workOrderId: string,
   _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
@@ -418,7 +418,7 @@ export async function resolveWorkOrder(
 }
 
 export async function addWorkOrderComment(
-  workOrderId: number,
+  workOrderId: string,
   _prevState: ActionResult<void> | undefined,
   formData: FormData
 ): Promise<ActionResult<void>> {
@@ -450,7 +450,7 @@ export async function addWorkOrderComment(
   });
 
   // Notify reporter and assignee (excluding the commenter)
-  const usersToNotify = new Set<number>();
+  const usersToNotify = new Set<string>();
   if (workOrder.reportedById !== user.id) {
     usersToNotify.add(workOrder.reportedById);
   }
@@ -474,10 +474,10 @@ export async function addWorkOrderComment(
 }
 
 export interface BulkUpdateData {
-  ids: number[];
+  ids: string[];
   status?: "open" | "in_progress" | "resolved" | "closed";
   priority?: "low" | "medium" | "high" | "critical";
-  assignedToId?: number | null;
+  assignedToId?: string | null;
 }
 
 export async function bulkUpdateWorkOrders(
@@ -532,23 +532,23 @@ export async function bulkUpdateWorkOrders(
 
     // Prepare batch operations
     const statusLogs: Array<{
-      workOrderId: number;
+      workOrderId: string;
       action: "status_change";
       oldValue: string;
       newValue: string;
-      createdById: number;
+      createdById: string;
     }> = [];
 
     const assignmentLogs: Array<{
-      workOrderId: number;
+      workOrderId: string;
       action: "assignment";
       oldValue: string | null;
       newValue: string;
-      createdById: number;
+      createdById: string;
     }> = [];
 
     const assignmentNotifications: Array<{
-      userId: number;
+      userId: string;
       type: "work_order_assigned";
       title: string;
       message: string;
@@ -556,7 +556,7 @@ export async function bulkUpdateWorkOrders(
     }> = [];
 
     // Filter to only valid IDs and collect logs
-    const validIds: number[] = [];
+    const validIds: string[] = [];
     for (const id of ids) {
       const existing = existingMap.get(id);
       if (!existing) continue;
@@ -659,8 +659,8 @@ export async function bulkUpdateWorkOrders(
 }
 
 export async function duplicateWorkOrder(
-  workOrderId: number
-): Promise<ActionResult<{ id: number }>> {
+  workOrderId: string
+): Promise<ActionResult<{ id: string }>> {
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in" };
@@ -729,8 +729,8 @@ export async function duplicateWorkOrder(
 }
 
 export async function updateChecklistItem(
-  completionId: number,
-  workOrderId: number,
+  completionId: string,
+  workOrderId: string,
   data: z.infer<typeof updateChecklistItemSchema>
 ): Promise<ActionResult<void>> {
   const user = await getCurrentUser();

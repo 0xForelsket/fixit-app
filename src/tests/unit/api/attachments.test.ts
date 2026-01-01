@@ -109,12 +109,13 @@ describe("GET /api/attachments", () => {
 
   it("returns 400 when entityType is missing", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -143,12 +144,13 @@ describe("GET /api/attachments", () => {
 
   it("returns 400 when entityId is missing", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -177,12 +179,13 @@ describe("GET /api/attachments", () => {
 
   it("returns 400 when entityId is not a number", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -213,12 +216,13 @@ describe("GET /api/attachments", () => {
 
   it("returns attachments list", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -235,17 +239,18 @@ describe("GET /api/attachments", () => {
 
     const mockAttachments = [
       {
-        id: 1,
+        id: "1",
+        
         entityType: "work_order" as const,
-        entityId: 1,
+        entityId: "1",
         type: "document" as const,
         filename: "report.pdf",
         s3Key: "work_orders/1/report.pdf",
         mimeType: "application/pdf",
         sizeBytes: 1024,
-        uploadedById: 1,
+        uploadedById: "1",
         createdAt: new Date(),
-        uploadedBy: { id: 1, name: "Tech" },
+        uploadedBy: {  name: "Tech" },
       },
     ];
     vi.mocked(db.query.attachments.findMany).mockResolvedValue(mockAttachments);
@@ -319,12 +324,13 @@ describe("POST /api/attachments", () => {
       reset: Date.now() + 60000,
     });
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -360,12 +366,13 @@ describe("POST /api/attachments", () => {
       reset: Date.now() + 60000,
     });
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -381,15 +388,15 @@ describe("POST /api/attachments", () => {
     } as any);
 
     const mockAttachment = {
-      id: 1,
+      
       entityType: "work_order" as const,
-      entityId: 1,
+      entityId: "1",
       type: "photo" as const,
       filename: "image.jpg",
       s3Key: "work_orders/1/image.jpg",
       mimeType: "image/jpeg",
       sizeBytes: 1024,
-      uploadedById: 1,
+      uploadedById: "1",
       createdAt: new Date(),
     };
     vi.mocked(db.insert).mockReturnValue({
@@ -403,7 +410,7 @@ describe("POST /api/attachments", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         entityType: "work_order",
-        entityId: 1,
+        entityId: "1",
         attachmentType: "photo",
         filename: "image.jpg",
         mimeType: "image/jpeg",
@@ -440,12 +447,13 @@ describe("GET /api/attachments/[id]", () => {
 
   it("returns 400 for invalid attachment ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -473,12 +481,13 @@ describe("GET /api/attachments/[id]", () => {
 
   it("returns 404 when attachment not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -507,12 +516,13 @@ describe("GET /api/attachments/[id]", () => {
 
   it("returns attachment with download URL", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -528,15 +538,15 @@ describe("GET /api/attachments/[id]", () => {
     } as any);
 
     const mockAttachment = {
-      id: 1,
+      id: "1",
       entityType: "work_order" as const,
-      entityId: 1,
+      entityId: "1",
       type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
       mimeType: "application/pdf",
       sizeBytes: 1024,
-      uploadedById: 1,
+      uploadedById: "1",
       createdAt: new Date(),
     };
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue(mockAttachment);
@@ -575,12 +585,13 @@ describe("DELETE /api/attachments/[id]", () => {
 
   it("returns 404 when attachment not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -610,24 +621,26 @@ describe("DELETE /api/attachments/[id]", () => {
   it("returns 403 when user is not owner and not admin", async () => {
     vi.mocked(userHasPermission).mockReturnValue(false);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 2, // Different user
+      displayId: 2,
+      id: "2", // Different user
       employeeId: "TECH-002",
       name: "Other Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       entityType: "work_order" as const,
-      entityId: 1,
+      entityId: "1",
       type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
       mimeType: "application/pdf",
       sizeBytes: 1024,
-      uploadedById: 1, // Owned by user 1
+      uploadedById: "1", // Owned by user 1
       createdAt: new Date(),
     });
 
@@ -644,12 +657,13 @@ describe("DELETE /api/attachments/[id]", () => {
 
   it("deletes attachment when user is owner", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -664,15 +678,16 @@ describe("DELETE /api/attachments/[id]", () => {
       updatedAt: new Date(),
     } as any);
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       entityType: "work_order" as const,
-      entityId: 1,
+      entityId: "1",
       type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
       mimeType: "application/pdf",
       sizeBytes: 1024,
-      uploadedById: 1, // Same user
+      uploadedById: "1", // Same user
       createdAt: new Date(),
     });
     vi.mocked(db.delete).mockReturnValue({
@@ -695,12 +710,13 @@ describe("DELETE /api/attachments/[id]", () => {
 
   it("deletes attachment when user is admin", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 2,
+      displayId: 2,
+      id: "2",
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -715,15 +731,16 @@ describe("DELETE /api/attachments/[id]", () => {
       updatedAt: new Date(),
     } as any);
     vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
-      id: 1,
+      id: "1",
+      
       entityType: "work_order" as const,
-      entityId: 1,
+      entityId: "1",
       type: "document" as const,
       filename: "report.pdf",
       s3Key: "work_orders/1/1.pdf",
       mimeType: "application/pdf",
       sizeBytes: 1024,
-      uploadedById: 1, // Different user
+      uploadedById: "1", // Different user
       createdAt: new Date(),
     });
     vi.mocked(db.delete).mockReturnValue({

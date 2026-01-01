@@ -23,7 +23,7 @@ export async function GET() {
       .where(
         sql`${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress'`
       );
-    const openWorkOrders = backlogResult[0].count;
+    const openWorkOrders = Number(backlogResult[0].count);
 
     // 2. Critical/High Priority Open
     const priorityResult = await db
@@ -35,7 +35,7 @@ export async function GET() {
           sql`${workOrders.priority} = 'critical' OR ${workOrders.priority} = 'high'`
         )
       );
-    const highPriorityOpen = priorityResult[0].count;
+    const highPriorityOpen = Number(priorityResult[0].count);
 
     // 3. MTTR (Mean Time To Repair) - Last 30 days
     // Avg(resolvedAt - createdAt) where status is resolved/closed

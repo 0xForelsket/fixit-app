@@ -23,7 +23,7 @@ export const workOrderStatusSchema = z.enum([
 ]);
 
 export const createWorkOrderSchema = z.object({
-  equipmentId: z.number().int().positive("Equipment is required"),
+  equipmentId: z.string().min(1, "Equipment is required"),
   type: workOrderTypeSchema,
   title: z.string().min(1, "Title is required").max(200, "Title is too long"),
   description: z
@@ -56,7 +56,7 @@ export const updateWorkOrderSchema = z.object({
     .optional(),
   priority: workOrderPrioritySchema.optional(),
   status: workOrderStatusSchema.optional(),
-  assignedToId: z.number().int().positive().optional().nullable(),
+  assignedToId: z.string().min(1).optional().nullable(),
   resolutionNotes: z
     .string()
     .max(5000, "Resolution notes are too long")

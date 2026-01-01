@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 interface CostByDepartment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   laborCost: number;

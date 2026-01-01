@@ -8,11 +8,11 @@ import { ExternalLink, Layers, MonitorCog, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 
 interface Equipment extends BaseTreeItem {
-  id: number;
+  id: string;
   name: string;
   code: string;
   status: string;
-  locationId: number;
+  locationId: string;
   location?: { name: string } | null;
 }
 

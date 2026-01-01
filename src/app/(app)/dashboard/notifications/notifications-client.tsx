@@ -35,7 +35,7 @@ export function NotificationsClient({
       ? notifications.filter((n) => !n.isRead)
       : notifications;
 
-  const markAsRead = (id: number) => {
+  const markAsRead = (id: string) => {
     startTransition(async () => {
       try {
         await fetch(`/api/notifications/${id}`, {
@@ -65,7 +65,7 @@ export function NotificationsClient({
     });
   };
 
-  const deleteNotification = (id: number) => {
+  const deleteNotification = (id: string) => {
     startTransition(async () => {
       try {
         await fetch(`/api/notifications/${id}`, {

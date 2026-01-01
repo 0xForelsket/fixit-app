@@ -56,11 +56,11 @@ describe("GET /api/analytics/kpis", () => {
 
   it("returns 401 when lacking analytics permission", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
-      roleId: 1,
+      roleId: "1",
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
       sessionVersion: 1,
     });
@@ -73,11 +73,11 @@ describe("GET /api/analytics/kpis", () => {
 
   it("requires analytics permission", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       sessionVersion: 1,
       permissions: ["*"],
     });
@@ -94,11 +94,11 @@ describe("GET /api/analytics/kpis", () => {
 
   it("calls userHasPermission with correct permission", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       sessionVersion: 1,
       permissions: ["*"],
     });
@@ -111,11 +111,11 @@ describe("GET /api/analytics/kpis", () => {
 
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "3",
       sessionVersion: 1,
       permissions: ["*"],
     });

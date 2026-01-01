@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface BomEditorProps {
-  modelId: number;
+  modelId: string;
   items: (EquipmentBom & { part: SparePart })[];
   parts: SparePart[]; // All available parts for selection
 }
@@ -40,7 +40,7 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          partId: Number.parseInt(selectedPartId),
+          partId: selectedPartId,
           quantityRequired: quantity,
           notes,
         }),
@@ -61,7 +61,7 @@ export function BomEditor({ modelId, items, parts }: BomEditorProps) {
     }
   };
 
-  const handleDelete = async (bomId: number) => {
+  const handleDelete = async (bomId: string) => {
     if (!confirm("Remove this part from BOM?")) return;
     setLoading(true);
     try {

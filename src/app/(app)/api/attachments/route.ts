@@ -29,15 +29,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const entityIdNum = Number.parseInt(entityId, 10);
-    if (Number.isNaN(entityIdNum)) {
-      return ApiErrors.badRequest("Invalid entityId", requestId);
-    }
-
     const attachmentList = await db.query.attachments.findMany({
       where: and(
         eq(attachments.entityType, entityType),
-        eq(attachments.entityId, entityIdNum)
+        eq(attachments.entityId, entityId)
       ),
       with: {
         uploadedBy: true,
@@ -106,7 +101,7 @@ export async function POST(request: NextRequest) {
       .insert(attachments)
       .values({
         entityType: entityType as EntityType,
-        entityId: Number(entityId),
+        entityId: entityId,
         type: attachmentType as AttachmentType,
         filename,
         s3Key: "", // Will update after we have the full key

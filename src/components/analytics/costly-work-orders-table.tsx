@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 interface TopCostlyWorkOrder {
-  id: number;
+  id: string;
   title: string;
   equipmentName: string;
   equipmentCode: string;

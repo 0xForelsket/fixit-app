@@ -17,7 +17,7 @@ vi.mock("@/components/ui/use-toast", () => ({
 
 const mockItems = [
   {
-    id: 1,
+    id: "1", displayId: 1,
     status: "pending" as const,
     notes: null,
     checklist: {
@@ -28,7 +28,7 @@ const mockItems = [
     },
   },
   {
-    id: 2,
+    id: "2", displayId: 2,
     status: "completed" as const,
     notes: null,
     checklist: {
@@ -42,7 +42,7 @@ const mockItems = [
 
 describe("WorkOrderChecklist", () => {
   it("renders checklist items correctly", () => {
-    render(<WorkOrderChecklist workOrderId={123} items={mockItems} />);
+    render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
 
     expect(screen.getByText("Check oil level")).toBeInTheDocument();
     expect(screen.getByText("Inspect belts")).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe("WorkOrderChecklist", () => {
     // Mock successful response
     vi.mocked(actions.updateChecklistItem).mockResolvedValue({ success: true });
 
-    render(<WorkOrderChecklist workOrderId={123} items={mockItems} />);
+    render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
 
     const buttons = screen.getAllByRole("button");
     // Click the first item (pending -> completed)

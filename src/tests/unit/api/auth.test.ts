@@ -106,7 +106,7 @@ describe("POST /api/auth/login", () => {
     vi.mocked(authenticateUser).mockResolvedValue({
       success: true,
       user: {
-        id: 1,
+        id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",

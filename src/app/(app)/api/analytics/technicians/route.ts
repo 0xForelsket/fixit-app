@@ -28,7 +28,13 @@ export async function GET() {
       .where(eq(roles.name, "tech"))
       .groupBy(users.id);
 
-    return apiSuccess(result);
+    return apiSuccess(
+      result.map((r) => ({
+        ...r,
+        resolvedCount: Number(r.resolvedCount),
+        activeCount: Number(r.activeCount),
+      }))
+    );
   } catch (error) {
     apiLogger.error({ requestId, error }, "Tech stats error");
     return ApiErrors.internal(error, requestId);

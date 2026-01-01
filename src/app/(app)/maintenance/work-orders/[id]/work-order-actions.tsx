@@ -22,7 +22,7 @@ import { useActionState, useState } from "react";
 
 interface WorkOrderActionsProps {
   workOrder: WorkOrder;
-  currentUser: { id: number; name: string };
+  currentUser: { id: string; name: string };
   allTechs: User[];
 }
 

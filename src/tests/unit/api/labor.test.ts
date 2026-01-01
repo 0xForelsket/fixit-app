@@ -58,20 +58,20 @@ describe("GET /api/labor", () => {
 
   it("returns labor logs when authenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
 
     const mockLogs = [
       {
-        id: 1,
-        workOrderId: 5,
-        userId: 1,
+        id: "1", displayId: 1,
+        workOrderId: "5",
+        userId: "1",
         startTime: new Date(),
         endTime: new Date(),
         durationMinutes: 60,
@@ -79,8 +79,8 @@ describe("GET /api/labor", () => {
         isBillable: true,
         notes: "Some notes",
         createdAt: new Date(),
-        user: { id: 1, name: "Tech" },
-        workOrder: { id: 5, title: "Fix machine" },
+        user: { id: "1", displayId: 1, name: "Tech" },
+        workOrder: { id: "5", displayId: 5, title: "Fix machine" },
       },
     ];
 
@@ -97,11 +97,11 @@ describe("GET /api/labor", () => {
 
   it("filters by workOrderId when provided", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -128,8 +128,8 @@ describe("POST /api/labor", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        workOrderId: 1,
-        userId: 1,
+        workOrderId: "1",
+        userId: "1",
         durationMinutes: 60,
       }),
     });
@@ -141,11 +141,11 @@ describe("POST /api/labor", () => {
 
   it("returns 400 when missing required fields", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -154,7 +154,7 @@ describe("POST /api/labor", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        workOrderId: 1,
+        workOrderId: "1",
         // Missing userId and durationMinutes
       }),
     });
@@ -168,19 +168,19 @@ describe("POST /api/labor", () => {
 
   it("creates labor log successfully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
 
     const mockLog = {
-      id: 1,
-      workOrderId: 5,
-      userId: 1,
+      id: "1", displayId: 1,
+      workOrderId: "5",
+      userId: "1",
       durationMinutes: 90,
       hourlyRate: 50,
       isBillable: true,
@@ -200,8 +200,8 @@ describe("POST /api/labor", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        workOrderId: 5,
-        userId: 1,
+        workOrderId: "5",
+        userId: "1",
         durationMinutes: 90,
         hourlyRate: 50,
         notes: "Fixed the issue",
@@ -217,11 +217,11 @@ describe("POST /api/labor", () => {
 
   it("sets isBillable to true by default", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -231,7 +231,7 @@ describe("POST /api/labor", () => {
       values: vi.fn((vals) => {
         capturedValues = vals;
         return {
-          returning: vi.fn().mockResolvedValue([{ id: 1, isBillable: true }]),
+          returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1, isBillable: true }]),
         };
       }),
     } as unknown as ReturnType<typeof db.insert>);
@@ -240,8 +240,8 @@ describe("POST /api/labor", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        workOrderId: 5,
-        userId: 1,
+        workOrderId: "5",
+        userId: "1",
         durationMinutes: 60,
       }),
     });

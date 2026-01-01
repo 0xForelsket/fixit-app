@@ -64,7 +64,7 @@ describe("GET /api/inventory/parts/[id]", () => {
 
     const request = new Request("http://localhost/api/inventory/parts/1");
     const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -72,12 +72,12 @@ describe("GET /api/inventory/parts/[id]", () => {
 
   it("returns 400 for invalid part ID", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -102,12 +102,12 @@ describe("GET /api/inventory/parts/[id]", () => {
 
   it("returns 404 when part not found", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -125,7 +125,7 @@ describe("GET /api/inventory/parts/[id]", () => {
 
     const request = new Request("http://localhost/api/inventory/parts/999");
     const response = await GET(request, {
-      params: Promise.resolve({ id: "999" }),
+      params: Promise.resolve({ id: "999", displayId: 999 }),
     });
 
     expect(response.status).toBe(404);
@@ -133,12 +133,12 @@ describe("GET /api/inventory/parts/[id]", () => {
 
   it("returns part details", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -154,13 +154,13 @@ describe("GET /api/inventory/parts/[id]", () => {
     } as any);
 
     const mockPart = {
-      id: 1,
+      id: "1", displayId: 1,
       name: "Bearing SKF-123",
       sku: "SKF-123",
       barcode: null,
       description: "High quality bearing",
       category: "mechanical" as const,
-      vendorId: 1,
+      vendorId: "1",
       unitCost: 25.5,
       reorderPoint: 10,
       leadTimeDays: 5,
@@ -172,7 +172,7 @@ describe("GET /api/inventory/parts/[id]", () => {
 
     const request = new Request("http://localhost/api/inventory/parts/1");
     const response = await GET(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
     const data = await response.json();
 
@@ -192,7 +192,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       body: JSON.stringify({ name: "Updated Name" }),
     });
     const response = await PATCH(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -201,12 +201,12 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 401 when user lacks permission", async () => {
     vi.mocked(userHasPermission).mockReturnValue(false);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Operator",
       email: "op@example.com",
       pin: "hashed",
-      roleId: 1,
-      departmentId: 1,
+      roleId: "1",
+      departmentId: "1",
       isActive: true,
       employeeId: "OP-001",
       hourlyRate: 20.0,
@@ -227,7 +227,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       body: JSON.stringify({ name: "Updated Name" }),
     });
     const response = await PATCH(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -236,12 +236,12 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -271,12 +271,12 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -304,7 +304,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       body: JSON.stringify({ name: "Updated Name" }),
     });
     const response = await PATCH(request, {
-      params: Promise.resolve({ id: "999" }),
+      params: Promise.resolve({ id: "999", displayId: 999 }),
     });
 
     expect(response.status).toBe(404);
@@ -313,12 +313,12 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("updates part successfully", async () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -334,7 +334,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
     } as any);
 
     const updatedPart = {
-      id: 1,
+      id: "1", displayId: 1,
       name: "Updated Bearing",
       sku: "SKF-123",
       unitCost: 30.0,
@@ -353,7 +353,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       body: JSON.stringify({ name: "Updated Bearing", unitCost: 30.0 }),
     });
     const response = await PATCH(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
     const data = await response.json();
 
@@ -371,7 +371,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -380,12 +380,12 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 401 when user lacks permission", async () => {
     vi.mocked(userHasPermission).mockReturnValue(false);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       sessionVersion: 1,
       permissions: ["ticket:view", "equipment:view"],
       hourlyRate: 25.0,
@@ -395,7 +395,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
 
     expect(response.status).toBe(401);
@@ -404,12 +404,12 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -437,12 +437,12 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -466,7 +466,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "999" }),
+      params: Promise.resolve({ id: "999", displayId: 999 }),
     });
 
     expect(response.status).toBe(404);
@@ -475,12 +475,12 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("deletes part successfully", async () => {
     vi.mocked(userHasPermission).mockReturnValue(true);
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       isActive: true,
       employeeId: "ADMIN-001",
       hourlyRate: 50.0,
@@ -496,7 +496,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
     } as any);
     vi.mocked(db.delete).mockReturnValue({
       where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+        returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
       })),
     } as unknown as ReturnType<typeof db.delete>);
 
@@ -504,7 +504,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       method: "DELETE",
     });
     const response = await DELETE(request, {
-      params: Promise.resolve({ id: "1" }),
+      params: Promise.resolve({ id: "1", displayId: 1 }),
     });
     const data = await response.json();
 

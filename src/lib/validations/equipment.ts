@@ -16,11 +16,11 @@ export const createEquipmentSchema = z.object({
       /^[A-Z0-9-]+$/,
       "Code can only contain uppercase letters, numbers, and hyphens"
     ),
-  locationId: z.number().int().positive("Location is required"),
-  ownerId: z.number().int().positive().optional().nullable(),
-  departmentId: z.number().int().positive("Responsible department is required"),
-  typeId: z.number().int().positive().optional().nullable(),
-  parentId: z.number().int().positive().optional().nullable(),
+  locationId: z.string().min(1, "Location is required"),
+  ownerId: z.string().min(1).optional().nullable(),
+  departmentId: z.string().min(1, "Responsible department is required"),
+  typeId: z.string().min(1).optional().nullable(),
+  parentId: z.string().min(1).optional().nullable(),
   status: equipmentStatusSchema.default("operational"),
 });
 
@@ -39,11 +39,11 @@ export const updateEquipmentSchema = z.object({
       "Code can only contain uppercase letters, numbers, and hyphens"
     )
     .optional(),
-  locationId: z.number().int().positive().optional(),
-  ownerId: z.number().int().positive().optional().nullable(),
-  departmentId: z.number().int().positive().optional().nullable(),
-  typeId: z.number().int().positive().optional().nullable(),
-  parentId: z.number().int().positive().optional().nullable(),
+  locationId: z.string().min(1).optional(),
+  ownerId: z.string().min(1).optional().nullable(),
+  departmentId: z.string().min(1).optional().nullable(),
+  typeId: z.string().min(1).optional().nullable(),
+  parentId: z.string().min(1).optional().nullable(),
   status: equipmentStatusSchema.optional(),
 });
 

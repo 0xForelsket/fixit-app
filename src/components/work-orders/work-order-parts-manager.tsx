@@ -5,18 +5,18 @@ import { PartsList } from "./parts/parts-list";
 import { PartsSummary } from "./parts/parts-summary";
 
 interface Part {
-  id: number;
+  id: string;
   name: string;
   sku: string;
 }
 
 interface Location {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface WorkOrderPart {
-  id: number;
+  id: string;
   part: Part;
   quantity: number;
   unitCost: number | null;
@@ -25,7 +25,7 @@ interface WorkOrderPart {
 }
 
 interface WorkOrderPartsManagerProps {
-  workOrderId: number;
+  workOrderId: string;
   parts: WorkOrderPart[]; // Consumed parts
   allParts: Part[]; // Catalog
   locations: Location[];

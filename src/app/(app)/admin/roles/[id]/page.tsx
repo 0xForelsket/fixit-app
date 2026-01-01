@@ -8,12 +8,7 @@ interface PageProps {
 }
 
 export default async function EditRolePage({ params }: PageProps) {
-  const { id } = await params;
-  const roleId = Number.parseInt(id, 10);
-
-  if (Number.isNaN(roleId)) {
-    notFound();
-  }
+  const { id: roleId } = await params;
 
   const role = await getRole(roleId);
 

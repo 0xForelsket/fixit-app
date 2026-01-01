@@ -9,7 +9,7 @@ import { ThemeToggle } from "./theme-toggle";
 
 interface HeaderProps {
   title: string;
-  userId: number;
+  userId: string;
   onMenuClick?: () => void;
 }
 

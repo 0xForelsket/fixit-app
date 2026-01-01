@@ -19,27 +19,27 @@ import { useMemo, useState } from "react";
 
 interface EquipmentFormProps {
   equipment?: {
-    id: number;
+    id: string;
     name: string;
     code: string;
     status: string;
-    locationId: number;
-    ownerId: number | null;
-    departmentId: number | null;
-    modelId: number | null;
-    typeId: number | null;
+    locationId: string;
+    ownerId: string | null;
+    departmentId: string | null;
+    modelId: string | null;
+    typeId: string | null;
     type?: {
-      categoryId: number;
+      categoryId: string;
     } | null;
-    parentId: number | null;
+    parentId: string | null;
   };
-  locations: { id: number; name: string }[];
-  departments: { id: number; name: string }[];
-  users: { id: number; name: string }[];
-  models: { id: number; name: string }[];
+  locations: { id: string; name: string }[];
+  departments: { id: string; name: string }[];
+  users: { id: string; name: string }[];
+  models: { id: string; name: string }[];
   categories: EquipmentCategory[];
   types: EquipmentType[];
-  equipmentList?: { id: number; name: string; code: string }[];
+  equipmentList?: { id: string; name: string; code: string }[];
   isNew?: boolean;
 }
 
@@ -77,27 +77,27 @@ export function EquipmentForm({
   const [code, setCode] = useState(equipment?.code || "");
   const [status, setStatus] = useState(equipment?.status || "operational");
   const [locationId, setLocationId] = useState(
-    equipment?.locationId?.toString() || searchParams.get("locationId") || ""
+    equipment?.locationId || searchParams.get("locationId") || ""
   );
-  const [ownerId, setOwnerId] = useState(equipment?.ownerId?.toString() || "");
+  const [ownerId, setOwnerId] = useState(equipment?.ownerId || "");
   const [departmentId, setDepartmentId] = useState(
-    equipment?.departmentId?.toString() || ""
+    equipment?.departmentId || ""
   );
-  const [modelId, setModelId] = useState(equipment?.modelId?.toString() || "");
+  const [modelId, setModelId] = useState(equipment?.modelId || "");
 
   const [categoryId, setCategoryId] = useState(
-    equipment?.type?.categoryId?.toString() || ""
+    equipment?.type?.categoryId || ""
   );
-  const [typeId, setTypeId] = useState(equipment?.typeId?.toString() || "");
+  const [typeId, setTypeId] = useState(equipment?.typeId || "");
   const [parentId, setParentId] = useState(
-    equipment?.parentId?.toString() || searchParams.get("parentId") || ""
+    equipment?.parentId || searchParams.get("parentId") || ""
   );
   const [parentSearch, setParentSearch] = useState("");
 
   const filteredTypes = useMemo(() => {
     if (!categoryId) return [];
     return types.filter(
-      (t: EquipmentType) => t.categoryId === Number.parseInt(categoryId)
+      (t: EquipmentType) => t.categoryId === categoryId
     );
   }, [categoryId, types]);
 
@@ -112,7 +112,7 @@ export function EquipmentForm({
   }, [equipmentList, parentSearch, equipment?.id]);
 
   const activeParent = useMemo(() => {
-    return equipmentList.find((e) => e.id.toString() === parentId);
+    return equipmentList.find((e) => e.id === parentId);
   }, [equipmentList, parentId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,12 +125,12 @@ export function EquipmentForm({
         name,
         code,
         status,
-        locationId: Number.parseInt(locationId),
-        ownerId: ownerId ? Number.parseInt(ownerId) : null,
-        departmentId: departmentId ? Number.parseInt(departmentId) : null,
-        modelId: modelId ? Number.parseInt(modelId) : null,
-        typeId: typeId ? Number.parseInt(typeId) : null,
-        parentId: parentId ? Number.parseInt(parentId) : null,
+        locationId,
+        ownerId: ownerId || null,
+        departmentId: departmentId || null,
+        modelId: modelId || null,
+        typeId: typeId || null,
+        parentId: parentId || null,
       };
 
       const url = isNew ? "/api/equipment" : `/api/equipment/${equipment?.id}`;
@@ -211,7 +211,7 @@ export function EquipmentForm({
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id.toString()}>
+                <SelectItem key={cat.id} value={cat.id}>
                   {cat.label} ({cat.name})
                 </SelectItem>
               ))}
@@ -240,7 +240,7 @@ export function EquipmentForm({
             </SelectTrigger>
             <SelectContent>
               {filteredTypes.map((t) => (
-                <SelectItem key={t.id} value={t.id.toString()}>
+                <SelectItem key={t.id} value={t.id}>
                   {t.name} ({t.code})
                 </SelectItem>
               ))}
@@ -259,7 +259,7 @@ export function EquipmentForm({
             </SelectTrigger>
             <SelectContent>
               {models.map((m) => (
-                <SelectItem key={m.id} value={m.id.toString()}>
+                <SelectItem key={m.id} value={m.id}>
                   {m.name}
                 </SelectItem>
               ))}
@@ -275,7 +275,7 @@ export function EquipmentForm({
             </SelectTrigger>
             <SelectContent>
               {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.id.toString()}>
+                <SelectItem key={dept.id} value={dept.id}>
                   {dept.name}
                 </SelectItem>
               ))}
@@ -291,7 +291,7 @@ export function EquipmentForm({
             </SelectTrigger>
             <SelectContent>
               {locations.map((loc) => (
-                <SelectItem key={loc.id} value={loc.id.toString()}>
+                <SelectItem key={loc.id} value={loc.id}>
                   {loc.name}
                 </SelectItem>
               ))}
@@ -307,7 +307,7 @@ export function EquipmentForm({
             </SelectTrigger>
             <SelectContent>
               {users.map((user) => (
-                <SelectItem key={user.id} value={user.id.toString()}>
+                <SelectItem key={user.id} value={user.id}>
                   {user.name}
                 </SelectItem>
               ))}
@@ -368,7 +368,7 @@ export function EquipmentForm({
                           key={e.id}
                           type="button"
                           onClick={() => {
-                            setParentId(e.id.toString());
+                            setParentId(e.id);
                             setParentSearch("");
                           }}
                           className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center justify-between group transition-colors"

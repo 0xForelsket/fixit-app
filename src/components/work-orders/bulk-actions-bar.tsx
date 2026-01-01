@@ -15,9 +15,9 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 interface BulkActionsBarProps {
-  selectedIds: number[];
+  selectedIds: string[];
   onClear: () => void;
-  technicians: { id: number; name: string }[];
+  technicians: { id: string; name: string }[];
 }
 
 const statusOptions = [
@@ -48,7 +48,7 @@ export function BulkActionsBar({
     update: {
       status?: (typeof statusOptions)[number]["value"];
       priority?: (typeof priorityOptions)[number]["value"];
-      assignedToId?: number | null;
+      assignedToId?: string | null;
     },
     actionLabel: string
   ) => {

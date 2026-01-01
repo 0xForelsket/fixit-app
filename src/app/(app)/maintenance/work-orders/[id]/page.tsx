@@ -52,10 +52,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const { id } = await params;
-  const workOrderId = Number(id);
-
-  if (Number.isNaN(workOrderId)) notFound();
+  const { id: workOrderId } = await params;
 
   // Parallelize all data fetching
   const [
@@ -291,11 +288,11 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
       <div className="hidden lg:block space-y-6">
         <EntityHeader
           title={workOrder.title}
-          badge={`#${workOrder.id}`}
+          badge={`#${workOrder.displayId}`}
           parentLink={{ href: "/maintenance/work-orders", label: "Back" }}
           breadcrumbs={[
             { label: "Work Orders", href: "/maintenance/work-orders" },
-            { label: `#${workOrder.id}` },
+            { label: `#${workOrder.displayId}` },
           ]}
           meta={
             <>

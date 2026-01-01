@@ -93,7 +93,7 @@ export async function createScheduleAction(
 }
 
 export async function updateScheduleAction(
-  id: number,
+  id: string,
   data: z.infer<typeof updateMaintenanceScheduleSchema>
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
@@ -166,7 +166,7 @@ export async function updateScheduleAction(
 }
 
 export async function deleteScheduleAction(
-  id: number
+  id: string
 ): Promise<ScheduleActionState> {
   const user = await getCurrentUser();
   if (!user || !userHasPermission(user, PERMISSIONS.MAINTENANCE_DELETE)) {

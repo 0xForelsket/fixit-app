@@ -58,7 +58,7 @@ vi.mock("@/db", () => ({
 
 describe("Maintenance Actions", () => {
   const mockUser = {
-    id: 1,
+    id: "1", displayId: 1,
     name: "Tech User",
     employeeId: "TECH-001",
     roleName: "tech",
@@ -68,7 +68,7 @@ describe("Maintenance Actions", () => {
       "maintenance:update",
       "maintenance:delete",
     ],
-    roleId: 1,
+    roleId: "1",
     hourlyRate: null,
   };
 
@@ -81,7 +81,7 @@ describe("Maintenance Actions", () => {
   describe("createScheduleAction", () => {
     const validInput = {
       title: "Monthly Service",
-      equipmentId: 1,
+      equipmentId: "1",
       type: "maintenance" as const,
       frequencyDays: 30,
       isActive: true,
@@ -108,7 +108,7 @@ describe("Maintenance Actions", () => {
     });
 
     it("should create schedule and checklists successfully", async () => {
-      mockReturning.mockResolvedValue([{ id: 100 }]);
+      mockReturning.mockResolvedValue([{ id: "100", displayId: 100 }]);
 
       await createScheduleAction(validInput);
 
@@ -116,7 +116,7 @@ describe("Maintenance Actions", () => {
       expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Monthly Service",
-          equipmentId: 1,
+          equipmentId: "1",
         })
       );
 
@@ -124,7 +124,7 @@ describe("Maintenance Actions", () => {
       expect(mockValues).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
-            scheduleId: 100,
+            scheduleId: "100",
             description: "Check oil",
           }),
         ])
@@ -133,10 +133,10 @@ describe("Maintenance Actions", () => {
   });
 
   describe("updateScheduleAction", () => {
-    const scheduleId = 100;
+    const scheduleId = "100";
     const updateInput = {
       title: "Updated Service",
-      equipmentId: 1,
+      equipmentId: "1",
       type: "maintenance" as const,
       frequencyDays: 60,
       isActive: true,
@@ -167,7 +167,7 @@ describe("Maintenance Actions", () => {
   });
 
   describe("deleteScheduleAction", () => {
-    const scheduleId = 100;
+    const scheduleId = "100";
 
     it("should delete schedule successfully", async () => {
       mockReturning.mockResolvedValue([{ id: scheduleId }]);

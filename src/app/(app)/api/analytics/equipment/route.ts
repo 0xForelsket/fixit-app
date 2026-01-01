@@ -35,6 +35,8 @@ export async function GET() {
     // Mock downtime for now (random hours for demo/MVP)
     const equipmentWithMockDowntime = result.map((m) => ({
       ...m,
+      breakdowns: Number(m.breakdowns),
+      totalWorkOrders: Number(m.totalWorkOrders),
       downtimeHours: Number(m.breakdowns) * 2 + Math.floor(Math.random() * 5), // Mock logic: ~2h per breakdown + noise
     }));
 

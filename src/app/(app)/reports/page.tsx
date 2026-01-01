@@ -133,6 +133,7 @@ async function getWorkOrders(params: SearchParams) {
   const idQuery = db
     .select({
       id: workOrders.id,
+      displayId: workOrders.displayId,
       // We need to select these to sort by them in some SQL dialects,
       // but mostly we just need the IDs in the correct order.
     })
@@ -148,7 +149,7 @@ async function getWorkOrders(params: SearchParams) {
     const direction = params.dir === "asc" ? asc : desc;
     switch (params.sort) {
       case "id":
-        idQuery.orderBy(direction(workOrders.id));
+        idQuery.orderBy(direction(workOrders.displayId));
         break;
       case "title":
         idQuery.orderBy(direction(workOrders.title));
@@ -563,7 +564,8 @@ export default async function ReportsPage({
 }
 
 interface WorkOrderWithRelations {
-  id: number;
+  id: string;
+  displayId: number;
   title: string;
   status: string;
   priority: string;
@@ -598,7 +600,7 @@ function WorkOrderRow({
           href={`/maintenance/work-orders/${workOrder.id}`}
           className="font-mono text-xs font-bold text-primary hover:underline"
         >
-          #{workOrder.id}
+          #{workOrder.displayId}
         </Link>
       </TableCell>
       <TableCell className="p-5">

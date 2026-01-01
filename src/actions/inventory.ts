@@ -221,7 +221,7 @@ export interface PartImportRowResult {
   success: boolean;
   partNumber: string;
   error?: string;
-  partId?: number;
+  partId?: string;
 }
 
 export interface PartImportResult {
@@ -256,7 +256,7 @@ export async function importPartsFromCSV(
 
   // Get all locations for lookup
   const allLocations = await db.query.locations.findMany();
-  const locationMap = new Map(
+  const locationMap = new Map<string, string>(
     allLocations.map((loc) => [loc.name.toLowerCase(), loc.id])
   );
 
@@ -280,7 +280,7 @@ export async function importPartsFromCSV(
     minStock: number;
     unitCost: number | null;
     quantity?: number;
-    locationId?: number;
+    locationId?: string;
     manufacturer?: string;
   };
 
@@ -328,7 +328,7 @@ export async function importPartsFromCSV(
       }
 
       // Lookup location if provided
-      let locationId: number | undefined;
+      let locationId: string | undefined;
       if (row.location && row.location.trim() !== "") {
         locationId = locationMap.get(row.location.trim().toLowerCase());
         if (!locationId) {
@@ -382,19 +382,19 @@ export async function importPartsFromCSV(
 
       // Map inserted parts back to rows
       const inventoryLevelValues: Array<{
-        partId: number;
-        locationId: number;
+        partId: string;
+        locationId: string;
         quantity: number;
       }> = [];
 
       const transactionValues: Array<{
-        partId: number;
-        locationId: number;
+        partId: string;
+        locationId: string;
         type: "in";
         quantity: number;
         reference: string;
         notes: string;
-        createdById: number;
+        createdById: string;
       }> = [];
 
       for (let i = 0; i < validRows.length; i++) {

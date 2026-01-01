@@ -22,12 +22,7 @@ export async function PATCH(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const notificationId = Number.parseInt(id, 10);
-
-    if (Number.isNaN(notificationId)) {
-      return ApiErrors.badRequest("Invalid notification ID", requestId);
-    }
+    const { id: notificationId } = await params;
 
     const body = await request.json();
 
@@ -73,12 +68,7 @@ export async function DELETE(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const notificationId = Number.parseInt(id, 10);
-
-    if (Number.isNaN(notificationId)) {
-      return ApiErrors.badRequest("Invalid notification ID", requestId);
-    }
+    const { id: notificationId } = await params;
 
     // Verify the notification belongs to the user
     const notification = await db.query.notifications.findFirst({

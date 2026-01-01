@@ -10,7 +10,7 @@ import { AlertTriangle, Calendar, ClipboardList, History } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface EquipmentTabsProps {
-  equipmentId: number;
+  equipmentId: string;
   overviewContent: React.ReactNode;
   historyContent: React.ReactNode;
   maintenanceContent: React.ReactNode;

@@ -25,7 +25,7 @@ const NOTIFICATION_TYPE_TO_PREF_KEY: Record<
 };
 
 interface CreateNotificationParams {
-  userId: number;
+  userId: string;
   type: NotificationType;
   title: string;
   message: string;
@@ -87,7 +87,7 @@ export async function createNotification(
  * Returns the number of notifications actually created.
  */
 export async function createNotificationsForUsers(
-  userIds: number[],
+  userIds: string[],
   type: NotificationType,
   title: string,
   message: string,

@@ -5,7 +5,7 @@ import { Trash2 } from "lucide-react";
 
 interface LaborHistoryProps {
   logs: (LaborLog & { user?: User })[];
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 export function LaborHistory({ logs, onDelete }: LaborHistoryProps) {

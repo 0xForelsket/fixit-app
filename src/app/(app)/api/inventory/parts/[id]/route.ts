@@ -18,12 +18,7 @@ export async function GET(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const partId = Number.parseInt(id);
-
-    if (Number.isNaN(partId)) {
-      return ApiErrors.badRequest("Invalid part ID", requestId);
-    }
+    const { id: partId } = await params;
 
     const part = await db.query.spareParts.findFirst({
       where: eq(spareParts.id, partId),
@@ -52,12 +47,7 @@ export async function PATCH(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const partId = Number.parseInt(id);
-
-    if (Number.isNaN(partId)) {
-      return ApiErrors.badRequest("Invalid part ID", requestId);
-    }
+    const { id: partId } = await params;
 
     const body = await request.json();
     const {
@@ -114,12 +104,7 @@ export async function DELETE(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const partId = Number.parseInt(id);
-
-    if (Number.isNaN(partId)) {
-      return ApiErrors.badRequest("Invalid part ID", requestId);
-    }
+    const { id: partId } = await params;
 
     const [deleted] = await db
       .delete(spareParts)

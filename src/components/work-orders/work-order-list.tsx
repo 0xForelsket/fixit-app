@@ -14,7 +14,7 @@ interface WorkOrderListProps {
   workOrders: WorkOrderWithRelations[];
   emptyMessage?: string;
   searchParams?: Record<string, string | undefined>;
-  technicians?: { id: number; name: string }[];
+  technicians?: { id: string; name: string }[];
 }
 
 export function WorkOrderList({
@@ -23,9 +23,9 @@ export function WorkOrderList({
   searchParams,
   technicians = [],
 }: WorkOrderListProps) {
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const handleSelect = useCallback((id: number) => {
+  const handleSelect = useCallback((id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );

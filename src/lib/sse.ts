@@ -6,7 +6,7 @@
  */
 
 export interface SSEClient {
-  userId: number;
+  userId: string;
   controller: ReadableStreamDefaultController;
   createdAt: Date;
 }
@@ -18,13 +18,13 @@ export interface SSEMessage {
 
 // In-memory store of active connections
 // Map of userId -> Set of controllers
-const clients = new Map<number, Set<ReadableStreamDefaultController>>();
+const clients = new Map<string, Set<ReadableStreamDefaultController>>();
 
 /**
  * Register a new SSE client connection
  */
 export function addClient(
-  userId: number,
+  userId: string,
   controller: ReadableStreamDefaultController
 ): void {
   if (!clients.has(userId)) {
@@ -37,7 +37,7 @@ export function addClient(
  * Remove a client connection (on disconnect)
  */
 export function removeClient(
-  userId: number,
+  userId: string,
   controller: ReadableStreamDefaultController
 ): void {
   const userClients = clients.get(userId);
@@ -52,7 +52,7 @@ export function removeClient(
 /**
  * Send a message to a specific user's connections
  */
-export function sendToUser(userId: number, message: SSEMessage): void {
+export function sendToUser(userId: string, message: SSEMessage): void {
   const userClients = clients.get(userId);
   if (!userClients || userClients.size === 0) return;
 
@@ -72,7 +72,7 @@ export function sendToUser(userId: number, message: SSEMessage): void {
 /**
  * Send a message to multiple users
  */
-export function sendToUsers(userIds: number[], message: SSEMessage): void {
+export function sendToUsers(userIds: string[], message: SSEMessage): void {
   for (const userId of userIds) {
     sendToUser(userId, message);
   }
@@ -141,7 +141,7 @@ export function getConnectionStats(): {
 /**
  * Check if a user has any active connections
  */
-export function isUserConnected(userId: number): boolean {
+export function isUserConnected(userId: string): boolean {
   const userClients = clients.get(userId);
   return !!userClients && userClients.size > 0;
 }

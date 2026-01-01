@@ -10,7 +10,7 @@ import { ClipboardCheck, ClipboardList, History, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface WorkOrderTabsProps {
-  workOrderId: number;
+  workOrderId: string;
   overviewContent: React.ReactNode;
   procedureContent: React.ReactNode;
   activityContent: React.ReactNode;

@@ -58,13 +58,13 @@ vi.mock("@/db", () => ({
 
 describe("Inventory Actions", () => {
   const mockUser = {
-    id: 1,
+    id: "1", displayId: 1,
     name: "Test User",
     employeeId: "TECH-001",
     roleName: "tech",
     sessionVersion: 1,
     permissions: ["inventory:receive_stock", "inventory:use_parts"],
-    roleId: 1,
+    roleId: "1",
     hourlyRate: 25,
   };
 
@@ -76,8 +76,8 @@ describe("Inventory Actions", () => {
 
   describe("createTransactionAction", () => {
     const validInput = {
-      partId: 1,
-      locationId: 1,
+      partId: "1",
+      locationId: "1",
       type: "in" as const,
       quantity: 10,
       reference: "PO-123",
@@ -102,9 +102,9 @@ describe("Inventory Actions", () => {
 
     it("should process 'in' transaction correctly", async () => {
       mockTx.query.inventoryLevels.findFirst.mockResolvedValue({
-        id: 1,
-        partId: 1,
-        locationId: 1,
+        id: "1", displayId: 1,
+        partId: "1",
+        locationId: "1",
         quantity: 5,
       });
 
@@ -120,9 +120,9 @@ describe("Inventory Actions", () => {
 
     it("should process 'out' transaction correctly", async () => {
       mockTx.query.inventoryLevels.findFirst.mockResolvedValue({
-        id: 1,
-        partId: 1,
-        locationId: 1,
+        id: "1", displayId: 1,
+        partId: "1",
+        locationId: "1",
         quantity: 20,
       });
 
@@ -140,9 +140,9 @@ describe("Inventory Actions", () => {
 
     it("should fail if 'out' transaction results in negative stock", async () => {
       mockTx.query.inventoryLevels.findFirst.mockResolvedValue({
-        id: 1,
-        partId: 1,
-        locationId: 1,
+        id: "1", displayId: 1,
+        partId: "1",
+        locationId: "1",
         quantity: 5,
       });
 
@@ -159,9 +159,9 @@ describe("Inventory Actions", () => {
     it("should process 'transfer' transaction correctly", async () => {
       mockTx.query.inventoryLevels.findFirst
         .mockResolvedValueOnce({
-          id: 1,
-          partId: 1,
-          locationId: 1,
+          id: "1", displayId: 1,
+          partId: "1",
+          locationId: "1",
           quantity: 20,
         })
         .mockResolvedValueOnce(null);
@@ -169,7 +169,7 @@ describe("Inventory Actions", () => {
       const result = await createTransactionAction({
         ...validInput,
         type: "transfer",
-        toLocationId: 2,
+        toLocationId: "2",
         quantity: 5,
       });
 
@@ -182,8 +182,8 @@ describe("Inventory Actions", () => {
       expect(mockTx.insert).toHaveBeenCalledWith(inventoryLevels);
       expect(mockTx.values).toHaveBeenCalledWith(
         expect.objectContaining({
-          partId: 1,
-          locationId: 2,
+          partId: "1",
+          locationId: "2",
           quantity: 5,
         })
       );
@@ -192,9 +192,9 @@ describe("Inventory Actions", () => {
 
   describe("consumeWorkOrderPartAction", () => {
     const validInput = {
-      workOrderId: 1,
-      partId: 1,
-      locationId: 1,
+      workOrderId: "1",
+      partId: "1",
+      locationId: "1",
       quantity: 2,
     };
 
@@ -208,7 +208,7 @@ describe("Inventory Actions", () => {
 
     it("should fail if stock is insufficient", async () => {
       mockTx.query.inventoryLevels.findFirst.mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         quantity: 1,
         part: { unitCost: 10 },
       });
@@ -221,7 +221,7 @@ describe("Inventory Actions", () => {
 
     it("should consume part and create logs", async () => {
       mockTx.query.inventoryLevels.findFirst.mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         quantity: 10,
         part: { unitCost: 10 },
       });

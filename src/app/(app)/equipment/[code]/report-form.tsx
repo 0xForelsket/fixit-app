@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 
 interface ReportFormProps {
   equipment: {
-    id: number;
+    id: string;
     name: string;
   };
 }
@@ -171,7 +171,7 @@ export function ReportForm({ equipment }: ReportFormProps) {
   const onSubmit = (data: CreateWorkOrderInput) => {
     startTransition(async () => {
       const formData = new FormData();
-      formData.append("equipmentId", data.equipmentId.toString());
+      formData.append("equipmentId", data.equipmentId);
       formData.append("type", data.type);
       formData.append("title", data.title);
       formData.append("description", data.description);

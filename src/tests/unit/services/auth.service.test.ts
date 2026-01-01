@@ -47,13 +47,13 @@ import { createSession } from "@/lib/session";
 
 describe("Auth Service", () => {
   const mockUser = {
-    id: 1,
+    id: "1", displayId: 1,
     employeeId: "EMP-001",
     name: "Test User",
     email: "test@example.com",
     pin: "hashed_pin",
-    roleId: 1,
-    departmentId: 1,
+    roleId: "1",
+    departmentId: "1",
     isActive: true,
     hourlyRate: 25.0,
     preferences: {
@@ -69,7 +69,7 @@ describe("Auth Service", () => {
   };
 
   const mockRole = {
-    id: 1,
+    id: "1", displayId: 1,
     name: "operator",
     description: "Operator role",
     isSystemRole: false,
@@ -187,12 +187,12 @@ describe("Auth Service", () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.user).toEqual({
-          id: 1,
+          id: "1", displayId: 1,
           employeeId: "EMP-001",
           name: "Test User",
           roleName: "operator",
-          roleId: 1,
-          departmentId: 1,
+          roleId: "1",
+          departmentId: "1",
           sessionVersion: 1,
           permissions: ["work_orders:read", "work_orders:write"],
           hourlyRate: 25.0,

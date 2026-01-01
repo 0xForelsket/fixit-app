@@ -50,7 +50,7 @@ export async function createVendor(data: z.infer<typeof vendorSchema>) {
 }
 
 export async function updateVendor(
-  id: number,
+  id: string,
   data: z.infer<typeof vendorSchema>
 ) {
   const user = await getCurrentUser();
@@ -76,7 +76,7 @@ export async function updateVendor(
   redirect("/assets/vendors");
 }
 
-export async function deleteVendor(id: number) {
+export async function deleteVendor(id: string) {
   const user = await getCurrentUser();
   if (!user) {
     throw new Error("Unauthorized");

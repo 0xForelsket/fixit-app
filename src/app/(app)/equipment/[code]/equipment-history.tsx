@@ -3,7 +3,8 @@ import { ArrowRight, Clock, Wrench } from "lucide-react";
 import Link from "next/link";
 
 interface WorkOrderHistoryItem {
-  id: number;
+  id: string;
+  displayId: number;
   title: string;
   status: string;
   priority: string;
@@ -41,7 +42,7 @@ export function EquipmentHistory({ workOrders }: EquipmentHistoryProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="font-mono text-[10px] font-black text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded uppercase">
-                #{wo.id}
+                #{wo.displayId}
               </span>
               <h4 className="font-bold text-sm text-zinc-900 truncate">
                 {wo.title}

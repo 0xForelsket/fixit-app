@@ -157,7 +157,7 @@ export default async function EquipmentPage({
   }
 
   if (params.location) {
-    conditions.push(eq(equipmentTable.locationId, Number(params.location)));
+    conditions.push(eq(equipmentTable.locationId, params.location));
   }
 
   // Parallelize remaining data fetching

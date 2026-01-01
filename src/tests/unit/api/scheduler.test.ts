@@ -121,12 +121,12 @@ describe("POST /api/scheduler/run", () => {
   it("authorizes with user having scheduler permission", async () => {
     process.env.CRON_SECRET = undefined;
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       sessionVersion: 1,
       permissions: ["system:scheduler"],
       hourlyRate: 50.0,
@@ -154,12 +154,12 @@ describe("POST /api/scheduler/run", () => {
   it("authorizes with wildcard permission", async () => {
     process.env.CRON_SECRET = undefined;
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
-      departmentId: 1,
+      roleId: "3",
+      departmentId: "1",
       sessionVersion: 1,
       permissions: ["*"],
       hourlyRate: 50.0,
@@ -185,12 +185,12 @@ describe("POST /api/scheduler/run", () => {
   it("rejects user without scheduler permission", async () => {
     process.env.CRON_SECRET = ""; // Empty string
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "2",
+      departmentId: "1",
       sessionVersion: 1,
       permissions: ["ticket:view", "equipment:view"],
       hourlyRate: 25.0,
@@ -217,8 +217,8 @@ describe("POST /api/scheduler/run", () => {
     process.env.CRON_SECRET = "test-secret";
 
     const mockSchedule = {
-      id: 1,
-      equipmentId: 1,
+      id: "1", displayId: 1,
+      equipmentId: "1",
       title: "Monthly Maintenance",
       type: "preventive" as const,
       frequencyDays: 30,
@@ -251,12 +251,12 @@ describe("POST /api/scheduler/run", () => {
           users: {
             findMany: vi
               .fn()
-              .mockResolvedValue([{ id: 1, assignedRole: { name: "admin" } }]),
+              .mockResolvedValue([{ id: "1", displayId: 1, assignedRole: { name: "admin" } }]),
           },
         },
         insert: vi.fn(() => ({
           values: vi.fn(() => ({
-            returning: vi.fn().mockResolvedValue([{ id: 1 }]),
+            returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
           })),
         })),
         select: vi.fn(() => ({
@@ -292,8 +292,8 @@ describe("POST /api/scheduler/run", () => {
     process.env.CRON_SECRET = "test-secret";
 
     const mockSchedule = {
-      id: 1,
-      equipmentId: 1,
+      id: "1", displayId: 1,
+      equipmentId: "1",
       title: "Maintenance",
       type: "preventive" as const,
       frequencyDays: 7,
@@ -341,13 +341,13 @@ describe("POST /api/scheduler/run", () => {
       process.env.CRON_SECRET = "test-secret";
 
       const overdueWorkOrder = {
-        id: 1,
-        equipmentId: 10,
+        id: "1", displayId: 1,
+        equipmentId: "10",
         title: "Fix Machine A",
         status: "open",
         dueBy: new Date(Date.now() - 3600000), // 1 hour ago
         escalatedAt: null,
-        assignedToId: 5,
+        assignedToId: "5",
       };
 
       let selectCallCount = 0;
@@ -365,14 +365,14 @@ describe("POST /api/scheduler/run", () => {
 
       // Mock admin role and users
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         name: "admin",
       } as any);
       vi.mocked(db.query.users.findMany).mockResolvedValue([
-        { id: 2, name: "Admin User" },
+        { id: "2", displayId: 2, name: "Admin User" },
       ] as any[]);
       vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-        id: 10,
+        id: "10", displayId: 10,
         name: "Machine A",
       } as any);
 
@@ -396,14 +396,14 @@ describe("POST /api/scheduler/run", () => {
       expect(createNotification).toHaveBeenCalledTimes(2);
       expect(createNotification).toHaveBeenCalledWith(
         expect.objectContaining({
-          userId: 2, // Admin
+          userId: "2", // Admin
           type: "work_order_escalated",
           title: "Work Order Escalated - SLA Breached",
         })
       );
       expect(createNotification).toHaveBeenCalledWith(
         expect.objectContaining({
-          userId: 5, // Assigned tech
+          userId: "5", // Assigned tech
           type: "work_order_escalated",
           title: "Your Work Order Has Been Escalated",
         })
@@ -442,8 +442,8 @@ describe("POST /api/scheduler/run", () => {
       process.env.CRON_SECRET = "test-secret";
 
       const unassignedOverdueWorkOrder = {
-        id: 2,
-        equipmentId: 10,
+        id: "2", displayId: 2,
+        equipmentId: "10",
         title: "Unassigned Work Order",
         status: "open",
         dueBy: new Date(Date.now() - 3600000),
@@ -465,15 +465,15 @@ describe("POST /api/scheduler/run", () => {
       } as unknown as ReturnType<typeof db.select>);
 
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         name: "admin",
       } as any);
       vi.mocked(db.query.users.findMany).mockResolvedValue([
-        { id: 2, name: "Admin 1" },
-        { id: 3, name: "Admin 2" },
+        { id: "2", displayId: 2, name: "Admin 1" },
+        { id: "3", displayId: 3, name: "Admin 2" },
       ] as any[]);
       vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
-        id: 10,
+        id: "10", displayId: 10,
         name: "Equipment X",
       } as any);
 
@@ -498,13 +498,13 @@ describe("POST /api/scheduler/run", () => {
       process.env.CRON_SECRET = "test-secret";
 
       const overdueWorkOrder = {
-        id: 1,
-        equipmentId: 10,
+        id: "1", displayId: 1,
+        equipmentId: "10",
         title: "Problematic Work Order",
         status: "in_progress",
         dueBy: new Date(Date.now() - 3600000),
         escalatedAt: null,
-        assignedToId: 5,
+        assignedToId: "5",
       };
 
       let selectCallCount = 0;
@@ -521,7 +521,7 @@ describe("POST /api/scheduler/run", () => {
       } as unknown as ReturnType<typeof db.select>);
 
       vi.mocked(db.query.roles.findFirst).mockResolvedValue({
-        id: 1,
+        id: "1", displayId: 1,
         name: "admin",
       } as any);
       vi.mocked(db.query.users.findMany).mockResolvedValue([] as any[]);

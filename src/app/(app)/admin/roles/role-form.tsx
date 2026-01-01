@@ -152,13 +152,13 @@ function getPermissionDescription(permission: string): string | undefined {
 }
 
 type SubmitResult =
-  | { success: true; data?: { id: number } | undefined }
+  | { success: true; data?: { id: string } | undefined }
   | { success: false; error: string };
 
 interface RoleFormProps {
   mode: "create" | "edit";
   initialData?: {
-    id: number;
+    id: string;
     name: string;
     description: string | null;
     permissions: string[];

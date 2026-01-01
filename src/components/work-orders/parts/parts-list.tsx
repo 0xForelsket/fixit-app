@@ -1,13 +1,13 @@
 import { Package } from "lucide-react";
 
 interface Part {
-  id: number;
+  id: string;
   name: string;
   sku: string;
 }
 
 interface WorkOrderPart {
-  id: number;
+  id: string;
   part: Part;
   quantity: number;
   unitCost: number | null;

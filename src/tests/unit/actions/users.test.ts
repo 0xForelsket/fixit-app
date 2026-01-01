@@ -43,12 +43,12 @@ vi.mock("@/db", () => ({
 
 describe("User Actions", () => {
   const mockUser: SessionUser = {
-    id: 1,
+    id: "1", displayId: 1,
     name: "Admin User",
     employeeId: "ADMIN-001",
-    roleId: 1,
+    roleId: "1",
     roleName: "admin",
-    departmentId: 1,
+    departmentId: "1",
     sessionVersion: 1,
     permissions: ["*"],
     hourlyRate: 50.0,
@@ -70,23 +70,23 @@ describe("User Actions", () => {
 
     it("should create user successfully", async () => {
       // Mock role check
-      mockTx.query.roles.findFirst.mockResolvedValue({ id: 2, name: "tech" });
+      mockTx.query.roles.findFirst.mockResolvedValue({ id: "2", displayId: 2, name: "tech" });
       // Mock duplicate check
       mockTx.query.users.findFirst.mockResolvedValue(undefined);
       // Mock insert return
-      mockTx.returning.mockResolvedValue([{ id: 10 }]);
+      mockTx.returning.mockResolvedValue([{ id: "10", displayId: 10 }]);
 
       const result = await createUser(validFormData);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual({ id: 10 });
+        expect(result.data).toEqual({ id: "10", displayId: 10 });
       }
       expect(mockTx.insert).toHaveBeenCalledWith(users);
     });
 
     it("should fail if employee ID exists", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue({ id: 5 });
+      mockTx.query.users.findFirst.mockResolvedValue({ id: "5", displayId: 5 });
 
       const result = await createUser(validFormData);
 
@@ -112,7 +112,7 @@ describe("User Actions", () => {
   });
 
   describe("updateUser", () => {
-    const userId = 5;
+    const userId = "5";
     const updateFormData = new FormData();
     updateFormData.append("name", "Updated Name");
 
@@ -144,7 +144,7 @@ describe("User Actions", () => {
   });
 
   describe("deleteUser", () => {
-    const targetUserId = 5;
+    const targetUserId = "5";
 
     it("should delete user (soft delete) successfully", async () => {
       mockTx.query.users.findFirst.mockResolvedValue({ id: targetUserId });

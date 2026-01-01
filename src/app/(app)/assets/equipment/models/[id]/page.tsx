@@ -10,12 +10,7 @@ export default async function EditEquipmentModelPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const modelId = Number.parseInt(id);
-
-  if (Number.isNaN(modelId)) {
-    notFound();
-  }
+  const { id: modelId } = await params;
 
   const model = await db.query.equipmentModels.findFirst({
     where: eq(equipmentModels.id, modelId),

@@ -89,15 +89,15 @@ export async function POST(request: Request) {
       code: string;
       name: string;
       description?: string;
-      parentId?: number;
+      parentId?: string;
     }> = [];
 
     const toUpdate: Array<{
-      id: number;
+      id: string;
       code: string;
       name: string;
       description?: string;
-      parentId?: number;
+      parentId?: string;
     }> = [];
 
     for (let i = 0; i < parseResult.data.length; i++) {
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
       const data = validated.data;
 
-      let parentId: number | undefined;
+      let parentId: string | undefined;
       if (data.parent_code) {
         parentId = existingCodes.get(data.parent_code.toLowerCase());
         if (!parentId) {
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
           description: data.description,
           parentId,
         });
-        existingCodes.set(data.code.toLowerCase(), -1);
+        existingCodes.set(data.code.toLowerCase(), "new");
       }
     }
 

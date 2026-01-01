@@ -15,14 +15,14 @@ import { Clock } from "lucide-react";
 import Link from "next/link";
 
 interface RecentDowntimeEvent {
-  id: number;
-  equipmentId: number;
+  id: string;
+  equipmentId: string;
   equipmentName: string;
   equipmentCode: string;
   startTime: Date;
   endTime: Date | null;
   downtimeHours: number;
-  workOrderId: number | null;
+  workOrderId: string | null;
   workOrderTitle: string | null;
   workOrderType: string | null;
 }

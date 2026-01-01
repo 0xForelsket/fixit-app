@@ -12,8 +12,8 @@ interface WorkOrderTableProps {
   workOrders: WorkOrderWithRelations[];
   searchParams?: Record<string, string | undefined>;
   selectable?: boolean;
-  selectedIds?: number[];
-  onSelect?: (id: number) => void;
+  selectedIds?: string[];
+  onSelect?: (id: string) => void;
   onSelectAll?: () => void;
 }
 
@@ -186,7 +186,7 @@ export function WorkOrderTable({
         compact
         selectable={selectable}
         selectedIds={selectedIds}
-        onSelect={onSelect ? (id) => onSelect(id as number) : undefined}
+        onSelect={onSelect ? (id) => onSelect(id as string) : undefined}
         onSelectAll={onSelectAll}
       />
     </div>

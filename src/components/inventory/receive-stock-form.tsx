@@ -31,16 +31,16 @@ import { z } from "zod";
 // or just import the type?
 // Let's redefine local form schema to match UI needs, then map to action.
 const formSchema = z.object({
-  partId: z.coerce.number().min(1, "Part is required"),
-  locationId: z.coerce.number().min(1, "Location is required"),
+  partId: z.string().min(1, "Part is required"),
+  locationId: z.string().min(1, "Location is required"),
   quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
   reference: z.string().optional(),
   notes: z.string().optional(),
 });
 
 interface ReceiveStockFormProps {
-  parts: { id: number; name: string; sku: string }[];
-  locations: { id: number; name: string }[];
+  parts: { id: string; name: string; sku: string }[];
+  locations: { id: string; name: string }[];
 }
 
 export function ReceiveStockForm({ parts, locations }: ReceiveStockFormProps) {

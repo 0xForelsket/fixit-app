@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 
 interface UploadOptions {
   entityType: "user" | "equipment" | "work_order" | "location";
-  entityId: number;
+  entityId: string;
   maxSizeMB?: number;
   attachmentType?: "photo" | "document" | "avatar";
   onUploadComplete: (attachment: {

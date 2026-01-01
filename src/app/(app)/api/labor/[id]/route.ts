@@ -18,12 +18,7 @@ export async function GET(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const logId = Number.parseInt(id);
-
-    if (Number.isNaN(logId)) {
-      return ApiErrors.badRequest("Invalid log ID", requestId);
-    }
+    const { id: logId } = await params;
 
     const log = await db.query.laborLogs.findFirst({
       where: eq(laborLogs.id, logId),
@@ -57,12 +52,7 @@ export async function DELETE(
       return ApiErrors.unauthorized(requestId);
     }
 
-    const { id } = await params;
-    const logId = Number.parseInt(id);
-
-    if (Number.isNaN(logId)) {
-      return ApiErrors.badRequest("Invalid log ID", requestId);
-    }
+    const { id: logId } = await params;
 
     const [deleted] = await db
       .delete(laborLogs)

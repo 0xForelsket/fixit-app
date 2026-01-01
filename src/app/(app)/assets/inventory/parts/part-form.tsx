@@ -63,7 +63,7 @@ export function PartForm({ part, isNew, vendors = [] }: PartFormProps) {
         unitCost: unitCost ? Number.parseFloat(unitCost) : null,
         reorderPoint: Number.parseInt(reorderPoint) || 0,
         leadTimeDays: leadTimeDays ? Number.parseInt(leadTimeDays) : null,
-        vendorId: vendorId ? Number.parseInt(vendorId) : null,
+        vendorId: vendorId || null,
         isActive,
       };
 

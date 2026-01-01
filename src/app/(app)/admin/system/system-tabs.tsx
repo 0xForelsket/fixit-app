@@ -19,20 +19,20 @@ import { SettingsTab } from "./tabs/settings-tab";
 import { UsersTab } from "./tabs/users-tab";
 
 interface User {
-  id: number;
+  id: string;
   employeeId: string;
   name: string;
   email: string | null;
   isActive: boolean;
   createdAt: Date;
   assignedRole: {
-    id: number;
+    id: string;
     name: string;
   } | null;
 }
 
 interface Role {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   permissions: string[];
@@ -41,7 +41,7 @@ interface Role {
 }
 
 interface Equipment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   location: { name: string } | null;
@@ -49,18 +49,18 @@ interface Equipment {
 }
 
 interface Department {
-  id: number;
+  id: string;
   name: string;
   code: string;
   description: string | null;
-  managerId: number | null;
+  managerId: string | null;
   managerName: string | null;
   memberCount: number;
   equipmentCount: number;
 }
 
 interface UserForSelect {
-  id: number;
+  id: string;
   name: string;
 }
 

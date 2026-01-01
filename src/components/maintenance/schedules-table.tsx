@@ -14,7 +14,7 @@ import { ChevronRight, Settings, Wrench } from "lucide-react";
 import Link from "next/link";
 
 interface Schedule {
-  id: number;
+  id: string;
   title: string;
   type: string;
   frequencyDays: number;

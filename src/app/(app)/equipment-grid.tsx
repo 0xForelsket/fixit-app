@@ -10,7 +10,7 @@ import { saveToRecent } from "@/components/home/recent-equipment";
 
 interface EquipmentWithLocation extends Equipment {
   location: Location | null;
-  children?: { id: number }[];
+  children?: { id: string }[];
 }
 
 interface EquipmentGridProps {

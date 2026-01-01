@@ -8,18 +8,18 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type SubmitResult =
-  | { success: true; data?: { id: number } }
+  | { success: true; data?: { id: string } }
   | { success: false; error: string };
 
 interface UserFormProps {
   mode: "create" | "edit";
   roles: Role[];
   initialData?: {
-    id: number;
+    id: string;
     employeeId: string;
     name: string;
     email: string | null;
-    roleId: number | null;
+    roleId: string | null;
     isActive: boolean;
     hourlyRate: number | null;
   };
@@ -35,7 +35,7 @@ export function UserForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedRoleId, setSelectedRoleId] = useState<number | null>(
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(
     initialData?.roleId ?? null
   );
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);

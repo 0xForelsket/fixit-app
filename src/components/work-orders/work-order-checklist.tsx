@@ -9,7 +9,7 @@ import { CheckCircle2, Circle, Clock, Info } from "lucide-react";
 import { startTransition, useOptimistic } from "react";
 
 interface ChecklistItem {
-  id: number;
+  id: string;
   status: ChecklistItemStatus;
   notes: string | null;
   checklist: {
@@ -21,7 +21,7 @@ interface ChecklistItem {
 }
 
 interface WorkOrderChecklistProps {
-  workOrderId: number;
+  workOrderId: string;
   items: ChecklistItem[];
 }
 
@@ -31,7 +31,7 @@ export function WorkOrderChecklist({
 }: WorkOrderChecklistProps) {
   const [optimisticItems, setOptimisticItem] = useOptimistic(
     items,
-    (state, updatedItem: { id: number; status: ChecklistItemStatus }) =>
+    (state, updatedItem: { id: string; status: ChecklistItemStatus }) =>
       state.map((item) =>
         item.id === updatedItem.id
           ? { ...item, status: updatedItem.status }

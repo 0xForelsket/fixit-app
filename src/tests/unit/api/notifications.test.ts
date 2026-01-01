@@ -46,19 +46,19 @@ describe("GET /api/notifications", () => {
 
   it("returns notifications for authenticated user", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
 
     const mockNotifications = [
       {
-        id: 1,
-        userId: 1,
+        id: "1", displayId: 1,
+        userId: "1",
         type: "work_order_assigned" as const,
         title: "New work order assigned",
         message: "You have been assigned to WO-123",
@@ -67,8 +67,8 @@ describe("GET /api/notifications", () => {
         createdAt: new Date(),
       },
       {
-        id: 2,
-        userId: 1,
+        id: "2", displayId: 2,
+        userId: "1",
         type: "work_order_escalated" as const,
         title: "Critical issue reported",
         message: "Machine A is down",
@@ -92,11 +92,11 @@ describe("GET /api/notifications", () => {
 
   it("returns empty array when user has no notifications", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
@@ -112,11 +112,11 @@ describe("GET /api/notifications", () => {
 
   it("handles database errors gracefully", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue({
-      id: 1,
+      id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
-      roleId: 2,
+      roleId: "2",
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });

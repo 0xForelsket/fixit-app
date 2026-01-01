@@ -11,7 +11,7 @@ interface UploadedFile {
   sizeBytes: number;
 }
 
-export function AvatarUpload({ userId }: { userId: number }) {
+export function AvatarUpload({ userId }: { userId: string }) {
   const router = useRouter();
 
   const handleUpload = async (file: UploadedFile) => {

@@ -3,7 +3,7 @@ import { z } from "zod";
 export const scheduleTypeSchema = z.enum(["maintenance", "calibration"]);
 
 export const checklistItemSchema = z.object({
-  id: z.number().optional(),
+  id: z.string().optional(),
   stepNumber: z.number(),
   description: z.string(),
   isRequired: z.boolean(),
@@ -12,7 +12,7 @@ export const checklistItemSchema = z.object({
 
 export const insertMaintenanceScheduleSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title is too long"),
-  equipmentId: z.coerce.number().min(1, "Equipment is required"), // Coerce for form compatibility
+  equipmentId: z.string().min(1, "Equipment is required"), // String for UUID support
   type: scheduleTypeSchema,
   frequencyDays: z.coerce
     .number()

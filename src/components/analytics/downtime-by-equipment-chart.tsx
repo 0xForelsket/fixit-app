@@ -14,7 +14,7 @@ import {
 } from "recharts";
 
 interface DowntimeByEquipment {
-  id: number;
+  id: string;
   name: string;
   code: string;
   downtimeHours: number;

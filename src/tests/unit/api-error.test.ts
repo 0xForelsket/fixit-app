@@ -98,7 +98,7 @@ describe("api-error", () => {
 
   describe("apiSuccess", () => {
     it("should create success response with data", async () => {
-      const data = { id: 1, name: "Test" };
+      const data = { id: "1", displayId: 1, name: "Test" };
       const response = apiSuccess(data);
       const body = await response.json();
 
@@ -120,7 +120,7 @@ describe("api-error", () => {
     });
 
     it("should handle array data", async () => {
-      const data = [{ id: 1 }, { id: 2 }];
+      const data = [{ id: "1", displayId: 1 }, { id: "2", displayId: 2 }];
       const response = apiSuccess(data);
       const body = await response.json();
 

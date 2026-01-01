@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { DeleteScheduleButton } from "../delete-schedule-button";
 import { ScheduleForm } from "../schedule-form";
 
-async function getSchedule(id: number) {
+async function getSchedule(id: string) {
   return db.query.maintenanceSchedules.findFirst({
     where: eq(maintenanceSchedules.id, id),
     with: {
@@ -17,7 +17,7 @@ async function getSchedule(id: number) {
   });
 }
 
-async function getChecklists(scheduleId: number) {
+async function getChecklists(scheduleId: string) {
   return db.query.maintenanceChecklists.findMany({
     where: eq(maintenanceChecklists.scheduleId, scheduleId),
     orderBy: (checklists, { asc }) => [asc(checklists.stepNumber)],
@@ -35,12 +35,7 @@ export default async function EditSchedulePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  const scheduleId = Number.parseInt(id);
-
-  if (Number.isNaN(scheduleId)) {
-    notFound();
-  }
+  const { id: scheduleId } = await params;
 
   const [schedule, checklists, equipment] = await Promise.all([
     getSchedule(scheduleId),

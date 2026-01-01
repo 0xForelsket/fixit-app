@@ -7,7 +7,7 @@ import Link from "next/link";
 
 interface AgendaItemProps {
   schedule: {
-    id: number;
+    id: string;
     title: string;
     type: string;
     nextDue: string | Date | null;

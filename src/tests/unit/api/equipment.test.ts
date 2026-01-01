@@ -74,12 +74,12 @@ describe("GET /api/equipment", () => {
 
   it("returns equipment list with pagination", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
-      id: 1,
-      name: "Tech",
+      id: "user-1",
+      displayId: 1, name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "role-2",
+      departmentId: "dept-1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -96,12 +96,12 @@ describe("GET /api/equipment", () => {
 
     const mockEquipment = [
       {
-        id: 1,
-        name: "Machine A",
+        id: "equip-1",
+        displayId: 1, name: "Machine A",
         code: "MA-001",
         status: "operational" as const,
-        locationId: 1,
-        departmentId: 1,
+        locationId: "loc-1",
+        departmentId: "dept-1",
         modelId: null,
         typeId: null,
         ownerId: null,
@@ -110,15 +110,16 @@ describe("GET /api/equipment", () => {
         updatedAt: new Date(),
       },
       {
-        id: 2,
+        id: "equip-2",
+       displayId: 2,
         name: "Machine B",
         code: "MB-001",
         status: "operational" as const,
-        locationId: 1,
-        departmentId: 1,
+        locationId: "loc-1",
+        departmentId: "dept-1",
         modelId: null,
         typeId: null,
-        ownerId: 2,
+        ownerId: "user-2",
         parentId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -147,12 +148,12 @@ describe("GET /api/equipment", () => {
 
   it("accepts locationId filter parameter", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
-      id: 1,
-      name: "Tech",
+      id: "user-1",
+      displayId: 1, name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "role-2",
+      departmentId: "dept-1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -169,12 +170,12 @@ describe("GET /api/equipment", () => {
 
     const mockEquipment = [
       {
-        id: 1,
-        name: "Machine A",
+        id: "equip-1",
+        displayId: 1, name: "Machine A",
         code: "MA-001",
         status: "operational" as const,
-        locationId: 5,
-        departmentId: 1,
+        locationId: "loc-5",
+        departmentId: "dept-1",
         modelId: null,
         typeId: null,
         ownerId: null,
@@ -191,7 +192,7 @@ describe("GET /api/equipment", () => {
       }),
     } as unknown as ReturnType<typeof db.select>);
 
-    const request = new Request("http://localhost/api/equipment?locationId=5");
+    const request = new Request("http://localhost/api/equipment?locationId=loc-5");
     const response = await GET(request);
 
     // Should not return an error - 200 or 500 depends on internal implementation
@@ -201,12 +202,12 @@ describe("GET /api/equipment", () => {
 
   it("accepts status filter parameter", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
-      id: 1,
-      name: "Tech",
+      id: "user-1",
+      displayId: 1, name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "role-2",
+      departmentId: "dept-1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -237,12 +238,12 @@ describe("GET /api/equipment", () => {
 
   it("accepts search parameter", async () => {
     vi.mocked(requireAuth).mockResolvedValue({
-      id: 1,
-      name: "Tech",
+      id: "user-1",
+      displayId: 1, name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
-      roleId: 2,
-      departmentId: 1,
+      roleId: "role-2",
+      departmentId: "dept-1",
       isActive: true,
       employeeId: "TECH-001",
       hourlyRate: 25.0,
@@ -349,7 +350,7 @@ describe("POST /api/equipment", () => {
       body: JSON.stringify({
         name: "Test Equipment",
         code: "TE-001",
-        locationId: 1,
+        locationId: "loc-1",
       }),
     });
 
@@ -366,11 +367,11 @@ describe("POST /api/equipment", () => {
     });
     vi.mocked(requireCsrf).mockResolvedValue(undefined);
     vi.mocked(requirePermission).mockResolvedValue({
-      id: 1,
-      employeeId: "ADMIN-001",
+      id: "user-1",
+      displayId: 1, employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "role-3",
       sessionVersion: 1,
       permissions: ["*"],
     });
@@ -396,21 +397,22 @@ describe("POST /api/equipment", () => {
     });
     vi.mocked(requireCsrf).mockResolvedValue(undefined);
     vi.mocked(requirePermission).mockResolvedValue({
-      id: 1,
-      employeeId: "ADMIN-001",
+      id: "user-1",
+      displayId: 1, employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
-      roleId: 3,
+      roleId: "role-3",
       sessionVersion: 1,
       permissions: ["*"],
     });
 
     const mockEquipment = {
-      id: 10,
+      id: "equip-10",
+     displayId: 10,
       name: "New Machine",
       code: "NM-001",
-      locationId: 1,
-      departmentId: 1,
+      locationId: "loc-1",
+      departmentId: "dept-1",
       modelId: null,
       typeId: null,
       ownerId: null,
@@ -432,8 +434,8 @@ describe("POST /api/equipment", () => {
       body: JSON.stringify({
         name: "New Machine",
         code: "NM-001",
-        locationId: 1,
-        departmentId: 1,
+        locationId: "loc-1",
+        departmentId: "dept-1",
       }),
     });
 

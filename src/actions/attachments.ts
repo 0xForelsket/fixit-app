@@ -82,8 +82,8 @@ export async function getAllAttachments(
   });
 
   // Extract Entity IDs to fetch names in bulk
-  const workOrderIds = new Set<number>();
-  const equipmentIds = new Set<number>();
+  const workOrderIds = new Set<string>();
+  const equipmentIds = new Set<string>();
 
   for (const file of data) {
     if (file.entityType === "work_order") {
@@ -185,7 +185,7 @@ export async function createAttachment(
 }
 
 export async function deleteAttachment(
-  attachmentId: number
+  attachmentId: string
 ): Promise<ActionResult<void>> {
   const user = await getCurrentUser();
   if (!user) {

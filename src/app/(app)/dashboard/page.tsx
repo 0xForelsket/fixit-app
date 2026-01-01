@@ -84,7 +84,7 @@ async function getStats(
   };
 }
 
-async function getMyWorkOrders(userId: number) {
+async function getMyWorkOrders(userId: string) {
   return db.query.workOrders.findMany({
     where: and(
       or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress")),
@@ -200,7 +200,7 @@ async function PersonalStatsSection({ user }: { user: SessionUser }) {
   );
 }
 
-async function PersonalQueueSection({ userId }: { userId: number }) {
+async function PersonalQueueSection({ userId }: { userId: string }) {
   const myWorkOrders = await getMyWorkOrders(userId);
 
   return (
