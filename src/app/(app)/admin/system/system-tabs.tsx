@@ -9,12 +9,13 @@ import {
   PillTabsTrigger,
 } from "@/components/ui/pill-tabs";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
-import { Building2, Cog, QrCode, Shield, Upload, Users } from "lucide-react";
+import { Building2, Calendar, Cog, QrCode, Shield, Upload, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DepartmentsTab } from "./tabs/departments-tab";
 import { ImportTab } from "./tabs/import-tab";
 import { QrCodesTab } from "./tabs/qr-codes-tab";
 import { RolesTab } from "./tabs/roles-tab";
+import { SchedulerTab } from "./tabs/scheduler-tab";
 import { SettingsTab } from "./tabs/settings-tab";
 import { UsersTab } from "./tabs/users-tab";
 
@@ -64,6 +65,22 @@ interface UserForSelect {
   name: string;
 }
 
+interface MaintenanceSchedule {
+  id: string;
+  title: string;
+  equipmentName: string;
+  frequencyDays: number;
+  nextDue: Date;
+  lastGenerated: Date | null;
+  isActive: boolean;
+}
+
+interface SchedulerData {
+  schedules: MaintenanceSchedule[];
+  overdueCount: number;
+  upcomingCount: number;
+}
+
 interface SystemTabsProps {
   users: User[];
   userStats: {
@@ -84,6 +101,7 @@ interface SystemTabsProps {
   departments: Department[];
   usersForSelect: UserForSelect[];
   canEditDepartments: boolean;
+  schedulerData: SchedulerData;
 }
 
 export function SystemTabs({
@@ -96,6 +114,7 @@ export function SystemTabs({
   departments,
   usersForSelect,
   canEditDepartments,
+  schedulerData,
 }: SystemTabsProps) {
   const [activeTab, setActiveTab] = useState("users");
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
@@ -114,6 +133,7 @@ export function SystemTabs({
         "roles",
         "departments",
         "settings",
+        "scheduler",
         "qr-codes",
         "import",
       ].includes(hash)
@@ -149,6 +169,10 @@ export function SystemTabs({
     userPermissions,
     PERMISSIONS.USER_VIEW
   );
+  const canViewScheduler = hasPermission(
+    userPermissions,
+    PERMISSIONS.SYSTEM_SCHEDULER
+  );
 
   const tabs = [
     { id: "users", label: "Users", icon: Users, visible: canViewUsers },
@@ -160,6 +184,12 @@ export function SystemTabs({
       visible: canViewDepartments,
     },
     { id: "settings", label: "Settings", icon: Cog, visible: canViewSettings },
+    {
+      id: "scheduler",
+      label: "Scheduler",
+      icon: Calendar,
+      visible: canViewScheduler,
+    },
     {
       id: "qr-codes",
       label: "QR Codes",
@@ -208,6 +238,14 @@ export function SystemTabs({
 
         <PillTabsContent value="settings">
           <SettingsTab />
+        </PillTabsContent>
+
+        <PillTabsContent value="scheduler">
+          <SchedulerTab
+            schedules={schedulerData.schedules}
+            overdueCount={schedulerData.overdueCount}
+            upcomingCount={schedulerData.upcomingCount}
+          />
         </PillTabsContent>
 
         <PillTabsContent value="qr-codes">

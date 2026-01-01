@@ -1,10 +1,10 @@
 import { getDepartments } from "@/actions/departments";
 import { getRoles } from "@/actions/roles";
 import { db } from "@/db";
-import { equipment, users } from "@/db/schema";
+import { equipment, maintenanceSchedules, users } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser, requireAnyPermission } from "@/lib/session";
-import { desc } from "drizzle-orm";
+import { and, desc, eq, gte, lt } from "drizzle-orm";
 import { headers } from "next/headers";
 import { SystemTabs } from "./system-tabs";
 
@@ -35,6 +35,38 @@ async function getUsersForSelect() {
   });
 }
 
+async function getSchedulerData() {
+  const now = new Date();
+  const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const schedules = await db.query.maintenanceSchedules.findMany({
+    where: eq(maintenanceSchedules.isActive, true),
+    with: { equipment: { columns: { name: true } } },
+    orderBy: [desc(maintenanceSchedules.nextDue)],
+  });
+
+  const formattedSchedules = schedules.map((s) => ({
+    id: s.id,
+    title: s.title,
+    equipmentName: s.equipment?.name || "Unknown Equipment",
+    frequencyDays: s.frequencyDays,
+    nextDue: s.nextDue,
+    lastGenerated: s.lastGenerated,
+    isActive: s.isActive,
+  }));
+
+  const overdueCount = schedules.filter((s) => s.nextDue < now).length;
+  const upcomingCount = schedules.filter(
+    (s) => s.nextDue >= now && s.nextDue <= oneWeekFromNow
+  ).length;
+
+  return {
+    schedules: formattedSchedules,
+    overdueCount,
+    upcomingCount,
+  };
+}
+
 export default async function SystemPage() {
   // Check if user has any admin-related permission
   const currentUser = await getCurrentUser();
@@ -43,6 +75,7 @@ export default async function SystemPage() {
     PERMISSIONS.SYSTEM_SETTINGS,
     PERMISSIONS.EQUIPMENT_CREATE,
     PERMISSIONS.SYSTEM_QR_CODES,
+    PERMISSIONS.SYSTEM_SCHEDULER,
   ]);
 
   // Check if user can edit departments (admin only)
@@ -51,13 +84,14 @@ export default async function SystemPage() {
     : false;
 
   // Fetch all data in parallel
-  const [usersList, roles, equipmentList, departmentsList, usersForSelect] =
+  const [usersList, roles, equipmentList, departmentsList, usersForSelect, schedulerData] =
     await Promise.all([
       getUsers(),
       getRoles({}),
       getEquipment(),
       getDepartments({}),
       getUsersForSelect(),
+      getSchedulerData(),
     ]);
 
   // Get base URL for QR codes
@@ -93,6 +127,7 @@ export default async function SystemPage() {
       departments={departmentsList}
       usersForSelect={usersForSelect}
       canEditDepartments={canEditDepartments}
+      schedulerData={schedulerData}
     />
   );
 }
