@@ -27,9 +27,6 @@ In late December, the project underwent a massive migration (`e06b975`) from SQL
 ### The Event
 As the dashboard grew, performance degraded. A strict audit (`docs/N+1_QUERY_AUDIT.md`) revealed pervasive N+1 query patterns, particularly in "Work Order" lists fetching related "Technicians" and "Equipment".
 
-### The Insight
-Drizzle ORM's query builder is ergonomic but dangerous. It makes loop-based fetching look cleaner than it is performant.
-
 ### The Fix
 We shifted from:
 ```ts
@@ -37,14 +34,13 @@ We shifted from:
 const orders = await getOrders();
 for (const o of orders) { o.tech = await getTech(o.techId); }
 ```
-To two optimized patterns:
+To three optimized patterns:
 1.  **Single Query Joins:** Using `db.select().from().innerJoin()` for read-heavy views.
 2.  **Batch Filling:** Using `Promise.all` + `inArray` checks for situations where joins were too complex.
+3.  **Raw SQL Aggregations:** For the KPIs dashboard (`src/app/(app)/api/analytics/kpis/route.ts`), we bypassed the ORM builder entirely to write a single multi-metric SQL query using `FILTER (WHERE ...)` clauses. This reduced 6 separate database calls to 1 round-trip.
 
 ### Payload Optimization
-We also found that we were over-fetching massive objects for simple selects.
-**Before:** Fetched full `User` object (including sensitive auth fields) just to display "Assigned To: John".
-**After:** Implemented strict Drizzle columns selection: `columns: { id: true, name: true }`.
+We also implemented strict Drizzle column selection (`columns: { i: true, n: true }`) to stop over-fetching sensitive user fields or heavy blobs.
 
 ---
 
@@ -55,60 +51,58 @@ The team moved from mixed Vitest/Jest setups to Bun's native test runner (`bun:t
 
 ### The Friction
 While unit tests for logic functions were trivial to migrate, **React Component tests failed effectively everywhere**.
-*   **Root Cause:** Bun's module loader is faster than Testing Library's expectation of DOM availability. `import { screen }` would crash before `happy-dom` could register.
+*   **Root Cause:** Bun's module loader is faster than Testing Library's expectation of DOM availability.
 *   **The "Glue" Code:** We had to invent a `dom-setup.ts` pattern to force order-of-operations.
 
 ### The Lesson
-**Bleeding edge speeds have bleeding edge sharp corners.** Bun is incredibly fast, but its ecosystem compatibility (especially with deeply entrenched tools like `testing-library` + `jest-dom`) often requires custom shims that aren't documented in the official "Migration" guides.
+**Bleeding edge speeds have bleeding edge sharp corners.** Bun is incredibly fast, but its ecosystem compatibility (especially with deeply entrenched tools like `testing-library` + `jest-dom`) often requires custom shims.
 
 ---
 
-## 4. UI Architecture & Patterns
+## 4. PWA & Offline Strategy
 
-### The "God Component" Trap (Sidebar)
-The `Sidebar` component grew to >700 lines (`1021069`).
-**The Lesson:** "Files" are not "Features". Breaking it down by *responsibility* (navigation vs. user context vs. layout) made the code testable and readable.
+### The "NetworkFirst" Choice
+For critical data (Work Orders, Equipment), we configured the PWA (`next.config.ts`) to use a `NetworkFirst` strategy with a 10-second timeout.
+**Why:** In a manufacturing environment, stale data (like an old machine status) is dangerous. We prioritize fresh data but fall back to the cache only if the connection is truly dead. This is safer than `StaleWhileRevalidate` for operational data.
 
-### Form Standardization
-Inconsistency between forms (Create Work Order vs. New Equipment) led to a disjointed UX.
-**The Solution:** We standardized on `src/components/ui/form-layout.tsx` providing `FieldGroup`, `FormGrid`, and `FormSection` primitives. This enforced consistent spacing, label styling, and error handling across all forms without reinventing the wheel for every page.
-
-### Theme Awareness
-We migrated hardcoded Tailwind colors (`bg-white`, `text-gray-900`) to semantic CSS variables (`bg-card`, `text-foreground`). This unlocked "Industrial Mode" (high contrast) and Dark Mode with zero extra logic in components, respecting the user's operational environment.
+### Full Text Search without ElasticSearch
+Instead of spinning up a separate search service, we utilized **Postgres GIN Indexes** (`src/db/schema.ts`):
+```ts
+searchIdx: index("wo_search_idx").using("gin", sql`to_tsvector('english', ${table.title} || ' ' || ${table.description})`)
+```
+This allowed for high-performance, ranked text search directly within the primary database, keeping the infrastructure simple.
 
 ---
 
 ## 5. Security & Authentication
 
-### The "Mixed Auth" Debt
-Initial rapid development left us with two parallel auth systems: legacy "Role Checking" (`user.role === 'admin'`) and the new "Permissions System" (`hasPermission(user, 'create:worknetwork')`).
-**The Cleanup:** We audited `src/lib/auth.ts` to expose `requirePermission()` as the primary gatekeeper, deprecating direct role checks. This allows for granular custom roles later without code changes.
+### Middleware Tunnel Detection
+Running the app behind SSH tunnels (Serveo, Pinggy) caused auth redirect loops because the `Host` header didn't match the configured `NEXTAUTH_URL`.
+**The Fix:** We updated `src/middleware.ts` to explicitly detect tunnel hostnames (`.trycloudflare.com`, `.pinggy.link`) and treat them as valid "App Contexts", bypassing standard production domain enforcement.
 
 ### Brute Force Protection
-We implemented natively supported rate-limiting and lockout logic (`BRUTE_FORCE_CONFIG`) directly in the auth service, relying on the database state rather than memory stores (Redis), keeping the infrastructure simple for a manufacturing deployment context.
+We implemented natively supported rate-limiting and lockout logic directly in the auth service, avoiding the need for Redis in this scale of deployment.
 
 ---
 
-## 6. DevOps & Tooling Improvements
+## 6. UI Architecture & Patterns
 
-### Bun Shell for Cross-Platform scripts
-Replacing standard Bash scripts (`tunnel.sh`) with TypeScript scripts using Bun Shell (`$`) solved recurring Windows/WSL interoperability headaches. It allowed us to write complex retry logic and environment variable injection in the same language as the app.
+### The "God Component" Trap
+The `Sidebar` component grew to >700 lines. Breaking it down by *responsibility* (navigation vs. user context vs. layout) proved that "Files" are not "Features".
 
-### Dynamic Imports for "Heavy" Features
-We reduced the initial bundle size by implementing `next/dynamic` for specific heavy dependencies:
-*   `@react-pdf/renderer` (Reporting)
-*   `html5-qrcode` (Scanner)
-*   `recharts` (Analytics)
+### Form Standardization
+We standardized on `src/components/ui/form-layout.tsx` providing `FieldGroup`, `FormGrid`, and `FormSection` primitives to stop UI drift.
 
-These libraries are now only loaded when the user actually navigates to those specific routes, significantly improving First Contentful Paint (FCP).
+### Theme Awareness
+We migrated to semantic CSS variables (`bg-card`, `text-foreground`) instead of hardcoded colors, enabling multiple themes (Light/Dark/Industrial) without component logic changes.
 
 ---
 
 ## Summary Recommendation
 For the next iteration or project:
 1.  **Schema First:** Use UUIDv7 from the start.
-2.  **Performance First:** Profile bundle size and SQL query counts *before* feature complete.
-3.  **Testing Strategy:** If using Bun, establish the DOM environment pattern immediately, rather than porting it later.
-4.  **Composition:** Use primitives like `FieldGroup` early to prevent UI drift.
+2.  **Raw SQL for Stats:** Don't fear `db.execute(sql\`...\`)` for analytics; ORMs are for entities, SQL is for stats.
+3.  **Testing Strategy:** If using Bun, establish the DOM environment pattern immediately.
+4.  **Keep Infra Simple:** Use Postgres GIN indexes and PWA caching before reaching for ElasticSearch or Redis.
 
 *Generated: January 2, 2026*
