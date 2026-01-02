@@ -44,6 +44,7 @@ export interface CostByMonth {
 
 export interface TopCostlyWorkOrder {
   id: string;
+  displayId: number;
   title: string;
   equipmentName: string;
   equipmentCode: string;
@@ -111,6 +112,7 @@ export async function getCostSummary(
     const filteredWorkOrders = await db
       .select({
         id: workOrders.id,
+        displayId: workOrders.displayId,
         title: workOrders.title,
         status: workOrders.status,
         createdAt: workOrders.createdAt,
@@ -331,6 +333,7 @@ export async function getCostSummary(
       const partsCost = partsCostByWO.get(wo.id) || 0;
       return {
         id: wo.id,
+        displayId: wo.displayId,
         title: wo.title,
         equipmentName: eq?.name || "Unknown",
         equipmentCode: eq?.code || "",

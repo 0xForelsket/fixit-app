@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
+import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
+import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
 import { formatRelativeTime } from "@/lib/utils";
 import Link from "next/link";
-
-import type { WorkOrderWithRelations } from "@/components/work-orders/work-order-card";
 
 interface DashboardWorkOrderTableProps {
   workOrders: WorkOrderWithRelations[];
@@ -22,7 +22,7 @@ export function DashboardWorkOrderTable({
       width: "60px",
       cell: (row) => (
         <span className="font-mono text-[10px] font-black text-muted-foreground group-hover:text-primary transition-colors">
-          #{String(row.id).padStart(3, "0")}
+          {formatWorkOrderId(row.displayId)}
         </span>
       ),
     },
@@ -109,7 +109,7 @@ export function DashboardWorkOrderTable({
           asChild
         >
           <Link
-            href={`/maintenance/work-orders/${row.id}`}
+            href={getWorkOrderPath(row.displayId)}
             onClick={(e) => e.stopPropagation()}
           >
             PROTOCOL
@@ -124,7 +124,7 @@ export function DashboardWorkOrderTable({
       columns={columns}
       data={workOrders}
       getRowId={(row) => row.id}
-      getRowHref={(row) => `/maintenance/work-orders/${row.id}`}
+      getRowHref={(row) => getWorkOrderPath(row.displayId)}
       emptyMessage="No active work orders"
       compact
       className="rounded-2xl shadow-xl ring-1 ring-border/50"

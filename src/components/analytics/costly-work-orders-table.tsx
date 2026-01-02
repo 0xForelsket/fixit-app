@@ -10,11 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-interface TopCostlyWorkOrder {
+export interface TopCostlyWorkOrder {
   id: string;
+  displayId: number;
   title: string;
   equipmentName: string;
   equipmentCode: string;
@@ -100,15 +102,15 @@ export function CostlyWorkOrdersTable({ data }: CostlyWorkOrdersTableProps) {
                   >
                     <TableCell className="font-mono font-bold text-xs">
                       <Link
-                        href={`/maintenance/work-orders/${wo.id}`}
+                        href={getWorkOrderPath(wo.displayId)}
                         className="text-primary hover:underline"
                       >
-                        #{wo.id}
+                        {formatWorkOrderId(wo.displayId)}
                       </Link>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate font-medium text-sm">
                       <Link
-                        href={`/maintenance/work-orders/${wo.id}`}
+                        href={getWorkOrderPath(wo.displayId)}
                         className="hover:text-primary hover:underline"
                       >
                         {wo.title}

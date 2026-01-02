@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { getWorkOrderPath } from "../lib/format-ids";
 import { DEFAULT_ROLE_PERMISSIONS } from "../lib/permissions";
 import * as schema from "./schema";
 
@@ -429,10 +430,10 @@ async function seed() {
     // ==================== NOTIFICATIONS ====================
     console.log("Creating notifications...");
     await db.insert(schema.notifications).values([
-      { userId: techAssy1.id, type: "work_order_assigned", title: "New Work Order Assigned", message: "You have been assigned to WO: CNC Mill not powering on", link: `/maintenance/work-orders/${wo1.displayId}`, isRead: true, createdAt: hoursAgo(2) },
-      { userId: techAssy1.id, type: "work_order_escalated", title: "Critical Issue Reported", message: "Emergency stop button sticking reported on Conveyor System 1", link: `/maintenance/work-orders/${wo4.displayId}`, isRead: false, createdAt: hoursAgo(1) },
-      { userId: techAssy2.id, type: "work_order_assigned", title: "New Work Order Assigned", message: "You have been assigned to WO: Scheduled gripper replacement", link: `/maintenance/work-orders/${wo2.displayId}`, isRead: true, createdAt: hoursAgo(5) },
-      { userId: techMold1.id, type: "work_order_created", title: "New Work Order", message: "Temperature sensor drift detected on Injection Molder A", link: `/maintenance/work-orders/${wo3.displayId}`, isRead: false, createdAt: hoursAgo(2) },
+      { userId: techAssy1.id, type: "work_order_assigned", title: "New Work Order Assigned", message: "You have been assigned to WO: CNC Mill not powering on", link: getWorkOrderPath(wo1.displayId), isRead: true, createdAt: hoursAgo(2) },
+      { userId: techAssy1.id, type: "work_order_escalated", title: "Critical Issue Reported", message: "Emergency stop button sticking reported on Conveyor System 1", link: getWorkOrderPath(wo4.displayId), isRead: false, createdAt: hoursAgo(1) },
+      { userId: techAssy2.id, type: "work_order_assigned", title: "New Work Order Assigned", message: "You have been assigned to WO: Scheduled gripper replacement", link: getWorkOrderPath(wo2.displayId), isRead: true, createdAt: hoursAgo(5) },
+      { userId: techMold1.id, type: "work_order_created", title: "New Work Order", message: "Temperature sensor drift detected on Injection Molder A", link: getWorkOrderPath(wo3.displayId), isRead: false, createdAt: hoursAgo(2) },
       { userId: op1.id, type: "work_order_status_changed", title: "Work Order Updated", message: "CNC Mill not powering on is now In Progress", isRead: true, createdAt: hoursAgo(2) },
       { userId: maintManager.id, type: "maintenance_due", title: "Maintenance Due Soon", message: "Compressor oil change due in 3 days", link: "/maintenance/schedules", isRead: false, createdAt: daysAgo(1) },
       { userId: fcltManager.id, type: "maintenance_due", title: "Maintenance Due", message: "AHU filter replacement is due", link: "/maintenance/schedules", isRead: true, createdAt: daysAgo(2) },

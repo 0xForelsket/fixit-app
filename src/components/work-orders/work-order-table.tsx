@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { type ColumnDef, DataTable } from "@/components/ui/data-table";
+import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
 import Link from "next/link";
@@ -36,7 +37,7 @@ export function WorkOrderTable({
       width: "80px",
       cell: (row) => (
         <span className="font-mono font-bold text-muted-foreground">
-          #{String(row.id).padStart(3, "0")}
+          {formatWorkOrderId(row.displayId)}
         </span>
       ),
     },
@@ -164,7 +165,7 @@ export function WorkOrderTable({
           asChild
         >
           <Link
-            href={`/maintenance/work-orders/${row.id}`}
+            href={getWorkOrderPath(row.displayId)}
             onClick={(e) => e.stopPropagation()}
           >
             VIEW
@@ -181,7 +182,7 @@ export function WorkOrderTable({
         data={workOrders}
         searchParams={searchParams}
         getRowId={(row) => row.id}
-        getRowHref={(row) => `/maintenance/work-orders/${row.id}`}
+        getRowHref={(row) => getWorkOrderPath(row.displayId)}
         emptyMessage="No work orders found"
         compact
         selectable={selectable}

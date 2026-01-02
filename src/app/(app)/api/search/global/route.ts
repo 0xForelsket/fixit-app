@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { equipment, spareParts, workOrders } from "@/db/schema";
 import { ApiErrors } from "@/lib/api-error";
+import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
 import { generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { eq, like, or, sql } from "drizzle-orm";
@@ -114,9 +115,9 @@ export async function GET(request: Request) {
         results.push({
           id: `wo-${workOrder.id}`,
           type: "work_order",
-          title: `#${workOrder.displayId}: ${workOrder.title}`,
+          title: `${formatWorkOrderId(workOrder.displayId)}: ${workOrder.title}`,
           subtitle: `Work Order - ${workOrder.status}`,
-          href: `/maintenance/work-orders/${workOrder.id}`,
+          href: getWorkOrderPath(workOrder.displayId),
         });
       }
     }
@@ -153,9 +154,9 @@ export async function GET(request: Request) {
         results.push({
           id: `wo-${wo.id}`,
           type: "work_order",
-          title: `#${wo.displayId}: ${wo.title}`,
+          title: `${formatWorkOrderId(wo.displayId)}: ${wo.title}`,
           subtitle: `Work Order - ${wo.status}`,
-          href: `/maintenance/work-orders/${wo.id}`,
+          href: getWorkOrderPath(wo.displayId),
         });
       }
     }

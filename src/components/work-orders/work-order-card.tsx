@@ -4,6 +4,7 @@ import { assignToMe, quickResolveWorkOrder, startWorkOrder } from "@/actions/wor
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Equipment, User, WorkOrder } from "@/db/schema";
+import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
 import { ArrowRight, CheckCircle, Loader2, Play, Timer, UserCheck } from "lucide-react";
@@ -35,7 +36,7 @@ export function WorkOrderCard({
 }: WorkOrderCardProps) {
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
-  const targetHref = href || `/maintenance/work-orders/${workOrder.id}`;
+  const targetHref = href || getWorkOrderPath(workOrder.displayId);
 
   // Quick action state
   const [isPending, startTransition] = useTransition();
@@ -95,7 +96,7 @@ export function WorkOrderCard({
         <div className="flex items-center justify-between px-3 py-1.5 bg-muted/30 border-b border-border/50">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[9px] font-black text-muted-foreground">
-              #{String(workOrder.id).padStart(3, "0")}
+              {formatWorkOrderId(workOrder.displayId)}
             </span>
             <Badge
               variant="outline"
@@ -235,7 +236,7 @@ export function WorkOrderCard({
           variant="outline"
           className="font-mono text-[10px] bg-muted/50 border-border px-1.5 py-0 font-black"
         >
-          #{String(workOrder.id).padStart(3, "0")}
+          {formatWorkOrderId(workOrder.displayId)}
         </Badge>
         <span
           className={cn(
