@@ -73,6 +73,14 @@ export function DashboardShell({
 
   return (
     <div className="flex h-screen bg-background/50 industrial-grid transition-colors duration-500">
+      {/* Skip to main content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-lg focus:font-semibold focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2"
+      >
+        Skip to main content
+      </a>
+
       <Sidebar
         user={user}
         avatarUrl={avatarUrl}
@@ -90,7 +98,11 @@ export function DashboardShell({
           userId={user.id}
           onMenuClick={() => setSidebarOpen(true)}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-8 animate-in relative z-10 transition-all duration-300">
+        <main
+          id="main-content"
+          className="flex-1 overflow-y-auto p-4 md:p-8 pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-8 animate-in relative z-10 transition-all duration-300"
+          tabIndex={-1}
+        >
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
         <BottomNav permissions={user.permissions} />
