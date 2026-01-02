@@ -1,40 +1,48 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { NextRequest } from "next/server";
 
-// Mock dependencies
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindMany = mock();
+
+const mockGetCurrentUser = mock();
+
+const mockUserHasPermission = mock();
+
+const mockApiLogger = {
+  error: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       workOrders: {
-        findMany: vi.fn(),
+        findMany: mockFindMany,
       },
     },
   },
 }));
 
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.mock("@/lib/auth", () => ({
-  userHasPermission: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     REPORTS_EXPORT: "reports:export",
   },
 }));
 
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-import { GET } from "@/app/(app)/api/reports/export/route";
-import { db } from "@/db";
-import { userHasPermission } from "@/lib/auth";
-import { getCurrentUser } from "@/lib/session";
-import { NextRequest } from "next/server";
+// Dynamic imports after mock.module
+const { GET } = await import("@/app/(app)/api/reports/export/route");
 
 describe("GET /api/reports/export", () => {
   const mockUser = {
@@ -97,7 +105,12 @@ describe("GET /api/reports/export", () => {
   ];
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindMany.mockClear();
+    mockGetCurrentUser.mockClear();
+    mockUserHasPermission.mockClear();
+    mockApiLogger.error.mockClear();
+    mockApiLogger.info.mockClear();
+    mockGenerateRequestId.mockClear();
   });
 
   function createRequest(params: Record<string, string> = {}): NextRequest {
@@ -109,7 +122,7 @@ describe("GET /api/reports/export", () => {
   }
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const response = await GET(createRequest());
 
@@ -117,8 +130,8 @@ describe("GET /api/reports/export", () => {
   });
 
   it("returns 401 when lacking reports:export permission", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(false);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(false);
 
     const response = await GET(createRequest());
 
@@ -126,9 +139,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("returns CSV file with proper headers", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue([]);
 
     const response = await GET(createRequest());
 
@@ -139,9 +152,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("includes CSV column headers", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue([]);
 
     const response = await GET(createRequest());
     const csv = await response.text();
@@ -156,9 +169,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("exports work order data correctly", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue(mockWorkOrders);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue(mockWorkOrders);
 
     const response = await GET(createRequest());
     const csv = await response.text();
@@ -171,9 +184,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("escapes CSV special characters", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue(mockWorkOrders);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue(mockWorkOrders);
 
     const response = await GET(createRequest());
     const csv = await response.text();
@@ -183,9 +196,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("handles null equipment gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue(mockWorkOrders);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue(mockWorkOrders);
 
     const response = await GET(createRequest());
     const csv = await response.text();
@@ -197,13 +210,13 @@ describe("GET /api/reports/export", () => {
 
   describe("Filtering", () => {
     it("filters by status", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-      vi.mocked(userHasPermission).mockReturnValue(true);
-      vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserHasPermission.mockReturnValue(true);
+      mockFindMany.mockResolvedValue([]);
 
       await GET(createRequest({ status: "open" }));
 
-      expect(db.query.workOrders.findMany).toHaveBeenCalledWith(
+      expect(mockFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.anything(),
         })
@@ -211,19 +224,19 @@ describe("GET /api/reports/export", () => {
     });
 
     it("filters by priority", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-      vi.mocked(userHasPermission).mockReturnValue(true);
-      vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserHasPermission.mockReturnValue(true);
+      mockFindMany.mockResolvedValue([]);
 
       await GET(createRequest({ priority: "critical" }));
 
-      expect(db.query.workOrders.findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
     });
 
     it("filters by date range", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-      vi.mocked(userHasPermission).mockReturnValue(true);
-      vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserHasPermission.mockReturnValue(true);
+      mockFindMany.mockResolvedValue([]);
 
       await GET(
         createRequest({
@@ -232,39 +245,39 @@ describe("GET /api/reports/export", () => {
         })
       );
 
-      expect(db.query.workOrders.findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
     });
 
     it("ignores status=all filter", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-      vi.mocked(userHasPermission).mockReturnValue(true);
-      vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserHasPermission.mockReturnValue(true);
+      mockFindMany.mockResolvedValue([]);
 
       await GET(createRequest({ status: "all" }));
 
       // Should be called without status filter when "all"
-      expect(db.query.workOrders.findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
     });
 
     it("ignores priority=all filter", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-      vi.mocked(userHasPermission).mockReturnValue(true);
-      vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+      mockGetCurrentUser.mockResolvedValue(mockUser);
+      mockUserHasPermission.mockReturnValue(true);
+      mockFindMany.mockResolvedValue([]);
 
       await GET(createRequest({ priority: "all" }));
 
-      expect(db.query.workOrders.findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
     });
   });
 
   it("includes related data in query", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue([]);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue([]);
 
     await GET(createRequest());
 
-    expect(db.query.workOrders.findMany).toHaveBeenCalledWith(
+    expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         with: {
           equipment: { with: { location: true } },
@@ -276,9 +289,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("handles database errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockRejectedValue(
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockRejectedValue(
       new Error("Database error")
     );
 
@@ -288,9 +301,9 @@ describe("GET /api/reports/export", () => {
   });
 
   it("formats dates correctly in CSV", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(db.query.workOrders.findMany).mockResolvedValue(mockWorkOrders);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
+    mockFindMany.mockResolvedValue(mockWorkOrders);
 
     const response = await GET(createRequest());
     const csv = await response.text();

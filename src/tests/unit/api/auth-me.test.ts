@@ -1,38 +1,42 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Create mocks
+const mockGetCurrentUser = mock();
+const mockDeleteSession = mock();
 
 // Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  deleteSession: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  deleteSession: mockDeleteSession,
 }));
 
 // Mock logger
-vi.mock("@/lib/logger", () => ({
+mock.module("@/lib/logger", () => ({
   authLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
+    error: mock(),
+    warn: mock(),
+    info: mock(),
   },
   apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
+    error: mock(),
+    warn: mock(),
+    info: mock(),
   },
-  generateRequestId: vi.fn(() => "test-request-id"),
+  generateRequestId: mock(() => "test-request-id"),
 }));
 
-import { POST } from "@/app/(app)/api/auth/logout/route";
-import { GET } from "@/app/(app)/api/auth/me/route";
-import { deleteSession, getCurrentUser } from "@/lib/session";
+const { POST } = await import("@/app/(app)/api/auth/logout/route");
+const { GET } = await import("@/app/(app)/api/auth/me/route");
 
 describe("GET /api/auth/me", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockGetCurrentUser.mockClear();
+    mockDeleteSession.mockClear();
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const response = await GET();
 
@@ -49,7 +53,7 @@ describe("GET /api/auth/me", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     };
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
+    mockGetCurrentUser.mockResolvedValue(mockUser);
 
     const response = await GET();
     const data = await response.json();
@@ -68,7 +72,7 @@ describe("GET /api/auth/me", () => {
       sessionVersion: 1,
       permissions: ["*"],
     };
-    vi.mocked(getCurrentUser).mockResolvedValue(mockAdmin);
+    mockGetCurrentUser.mockResolvedValue(mockAdmin);
 
     const response = await GET();
     const data = await response.json();
@@ -79,7 +83,7 @@ describe("GET /api/auth/me", () => {
   });
 
   it("handles errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockRejectedValue(new Error("Session error"));
+    mockGetCurrentUser.mockRejectedValue(new Error("Session error"));
 
     const response = await GET();
 
@@ -89,22 +93,23 @@ describe("GET /api/auth/me", () => {
 
 describe("POST /api/auth/logout", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockGetCurrentUser.mockClear();
+    mockDeleteSession.mockClear();
   });
 
   it("logs out successfully", async () => {
-    vi.mocked(deleteSession).mockResolvedValue(undefined);
+    mockDeleteSession.mockResolvedValue(undefined);
 
     const response = await POST();
     const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(data.data.success).toBe(true);
-    expect(deleteSession).toHaveBeenCalled();
+    expect(mockDeleteSession).toHaveBeenCalled();
   });
 
   it("handles logout errors", async () => {
-    vi.mocked(deleteSession).mockRejectedValue(new Error("Logout failed"));
+    mockDeleteSession.mockRejectedValue(new Error("Logout failed"));
 
     const response = await POST();
 

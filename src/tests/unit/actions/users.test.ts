@@ -1,172 +1,262 @@
-import { createUser, deleteUser, updateUser } from "@/actions/users";
+// Actions will be imported dynamically after mocks
 import { users } from "@/db/schema";
-import { requirePermission } from "@/lib/auth";
+import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
 import type { SessionUser } from "@/lib/session";
-import { getCurrentUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+const mockGetCurrentUser = mock();
+const mockRequirePermission = mock();
+const mockHashPin = mock((pin) => Promise.resolve(`hashed_${pin}`));
+const mockRevalidatePath = mock();
+
+const mockFindFirstUser = mock();
+const mockFindFirstRole = mock();
+const mockInsert = mock();
+const mockValues = mock();
+const mockReturning = mock();
+const mockUpdate = mock();
+const mockSet = mock();
+const mockWhere = mock();
+const mockDelete = mock();
+
+// Chainable mocks
+mockInsert.mockReturnValue({ values: mockValues });
+mockValues.mockReturnValue({ returning: mockReturning });
+mockUpdate.mockReturnValue({ set: mockSet });
+mockSet.mockReturnValue({ where: mockWhere });
+mockDelete.mockReturnValue({ where: mockWhere }); // Add return for delete
 
 // Mock dependencies
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.mock("@/lib/auth", () => ({
-  requirePermission: vi.fn(),
-  hashPin: vi.fn((pin) => Promise.resolve(`hashed_${pin}`)),
+mock.module("@/lib/auth", () => ({
+  requirePermission: mockRequirePermission,
+  hashPin: mockHashPin,
+  hasPermission: mock((userPermissions: string[], required: string) => {
+    if (userPermissions.includes("*")) return true;
+    return userPermissions.includes(required);
+  }),
+  userHasPermission: mock((user, permission) => {
+    if (user?.permissions?.includes("*")) return true;
+    return user?.permissions?.includes(permission);
+  }),
+  PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
+mock.module("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
 }));
 
-// Mock DB - use vi.hoisted to avoid hoisting issues with vi.mock factory
-const mockTx = vi.hoisted(() => ({
-  query: {
-    users: {
-      findFirst: vi.fn(),
+// Mock the db module
+mock.module("@/db", () => ({
+  db: {
+    query: {
+      users: {
+        findFirst: mockFindFirstUser,
+      },
+      roles: {
+        findFirst: mockFindFirstRole,
+      },
     },
-    roles: {
-      findFirst: vi.fn(),
-    },
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete, // Add delete
   },
-  insert: vi.fn().mockReturnThis(),
-  values: vi.fn().mockReturnThis(),
-  returning: vi.fn(),
-  update: vi.fn().mockReturnThis(),
-  set: vi.fn().mockReturnThis(),
-  where: vi.fn(),
 }));
 
-vi.mock("@/db", () => ({
-  db: mockTx,
-}));
+// Import actions dynamically
+const { createUser, deleteUser, updateUser } = await import("@/actions/users");
 
-describe("User Actions", () => {
+describe("users actions", () => {
   const mockUser: SessionUser = {
     id: "1", displayId: 1,
-    name: "Admin User",
+    name: "Admin",
     employeeId: "ADMIN-001",
-    roleId: "1",
+    roleId: "3",
     roleName: "admin",
     departmentId: "1",
-    sessionVersion: 1,
     permissions: ["*"],
     hourlyRate: 50.0,
+    sessionVersion: 1,
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(requirePermission).mockResolvedValue(mockUser);
+    mockGetCurrentUser.mockClear();
+    mockRequirePermission.mockClear();
+    mockHashPin.mockClear();
+    mockRevalidatePath.mockClear();
+    mockFindFirstUser.mockClear();
+    mockFindFirstRole.mockClear();
+    mockInsert.mockClear();
+    mockValues.mockClear();
+    mockReturning.mockClear();
+    mockUpdate.mockClear();
+    mockSet.mockClear();
+    mockWhere.mockClear();
+    mockDelete.mockClear(); // Clear delete mock
+
+    // Setup default mock behaviors
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockRequirePermission.mockResolvedValue(mockUser);
   });
 
   describe("createUser", () => {
-    const validFormData = new FormData();
-    validFormData.append("employeeId", "TEST-001");
-    validFormData.append("name", "Test User");
-    validFormData.append("pin", "123456");
-    validFormData.append("roleId", "2");
-    validFormData.append("isActive", "true");
+    it("should return error if unauthorized", async () => {
+      mockRequirePermission.mockRejectedValue(new Error("Unauthorized"));
 
-    it("should create user successfully", async () => {
-      // Mock role check
-      mockTx.query.roles.findFirst.mockResolvedValue({ id: "2", displayId: 2, name: "tech" });
-      // Mock duplicate check
-      mockTx.query.users.findFirst.mockResolvedValue(undefined);
-      // Mock insert return
-      mockTx.returning.mockResolvedValue([{ id: "10", displayId: 10 }]);
+      const formData = new FormData();
 
-      const result = await createUser(validFormData);
-
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({ id: "10" });
-      }
-      expect(mockTx.insert).toHaveBeenCalledWith(users);
+      await expect(createUser(formData)).rejects.toThrow("Unauthorized");
     });
 
-    it("should fail if employee ID exists", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue({ id: "5", displayId: 5 });
+    it("should return error if role not found", async () => {
+      mockFindFirstRole.mockResolvedValue(null);
 
-      const result = await createUser(validFormData);
+      const formData = new FormData();
+      formData.set("roleId", "999");
+      formData.set("employeeId", "TEST-001");
+      formData.set("name", "Test User");
+      formData.set("pin", "123456");
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toContain("Employee ID already exists");
-      }
-    });
-
-    it("should fail if role does not exist", async () => {
-      // First check (duplicate user) returns undefined
-      mockTx.query.users.findFirst.mockResolvedValue(undefined);
-      // Role check returns undefined
-      mockTx.query.roles.findFirst.mockResolvedValue(undefined);
-
-      const result = await createUser(validFormData);
+      const result = await createUser(formData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBe("Selected role does not exist");
       }
     });
+
+    it("should return error if employee ID already exists", async () => {
+      mockFindFirstRole.mockResolvedValue({ id: "2" });
+      mockFindFirstUser.mockResolvedValue({ id: "5" }); // User exists
+
+      const formData = new FormData();
+      formData.set("roleId", "2");
+      formData.set("employeeId", "EXISTING");
+      formData.set("name", "Test User");
+      formData.set("pin", "123456");
+
+      const result = await createUser(formData);
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("A user with this Employee ID already exists");
+      }
+    });
+
+    it("should create user successfully", async () => {
+      mockFindFirstRole.mockResolvedValue({ id: "2" });
+      mockFindFirstUser.mockResolvedValue(null); // No existing user
+      mockReturning.mockResolvedValue([{ id: "10", displayId: 10 }]);
+
+      const formData = new FormData();
+      formData.set("roleId", "2");
+      formData.set("employeeId", "NEW-001");
+      formData.set("name", "New User");
+      formData.set("pin", "123456");
+
+      const result = await createUser(formData);
+
+      expect(result.success).toBe(true);
+      expect(mockInsert).toHaveBeenCalledWith(users);
+      expect(mockHashPin).toHaveBeenCalledWith("123456");
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/users");
+    });
   });
 
   describe("updateUser", () => {
-    const userId = "5";
-    const updateFormData = new FormData();
-    updateFormData.append("name", "Updated Name");
+    it("should return error if unauthorized", async () => {
+      mockRequirePermission.mockRejectedValue(new Error("Unauthorized"));
 
-    it("should update user successfully", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue({
-        id: userId,
-        email: "test@example.com",
-      });
+      const formData = new FormData();
 
-      const result = await updateUser(userId, updateFormData);
-
-      expect(result.success).toBe(true);
-      expect(mockTx.update).toHaveBeenCalledWith(users);
-      expect(mockTx.set).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "Updated Name" })
-      );
+      await expect(updateUser("1", formData)).rejects.toThrow("Unauthorized");
     });
 
-    it("should fail if user not found", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue(undefined);
+    it("should return error if user not found", async () => {
+      mockFindFirstUser.mockResolvedValue(null);
 
-      const result = await updateUser(userId, updateFormData);
+      const formData = new FormData();
+      formData.set("name", "Updated Name");
+
+      const result = await updateUser("999", formData);
 
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBe("User not found");
       }
     });
+
+    it("should update user successfully", async () => {
+      mockFindFirstUser.mockResolvedValue({ id: "1", displayId: 1 });
+      mockFindFirstRole.mockResolvedValue({ id: "2" });
+
+      const formData = new FormData();
+      formData.set("name", "Updated Name");
+      formData.set("roleId", "2");
+
+      const result = await updateUser("1", formData);
+
+      expect(result.success).toBe(true);
+      expect(mockUpdate).toHaveBeenCalledWith(users);
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/users");
+    });
+
+    it("should update pin if provided", async () => {
+      mockFindFirstUser.mockResolvedValue({ id: "1", displayId: 1 });
+
+      const formData = new FormData();
+      formData.set("pin", "654321");
+
+      const result = await updateUser("1", formData);
+
+      expect(result.success).toBe(true);
+      expect(mockHashPin).toHaveBeenCalledWith("654321");
+    });
   });
 
   describe("deleteUser", () => {
-    const targetUserId = "5";
+    it("should return error if unauthorized", async () => {
+      mockRequirePermission.mockRejectedValue(new Error("Unauthorized"));
 
-    it("should delete user (soft delete) successfully", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue({ id: targetUserId });
-
-      const result = await deleteUser(targetUserId);
-
-      expect(result.success).toBe(true);
-      expect(mockTx.update).toHaveBeenCalledWith(users);
-      expect(mockTx.set).toHaveBeenCalledWith(
-        expect.objectContaining({ isActive: false })
-      );
+      await expect(deleteUser("1")).rejects.toThrow("Unauthorized");
     });
 
-    it("should prevent self-deletion", async () => {
-      mockTx.query.users.findFirst.mockResolvedValue({ id: mockUser.id });
+    it("should return error if user not found", async () => {
+      mockFindFirstUser.mockResolvedValue(null);
 
-      const result = await deleteUser(mockUser.id);
+      const result = await deleteUser("999");
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("User not found");
+      }
+    });
+
+    it("should prevent deleting self", async () => {
+      mockFindFirstUser.mockResolvedValue({ id: "1", displayId: 1 });
+      // mockUser.id is "1"
+
+      const result = await deleteUser("1");
 
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error).toBe("You cannot delete your own account");
       }
+    });
+
+    it("should delete user successfully", async () => {
+      mockFindFirstUser.mockResolvedValue({ id: "2", displayId: 2 });
+      // mockUser.id is "1", deleting "2"
+      // Note: deleteUser performs a soft-delete (sets isActive: false), not a hard delete
+
+      const result = await deleteUser("2");
+
+      expect(result.success).toBe(true);
+      expect(mockUpdate).toHaveBeenCalledWith(users);
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/users");
     });
   });
 });

@@ -4,17 +4,37 @@ import {
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
-import { userHasPermission } from "@/lib/auth";
-import { getCurrentUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+const mockGetCurrentUser = mock();
+const mockUserHasPermission = mock();
+const mockRevalidatePath = mock();
+const mockRedirect = mock();
+
+const mockInsert = mock();
+const mockValues = mock();
+const mockReturning = mock();
+const mockUpdate = mock();
+const mockSet = mock();
+const mockWhere = mock();
+const mockDelete = mock();
+
+// Chainable mocks
+mockInsert.mockReturnValue({ values: mockValues });
+mockValues.mockReturnValue({ returning: mockReturning });
+mockUpdate.mockReturnValue({ set: mockSet });
+mockSet.mockReturnValue({ where: mockWhere });
+mockWhere.mockReturnValue({ returning: mockReturning });
+// For delete
+mockDelete.mockReturnValue({ where: mockWhere });
 
 // Mock dependencies
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.mock("@/lib/auth", () => ({
-  userHasPermission: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     MAINTENANCE_CREATE: "maintenance:create",
     MAINTENANCE_UPDATE: "maintenance:update",
@@ -22,39 +42,33 @@ vi.mock("@/lib/auth", () => ({
   },
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
+mock.module("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
 }));
 
-vi.mock("next/navigation", () => ({
-  redirect: vi.fn(),
+mock.module("next/navigation", () => ({
+  redirect: mockRedirect,
 }));
 
-// Mock DB - use vi.hoisted to avoid hoisting issues with vi.mock factory
-// Create a proper chainable mock that supports Drizzle's fluent API
-const mockReturning = vi.hoisted(() => vi.fn());
-const mockWhere = vi.hoisted(() => vi.fn(() => ({ returning: mockReturning })));
-const mockSet = vi.hoisted(() =>
-  vi.fn(() => ({ where: mockWhere, returning: mockReturning }))
-);
-const mockValues = vi.hoisted(() =>
-  vi.fn(() => ({ returning: mockReturning }))
-);
-
-const mockTx = vi.hoisted(() => ({
-  insert: vi.fn(() => ({ values: mockValues })),
+const mockTx = {
+  insert: mockInsert,
   values: mockValues,
   returning: mockReturning,
-  update: vi.fn(() => ({ set: mockSet })),
+  update: mockUpdate,
   set: mockSet,
   where: mockWhere,
-  delete: vi.fn(() => ({ where: mockWhere, returning: mockReturning })),
-  transaction: vi.fn((callback) => callback(mockTx)),
-}));
+  delete: mockDelete,
+  // transaction just calls the callback with itself
+  transaction: mock((callback: any) => callback(mockTx)),
+};
 
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: mockTx,
 }));
+
+// Import after mocking
+import { userHasPermission } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/session";
 
 describe("Maintenance Actions", () => {
   const mockUser = {
@@ -73,9 +87,20 @@ describe("Maintenance Actions", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(getCurrentUser).mockResolvedValue(mockUser);
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockGetCurrentUser.mockClear();
+    mockUserHasPermission.mockClear();
+    mockRevalidatePath.mockClear();
+    mockRedirect.mockClear();
+    mockInsert.mockClear();
+    mockValues.mockClear();
+    mockReturning.mockClear();
+    mockUpdate.mockClear();
+    mockSet.mockClear();
+    mockWhere.mockClear();
+    mockDelete.mockClear();
+
+    mockGetCurrentUser.mockResolvedValue(mockUser);
+    mockUserHasPermission.mockReturnValue(true);
   });
 
   describe("createScheduleAction", () => {
@@ -96,13 +121,13 @@ describe("Maintenance Actions", () => {
     };
 
     it("should return error if user is unauthorized", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(null);
+      mockGetCurrentUser.mockResolvedValue(null);
       const result = await createScheduleAction(validInput);
       expect(result.error).toBe("Unauthorized");
     });
 
     it("should return error if user lacks permission", async () => {
-      vi.mocked(userHasPermission).mockReturnValue(false);
+      mockUserHasPermission.mockReturnValue(false);
       const result = await createScheduleAction(validInput);
       expect(result.error).toBe("Unauthorized");
     });
@@ -112,7 +137,7 @@ describe("Maintenance Actions", () => {
 
       await createScheduleAction(validInput);
 
-      expect(mockTx.insert).toHaveBeenCalledWith(maintenanceSchedules);
+      expect(mockInsert).toHaveBeenCalledWith(maintenanceSchedules);
       expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Monthly Service",
@@ -120,7 +145,7 @@ describe("Maintenance Actions", () => {
         })
       );
 
-      expect(mockTx.insert).toHaveBeenCalledWith(maintenanceChecklists);
+      expect(mockInsert).toHaveBeenCalledWith(maintenanceChecklists);
       expect(mockValues).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -148,7 +173,7 @@ describe("Maintenance Actions", () => {
 
       await updateScheduleAction(scheduleId, updateInput);
 
-      expect(mockTx.update).toHaveBeenCalledWith(maintenanceSchedules);
+      expect(mockUpdate).toHaveBeenCalledWith(maintenanceSchedules);
       expect(mockSet).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Updated Service",
@@ -175,8 +200,8 @@ describe("Maintenance Actions", () => {
       const result = await deleteScheduleAction(scheduleId);
 
       expect(result.success).toBe(true);
-      expect(mockTx.delete).toHaveBeenCalledWith(maintenanceChecklists);
-      expect(mockTx.delete).toHaveBeenCalledWith(maintenanceSchedules);
+      expect(mockDelete).toHaveBeenCalledWith(maintenanceChecklists);
+      expect(mockDelete).toHaveBeenCalledWith(maintenanceSchedules);
     });
 
     it("should return error if schedule not found", async () => {

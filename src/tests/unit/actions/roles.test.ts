@@ -1,46 +1,67 @@
-import { createRole, deleteRole, updateRole } from "@/actions/roles";
+// Actions will be imported dynamically after mocks
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+const mockFindFirstRole = mock();
+const mockFindFirstUser = mock();
+const mockSelect = mock();
+const mockInsert = mock();
+const mockUpdate = mock();
+const mockDelete = mock();
+const mockFrom = mock();
+const mockOrderBy = mock();
+const mockRevalidatePath = mock();
+
+// Mock dependencies of db
+mockSelect.mockReturnValue({
+  from: mockFrom,
+});
+
+mockFrom.mockReturnValue({
+  orderBy: mockOrderBy,
+});
+
+// Setup mockDelete to prevent crashes if called unexpectedly
+mockDelete.mockReturnValue({
+  where: mock(),
+});
 
 // Mock the db module
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
     query: {
       roles: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirstRole,
       },
       users: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirstUser,
       },
     },
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        orderBy: vi.fn(),
-      })),
-    })),
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
-    delete: vi.fn(() => ({
-      where: vi.fn(),
-    })),
+    select: mockSelect,
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete,
   },
 }));
 
+const mockRequirePermission = mock();
+
+// Import PERMISSIONS for use in mocks and tests
+import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
+
 // Mock auth
-vi.mock("@/lib/auth", () => ({
-  requirePermission: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  requirePermission: mockRequirePermission,
+  PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
-import { db } from "@/db";
-import { requirePermission } from "@/lib/auth";
+// Mock next/cache
+mock.module("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
+}));
+
+// Dynamic import
+const { createRole, deleteRole, updateRole } = await import("@/actions/roles");
 
 describe("roles actions", () => {
   const mockUser: SessionUser = {
@@ -56,13 +77,29 @@ describe("roles actions", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(requirePermission).mockResolvedValue(mockUser);
+    mockFindFirstRole.mockClear();
+    mockFindFirstUser.mockClear();
+    mockSelect.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockDelete.mockClear();
+    mockRequirePermission.mockClear();
+    mockRequirePermission.mockResolvedValue(mockUser);
+    
+    // Reset defaults
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({
+        where: mock().mockResolvedValue(undefined),
+      })),
+    });
+    mockDelete.mockReturnValue({
+      where: mock().mockResolvedValue(undefined),
+    });
   });
 
   describe("createRole", () => {
     it("should require permission", async () => {
-      vi.mocked(requirePermission).mockRejectedValue(new Error("Forbidden"));
+      mockRequirePermission.mockRejectedValue(new Error("Forbidden"));
 
       const formData = new FormData();
       formData.set("name", "TestRole");
@@ -83,7 +120,7 @@ describe("roles actions", () => {
     });
 
     it("should reject duplicate role name", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockFindFirstRole.mockResolvedValue({
         id: "1", displayId: 1,
         name: "existing-role",
         description: null,
@@ -106,12 +143,12 @@ describe("roles actions", () => {
     });
 
     it("should create role successfully", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
-      vi.mocked(db.insert).mockReturnValue({
-        values: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([{ id: "5", displayId: 5 }]),
+      mockFindFirstRole.mockResolvedValue(undefined);
+      mockInsert.mockReturnValue({
+        values: mock(() => ({
+          returning: mock().mockResolvedValue([{ id: "5", displayId: 5 }]),
         })),
-      } as unknown as ReturnType<typeof db.insert>);
+      });
 
       const formData = new FormData();
       formData.set("name", "new-role");
@@ -130,7 +167,7 @@ describe("roles actions", () => {
 
   describe("updateRole", () => {
     it("should return error for non-existent role", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+      mockFindFirstRole.mockResolvedValue(undefined);
 
       const formData = new FormData();
       formData.set("name", "Updated Name");
@@ -144,7 +181,7 @@ describe("roles actions", () => {
     });
 
     it("should reject updates to system roles", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockFindFirstRole.mockResolvedValue({
         id: "1", displayId: 1,
         name: "admin",
         description: "System administrator",
@@ -167,7 +204,7 @@ describe("roles actions", () => {
 
     it("should reject duplicate name when renaming", async () => {
       // First call: find the role being updated
-      vi.mocked(db.query.roles.findFirst)
+      mockFindFirstRole
         .mockResolvedValueOnce({
           id: "5", displayId: 5,
           name: "custom-role",
@@ -200,7 +237,7 @@ describe("roles actions", () => {
     });
 
     it("should update role successfully", async () => {
-      vi.mocked(db.query.roles.findFirst)
+      mockFindFirstRole
         .mockResolvedValueOnce({
           id: "5", displayId: 5,
           name: "custom-role",
@@ -212,11 +249,11 @@ describe("roles actions", () => {
         })
         .mockResolvedValueOnce(undefined); // No duplicate name
 
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn(() => ({
-          where: vi.fn().mockResolvedValue(undefined),
+      mockUpdate.mockReturnValue({
+        set: mock(() => ({
+          where: mock().mockResolvedValue(undefined),
         })),
-      } as unknown as ReturnType<typeof db.update>);
+      });
 
       const formData = new FormData();
       formData.set("name", "updated-role");
@@ -227,11 +264,11 @@ describe("roles actions", () => {
       const result = await updateRole("5", formData);
 
       expect(result.success).toBe(true);
-      expect(db.update).toHaveBeenCalled();
+      expect(mockUpdate).toHaveBeenCalled();
     });
 
     it("should allow updating same name (no rename)", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValueOnce({
+      mockFindFirstRole.mockResolvedValueOnce({
         id: "5", displayId: 5,
         name: "custom-role",
         description: null,
@@ -241,11 +278,11 @@ describe("roles actions", () => {
         updatedAt: new Date(),
       });
 
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn(() => ({
-          where: vi.fn().mockResolvedValue(undefined),
+      mockUpdate.mockReturnValue({
+        set: mock(() => ({
+          where: mock().mockResolvedValue(undefined),
         })),
-      } as unknown as ReturnType<typeof db.update>);
+      });
 
       const formData = new FormData();
       formData.set("name", "custom-role"); // Same name
@@ -260,7 +297,7 @@ describe("roles actions", () => {
 
   describe("deleteRole", () => {
     it("should return error for non-existent role", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+      mockFindFirstRole.mockResolvedValue(undefined);
 
       const result = await deleteRole("999");
 
@@ -271,7 +308,7 @@ describe("roles actions", () => {
     });
 
     it("should reject deletion of system roles", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockFindFirstRole.mockResolvedValue({
         id: "1", displayId: 1,
         name: "admin",
         description: "System administrator",
@@ -290,7 +327,7 @@ describe("roles actions", () => {
     });
 
     it("should reject deletion when users are assigned", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValueOnce({
+      mockFindFirstRole.mockResolvedValueOnce({
         id: "5", displayId: 5,
         name: "custom-role",
         description: null,
@@ -300,7 +337,7 @@ describe("roles actions", () => {
         updatedAt: new Date(),
       });
 
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         id: "10", displayId: 10,
         employeeId: "EMP-001",
         name: "Test User",
@@ -327,7 +364,7 @@ describe("roles actions", () => {
     });
 
     it("should delete role successfully when no users assigned", async () => {
-      vi.mocked(db.query.roles.findFirst).mockResolvedValueOnce({
+      mockFindFirstRole.mockResolvedValueOnce({
         id: "5", displayId: 5,
         name: "unused-role",
         description: null,
@@ -337,16 +374,16 @@ describe("roles actions", () => {
         updatedAt: new Date(),
       });
 
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(undefined);
+      mockFindFirstUser.mockResolvedValue(undefined);
 
-      vi.mocked(db.delete).mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
-      } as unknown as ReturnType<typeof db.delete>);
+      mockDelete.mockReturnValue({
+        where: mock().mockResolvedValue(undefined),
+      });
 
       const result = await deleteRole("5");
 
       expect(result.success).toBe(true);
-      expect(db.delete).toHaveBeenCalled();
+      expect(mockDelete).toHaveBeenCalled();
     });
   });
 });

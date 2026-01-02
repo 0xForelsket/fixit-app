@@ -1,47 +1,62 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindFirst = mock();
+const mockUpdateSet = mock();
+const mockUpdateWhere = mock();
+const mockUpdateReturning = mock();
+const mockUpdate = mock(() => ({
+  set: mockUpdateSet.mockReturnValue({
+    where: mockUpdateWhere.mockReturnValue({
+      returning: mockUpdateReturning.mockResolvedValue([]),
+    }),
+  }),
+}));
+const mockDeleteWhere = mock();
+const mockDeleteReturning = mock();
+const mockDelete = mock(() => ({
+  where: mockDeleteWhere.mockReturnValue({
+    returning: mockDeleteReturning.mockResolvedValue([]),
+  }),
+}));
+
+const mockGetCurrentUser = mock();
+const mockRequireCsrf = mock().mockResolvedValue(true);
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+const mockUserHasPermission = mock();
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       spareParts: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirst,
       },
     },
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([]),
-        })),
-      })),
-    })),
-    delete: vi.fn(() => ({
-      where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([]),
-      })),
-    })),
+    update: mockUpdate,
+    delete: mockDelete,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  requireCsrf: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  requireCsrf: mockRequireCsrf,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-// Mock auth
-vi.mock("@/lib/auth", () => ({
-  userHasPermission: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     INVENTORY_VIEW: "inventory:view",
     INVENTORY_UPDATE: "inventory:update",
@@ -49,18 +64,44 @@ vi.mock("@/lib/auth", () => ({
   },
 }));
 
-import { DELETE, GET, PATCH } from "@/app/(app)/api/inventory/parts/[id]/route";
-import { db } from "@/db";
-import { userHasPermission } from "@/lib/auth";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { DELETE, GET, PATCH } = await import("@/app/(app)/api/inventory/parts/[id]/route");
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  mockFindFirst.mockClear();
+  mockUpdate.mockClear();
+  mockUpdateSet.mockClear();
+  mockUpdateWhere.mockClear();
+  mockUpdateReturning.mockClear();
+  mockDelete.mockClear();
+  mockDeleteWhere.mockClear();
+  mockDeleteReturning.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockRequireCsrf.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+  mockUserHasPermission.mockClear();
+
+  // Reset chains
+  mockUpdate.mockReturnValue({
+    set: mockUpdateSet.mockReturnValue({
+      where: mockUpdateWhere.mockReturnValue({
+        returning: mockUpdateReturning.mockResolvedValue([]),
+      }),
+    }),
+  });
+  mockDelete.mockReturnValue({
+    where: mockDeleteWhere.mockReturnValue({
+      returning: mockDeleteReturning.mockResolvedValue([]),
+    }),
+  });
 });
 
 describe("GET /api/inventory/parts/[id]", () => {
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/inventory/parts/1");
     const response = await GET(request, {
@@ -71,7 +112,7 @@ describe("GET /api/inventory/parts/[id]", () => {
   });
 
   it("returns 400 for invalid part ID", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
@@ -101,7 +142,7 @@ describe("GET /api/inventory/parts/[id]", () => {
   });
 
   it("returns 404 when part not found", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
@@ -121,7 +162,7 @@ describe("GET /api/inventory/parts/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.query.spareParts.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/inventory/parts/999");
     const response = await GET(request, {
@@ -132,7 +173,7 @@ describe("GET /api/inventory/parts/[id]", () => {
   });
 
   it("returns part details", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
@@ -168,7 +209,7 @@ describe("GET /api/inventory/parts/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    vi.mocked(db.query.spareParts.findFirst).mockResolvedValue(mockPart);
+    mockFindFirst.mockResolvedValue(mockPart);
 
     const request = new Request("http://localhost/api/inventory/parts/1");
     const response = await GET(request, {
@@ -184,7 +225,7 @@ describe("GET /api/inventory/parts/[id]", () => {
 
 describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/inventory/parts/1", {
       method: "PATCH",
@@ -199,8 +240,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("returns 401 when user lacks permission", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(false);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(false);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Operator",
       email: "op@example.com",
@@ -234,8 +275,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("returns 400 for invalid part ID", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(true);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
@@ -269,8 +310,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("returns 404 when part not found", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(true);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
@@ -290,13 +331,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.update).mockReturnValue({
-      set: vi.fn(() => ({
-        where: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([]),
-        })),
-      })),
-    } as unknown as ReturnType<typeof db.update>);
+    mockUpdateReturning.mockResolvedValue([]);
 
     const request = new Request("http://localhost/api/inventory/parts/999", {
       method: "PATCH",
@@ -311,8 +346,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   });
 
   it("updates part successfully", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(true);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
@@ -339,13 +374,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
       sku: "SKF-123",
       unitCost: 30.0,
     };
-    vi.mocked(db.update).mockReturnValue({
-      set: vi.fn(() => ({
-        where: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([updatedPart]),
-        })),
-      })),
-    } as unknown as ReturnType<typeof db.update>);
+    mockUpdateReturning.mockResolvedValue([updatedPart]);
 
     const request = new Request("http://localhost/api/inventory/parts/1", {
       method: "PATCH",
@@ -365,7 +394,7 @@ describe("PATCH /api/inventory/parts/[id]", () => {
 
 describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/inventory/parts/1", {
       method: "DELETE",
@@ -378,8 +407,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("returns 401 when user lacks permission", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(false);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(false);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -402,8 +431,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("returns 400 for invalid part ID", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(true);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
@@ -435,8 +464,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("returns 404 when part not found", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(true);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
@@ -456,11 +485,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([]),
-      })),
-    } as unknown as ReturnType<typeof db.delete>);
+    mockDeleteReturning.mockResolvedValue([]);
 
     const request = new Request("http://localhost/api/inventory/parts/999", {
       method: "DELETE",
@@ -473,8 +498,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   });
 
   it("deletes part successfully", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(true);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(true);
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       email: "admin@example.com",
@@ -494,11 +519,7 @@ describe("DELETE /api/inventory/parts/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
-      })),
-    } as unknown as ReturnType<typeof db.delete>);
+    mockDeleteReturning.mockResolvedValue([{ id: "1", displayId: 1 }]);
 
     const request = new Request("http://localhost/api/inventory/parts/1", {
       method: "DELETE",

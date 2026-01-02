@@ -1,56 +1,81 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindFirst = mock();
+const mockUpdateSet = mock();
+const mockUpdateWhere = mock();
+const mockUpdate = mock(() => ({
+  set: mockUpdateSet.mockReturnValue({
+    where: mockUpdateWhere,
+  }),
+}));
+
+const mockGetCurrentUser = mock();
+const mockRequireCsrf = mock().mockResolvedValue(true);
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       notifications: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirst,
       },
     },
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
+    update: mockUpdate,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  requireCsrf: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  requireCsrf: mockRequireCsrf,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-import { PATCH } from "@/app/(app)/api/notifications/[id]/route";
-import { POST as POST_READ_ALL } from "@/app/(app)/api/notifications/read-all/route";
-import { db } from "@/db";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { PATCH } = await import("@/app/(app)/api/notifications/[id]/route");
+const { POST: POST_READ_ALL } = await import("@/app/(app)/api/notifications/read-all/route");
+
+beforeEach(() => {
+  mockFindFirst.mockClear();
+  mockUpdate.mockClear();
+  mockUpdateSet.mockClear();
+  mockUpdateWhere.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockRequireCsrf.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+
+  // Reset chains
+  mockUpdate.mockReturnValue({
+    set: mockUpdateSet.mockReturnValue({
+      where: mockUpdateWhere,
+    }),
+  });
+});
 
 describe("PATCH /api/notifications/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/notifications/1", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isRead: true }),
-    }) as unknown as import("next/server").NextRequest;
+    }) as any;
 
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "1" }),
@@ -60,7 +85,7 @@ describe("PATCH /api/notifications/[id]", () => {
   });
 
   it("returns 400 for invalid notification ID", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
       displayId: 1,
       employeeId: "TECH-001",
@@ -75,7 +100,7 @@ describe("PATCH /api/notifications/[id]", () => {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isRead: true }),
-    }) as unknown as import("next/server").NextRequest;
+    }) as any;
 
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "abc" }),
@@ -85,7 +110,7 @@ describe("PATCH /api/notifications/[id]", () => {
   });
 
   it("returns 404 when notification not found", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
       displayId: 1,
       employeeId: "TECH-001",
@@ -95,13 +120,13 @@ describe("PATCH /api/notifications/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.query.notifications.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/notifications/999", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isRead: true }),
-    }) as unknown as import("next/server").NextRequest;
+    }) as any;
 
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "999" }),
@@ -111,7 +136,7 @@ describe("PATCH /api/notifications/[id]", () => {
   });
 
   it("returns 403 when notification belongs to different user", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       displayId: 2,
       id: "2", // Different user
       employeeId: "TECH-002",
@@ -121,7 +146,7 @@ describe("PATCH /api/notifications/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1",
       
       userId: "1", // Belongs to user 1
@@ -137,7 +162,7 @@ describe("PATCH /api/notifications/[id]", () => {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isRead: true }),
-    }) as unknown as import("next/server").NextRequest;
+    }) as any;
 
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "1" }),
@@ -147,7 +172,7 @@ describe("PATCH /api/notifications/[id]", () => {
   });
 
   it("updates notification successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
       displayId: 1,
       employeeId: "TECH-001",
@@ -157,7 +182,7 @@ describe("PATCH /api/notifications/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1",
       
       userId: "1", // Same user
@@ -173,7 +198,7 @@ describe("PATCH /api/notifications/[id]", () => {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isRead: true }),
-    }) as unknown as import("next/server").NextRequest;
+    }) as any;
 
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "1" }),
@@ -182,11 +207,11 @@ describe("PATCH /api/notifications/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(data.data.success).toBe(true);
-    expect(db.update).toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalled();
   });
 
   it("can mark notification as unread", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
       displayId: 1,
       employeeId: "TECH-001",
@@ -196,7 +221,7 @@ describe("PATCH /api/notifications/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.query.notifications.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1",
       
       userId: "1",
@@ -212,7 +237,7 @@ describe("PATCH /api/notifications/[id]", () => {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isRead: false }),
-    }) as unknown as import("next/server").NextRequest;
+    }) as any;
 
     const response = await PATCH(request, {
       params: Promise.resolve({ id: "1" }),
@@ -225,12 +250,8 @@ describe("PATCH /api/notifications/[id]", () => {
 });
 
 describe("POST /api/notifications/read-all", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const response = await POST_READ_ALL();
 
@@ -238,7 +259,7 @@ describe("POST /api/notifications/read-all", () => {
   });
 
   it("marks all notifications as read", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
       displayId: 1,
       employeeId: "TECH-001",
@@ -254,11 +275,11 @@ describe("POST /api/notifications/read-all", () => {
 
     expect(response.status).toBe(200);
     expect(data.data.success).toBe(true);
-    expect(db.update).toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalled();
   });
 
   it("handles errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
       displayId: 1,
       employeeId: "TECH-001",
@@ -268,7 +289,7 @@ describe("POST /api/notifications/read-all", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.update).mockImplementation(() => {
+    mockUpdate.mockImplementation(() => {
       throw new Error("Database error");
     });
 

@@ -1,37 +1,40 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Create mocks
+const mockGetCurrentUser = mock();
+const mockGetPresignedUploadUrl = mock();
 
 // Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock S3
-vi.mock("@/lib/s3", () => ({
-  getPresignedUploadUrl: vi.fn(),
+mock.module("@/lib/s3", () => ({
+  getPresignedUploadUrl: mockGetPresignedUploadUrl,
 }));
 
 // Mock logger
-vi.mock("@/lib/logger", () => ({
+mock.module("@/lib/logger", () => ({
   apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
+    error: mock(),
+    warn: mock(),
+    info: mock(),
   },
-  generateRequestId: vi.fn(() => "test-request-id"),
+  generateRequestId: mock(() => "test-request-id"),
 }));
 
-import { POST } from "@/app/(app)/api/attachments/presigned-url/route";
-import { getPresignedUploadUrl } from "@/lib/s3";
-import { getCurrentUser } from "@/lib/session";
+const { POST } = await import("@/app/(app)/api/attachments/presigned-url/route");
 
 describe("POST /api/attachments/presigned-url", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockGetCurrentUser.mockClear();
+    mockGetPresignedUploadUrl.mockClear();
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request(
       "http://localhost/api/attachments/presigned-url",
@@ -53,7 +56,7 @@ describe("POST /api/attachments/presigned-url", () => {
   });
 
   it("returns 400 when missing required fields", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -83,7 +86,7 @@ describe("POST /api/attachments/presigned-url", () => {
   });
 
   it("returns presigned URL and s3Key on success", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -93,7 +96,7 @@ describe("POST /api/attachments/presigned-url", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(getPresignedUploadUrl).mockResolvedValue(
+    mockGetPresignedUploadUrl.mockResolvedValue(
       "https://s3.example.com/upload?signed=true"
     );
 
@@ -121,7 +124,7 @@ describe("POST /api/attachments/presigned-url", () => {
   });
 
   it("generates correct s3Key format for different entity types", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -131,7 +134,7 @@ describe("POST /api/attachments/presigned-url", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(getPresignedUploadUrl).mockResolvedValue(
+    mockGetPresignedUploadUrl.mockResolvedValue(
       "https://s3.example.com/upload"
     );
 
@@ -157,7 +160,7 @@ describe("POST /api/attachments/presigned-url", () => {
   });
 
   it("handles S3 errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -167,7 +170,7 @@ describe("POST /api/attachments/presigned-url", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(getPresignedUploadUrl).mockRejectedValue(
+    mockGetPresignedUploadUrl.mockRejectedValue(
       new Error("S3 bucket not accessible")
     );
 
@@ -193,7 +196,7 @@ describe("POST /api/attachments/presigned-url", () => {
   });
 
   it("preserves file extension from filename", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -203,7 +206,7 @@ describe("POST /api/attachments/presigned-url", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(getPresignedUploadUrl).mockResolvedValue(
+    mockGetPresignedUploadUrl.mockResolvedValue(
       "https://s3.example.com/upload"
     );
 

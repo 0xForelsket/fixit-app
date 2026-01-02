@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, mock } from "bun:test";
 
 describe("Input", () => {
   it("renders as an input element", () => {
@@ -70,7 +70,7 @@ describe("Input", () => {
     });
 
     it("handles onChange events", async () => {
-      const handleChange = vi.fn();
+      const handleChange = mock(() => {});
       const user = userEvent.setup();
       render(<Input onChange={handleChange} />);
 
@@ -81,7 +81,7 @@ describe("Input", () => {
     });
 
     it("handles onFocus events", async () => {
-      const handleFocus = vi.fn();
+      const handleFocus = mock(() => {});
       const user = userEvent.setup();
       render(<Input onFocus={handleFocus} />);
 
@@ -92,7 +92,7 @@ describe("Input", () => {
     });
 
     it("handles onBlur events", async () => {
-      const handleBlur = vi.fn();
+      const handleBlur = mock(() => {});
       const user = userEvent.setup();
       render(<Input onBlur={handleBlur} />);
 

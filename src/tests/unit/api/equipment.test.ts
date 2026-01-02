@@ -1,41 +1,62 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindMany = mock();
+const mockInsertValues = mock();
+const mockInsertReturning = mock();
+const mockInsert = mock(() => ({
+  values: mockInsertValues.mockReturnValue({
+    returning: mockInsertReturning,
+  }),
+}));
+const mockSelectFrom = mock();
+const mockSelectWhere = mock();
+const mockSelect = mock(() => ({
+  from: mockSelectFrom.mockReturnValue({
+    where: mockSelectWhere,
+  }),
+}));
+
+const mockRequireAuth = mock();
+const mockRequireCsrf = mock();
+const mockRequirePermission = mock();
+
+const mockCheckRateLimit = mock(() => ({
+  success: true,
+  remaining: 99,
+  reset: Date.now() + 60000,
+}));
+const mockGetClientIp = mock(() => "127.0.0.1");
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       equipment: {
-        findMany: vi.fn(),
+        findMany: mockFindMany,
       },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
+    insert: mockInsert,
+    select: mockSelect,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  requireAuth: vi.fn(),
-  requireCsrf: vi.fn(),
-  requirePermission: vi.fn(),
+mock.module("@/lib/session", () => ({
+  requireAuth: mockRequireAuth,
+  requireCsrf: mockRequireCsrf,
+  requirePermission: mockRequirePermission,
 }));
 
-// Mock rate limit
-vi.mock("@/lib/rate-limit", () => ({
-  checkRateLimit: vi.fn(() => ({
-    success: true,
-    remaining: 99,
-    reset: Date.now() + 60000,
-  })),
-  getClientIp: vi.fn(() => "127.0.0.1"),
+mock.module("@/lib/rate-limit", () => ({
+  checkRateLimit: mockCheckRateLimit,
+  getClientIp: mockGetClientIp,
   RATE_LIMITS: {
     login: { limit: 5, windowMs: 60000 },
     api: { limit: 100, windowMs: 60000 },
@@ -43,28 +64,48 @@ vi.mock("@/lib/rate-limit", () => ({
   },
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-import { GET, POST } from "@/app/(app)/api/equipment/route";
-import { db } from "@/db";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { requireAuth, requireCsrf, requirePermission } from "@/lib/session";
+// Dynamic imports after mock.module
+const { GET, POST } = await import("@/app/(app)/api/equipment/route");
 
 describe("GET /api/equipment", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindMany.mockClear();
+    mockInsert.mockClear();
+    mockInsertValues.mockClear();
+    mockInsertReturning.mockClear();
+    mockSelect.mockClear();
+    mockSelectFrom.mockClear();
+    mockSelectWhere.mockClear();
+    mockRequireAuth.mockClear();
+    mockRequireCsrf.mockClear();
+    mockRequirePermission.mockClear();
+    mockCheckRateLimit.mockClear();
+    mockGetClientIp.mockClear();
+    mockApiLogger.error.mockClear();
+    mockApiLogger.warn.mockClear();
+    mockApiLogger.info.mockClear();
+    mockGenerateRequestId.mockClear();
+
+    // Reset chains
+    mockInsert.mockReturnValue({
+      values: mockInsertValues.mockReturnValue({
+        returning: mockInsertReturning,
+      }),
+    });
+    mockSelect.mockReturnValue({
+      from: mockSelectFrom.mockReturnValue({
+        where: mockSelectWhere,
+      }),
+    });
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(requireAuth).mockRejectedValue(new Error("Unauthorized"));
+    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
     const request = new Request("http://localhost/api/equipment");
     const response = await GET(request);
@@ -73,7 +114,7 @@ describe("GET /api/equipment", () => {
   });
 
   it("returns equipment list with pagination", async () => {
-    vi.mocked(requireAuth).mockResolvedValue({
+    mockRequireAuth.mockResolvedValue({
       id: "user-1",
       displayId: 1, name: "Tech",
       email: "tech@example.com",
@@ -126,12 +167,8 @@ describe("GET /api/equipment", () => {
       },
     ];
 
-    vi.mocked(db.query.equipment.findMany).mockResolvedValue(mockEquipment);
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([{ count: 2 }]),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFindMany.mockResolvedValue(mockEquipment);
+    mockSelectWhere.mockResolvedValue([{ count: 2 }]);
 
     const request = new Request(
       "http://localhost/api/equipment?page=1&limit=10"
@@ -147,7 +184,7 @@ describe("GET /api/equipment", () => {
   });
 
   it("accepts locationId filter parameter", async () => {
-    vi.mocked(requireAuth).mockResolvedValue({
+    mockRequireAuth.mockResolvedValue({
       id: "user-1",
       displayId: 1, name: "Tech",
       email: "tech@example.com",
@@ -185,12 +222,8 @@ describe("GET /api/equipment", () => {
       },
     ];
 
-    vi.mocked(db.query.equipment.findMany).mockResolvedValue(mockEquipment);
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 1 }]),
-      }),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFindMany.mockResolvedValue(mockEquipment);
+    mockSelectWhere.mockResolvedValue([{ count: 1 }]);
 
     const request = new Request("http://localhost/api/equipment?locationId=loc-5");
     const response = await GET(request);
@@ -201,7 +234,7 @@ describe("GET /api/equipment", () => {
   });
 
   it("accepts status filter parameter", async () => {
-    vi.mocked(requireAuth).mockResolvedValue({
+    mockRequireAuth.mockResolvedValue({
       id: "user-1",
       displayId: 1, name: "Tech",
       email: "tech@example.com",
@@ -222,12 +255,8 @@ describe("GET /api/equipment", () => {
       updatedAt: new Date(),
     } as any);
 
-    vi.mocked(db.query.equipment.findMany).mockResolvedValue([]);
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 0 }]),
-      }),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFindMany.mockResolvedValue([]);
+    mockSelectWhere.mockResolvedValue([{ count: 0 }]);
 
     const request = new Request("http://localhost/api/equipment?status=down");
     const response = await GET(request);
@@ -237,7 +266,7 @@ describe("GET /api/equipment", () => {
   });
 
   it("accepts search parameter", async () => {
-    vi.mocked(requireAuth).mockResolvedValue({
+    mockRequireAuth.mockResolvedValue({
       id: "user-1",
       displayId: 1, name: "Tech",
       email: "tech@example.com",
@@ -258,12 +287,8 @@ describe("GET /api/equipment", () => {
       updatedAt: new Date(),
     } as any);
 
-    vi.mocked(db.query.equipment.findMany).mockResolvedValue([]);
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 0 }]),
-      }),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFindMany.mockResolvedValue([]);
+    mockSelectWhere.mockResolvedValue([{ count: 0 }]);
 
     const request = new Request("http://localhost/api/equipment?search=pump");
     const response = await GET(request);
@@ -275,11 +300,28 @@ describe("GET /api/equipment", () => {
 
 describe("POST /api/equipment", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindMany.mockClear();
+    mockInsert.mockClear();
+    mockInsertValues.mockClear();
+    mockInsertReturning.mockClear();
+    mockSelect.mockClear();
+    mockSelectFrom.mockClear();
+    mockSelectWhere.mockClear();
+    mockRequireAuth.mockClear();
+    mockRequireCsrf.mockClear();
+    mockRequirePermission.mockClear();
+    mockCheckRateLimit.mockClear();
+    
+    // Reset chains
+    mockInsert.mockReturnValue({
+      values: mockInsertValues.mockReturnValue({
+        returning: mockInsertReturning,
+      }),
+    });
   });
 
   it("returns 429 when rate limited", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: false,
       remaining: 0,
       reset: Date.now() + 60000,
@@ -297,12 +339,12 @@ describe("POST /api/equipment", () => {
   });
 
   it("returns 403 when CSRF token missing", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockRejectedValue(new Error("CSRF token missing"));
+    mockRequireCsrf.mockRejectedValue(new Error("CSRF token missing"));
 
     const request = new Request("http://localhost/api/equipment", {
       method: "POST",
@@ -316,13 +358,13 @@ describe("POST /api/equipment", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    vi.mocked(requirePermission).mockRejectedValue(new Error("Unauthorized"));
+    mockRequireCsrf.mockResolvedValue(undefined);
+    mockRequirePermission.mockRejectedValue(new Error("Unauthorized"));
 
     const request = new Request("http://localhost/api/equipment", {
       method: "POST",
@@ -336,13 +378,13 @@ describe("POST /api/equipment", () => {
   });
 
   it("returns 403 when lacking permission", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    vi.mocked(requirePermission).mockRejectedValue(new Error("Forbidden"));
+    mockRequireCsrf.mockResolvedValue(undefined);
+    mockRequirePermission.mockRejectedValue(new Error("Forbidden"));
 
     const request = new Request("http://localhost/api/equipment", {
       method: "POST",
@@ -360,13 +402,13 @@ describe("POST /api/equipment", () => {
   });
 
   it("returns 400 for invalid input", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    vi.mocked(requirePermission).mockResolvedValue({
+    mockRequireCsrf.mockResolvedValue(undefined);
+    mockRequirePermission.mockResolvedValue({
       id: "user-1",
       displayId: 1, employeeId: "ADMIN-001",
       name: "Admin",
@@ -390,13 +432,13 @@ describe("POST /api/equipment", () => {
   });
 
   it("creates equipment successfully", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    vi.mocked(requirePermission).mockResolvedValue({
+    mockRequireCsrf.mockResolvedValue(undefined);
+    mockRequirePermission.mockResolvedValue({
       id: "user-1",
       displayId: 1, employeeId: "ADMIN-001",
       name: "Admin",
@@ -422,11 +464,7 @@ describe("POST /api/equipment", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockEquipment]),
-      })),
-    } as unknown as ReturnType<typeof db.insert>);
+    mockInsertReturning.mockResolvedValue([mockEquipment]);
 
     const request = new Request("http://localhost/api/equipment", {
       method: "POST",

@@ -1,43 +1,53 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindMany = mock();
+
+const mockGetCurrentUser = mock();
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       notifications: {
-        findMany: vi.fn(),
+        findMany: mockFindMany,
       },
     },
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-import { GET } from "@/app/(app)/api/notifications/route";
-import { db } from "@/db";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { GET } = await import("@/app/(app)/api/notifications/route");
+
+beforeEach(() => {
+  mockFindMany.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+});
 
 describe("GET /api/notifications", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const response = await GET();
 
@@ -45,7 +55,7 @@ describe("GET /api/notifications", () => {
   });
 
   it("returns notifications for authenticated user", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -78,7 +88,7 @@ describe("GET /api/notifications", () => {
       },
     ];
 
-    vi.mocked(db.query.notifications.findMany).mockResolvedValue(
+    mockFindMany.mockResolvedValue(
       mockNotifications
     );
 
@@ -91,7 +101,7 @@ describe("GET /api/notifications", () => {
   });
 
   it("returns empty array when user has no notifications", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -101,7 +111,7 @@ describe("GET /api/notifications", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.notifications.findMany).mockResolvedValue([]);
+    mockFindMany.mockResolvedValue([]);
 
     const response = await GET();
     const data = await response.json();
@@ -111,7 +121,7 @@ describe("GET /api/notifications", () => {
   });
 
   it("handles database errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -121,7 +131,7 @@ describe("GET /api/notifications", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.notifications.findMany).mockRejectedValue(
+    mockFindMany.mockRejectedValue(
       new Error("Connection timeout")
     );
 

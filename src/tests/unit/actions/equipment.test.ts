@@ -4,52 +4,79 @@ import {
   updateEquipment,
 } from "@/actions/equipment";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+const mockFindFirst = mock();
+const mockInsert = mock(() => ({
+  values: mock(() => ({
+    returning: mock(),
+  })),
+}));
+const mockUpdate = mock(() => ({
+  set: mock(() => ({
+    where: mock(),
+  })),
+}));
+const mockDelete = mock(() => ({
+  where: mock(),
+}));
 
 // Mock the db module
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
     query: {
       equipment: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirst,
       },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
-    delete: vi.fn(() => ({
-      where: vi.fn(),
-    })),
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete,
+  },
+}));
+
+const mockGetCurrentUser = mock();
+
+// Mock auth module explicitly to avoid leakage
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mock((user, permission) => {
+    if (user?.permissions?.includes("*")) return true;
+    return user?.permissions?.includes(permission) ?? false;
+  }),
+  PERMISSIONS: {
+    EQUIPMENT_CREATE: "equipment:create",
+    EQUIPMENT_UPDATE: "equipment:update",
+    EQUIPMENT_DELETE: "equipment:delete",
   },
 }));
 
 // Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-vi.mock("@/lib/audit", () => ({
-  logAudit: vi.fn(),
+mock.module("@/lib/audit", () => ({
+  logAudit: mock(),
 }));
 
+// Re-import after mocking
 import { db } from "@/db";
-import { getCurrentUser } from "@/lib/session";
+// We don't import from @/lib/auth because we mocked it effectively for the action to use.
+// But wait, the action might import PERMISSIONS from the real module if my mock module didn't replace it fully?
+// mock.module("@/lib/auth", ...) replaces the module for everyone importing it via "@/lib/auth".
 
 describe("createEquipment action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindFirst.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockDelete.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const formData = new FormData();
     formData.set("name", "Test Equipment");
@@ -62,7 +89,7 @@ describe("createEquipment action", () => {
   });
 
   it("should reject non-admin users", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -83,7 +110,7 @@ describe("createEquipment action", () => {
   });
 
   it("should reject operator users", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -104,7 +131,7 @@ describe("createEquipment action", () => {
   });
 
   it("should return error for invalid input", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -125,7 +152,7 @@ describe("createEquipment action", () => {
   });
 
   it("should create equipment successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -150,11 +177,11 @@ describe("createEquipment action", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockEquipment]),
+    mockInsert.mockReturnValue({
+      values: mock(() => ({
+        returning: mock().mockResolvedValue([mockEquipment]),
       })),
-    } as unknown);
+    });
 
     const formData = new FormData();
     formData.set("name", "Test Equipment");
@@ -169,7 +196,7 @@ describe("createEquipment action", () => {
   });
 
   it("should handle duplicate code error", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -179,15 +206,13 @@ describe("createEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi
-          .fn()
-          .mockRejectedValue(
-            new Error("UNIQUE constraint failed: equipment.code")
-          ),
+    mockInsert.mockReturnValue({
+      values: mock(() => ({
+        returning: mock().mockRejectedValue(
+          new Error("UNIQUE constraint failed: equipment.code")
+        ),
       })),
-    } as unknown);
+    });
 
     const formData = new FormData();
     formData.set("name", "Test Equipment");
@@ -203,11 +228,15 @@ describe("createEquipment action", () => {
 
 describe("updateEquipment action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindFirst.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockDelete.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const formData = new FormData();
     formData.set("name", "Updated Name");
@@ -218,7 +247,7 @@ describe("updateEquipment action", () => {
   });
 
   it("should reject non-admin users", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -237,7 +266,7 @@ describe("updateEquipment action", () => {
   });
 
   it("should return error for non-existent equipment", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -247,7 +276,7 @@ describe("updateEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const formData = new FormData();
     formData.set("name", "Updated Name");
@@ -258,7 +287,7 @@ describe("updateEquipment action", () => {
   });
 
   it("should update equipment successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -268,7 +297,7 @@ describe("updateEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Old Name",
       code: "TM-001",
@@ -283,9 +312,9 @@ describe("updateEquipment action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-      set: vi.fn(() => ({ where: vi.fn() })),
-    } as unknown);
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({ where: mock() })),
+    });
 
     const formData = new FormData();
     formData.set("name", "Updated Name");
@@ -293,11 +322,11 @@ describe("updateEquipment action", () => {
     const result = await updateEquipment("1", {}, formData);
 
     expect(result.success).toBe(true);
-    expect(db.update).toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalled();
   });
 
   it("should log status change", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -307,7 +336,7 @@ describe("updateEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
@@ -322,13 +351,13 @@ describe("updateEquipment action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(),
-    } as unknown);
+    mockInsert.mockReturnValue({
+      values: mock(),
+    });
 
-    vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-      set: vi.fn(() => ({ where: vi.fn() })),
-    } as unknown);
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({ where: mock() })),
+    });
 
     const formData = new FormData();
     formData.set("status", "down");
@@ -336,11 +365,11 @@ describe("updateEquipment action", () => {
     const result = await updateEquipment("1", {}, formData);
 
     expect(result.success).toBe(true);
-    expect(db.insert).toHaveBeenCalled(); // For status change log
+    expect(mockInsert).toHaveBeenCalled(); // For status change log
   });
 
   it("should handle duplicate code error on update", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -350,7 +379,7 @@ describe("updateEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
@@ -365,15 +394,14 @@ describe("updateEquipment action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-      set: vi.fn(() => ({
-        where: vi
-          .fn()
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({
+        where: mock()
           .mockRejectedValue(
             new Error("UNIQUE constraint failed: equipment.code")
           ),
       })),
-    } as unknown);
+    });
 
     const formData = new FormData();
     formData.set("code", "EXISTING-CODE");
@@ -386,11 +414,15 @@ describe("updateEquipment action", () => {
 
 describe("deleteEquipment action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindFirst.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockDelete.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const result = await deleteEquipment("1");
 
@@ -398,7 +430,7 @@ describe("deleteEquipment action", () => {
   });
 
   it("should reject non-admin users", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -414,7 +446,7 @@ describe("deleteEquipment action", () => {
   });
 
   it("should return error for non-existent equipment", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -424,7 +456,7 @@ describe("deleteEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const result = await deleteEquipment("999");
 
@@ -432,7 +464,7 @@ describe("deleteEquipment action", () => {
   });
 
   it("should prevent deletion of equipment with tickets", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -442,7 +474,7 @@ describe("deleteEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
@@ -462,7 +494,7 @@ describe("deleteEquipment action", () => {
   });
 
   it("should delete equipment successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -472,7 +504,7 @@ describe("deleteEquipment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Equipment",
       code: "TM-001",
@@ -484,13 +516,13 @@ describe("deleteEquipment action", () => {
       workOrders: [], // No work orders
     } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
-    vi.mocked(db.delete as unknown as () => unknown).mockReturnValue({
-      where: vi.fn(),
-    } as unknown);
+    mockDelete.mockReturnValue({
+      where: mock(),
+    });
 
     const result = await deleteEquipment("1");
 
     expect(result.success).toBe(true);
-    expect(db.delete).toHaveBeenCalled();
+    expect(mockDelete).toHaveBeenCalled();
   });
 });

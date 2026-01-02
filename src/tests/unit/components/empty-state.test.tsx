@@ -1,11 +1,10 @@
-import { EmptyState } from "@/components/ui/empty-state";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AlertCircle, Inbox, Package } from "lucide-react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, mock } from "bun:test";
 
 // Mock next/link
-vi.mock("next/link", () => ({
+mock.module("next/link", () => ({
   default: ({
     children,
     href,
@@ -14,6 +13,9 @@ vi.mock("next/link", () => ({
     href: string;
   }) => <a href={href}>{children}</a>,
 }));
+
+// Dynamic import after mock.module
+const { EmptyState } = await import("@/components/ui/empty-state");
 
 describe("EmptyState", () => {
   it("renders title correctly", () => {
@@ -102,7 +104,7 @@ describe("EmptyState", () => {
     });
 
     it("renders action button with onClick handler", async () => {
-      const handleClick = vi.fn();
+      const handleClick = mock();
       const user = userEvent.setup();
 
       render(
@@ -120,7 +122,7 @@ describe("EmptyState", () => {
     });
 
     it("prefers href over onClick when both provided", () => {
-      const handleClick = vi.fn();
+      const handleClick = mock();
 
       render(
         <EmptyState
@@ -155,7 +157,7 @@ describe("EmptyState", () => {
   });
 
   it("combines title, description, children, and action", () => {
-    const handleClick = vi.fn();
+    const handleClick = mock();
 
     render(
       <EmptyState

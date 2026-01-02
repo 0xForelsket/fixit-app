@@ -1,13 +1,17 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-vi.mock("@/lib/services/auth.service", () => ({
-  authenticateUser: vi.fn(),
+const mockAuthenticateUser = mock();
+const mockCheckRateLimit = mock();
+const mockGetClientIp = mock(() => "127.0.0.1");
+
+mock.module("@/lib/services/auth.service", () => ({
+  authenticateUser: mockAuthenticateUser,
 }));
 
-vi.mock("@/lib/rate-limit", () => ({
-  checkRateLimit: vi.fn(),
-  getClientIp: vi.fn(() => "127.0.0.1"),
+mock.module("@/lib/rate-limit", () => ({
+  checkRateLimit: mockCheckRateLimit,
+  getClientIp: mockGetClientIp,
   RATE_LIMITS: {
     login: { limit: 5, windowMs: 60000 },
     api: { limit: 100, windowMs: 60000 },
@@ -15,14 +19,15 @@ vi.mock("@/lib/rate-limit", () => ({
   },
 }));
 
-import { POST } from "@/app/(app)/api/auth/login/route";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { authenticateUser } from "@/lib/services/auth.service";
+const { POST } = await import("@/app/(app)/api/auth/login/route");
 
 describe("POST /api/auth/login", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockAuthenticateUser.mockClear();
+    mockCheckRateLimit.mockClear();
+    mockGetClientIp.mockClear();
+    mockGetClientIp.mockReturnValue("127.0.0.1");
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 4,
       reset: Date.now() + 60000,
@@ -30,7 +35,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 429 when rate limited", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: false,
       remaining: 0,
       reset: Date.now() + 60000,
@@ -63,7 +68,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 401 for invalid credentials", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Invalid employee ID or PIN",
       status: 401,
@@ -83,7 +88,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns 403 for locked account", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Account is locked. Try again in 10 minute(s).",
       status: 403,
@@ -103,7 +108,7 @@ describe("POST /api/auth/login", () => {
   });
 
   it("returns success with user and csrf token", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
         id: "1", displayId: 1,

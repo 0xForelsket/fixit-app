@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, mock } from "bun:test";
 
 describe("Button", () => {
   it("renders with default props", () => {
@@ -20,7 +20,7 @@ describe("Button", () => {
   });
 
   it("handles click events", async () => {
-    const handleClick = vi.fn();
+    const handleClick = mock(() => {});
     const user = userEvent.setup();
 
     render(<Button onClick={handleClick}>Click me</Button>);
@@ -31,7 +31,7 @@ describe("Button", () => {
   });
 
   it("can be disabled", async () => {
-    const handleClick = vi.fn();
+    const handleClick = mock(() => {});
     const user = userEvent.setup();
 
     render(

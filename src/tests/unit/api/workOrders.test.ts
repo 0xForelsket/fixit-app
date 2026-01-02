@@ -1,38 +1,68 @@
-import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-vi.mock("@/db", () => ({
+// Create mocks
+const mockWorkOrdersFindMany = mock();
+const mockEquipmentFindFirst = mock();
+const mockUsersFindMany = mock();
+
+const mockInsertValues = mock();
+const mockInsertReturning = mock();
+const mockInsert = mock(() => ({
+  values: mockInsertValues.mockReturnValue({
+    returning: mockInsertReturning,
+  }),
+}));
+
+const mockSelectFrom = mock();
+const mockSelectWhere = mock();
+const mockSelect = mock(() => ({
+  from: mockSelectFrom.mockReturnValue({
+    where: mockSelectWhere,
+  }),
+}));
+
+const mockRequireAuth = mock();
+const mockRequireCsrf = mock();
+const mockGetCurrentUser = mock();
+
+const mockCheckRateLimit = mock(() => ({
+  success: true,
+  remaining: 99,
+  reset: Date.now() + 60000,
+}));
+const mockGetClientIp = mock(() => "127.0.0.1");
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
-      workOrders: { findMany: vi.fn() },
-      equipment: { findFirst: vi.fn() },
-      users: { findMany: vi.fn() },
+      workOrders: { findMany: mockWorkOrdersFindMany },
+      equipment: { findFirst: mockEquipmentFindFirst },
+      users: { findMany: mockUsersFindMany },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
+    insert: mockInsert,
+    select: mockSelect,
   },
 }));
 
-vi.mock("@/lib/session", () => ({
-  requireAuth: vi.fn(),
-  requireCsrf: vi.fn(),
+mock.module("@/lib/session", () => ({
+  requireAuth: mockRequireAuth,
+  requireCsrf: mockRequireCsrf,
+  getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.mock("@/lib/rate-limit", () => ({
-  checkRateLimit: vi.fn(() => ({
-    success: true,
-    remaining: 99,
-    reset: Date.now() + 60000,
-  })),
-  getClientIp: vi.fn(() => "127.0.0.1"),
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mock(() => true),
+  PERMISSIONS: {
+    TICKET_VIEW_ALL: "ticket:view_all",
+    TICKET_CREATE: "ticket:create",
+    TICKET_VIEW: "ticket:view",
+  },
+}));
+
+mock.module("@/lib/rate-limit", () => ({
+  checkRateLimit: mockCheckRateLimit,
+  getClientIp: mockGetClientIp,
   RATE_LIMITS: {
     login: { limit: 5, windowMs: 60000 },
     api: { limit: 100, windowMs: 60000 },
@@ -40,17 +70,37 @@ vi.mock("@/lib/rate-limit", () => ({
   },
 }));
 
-import { GET, POST } from "@/app/(app)/api/work-orders/route";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { requireAuth, requireCsrf } from "@/lib/session";
+mock.module("@/lib/logger", () => ({
+  apiLogger: {
+    error: mock(),
+    info: mock(),
+    warn: mock(),
+  },
+  generateRequestId: mock(() => "test-request-id"),
+}));
+
+// Dynamic imports after mock.module
+const { GET, POST } = await import("@/app/(app)/api/work-orders/route");
 
 describe("GET /api/work-orders", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockWorkOrdersFindMany.mockClear();
+    mockEquipmentFindFirst.mockClear();
+    mockUsersFindMany.mockClear();
+    mockInsert.mockClear();
+    mockInsertValues.mockClear();
+    mockInsertReturning.mockClear();
+    mockSelect.mockClear();
+    mockSelectFrom.mockClear();
+    mockSelectWhere.mockClear();
+    mockRequireAuth.mockClear();
+    mockRequireCsrf.mockClear();
+    mockGetCurrentUser.mockClear();
+    mockCheckRateLimit.mockClear();
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(requireAuth).mockRejectedValue(new Error("Unauthorized"));
+    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
     const request = new Request("http://localhost/api/work-orders");
     const response = await GET(request);
@@ -61,11 +111,35 @@ describe("GET /api/work-orders", () => {
 
 describe("POST /api/work-orders", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockWorkOrdersFindMany.mockClear();
+    mockEquipmentFindFirst.mockClear();
+    mockUsersFindMany.mockClear();
+    mockInsert.mockClear();
+    mockInsertValues.mockClear();
+    mockInsertReturning.mockClear();
+    mockSelect.mockClear();
+    mockSelectFrom.mockClear();
+    mockSelectWhere.mockClear();
+    mockRequireAuth.mockClear();
+    mockRequireCsrf.mockClear();
+    mockGetCurrentUser.mockClear();
+    mockCheckRateLimit.mockClear();
+    
+    // Reset chains
+    mockInsert.mockReturnValue({
+      values: mockInsertValues.mockReturnValue({
+        returning: mockInsertReturning,
+      }),
+    });
+    mockSelect.mockReturnValue({
+      from: mockSelectFrom.mockReturnValue({
+        where: mockSelectWhere,
+      }),
+    });
   });
 
   it("returns 429 when rate limited", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: false,
       remaining: 0,
       reset: Date.now() + 60000,
@@ -83,12 +157,12 @@ describe("POST /api/work-orders", () => {
   });
 
   it("returns 403 when CSRF token missing", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockRejectedValue(new Error("CSRF token missing"));
+    mockRequireCsrf.mockRejectedValue(new Error("CSRF token missing"));
 
     const request = new Request("http://localhost/api/work-orders", {
       method: "POST",
@@ -102,13 +176,13 @@ describe("POST /api/work-orders", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    vi.mocked(requireAuth).mockRejectedValue(new Error("Unauthorized"));
+    mockRequireCsrf.mockResolvedValue(undefined);
+    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
     const request = new Request("http://localhost/api/work-orders", {
       method: "POST",
@@ -122,13 +196,13 @@ describe("POST /api/work-orders", () => {
   });
 
   it("returns 400 for invalid input", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 99,
       reset: Date.now() + 60000,
     });
-    vi.mocked(requireCsrf).mockResolvedValue(undefined);
-    const mockUser: SessionUser = {
+    mockRequireCsrf.mockResolvedValue(undefined);
+    const mockUser = {
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Test User",
@@ -139,7 +213,7 @@ describe("POST /api/work-orders", () => {
       permissions: ["ticket:create", "ticket:view"],
       hourlyRate: 25.0,
     };
-    vi.mocked(requireAuth).mockResolvedValue(mockUser);
+    mockRequireAuth.mockResolvedValue(mockUser);
 
     const request = new Request("http://localhost/api/work-orders", {
       method: "POST",

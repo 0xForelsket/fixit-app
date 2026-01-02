@@ -1,53 +1,67 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Create mocks
+const mockGetCurrentUser = mock();
+const mockUserHasPermission = mock();
+const mockSelect = mock();
+const mockFrom = mock();
+const mockWhere = mock();
 
 // Mock the db module
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
+    select: mockSelect.mockReturnValue({
+      from: mockFrom.mockReturnValue({
+        where: mockWhere,
+      }),
+    }),
   },
 }));
 
 // Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock auth
-vi.mock("@/lib/auth", () => ({
-  userHasPermission: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     ANALYTICS_VIEW: "analytics:view",
   },
 }));
 
 // Mock logger
-vi.mock("@/lib/logger", () => ({
+mock.module("@/lib/logger", () => ({
   apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
+    error: mock(),
+    warn: mock(),
+    info: mock(),
   },
-  generateRequestId: vi.fn(() => "test-request-id"),
+  generateRequestId: mock(() => "test-request-id"),
 }));
 
-import { GET } from "@/app/(app)/api/analytics/kpis/route";
-import { db } from "@/db";
-import { userHasPermission } from "@/lib/auth";
-import { getCurrentUser } from "@/lib/session";
+const { GET } = await import("@/app/(app)/api/analytics/kpis/route");
 
 describe("GET /api/analytics/kpis", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockGetCurrentUser.mockClear();
+    mockUserHasPermission.mockClear();
+    mockSelect.mockClear();
+    mockFrom.mockClear();
+    mockWhere.mockClear();
+    // Reset mock chain
+    mockSelect.mockReturnValue({
+      from: mockFrom.mockReturnValue({
+        where: mockWhere,
+      }),
+    });
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
-    vi.mocked(userHasPermission).mockReturnValue(false);
+    mockGetCurrentUser.mockResolvedValue(null);
+    mockUserHasPermission.mockReturnValue(false);
 
     const response = await GET();
 
@@ -55,7 +69,7 @@ describe("GET /api/analytics/kpis", () => {
   });
 
   it("returns 401 when lacking analytics permission", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -64,7 +78,7 @@ describe("GET /api/analytics/kpis", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.operator,
       sessionVersion: 1,
     });
-    vi.mocked(userHasPermission).mockReturnValue(false);
+    mockUserHasPermission.mockReturnValue(false);
 
     const response = await GET();
 
@@ -72,7 +86,7 @@ describe("GET /api/analytics/kpis", () => {
   });
 
   it("requires analytics permission", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -81,7 +95,7 @@ describe("GET /api/analytics/kpis", () => {
       sessionVersion: 1,
       permissions: ["*"],
     });
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockUserHasPermission.mockReturnValue(true);
 
     // The endpoint requires complex db queries - just verify auth passes
     // When permission is granted, it should attempt to query the database
@@ -93,7 +107,7 @@ describe("GET /api/analytics/kpis", () => {
   });
 
   it("calls userHasPermission with correct permission", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -102,15 +116,15 @@ describe("GET /api/analytics/kpis", () => {
       sessionVersion: 1,
       permissions: ["*"],
     });
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockUserHasPermission.mockReturnValue(true);
 
     await GET();
 
-    expect(userHasPermission).toHaveBeenCalled();
+    expect(mockUserHasPermission).toHaveBeenCalled();
   });
 
   it("handles database errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -119,13 +133,8 @@ describe("GET /api/analytics/kpis", () => {
       sessionVersion: 1,
       permissions: ["*"],
     });
-    vi.mocked(userHasPermission).mockReturnValue(true);
-
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockRejectedValue(new Error("Database error")),
-      }),
-    } as unknown as ReturnType<typeof db.select>);
+    mockUserHasPermission.mockReturnValue(true);
+    mockWhere.mockRejectedValue(new Error("Database error"));
 
     const response = await GET();
     const data = await response.json();

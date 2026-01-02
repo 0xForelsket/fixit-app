@@ -1,75 +1,141 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockSelectFrom = mock();
+const mockSelectWhere = mock();
+const mockSelect = mock(() => ({
+  from: mockSelectFrom.mockReturnValue({
+    where: mockSelectWhere,
+  }),
+}));
+
+const mockInsertValues = mock();
+const mockInsertReturning = mock();
+const mockInsert = mock(() => ({
+  values: mockInsertValues.mockReturnValue({
+    returning: mockInsertReturning,
+  }),
+}));
+
+const mockUpdateSet = mock();
+const mockUpdateWhere = mock();
+const mockUpdate = mock(() => ({
+  set: mockUpdateSet.mockReturnValue({
+    where: mockUpdateWhere,
+  }),
+}));
+
+const mockUsersFindMany = mock();
+const mockUsersFindFirst = mock();
+const mockRolesFindFirst = mock();
+const mockEquipmentFindFirst = mock();
+
+const mockTransaction = mock();
+
+const mockGetCurrentUser = mock();
+const mockRequireCsrf = mock().mockResolvedValue(true);
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockSchedulerLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+const mockCreateNotification = mock().mockResolvedValue(true);
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
+    select: mockSelect,
+    insert: mockInsert,
+    update: mockUpdate,
     query: {
       users: {
-        findMany: vi.fn(),
-        findFirst: vi.fn(),
+        findMany: mockUsersFindMany,
+        findFirst: mockUsersFindFirst,
       },
       roles: {
-        findFirst: vi.fn(),
+        findFirst: mockRolesFindFirst,
       },
       equipment: {
-        findFirst: vi.fn(),
+        findFirst: mockEquipmentFindFirst,
       },
     },
-    transaction: vi.fn(),
+    transaction: mockTransaction,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  requireCsrf: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  requireCsrf: mockRequireCsrf,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  schedulerLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  schedulerLogger: mockSchedulerLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-// Mock notifications helper
-vi.mock("@/lib/notifications", () => ({
-  createNotification: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/notifications", () => ({
+  createNotification: mockCreateNotification,
 }));
 
-import { POST } from "@/app/(app)/api/scheduler/run/route";
-import { db } from "@/db";
-import { createNotification } from "@/lib/notifications";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { POST } = await import("@/app/(app)/api/scheduler/run/route");
 
 describe("POST /api/scheduler/run", () => {
-  const originalEnv = process.env;
+  const originalEnv = { ...process.env };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockSelect.mockClear();
+    mockSelectFrom.mockClear();
+    mockSelectWhere.mockClear();
+    mockInsert.mockClear();
+    mockInsertValues.mockClear();
+    mockInsertReturning.mockClear();
+    mockUpdate.mockClear();
+    mockUpdateSet.mockClear();
+    mockUpdateWhere.mockClear();
+    mockUsersFindMany.mockClear();
+    mockUsersFindFirst.mockClear();
+    mockRolesFindFirst.mockClear();
+    mockEquipmentFindFirst.mockClear();
+    mockTransaction.mockClear();
+    mockGetCurrentUser.mockClear();
+    mockRequireCsrf.mockClear();
+    mockApiLogger.error.mockClear();
+    mockApiLogger.warn.mockClear();
+    mockApiLogger.info.mockClear();
+    mockSchedulerLogger.error.mockClear();
+    mockSchedulerLogger.warn.mockClear();
+    mockSchedulerLogger.info.mockClear();
+    mockGenerateRequestId.mockClear();
+    mockCreateNotification.mockClear();
+
+    // Reset chains
+    mockSelect.mockReturnValue({
+      from: mockSelectFrom.mockReturnValue({
+        where: mockSelectWhere.mockResolvedValue([]),
+      }),
+    });
+    mockInsert.mockReturnValue({
+      values: mockInsertValues.mockReturnValue({
+        returning: mockInsertReturning,
+      }),
+    });
+    mockUpdate.mockReturnValue({
+      set: mockUpdateSet.mockReturnValue({
+        where: mockUpdateWhere,
+      }),
+    });
+
+    // Reset env
     process.env = { ...originalEnv };
   });
 
@@ -79,7 +145,7 @@ describe("POST /api/scheduler/run", () => {
 
   it("returns 401 when not authenticated and no cron secret", async () => {
     process.env.CRON_SECRET = undefined;
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -94,13 +160,8 @@ describe("POST /api/scheduler/run", () => {
     process.env.CRON_SECRET = "test-secret";
 
     // Mock no pending schedules and no work orders to escalate
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([]),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
-
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+    mockSelectWhere.mockResolvedValue([]);
+    mockRolesFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -120,7 +181,7 @@ describe("POST /api/scheduler/run", () => {
 
   it("authorizes with user having scheduler permission", async () => {
     process.env.CRON_SECRET = undefined;
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -132,13 +193,8 @@ describe("POST /api/scheduler/run", () => {
       hourlyRate: 50.0,
     });
 
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([]),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
-
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+    mockSelectWhere.mockResolvedValue([]);
+    mockRolesFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -153,7 +209,7 @@ describe("POST /api/scheduler/run", () => {
 
   it("authorizes with wildcard permission", async () => {
     process.env.CRON_SECRET = undefined;
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -165,13 +221,8 @@ describe("POST /api/scheduler/run", () => {
       hourlyRate: 50.0,
     });
 
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([]),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
-
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+    mockSelectWhere.mockResolvedValue([]);
+    mockRolesFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -184,7 +235,7 @@ describe("POST /api/scheduler/run", () => {
 
   it("rejects user without scheduler permission", async () => {
     process.env.CRON_SECRET = ""; // Empty string
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -197,11 +248,7 @@ describe("POST /api/scheduler/run", () => {
     });
 
     // Reset db mock to not return any schedules
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockResolvedValue([]),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
+    mockSelectWhere.mockResolvedValue([]);
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -230,43 +277,37 @@ describe("POST /api/scheduler/run", () => {
 
     // First call returns schedules, second call returns no work orders to escalate
     let selectCallCount = 0;
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockImplementation(() => {
-          selectCallCount++;
-          if (selectCallCount === 1) {
-            return Promise.resolve([mockSchedule]);
-          }
-          return Promise.resolve([]); // No work orders to escalate
-        }),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
+    mockSelectWhere.mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return Promise.resolve([mockSchedule]);
+      }
+      return Promise.resolve([]); // No work orders to escalate
+    });
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+    mockRolesFindFirst.mockResolvedValue(undefined);
 
     // Mock the transaction
-    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+    mockTransaction.mockImplementation(async (callback: any) => {
       const tx = {
         query: {
           users: {
-            findMany: vi
-              .fn()
-              .mockResolvedValue([{ id: "1", displayId: 1, assignedRole: { name: "admin" } }]),
+            findMany: mock(() => Promise.resolve([{ id: "1", displayId: 1, assignedRole: { name: "admin" } }])),
           },
         },
-        insert: vi.fn(() => ({
-          values: vi.fn(() => ({
-            returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
+        insert: mock(() => ({
+          values: mock(() => ({
+            returning: mock(() => Promise.resolve([{ id: "1", displayId: 1 }])),
           })),
         })),
-        select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn().mockResolvedValue([]),
+        select: mock(() => ({
+          from: mock(() => ({
+            where: mock(() => Promise.resolve([])),
           })),
         })),
-        update: vi.fn(() => ({
-          set: vi.fn(() => ({
-            where: vi.fn(),
+        update: mock(() => ({
+          set: mock(() => ({
+            where: mock(() => Promise.resolve()),
           })),
         })),
       };
@@ -304,20 +345,16 @@ describe("POST /api/scheduler/run", () => {
     };
 
     let selectCallCount = 0;
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn().mockImplementation(() => {
-          selectCallCount++;
-          if (selectCallCount === 1) {
-            return Promise.resolve([mockSchedule]);
-          }
-          return Promise.resolve([]);
-        }),
-      })),
-    } as unknown as ReturnType<typeof db.select>);
+    mockSelectWhere.mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return Promise.resolve([mockSchedule]);
+      }
+      return Promise.resolve([]);
+    });
 
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
-    vi.mocked(db.transaction).mockRejectedValue(
+    mockRolesFindFirst.mockResolvedValue(undefined);
+    mockTransaction.mockRejectedValue(
       new Error("Transaction failed")
     );
 
@@ -351,27 +388,23 @@ describe("POST /api/scheduler/run", () => {
       };
 
       let selectCallCount = 0;
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn(() => ({
-          where: vi.fn().mockImplementation(() => {
-            selectCallCount++;
-            if (selectCallCount === 1) {
-              return Promise.resolve([]); // No schedules
-            }
-            return Promise.resolve([overdueWorkOrder]); // Overdue work order
-          }),
-        })),
-      } as unknown as ReturnType<typeof db.select>);
+      mockSelectWhere.mockImplementation(() => {
+        selectCallCount++;
+        if (selectCallCount === 1) {
+          return Promise.resolve([]); // No schedules
+        }
+        return Promise.resolve([overdueWorkOrder]); // Overdue work order
+      });
 
       // Mock admin role and users
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockRolesFindFirst.mockResolvedValue({
         id: "1", displayId: 1,
         name: "admin",
       } as any);
-      vi.mocked(db.query.users.findMany).mockResolvedValue([
+      mockUsersFindMany.mockResolvedValue([
         { id: "2", displayId: 2, name: "Admin User" },
       ] as any[]);
-      vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+      mockEquipmentFindFirst.mockResolvedValue({
         id: "10", displayId: 10,
         name: "Machine A",
       } as any);
@@ -390,18 +423,18 @@ describe("POST /api/scheduler/run", () => {
       expect(data.data.escalated).toBe(1);
 
       // Should update work order with escalatedAt
-      expect(db.update).toHaveBeenCalled();
+      expect(mockUpdate).toHaveBeenCalled();
 
       // Should notify admin and assigned technician
-      expect(createNotification).toHaveBeenCalledTimes(2);
-      expect(createNotification).toHaveBeenCalledWith(
+      expect(mockCreateNotification).toHaveBeenCalledTimes(2);
+      expect(mockCreateNotification).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: "2", // Admin
           type: "work_order_escalated",
           title: "Work Order Escalated - SLA Breached",
         })
       );
-      expect(createNotification).toHaveBeenCalledWith(
+      expect(mockCreateNotification).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: "5", // Assigned tech
           type: "work_order_escalated",
@@ -415,13 +448,9 @@ describe("POST /api/scheduler/run", () => {
 
       // Work order with escalatedAt already set should not be returned
       // because the query filters for isNull(escalatedAt)
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn(() => ({
-          where: vi.fn().mockResolvedValue([]),
-        })),
-      } as unknown as ReturnType<typeof db.select>);
+      mockSelectWhere.mockResolvedValue([]);
 
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(undefined);
+      mockRolesFindFirst.mockResolvedValue(undefined);
 
       const request = new Request("http://localhost/api/scheduler/run", {
         method: "POST",
@@ -435,7 +464,7 @@ describe("POST /api/scheduler/run", () => {
 
       expect(response.status).toBe(200);
       expect(data.data.escalated).toBe(0);
-      expect(createNotification).not.toHaveBeenCalled();
+      expect(mockCreateNotification).not.toHaveBeenCalled();
     });
 
     it("escalates work order without assigned tech (admin only notification)", async () => {
@@ -452,27 +481,23 @@ describe("POST /api/scheduler/run", () => {
       };
 
       let selectCallCount = 0;
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn(() => ({
-          where: vi.fn().mockImplementation(() => {
-            selectCallCount++;
-            if (selectCallCount === 1) {
-              return Promise.resolve([]);
-            }
-            return Promise.resolve([unassignedOverdueWorkOrder]);
-          }),
-        })),
-      } as unknown as ReturnType<typeof db.select>);
+      mockSelectWhere.mockImplementation(() => {
+        selectCallCount++;
+        if (selectCallCount === 1) {
+          return Promise.resolve([]);
+        }
+        return Promise.resolve([unassignedOverdueWorkOrder]);
+      });
 
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockRolesFindFirst.mockResolvedValue({
         id: "1", displayId: 1,
         name: "admin",
       } as any);
-      vi.mocked(db.query.users.findMany).mockResolvedValue([
+      mockUsersFindMany.mockResolvedValue([
         { id: "2", displayId: 2, name: "Admin 1" },
         { id: "3", displayId: 3, name: "Admin 2" },
       ] as any[]);
-      vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+      mockEquipmentFindFirst.mockResolvedValue({
         id: "10", displayId: 10,
         name: "Equipment X",
       } as any);
@@ -491,7 +516,7 @@ describe("POST /api/scheduler/run", () => {
       expect(data.data.escalated).toBe(1);
 
       // Should notify both admins but no tech (no assignee)
-      expect(createNotification).toHaveBeenCalledTimes(2);
+      expect(mockCreateNotification).toHaveBeenCalledTimes(2);
     });
 
     it("handles escalation errors gracefully", async () => {
@@ -508,30 +533,22 @@ describe("POST /api/scheduler/run", () => {
       };
 
       let selectCallCount = 0;
-      vi.mocked(db.select).mockReturnValue({
-        from: vi.fn(() => ({
-          where: vi.fn().mockImplementation(() => {
-            selectCallCount++;
-            if (selectCallCount === 1) {
-              return Promise.resolve([]);
-            }
-            return Promise.resolve([overdueWorkOrder]);
-          }),
-        })),
-      } as unknown as ReturnType<typeof db.select>);
+      mockSelectWhere.mockImplementation(() => {
+        selectCallCount++;
+        if (selectCallCount === 1) {
+          return Promise.resolve([]);
+        }
+        return Promise.resolve([overdueWorkOrder]);
+      });
 
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockRolesFindFirst.mockResolvedValue({
         id: "1", displayId: 1,
         name: "admin",
       } as any);
-      vi.mocked(db.query.users.findMany).mockResolvedValue([] as any[]);
+      mockUsersFindMany.mockResolvedValue([] as any[]);
 
       // Make update fail
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn(() => ({
-          where: vi.fn().mockRejectedValue(new Error("Update failed")),
-        })),
-      } as unknown as ReturnType<typeof db.update>);
+      mockUpdateWhere.mockRejectedValue(new Error("Update failed"));
 
       const request = new Request("http://localhost/api/scheduler/run", {
         method: "POST",

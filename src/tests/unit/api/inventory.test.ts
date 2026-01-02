@@ -1,58 +1,84 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindMany = mock();
+const mockInsertValues = mock();
+const mockInsertReturning = mock();
+const mockInsert = mock(() => ({
+  values: mockInsertValues.mockReturnValue({
+    returning: mockInsertReturning,
+  }),
+}));
+
+const mockGetCurrentUser = mock();
+const mockRequireCsrf = mock().mockResolvedValue(true);
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+const mockUserHasPermission = mock();
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       spareParts: {
-        findMany: vi.fn(),
+        findMany: mockFindMany,
       },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
+    insert: mockInsert,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  requireCsrf: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  requireCsrf: mockRequireCsrf,
 }));
 
-// Mock auth
-vi.mock("@/lib/auth", () => ({
-  userHasPermission: vi.fn(),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
+}));
+
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     INVENTORY_CREATE: "inventory:create",
     INVENTORY_VIEW: "inventory:view",
   },
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
-}));
+// Dynamic imports after mock.module
+const { GET, POST } = await import("@/app/(app)/api/inventory/parts/route");
 
-import { GET, POST } from "@/app/(app)/api/inventory/parts/route";
-import { db } from "@/db";
-import { userHasPermission } from "@/lib/auth";
-import { getCurrentUser } from "@/lib/session";
+beforeEach(() => {
+  mockFindMany.mockClear();
+  mockInsert.mockClear();
+  mockInsertValues.mockClear();
+  mockInsertReturning.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockRequireCsrf.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+  mockUserHasPermission.mockClear();
+
+  // Reset chains
+  mockInsert.mockReturnValue({
+    values: mockInsertValues.mockReturnValue({
+      returning: mockInsertReturning,
+    }),
+  });
+});
 
 describe("GET /api/inventory/parts", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const response = await GET();
 
@@ -62,7 +88,7 @@ describe("GET /api/inventory/parts", () => {
   });
 
   it("returns parts list when authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
@@ -116,7 +142,7 @@ describe("GET /api/inventory/parts", () => {
       },
     ];
 
-    vi.mocked(db.query.spareParts.findMany).mockResolvedValue(mockParts);
+    mockFindMany.mockResolvedValue(mockParts);
 
     const response = await GET();
     const data = await response.json();
@@ -127,7 +153,7 @@ describe("GET /api/inventory/parts", () => {
   });
 
   it("handles database errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Tech",
       email: "tech@example.com",
@@ -148,7 +174,7 @@ describe("GET /api/inventory/parts", () => {
       updatedAt: new Date(),
     } as any);
 
-    vi.mocked(db.query.spareParts.findMany).mockRejectedValue(
+    mockFindMany.mockRejectedValue(
       new Error("Database connection lost")
     );
 
@@ -163,13 +189,9 @@ describe("GET /api/inventory/parts", () => {
 });
 
 describe("POST /api/inventory/parts", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
-    vi.mocked(userHasPermission).mockReturnValue(false);
+    mockGetCurrentUser.mockResolvedValue(null);
+    mockUserHasPermission.mockReturnValue(false);
 
     const request = new Request("http://localhost/api/inventory/parts", {
       method: "POST",
@@ -187,7 +209,7 @@ describe("POST /api/inventory/parts", () => {
   });
 
   it("returns 401 when lacking permission", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Operator",
       employeeId: "OP-001",
@@ -207,7 +229,7 @@ describe("POST /api/inventory/parts", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(userHasPermission).mockReturnValue(false);
+    mockUserHasPermission.mockReturnValue(false);
 
     const request = new Request("http://localhost/api/inventory/parts", {
       method: "POST",
@@ -225,7 +247,7 @@ describe("POST /api/inventory/parts", () => {
   });
 
   it("returns 400 when missing required fields", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
@@ -245,7 +267,7 @@ describe("POST /api/inventory/parts", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockUserHasPermission.mockReturnValue(true);
 
     const request = new Request("http://localhost/api/inventory/parts", {
       method: "POST",
@@ -264,7 +286,7 @@ describe("POST /api/inventory/parts", () => {
   });
 
   it("creates part successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
@@ -273,6 +295,7 @@ describe("POST /api/inventory/parts", () => {
       roleId: "3",
       departmentId: "1",
       isActive: true,
+      employeeId: "ADMIN-001",
       hourlyRate: 50.0,
       preferences: {
         theme: "light",
@@ -284,7 +307,7 @@ describe("POST /api/inventory/parts", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockUserHasPermission.mockReturnValue(true);
 
     const mockPart = {
       id: "5", displayId: 5,
@@ -302,11 +325,7 @@ describe("POST /api/inventory/parts", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockPart]),
-      })),
-    } as unknown as ReturnType<typeof db.insert>);
+    mockInsertReturning.mockResolvedValue([mockPart]);
 
     const request = new Request("http://localhost/api/inventory/parts", {
       method: "POST",
@@ -329,7 +348,7 @@ describe("POST /api/inventory/parts", () => {
   });
 
   it("sets default values for optional fields", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
@@ -338,6 +357,7 @@ describe("POST /api/inventory/parts", () => {
       roleId: "3",
       departmentId: "1",
       isActive: true,
+      employeeId: "ADMIN-001",
       hourlyRate: 50.0,
       preferences: {
         theme: "light",
@@ -349,7 +369,7 @@ describe("POST /api/inventory/parts", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockUserHasPermission.mockReturnValue(true);
 
     const mockPart = {
       id: "6", displayId: 6,
@@ -367,15 +387,13 @@ describe("POST /api/inventory/parts", () => {
       updatedAt: new Date(),
     };
 
-    let capturedValues: unknown;
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn((vals) => {
-        capturedValues = vals;
-        return {
-          returning: vi.fn().mockResolvedValue([mockPart]),
-        };
-      }),
-    } as unknown as ReturnType<typeof db.insert>);
+    let capturedValues: any;
+    mockInsertValues.mockImplementation((vals: any) => {
+      capturedValues = vals;
+      return {
+        returning: mockInsertReturning.mockResolvedValue([mockPart]),
+      };
+    });
 
     const request = new Request("http://localhost/api/inventory/parts", {
       method: "POST",
@@ -390,12 +408,12 @@ describe("POST /api/inventory/parts", () => {
 
     await POST(request);
 
-    expect((capturedValues as Record<string, unknown>).reorderPoint).toBe(0);
-    expect((capturedValues as Record<string, unknown>).isActive).toBe(true);
+    expect(capturedValues.reorderPoint).toBe(0);
+    expect(capturedValues.isActive).toBe(true);
   });
 
   it("handles database errors gracefully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
@@ -404,6 +422,7 @@ describe("POST /api/inventory/parts", () => {
       roleId: "3",
       departmentId: "1",
       isActive: true,
+      employeeId: "ADMIN-001",
       hourlyRate: 50.0,
       preferences: {
         theme: "light",
@@ -415,13 +434,9 @@ describe("POST /api/inventory/parts", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(userHasPermission).mockReturnValue(true);
+    mockUserHasPermission.mockReturnValue(true);
 
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockRejectedValue(new Error("Duplicate SKU")),
-      })),
-    } as unknown as ReturnType<typeof db.insert>);
+    mockInsertReturning.mockRejectedValue(new Error("Duplicate SKU"));
 
     const request = new Request("http://localhost/api/inventory/parts", {
       method: "POST",

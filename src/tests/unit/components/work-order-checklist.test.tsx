@@ -1,17 +1,20 @@
-import * as actions from "@/actions/workOrders";
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, mock } from "bun:test";
+
+// Create mocks
+const mockUpdateChecklistItem = mock();
+const mockToast = mock();
 
 // Mock the server action
-vi.mock("@/actions/workOrders", () => ({
-  updateChecklistItem: vi.fn(),
+mock.module("@/actions/workOrders", () => ({
+  updateChecklistItem: mockUpdateChecklistItem,
 }));
 
 // Mock useToast
-vi.mock("@/components/ui/use-toast", () => ({
+mock.module("@/components/ui/use-toast", () => ({
   useToast: () => ({
-    toast: vi.fn(),
+    toast: mockToast,
   }),
 }));
 
@@ -51,7 +54,7 @@ describe("WorkOrderChecklist", () => {
 
   it("calls updateChecklistItem when an item is toggled", async () => {
     // Mock successful response
-    vi.mocked(actions.updateChecklistItem).mockResolvedValue({ success: true });
+    mockUpdateChecklistItem.mockResolvedValue({ success: true });
 
     render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
 
@@ -59,7 +62,7 @@ describe("WorkOrderChecklist", () => {
     // Click the first item (pending -> completed)
     fireEvent.click(buttons[0]);
 
-    expect(actions.updateChecklistItem).toHaveBeenCalledWith("1", "123", {
+    expect(mockUpdateChecklistItem).toHaveBeenCalledWith("1", "123", {
       status: "completed",
     });
   });

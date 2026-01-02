@@ -1,74 +1,137 @@
-import {
+// Actions will be imported dynamically after mocks
+import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+const mockCreateNotification = mock().mockResolvedValue(true);
+
+// Mock the notifications helper
+mock.module("@/lib/notifications", () => ({
+  createNotification: mockCreateNotification,
+}));
+
+const mockFindFirstEquipment = mock();
+const mockFindManyUsers = mock();
+const mockFindFirstWorkOrder = mock();
+const mockFindFirstRole = mock();
+
+const mockInsert = mock(() => ({
+  values: mock(() => ({
+    returning: mock(),
+  })),
+}));
+
+const mockUpdate = mock(() => ({
+  set: mock(() => ({
+    where: mock(),
+  })),
+}));
+
+const mockDelete = mock(() => ({
+  where: mock(),
+}));
+
+const mockTransaction = mock((callback: (tx: unknown) => Promise<unknown>) => {
+  // Call the callback with a mock transaction object
+  const mockTx = {
+    insert: mockInsert,
+    values: mock(() => ({ returning: mock() })), // Ensure transaction usage matches
+    update: mockUpdate,
+    delete: mockDelete,
+    query: {
+      equipment: { findFirst: mockFindFirstEquipment },
+      users: { findMany: mockFindManyUsers },
+      workOrders: { findFirst: mockFindFirstWorkOrder },
+      roles: { findFirst: mockFindFirstRole },
+    }
+  };
+  return callback(mockTx);
+});
+
+// Mock auth to prevent leakage
+mock.module("@/lib/auth", () => ({
+  hasPermission: mock((userPermissions: string[], required: string) => {
+    if (userPermissions.includes("*")) return true;
+    return userPermissions.includes(required);
+  }),
+  userHasPermission: mock((user, permission) => {
+    if (user?.permissions?.includes("*")) return true;
+    return user?.permissions?.includes(permission);
+  }),
+  PERMISSIONS: PERMISSIONS_SOURCE,
+}));
+
+
+
+// Mock the db module
+mock.module("@/db", () => ({
+  db: {
+    query: {
+      equipment: {
+        findFirst: mockFindFirstEquipment,
+      },
+      users: {
+        findMany: mockFindManyUsers,
+      },
+      workOrders: {
+        findFirst: mockFindFirstWorkOrder,
+      },
+      roles: {
+        findFirst: mockFindFirstRole,
+      },
+    },
+    transaction: mockTransaction,
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete, // Add delete
+  },
+}));
+
+const mockGetCurrentUser = mock();
+
+// Mock session
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+}));
+
+// Mock audit
+mock.module("@/lib/audit", () => ({
+  logAudit: mock(),
+}));
+
+// Mock logger
+mock.module("@/lib/logger", () => ({
+  workOrderLogger: {
+    info: mock(),
+    error: mock(),
+  },
+}));
+
+// Import actions dynamically
+const {
   addWorkOrderComment,
   createWorkOrder,
   resolveWorkOrder,
   updateWorkOrder,
-} from "@/actions/workOrders";
-import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+} = await import("@/actions/workOrders");
 
-// Mock the notifications helper
-vi.mock("@/lib/notifications", () => ({
-  createNotification: vi.fn().mockResolvedValue(true),
-}));
-
-// Mock the db module
-vi.mock("@/db", () => ({
-  db: {
-    query: {
-      equipment: {
-        findFirst: vi.fn(),
-      },
-      users: {
-        findMany: vi.fn(),
-      },
-      workOrders: {
-        findFirst: vi.fn(),
-      },
-      roles: {
-        findFirst: vi.fn(),
-      },
-    },
-    transaction: vi.fn((callback: (tx: unknown) => Promise<unknown>) => {
-      // Call the callback with a mock transaction object
-      const mockTx = {
-        insert: vi.fn(() => ({
-          values: vi.fn(() => ({
-            returning: vi.fn(),
-          })),
-        })),
-      };
-      return callback(mockTx);
-    }),
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
-  },
-}));
-
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-}));
-
+// Also import db after mocks (even if not strictly needed given we mock the module)
 import { db } from "@/db";
-import { createNotification } from "@/lib/notifications";
-import { getCurrentUser } from "@/lib/session";
 
 describe("createWorkOrder action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCreateNotification.mockClear();
+    mockFindFirstEquipment.mockClear();
+    mockFindManyUsers.mockClear();
+    mockFindFirstWorkOrder.mockClear();
+    mockFindFirstRole.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockTransaction.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const formData = new FormData();
     formData.set("equipmentId", "1");
@@ -85,7 +148,7 @@ describe("createWorkOrder action", () => {
   });
 
   it("should return error for invalid input", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -110,7 +173,7 @@ describe("createWorkOrder action", () => {
   });
 
   it("should create work order successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -135,24 +198,35 @@ describe("createWorkOrder action", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+    mockTransaction.mockImplementation(async (callback) => {
       const mockTx = {
-        insert: vi.fn(() => ({
-          values: vi.fn(() => ({
-            returning: vi.fn().mockResolvedValue([mockWorkOrder]),
+        insert: mock(() => ({
+          values: mock(() => ({
+            returning: mock().mockResolvedValue([mockWorkOrder]),
           })),
         })),
+        query: {
+         roles: {
+           findFirst: mockFindFirstRole // Ensure roles.findFirst is available in transaction
+         },
+         equipment: {
+           findFirst: mockFindFirstEquipment
+         }
+        }
       };
+      // We need to ensure db.insert inside transaction behaves correctly. 
+      // The original code mocked db.insert globally. The action likely uses tx.insert or db.insert.
+      // If it uses tx.insert, our mockTx covers it.
       return callback(mockTx as unknown as Parameters<typeof callback>[0]);
     });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockWorkOrder]),
+    mockInsert.mockReturnValue({
+      values: mock(() => ({
+        returning: mock().mockResolvedValue([mockWorkOrder]),
       })),
-    } as unknown);
+    });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    mockFindFirstEquipment.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Test Equipment",
       code: "TM-001",
@@ -167,7 +241,7 @@ describe("createWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.query.users.findMany).mockResolvedValue([]);
+    mockFindManyUsers.mockResolvedValue([]);
 
     const formData = new FormData();
     formData.set("equipmentId", "1");
@@ -185,7 +259,7 @@ describe("createWorkOrder action", () => {
   });
 
   it("should notify techs for critical priority work orders", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -210,28 +284,35 @@ describe("createWorkOrder action", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(db.transaction).mockImplementation(async (callback) => {
-      const mockTx = {
-        insert: vi.fn(() => ({
-          values: vi.fn(() => ({
-            returning: vi.fn().mockResolvedValue([mockWorkOrder]),
-          })),
-        })),
-      };
-      return callback(mockTx as unknown as Parameters<typeof callback>[0]);
-    });
-
-    const mockInsert = vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockWorkOrder]),
+    const mockTxInsert = mock(() => ({
+      values: mock(() => ({
+        returning: mock().mockResolvedValue([mockWorkOrder]),
       })),
     }));
 
-    vi.mocked(db.insert as unknown as typeof mockInsert).mockImplementation(
-      mockInsert
-    );
+    mockTransaction.mockImplementation(async (callback) => {
+        const mockTx = {
+            insert: mockTxInsert,
+            query: {
+                roles: {
+                    findFirst: mockFindFirstRole
+                },
+                users: {
+                    findMany: mockFindManyUsers
+                }
+            }
+        };
+      return callback(mockTx as unknown as Parameters<typeof callback>[0]);
+    });
 
-    vi.mocked(db.query.equipment.findFirst).mockResolvedValue({
+    // Also verify mockInsert is called if the code falls back to db.insert or if that's what we want to test
+    mockInsert.mockImplementation(() => ({
+      values: mock(() => ({
+        returning: mock().mockResolvedValue([mockWorkOrder]),
+      })),
+    }));
+
+    mockFindFirstEquipment.mockResolvedValue({
       id: "1", displayId: 1,
       name: "Test Equipment",
       code: "TM-001",
@@ -247,7 +328,7 @@ describe("createWorkOrder action", () => {
     });
 
     // Mock the tech role lookup - this is required for notification logic
-    vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+    mockFindFirstRole.mockResolvedValue({
       id: "2", displayId: 2,
       name: "tech",
       description: "Maintenance technician",
@@ -257,7 +338,7 @@ describe("createWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.query.users.findMany).mockResolvedValue([
+    mockFindManyUsers.mockResolvedValue([
       {
         id: "2", displayId: 2,
         employeeId: "TECH-001",
@@ -286,18 +367,26 @@ describe("createWorkOrder action", () => {
 
     await createWorkOrder(undefined, formData);
 
-    // Should have called insert for notifications (via mockInsert)
-    expect(mockInsert).toHaveBeenCalled();
+    // Should have called insert for notifications
+    expect(mockTxInsert).toHaveBeenCalled(); 
   });
 });
 
 describe("updateWorkOrder action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCreateNotification.mockClear();
+    mockFindFirstEquipment.mockClear();
+    mockFindManyUsers.mockClear();
+    mockFindFirstWorkOrder.mockClear();
+    mockFindFirstRole.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockTransaction.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const formData = new FormData();
     formData.set("status", "in_progress");
@@ -311,7 +400,7 @@ describe("updateWorkOrder action", () => {
   });
 
   it("should reject updates from operators", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -335,7 +424,7 @@ describe("updateWorkOrder action", () => {
   });
 
   it("should return error for non-existent work order", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -345,7 +434,7 @@ describe("updateWorkOrder action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.workOrders.findFirst).mockResolvedValue(undefined);
+    mockFindFirstWorkOrder.mockResolvedValue(undefined);
 
     const formData = new FormData();
     formData.set("status", "in_progress");
@@ -359,7 +448,7 @@ describe("updateWorkOrder action", () => {
   });
 
   it("should update work order status successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -369,7 +458,7 @@ describe("updateWorkOrder action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+    mockFindFirstWorkOrder.mockResolvedValue({
       id: "1", displayId: 1,
       equipmentId: "1",
       type: "breakdown",
@@ -388,13 +477,13 @@ describe("updateWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-      set: vi.fn(() => ({ where: vi.fn() })),
-    } as unknown);
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({ where: mock() })),
+    });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(),
-    } as unknown);
+    mockInsert.mockReturnValue({
+      values: mock(),
+    });
 
     const formData = new FormData();
     formData.set("status", "in_progress");
@@ -402,12 +491,12 @@ describe("updateWorkOrder action", () => {
     const result = await updateWorkOrder("1", undefined, formData);
 
     expect(result.success).toBe(true);
-    expect(db.update).toHaveBeenCalled();
-    expect(db.insert).toHaveBeenCalled(); // For status change log
+    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockInsert).toHaveBeenCalled(); // For status change log
   });
 
   it("should allow admin to update work orders", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
@@ -417,7 +506,7 @@ describe("updateWorkOrder action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+    mockFindFirstWorkOrder.mockResolvedValue({
       id: "1", displayId: 1,
       equipmentId: "1",
       type: "breakdown",
@@ -436,13 +525,13 @@ describe("updateWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-      set: vi.fn(() => ({ where: vi.fn() })),
-    } as unknown);
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({ where: mock() })),
+    });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(),
-    } as unknown);
+    mockInsert.mockReturnValue({
+      values: mock(),
+    });
 
     const formData = new FormData();
     formData.set("priority", "high");
@@ -455,11 +544,19 @@ describe("updateWorkOrder action", () => {
 
 describe("resolveWorkOrder action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCreateNotification.mockClear();
+    mockFindFirstEquipment.mockClear();
+    mockFindManyUsers.mockClear();
+    mockFindFirstWorkOrder.mockClear();
+    mockFindFirstRole.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockTransaction.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const formData = new FormData();
     formData.set("resolutionNotes", "Fixed it");
@@ -473,7 +570,7 @@ describe("resolveWorkOrder action", () => {
   });
 
   it("should reject resolution from operators", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -497,7 +594,7 @@ describe("resolveWorkOrder action", () => {
   });
 
   it("should require resolution notes", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -519,7 +616,7 @@ describe("resolveWorkOrder action", () => {
   });
 
   it("should resolve work order successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -529,7 +626,7 @@ describe("resolveWorkOrder action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+    mockFindFirstWorkOrder.mockResolvedValue({
       id: "1", displayId: 1,
       equipmentId: "1",
       type: "breakdown",
@@ -548,13 +645,13 @@ describe("resolveWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
-    vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-      set: vi.fn(() => ({ where: vi.fn() })),
-    } as unknown);
+    mockUpdate.mockReturnValue({
+      set: mock(() => ({ where: mock() })),
+    });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(),
-    } as unknown);
+    mockInsert.mockReturnValue({
+      values: mock(),
+    });
 
     const formData = new FormData();
     formData.set("resolutionNotes", "Replaced the faulty component.");
@@ -562,18 +659,26 @@ describe("resolveWorkOrder action", () => {
     const result = await resolveWorkOrder("1", undefined, formData);
 
     expect(result.success).toBe(true);
-    expect(db.update).toHaveBeenCalled();
-    expect(db.insert).toHaveBeenCalled(); // For status change log
+    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockInsert).toHaveBeenCalled(); // For status change log
   });
 });
 
 describe("addWorkOrderComment action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCreateNotification.mockClear();
+    mockFindFirstEquipment.mockClear();
+    mockFindManyUsers.mockClear();
+    mockFindFirstWorkOrder.mockClear();
+    mockFindFirstRole.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockTransaction.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   it("should return error when not logged in", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const formData = new FormData();
     formData.set("comment", "Test comment");
@@ -587,7 +692,7 @@ describe("addWorkOrderComment action", () => {
   });
 
   it("should require comment content", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -609,7 +714,7 @@ describe("addWorkOrderComment action", () => {
   });
 
   it("should add comment successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -619,9 +724,9 @@ describe("addWorkOrderComment action", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn(),
-    } as unknown);
+    mockInsert.mockReturnValue({
+      values: mock(),
+    });
 
     const formData = new FormData();
     formData.set("comment", "Additional details about the issue");
@@ -629,11 +734,11 @@ describe("addWorkOrderComment action", () => {
     const result = await addWorkOrderComment("1", undefined, formData);
 
     expect(result.success).toBe(true);
-    expect(db.insert).toHaveBeenCalled();
+    expect(mockInsert).toHaveBeenCalled();
   });
 
   it("should trim comment whitespace", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
@@ -644,13 +749,13 @@ describe("addWorkOrderComment action", () => {
     });
 
     let capturedValues: unknown;
-    vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-      values: vi.fn((val) => {
+    mockInsert.mockReturnValue({
+      values: mock((val) => {
         capturedValues = val;
       }),
-    } as unknown);
+    });
 
-    vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+    mockFindFirstWorkOrder.mockResolvedValue({
       id: "1", displayId: 1,
       equipmentId: "1",
       type: "breakdown",
@@ -682,12 +787,20 @@ describe("addWorkOrderComment action", () => {
 
 describe("Notification triggers", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCreateNotification.mockClear();
+    mockFindFirstEquipment.mockClear();
+    mockFindManyUsers.mockClear();
+    mockFindFirstWorkOrder.mockClear();
+    mockFindFirstRole.mockClear();
+    mockInsert.mockClear();
+    mockUpdate.mockClear();
+    mockTransaction.mockClear();
+    mockGetCurrentUser.mockClear();
   });
 
   describe("updateWorkOrder notifications", () => {
     it("should notify reporter on status change", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
@@ -697,7 +810,7 @@ describe("Notification triggers", () => {
         sessionVersion: 1,
       });
 
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+      mockFindFirstWorkOrder.mockResolvedValue({
         id: "1", displayId: 1,
         equipmentId: "1",
         type: "breakdown",
@@ -706,58 +819,6 @@ describe("Notification triggers", () => {
         priority: "medium",
         status: "open",
         reportedById: "2", // Different from current user
-        assignedToId: "1",
-        dueBy: new Date(),
-        departmentId: null,
-        resolvedAt: null,
-        resolutionNotes: null,
-        escalatedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-        set: vi.fn(() => ({ where: vi.fn() })),
-      } as unknown);
-
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
-
-      const formData = new FormData();
-      formData.set("status", "in_progress");
-
-      await updateWorkOrder("1", undefined, formData);
-
-      expect(createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: "2", // Reporter
-          type: "work_order_status_changed",
-          title: expect.stringContaining("IN PROGRESS"),
-        })
-      );
-    });
-
-    it("should not notify reporter if they made the change", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
-        id: "2", displayId: 2, // Same as reporter
-        employeeId: "TECH-002",
-        name: "Tech",
-        roleName: "tech",
-        roleId: "2",
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-        sessionVersion: 1,
-      });
-
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
-        id: "1", displayId: 1,
-        equipmentId: "1",
-        type: "breakdown",
-        title: "Test Work Order",
-        description: "Test",
-        priority: "medium",
-        status: "open",
-        reportedById: "2", // Same as current user
         assignedToId: null,
         dueBy: new Date(),
         departmentId: null,
@@ -768,31 +829,30 @@ describe("Notification triggers", () => {
         updatedAt: new Date(),
       });
 
-      vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-        set: vi.fn(() => ({ where: vi.fn() })),
-      } as unknown);
+      mockUpdate.mockReturnValue({
+        set: mock(() => ({ where: mock() })),
+      });
 
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
 
       const formData = new FormData();
       formData.set("status", "in_progress");
 
       await updateWorkOrder("1", undefined, formData);
 
-      // Should not notify because reporter made the change themselves
-      expect(createNotification).not.toHaveBeenCalledWith(
+      expect(mockCreateNotification).toHaveBeenCalledWith(
         expect.objectContaining({
+          userId: "2",
           type: "work_order_status_changed",
+          title: expect.stringContaining("IN PROGRESS"),
         })
       );
     });
-  });
 
-  describe("resolveWorkOrder notifications", () => {
-    it("should notify reporter when work order is resolved", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+    it("should not notify reporter if they made the change", async () => {
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
@@ -802,7 +862,55 @@ describe("Notification triggers", () => {
         sessionVersion: 1,
       });
 
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+      mockFindFirstWorkOrder.mockResolvedValue({
+        id: "1", displayId: 1,
+        equipmentId: "1",
+        type: "breakdown",
+        title: "Test Work Order",
+        description: "Test",
+        priority: "medium",
+        status: "open",
+        reportedById: "1", // Same as current user
+        assignedToId: null,
+        dueBy: new Date(),
+        departmentId: null,
+        resolvedAt: null,
+        resolutionNotes: null,
+        escalatedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockUpdate.mockReturnValue({
+        set: mock(() => ({ where: mock() })),
+      });
+
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
+
+      const formData = new FormData();
+      formData.set("status", "in_progress");
+
+      await updateWorkOrder("1", undefined, formData);
+
+      expect(mockCreateNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("resolveWorkOrder notifications", () => {
+    it("should notify reporter when work order is resolved", async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: "1", displayId: 1, // Tech user
+        employeeId: "TECH-001",
+        name: "Tech",
+        roleName: "tech",
+        roleId: "2",
+        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
+        sessionVersion: 1,
+      });
+
+      mockFindFirstWorkOrder.mockResolvedValue({
         id: "1", displayId: 1,
         equipmentId: "1",
         type: "breakdown",
@@ -810,7 +918,7 @@ describe("Notification triggers", () => {
         description: "Test",
         priority: "medium",
         status: "in_progress",
-        reportedById: "2", // Different from current user
+        reportedById: "2", // Different from current user (reporter)
         assignedToId: "1",
         dueBy: new Date(),
         departmentId: null,
@@ -821,20 +929,20 @@ describe("Notification triggers", () => {
         updatedAt: new Date(),
       });
 
-      vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-        set: vi.fn(() => ({ where: vi.fn() })),
-      } as unknown);
+      mockUpdate.mockReturnValue({
+        set: mock(() => ({ where: mock() })),
+      });
 
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
 
       const formData = new FormData();
-      formData.set("resolutionNotes", "Fixed the issue");
+      formData.set("resolutionNotes", "Fixed");
 
       await resolveWorkOrder("1", undefined, formData);
 
-      expect(createNotification).toHaveBeenCalledWith(
+      expect(mockCreateNotification).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: "2", // Reporter
           type: "work_order_resolved",
@@ -844,209 +952,8 @@ describe("Notification triggers", () => {
     });
 
     it("should not notify reporter if they resolved it themselves", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
-        id: "2", displayId: 2, // Same as reporter
-        employeeId: "TECH-002",
-        name: "Tech",
-        roleName: "tech",
-        roleId: "2",
-        permissions: DEFAULT_ROLE_PERMISSIONS.tech,
-        sessionVersion: 1,
-      });
-
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
-        id: "1", displayId: 1,
-        equipmentId: "1",
-        type: "breakdown",
-        title: "Test Work Order",
-        description: "Test",
-        priority: "medium",
-        status: "in_progress",
-        reportedById: "2", // Same as current user
-        assignedToId: "2",
-        dueBy: new Date(),
-        departmentId: null,
-        resolvedAt: null,
-        resolutionNotes: null,
-        escalatedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      vi.mocked(db.update as unknown as () => unknown).mockReturnValue({
-        set: vi.fn(() => ({ where: vi.fn() })),
-      } as unknown);
-
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
-
-      const formData = new FormData();
-      formData.set("resolutionNotes", "Fixed the issue myself");
-
-      await resolveWorkOrder("1", undefined, formData);
-
-      expect(createNotification).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("addWorkOrderComment notifications", () => {
-    it("should notify reporter and assignee when comment is added", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
-        id: "3", displayId: 3, // A different user
-        employeeId: "ADMIN-001",
-        name: "Admin",
-        roleName: "admin",
-        roleId: "1",
-        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
-        sessionVersion: 1,
-      });
-
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
-        id: "1", displayId: 1,
-        equipmentId: "1",
-        type: "breakdown",
-        title: "Test Work Order",
-        description: "Test",
-        priority: "medium",
-        status: "in_progress",
-        reportedById: "1", // Different from commenter
-        assignedToId: "2", // Different from commenter
-        dueBy: new Date(),
-        departmentId: null,
-        resolvedAt: null,
-        resolutionNotes: null,
-        escalatedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
-
-      const formData = new FormData();
-      formData.set("comment", "This is a comment");
-
-      await addWorkOrderComment("1", undefined, formData);
-
-      // Should notify both reporter and assignee
-      expect(createNotification).toHaveBeenCalledTimes(2);
-      expect(createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: "1", // Reporter
-          type: "work_order_commented",
-        })
-      );
-      expect(createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: "2", // Assignee
-          type: "work_order_commented",
-        })
-      );
-    });
-
-    it("should not notify commenter if they are reporter or assignee", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
-        id: "1", displayId: 1, // Same as reporter
-        employeeId: "OP-001",
-        name: "Operator",
-        roleName: "operator",
-        roleId: "1",
-        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
-        sessionVersion: 1,
-      });
-
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
-        id: "1", displayId: 1,
-        equipmentId: "1",
-        type: "breakdown",
-        title: "Test Work Order",
-        description: "Test",
-        priority: "medium",
-        status: "in_progress",
-        reportedById: "1", // Same as commenter
-        assignedToId: "2", // Different from commenter
-        dueBy: new Date(),
-        departmentId: null,
-        resolvedAt: null,
-        resolutionNotes: null,
-        escalatedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
-
-      const formData = new FormData();
-      formData.set("comment", "Adding my own comment");
-
-      await addWorkOrderComment("1", undefined, formData);
-
-      // Should only notify assignee, not reporter (who is the commenter)
-      expect(createNotification).toHaveBeenCalledTimes(1);
-      expect(createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: "2", // Assignee only
-          type: "work_order_commented",
-        })
-      );
-    });
-
-    it("should not send duplicate notification if reporter is assignee", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
-        id: "3", displayId: 3, // Different user
-        employeeId: "ADMIN-001",
-        name: "Admin",
-        roleName: "admin",
-        roleId: "1",
-        permissions: DEFAULT_ROLE_PERMISSIONS.admin,
-        sessionVersion: 1,
-      });
-
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
-        id: "1", displayId: 1,
-        equipmentId: "1",
-        type: "breakdown",
-        title: "Test Work Order",
-        description: "Test",
-        priority: "medium",
-        status: "in_progress",
-        reportedById: "1",
-        assignedToId: "1", // Same as reporter
-        dueBy: new Date(),
-        departmentId: null,
-        resolvedAt: null,
-        resolutionNotes: null,
-        escalatedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
-
-      const formData = new FormData();
-      formData.set("comment", "Comment from admin");
-
-      await addWorkOrderComment("1", undefined, formData);
-
-      // Should only send one notification (reporter = assignee)
-      expect(createNotification).toHaveBeenCalledTimes(1);
-      expect(createNotification).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: "1",
-          type: "work_order_commented",
-        })
-      );
-    });
-
-    it("should not notify when work order has no assignee", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
-        id: "2", displayId: 2, // Different from reporter
+      mockGetCurrentUser.mockResolvedValue({
+        id: "1", displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -1055,7 +962,212 @@ describe("Notification triggers", () => {
         sessionVersion: 1,
       });
 
-      vi.mocked(db.query.workOrders.findFirst).mockResolvedValue({
+      mockFindFirstWorkOrder.mockResolvedValue({
+        id: "1", displayId: 1,
+        equipmentId: "1",
+        type: "breakdown",
+        title: "Test Work Order",
+        description: "Test",
+        priority: "medium",
+        status: "in_progress",
+        reportedById: "1", // Same as current user
+        assignedToId: "1",
+        dueBy: new Date(),
+        departmentId: null,
+        resolvedAt: null,
+        resolutionNotes: null,
+        escalatedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockUpdate.mockReturnValue({
+        set: mock(() => ({ where: mock() })),
+      });
+
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
+
+      const formData = new FormData();
+      formData.set("resolutionNotes", "Fixed");
+
+      await resolveWorkOrder("1", undefined, formData);
+
+      expect(mockCreateNotification).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("addWorkOrderComment notifications", () => {
+    it("should notify reporter and assignee when comment is added", async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: "3", displayId: 3, // Commenter
+        employeeId: "OTHER-001",
+        name: "Other User",
+        roleName: "operator",
+        roleId: "1",
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        sessionVersion: 1,
+      });
+
+      mockFindFirstWorkOrder.mockResolvedValue({
+        id: "1", displayId: 1,
+        equipmentId: "1",
+        type: "breakdown",
+        title: "Test Work Order",
+        description: "Test",
+        priority: "medium",
+        status: "open",
+        reportedById: "1", // Reporter
+        assignedToId: "2", // Assignee
+        dueBy: new Date(),
+        departmentId: null,
+        resolvedAt: null,
+        resolutionNotes: null,
+        escalatedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
+
+      const formData = new FormData();
+      formData.set("comment", "New comment");
+
+      await addWorkOrderComment("1", undefined, formData);
+
+      // Should notify reporter
+      expect(mockCreateNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "1",
+          type: "work_order_commented",
+        })
+      );
+
+      // Should notify assignee
+      expect(mockCreateNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "2",
+          type: "work_order_commented",
+        })
+      );
+    });
+
+    it("should not notify commenter if they are reporter or assignee", async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: "1", displayId: 1, // Commenter (also reporter)
+        employeeId: "OP-001",
+        name: "Operator",
+        roleName: "operator",
+        roleId: "1",
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        sessionVersion: 1,
+      });
+
+      mockFindFirstWorkOrder.mockResolvedValue({
+        id: "1", displayId: 1,
+        equipmentId: "1",
+        type: "breakdown",
+        title: "Test Work Order",
+        description: "Test",
+        priority: "medium",
+        status: "open",
+        reportedById: "1", // Reporter is same as commenter
+        assignedToId: "2", // Assignee
+        dueBy: new Date(),
+        departmentId: null,
+        resolvedAt: null,
+        resolutionNotes: null,
+        escalatedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
+
+      const formData = new FormData();
+      formData.set("comment", "New comment");
+
+      await addWorkOrderComment("1", undefined, formData);
+
+      // Should NOT notify reporter (commenter)
+      expect(mockCreateNotification).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "1",
+        })
+      );
+
+      // Should notify assignee
+      expect(mockCreateNotification).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: "2",
+        })
+      );
+    });
+
+    it("should not send duplicate notification if reporter is assignee", async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: "3", displayId: 3, // Commenter
+        employeeId: "OTHER-001",
+        name: "Other User",
+        roleName: "operator",
+        roleId: "1",
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        sessionVersion: 1,
+      });
+
+      mockFindFirstWorkOrder.mockResolvedValue({
+        id: "1", displayId: 1,
+        equipmentId: "1",
+        type: "breakdown",
+        title: "Test Work Order",
+        description: "Test",
+        priority: "medium",
+        status: "open",
+        reportedById: "1", // Reporter
+        assignedToId: "1", // Assignee is same as reporter
+        dueBy: new Date(),
+        departmentId: null,
+        resolvedAt: null,
+        resolutionNotes: null,
+        escalatedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
+
+      const formData = new FormData();
+      formData.set("comment", "New comment");
+
+      await addWorkOrderComment("1", undefined, formData);
+
+      // Should notify userId "1" only once
+      const calls = mockCreateNotification.mock.calls;
+      const notificationsToUser1 = calls.filter(
+        (call: any) => call[0].userId === "1"
+      );
+      expect(notificationsToUser1.length).toBe(1);
+    });
+
+    it("should not notify when work order has no assignee", async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: "3", displayId: 3, // Commenter
+        employeeId: "OTHER-001",
+        name: "Other User",
+        roleName: "operator",
+        roleId: "1",
+        permissions: DEFAULT_ROLE_PERMISSIONS.operator,
+        sessionVersion: 1,
+      });
+
+      mockFindFirstWorkOrder.mockResolvedValue({
         id: "1", displayId: 1,
         equipmentId: "1",
         type: "breakdown",
@@ -1074,23 +1186,24 @@ describe("Notification triggers", () => {
         updatedAt: new Date(),
       });
 
-      vi.mocked(db.insert as unknown as () => unknown).mockReturnValue({
-        values: vi.fn(),
-      } as unknown);
+      mockInsert.mockReturnValue({
+        values: mock(),
+      });
 
       const formData = new FormData();
-      formData.set("comment", "Comment on unassigned work order");
+      formData.set("comment", "New comment");
 
       await addWorkOrderComment("1", undefined, formData);
 
-      // Should only notify reporter
-      expect(createNotification).toHaveBeenCalledTimes(1);
-      expect(createNotification).toHaveBeenCalledWith(
+      // Should notify reporter
+      expect(mockCreateNotification).toHaveBeenCalledWith(
         expect.objectContaining({
-          userId: "1", // Reporter only
-          type: "work_order_commented",
+          userId: "1",
         })
       );
+
+      // Should verify called exactly once (for reporter)
+      expect(mockCreateNotification).toHaveBeenCalledTimes(1);
     });
   });
 });

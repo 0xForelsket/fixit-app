@@ -1,33 +1,63 @@
-import { createAttachment } from "@/actions/attachments";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+// Actions will be imported dynamically after mocks
+import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+const mockGetCurrentUser = mock();
+const mockInsert = mock();
+const mockValues = mock();
+const mockReturning = mock();
+
+// Chainable mocks
+mockInsert.mockReturnValue({ values: mockValues });
+mockValues.mockReturnValue({ returning: mockReturning });
 
 // Mock the db module
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
+    insert: mockInsert,
+    // Add dummies to prevent crashes if other tests look for them
+    query: {},
+    update: mock(),
+    delete: mock(() => ({ where: mock() })),
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+// Mock auth module
+mock.module("@/lib/auth", () => ({
+  hasPermission: mock((userPermissions: string[], required: string) => {
+    if (userPermissions.includes("*")) return true;
+    return userPermissions.includes(required);
+  }),
+  userHasPermission: mock((user, permission) => {
+    if (user?.permissions?.includes("*")) return true;
+    return user?.permissions?.includes(permission);
+  }),
+  PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
-import { db } from "@/db";
-import { getCurrentUser } from "@/lib/session";
+// Mock session
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+}));
+
+// Mock audit
+mock.module("@/lib/audit", () => ({
+  logAudit: mock(),
+}));
+
+const { createAttachment } = await import("@/actions/attachments");
 
 describe("attachments actions", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockGetCurrentUser.mockClear();
+    mockInsert.mockClear();
+    mockValues.mockClear();
+    mockReturning.mockClear();
   });
 
   describe("createAttachment", () => {
     it("should return error when not logged in", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue(null);
+      mockGetCurrentUser.mockResolvedValue(null);
 
       const result = await createAttachment({
         entityType: "work_order",
@@ -44,7 +74,7 @@ describe("attachments actions", () => {
     });
 
     it("should return error for invalid data", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
@@ -68,7 +98,7 @@ describe("attachments actions", () => {
     });
 
     it("should return error when s3Key is missing", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
@@ -92,7 +122,7 @@ describe("attachments actions", () => {
     });
 
     it("should create attachment successfully for work order", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
@@ -104,9 +134,9 @@ describe("attachments actions", () => {
 
       const mockAttachment = {
         id: "1", displayId: 1,
-        entityType: "work_order",
+        entityType: "work_order" as any,
         entityId: "5",
-        type: "photo",
+        type: "photo" as any,
         filename: "issue.jpg",
         s3Key: "uploads/issue.jpg",
         mimeType: "image/jpeg",
@@ -115,11 +145,7 @@ describe("attachments actions", () => {
         createdAt: new Date(),
       };
 
-      vi.mocked(db.insert).mockReturnValue({
-        values: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([mockAttachment]),
-        })),
-      } as unknown as ReturnType<typeof db.insert>);
+      mockReturning.mockResolvedValue([mockAttachment]);
 
       const result = await createAttachment({
         entityType: "work_order",
@@ -136,7 +162,7 @@ describe("attachments actions", () => {
     });
 
     it("should create attachment successfully for equipment", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
@@ -148,9 +174,9 @@ describe("attachments actions", () => {
 
       const mockAttachment = {
         id: "2", displayId: 2,
-        entityType: "equipment",
+        entityType: "equipment" as any,
         entityId: "10",
-        type: "document",
+        type: "document" as any,
         filename: "manual.pdf",
         s3Key: "uploads/manual.pdf",
         mimeType: "application/pdf",
@@ -159,11 +185,7 @@ describe("attachments actions", () => {
         createdAt: new Date(),
       };
 
-      vi.mocked(db.insert).mockReturnValue({
-        values: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([mockAttachment]),
-        })),
-      } as unknown as ReturnType<typeof db.insert>);
+      mockReturning.mockResolvedValue([mockAttachment]);
 
       const result = await createAttachment({
         entityType: "equipment",
@@ -180,7 +202,7 @@ describe("attachments actions", () => {
     });
 
     it("should handle database errors gracefully", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
@@ -190,13 +212,7 @@ describe("attachments actions", () => {
         permissions: ["ticket:view"],
       });
 
-      vi.mocked(db.insert).mockReturnValue({
-        values: vi.fn(() => ({
-          returning: vi
-            .fn()
-            .mockRejectedValue(new Error("DB connection failed")),
-        })),
-      } as unknown as ReturnType<typeof db.insert>);
+      mockReturning.mockRejectedValue(new Error("DB connection failed"));
 
       const result = await createAttachment({
         entityType: "work_order",
@@ -209,11 +225,12 @@ describe("attachments actions", () => {
       });
 
       expect(result.error).toBe("Database error");
+      // @ts-ignore
       expect(result.success).toBeUndefined();
     });
 
     it("should accept different attachment types", async () => {
-      vi.mocked(getCurrentUser).mockResolvedValue({
+      mockGetCurrentUser.mockResolvedValue({
         id: "1", displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
@@ -226,24 +243,20 @@ describe("attachments actions", () => {
       const attachmentTypes = ["photo", "document", "before", "after"] as const;
 
       for (const type of attachmentTypes) {
-        vi.mocked(db.insert).mockReturnValue({
-          values: vi.fn(() => ({
-            returning: vi.fn().mockResolvedValue([
-              {
-                id: "1", displayId: 1,
-                entityType: "work_order",
-                entityId: "1",
-                type,
-                filename: "test.jpg",
-                s3Key: "uploads/test.jpg",
-                mimeType: "image/jpeg",
-                sizeBytes: 1024,
-                uploadedById: "1",
-                createdAt: new Date(),
-              },
-            ]),
-          })),
-        } as unknown as ReturnType<typeof db.insert>);
+        mockReturning.mockResolvedValue([
+          {
+            id: "1", displayId: 1,
+            entityType: "work_order",
+            entityId: "1",
+            type: type as any,
+            filename: "test.jpg",
+            s3Key: "uploads/test.jpg",
+            mimeType: "image/jpeg",
+            sizeBytes: 1024,
+            uploadedById: "1",
+            createdAt: new Date(),
+          },
+        ]);
 
         const result = await createAttachment({
           entityType: "work_order",

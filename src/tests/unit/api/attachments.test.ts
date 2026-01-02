@@ -1,97 +1,148 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindMany = mock();
+const mockFindFirst = mock();
+const mockInsertValues = mock();
+const mockInsertReturning = mock();
+const mockInsert = mock(() => ({
+  values: mockInsertValues.mockReturnValue({
+    returning: mockInsertReturning,
+  }),
+}));
+const mockUpdateSet = mock();
+const mockUpdateWhere = mock();
+const mockUpdate = mock(() => ({
+  set: mockUpdateSet.mockReturnValue({
+    where: mockUpdateWhere,
+  }),
+}));
+const mockDeleteWhere = mock();
+const mockDelete = mock(() => ({
+  where: mockDeleteWhere,
+}));
+
+const mockGetCurrentUser = mock();
+const mockRequireCsrf = mock().mockResolvedValue(true);
+const mockCheckRateLimit = mock(() => ({
+  success: true,
+  remaining: 9,
+  reset: Date.now() + 60000,
+}));
+const mockGetClientIp = mock(() => "127.0.0.1");
+
+const mockGenerateS3Key = mock(() => "work_orders/1/1.pdf");
+const mockGetPresignedUploadUrl = mock(() => "https://s3.example.com/presigned-upload");
+const mockGetPresignedDownloadUrl = mock(() => "https://s3.example.com/presigned-download");
+const mockDeleteObject = mock();
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+const mockUserHasPermission = mock();
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       attachments: {
-        findMany: vi.fn(),
-        findFirst: vi.fn(),
+        findMany: mockFindMany,
+        findFirst: mockFindFirst,
       },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
-    delete: vi.fn(() => ({
-      where: vi.fn(),
-    })),
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  requireCsrf: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  requireCsrf: mockRequireCsrf,
 }));
 
-// Mock rate limit
-vi.mock("@/lib/rate-limit", () => ({
-  checkRateLimit: vi.fn(() => ({
-    success: true,
-    remaining: 9,
-    reset: Date.now() + 60000,
-  })),
-  getClientIp: vi.fn(() => "127.0.0.1"),
+mock.module("@/lib/rate-limit", () => ({
+  checkRateLimit: mockCheckRateLimit,
+  getClientIp: mockGetClientIp,
   RATE_LIMITS: {
     upload: { limit: 10, windowMs: 60000 },
   },
 }));
 
-// Mock S3
-vi.mock("@/lib/s3", () => ({
-  generateS3Key: vi.fn(() => "work_orders/1/1.pdf"),
-  getPresignedUploadUrl: vi.fn(() => "https://s3.example.com/presigned-upload"),
-  getPresignedDownloadUrl: vi.fn(
-    () => "https://s3.example.com/presigned-download"
-  ),
-  deleteObject: vi.fn(),
+mock.module("@/lib/s3", () => ({
+  generateS3Key: mockGenerateS3Key,
+  getPresignedUploadUrl: mockGetPresignedUploadUrl,
+  getPresignedDownloadUrl: mockGetPresignedDownloadUrl,
+  deleteObject: mockDeleteObject,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-// Mock auth
-vi.mock("@/lib/auth", () => ({
-  userHasPermission: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     ALL: "*",
   },
 }));
 
-import {
-  DELETE,
-  GET as GET_BY_ID,
-} from "@/app/(app)/api/attachments/[id]/route";
-import { GET, POST } from "@/app/(app)/api/attachments/route";
-import { db } from "@/db";
-import { userHasPermission } from "@/lib/auth";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { deleteObject } from "@/lib/s3";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { DELETE, GET: GET_BY_ID } = await import("@/app/(app)/api/attachments/[id]/route");
+const { GET, POST } = await import("@/app/(app)/api/attachments/route");
 
 beforeEach(() => {
-  vi.clearAllMocks();
-  vi.mocked(userHasPermission).mockReturnValue(true);
+  mockFindMany.mockClear();
+  mockFindFirst.mockClear();
+  mockInsert.mockClear();
+  mockInsertValues.mockClear();
+  mockInsertReturning.mockClear();
+  mockUpdate.mockClear();
+  mockUpdateSet.mockClear();
+  mockUpdateWhere.mockClear();
+  mockDelete.mockClear();
+  mockDeleteWhere.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockRequireCsrf.mockClear();
+  mockCheckRateLimit.mockClear();
+  mockGetClientIp.mockClear();
+  mockGenerateS3Key.mockClear();
+  mockGetPresignedUploadUrl.mockClear();
+  mockGetPresignedDownloadUrl.mockClear();
+  mockDeleteObject.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+  mockUserHasPermission.mockClear();
+
+  mockUserHasPermission.mockReturnValue(true);
+  
+  // Re-setup mock chains if needed
+  mockInsert.mockReturnValue({
+    values: mockInsertValues.mockReturnValue({
+      returning: mockInsertReturning,
+    }),
+  });
+  mockUpdate.mockReturnValue({
+    set: mockUpdateSet.mockReturnValue({
+      where: mockUpdateWhere,
+    }),
+  });
+  mockDelete.mockReturnValue({
+    where: mockDeleteWhere,
+  });
 });
 
 describe("GET /api/attachments", () => {
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request(
       "http://localhost/api/attachments?entityType=work_order&entityId=1"
@@ -108,9 +159,8 @@ describe("GET /api/attachments", () => {
   });
 
   it("returns 400 when entityType is missing", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -143,9 +193,8 @@ describe("GET /api/attachments", () => {
   });
 
   it("returns 400 when entityId is missing", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -178,9 +227,8 @@ describe("GET /api/attachments", () => {
   });
 
   it("returns 400 when entityId is not a number", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -215,9 +263,8 @@ describe("GET /api/attachments", () => {
   });
 
   it("returns attachments list", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -240,7 +287,6 @@ describe("GET /api/attachments", () => {
     const mockAttachments = [
       {
         id: "1",
-        
         entityType: "work_order" as const,
         entityId: "1",
         type: "document" as const,
@@ -250,10 +296,10 @@ describe("GET /api/attachments", () => {
         sizeBytes: 1024,
         uploadedById: "1",
         createdAt: new Date(),
-        uploadedBy: {  name: "Tech" },
+        uploadedBy: { name: "Tech" },
       },
     ];
-    vi.mocked(db.query.attachments.findMany).mockResolvedValue(mockAttachments);
+    mockFindMany.mockResolvedValue(mockAttachments);
 
     const request = new Request(
       "http://localhost/api/attachments?entityType=work_order&entityId=1"
@@ -275,7 +321,7 @@ describe("GET /api/attachments", () => {
 
 describe("POST /api/attachments", () => {
   it("returns 429 when rate limited", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: false,
       remaining: 0,
       reset: Date.now() + 60000,
@@ -296,12 +342,12 @@ describe("POST /api/attachments", () => {
   });
 
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 9,
       reset: Date.now() + 60000,
     });
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/attachments", {
       method: "POST",
@@ -318,14 +364,13 @@ describe("POST /api/attachments", () => {
   });
 
   it("returns 400 when required fields are missing", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 9,
       reset: Date.now() + 60000,
     });
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -360,14 +405,13 @@ describe("POST /api/attachments", () => {
   });
 
   it("creates attachment and returns presigned URL", async () => {
-    vi.mocked(checkRateLimit).mockReturnValue({
+    mockCheckRateLimit.mockReturnValue({
       success: true,
       remaining: 9,
       reset: Date.now() + 60000,
     });
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -388,7 +432,6 @@ describe("POST /api/attachments", () => {
     } as any);
 
     const mockAttachment = {
-      
       entityType: "work_order" as const,
       entityId: "1",
       type: "photo" as const,
@@ -399,11 +442,11 @@ describe("POST /api/attachments", () => {
       uploadedById: "1",
       createdAt: new Date(),
     };
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockAttachment]),
-      })),
-    } as unknown as ReturnType<typeof db.insert>);
+    mockInsert.mockReturnValue({
+      values: mock().mockReturnValue({
+        returning: mock().mockResolvedValue([mockAttachment]),
+      }),
+    } as any);
 
     const request = new Request("http://localhost/api/attachments", {
       method: "POST",
@@ -432,7 +475,7 @@ describe("POST /api/attachments", () => {
 
 describe("GET /api/attachments/[id]", () => {
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request(
       "http://localhost/api/attachments/1"
@@ -446,9 +489,8 @@ describe("GET /api/attachments/[id]", () => {
   });
 
   it("returns 400 for invalid attachment ID", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -480,9 +522,8 @@ describe("GET /api/attachments/[id]", () => {
   });
 
   it("returns 404 when attachment not found", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -501,7 +542,7 @@ describe("GET /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.query.attachments.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const request = new Request(
       "http://localhost/api/attachments/999"
@@ -515,9 +556,8 @@ describe("GET /api/attachments/[id]", () => {
   });
 
   it("returns attachment with download URL", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -549,7 +589,7 @@ describe("GET /api/attachments/[id]", () => {
       uploadedById: "1",
       createdAt: new Date(),
     };
-    vi.mocked(db.query.attachments.findFirst).mockResolvedValue(mockAttachment);
+    mockFindFirst.mockResolvedValue(mockAttachment);
 
     const request = new Request(
       "http://localhost/api/attachments/1"
@@ -570,7 +610,7 @@ describe("GET /api/attachments/[id]", () => {
 
 describe("DELETE /api/attachments/[id]", () => {
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/attachments/1", {
       method: "DELETE",
@@ -584,9 +624,8 @@ describe("DELETE /api/attachments/[id]", () => {
   });
 
   it("returns 404 when attachment not found", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -605,7 +644,7 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.query.attachments.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/attachments/999", {
       method: "DELETE",
@@ -619,8 +658,8 @@ describe("DELETE /api/attachments/[id]", () => {
   });
 
   it("returns 403 when user is not owner and not admin", async () => {
-    vi.mocked(userHasPermission).mockReturnValue(false);
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockUserHasPermission.mockReturnValue(false);
+    mockGetCurrentUser.mockResolvedValue({
       displayId: 2,
       id: "2", // Different user
       employeeId: "TECH-002",
@@ -630,9 +669,8 @@ describe("DELETE /api/attachments/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1",
-      
       entityType: "work_order" as const,
       entityId: "1",
       type: "document" as const,
@@ -656,9 +694,8 @@ describe("DELETE /api/attachments/[id]", () => {
   });
 
   it("deletes attachment when user is owner", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1",
-      
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -677,9 +714,8 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1",
-      
       entityType: "work_order" as const,
       entityId: "1",
       type: "document" as const,
@@ -690,9 +726,9 @@ describe("DELETE /api/attachments/[id]", () => {
       uploadedById: "1", // Same user
       createdAt: new Date(),
     });
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn(),
-    } as unknown as ReturnType<typeof db.delete>);
+    mockDelete.mockReturnValue({
+      where: mock(),
+    } as any);
 
     const request = new Request("http://localhost/api/attachments/1", {
       method: "DELETE",
@@ -705,11 +741,11 @@ describe("DELETE /api/attachments/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(data.data.success).toBe(true);
-    expect(deleteObject).toHaveBeenCalled();
+    expect(mockDeleteObject).toHaveBeenCalled();
   });
 
   it("deletes attachment when user is admin", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       displayId: 2,
       id: "2",
       name: "Admin",
@@ -730,9 +766,8 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    vi.mocked(db.query.attachments.findFirst).mockResolvedValue({
+    mockFindFirst.mockResolvedValue({
       id: "1",
-      
       entityType: "work_order" as const,
       entityId: "1",
       type: "document" as const,
@@ -743,9 +778,9 @@ describe("DELETE /api/attachments/[id]", () => {
       uploadedById: "1", // Different user
       createdAt: new Date(),
     });
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn(),
-    } as unknown as ReturnType<typeof db.delete>);
+    mockDelete.mockReturnValue({
+      where: mock(),
+    } as any);
 
     const request = new Request("http://localhost/api/attachments/1", {
       method: "DELETE",

@@ -1,21 +1,32 @@
 import { login } from "@/actions/auth";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-vi.mock("@/lib/services/auth.service", () => ({
-  authenticateUser: vi.fn(),
+const mockAuthenticateUser = mock();
+const mockDeleteSession = mock();
+const mockRedirect = mock();
+
+mock.module("@/lib/services/auth.service", () => ({
+  authenticateUser: mockAuthenticateUser,
 }));
 
-vi.mock("@/lib/session", () => ({
-  deleteSession: vi.fn(),
+mock.module("@/lib/session", () => ({
+  deleteSession: mockDeleteSession,
 }));
 
+mock.module("next/navigation", () => ({
+  redirect: mockRedirect,
+}));
+
+// We must import after mocking
 import { authenticateUser } from "@/lib/services/auth.service";
 import { redirect } from "next/navigation";
 
 describe("login action", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockAuthenticateUser.mockClear();
+    mockDeleteSession.mockClear();
+    mockRedirect.mockClear();
   });
 
   it("should return error for invalid input format", async () => {
@@ -29,7 +40,7 @@ describe("login action", () => {
   });
 
   it("should return error when authentication fails", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Invalid employee ID or PIN",
     });
@@ -44,7 +55,7 @@ describe("login action", () => {
   });
 
   it("should return error for inactive user", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Account is disabled. Please contact an administrator.",
     });
@@ -61,7 +72,7 @@ describe("login action", () => {
   });
 
   it("should return error for locked account", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Account is locked. Try again in 10 minute(s).",
     });
@@ -76,7 +87,7 @@ describe("login action", () => {
   });
 
   it("should return error for wrong PIN", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Invalid employee ID or PIN",
     });
@@ -91,7 +102,7 @@ describe("login action", () => {
   });
 
   it("should return lockout error after too many failed attempts", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: false,
       error: "Too many failed attempts. Account locked for 15 minutes.",
     });
@@ -108,7 +119,7 @@ describe("login action", () => {
   });
 
   it("should redirect tech to /dashboard on successful login", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
         id: "1", displayId: 1,
@@ -129,11 +140,11 @@ describe("login action", () => {
       await login({}, formData);
     } catch {}
 
-    expect(redirect).toHaveBeenCalledWith("/dashboard");
+    expect(mockRedirect).toHaveBeenCalledWith("/dashboard");
   });
 
   it("should redirect admin to /dashboard on successful login", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
         id: "1", displayId: 1,
@@ -154,11 +165,11 @@ describe("login action", () => {
       await login({}, formData);
     } catch {}
 
-    expect(redirect).toHaveBeenCalledWith("/dashboard");
+    expect(mockRedirect).toHaveBeenCalledWith("/dashboard");
   });
 
   it("should redirect operator to / on successful login", async () => {
-    vi.mocked(authenticateUser).mockResolvedValue({
+    mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
         id: "1", displayId: 1,
@@ -179,6 +190,6 @@ describe("login action", () => {
       await login({}, formData);
     } catch {}
 
-    expect(redirect).toHaveBeenCalledWith("/dashboard");
+    expect(mockRedirect).toHaveBeenCalledWith("/dashboard");
   });
 });

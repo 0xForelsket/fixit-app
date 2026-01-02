@@ -1,26 +1,27 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Create mock functions
+const mockFrom = mock();
+const mockSelect = mock(() => ({ from: mockFrom }));
 
 // Mock the db module
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
-    select: vi.fn(() => ({
-      from: vi.fn(),
-    })),
+    select: mockSelect,
   },
 }));
 
-import { GET } from "@/app/(app)/api/health/route";
-import { db } from "@/db";
+const { GET } = await import("@/app/(app)/api/health/route");
 
 describe("GET /api/health", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockSelect.mockClear();
+    mockFrom.mockClear();
+    mockSelect.mockReturnValue({ from: mockFrom });
   });
 
   it("returns healthy status when database is accessible", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ ping: 1 }]),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockResolvedValue([{ ping: 1 }]);
 
     const response = await GET();
     const data = await response.json();
@@ -32,9 +33,7 @@ describe("GET /api/health", () => {
   });
 
   it("returns unhealthy status when database is down", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockRejectedValue(new Error("Connection refused")),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockRejectedValue(new Error("Connection refused"));
 
     const response = await GET();
     const data = await response.json();
@@ -46,9 +45,7 @@ describe("GET /api/health", () => {
   });
 
   it("includes timestamp in response", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ ping: 1 }]),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockResolvedValue([{ ping: 1 }]);
 
     const response = await GET();
     const data = await response.json();
@@ -58,9 +55,7 @@ describe("GET /api/health", () => {
   });
 
   it("includes version in response", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ ping: 1 }]),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockResolvedValue([{ ping: 1 }]);
 
     const response = await GET();
     const data = await response.json();
@@ -69,9 +64,7 @@ describe("GET /api/health", () => {
   });
 
   it("includes uptime in response", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ ping: 1 }]),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockResolvedValue([{ ping: 1 }]);
 
     const response = await GET();
     const data = await response.json();
@@ -82,9 +75,7 @@ describe("GET /api/health", () => {
   });
 
   it("includes memory usage in response", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ ping: 1 }]),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockResolvedValue([{ ping: 1 }]);
 
     const response = await GET();
     const data = await response.json();
@@ -96,9 +87,7 @@ describe("GET /api/health", () => {
   });
 
   it("returns period in response for KPIs context", async () => {
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ ping: 1 }]),
-    } as unknown as ReturnType<typeof db.select>);
+    mockFrom.mockResolvedValue([{ ping: 1 }]);
 
     const response = await GET();
     const data = await response.json();

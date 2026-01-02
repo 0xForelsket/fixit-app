@@ -2,7 +2,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, mock } from "bun:test";
 
 describe("Textarea", () => {
   it("renders correctly", () => {
@@ -43,7 +43,7 @@ describe("Textarea", () => {
   });
 
   it("handles onChange event", async () => {
-    const handleChange = vi.fn();
+    const handleChange = mock(() => {});
     const user = userEvent.setup();
 
     render(<Textarea onChange={handleChange} data-testid="textarea" />);
@@ -136,7 +136,7 @@ describe("Textarea", () => {
   });
 
   it("handles onFocus event", async () => {
-    const handleFocus = vi.fn();
+    const handleFocus = mock(() => {});
     const user = userEvent.setup();
 
     render(<Textarea onFocus={handleFocus} data-testid="textarea" />);
@@ -146,7 +146,7 @@ describe("Textarea", () => {
   });
 
   it("handles onBlur event", async () => {
-    const handleBlur = vi.fn();
+    const handleBlur = mock(() => {});
     const user = userEvent.setup();
 
     render(

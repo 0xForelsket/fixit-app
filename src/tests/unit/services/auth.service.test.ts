@@ -1,49 +1,55 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Create mocks
+const mockFindFirstUser = mock();
+const mockFindFirstRole = mock();
+const mockUpdate = mock();
+const mockVerifyPin = mock();
+const mockCreateSession = mock();
+const mockAuthLoggerInfo = mock();
+const mockAuthLoggerWarn = mock();
+const mockAuthLoggerError = mock();
 
 // Mock dependencies
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
     query: {
       users: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirstUser,
       },
       roles: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirstRole,
       },
     },
-    update: vi.fn(() => ({
-      set: vi.fn(() => ({
-        where: vi.fn(),
-      })),
-    })),
+    update: mockUpdate.mockReturnValue({
+      set: mock().mockReturnValue({
+        where: mock(),
+      }),
+    }),
   },
 }));
 
-vi.mock("@/lib/auth", () => ({
-  verifyPin: vi.fn(),
+mock.module("@/lib/auth", () => ({
+  verifyPin: mockVerifyPin,
 }));
 
-vi.mock("@/lib/session", () => ({
-  createSession: vi.fn(),
+mock.module("@/lib/session", () => ({
+  createSession: mockCreateSession,
 }));
 
-vi.mock("@/lib/logger", () => ({
+mock.module("@/lib/logger", () => ({
   authLogger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
+    info: mockAuthLoggerInfo,
+    warn: mockAuthLoggerWarn,
+    error: mockAuthLoggerError,
   },
 }));
 
-vi.mock("@/lib/permissions", () => ({
-  getLegacyRolePermissions: vi.fn(() => ["work_orders:read"]),
+mock.module("@/lib/permissions", () => ({
+  getLegacyRolePermissions: mock(() => ["work_orders:read"]),
 }));
 
-import { db } from "@/db";
-import { verifyPin } from "@/lib/auth";
-import { authLogger } from "@/lib/logger";
-import { authenticateUser } from "@/lib/services/auth.service";
-import { createSession } from "@/lib/session";
+const { authenticateUser } = await import("@/lib/services/auth.service");
 
 describe("Auth Service", () => {
   const mockUser = {
@@ -79,12 +85,25 @@ describe("Auth Service", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindFirstUser.mockClear();
+    mockFindFirstRole.mockClear();
+    mockUpdate.mockClear();
+    mockVerifyPin.mockClear();
+    mockCreateSession.mockClear();
+    mockAuthLoggerInfo.mockClear();
+    mockAuthLoggerWarn.mockClear();
+    mockAuthLoggerError.mockClear();
+    // Reset the update mock chain
+    mockUpdate.mockReturnValue({
+      set: mock().mockReturnValue({
+        where: mock(),
+      }),
+    });
   });
 
   describe("authenticateUser", () => {
     it("returns error for non-existent user", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(undefined);
+      mockFindFirstUser.mockResolvedValue(undefined);
 
       const result = await authenticateUser("INVALID-ID", "1234");
 
@@ -96,7 +115,7 @@ describe("Auth Service", () => {
     });
 
     it("returns error for inactive user", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         isActive: false,
       });
@@ -112,7 +131,7 @@ describe("Auth Service", () => {
 
     it("returns error for locked account", async () => {
       const lockedUntil = new Date(Date.now() + 10 * 60000); // 10 minutes from now
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         lockedUntil,
       });
@@ -125,12 +144,12 @@ describe("Auth Service", () => {
         expect(result.error).toContain("minute");
         expect(result.status).toBe(403);
       }
-      expect(authLogger.warn).toHaveBeenCalled();
+      expect(mockAuthLoggerWarn).toHaveBeenCalled();
     });
 
     it("returns error for invalid PIN", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
-      vi.mocked(verifyPin).mockResolvedValue(false);
+      mockFindFirstUser.mockResolvedValue(mockUser);
+      mockVerifyPin.mockResolvedValue(false);
 
       const result = await authenticateUser("EMP-001", "wrong");
 
@@ -139,28 +158,28 @@ describe("Auth Service", () => {
         error: "Invalid employee ID or PIN",
         status: 401,
       });
-      expect(db.update).toHaveBeenCalled();
+      expect(mockUpdate).toHaveBeenCalled();
     });
 
     it("increments failed attempts on wrong PIN", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         failedLoginAttempts: 2,
       });
-      vi.mocked(verifyPin).mockResolvedValue(false);
+      mockVerifyPin.mockResolvedValue(false);
 
       await authenticateUser("EMP-001", "wrong");
 
-      expect(db.update).toHaveBeenCalled();
-      expect(authLogger.info).toHaveBeenCalled();
+      expect(mockUpdate).toHaveBeenCalled();
+      expect(mockAuthLoggerInfo).toHaveBeenCalled();
     });
 
     it("locks account after 5 failed attempts", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         failedLoginAttempts: 4,
       });
-      vi.mocked(verifyPin).mockResolvedValue(false);
+      mockVerifyPin.mockResolvedValue(false);
 
       const result = await authenticateUser("EMP-001", "wrong");
 
@@ -170,17 +189,17 @@ describe("Auth Service", () => {
         expect(result.error).toContain("locked for 15 minutes");
         expect(result.status).toBe(403);
       }
-      expect(authLogger.warn).toHaveBeenCalledWith(
+      expect(mockAuthLoggerWarn).toHaveBeenCalledWith(
         expect.objectContaining({ attempts: 5 }),
         expect.any(String)
       );
     });
 
     it("authenticates successfully with valid credentials", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(mockRole);
-      vi.mocked(verifyPin).mockResolvedValue(true);
-      vi.mocked(createSession).mockResolvedValue("csrf-token-123");
+      mockFindFirstUser.mockResolvedValue(mockUser);
+      mockFindFirstRole.mockResolvedValue(mockRole);
+      mockVerifyPin.mockResolvedValue(true);
+      mockCreateSession.mockResolvedValue("csrf-token-123");
 
       const result = await authenticateUser("EMP-001", "1234");
 
@@ -202,41 +221,41 @@ describe("Auth Service", () => {
     });
 
     it("resets failed attempts on successful login", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         failedLoginAttempts: 3,
       });
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(mockRole);
-      vi.mocked(verifyPin).mockResolvedValue(true);
-      vi.mocked(createSession).mockResolvedValue("csrf-token");
+      mockFindFirstRole.mockResolvedValue(mockRole);
+      mockVerifyPin.mockResolvedValue(true);
+      mockCreateSession.mockResolvedValue("csrf-token");
 
       await authenticateUser("EMP-001", "1234");
 
-      expect(db.update).toHaveBeenCalled();
+      expect(mockUpdate).toHaveBeenCalled();
     });
 
     it("logs successful login", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(mockRole);
-      vi.mocked(verifyPin).mockResolvedValue(true);
-      vi.mocked(createSession).mockResolvedValue("csrf-token");
+      mockFindFirstUser.mockResolvedValue(mockUser);
+      mockFindFirstRole.mockResolvedValue(mockRole);
+      mockVerifyPin.mockResolvedValue(true);
+      mockCreateSession.mockResolvedValue("csrf-token");
 
       await authenticateUser("EMP-001", "1234");
 
-      expect(authLogger.info).toHaveBeenCalledWith(
+      expect(mockAuthLoggerInfo).toHaveBeenCalledWith(
         { employeeId: "EMP-001", role: "operator" },
         "Successful login"
       );
     });
 
     it("uses legacy permissions when role has none", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue(mockUser);
+      mockFindFirstRole.mockResolvedValue({
         ...mockRole,
         permissions: [],
       });
-      vi.mocked(verifyPin).mockResolvedValue(true);
-      vi.mocked(createSession).mockResolvedValue("csrf-token");
+      mockVerifyPin.mockResolvedValue(true);
+      mockCreateSession.mockResolvedValue("csrf-token");
 
       const result = await authenticateUser("EMP-001", "1234");
 
@@ -247,12 +266,12 @@ describe("Auth Service", () => {
     });
 
     it("uses operator role name when user has no role", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         roleId: null,
       });
-      vi.mocked(verifyPin).mockResolvedValue(true);
-      vi.mocked(createSession).mockResolvedValue("csrf-token");
+      mockVerifyPin.mockResolvedValue(true);
+      mockCreateSession.mockResolvedValue("csrf-token");
 
       const result = await authenticateUser("EMP-001", "1234");
 
@@ -264,13 +283,13 @@ describe("Auth Service", () => {
 
     it("allows login when lock has expired", async () => {
       const expiredLock = new Date(Date.now() - 60000); // 1 minute ago
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirstUser.mockResolvedValue({
         ...mockUser,
         lockedUntil: expiredLock,
       });
-      vi.mocked(db.query.roles.findFirst).mockResolvedValue(mockRole);
-      vi.mocked(verifyPin).mockResolvedValue(true);
-      vi.mocked(createSession).mockResolvedValue("csrf-token");
+      mockFindFirstRole.mockResolvedValue(mockRole);
+      mockVerifyPin.mockResolvedValue(true);
+      mockCreateSession.mockResolvedValue("csrf-token");
 
       const result = await authenticateUser("EMP-001", "1234");
 

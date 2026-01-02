@@ -1,48 +1,71 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindFirst = mock();
+const mockDeleteWhere = mock();
+const mockDeleteReturning = mock();
+const mockDelete = mock(() => ({
+  where: mockDeleteWhere.mockReturnValue({
+    returning: mockDeleteReturning.mockResolvedValue([]),
+  }),
+}));
+
+const mockGetCurrentUser = mock();
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       laborLogs: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirst,
       },
     },
-    delete: vi.fn(() => ({
-      where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([]),
-      })),
-    })),
+    delete: mockDelete,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-import { DELETE, GET } from "@/app/(app)/api/labor/[id]/route";
-import { db } from "@/db";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { DELETE, GET } = await import("@/app/(app)/api/labor/[id]/route");
+
+beforeEach(() => {
+  mockFindFirst.mockClear();
+  mockDelete.mockClear();
+  mockDeleteWhere.mockClear();
+  mockDeleteReturning.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+
+  // Reset chains
+  mockDelete.mockReturnValue({
+    where: mockDeleteWhere.mockReturnValue({
+      returning: mockDeleteReturning.mockResolvedValue([]),
+    }),
+  });
+});
 
 describe("GET /api/labor/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/labor/1");
     const response = await GET(request, {
@@ -53,7 +76,7 @@ describe("GET /api/labor/[id]", () => {
   });
 
   it("returns 400 for invalid labor log ID", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -72,7 +95,7 @@ describe("GET /api/labor/[id]", () => {
   });
 
   it("returns 404 when labor log not found", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -81,7 +104,7 @@ describe("GET /api/labor/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.query.laborLogs.findFirst).mockResolvedValue(undefined);
+    mockFindFirst.mockResolvedValue(undefined);
 
     const request = new Request("http://localhost/api/labor/999");
     const response = await GET(request, {
@@ -92,7 +115,7 @@ describe("GET /api/labor/[id]", () => {
   });
 
   it("returns labor log with related data", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -116,7 +139,7 @@ describe("GET /api/labor/[id]", () => {
       user: { id: "1", displayId: 1, name: "Tech User" },
       workOrder: { id: "1", displayId: 1, title: "Work Order 1" },
     };
-    vi.mocked(db.query.laborLogs.findFirst).mockResolvedValue(mockLaborLog);
+    mockFindFirst.mockResolvedValue(mockLaborLog);
 
     const request = new Request("http://localhost/api/labor/1");
     const response = await GET(request, {
@@ -133,12 +156,8 @@ describe("GET /api/labor/[id]", () => {
 });
 
 describe("DELETE /api/labor/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/labor/1", {
       method: "DELETE",
@@ -151,7 +170,7 @@ describe("DELETE /api/labor/[id]", () => {
   });
 
   it("returns 400 for invalid labor log ID", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -172,7 +191,7 @@ describe("DELETE /api/labor/[id]", () => {
   });
 
   it("returns 404 when labor log not found", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -181,11 +200,7 @@ describe("DELETE /api/labor/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([]),
-      })),
-    } as unknown as ReturnType<typeof db.delete>);
+    mockDeleteReturning.mockResolvedValue([]);
 
     const request = new Request("http://localhost/api/labor/999", {
       method: "DELETE",
@@ -198,7 +213,7 @@ describe("DELETE /api/labor/[id]", () => {
   });
 
   it("deletes labor log successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -207,11 +222,7 @@ describe("DELETE /api/labor/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
-      })),
-    } as unknown as ReturnType<typeof db.delete>);
+    mockDeleteReturning.mockResolvedValue([{ id: "1", displayId: 1 }]);
 
     const request = new Request("http://localhost/api/labor/1", {
       method: "DELETE",

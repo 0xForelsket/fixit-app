@@ -1,38 +1,60 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Create mocks
+const mockFindFirst = mock();
+const mockFindMany = mock();
+const mockInsert = mock();
+const mockValues = mock();
+const mockReturning = mock(() => ([{ id: "1", displayId: 1 }]));
 
 // Mock the db module
-vi.mock("@/db", () => ({
+mock.module("@/db", () => ({
   db: {
     query: {
       users: {
-        findFirst: vi.fn(),
+        findFirst: mockFindFirst,
+        findMany: mockFindMany,
       },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1 }]),
-      })),
-    })),
+    insert: mockInsert.mockReturnValue({
+      values: mockValues.mockReturnValue({
+        returning: mockReturning,
+      }),
+    }),
   },
 }));
 
-import { db } from "@/db";
-import {
+// Mock SSE module
+mock.module("@/lib/sse", () => ({
+  sendToUser: mock(),
+}));
+
+const {
   createCriticalNotification,
   createNotification,
   createNotificationsForUsers,
-} from "@/lib/notifications";
+} = await import("@/lib/notifications");
 
 describe("notifications helper", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockFindFirst.mockClear();
+    mockFindMany.mockClear();
+    mockInsert.mockClear();
+    mockValues.mockClear();
+    mockReturning.mockClear();
+    // Reset mocks
+    mockInsert.mockReturnValue({
+      values: mockValues.mockReturnValue({
+        returning: mockReturning.mockResolvedValue([{ id: "1", displayId: 1 }]),
+      }),
+    });
   });
 
   describe("createNotification", () => {
     it("creates notification when user has no preferences set", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirst.mockResolvedValue({
         preferences: null,
-      } as any);
+      });
 
       const result = await createNotification({
         userId: "1",
@@ -43,17 +65,17 @@ describe("notifications helper", () => {
       });
 
       expect(result).toBe(true);
-      expect(db.insert).toHaveBeenCalled();
+      expect(mockInsert).toHaveBeenCalled();
     });
 
     it("creates notification when user has preferences but no inApp settings", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirst.mockResolvedValue({
         preferences: {
           theme: "dark",
           density: "comfortable",
           notifications: { email: true },
         },
-      } as any);
+      });
 
       const result = await createNotification({
         userId: "1",
@@ -63,11 +85,11 @@ describe("notifications helper", () => {
       });
 
       expect(result).toBe(true);
-      expect(db.insert).toHaveBeenCalled();
+      expect(mockInsert).toHaveBeenCalled();
     });
 
     it("creates notification when notification type is enabled", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirst.mockResolvedValue({
         preferences: {
           theme: "system",
           density: "comfortable",
@@ -84,7 +106,7 @@ describe("notifications helper", () => {
             },
           },
         },
-      } as any);
+      });
 
       const result = await createNotification({
         userId: "1",
@@ -95,11 +117,11 @@ describe("notifications helper", () => {
       });
 
       expect(result).toBe(true);
-      expect(db.insert).toHaveBeenCalled();
+      expect(mockInsert).toHaveBeenCalled();
     });
 
     it("skips notification when notification type is disabled", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirst.mockResolvedValue({
         preferences: {
           theme: "system",
           density: "comfortable",
@@ -116,7 +138,7 @@ describe("notifications helper", () => {
             },
           },
         },
-      } as any);
+      });
 
       const result = await createNotification({
         userId: "1",
@@ -126,11 +148,11 @@ describe("notifications helper", () => {
       });
 
       expect(result).toBe(false);
-      expect(db.insert).not.toHaveBeenCalled();
+      expect(mockInsert).not.toHaveBeenCalled();
     });
 
     it("skips notification when escalation type is disabled", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirst.mockResolvedValue({
         preferences: {
           theme: "system",
           density: "comfortable",
@@ -147,7 +169,7 @@ describe("notifications helper", () => {
             },
           },
         },
-      } as any);
+      });
 
       const result = await createNotification({
         userId: "1",
@@ -157,13 +179,13 @@ describe("notifications helper", () => {
       });
 
       expect(result).toBe(false);
-      expect(db.insert).not.toHaveBeenCalled();
+      expect(mockInsert).not.toHaveBeenCalled();
     });
 
     it("creates notification without link when not provided", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
+      mockFindFirst.mockResolvedValue({
         preferences: null,
-      } as any);
+      });
 
       await createNotification({
         userId: "1",
@@ -172,10 +194,8 @@ describe("notifications helper", () => {
         message: "Check equipment",
       });
 
-      expect(db.insert).toHaveBeenCalled();
-      const insertMock = vi.mocked(db.insert);
-      const valuesMock = insertMock.mock.results[0]?.value?.values;
-      expect(valuesMock).toHaveBeenCalledWith(
+      expect(mockInsert).toHaveBeenCalled();
+      expect(mockValues).toHaveBeenCalledWith(
         expect.objectContaining({
           link: null,
         })
@@ -193,13 +213,20 @@ describe("notifications helper", () => {
       );
 
       expect(result).toBe(0);
-      expect(db.query.users.findFirst).not.toHaveBeenCalled();
+      expect(mockFindMany).not.toHaveBeenCalled();
     });
 
     it("creates notifications for multiple users", async () => {
-      vi.mocked(db.query.users.findFirst).mockResolvedValue({
-        preferences: null,
-      } as any);
+      mockFindMany.mockResolvedValue([
+        { id: "1", preferences: null },
+        { id: "2", preferences: null },
+        { id: "3", preferences: null },
+      ]);
+      mockReturning.mockResolvedValue([
+        { id: "n1", userId: "1" },
+        { id: "n2", userId: "2" },
+        { id: "n3", userId: "3" },
+      ]);
 
       const result = await createNotificationsForUsers(
         ["1", "2", "3"],
@@ -210,32 +237,34 @@ describe("notifications helper", () => {
       );
 
       expect(result).toBe(3);
-      expect(db.insert).toHaveBeenCalledTimes(3);
+      expect(mockInsert).toHaveBeenCalled();
     });
 
     it("respects each user preferences individually", async () => {
-      vi.mocked(db.query.users.findFirst)
-        .mockResolvedValueOnce({ preferences: null } as any) // User 1: no prefs, create
-        .mockResolvedValueOnce({
-          // User 2: disabled, skip
-          preferences: {
-            theme: "system",
-            density: "comfortable",
-            notifications: {
-              email: true,
-              inApp: {
-                workOrderCreated: false,
-                workOrderAssigned: false,
-                workOrderEscalated: false,
-                workOrderResolved: false,
-                workOrderCommented: false,
-                workOrderStatusChanged: false,
-                maintenanceDue: false,
-              },
+      mockFindMany.mockResolvedValue([
+        { id: "1", preferences: null }, // User 1: no prefs, create
+        { id: "2", preferences: { // User 2: disabled, skip
+          theme: "system",
+          density: "comfortable",
+          notifications: {
+            email: true,
+            inApp: {
+              workOrderCreated: false,
+              workOrderAssigned: false,
+              workOrderEscalated: false,
+              workOrderResolved: false,
+              workOrderCommented: false,
+              workOrderStatusChanged: false,
+              maintenanceDue: false,
             },
           },
-        } as any)
-        .mockResolvedValueOnce({ preferences: null } as any); // User 3: no prefs, create
+        }},
+        { id: "3", preferences: null }, // User 3: no prefs, create
+      ]);
+      mockReturning.mockResolvedValue([
+        { id: "n1", userId: "1" },
+        { id: "n3", userId: "3" },
+      ]);
 
       const result = await createNotificationsForUsers(
         ["1", "2", "3"],
@@ -245,7 +274,7 @@ describe("notifications helper", () => {
       );
 
       expect(result).toBe(2); // Only 2 created (users 1 and 3)
-      expect(db.insert).toHaveBeenCalledTimes(2);
+      expect(mockInsert).toHaveBeenCalled();
     });
   });
 
@@ -261,8 +290,8 @@ describe("notifications helper", () => {
       });
 
       // Should not query user preferences
-      expect(db.query.users.findFirst).not.toHaveBeenCalled();
-      expect(db.insert).toHaveBeenCalled();
+      expect(mockFindFirst).not.toHaveBeenCalled();
+      expect(mockInsert).toHaveBeenCalled();
     });
   });
 });

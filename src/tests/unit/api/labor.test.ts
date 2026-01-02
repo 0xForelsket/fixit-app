@@ -1,54 +1,81 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock the db module
-vi.mock("@/db", () => ({
+// Create mocks
+const mockFindMany = mock();
+const mockInsertValues = mock();
+const mockInsertReturning = mock();
+const mockInsert = mock(() => ({
+  values: mockInsertValues.mockReturnValue({
+    returning: mockInsertReturning,
+  }),
+}));
+
+const mockGetCurrentUser = mock();
+const mockRequireCsrf = mock().mockResolvedValue(true);
+
+const mockApiLogger = {
+  error: mock(),
+  warn: mock(),
+  info: mock(),
+};
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+const mockRevalidatePath = mock();
+
+// Mock modules
+mock.module("@/db", () => ({
   db: {
     query: {
       laborLogs: {
-        findMany: vi.fn(),
+        findMany: mockFindMany,
       },
     },
-    insert: vi.fn(() => ({
-      values: vi.fn(() => ({
-        returning: vi.fn(),
-      })),
-    })),
+    insert: mockInsert,
   },
 }));
 
-// Mock session
-vi.mock("@/lib/session", () => ({
-  getCurrentUser: vi.fn(),
-  requireCsrf: vi.fn().mockResolvedValue(true),
+mock.module("@/lib/session", () => ({
+  getCurrentUser: mockGetCurrentUser,
+  requireCsrf: mockRequireCsrf,
 }));
 
-// Mock logger
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
+mock.module("@/lib/logger", () => ({
+  apiLogger: mockApiLogger,
+  generateRequestId: mockGenerateRequestId,
 }));
 
-// Mock next/cache
-vi.mock("next/cache", () => ({
-  revalidatePath: vi.fn(),
+mock.module("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
 }));
 
-import { GET, POST } from "@/app/(app)/api/labor/route";
-import { db } from "@/db";
-import { getCurrentUser } from "@/lib/session";
+// Dynamic imports after mock.module
+const { GET, POST } = await import("@/app/(app)/api/labor/route");
+
+beforeEach(() => {
+  mockFindMany.mockClear();
+  mockInsert.mockClear();
+  mockInsertValues.mockClear();
+  mockInsertReturning.mockClear();
+  mockGetCurrentUser.mockClear();
+  mockRequireCsrf.mockClear();
+  mockApiLogger.error.mockClear();
+  mockApiLogger.warn.mockClear();
+  mockApiLogger.info.mockClear();
+  mockGenerateRequestId.mockClear();
+  mockRevalidatePath.mockClear();
+
+  // Reset chains
+  mockInsert.mockReturnValue({
+    values: mockInsertValues.mockReturnValue({
+      returning: mockInsertReturning,
+    }),
+  });
+});
 
 describe("GET /api/labor", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/labor");
     const response = await GET(request);
@@ -57,7 +84,7 @@ describe("GET /api/labor", () => {
   });
 
   it("returns labor logs when authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -84,7 +111,7 @@ describe("GET /api/labor", () => {
       },
     ];
 
-    vi.mocked(db.query.laborLogs.findMany).mockResolvedValue(mockLogs);
+    mockFindMany.mockResolvedValue(mockLogs);
 
     const request = new Request("http://localhost/api/labor");
     const response = await GET(request);
@@ -96,7 +123,7 @@ describe("GET /api/labor", () => {
   });
 
   it("filters by workOrderId when provided", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -106,23 +133,19 @@ describe("GET /api/labor", () => {
       sessionVersion: 1,
     });
 
-    vi.mocked(db.query.laborLogs.findMany).mockResolvedValue([]);
+    mockFindMany.mockResolvedValue([]);
 
     const request = new Request("http://localhost/api/labor?workOrderId=5");
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(db.query.laborLogs.findMany).toHaveBeenCalled();
+    expect(mockFindMany).toHaveBeenCalled();
   });
 });
 
 describe("POST /api/labor", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("returns 401 when not authenticated", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue(null);
+    mockGetCurrentUser.mockResolvedValue(null);
 
     const request = new Request("http://localhost/api/labor", {
       method: "POST",
@@ -140,7 +163,7 @@ describe("POST /api/labor", () => {
   });
 
   it("returns 400 when missing required fields", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -167,7 +190,7 @@ describe("POST /api/labor", () => {
   });
 
   it("creates labor log successfully", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -190,11 +213,7 @@ describe("POST /api/labor", () => {
       createdAt: new Date(),
     };
 
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([mockLog]),
-      })),
-    } as unknown as ReturnType<typeof db.insert>);
+    mockInsertReturning.mockResolvedValue([mockLog]);
 
     const request = new Request("http://localhost/api/labor", {
       method: "POST",
@@ -216,7 +235,7 @@ describe("POST /api/labor", () => {
   });
 
   it("sets isBillable to true by default", async () => {
-    vi.mocked(getCurrentUser).mockResolvedValue({
+    mockGetCurrentUser.mockResolvedValue({
       id: "1", displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
@@ -226,15 +245,13 @@ describe("POST /api/labor", () => {
       sessionVersion: 1,
     });
 
-    let capturedValues: unknown;
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn((vals) => {
-        capturedValues = vals;
-        return {
-          returning: vi.fn().mockResolvedValue([{ id: "1", displayId: 1, isBillable: true }]),
-        };
-      }),
-    } as unknown as ReturnType<typeof db.insert>);
+    let capturedValues: any;
+    mockInsertValues.mockImplementation((vals: any) => {
+      capturedValues = vals;
+      return {
+        returning: mockInsertReturning.mockResolvedValue([{ id: "1", displayId: 1, isBillable: true }]),
+      };
+    });
 
     const request = new Request("http://localhost/api/labor", {
       method: "POST",
@@ -248,6 +265,6 @@ describe("POST /api/labor", () => {
 
     await POST(request);
 
-    expect((capturedValues as Record<string, unknown>).isBillable).toBe(true);
+    expect(capturedValues.isBillable).toBe(true);
   });
 });
