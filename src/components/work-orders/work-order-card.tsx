@@ -162,20 +162,20 @@ export function WorkOrderCard({
             </div>
 
             {showQuickActions && (
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-1">
                 {canAssign && (
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-6 w-6 rounded-full hover:bg-primary/10"
+                    className="h-9 w-9 md:h-6 md:w-6 rounded-full hover:bg-primary/10"
                     onClick={(e) => handleQuickAction("assign", e)}
                     disabled={isPending}
                     title="Assign to me"
                   >
                     {actionType === "assign" ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <Loader2 className="h-4 w-4 md:h-3 md:w-3 animate-spin" />
                     ) : (
-                      <UserCheck className="h-3 w-3" />
+                      <UserCheck className="h-4 w-4 md:h-3 md:w-3" />
                     )}
                   </Button>
                 )}
@@ -183,15 +183,15 @@ export function WorkOrderCard({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-6 w-6 rounded-full hover:bg-amber-500/10 text-amber-600"
+                    className="h-9 w-9 md:h-6 md:w-6 rounded-full hover:bg-amber-500/10 text-amber-600"
                     onClick={(e) => handleQuickAction("start", e)}
                     disabled={isPending}
                     title="Start work"
                   >
                     {actionType === "start" ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <Loader2 className="h-4 w-4 md:h-3 md:w-3 animate-spin" />
                     ) : (
-                      <Play className="h-3 w-3" />
+                      <Play className="h-4 w-4 md:h-3 md:w-3" />
                     )}
                   </Button>
                 )}
@@ -199,15 +199,15 @@ export function WorkOrderCard({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-6 w-6 rounded-full hover:bg-green-500/10 text-green-600"
+                    className="h-9 w-9 md:h-6 md:w-6 rounded-full hover:bg-green-500/10 text-green-600"
                     onClick={(e) => handleQuickAction("resolve", e)}
                     disabled={isPending}
                     title="Quick resolve"
                   >
                     {actionType === "resolve" ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <Loader2 className="h-4 w-4 md:h-3 md:w-3 animate-spin" />
                     ) : (
-                      <CheckCircle className="h-3 w-3" />
+                      <CheckCircle className="h-4 w-4 md:h-3 md:w-3" />
                     )}
                   </Button>
                 )}
@@ -284,15 +284,15 @@ export function WorkOrderCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-full hover:bg-primary/10"
+                className="h-10 w-10 md:h-8 md:w-8 rounded-full hover:bg-primary/10"
                 onClick={(e) => handleQuickAction("assign", e)}
                 disabled={isPending}
                 title="Assign to me"
               >
                 {actionType === "assign" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 md:h-4 md:w-4 animate-spin" />
                 ) : (
-                  <UserCheck className="h-4 w-4" />
+                  <UserCheck className="h-5 w-5 md:h-4 md:w-4" />
                 )}
               </Button>
             )}
@@ -300,15 +300,15 @@ export function WorkOrderCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-full hover:bg-amber-500/10 text-amber-600"
+                className="h-10 w-10 md:h-8 md:w-8 rounded-full hover:bg-amber-500/10 text-amber-600"
                 onClick={(e) => handleQuickAction("start", e)}
                 disabled={isPending}
                 title="Start work"
               >
                 {actionType === "start" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 md:h-4 md:w-4 animate-spin" />
                 ) : (
-                  <Play className="h-4 w-4" />
+                  <Play className="h-5 w-5 md:h-4 md:w-4" />
                 )}
               </Button>
             )}
@@ -316,15 +316,15 @@ export function WorkOrderCard({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-full hover:bg-green-500/10 text-green-600"
+                className="h-10 w-10 md:h-8 md:w-8 rounded-full hover:bg-green-500/10 text-green-600"
                 onClick={(e) => handleQuickAction("resolve", e)}
                 disabled={isPending}
                 title="Quick resolve"
               >
                 {actionType === "resolve" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 md:h-4 md:w-4 animate-spin" />
                 ) : (
-                  <CheckCircle className="h-4 w-4" />
+                  <CheckCircle className="h-5 w-5 md:h-4 md:w-4" />
                 )}
               </Button>
             )}
