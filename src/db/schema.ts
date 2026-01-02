@@ -14,6 +14,10 @@ import {
 import { uuidv7 } from "uuidv7";
 
 // Enums as const objects for type safety
+export const reportFrequencies = ["daily", "weekly", "monthly"] as const;
+export type ReportFrequency = (typeof reportFrequencies)[number];
+
+// Enums as const objects for type safety
 export const userRoles = ["operator", "tech", "admin"] as const;
 export type UserRole = (typeof userRoles)[number];
 
@@ -743,6 +747,48 @@ export const systemSettings = pgTable("system_settings", {
     .notNull()
     .defaultNow(),
   updatedById: text("updated_by_id").references(() => users.id),
+});
+
+// Report Templates for Custom Report Builder
+export const reportTemplates = pgTable("report_templates", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  name: text("name").notNull(),
+  description: text("description"),
+  config: jsonb("config").notNull(), // Stores layout and widget configuration
+  createdById: text("created_by_id")
+    .references(() => users.id)
+    .notNull(),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow(),
+});
+
+// Report Schedules
+export const reportSchedules = pgTable("report_schedules", {
+  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  templateId: text("template_id")
+    .references(() => reportTemplates.id)
+    .notNull(),
+  frequency: text("frequency", { enum: reportFrequencies }).notNull(),
+  recipients: jsonb("recipients")
+    .notNull()
+    .$type<string[]>()
+    .default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  lastRunAt: timestamp("last_run_at"),
+  nextRunAt: timestamp("next_run_at"),
+  createdById: text("created_by_id")
+    .references(() => users.id)
+    .notNull(),
+  createdAt: timestamp("created_at")
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow(),
 });
 
 // System-wide audit logs

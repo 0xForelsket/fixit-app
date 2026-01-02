@@ -46,6 +46,7 @@ import {
   FileText,
   Inbox,
   MapPin,
+  Plus,
   Timer,
 } from "lucide-react";
 import Link from "next/link";
@@ -339,16 +340,28 @@ export default async function ReportsPage({
         description={`${total} WORK ORDERS PROCESSED${hasFilters ? " • FILTERED RESULTS" : ""}`}
         bgSymbol="RE"
         actions={
-          <Button
-            asChild
-            variant="outline"
-            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-          >
-            <a href={csvUrl} download="work-order-report.csv">
-              <Download className="mr-2 h-4 w-4" />
-              EXPORT CSV
-            </a>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
+              <Link href="/reports/builder">
+                <Plus className="mr-2 h-4 w-4" />
+                New Report
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+            >
+              <a href={csvUrl} download="work-order-report.csv">
+                <Download className="mr-2 h-4 w-4" />
+                EXPORT CSV
+              </a>
+            </Button>
+          </div>
         }
       />
 
