@@ -1,12 +1,30 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import * as matchers from "@testing-library/jest-dom/matchers";
 
+// Must register BEFORE any other imports that depend on DOM
 GlobalRegistrator.register();
 
+// Now import testing-library (after DOM is available)
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup } from "@testing-library/react";
 import type { SessionUser } from "@/lib/session";
-import { expect, mock } from "bun:test";
+import { afterEach, beforeEach, expect, mock } from "bun:test";
 
 expect.extend(matchers);
+
+// Re-export testing library utilities for tests to use
+// (ensures they are imported AFTER GlobalRegistrator.register())
+export { render, screen } from "@testing-library/react";
+export { default as userEvent } from "@testing-library/user-event";
+
+// Reset DOM before each test
+beforeEach(() => {
+  document.body.innerHTML = "";
+});
+
+// Clean up DOM after each test to prevent test pollution
+afterEach(() => {
+  cleanup();
+});
 
 // Shared mock user for tests
 export const createMockUser = (
