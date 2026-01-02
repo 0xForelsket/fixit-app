@@ -1,11 +1,14 @@
 "use client";
 
+import { assignToMe, quickResolveWorkOrder, startWorkOrder } from "@/actions/workOrders";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Equipment, User, WorkOrder } from "@/db/schema";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
-import { ArrowRight, Timer } from "lucide-react";
+import { ArrowRight, CheckCircle, Loader2, Play, Timer, UserCheck } from "lucide-react";
 import Link from "next/link";
+import { useState, useTransition } from "react";
 
 export type WorkOrderWithRelations = WorkOrder & {
   equipment: (Equipment & { location: { name: string } | null }) | null;
@@ -18,6 +21,8 @@ interface WorkOrderCardProps {
   index?: number;
   href?: string;
   variant?: "default" | "compact";
+  showQuickActions?: boolean;
+  currentUserId?: string;
 }
 
 export function WorkOrderCard({
@@ -25,10 +30,43 @@ export function WorkOrderCard({
   variant = "default",
   index = 0,
   href,
+  showQuickActions = false,
+  currentUserId,
 }: WorkOrderCardProps) {
   const statusConfig = getStatusConfig(workOrder.status);
   const priorityConfig = getPriorityConfig(workOrder.priority);
   const targetHref = href || `/maintenance/work-orders/${workOrder.id}`;
+
+  // Quick action state
+  const [isPending, startTransition] = useTransition();
+  const [actionType, setActionType] = useState<string | null>(null);
+
+  const canAssign = !workOrder.assignedToId || workOrder.assignedToId !== currentUserId;
+  const canStart = workOrder.status === "open";
+  const canResolve = workOrder.status !== "resolved" && workOrder.status !== "closed";
+
+  const handleQuickAction = (
+    action: "assign" | "start" | "resolve",
+    e: React.MouseEvent
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActionType(action);
+
+    startTransition(async () => {
+      try {
+        if (action === "assign") {
+          await assignToMe(workOrder.id);
+        } else if (action === "start") {
+          await startWorkOrder(workOrder.id);
+        } else if (action === "resolve") {
+          await quickResolveWorkOrder(workOrder.id);
+        }
+      } finally {
+        setActionType(null);
+      }
+    });
+  };
 
   const staggerClass =
     index < 5
@@ -122,6 +160,59 @@ export function WorkOrderCard({
                 </span>
               )}
             </div>
+
+            {showQuickActions && (
+              <div className="flex items-center gap-0.5">
+                {canAssign && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 rounded-full hover:bg-primary/10"
+                    onClick={(e) => handleQuickAction("assign", e)}
+                    disabled={isPending}
+                    title="Assign to me"
+                  >
+                    {actionType === "assign" ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <UserCheck className="h-3 w-3" />
+                    )}
+                  </Button>
+                )}
+                {canStart && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 rounded-full hover:bg-amber-500/10 text-amber-600"
+                    onClick={(e) => handleQuickAction("start", e)}
+                    disabled={isPending}
+                    title="Start work"
+                  >
+                    {actionType === "start" ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Play className="h-3 w-3" />
+                    )}
+                  </Button>
+                )}
+                {canResolve && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 rounded-full hover:bg-green-500/10 text-green-600"
+                    onClick={(e) => handleQuickAction("resolve", e)}
+                    disabled={isPending}
+                    title="Quick resolve"
+                  >
+                    {actionType === "resolve" ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-3 w-3" />
+                    )}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </Link>
@@ -186,10 +277,64 @@ export function WorkOrderCard({
             {workOrder.assignedTo?.name || "Unassigned"}
           </span>
         </div>
-        <div className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm hover:bg-primary/20 transition-colors">
-          Protocol
-          <ArrowRight className="inline-block ml-1 h-3 w-3" />
-        </div>
+
+        {showQuickActions ? (
+          <div className="flex items-center gap-1">
+            {canAssign && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full hover:bg-primary/10"
+                onClick={(e) => handleQuickAction("assign", e)}
+                disabled={isPending}
+                title="Assign to me"
+              >
+                {actionType === "assign" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <UserCheck className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+            {canStart && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full hover:bg-amber-500/10 text-amber-600"
+                onClick={(e) => handleQuickAction("start", e)}
+                disabled={isPending}
+                title="Start work"
+              >
+                {actionType === "start" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+            {canResolve && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full hover:bg-green-500/10 text-green-600"
+                onClick={(e) => handleQuickAction("resolve", e)}
+                disabled={isPending}
+                title="Quick resolve"
+              >
+                {actionType === "resolve" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-4 w-4" />
+                )}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm hover:bg-primary/20 transition-colors">
+            Protocol
+            <ArrowRight className="inline-block ml-1 h-3 w-3" />
+          </div>
+        )}
       </div>
     </Link>
   );
