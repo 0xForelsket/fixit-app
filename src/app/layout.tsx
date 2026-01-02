@@ -2,18 +2,11 @@ import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
-});
-
-const googleSans = localFont({
-  src: "../assets/fonts/GoogleSansFlex-Variable.ttf",
-  variable: "--font-google-sans",
   display: "swap",
 });
 
@@ -67,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${googleSans.variable} ${fraunces.variable} ${jetbrainsMono.variable} min-h-screen antialiased font-sans`}
+        className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} min-h-screen antialiased font-sans`}
         suppressHydrationWarning
       >
         <ThemeProvider>
