@@ -92,10 +92,10 @@ async function getTechnicianWorkloads() {
   const workloadData = await db
     .select({
       assignedToId: workOrders.assignedToId,
-      openCount: sql<number>`count(case when ${workOrders.status} = 'open' then 1 end)`,
-      inProgressCount: sql<number>`count(case when ${workOrders.status} = 'in_progress' then 1 end)`,
-      criticalCount: sql<number>`count(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 end)`,
-      overdueCount: sql<number>`count(case when ${workOrders.dueBy} < ${now} and ${workOrders.status} in ('open', 'in_progress') then 1 end)`,
+      openCount: sql<number>`cast(count(case when ${workOrders.status} = 'open' then 1 end) as integer)`.as('open_count'),
+      inProgressCount: sql<number>`cast(count(case when ${workOrders.status} = 'in_progress' then 1 end) as integer)`.as('in_progress_count'),
+      criticalCount: sql<number>`cast(count(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 end) as integer)`.as('critical_count'),
+      overdueCount: sql<number>`cast(count(case when ${workOrders.dueBy} < ${now.toISOString()} and ${workOrders.status} in ('open', 'in_progress') then 1 end) as integer)`.as('overdue_count'),
     })
     .from(workOrders)
     .where(
