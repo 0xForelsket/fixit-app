@@ -1,5 +1,5 @@
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, mock } from "bun:test";
 
 // Create mocks
@@ -45,20 +45,20 @@ const mockItems = [
 
 describe("WorkOrderChecklist", () => {
   it("renders checklist items correctly", () => {
-    render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
+    const { getByText } = render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
 
-    expect(screen.getByText("Check oil level")).toBeInTheDocument();
-    expect(screen.getByText("Inspect belts")).toBeInTheDocument();
-    expect(screen.getByText("1 / 2 Steps")).toBeInTheDocument();
+    expect(getByText("Check oil level")).toBeDefined();
+    expect(getByText("Inspect belts")).toBeDefined();
+    expect(getByText("1 / 2 Steps")).toBeDefined();
   });
 
   it("calls updateChecklistItem when an item is toggled", async () => {
     // Mock successful response
     mockUpdateChecklistItem.mockResolvedValue({ success: true });
 
-    render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
+    const { getAllByRole } = render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
 
-    const buttons = screen.getAllByRole("button");
+    const buttons = getAllByRole("button");
     // Click the first item (pending -> completed)
     fireEvent.click(buttons[0]);
 

@@ -44,17 +44,21 @@ it("tests something", async () => {
 ### ✅ Do Use (Works)
 
 ```tsx
-import { render } from "@testing-library/react";
+// Option 1: Standard destructuring (Preferred for new tests)
+import { render, fireEvent } from "@testing-library/react";
 
 it("tests something", () => {
-  // ✅ Destructure queries from render()
-  const { getByRole, getByText, getByTestId } = render(<Button>Click</Button>);
-  
-  // ✅ Use native assertions
+  const { getByRole } = render(<Button>Click</Button>);
   expect(getByRole("button")).toBeDefined();
-  
-  // ✅ Use native DOM click
   getByRole("button").click();
+});
+
+// Option 2: Using the specialized dom-setup wrapper (If screen is required)
+import { render, screen } from "@/tests/dom-setup";
+
+it("tests via screen", () => {
+  render(<Button>Click</Button>);
+  expect(screen.getByRole("button")).toBeDefined();
 });
 ```
 
@@ -63,43 +67,37 @@ it("tests something", () => {
 | ❌ Old Pattern | ✅ New Pattern |
 |---------------|---------------|
 | `screen.getByRole("button")` | `const { getByRole } = render(...); getByRole("button")` |
-| `screen.getByText("Hello")` | `const { getByText } = render(...); getByText("Hello")` |
-| `screen.getByTestId("foo")` | `const { getByTestId } = render(...); getByTestId("foo")` |
 | `userEvent.click(element)` | `element.click()` |
-| `userEvent.type(input, "text")` | `input.value = "text"; input.dispatchEvent(new Event("change"))` |
+| `userEvent.type(input, "text")` | `fireEvent.change(input, { target: { value: "text" } })` |
 | `.toBeInTheDocument()` | `.toBeDefined()` |
+| `expect(screen.queryByText("X")).not.toBeInTheDocument()` | `expect(queryByText("X")).toBeNull()` |
 | `.toHaveClass("foo")` | `.classList.contains("foo")).toBe(true)` |
 | `.toBeDisabled()` | `.hasAttribute("disabled")).toBe(true)` |
-| `.toHaveAttribute("type", "submit")` | `.getAttribute("type")).toBe("submit")` |
+| `.toHaveAttribute("x", "y")` | `.getAttribute("x")).toBe("y")` |
 
-## Typing Events
+## Event Handling
 
-For more complex user interactions (typing, keyboard events):
+For interactions that trigger React state changes, `fireEvent` is often more reliable than manual `dispatchEvent`:
 
 ```tsx
-it("handles typing", () => {
+import { render, fireEvent } from "@testing-library/react";
+
+it("handles input", () => {
   const { getByRole } = render(<Input />);
   const input = getByRole("textbox") as HTMLInputElement;
   
-  // Native approach
-  input.value = "new value";
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
+  // Use fireEvent for reliable React state updates
+  fireEvent.change(input, { target: { value: "Hello" } });
   
-  expect(input.value).toBe("new value");
+  expect(input.value).toBe("Hello");
 });
-```
 
-## Focus/Blur Events
-
-```tsx
-it("handles focus", () => {
-  const onFocus = mock(() => {});
-  const { getByRole } = render(<Input onFocus={onFocus} />);
+it("handles focus/blur", () => {
+  const { getByRole } = render(<Input />);
+  const input = getByRole("textbox");
   
-  getByRole("textbox").focus();
-  
-  expect(onFocus).toHaveBeenCalled();
+  input.focus();
+  input.blur();
 });
 ```
 

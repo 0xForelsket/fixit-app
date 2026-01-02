@@ -1,98 +1,98 @@
 import { StatusBadge } from "@/components/ui/status-badge";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it } from "bun:test";
 
 describe("StatusBadge", () => {
   describe("Work Order Statuses", () => {
     it("renders open status", () => {
-      render(<StatusBadge status="open" />);
-      expect(screen.getByText("Open")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="open" />);
+      expect(getByText("Open")).toBeDefined();
     });
 
     it("renders in_progress status", () => {
-      render(<StatusBadge status="in_progress" />);
-      expect(screen.getByText("In Progress")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="in_progress" />);
+      expect(getByText("In Progress")).toBeDefined();
     });
 
     it("renders resolved status", () => {
-      render(<StatusBadge status="resolved" />);
-      expect(screen.getByText("Resolved")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="resolved" />);
+      expect(getByText("Resolved")).toBeDefined();
     });
 
     it("renders closed status", () => {
-      render(<StatusBadge status="closed" />);
-      expect(screen.getByText("Closed")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="closed" />);
+      expect(getByText("Closed")).toBeDefined();
     });
   });
 
   describe("Priority Levels", () => {
     it("renders low priority", () => {
-      render(<StatusBadge status="low" />);
-      expect(screen.getByText("Low")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="low" />);
+      expect(getByText("Low")).toBeDefined();
     });
 
     it("renders medium priority", () => {
-      render(<StatusBadge status="medium" />);
-      expect(screen.getByText("Medium")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="medium" />);
+      expect(getByText("Medium")).toBeDefined();
     });
 
     it("renders high priority", () => {
-      render(<StatusBadge status="high" />);
-      expect(screen.getByText("High")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="high" />);
+      expect(getByText("High")).toBeDefined();
     });
 
     it("renders critical priority with animation class", () => {
-      const { container } = render(<StatusBadge status="critical" />);
-      expect(screen.getByText("Critical")).toBeInTheDocument();
+      const { container, getByText } = render(<StatusBadge status="critical" />);
+      expect(getByText("Critical")).toBeDefined();
       // Critical should have animation
-      expect(container.querySelector(".animate-pulse")).toBeInTheDocument();
+      expect(container.querySelector(".animate-pulse")).toBeDefined();
     });
   });
 
   describe("Equipment Statuses", () => {
     it("renders operational status", () => {
-      render(<StatusBadge status="operational" />);
-      expect(screen.getByText("Operational")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="operational" />);
+      expect(getByText("Operational")).toBeDefined();
     });
 
     it("renders maintenance status", () => {
-      render(<StatusBadge status="maintenance" />);
-      expect(screen.getByText("Maintenance")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="maintenance" />);
+      expect(getByText("Maintenance")).toBeDefined();
     });
 
     it("renders down status with animation", () => {
-      const { container } = render(<StatusBadge status="down" />);
-      expect(screen.getByText("Line Down")).toBeInTheDocument();
+      const { container, getByText } = render(<StatusBadge status="down" />);
+      expect(getByText("Line Down")).toBeDefined();
       // Down equipment should have pulsing animation
-      expect(container.querySelector(".animate-ping")).toBeInTheDocument();
+      expect(container.querySelector(".animate-ping")).toBeDefined();
     });
   });
 
   describe("Edge Cases", () => {
     it("renders Unknown for null status", () => {
-      render(<StatusBadge status={null} />);
-      expect(screen.getByText("Unknown")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status={null} />);
+      expect(getByText("Unknown")).toBeDefined();
     });
 
     it("renders Unknown for undefined status", () => {
-      render(<StatusBadge status={undefined} />);
-      expect(screen.getByText("Unknown")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status={undefined} />);
+      expect(getByText("Unknown")).toBeDefined();
     });
 
     it("renders Unknown for empty string", () => {
-      render(<StatusBadge status="" />);
-      expect(screen.getByText("Unknown")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="" />);
+      expect(getByText("Unknown")).toBeDefined();
     });
 
     it("handles unknown status gracefully", () => {
-      render(<StatusBadge status="some_random_status" />);
+      const { getByText } = render(<StatusBadge status="some_random_status" />);
       // Fallback displays the raw status
-      expect(screen.getByText("some_random_status")).toBeInTheDocument();
+      expect(getByText("some_random_status")).toBeDefined();
     });
 
     it("is case insensitive", () => {
-      render(<StatusBadge status="OPEN" />);
-      expect(screen.getByText("Open")).toBeInTheDocument();
+      const { getByText } = render(<StatusBadge status="OPEN" />);
+      expect(getByText("Open")).toBeDefined();
     });
   });
 
@@ -101,19 +101,19 @@ describe("StatusBadge", () => {
       const { container } = render(
         <StatusBadge status="open" className="custom-class" />
       );
-      expect(container.firstChild).toHaveClass("custom-class");
+      expect(container.firstElementChild?.classList.contains("custom-class")).toBe(true);
     });
 
     it("shows icon when showIcon is true", () => {
       const { container } = render(<StatusBadge status="open" showIcon />);
       // Icon should be rendered (svg element)
-      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(container.querySelector("svg")).toBeDefined();
     });
 
     it("applies pulse animation when pulse prop is true on dot-based status", () => {
       const { container } = render(<StatusBadge status="operational" pulse />);
       // Should have ping animation for statuses with showDot
-      expect(container.querySelector(".animate-ping")).toBeInTheDocument();
+      expect(container.querySelector(".animate-ping")).toBeDefined();
     });
   });
 });

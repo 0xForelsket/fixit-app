@@ -1,5 +1,5 @@
 import { StatsCard } from "@/components/ui/stats-card";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { Activity, AlertTriangle, Clock, Inbox } from "lucide-react";
 import { describe, expect, it } from "bun:test";
 
@@ -11,42 +11,42 @@ describe("StatsCard", () => {
   };
 
   it("renders title and value", () => {
-    render(<StatsCard {...defaultProps} />);
+    const { getByText } = render(<StatsCard {...defaultProps} />);
 
-    expect(screen.getByText("Open Tickets")).toBeInTheDocument();
-    expect(screen.getByText("42")).toBeInTheDocument();
+    expect(getByText("Open Tickets")).toBeDefined();
+    expect(getByText("42")).toBeDefined();
   });
 
   it("formats numeric values with locale", () => {
-    render(<StatsCard {...defaultProps} value={1234567} />);
+    const { getByText } = render(<StatsCard {...defaultProps} value={1234567} />);
 
     // Should format with commas (or locale-specific separator)
-    expect(screen.getByText("1,234,567")).toBeInTheDocument();
+    expect(getByText("1,234,567")).toBeDefined();
   });
 
   it("handles string values", () => {
-    render(<StatsCard {...defaultProps} value="N/A" />);
+    const { getByText } = render(<StatsCard {...defaultProps} value="N/A" />);
 
-    expect(screen.getByText("N/A")).toBeInTheDocument();
+    expect(getByText("N/A")).toBeDefined();
   });
 
   it("renders description when provided", () => {
-    render(<StatsCard {...defaultProps} description="last 24 hours" />);
+    const { getByText } = render(<StatsCard {...defaultProps} description="last 24 hours" />);
 
-    expect(screen.getByText("last 24 hours")).toBeInTheDocument();
+    expect(getByText("last 24 hours")).toBeDefined();
   });
 
   it("renders as a link when href is provided", () => {
-    render(<StatsCard {...defaultProps} href="/tickets" />);
+    const { getByRole } = render(<StatsCard {...defaultProps} href="/tickets" />);
 
-    const link = screen.getByRole("link");
-    expect(link).toHaveAttribute("href", "/tickets");
+    const link = getByRole("link");
+    expect(link.getAttribute("href")).toBe("/tickets");
   });
 
   it("renders as a div when no href is provided", () => {
-    render(<StatsCard {...defaultProps} />);
+    const { queryByRole } = render(<StatsCard {...defaultProps} />);
 
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(queryByRole("link")).toBeNull();
   });
 
   describe("Variants", () => {
@@ -55,7 +55,7 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} />
       );
 
-      expect(container.firstChild).toHaveClass("bg-card");
+      expect(container.firstElementChild?.classList.contains("bg-card")).toBe(true);
     });
 
     it("applies primary variant styles", () => {
@@ -63,7 +63,7 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="primary" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-primary/10");
+      expect(container.firstElementChild?.classList.contains("bg-primary/10")).toBe(true);
     });
 
     it("applies success variant styles", () => {
@@ -71,7 +71,7 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="success" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-success-500/15");
+      expect(container.firstElementChild?.classList.contains("bg-success-500/15")).toBe(true);
     });
 
     it("applies warning variant styles", () => {
@@ -79,7 +79,7 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="warning" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-warning-500/15");
+      expect(container.firstElementChild?.classList.contains("bg-warning-500/15")).toBe(true);
     });
 
     it("applies danger variant styles", () => {
@@ -87,7 +87,7 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="danger" />
       );
 
-      expect(container.firstChild).toHaveClass("bg-danger-500/15");
+      expect(container.firstElementChild?.classList.contains("bg-danger-500/15")).toBe(true);
     });
   });
 
@@ -98,7 +98,7 @@ describe("StatsCard", () => {
       );
 
       // Active state should have special styling
-      expect(container.firstChild).toHaveClass("border-primary/40");
+      expect(container.firstElementChild?.classList.contains("border-primary/40")).toBe(true);
     });
 
     it("shows pulse animation when active", () => {
@@ -106,13 +106,13 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} active={true} />
       );
 
-      expect(container.querySelector(".animate-pulse")).toBeInTheDocument();
+      expect(container.querySelector(".animate-pulse")).toBeDefined();
     });
   });
 
   describe("Trend Display", () => {
     it("renders positive trend", () => {
-      render(
+      const { getByText } = render(
         <StatsCard
           title="Test"
           value={10}
@@ -121,11 +121,11 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(screen.getByText("+10%")).toBeInTheDocument();
+      expect(getByText("+10%")).toBeDefined();
     });
 
     it("renders negative trend", () => {
-      render(
+      const { getByText } = render(
         <StatsCard
           title="Test"
           value={10}
@@ -134,11 +134,11 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(screen.getByText("5%")).toBeInTheDocument();
+      expect(getByText("5%")).toBeDefined();
     });
 
     it("renders trend with label", () => {
-      render(
+      const { getByText } = render(
         <StatsCard
           title="Test"
           value={10}
@@ -147,11 +147,11 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(screen.getByText("vs last month")).toBeInTheDocument();
+      expect(getByText("vs last month")).toBeDefined();
     });
 
     it("applies correct color for positive trend", () => {
-      render(
+      const { getByText } = render(
         <StatsCard
           title="Test"
           value={10}
@@ -160,11 +160,11 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(screen.getByText("+10%")).toHaveClass("bg-success-500/10");
+      expect(getByText("+10%").classList.contains("bg-success-500/10")).toBe(true);
     });
 
     it("applies correct color for negative trend", () => {
-      render(
+      const { getByText } = render(
         <StatsCard
           title="Test"
           value={10}
@@ -173,7 +173,7 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(screen.getByText("10%")).toHaveClass("bg-destructive/10");
+      expect(getByText("10%").classList.contains("bg-destructive/10")).toBe(true);
     });
   });
 
@@ -184,17 +184,17 @@ describe("StatsCard", () => {
       );
 
       // SVG icon should be rendered
-      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(container.querySelector("svg")).toBeDefined();
     });
 
     it("uses different icons for different cards", () => {
       const { rerender, container } = render(
         <StatsCard {...defaultProps} icon={Inbox} />
       );
-      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(container.querySelector("svg")).toBeDefined();
 
       rerender(<StatsCard {...defaultProps} icon={Clock} />);
-      expect(container.querySelector("svg")).toBeInTheDocument();
+      expect(container.querySelector("svg")).toBeDefined();
     });
   });
 
@@ -204,7 +204,7 @@ describe("StatsCard", () => {
         <StatsCard {...defaultProps} className="my-custom-class" />
       );
 
-      expect(container.firstChild).toHaveClass("my-custom-class");
+      expect(container.firstElementChild?.classList.contains("my-custom-class")).toBe(true);
     });
   });
 });

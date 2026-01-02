@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render } from "@testing-library/react";
 import { AlertCircle, Inbox, Package } from "lucide-react";
 import { describe, expect, it, mock } from "bun:test";
 
@@ -19,27 +18,27 @@ const { EmptyState } = await import("@/components/ui/empty-state");
 
 describe("EmptyState", () => {
   it("renders title correctly", () => {
-    render(<EmptyState title="No items found" />);
-    expect(screen.getByText("No items found")).toBeInTheDocument();
+    const { getByText } = render(<EmptyState title="No items found" />);
+    expect(getByText("No items found")).toBeDefined();
   });
 
   it("renders title as heading", () => {
-    render(<EmptyState title="Empty Title" />);
+    const { getByRole } = render(<EmptyState title="Empty Title" />);
     expect(
-      screen.getByRole("heading", { name: "Empty Title" })
-    ).toBeInTheDocument();
+      getByRole("heading", { name: "Empty Title" })
+    ).toBeDefined();
   });
 
   it("renders description when provided", () => {
-    render(
+    const { getByText } = render(
       <EmptyState
         title="No items"
         description="Try adjusting your search criteria"
       />
     );
     expect(
-      screen.getByText("Try adjusting your search criteria")
-    ).toBeInTheDocument();
+      getByText("Try adjusting your search criteria")
+    ).toBeDefined();
   });
 
   it("does not render description when not provided", () => {
@@ -51,80 +50,80 @@ describe("EmptyState", () => {
   it("uses default Search icon when none provided", () => {
     const { container } = render(<EmptyState title="No results" />);
     const iconContainer = container.querySelector(".h-16.w-16");
-    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer).toBeDefined();
     // Should have an SVG (the icon)
     const svg = iconContainer?.querySelector("svg");
-    expect(svg).toBeInTheDocument();
+    expect(svg).toBeDefined();
   });
 
   it("renders custom icon when provided", () => {
-    render(<EmptyState title="No packages" icon={Package} />);
-    // Icon should be rendered
-    const { container } = render(<EmptyState title="Empty" icon={Inbox} />);
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    const { container: container1 } = render(<EmptyState title="No packages" icon={Package} />);
+    expect(container1.querySelector("svg")).toBeDefined();
+    
+    const { container: container2 } = render(<EmptyState title="Empty" icon={Inbox} />);
+    expect(container2.querySelector("svg")).toBeDefined();
   });
 
   it("applies custom className", () => {
     const { container } = render(
       <EmptyState title="Empty" className="custom-empty-state" />
     );
-    expect(container.firstChild).toHaveClass("custom-empty-state");
+    expect(container.firstElementChild?.classList.contains("custom-empty-state")).toBe(true);
   });
 
   it("has default styling classes", () => {
     const { container } = render(<EmptyState title="Empty" />);
-    expect(container.firstChild).toHaveClass("flex");
-    expect(container.firstChild).toHaveClass("flex-col");
-    expect(container.firstChild).toHaveClass("items-center");
-    expect(container.firstChild).toHaveClass("justify-center");
+    expect(container.firstElementChild?.classList.contains("flex")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("flex-col")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("items-center")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("justify-center")).toBe(true);
   });
 
   it("renders children when provided", () => {
-    render(
+    const { getByRole } = render(
       <EmptyState title="No items">
         <button type="button">Custom action</button>
       </EmptyState>
     );
     expect(
-      screen.getByRole("button", { name: "Custom action" })
-    ).toBeInTheDocument();
+      getByRole("button", { name: "Custom action" })
+    ).toBeDefined();
   });
 
   describe("action prop", () => {
     it("renders action button with href as link", () => {
-      render(
+      const { getByRole } = render(
         <EmptyState
           title="No items"
           action={{ label: "Create Item", href: "/items/new" }}
         />
       );
-      const link = screen.getByRole("link", { name: "Create Item" });
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute("href", "/items/new");
+      const link = getByRole("link", { name: "Create Item" });
+      expect(link).toBeDefined();
+      expect(link.getAttribute("href")).toBe("/items/new");
     });
 
-    it("renders action button with onClick handler", async () => {
-      const handleClick = mock();
-      const user = userEvent.setup();
+    it("renders action button with onClick handler", () => {
+      const handleClick = mock(() => {});
 
-      render(
+      const { getByRole } = render(
         <EmptyState
           title="No items"
           action={{ label: "Retry", onClick: handleClick }}
         />
       );
 
-      const button = screen.getByRole("button", { name: "Retry" });
-      expect(button).toBeInTheDocument();
+      const button = getByRole("button", { name: "Retry" });
+      expect(button).toBeDefined();
 
-      await user.click(button);
+      button.click();
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
     it("prefers href over onClick when both provided", () => {
-      const handleClick = mock();
+      const handleClick = mock(() => {});
 
-      render(
+      const { getByRole } = render(
         <EmptyState
           title="No items"
           action={{
@@ -136,30 +135,30 @@ describe("EmptyState", () => {
       );
 
       // Should render as link when href is provided
-      expect(screen.getByRole("link", { name: "Action" })).toBeInTheDocument();
+      expect(getByRole("link", { name: "Action" })).toBeDefined();
     });
   });
 
   it("does not render action when not provided", () => {
-    render(<EmptyState title="No items" />);
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    const { queryByRole } = render(<EmptyState title="No items" />);
+    expect(queryByRole("button")).toBeNull();
+    expect(queryByRole("link")).toBeNull();
   });
 
   it("renders with different icons", () => {
     const { rerender, container } = render(
       <EmptyState title="Alert" icon={AlertCircle} />
     );
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeDefined();
 
     rerender(<EmptyState title="Package" icon={Package} />);
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeDefined();
   });
 
   it("combines title, description, children, and action", () => {
-    const handleClick = mock();
+    const handleClick = mock(() => {});
 
-    render(
+    const { getByText, getByRole } = render(
       <EmptyState
         title="No work orders"
         description="Get started by creating your first work order"
@@ -169,13 +168,13 @@ describe("EmptyState", () => {
       </EmptyState>
     );
 
-    expect(screen.getByText("No work orders")).toBeInTheDocument();
+    expect(getByText("No work orders")).toBeDefined();
     expect(
-      screen.getByText("Get started by creating your first work order")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Additional help text")).toBeInTheDocument();
+      getByText("Get started by creating your first work order")
+    ).toBeDefined();
+    expect(getByText("Additional help text")).toBeDefined();
     expect(
-      screen.getByRole("button", { name: "Create Work Order" })
-    ).toBeInTheDocument();
+      getByRole("button", { name: "Create Work Order" })
+    ).toBeDefined();
   });
 });

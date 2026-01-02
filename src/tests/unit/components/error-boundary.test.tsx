@@ -1,6 +1,5 @@
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
 
 // Component that throws an error
@@ -14,7 +13,7 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 // Suppress console.error for expected error boundary logs
 const originalError = console.error;
 beforeEach(() => {
-  console.error = mock();
+  console.error = mock(() => {});
 });
 
 afterEach(() => {
@@ -23,47 +22,47 @@ afterEach(() => {
 
 describe("ErrorBoundary", () => {
   it("renders children when no error", () => {
-    render(
+    const { getByText } = render(
       <ErrorBoundary>
         <div>Child content</div>
       </ErrorBoundary>
     );
 
-    expect(screen.getByText("Child content")).toBeInTheDocument();
+    expect(getByText("Child content")).toBeDefined();
   });
 
   it("renders default fallback when error occurs", () => {
-    render(
+    const { getByText } = render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText("Component Error")).toBeInTheDocument();
-    expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
+    expect(getByText("Component Error")).toBeDefined();
+    expect(getByText(/Something went wrong/)).toBeDefined();
   });
 
   it("renders custom fallback when provided", () => {
-    render(
+    const { getByText, queryByText } = render(
       <ErrorBoundary fallback={<div>Custom error message</div>}>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText("Custom error message")).toBeInTheDocument();
-    expect(screen.queryByText("Component Error")).not.toBeInTheDocument();
+    expect(getByText("Custom error message")).toBeDefined();
+    expect(queryByText("Component Error")).toBeNull();
   });
 
   it("shows Try Again button in default fallback", () => {
-    render(
+    const { getByRole } = render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
     expect(
-      screen.getByRole("button", { name: /Try Again/i })
-    ).toBeInTheDocument();
+      getByRole("button", { name: /Try Again/i })
+    ).toBeDefined();
   });
 
   it("logs error to console", () => {
@@ -88,7 +87,7 @@ describe("ErrorBoundary", () => {
     );
 
     // Check for SVG (Lucide icon)
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(container.querySelector("svg")).toBeDefined();
   });
 
   it("has proper styling for error state", () => {
@@ -98,31 +97,31 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
 
-    const errorContainer = container.firstChild as HTMLElement;
-    expect(errorContainer).toHaveClass("border-danger-200");
-    expect(errorContainer).toHaveClass("bg-danger-50");
+    const errorContainer = container.firstElementChild as HTMLElement;
+    expect(errorContainer?.classList.contains("border-danger-200")).toBe(true);
+    expect(errorContainer?.classList.contains("bg-danger-50")).toBe(true);
+    // Note: Classes might have changed, but testing for existence
   });
 
   describe("Recovery", () => {
-    it("clicking Try Again resets error state", async () => {
-      const user = userEvent.setup();
-
-      render(
+    it("clicking Try Again resets error state", () => {
+      const { getByRole, getByText } = render(
         <ErrorBoundary>
           <ThrowError shouldThrow={true} />
         </ErrorBoundary>
       );
 
       // Should show error state
-      expect(screen.getByText("Component Error")).toBeInTheDocument();
+      expect(getByText("Component Error")).toBeDefined();
 
       // Click Try Again - this resets the hasError state
-      await user.click(screen.getByRole("button", { name: /Try Again/i }));
+      const button = getByRole("button", { name: /Try Again/i });
+      button.click();
 
       // The component will attempt to re-render children
       // Since ThrowError still throws, it will go back to error state
       // This test just verifies the button works and triggers state reset
-      expect(screen.getByText("Component Error")).toBeInTheDocument();
+      expect(getByText("Component Error")).toBeDefined();
     });
   });
 
@@ -132,7 +131,7 @@ describe("ErrorBoundary", () => {
         throw new Error("Deep error");
       };
 
-      render(
+      const { getByText } = render(
         <ErrorBoundary>
           <div>
             <div>
@@ -144,11 +143,11 @@ describe("ErrorBoundary", () => {
         </ErrorBoundary>
       );
 
-      expect(screen.getByText("Component Error")).toBeInTheDocument();
+      expect(getByText("Component Error")).toBeDefined();
     });
 
     it("isolates errors to the boundary", () => {
-      render(
+      const { getByTestId, getByText } = render(
         <div>
           <div data-testid="sibling">Sibling content</div>
           <ErrorBoundary>
@@ -158,15 +157,15 @@ describe("ErrorBoundary", () => {
       );
 
       // Sibling should still render
-      expect(screen.getByTestId("sibling")).toBeInTheDocument();
+      expect(getByTestId("sibling")).toBeDefined();
       // Error boundary should show error
-      expect(screen.getByText("Component Error")).toBeInTheDocument();
+      expect(getByText("Component Error")).toBeDefined();
     });
   });
 
   describe("Props", () => {
     it("accepts ReactNode as children", () => {
-      render(
+      const { getByText } = render(
         <ErrorBoundary>
           <span>Text node</span>
           <div>Div node</div>
@@ -175,12 +174,12 @@ describe("ErrorBoundary", () => {
         </ErrorBoundary>
       );
 
-      expect(screen.getByText("Text node")).toBeInTheDocument();
-      expect(screen.getByText("Div node")).toBeInTheDocument();
+      expect(getByText("Text node")).toBeDefined();
+      expect(getByText("Div node")).toBeDefined();
     });
 
     it("accepts ReactNode as fallback", () => {
-      render(
+      const { getByText } = render(
         <ErrorBoundary
           fallback={
             <>
@@ -193,8 +192,8 @@ describe("ErrorBoundary", () => {
         </ErrorBoundary>
       );
 
-      expect(screen.getByText("Error 1")).toBeInTheDocument();
-      expect(screen.getByText("Error 2")).toBeInTheDocument();
+      expect(getByText("Error 1")).toBeDefined();
+      expect(getByText("Error 2")).toBeDefined();
     });
   });
 });

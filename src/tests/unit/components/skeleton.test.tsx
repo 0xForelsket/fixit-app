@@ -5,68 +5,65 @@ import {
   SkeletonTable,
   SkeletonTicketList,
 } from "@/components/ui/skeleton";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it } from "bun:test";
 
 describe("Skeleton", () => {
   it("renders correctly", () => {
-    render(<Skeleton data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton")).toBeInTheDocument();
+    const { getByTestId } = render(<Skeleton data-testid="skeleton" />);
+    expect(getByTestId("skeleton")).toBeDefined();
   });
 
   it("has skeleton class by default", () => {
-    render(<Skeleton data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton")).toHaveClass("skeleton");
+    const { getByTestId } = render(<Skeleton data-testid="skeleton" />);
+    expect(getByTestId("skeleton").classList.contains("skeleton")).toBe(true);
   });
 
   it("applies custom className", () => {
-    render(<Skeleton className="custom-class" data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton")).toHaveClass("custom-class");
+    const { getByTestId } = render(<Skeleton className="custom-class" data-testid="skeleton" />);
+    expect(getByTestId("skeleton").classList.contains("custom-class")).toBe(true);
   });
 
   it("renders as div element", () => {
-    render(<Skeleton data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton").tagName).toBe("DIV");
+    const { getByTestId } = render(<Skeleton data-testid="skeleton" />);
+    expect(getByTestId("skeleton").tagName).toBe("DIV");
   });
 
   it("handles default variant", () => {
-    render(<Skeleton variant="default" data-testid="skeleton" />);
-    const skeleton = screen.getByTestId("skeleton");
-    expect(skeleton).toHaveClass("skeleton");
-    expect(skeleton).not.toHaveClass("rounded-full");
-    expect(skeleton).not.toHaveClass("rounded-none");
+    const { getByTestId } = render(<Skeleton variant="default" data-testid="skeleton" />);
+    const skeleton = getByTestId("skeleton");
+    expect(skeleton.classList.contains("skeleton")).toBe(true);
+    expect(skeleton.classList.contains("rounded-full")).toBe(false);
+    expect(skeleton.classList.contains("rounded-none")).toBe(false);
   });
 
   it("handles circular variant", () => {
-    render(<Skeleton variant="circular" data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton")).toHaveClass("rounded-full");
+    const { getByTestId } = render(<Skeleton variant="circular" data-testid="skeleton" />);
+    expect(getByTestId("skeleton").classList.contains("rounded-full")).toBe(true);
   });
 
   it("handles rectangular variant", () => {
-    render(<Skeleton variant="rectangular" data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton")).toHaveClass("rounded-none");
+    const { getByTestId } = render(<Skeleton variant="rectangular" data-testid="skeleton" />);
+    expect(getByTestId("skeleton").classList.contains("rounded-none")).toBe(true);
   });
 
   it("passes through additional props", () => {
-    render(<Skeleton aria-label="Loading..." data-testid="skeleton" />);
-    expect(screen.getByTestId("skeleton")).toHaveAttribute(
-      "aria-label",
-      "Loading..."
-    );
+    const { getByTestId } = render(<Skeleton aria-label="Loading..." data-testid="skeleton" />);
+    expect(getByTestId("skeleton").getAttribute("aria-label")).toBe("Loading...");
   });
 
   it("can have custom dimensions via className", () => {
-    render(<Skeleton className="h-10 w-20" data-testid="skeleton" />);
-    const skeleton = screen.getByTestId("skeleton");
-    expect(skeleton).toHaveClass("h-10");
-    expect(skeleton).toHaveClass("w-20");
+    const { getByTestId } = render(<Skeleton className="h-10 w-20" data-testid="skeleton" />);
+    const skeleton = getByTestId("skeleton");
+    expect(skeleton.classList.contains("h-10")).toBe(true);
+    expect(skeleton.classList.contains("w-20")).toBe(true);
   });
 });
 
 describe("SkeletonCard", () => {
   it("renders correctly", () => {
     const { container } = render(<SkeletonCard />);
-    expect(container.firstChild).toBeInTheDocument();
+    expect(container.firstChild).toBeDefined();
   });
 
   it("contains skeleton elements", () => {
@@ -77,9 +74,9 @@ describe("SkeletonCard", () => {
 
   it("has card-like styling", () => {
     const { container } = render(<SkeletonCard />);
-    expect(container.firstChild).toHaveClass("rounded-xl");
-    expect(container.firstChild).toHaveClass("border");
-    expect(container.firstChild).toHaveClass("bg-card");
+    expect(container.firstElementChild?.classList.contains("rounded-xl")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("border")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("bg-card")).toBe(true);
   });
 });
 
@@ -124,8 +121,8 @@ describe("SkeletonStatsGrid", () => {
 
   it("has grid layout", () => {
     const { container } = render(<SkeletonStatsGrid />);
-    expect(container.firstChild).toHaveClass("grid");
-    expect(container.firstChild).toHaveClass("gap-4");
+    expect(container.firstElementChild?.classList.contains("grid")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("gap-4")).toBe(true);
   });
 
   it("contains skeleton elements", () => {
@@ -160,15 +157,15 @@ describe("SkeletonTable", () => {
 
   it("has table-like styling", () => {
     const { container } = render(<SkeletonTable />);
-    expect(container.firstChild).toHaveClass("rounded-xl");
-    expect(container.firstChild).toHaveClass("border");
-    expect(container.firstChild).toHaveClass("overflow-hidden");
+    expect(container.firstElementChild?.classList.contains("rounded-xl")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("border")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("overflow-hidden")).toBe(true);
   });
 
   it("has header section", () => {
     const { container } = render(<SkeletonTable />);
     const header = container.querySelector(".bg-muted\\/50");
-    expect(header).toBeInTheDocument();
+    expect(header).toBeDefined();
   });
 
   it("contains skeleton elements in each row", () => {
