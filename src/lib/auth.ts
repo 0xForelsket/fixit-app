@@ -1,4 +1,5 @@
-import bcrypt from "bcryptjs";
+// Native Bun.password is used instead of bcryptjs
+
 import {
   PERMISSIONS,
   type Permission,
@@ -7,14 +8,15 @@ import {
 } from "./permissions";
 import { type SessionUser, getCurrentUser } from "./session";
 
-const SALT_ROUNDS = 10;
-
 export async function hashPin(pin: string): Promise<string> {
-  return bcrypt.hash(pin, SALT_ROUNDS);
+  return Bun.password.hash(pin, {
+    algorithm: "bcrypt",
+    cost: 10,
+  });
 }
 
 export async function verifyPin(pin: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(pin, hash);
+  return Bun.password.verify(pin, hash);
 }
 
 export const SESSION_CONFIG = {

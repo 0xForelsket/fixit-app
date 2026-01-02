@@ -1,4 +1,5 @@
-import bcrypt from "bcryptjs";
+// Native Bun.password is used instead of bcryptjs
+
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
@@ -11,7 +12,10 @@ const client = postgres(connectionString);
 const db = drizzle(client, { schema });
 
 async function hashPin(pin: string): Promise<string> {
-  return bcrypt.hash(pin, 10);
+  return Bun.password.hash(pin, {
+    algorithm: "bcrypt",
+    cost: 10,
+  });
 }
 
 // Helper to generate random dates
