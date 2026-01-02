@@ -2,8 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Loader2, Printer } from "lucide-react";
-// Remove static imports to avoid SSR/Turbopack issues
-import QRCode from "qrcode";
+// qrcode is dynamically imported in handlePrint to reduce bundle size
 import { useState } from "react";
 
 interface PrintButtonProps {
@@ -24,9 +23,12 @@ export function PrintButton({ workOrder }: PrintButtonProps) {
     try {
       setIsGenerating(true);
 
-      // Dynamically import heavy PDF libraries only when needed
-      const { pdf } = await import("@react-pdf/renderer");
-      const { WorkOrderPDF } = await import("./pdf-document");
+      // Dynamically import heavy PDF libraries and qrcode only when needed
+      const [{ pdf }, { WorkOrderPDF }, QRCode] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("./pdf-document"),
+        import("qrcode"),
+      ]);
 
       // Generate QR Code URL
       const ticketUrl = window.location.href;

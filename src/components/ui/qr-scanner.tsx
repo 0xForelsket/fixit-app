@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Html5QrcodeScanner } from "html5-qrcode";
+// html5-qrcode is dynamically imported to reduce bundle size
+import type { Html5QrcodeScanner } from "html5-qrcode";
 import { AlertTriangle, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,8 +26,15 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
 
     setError(null);
 
-    const timeoutId = setTimeout(() => {
+    let isCancelled = false;
+    let scannerInstance: Html5QrcodeScanner | null = null;
+
+    const initScanner = async () => {
       try {
+        const { Html5QrcodeScanner } = await import("html5-qrcode");
+        
+        if (isCancelled) return;
+
         const scanner = new Html5QrcodeScanner(
           "reader",
           {
@@ -41,23 +49,26 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
         );
 
         scannerRef.current = scanner;
+        scannerInstance = scanner;
 
         scanner.render(
-          (decodedText) => {
+          (decodedText: string) => {
             onScan(decodedText);
           },
-          (_errorMessage) => {}
+          (_errorMessage: string) => {}
         );
       } catch (err) {
         console.error("Failed to initialize QR scanner", err);
         setError("Failed to initialize camera. Please check permissions.");
       }
-    }, 100);
+    };
+
+    initScanner();
 
     return () => {
-      clearTimeout(timeoutId);
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch((err) => {
+      isCancelled = true;
+      if (scannerInstance) {
+        scannerInstance.clear().catch((err: unknown) => {
           console.error("Failed to clear scanner", err);
         });
         scannerRef.current = null;
