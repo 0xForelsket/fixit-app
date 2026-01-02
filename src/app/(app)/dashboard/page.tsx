@@ -1,4 +1,8 @@
-import { CustomizableDashboard } from "@/components/dashboard/customizable-dashboard";
+import {
+  DashboardContent,
+  DashboardHeaderActions,
+  DashboardStats,
+} from "@/components/dashboard/customizable-dashboard";
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -322,26 +326,6 @@ export default async function DashboardPage() {
     redirect("/home");
   }
 
-  const headerActionsContent = (
-    <>
-      <Button
-        size="sm"
-        variant="outline"
-        className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10"
-        asChild
-      >
-        <Link href="/assets/qr-codes">SCAN QR</Link>
-      </Button>
-      <Button
-        size="sm"
-        className="h-8 text-[10px] font-black uppercase tracking-widest"
-        asChild
-      >
-        <Link href="/">REPORT ISSUE</Link>
-      </Button>
-    </>
-  );
-
   return (
     <PageLayout
       id="dashboard-page"
@@ -350,8 +334,26 @@ export default async function DashboardPage() {
       description="CENTRALIZED CONTROL PANEL FOR MAINTENANCE OPERATIONS"
       bgSymbol="TT"
       headerActions={
-        <CustomizableDashboard
-          headerActions={headerActionsContent}
+        <DashboardHeaderActions>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10"
+            asChild
+          >
+            <Link href="/assets/qr-codes">SCAN QR</Link>
+          </Button>
+          <Button
+            size="sm"
+            className="h-8 text-[10px] font-black uppercase tracking-widest"
+            asChild
+          >
+            <Link href="/">REPORT ISSUE</Link>
+          </Button>
+        </DashboardHeaderActions>
+      }
+      stats={
+        <DashboardStats
           personalStatsWidget={
             user ? (
               <Suspense fallback={<StatsLoading />}>
@@ -364,20 +366,23 @@ export default async function DashboardPage() {
               <GlobalStatsSection user={user} />
             </Suspense>
           }
-          myQueueWidget={
-            user ? (
-              <Suspense fallback={<FeedLoading />}>
-                <PersonalQueueSection userId={user.id} />
-              </Suspense>
-            ) : null
-          }
-          globalQueueWidget={
-            <Suspense fallback={<FeedLoading />}>
-              <GlobalQueueSection user={user} />
-            </Suspense>
-          }
         />
       }
-    />
+    >
+      <DashboardContent
+        myQueueWidget={
+          user ? (
+            <Suspense fallback={<FeedLoading />}>
+              <PersonalQueueSection userId={user.id} />
+            </Suspense>
+          ) : null
+        }
+        globalQueueWidget={
+          <Suspense fallback={<FeedLoading />}>
+            <GlobalQueueSection user={user} />
+          </Suspense>
+        }
+      />
+    </PageLayout>
   );
 }
