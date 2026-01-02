@@ -1,10 +1,10 @@
 import { getDepartments } from "@/actions/departments";
 import { getRoles } from "@/actions/roles";
 import { db } from "@/db";
-import { equipment, maintenanceSchedules, users } from "@/db/schema";
+import { departments, equipment, maintenanceSchedules, roles, users, workOrders } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser, requireAnyPermission } from "@/lib/session";
-import { and, desc, eq, gte, lt } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { SystemTabs } from "./system-tabs";
 
@@ -67,6 +67,68 @@ async function getSchedulerData() {
   };
 }
 
+async function getTechnicianWorkloads() {
+  // Get technician role
+  const techRole = await db.query.roles.findFirst({
+    where: eq(roles.name, "tech"),
+  });
+
+  if (!techRole) return [];
+
+  // Get all active technicians with their departments
+  const technicians = await db.query.users.findMany({
+    where: and(eq(users.roleId, techRole.id), eq(users.isActive, true)),
+    columns: { id: true, name: true, departmentId: true },
+    with: {
+      department: { columns: { name: true } },
+    },
+  });
+
+  if (technicians.length === 0) return [];
+
+  const now = new Date();
+
+  // Get workload counts for all technicians in a single query
+  const workloadData = await db
+    .select({
+      assignedToId: workOrders.assignedToId,
+      openCount: sql<number>`count(case when ${workOrders.status} = 'open' then 1 end)`,
+      inProgressCount: sql<number>`count(case when ${workOrders.status} = 'in_progress' then 1 end)`,
+      criticalCount: sql<number>`count(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 end)`,
+      overdueCount: sql<number>`count(case when ${workOrders.dueBy} < ${now} and ${workOrders.status} in ('open', 'in_progress') then 1 end)`,
+    })
+    .from(workOrders)
+    .where(
+      and(
+        inArray(
+          workOrders.assignedToId,
+          technicians.map((t) => t.id)
+        ),
+        or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress"))
+      )
+    )
+    .groupBy(workOrders.assignedToId);
+
+  // Create a map of workload by technician ID
+  const workloadMap = new Map(
+    workloadData.map((w) => [w.assignedToId, w])
+  );
+
+  // Combine technician info with workload data
+  return technicians.map((tech) => {
+    const workload = workloadMap.get(tech.id);
+    return {
+      id: tech.id,
+      name: tech.name,
+      departmentName: tech.department?.name || null,
+      openCount: Number(workload?.openCount || 0),
+      inProgressCount: Number(workload?.inProgressCount || 0),
+      criticalCount: Number(workload?.criticalCount || 0),
+      overdueCount: Number(workload?.overdueCount || 0),
+    };
+  });
+}
+
 export default async function SystemPage() {
   // Check if user has any admin-related permission
   const currentUser = await getCurrentUser();
@@ -84,7 +146,7 @@ export default async function SystemPage() {
     : false;
 
   // Fetch all data in parallel
-  const [usersList, roles, equipmentList, departmentsList, usersForSelect, schedulerData] =
+  const [usersList, rolesList, equipmentList, departmentsList, usersForSelect, schedulerData, technicianWorkloads] =
     await Promise.all([
       getUsers(),
       getRoles({}),
@@ -92,6 +154,7 @@ export default async function SystemPage() {
       getDepartments({}),
       getUsersForSelect(),
       getSchedulerData(),
+      getTechnicianWorkloads(),
     ]);
 
   // Get base URL for QR codes
@@ -111,16 +174,16 @@ export default async function SystemPage() {
   };
 
   const roleStats = {
-    total: roles.length,
-    system: roles.filter((r) => r.isSystemRole).length,
-    custom: roles.filter((r) => !r.isSystemRole).length,
+    total: rolesList.length,
+    system: rolesList.filter((r) => r.isSystemRole).length,
+    custom: rolesList.filter((r) => !r.isSystemRole).length,
   };
 
   return (
     <SystemTabs
       users={usersList}
       userStats={userStats}
-      roles={roles}
+      roles={rolesList}
       roleStats={roleStats}
       equipment={equipmentList}
       baseUrl={baseUrl}
@@ -128,6 +191,7 @@ export default async function SystemPage() {
       usersForSelect={usersForSelect}
       canEditDepartments={canEditDepartments}
       schedulerData={schedulerData}
+      technicianWorkloads={technicianWorkloads}
     />
   );
 }

@@ -9,7 +9,7 @@ import {
   PillTabsTrigger,
 } from "@/components/ui/pill-tabs";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
-import { Building2, Calendar, Cog, QrCode, Shield, Upload, Users } from "lucide-react";
+import { BarChart3, Building2, Calendar, Cog, QrCode, Shield, Upload, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DepartmentsTab } from "./tabs/departments-tab";
 import { ImportTab } from "./tabs/import-tab";
@@ -18,6 +18,7 @@ import { RolesTab } from "./tabs/roles-tab";
 import { SchedulerTab } from "./tabs/scheduler-tab";
 import { SettingsTab } from "./tabs/settings-tab";
 import { UsersTab } from "./tabs/users-tab";
+import { type TechnicianWorkload, WorkloadTab } from "./tabs/workload-tab";
 
 interface User {
   id: string;
@@ -102,6 +103,7 @@ interface SystemTabsProps {
   usersForSelect: UserForSelect[];
   canEditDepartments: boolean;
   schedulerData: SchedulerData;
+  technicianWorkloads: TechnicianWorkload[];
 }
 
 export function SystemTabs({
@@ -115,6 +117,7 @@ export function SystemTabs({
   usersForSelect,
   canEditDepartments,
   schedulerData,
+  technicianWorkloads,
 }: SystemTabsProps) {
   const [activeTab, setActiveTab] = useState("users");
   const [userPermissions, setUserPermissions] = useState<string[]>([]);
@@ -134,6 +137,7 @@ export function SystemTabs({
         "departments",
         "settings",
         "scheduler",
+        "workload",
         "qr-codes",
         "import",
       ].includes(hash)
@@ -174,6 +178,11 @@ export function SystemTabs({
     PERMISSIONS.SYSTEM_SCHEDULER
   );
 
+  const canViewWorkload = hasPermission(
+    userPermissions,
+    PERMISSIONS.TICKET_VIEW_ALL
+  );
+
   const tabs = [
     { id: "users", label: "Users", icon: Users, visible: canViewUsers },
     { id: "roles", label: "Roles", icon: Shield, visible: canViewRoles },
@@ -189,6 +198,12 @@ export function SystemTabs({
       label: "Scheduler",
       icon: Calendar,
       visible: canViewScheduler,
+    },
+    {
+      id: "workload",
+      label: "Workload",
+      icon: BarChart3,
+      visible: canViewWorkload,
     },
     {
       id: "qr-codes",
@@ -246,6 +261,10 @@ export function SystemTabs({
             overdueCount={schedulerData.overdueCount}
             upcomingCount={schedulerData.upcomingCount}
           />
+        </PillTabsContent>
+
+        <PillTabsContent value="workload">
+          <WorkloadTab technicians={technicianWorkloads} />
         </PillTabsContent>
 
         <PillTabsContent value="qr-codes">
