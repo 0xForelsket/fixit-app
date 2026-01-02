@@ -1,0 +1,3 @@
+[test]
+preload = ["./src/tests/setup.ts"]
+smol = true
