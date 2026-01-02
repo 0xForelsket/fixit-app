@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   register: true,
@@ -83,4 +88,5 @@ const nextConfig: NextConfig = {
 
 const isDev = process.env.NODE_ENV === "development";
 
-module.exports = isDev ? nextConfig : withPWA(nextConfig);
+// Apply plugins: bundleAnalyzer wraps the config when ANALYZE=true
+module.exports = withBundleAnalyzer(isDev ? nextConfig : withPWA(nextConfig));
