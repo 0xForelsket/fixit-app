@@ -41,12 +41,17 @@ To two optimized patterns:
 1.  **Single Query Joins:** Using `db.select().from().innerJoin()` for read-heavy views.
 2.  **Batch Filling:** Using `Promise.all` + `inArray` checks for situations where joins were too complex.
 
+### Payload Optimization
+We also found that we were over-fetching massive objects for simple selects.
+**Before:** Fetched full `User` object (including sensitive auth fields) just to display "Assigned To: John".
+**After:** Implemented strict Drizzle columns selection: `columns: { id: true, name: true }`.
+
 ---
 
 ## 3. The Testing Migration: Vitest to Bun Native
 
 ### The Event
-The team moved from proper Vitest/Jest setups to Bun's native test runner (`bun:test`).
+The team moved from mixed Vitest/Jest setups to Bun's native test runner (`bun:test`).
 
 ### The Friction
 While unit tests for logic functions were trivial to migrate, **React Component tests failed effectively everywhere**.
@@ -58,20 +63,33 @@ While unit tests for logic functions were trivial to migrate, **React Component 
 
 ---
 
-## 4. UI Architecture: The "God Component" Trap
+## 4. UI Architecture & Patterns
 
-### The Event
-The `Sidebar` component grew to >700 lines (`1021069`), managing navigation state, user menus, organization switching, and mobile responsiveness.
+### The "God Component" Trap (Sidebar)
+The `Sidebar` component grew to >700 lines (`1021069`).
+**The Lesson:** "Files" are not "Features". Breaking it down by *responsibility* (navigation vs. user context vs. layout) made the code testable and readable.
 
-### The Refactor
-We split it into 5 focused sub-modules (`sidebar-nav.tsx`, `sidebar-user.tsx`, etc.).
+### Form Standardization
+Inconsistency between forms (Create Work Order vs. New Equipment) led to a disjointed UX.
+**The Solution:** We standardized on `src/components/ui/form-layout.tsx` providing `FieldGroup`, `FormGrid`, and `FormSection` primitives. This enforced consistent spacing, label styling, and error handling across all forms without reinventing the wheel for every page.
 
-### The Lesson
-**"Files" are not "Features".** We initially kept everything in "Sidebar.tsx" because it was "The Sidebar". breaking it down by *responsibility* (navigation vs. user context vs. layout) made the code testable and readable.
+### Theme Awareness
+We migrated hardcoded Tailwind colors (`bg-white`, `text-gray-900`) to semantic CSS variables (`bg-card`, `text-foreground`). This unlocked "Industrial Mode" (high contrast) and Dark Mode with zero extra logic in components, respecting the user's operational environment.
 
 ---
 
-## 5. DevOps & Tooling Improvements
+## 5. Security & Authentication
+
+### The "Mixed Auth" Debt
+Initial rapid development left us with two parallel auth systems: legacy "Role Checking" (`user.role === 'admin'`) and the new "Permissions System" (`hasPermission(user, 'create:worknetwork')`).
+**The Cleanup:** We audited `src/lib/auth.ts` to expose `requirePermission()` as the primary gatekeeper, deprecating direct role checks. This allows for granular custom roles later without code changes.
+
+### Brute Force Protection
+We implemented natively supported rate-limiting and lockout logic (`BRUTE_FORCE_CONFIG`) directly in the auth service, relying on the database state rather than memory stores (Redis), keeping the infrastructure simple for a manufacturing deployment context.
+
+---
+
+## 6. DevOps & Tooling Improvements
 
 ### Bun Shell for Cross-Platform scripts
 Replacing standard Bash scripts (`tunnel.sh`) with TypeScript scripts using Bun Shell (`$`) solved recurring Windows/WSL interoperability headaches. It allowed us to write complex retry logic and environment variable injection in the same language as the app.
@@ -91,6 +109,6 @@ For the next iteration or project:
 1.  **Schema First:** Use UUIDv7 from the start.
 2.  **Performance First:** Profile bundle size and SQL query counts *before* feature complete.
 3.  **Testing Strategy:** If using Bun, establish the DOM environment pattern immediately, rather than porting it later.
-4.  **Component sizing:** Enforce specific file-size limits (e.g., ~200 lines) to force early component composition.
+4.  **Composition:** Use primitives like `FieldGroup` early to prevent UI drift.
 
 *Generated: January 2, 2026*
