@@ -23,7 +23,7 @@ export function parseWorkOrderId(formattedId: string): number | null {
   // Handle both "WO-123" and "123" formats
   const match = formattedId.match(/^(?:WO-)?(\d+)$/i);
   if (!match) return null;
-  return parseInt(match[1], 10);
+  return Number.parseInt(match[1], 10);
 }
 
 /**

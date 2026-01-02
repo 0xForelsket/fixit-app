@@ -10,7 +10,6 @@ import {
   ClipboardList,
   Mail,
   MonitorCog,
-  Phone,
   User,
   Users,
   Wrench,
