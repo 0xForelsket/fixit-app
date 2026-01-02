@@ -1,6 +1,7 @@
-import { ReportBuilder } from "@/components/reports/builder/report-builder";
-import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, mock } from "bun:test";
+import { ReportBuilder } from "@/components/reports/builder/report-builder";
+import type { WidgetConfig } from "@/components/reports/builder/types";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 
 // Mock server actions
 mock.module("@/actions/reports", () => ({
@@ -50,34 +51,35 @@ describe("ReportBuilder", () => {
   it("renders the initial state", () => {
     const { getByText } = render(<ReportBuilder userId="user1" />);
     expect(getByText("New Report")).toBeDefined();
-    expect(
-      getByText("Drag components here or click to add them")
-    ).toBeDefined();
+    expect(getByText("Start Building Your Report")).toBeDefined();
   });
 
   it("renders initial widgets", () => {
-      const initialTemplate = {
-          config: {
-              title: "Test Report",
-              description: "Desc",
-              widgets: [
-                  {
-                      id: "w1",
-                      type: "bar_chart",
-                      title: "Initial Widget",
-                      dataSource: "work_orders",
-                      layout: { id: "l1", x: 0, y: 0, w: 12, h: 4 },
-                  }
-              ]
-          }
-      };
+    const widget: WidgetConfig = {
+      id: "w1",
+      type: "bar_chart",
+      title: "Initial Widget",
+      dataSource: "work_orders",
+      layout: { id: "l1", x: 0, y: 0, w: 12, h: 4 },
+    };
+    const initialTemplate = {
+      config: {
+        title: "Test Report",
+        description: "Desc",
+        widgets: [widget],
+      },
+    };
 
-      const { getByDisplayValue } = render(<ReportBuilder userId="user1" initialTemplate={initialTemplate} />);
-      expect(getByDisplayValue("Initial Widget")).toBeDefined();
+    const { getByDisplayValue } = render(
+      <ReportBuilder userId="user1" initialTemplate={initialTemplate} />
+    );
+    expect(getByDisplayValue("Initial Widget")).toBeDefined();
   });
 
   it("allows adding widgets", async () => {
-    const { getByText, getByDisplayValue } = render(<ReportBuilder userId="user1" />);
+    const { getByText, getByDisplayValue } = render(
+      <ReportBuilder userId="user1" />
+    );
 
     const addChartBtn = getByText("Bar Chart");
     fireEvent.click(addChartBtn);
@@ -85,8 +87,8 @@ describe("ReportBuilder", () => {
     expect(global.crypto.randomUUID).toHaveBeenCalled();
 
     await waitFor(() => {
-        expect(getByDisplayValue("New Widget")).toBeDefined();
-        expect(getByText(/Data Source/i)).toBeDefined(); 
+      expect(getByDisplayValue("New Widget")).toBeDefined();
+      expect(getByText(/Data Source/i)).toBeDefined();
     });
   });
 
@@ -98,9 +100,9 @@ describe("ReportBuilder", () => {
     // Select by ID
     const titleInput = container.querySelector("#report-title");
     expect(titleInput).not.toBeNull();
-    
+
     if (titleInput) {
-        fireEvent.change(titleInput, { target: { value: "My Annual Report" } });
+      fireEvent.change(titleInput, { target: { value: "My Annual Report" } });
     }
 
     expect(getByDisplayValue("My Annual Report")).toBeDefined();
