@@ -11,12 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
 import {
-  ArrowDown,
-  ArrowUp,
   BarChart3,
   FileText,
   GripVertical,
@@ -32,15 +31,32 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import type { ReportConfig, WidgetConfig, WidgetType } from "./types";
 import { useRouter } from "next/navigation";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
+import { getWorkOrderStats, getInventoryStats, getLaborStats, getStatsSummary, type ChartData } from "@/actions/analytics";
+import { useEffect } from "react";
 // Placeholder data for previews
 const MOCK_DATA = [
   { name: "Jan", value: 400 },
@@ -80,33 +96,40 @@ export function ReportBuilder({
     setConfig((prev) => ({ ...prev, widgets: [...prev.widgets, newWidget] }));
   };
 
-  const removeWidget = (id: string) => {
-    setConfig((prev) => ({
-      ...prev,
-      widgets: prev.widgets.filter((w) => w.id !== id),
-    }));
-  };
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  const moveWidget = (index: number, direction: "up" | "down") => {
-    if (
-      (direction === "up" && index === 0) ||
-      (direction === "down" && index === config.widgets.length - 1)
-    )
-      return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const newWidgets = [...config.widgets];
-    const swapIndex = direction === "up" ? index - 1 : index + 1;
-    [newWidgets[index], newWidgets[swapIndex]] = [
-      newWidgets[swapIndex],
-      newWidgets[index],
-    ];
-    setConfig((prev) => ({ ...prev, widgets: newWidgets }));
+    if (over && active.id !== over.id) {
+      setConfig((prev) => {
+        const oldIndex = prev.widgets.findIndex((w) => w.id === active.id);
+        const newIndex = prev.widgets.findIndex((w) => w.id === over.id);
+
+        return {
+          ...prev,
+          widgets: arrayMove(prev.widgets, oldIndex, newIndex),
+        };
+      });
+    }
   };
 
   const updateWidget = (id: string, updates: Partial<WidgetConfig>) => {
     setConfig((prev) => ({
       ...prev,
       widgets: prev.widgets.map((w) => (w.id === id ? { ...w, ...updates } : w)),
+    }));
+  };
+
+  const removeWidget = (id: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      widgets: prev.widgets.filter((w) => w.id !== id),
     }));
   };
 
@@ -235,17 +258,27 @@ export function ReportBuilder({
               <p>Drag components here or click to add them</p>
             </div>
           ) : (
-            config.widgets.map((widget, index) => (
-              <WidgetCard
-                key={widget.id}
-                widget={widget}
-                index={index}
-                total={config.widgets.length}
-                onMove={moveWidget}
-                onRemove={removeWidget}
-                onUpdate={updateWidget}
-              />
-            ))
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={config.widgets}
+                strategy={verticalListSortingStrategy}
+              >
+                {config.widgets.map((widget, index) => (
+                  <WidgetCard
+                    key={widget.id}
+                    widget={widget}
+                    index={index}
+                    total={config.widgets.length}
+                    onRemove={removeWidget}
+                    onUpdate={updateWidget}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
           )}
         </div>
       </div>
@@ -253,27 +286,82 @@ export function ReportBuilder({
   );
 }
 
+
+// ... imports
+
 function WidgetCard({
   widget,
-  index,
-  total,
-  onMove,
   onRemove,
   onUpdate,
 }: {
   widget: WidgetConfig;
-  index: number;
-  total: number;
-  onMove: (index: number, dir: "up" | "down") => void;
+  index: number; // kept for compatibility if needed, but unused
+  total: number; // kept for compatibility if needed, but unused
   onRemove: (id: string) => void;
   onUpdate: (id: string, updates: Partial<WidgetConfig>) => void;
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: widget.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 1,
+  };
+
+  const [chartData, setChartData] = useState<ChartData>([]);
+  const [summaryData, setSummaryData] = useState<{ label: string; value: string | number }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (widget.type === "stats_summary") {
+           if (widget.dataSource === "work_orders" || widget.dataSource === "inventory" || widget.dataSource === "labor") {
+               const data = await getStatsSummary(widget.dataSource);
+               setSummaryData(data);
+           }
+        } else if (widget.type === "bar_chart" || widget.type === "pie_chart") {
+           let data: ChartData = [];
+           if (widget.dataSource === "work_orders") data = await getWorkOrderStats();
+           else if (widget.dataSource === "inventory") data = await getInventoryStats();
+           else if (widget.dataSource === "labor") data = await getLaborStats();
+           setChartData(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch widget data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [widget.dataSource, widget.type]);
+
   return (
-    <div className="group relative rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "group relative rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md",
+        isDragging && "shadow-lg scale-[1.02] border-primary/50"
+      )}
+      {...attributes}
+    >
       {/* Widget Toolbar */}
       <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-2">
         <div className="flex items-center gap-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab" />
+          <div {...listeners} className="cursor-grab hover:text-primary active:cursor-grabbing">
+            <GripVertical className="h-4 w-4 text-muted-foreground/50" />
+          </div>
           <Input
             value={widget.title}
             onChange={(e) => onUpdate(widget.id, { title: e.target.value })}
@@ -281,25 +369,6 @@ function WidgetCard({
           />
         </div>
         <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-           <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            disabled={index === 0}
-            onClick={() => onMove(index, "up")}
-          >
-            <ArrowUp className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            disabled={index === total - 1}
-            onClick={() => onMove(index, "down")}
-          >
-            <ArrowDown className="h-4 w-4" />
-          </Button>
-          <Separator orientation="vertical" className="h-4 mx-2" />
           <Button
             variant="ghost"
             size="icon"
@@ -313,6 +382,12 @@ function WidgetCard({
 
       {/* Widget Content Area */}
       <div className="p-6">
+        {loading ? (
+             <div className="flex h-[200px] items-center justify-center text-muted-foreground">
+                 Loading data...
+             </div>
+        ) : (
+        <>
         {widget.type === "text_block" && (
            <Textarea
              placeholder="Enter text content here..."
@@ -325,12 +400,10 @@ function WidgetCard({
         {widget.type === "bar_chart" && (
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MOCK_DATA}>
+              <BarChart data={chartData.length > 0 ? chartData : MOCK_DATA}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
-                <Legend />
                 <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -354,19 +427,45 @@ function WidgetCard({
         )}
 
         {widget.type === "pie_chart" && (
-            <div className="h-[300px] flex items-center justify-center border-2 border-dashed border-muted rounded-lg bg-muted/10">
-                <div className="text-center text-muted-foreground">
-                    <PieChartIcon className="mx-auto h-12 w-12 mb-2 opacity-50" />
-                    <p>Pie Chart Visualization ({widget.dataSource})</p>
+             <div className="h-[300px] w-full flex flex-col items-center">
+               {/* Use BarChart for now as PieChart needs more setup with Cells/Legend which we removed */}
+               <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={chartData.length > 0 ? chartData : MOCK_DATA} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#333" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={100} />
+                    <Bar dataKey="value" fill="#8884d8" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+               </ResponsiveContainer>
+                <div className="mt-4 flex gap-4">
+                   <Label className="text-xs text-muted-foreground uppercase">Data Source:</Label>
+                   <Select
+                      value={widget.dataSource}
+                      onValueChange={(v) => onUpdate(widget.id, { dataSource: v as import("./types").DataSource })}
+                   >
+                     <SelectTrigger className="h-8 w-[180px]">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="work_orders">Work Orders</SelectItem>
+                       <SelectItem value="inventory">Inventory</SelectItem>
+                       <SelectItem value="labor">Labor Hours</SelectItem>
+                     </SelectContent>
+                   </Select>
                 </div>
             </div>
         )}
 
         {widget.type === "stats_summary" && (
              <div className="grid grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map(i => (
+                {summaryData.length > 0 ? summaryData.map((s, i) => (
+                     <div key={i} className="rounded-lg border border-border bg-card p-4">
+                        <div className="text-2xl font-bold">{s.value}</div>
+                        <div className="text-xs text-muted-foreground uppercase font-bold">{s.label}</div>
+                    </div>
+                )) : [1, 2, 3, 4].map(i => (
                     <div key={i} className="rounded-lg border border-border bg-card p-4">
-                        <div className="text-2xl font-bold">124</div>
+                        <div className="text-2xl font-bold">--</div>
                         <div className="text-xs text-muted-foreground uppercase font-bold">Metric {i}</div>
                     </div>
                 ))}
@@ -378,8 +477,11 @@ function WidgetCard({
                 <div className="text-center text-muted-foreground">
                     <TableIcon className="mx-auto h-12 w-12 mb-2 opacity-50" />
                     <p>Data Table ({widget.dataSource})</p>
+                    <p className="text-xs">Tables are populated on report generation.</p>
                 </div>
             </div>
+        )}
+        </>
         )}
       </div>
     </div>
