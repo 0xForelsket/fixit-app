@@ -38,8 +38,6 @@ import {
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { DateRangePicker, WidgetDateRangePicker } from "./date-range-picker";
-import { ScheduleDialog } from "./schedule-dialog";
 import type {
   DataSource,
   DateRangeFilter,
@@ -67,6 +65,11 @@ function GridSkeleton() {
   );
 }
 
+// Loading skeleton for schedule dialog button
+function ScheduleButtonSkeleton() {
+  return <Skeleton className="h-10 w-full rounded-lg" />;
+}
+
 // Lazy load heavy chart components (recharts is ~200KB gzipped)
 const BarChartWidget = dynamic(
   () => import("./charts/bar-chart-widget").then((mod) => mod.BarChartWidget),
@@ -82,6 +85,23 @@ const PieChartWidget = dynamic(
 const WidgetGrid = dynamic(
   () => import("./widget-grid").then((mod) => mod.WidgetGrid),
   { ssr: false, loading: () => <GridSkeleton /> }
+);
+
+// Lazy load ScheduleDialog (only needed when scheduling reports)
+const ScheduleDialog = dynamic(
+  () => import("./schedule-dialog").then((mod) => mod.ScheduleDialog),
+  { ssr: false, loading: () => <ScheduleButtonSkeleton /> }
+);
+
+// Lazy load DateRangePicker components
+const DateRangePicker = dynamic(
+  () => import("./date-range-picker").then((mod) => mod.DateRangePicker),
+  { ssr: false, loading: () => <Skeleton className="h-9 w-full rounded-lg" /> }
+);
+
+const WidgetDateRangePicker = dynamic(
+  () => import("./date-range-picker").then((mod) => mod.WidgetDateRangePicker),
+  { ssr: false, loading: () => <Skeleton className="h-7 w-[140px] rounded" /> }
 );
 
 // ============ CONSTANTS ============
