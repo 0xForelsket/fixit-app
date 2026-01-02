@@ -25,7 +25,7 @@ Performed a comprehensive Drizzle ORM audit. See [`docs/N+1_QUERY_AUDIT.md`](doc
 - **`getTechnicians()`**: Replaced 2-step query with single `innerJoin` query.
 - **`getDepartmentWithDetails()`**: Restructured ~9 sequential queries into 3 parallelized phases.
 
-### 4. Payload Compression ✅ (NEW)
+### 4. Payload Compression ✅
 Audited API responses to ensure only required fields are sent. See [`docs/PAYLOAD_AUDIT.md`](docs/PAYLOAD_AUDIT.md) for full details.
 
 **Fixes implemented (6 endpoints):**
@@ -38,23 +38,37 @@ Audited API responses to ensure only required fields are sent. See [`docs/PAYLOA
 
 **Estimated savings:** 50-75% reduction in API response payload sizes.
 
+### 5. Component Splitting ✅ (NEW)
+Broke down the 713-line `sidebar.tsx` into 5 focused, reusable modules:
+
+| Component | Lines | Responsibility |
+|-----------|-------|----------------|
+| `sidebar.tsx` | 164 | State management, composition |
+| `sidebar-nav.tsx` | 311 | Navigation rendering, item/submenu components |
+| `sidebar-user-menu.tsx` | 158 | User profile dropdown |
+| `sidebar-nav-config.tsx` | 154 | Navigation data configuration |
+| `sidebar-header.tsx` | 69 | Logo, collapse/expand buttons |
+
+**Benefits:**
+- Improved maintainability - each component has a single responsibility
+- Better code discoverability - easier to find and modify specific pieces
+- Potential for lazy loading individual sections in the future
+- Smaller bundle chunks when code-split
+
 ---
 
 ## 🚀 Future Roadmap (Discussion Phase)
 
-### 5. Radical UI Optimization
+### 6. Radical UI Optimization
 - **CSS over JS Animations**: Replace basic `framer-motion` effects (fades, slides) with raw CSS transitions. This reduces the Javascript main-thread execution cost for UI interactions.
 - **Inline SVG Icons**: Convert critical-path icons (Sidebar, Header) from `lucide-react` to optimized inline SVGs. This eliminates the library overhead for the initial paint.
 
-### 6. Server-Side Execution
+### 7. Server-Side Execution
 - **`next/after()` Implementation**: (Next.js 15+) Shift non-blocking tasks like logging, analytics, and non-critical notifications to an `after()` block. This allows the API to return a response to the user immediately while finishing the "quiet" work in the background.
 - **Edge Runtime Audit**: Move high-traffic, read-heavy API routes to the Edge runtime for near-zero latency globally.
 
-### 7. Data Access Layer (Remaining)
+### 8. Data Access Layer (Remaining)
 - **Lazy Presigned URLs**: Consider generating S3 presigned URLs on-demand at the client level rather than server-side batch generation.
-
-### 8. Component Architecture
-- **Mega-Component Refactoring**: Break down complex components (like the current 714-line `sidebar.tsx`) into smaller, focused modules. This improves React's hydration speed and makes the code more maintainable.
 
 ### 9. Modern Charting
 - **Recharts Alternatives**: Evaluate switching from the generic `recharts` to a more modular library like `visx` or writing custom SVG components for high-frequency charts.
