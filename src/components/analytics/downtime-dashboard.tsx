@@ -6,12 +6,24 @@ import {
   getDepartmentsForDowntimeFilter,
   getDowntimeSummary,
 } from "@/actions/downtime";
-import { DowntimeByEquipmentChart } from "@/components/analytics/downtime-by-equipment-chart";
-import { DowntimeByReasonChart } from "@/components/analytics/downtime-by-reason-chart";
-import { DowntimeTrendChart } from "@/components/analytics/downtime-trend-chart";
 import { RecentDowntimeTable } from "@/components/analytics/recent-downtime-table";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import dynamic from "next/dynamic";
+
+// Lazy load heavy chart components (recharts is ~200KB gzipped)
+const DowntimeByEquipmentChart = dynamic(
+  () => import("@/components/analytics/downtime-by-equipment-chart").then((mod) => mod.DowntimeByEquipmentChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const DowntimeByReasonChart = dynamic(
+  () => import("@/components/analytics/downtime-by-reason-chart").then((mod) => mod.DowntimeByReasonChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const DowntimeTrendChart = dynamic(
+  () => import("@/components/analytics/downtime-trend-chart").then((mod) => mod.DowntimeTrendChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
 import {
   FilterToolbar,
   FilterToolbarGroup,
@@ -46,6 +58,16 @@ function formatHours(hours: number): string {
 
 function formatPercentage(value: number): string {
   return `${value.toFixed(1)}%`;
+}
+
+// Skeleton for chart loading state
+function ChartSkeleton() {
+  return (
+    <div className="rounded-xl border bg-card p-6 animate-pulse">
+      <div className="h-4 w-32 bg-zinc-200 rounded mb-6" />
+      <div className="h-[300px] bg-zinc-100 rounded" />
+    </div>
+  );
 }
 
 const DATE_RANGE_OPTIONS = [

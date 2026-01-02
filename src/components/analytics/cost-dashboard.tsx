@@ -7,13 +7,38 @@ import {
   getDepartmentsForFilter,
   getEquipmentForFilter,
 } from "@/actions/costs";
-import { CostByDepartmentChart } from "@/components/analytics/cost-by-department-chart";
-import { CostByEquipmentChart } from "@/components/analytics/cost-by-equipment-chart";
-import { CostDistributionChart } from "@/components/analytics/cost-distribution-chart";
-import { CostTrendChart } from "@/components/analytics/cost-trend-chart";
 import { CostlyWorkOrdersTable } from "@/components/analytics/costly-work-orders-table";
 import { Button } from "@/components/ui/button";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
+import dynamic from "next/dynamic";
+
+// Skeleton for chart loading state
+function ChartSkeleton() {
+  return (
+    <div className="rounded-xl border bg-card p-6 animate-pulse">
+      <div className="h-4 w-32 bg-zinc-200 rounded mb-6" />
+      <div className="h-[300px] bg-zinc-100 rounded" />
+    </div>
+  );
+}
+
+// Lazy load heavy chart components (recharts is ~200KB gzipped)
+const CostByDepartmentChart = dynamic(
+  () => import("@/components/analytics/cost-by-department-chart").then((mod) => mod.CostByDepartmentChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const CostByEquipmentChart = dynamic(
+  () => import("@/components/analytics/cost-by-equipment-chart").then((mod) => mod.CostByEquipmentChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const CostDistributionChart = dynamic(
+  () => import("@/components/analytics/cost-distribution-chart").then((mod) => mod.CostDistributionChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+const CostTrendChart = dynamic(
+  () => import("@/components/analytics/cost-trend-chart").then((mod) => mod.CostTrendChart),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
 import {
   FilterToolbar,
   FilterToolbarGroup,
