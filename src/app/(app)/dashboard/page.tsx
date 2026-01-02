@@ -1,3 +1,4 @@
+import { CustomizableDashboard } from "@/components/dashboard/customizable-dashboard";
 import { DashboardWorkOrderFeed } from "@/components/dashboard/dashboard-work-order-feed";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
@@ -321,6 +322,26 @@ export default async function DashboardPage() {
     redirect("/home");
   }
 
+  const headerActionsContent = (
+    <>
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10"
+        asChild
+      >
+        <Link href="/assets/qr-codes">SCAN QR</Link>
+      </Button>
+      <Button
+        size="sm"
+        className="h-8 text-[10px] font-black uppercase tracking-widest"
+        asChild
+      >
+        <Link href="/">REPORT ISSUE</Link>
+      </Button>
+    </>
+  );
+
   return (
     <PageLayout
       id="dashboard-page"
@@ -329,48 +350,34 @@ export default async function DashboardPage() {
       description="CENTRALIZED CONTROL PANEL FOR MAINTENANCE OPERATIONS"
       bgSymbol="TT"
       headerActions={
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10"
-            asChild
-          >
-            <Link href="/assets/qr-codes">SCAN QR</Link>
-          </Button>
-          <Button
-            size="sm"
-            className="h-8 text-[10px] font-black uppercase tracking-widest"
-            asChild
-          >
-            <Link href="/">REPORT ISSUE</Link>
-          </Button>
-        </div>
-      }
-      stats={
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {user && (
+        <CustomizableDashboard
+          headerActions={headerActionsContent}
+          personalStatsWidget={
+            user ? (
+              <Suspense fallback={<StatsLoading />}>
+                <PersonalStatsSection user={user} />
+              </Suspense>
+            ) : null
+          }
+          globalStatsWidget={
             <Suspense fallback={<StatsLoading />}>
-              <PersonalStatsSection user={user} />
+              <GlobalStatsSection user={user} />
             </Suspense>
-          )}
-          <Suspense fallback={<StatsLoading />}>
-            <GlobalStatsSection user={user} />
-          </Suspense>
-        </div>
+          }
+          myQueueWidget={
+            user ? (
+              <Suspense fallback={<FeedLoading />}>
+                <PersonalQueueSection userId={user.id} />
+              </Suspense>
+            ) : null
+          }
+          globalQueueWidget={
+            <Suspense fallback={<FeedLoading />}>
+              <GlobalQueueSection user={user} />
+            </Suspense>
+          }
+        />
       }
-    >
-      <div className="space-y-8">
-        {user && (
-          <Suspense fallback={<FeedLoading />}>
-            <PersonalQueueSection userId={user.id} />
-          </Suspense>
-        )}
-
-        <Suspense fallback={<FeedLoading />}>
-          <GlobalQueueSection user={user} />
-        </Suspense>
-      </div>
-    </PageLayout>
+    />
   );
 }
