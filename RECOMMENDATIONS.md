@@ -17,7 +17,7 @@ This document contains a comprehensive analysis of the FixIt CMMS application wi
 
 ## 1. Performance Optimizations
 
-### 1.1 Critical: Fix N+1 Query Issues
+### 1.1 Critical: Fix N+1 Query Issues ✅ DONE
 
 **Location:** `src/lib/notifications.ts:89-110`, `src/app/(app)/api/scheduler/run/route.ts:168-200`
 
@@ -50,7 +50,7 @@ await db.insert(notifications).values(notificationsToInsert);
 
 ---
 
-### 1.2 High: Lazy Load Heavy Libraries
+### 1.2 High: Lazy Load Heavy Libraries ✅ DONE
 
 **Problem:** Large libraries bundled on initial load (~2.5MB+ unnecessary bundle size)
 
@@ -80,7 +80,7 @@ const AreaChart = dynamic(
 
 ---
 
-### 1.3 High: Add Missing Database Indexes
+### 1.3 High: Add Missing Database Indexes ✅ DONE
 
 **Location:** `src/db/schema.ts`
 
@@ -176,7 +176,7 @@ return NextResponse.json(data, {
 
 ---
 
-### 2.2 High: Improve Mobile Touch Targets
+### 2.2 High: Improve Mobile Touch Targets ✅ DONE
 
 **Problem:** Some interactive elements below 44x44px minimum for mobile.
 
@@ -198,7 +198,7 @@ return NextResponse.json(data, {
 
 ---
 
-### 2.3 High: Add Skip-to-Content Link
+### 2.3 High: Add Skip-to-Content Link ✅ DONE
 
 **Location:** `src/app/(app)/layout.tsx`
 
@@ -216,7 +216,7 @@ return NextResponse.json(data, {
 
 ---
 
-### 2.4 High: Improve Accordion Accessibility
+### 2.4 High: Improve Accordion Accessibility ✅ DONE
 
 **Location:** `src/components/ui/accordion.tsx`
 
@@ -299,7 +299,7 @@ const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
 ## 3. User Flow Improvements
 
-### 3.1 Critical: Work Order Quick Actions
+### 3.1 Critical: Work Order Quick Actions ✅ DONE
 
 **Problem:** Common actions require multiple clicks.
 
@@ -341,7 +341,7 @@ const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
 ---
 
-### 3.3 High: Technician Workload Visibility
+### 3.3 High: Technician Workload Visibility ✅ DONE
 
 **Problem:** When assigning work orders, no visibility into technician availability.
 
@@ -463,7 +463,7 @@ for (const schedule of dueSchedules) {
 
 ---
 
-### 4.2 Critical: System Settings Persistence
+### 4.2 Critical: System Settings Persistence ✅ DONE
 
 **Problem:** Settings UI exists but doesn't save (`src/app/(app)/admin/settings/page.tsx`)
 
@@ -523,7 +523,7 @@ export async function sendWorkOrderNotification(
 
 ---
 
-### 4.4 High: Low Stock Alerts
+### 4.4 High: Low Stock Alerts ✅ DONE
 
 **Implementation:**
 
@@ -553,7 +553,7 @@ if (lowStockParts.length > 0) {
 
 ---
 
-### 4.5 High: Offline PWA Queue
+### 4.5 High: Offline PWA Queue ✅ DONE
 
 **Current:** `use-offline.ts` hook exists but is minimal.
 
@@ -661,7 +661,7 @@ export function SignaturePad({ onSave }: { onSave: (dataUrl: string) => void }) 
 
 ---
 
-### 4.8 Low: Dashboard Customization
+### 4.8 Low: Dashboard Customization ✅ DONE
 
 **Implementation:**
 
@@ -726,6 +726,98 @@ export async function POST(request: Request) {
   return NextResponse.json({ results });
 }
 ```
+
+---
+
+### 4.10 Medium: Department Management & Visibility
+
+**Problem:** Departments exist in the system (via System Settings tab) but lack a dedicated public-facing page. Users cannot easily see the org structure, department heads, or which technicians belong to which department.
+
+**Note:** Unlike the admin-only System Settings, this Departments page should be **visible to all roles** to improve organizational transparency.
+
+**Implementation:**
+
+```tsx
+// src/app/(app)/departments/page.tsx - Public departments directory
+export default async function DepartmentsPage() {
+  // No permission check - visible to all authenticated users
+  const departments = await getDepartmentsWithMembers();
+
+  return (
+    <div>
+      <DepartmentsHeader />
+      <DepartmentGrid departments={departments} />
+    </div>
+  );
+}
+```
+
+```tsx
+// src/app/(app)/departments/[id]/page.tsx - Department detail
+export default async function DepartmentDetailPage({ params }: Props) {
+  const department = await getDepartmentWithDetails(params.id);
+
+  return (
+    <div className="grid lg:grid-cols-3 gap-6">
+      {/* Sidebar - Department Info */}
+      <aside>
+        <DepartmentInfoCard department={department} />
+        <DepartmentHeadCard head={department.manager} />
+      </aside>
+
+      {/* Main Content */}
+      <main className="lg:col-span-2">
+        <Tabs defaultValue="members">
+          <TabsList>
+            <TabsTrigger value="members">Team Members</TabsTrigger>
+            <TabsTrigger value="equipment">Equipment</TabsTrigger>
+            <TabsTrigger value="workorders">Work Orders</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="members">
+            <MembersList members={department.members} />
+          </TabsContent>
+          <TabsContent value="equipment">
+            <EquipmentList equipment={department.equipment} />
+          </TabsContent>
+          <TabsContent value="workorders">
+            <WorkOrdersList workOrders={department.workOrders} />
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+}
+```
+
+```tsx
+// src/components/departments/org-chart.tsx - Visual hierarchy
+<OrgChart>
+  {departments.map(dept => (
+    <OrgChartNode key={dept.id}>
+      <DepartmentCard department={dept} />
+      <DepartmentHead head={dept.manager} />
+      <TeamMembers members={dept.members} collapsed />
+    </OrgChartNode>
+  ))}
+</OrgChart>
+```
+
+**Features:**
+1. **Departments Directory** (`/departments`) - Grid/list view of all departments
+2. **Department Detail Page** (`/departments/[id]`) - Full department info with tabs
+3. **Org Chart View** - Visual tree showing department hierarchy
+4. **Team Member Cards** - Show technicians with their role, contact info, workload
+5. **Department Head Highlight** - Prominently display the department manager
+6. **Quick Contact** - Easy access to contact department head or members
+7. **Department Stats** - Equipment count, active work orders, team size
+
+**Routes:**
+- `/departments` - All departments grid (public to all roles)
+- `/departments/[id]` - Department detail (public to all roles)
+- `/departments/org-chart` - Visual org chart view (public to all roles)
+
+**Impact:** Improves organizational transparency, helps users find the right contact for equipment issues, and provides visibility into team structure.
 
 ---
 
