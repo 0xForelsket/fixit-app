@@ -5,28 +5,10 @@ import { systemSettings, type SystemSettingsConfig } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
+import { DEFAULT_SETTINGS } from "@/lib/settings-defaults";
 import type { ActionResult } from "@/lib/types/actions";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-
-// Default settings values
-export const DEFAULT_SETTINGS: SystemSettingsConfig = {
-  sla: {
-    critical: 2,
-    high: 8,
-    medium: 24,
-    low: 72,
-  },
-  session: {
-    idleTimeout: 8,
-    maxDuration: 24,
-  },
-  notifications: {
-    emailEnabled: false,
-    escalationAlerts: true,
-    dailySummary: false,
-  },
-};
 
 /**
  * Get a specific system setting by key
