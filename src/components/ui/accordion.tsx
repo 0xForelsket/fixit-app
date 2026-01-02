@@ -15,6 +15,7 @@ interface AccordionProps {
 const AccordionContext = React.createContext<{
   activeItems: string[];
   toggleItem: (value: string) => void;
+  accordionId: string;
 } | null>(null);
 
 export function Accordion({
@@ -24,6 +25,7 @@ export function Accordion({
   collapsible = true,
 }: AccordionProps) {
   const [activeItems, setActiveItems] = React.useState<string[]>([]);
+  const accordionId = React.useId();
 
   const toggleItem = (value: string) => {
     setActiveItems((prev) => {
@@ -42,7 +44,7 @@ export function Accordion({
   };
 
   return (
-    <AccordionContext.Provider value={{ activeItems, toggleItem }}>
+    <AccordionContext.Provider value={{ activeItems, toggleItem, accordionId }}>
       <div className={cn("space-y-2", className)}>{children}</div>
     </AccordionContext.Provider>
   );
@@ -82,27 +84,32 @@ export function AccordionTrigger({
     throw new Error("AccordionTrigger must be used within Accordion");
 
   const isActive = context.activeItems.includes(value!);
-  const id = React.useId();
+  const triggerId = `${context.accordionId}-trigger-${value}`;
+  const contentId = `${context.accordionId}-content-${value}`;
 
   return (
-    <button
-      type="button"
-      onClick={() => context.toggleItem(value!)}
-      aria-expanded={isActive}
-      aria-controls={`${id}-content`}
-      className={cn(
-        "flex w-full items-center justify-between py-4 px-6 text-left transition-all hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
-        className
-      )}
-    >
-      {children}
-      <motion.div
-        animate={{ rotate: isActive ? 180 : 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+    <h3>
+      <button
+        type="button"
+        id={triggerId}
+        onClick={() => context.toggleItem(value!)}
+        aria-expanded={isActive}
+        aria-controls={contentId}
+        className={cn(
+          "flex w-full items-center justify-between py-4 px-6 text-left transition-all hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
+          className
+        )}
       >
-        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-      </motion.div>
-    </button>
+        {children}
+        <motion.div
+          animate={{ rotate: isActive ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          aria-hidden="true"
+        >
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        </motion.div>
+      </button>
+    </h3>
   );
 }
 
@@ -116,18 +123,20 @@ export function AccordionContent({
     throw new Error("AccordionContent must be used within Accordion");
 
   const isActive = context.activeItems.includes(value!);
-  // Note: ideally we'd pass the ID from trigger to content via context or prop
-  // but for simplicity we'll just focus on visual/aria consistency here.
+  const triggerId = `${context.accordionId}-trigger-${value}`;
+  const contentId = `${context.accordionId}-content-${value}`;
 
   return (
     <AnimatePresence initial={false}>
       {isActive && (
         <motion.div
+          id={contentId}
+          role="region"
+          aria-labelledby={triggerId}
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          role="region"
         >
           <div
             className={cn("px-6 pb-6 pt-0 text-muted-foreground", className)}
