@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   BarChart3,
+  Building2,
   ChevronDown,
   ChevronRight,
   ChevronsUpDown,
@@ -105,6 +106,12 @@ const navGroups: NavGroup[] = [
         label: "Documents",
         href: "/documents",
         icon: <Folder className="h-5 w-5" />,
+        permission: PERMISSIONS.TICKET_VIEW_ALL,
+      },
+      {
+        label: "Departments",
+        href: "/departments",
+        icon: <Building2 className="h-5 w-5" />,
         permission: PERMISSIONS.TICKET_VIEW_ALL,
       },
     ],

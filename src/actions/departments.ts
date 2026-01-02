@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { departments, equipment, users, workOrders } from "@/db/schema";
+import { attachments, departments, equipment, locations, roles, users, workOrders } from "@/db/schema";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 import type { ActionResult } from "@/lib/types/actions";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -274,4 +274,262 @@ export async function deleteDepartment(id: string): Promise<ActionResult> {
   revalidatePath("/admin/system");
 
   return { success: true };
+}
+
+// ============ PUBLIC DATA FETCHING FUNCTIONS ============
+// These are accessible to all authenticated users (no permission check)
+
+/**
+ * Get all departments with stats for the public listing page
+ */
+export async function getDepartmentsWithStats() {
+  const departmentsList = await db
+    .select({
+      id: departments.id,
+      name: departments.name,
+      code: departments.code,
+      description: departments.description,
+      managerId: departments.managerId,
+      memberCount: sql<number>`(SELECT COUNT(*) FROM users WHERE users.department_id = departments.id)::int`,
+      equipmentCount: sql<number>`(SELECT COUNT(*) FROM equipment WHERE equipment.department_id = departments.id)::int`,
+      activeWorkOrderCount: sql<number>`(SELECT COUNT(*) FROM work_orders WHERE work_orders.department_id = departments.id AND work_orders.status IN ('open', 'in_progress'))::int`,
+    })
+    .from(departments)
+    .where(eq(departments.isActive, true))
+    .orderBy(asc(departments.name));
+
+  // Get manager info with avatars
+  const managerIds = departmentsList
+    .map((d) => d.managerId)
+    .filter((id): id is string => id !== null);
+
+  if (managerIds.length === 0) {
+    return departmentsList.map((dept) => ({
+      ...dept,
+      managerName: null,
+      managerAvatarUrl: null,
+    }));
+  }
+
+  const managers = await db
+    .select({
+      id: users.id,
+      name: users.name,
+    })
+    .from(users)
+    .where(inArray(users.id, managerIds));
+
+  // Get avatar URLs for managers
+  const managerAvatars = await db
+    .select({
+      entityId: attachments.entityId,
+      s3Key: attachments.s3Key,
+    })
+    .from(attachments)
+    .where(
+      and(
+        eq(attachments.entityType, "user"),
+        eq(attachments.type, "avatar"),
+        inArray(attachments.entityId, managerIds)
+      )
+    );
+
+  const managerMap = new Map(managers.map((m) => [m.id, m.name]));
+  const avatarMap = new Map(
+    managerAvatars.map((a) => [a.entityId, `/api/attachments/${a.s3Key}`])
+  );
+
+  return departmentsList.map((dept) => ({
+    ...dept,
+    managerName: dept.managerId ? managerMap.get(dept.managerId) || null : null,
+    managerAvatarUrl: dept.managerId ? avatarMap.get(dept.managerId) || null : null,
+  }));
+}
+
+/**
+ * Get full department details with members, equipment, and work orders
+ */
+export async function getDepartmentWithDetails(id: string) {
+  // Get department base info
+  const department = await db.query.departments.findFirst({
+    where: eq(departments.id, id),
+  });
+
+  if (!department) {
+    return null;
+  }
+
+  // Get manager with role and avatar
+  let manager = null;
+  if (department.managerId) {
+    const managerData = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        roleName: roles.name,
+      })
+      .from(users)
+      .leftJoin(roles, eq(users.roleId, roles.id))
+      .where(eq(users.id, department.managerId))
+      .limit(1);
+
+    if (managerData.length > 0) {
+      const avatar = await db
+        .select({ s3Key: attachments.s3Key })
+        .from(attachments)
+        .where(
+          and(
+            eq(attachments.entityType, "user"),
+            eq(attachments.type, "avatar"),
+            eq(attachments.entityId, department.managerId)
+          )
+        )
+        .limit(1);
+
+      manager = {
+        ...managerData[0],
+        avatarUrl: avatar.length > 0 ? `/api/attachments/${avatar[0].s3Key}` : null,
+      };
+    }
+  }
+
+  // Get department members with their work order counts
+  const membersData = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      employeeId: users.employeeId,
+      email: users.email,
+      roleName: roles.name,
+    })
+    .from(users)
+    .leftJoin(roles, eq(users.roleId, roles.id))
+    .where(
+      and(eq(users.departmentId, id), eq(users.isActive, true))
+    )
+    .orderBy(asc(users.name));
+
+  // Get avatars for all members
+  const memberIds = membersData.map((m) => m.id);
+  const memberAvatars =
+    memberIds.length > 0
+      ? await db
+          .select({
+            entityId: attachments.entityId,
+            s3Key: attachments.s3Key,
+          })
+          .from(attachments)
+          .where(
+            and(
+              eq(attachments.entityType, "user"),
+              eq(attachments.type, "avatar"),
+              inArray(attachments.entityId, memberIds)
+            )
+          )
+      : [];
+
+  // Get active work order counts per member
+  const memberWorkOrderCounts =
+    memberIds.length > 0
+      ? await db
+          .select({
+            assignedToId: workOrders.assignedToId,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(workOrders)
+          .where(
+            and(
+              inArray(workOrders.assignedToId, memberIds),
+              or(
+                eq(workOrders.status, "open"),
+                eq(workOrders.status, "in_progress")
+              )
+            )
+          )
+          .groupBy(workOrders.assignedToId)
+      : [];
+
+  const avatarMap = new Map(
+    memberAvatars.map((a) => [a.entityId, `/api/attachments/${a.s3Key}`])
+  );
+  const woCountMap = new Map(
+    memberWorkOrderCounts.map((c) => [c.assignedToId, c.count])
+  );
+
+  const members = membersData.map((m) => ({
+    ...m,
+    avatarUrl: avatarMap.get(m.id) || null,
+    activeWorkOrderCount: woCountMap.get(m.id) || 0,
+  }));
+
+  // Get equipment assigned to department
+  const equipmentData = await db
+    .select({
+      id: equipment.id,
+      name: equipment.name,
+      code: equipment.code,
+      status: equipment.status,
+      locationName: locations.name,
+    })
+    .from(equipment)
+    .leftJoin(locations, eq(equipment.locationId, locations.id))
+    .where(eq(equipment.departmentId, id))
+    .orderBy(asc(equipment.name))
+    .limit(50);
+
+  // Get recent work orders for this department
+  const workOrdersData = await db
+    .select({
+      id: workOrders.id,
+      title: workOrders.title,
+      status: workOrders.status,
+      priority: workOrders.priority,
+      createdAt: workOrders.createdAt,
+      assignedToId: workOrders.assignedToId,
+    })
+    .from(workOrders)
+    .where(eq(workOrders.departmentId, id))
+    .orderBy(desc(workOrders.createdAt))
+    .limit(20);
+
+  // Get assignee names for work orders
+  const assigneeIds = workOrdersData
+    .map((wo) => wo.assignedToId)
+    .filter((id): id is string => id !== null);
+  
+  const assignees =
+    assigneeIds.length > 0
+      ? await db
+          .select({ id: users.id, name: users.name })
+          .from(users)
+          .where(inArray(users.id, assigneeIds))
+      : [];
+  
+  const assigneeMap = new Map(assignees.map((a) => [a.id, a.name]));
+
+  const workOrdersList = workOrdersData.map((wo) => ({
+    id: wo.id,
+    title: wo.title,
+    status: wo.status,
+    priority: wo.priority,
+    createdAt: wo.createdAt,
+    assigneeName: wo.assignedToId ? assigneeMap.get(wo.assignedToId) || null : null,
+  }));
+
+  // Get counts
+  const memberCount = members.length;
+  const equipmentCount = equipmentData.length;
+  const workOrderCount = workOrdersData.length;
+
+  return {
+    ...department,
+    manager,
+    members,
+    equipment: equipmentData,
+    workOrders: workOrdersList,
+    memberCount,
+    equipmentCount,
+    workOrderCount,
+  };
 }
