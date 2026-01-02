@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MapPin, Printer, QrCode } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCode } from "@/components/ui/qr-code";
 import { useRef, useState } from "react";
 
 interface Equipment {
@@ -157,10 +157,9 @@ export function QrCodesTab({ equipment, baseUrl }: QrCodesTabProps) {
                   id={`qr-${item.id}`}
                   className="shrink-0 rounded-lg bg-white p-2 shadow-sm"
                 >
-                  <QRCodeSVG
+                  <QRCode
                     value={`${baseUrl}/equipment/${item.code}`}
                     size={64}
-                    level="H"
                   />
                 </div>
                 <div className="flex-1 min-w-0">

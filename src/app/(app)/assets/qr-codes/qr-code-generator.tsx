@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MapPin, Printer, QrCode } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCode } from "@/components/ui/qr-code";
 import { useRef, useState } from "react";
 
 interface Equipment {
@@ -198,11 +198,9 @@ function QRCard({
         {/* QR Code */}
         <div className="shrink-0">
           <div className="rounded-lg border-2 border-slate-200 p-2 bg-white">
-            <QRCodeSVG
+            <QRCode
               value={reportUrl}
               size={120}
-              level="H"
-              includeMargin={false}
             />
           </div>
         </div>
