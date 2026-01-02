@@ -80,7 +80,22 @@ export async function GET() {
       return ApiErrors.unauthorized(requestId);
     }
 
-    const parts = await db.query.spareParts.findMany();
+    // Payload compression: only return fields needed for list display
+    const parts = await db.query.spareParts.findMany({
+      columns: {
+        id: true,
+        displayId: true,
+        name: true,
+        sku: true,
+        barcode: true,
+        category: true,
+        unitCost: true,
+        reorderPoint: true,
+        isActive: true,
+      },
+      orderBy: (spareParts, { asc }) => [asc(spareParts.name)],
+      limit: 100, // Pagination - return max 100 items
+    });
 
     return apiSuccess(parts);
   } catch (error) {

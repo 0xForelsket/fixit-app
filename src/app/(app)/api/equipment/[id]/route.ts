@@ -22,10 +22,19 @@ export async function GET(
     const equipmentItem = await db.query.equipment.findFirst({
       where: eq(equipmentTable.id, equipmentId),
       with: {
-        location: true,
-        owner: true,
-        parent: true,
-        children: true,
+        // Payload compression: only fetch needed columns from relations
+        location: {
+          columns: { id: true, name: true, code: true },
+        },
+        owner: {
+          columns: { id: true, name: true, employeeId: true },
+        },
+        parent: {
+          columns: { id: true, name: true, code: true },
+        },
+        children: {
+          columns: { id: true, name: true, code: true, status: true },
+        },
       },
     });
 

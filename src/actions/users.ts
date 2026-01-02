@@ -8,7 +8,7 @@ import { deleteObject } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/types/actions";
 import { createUserSchema, updateUserSchema } from "@/lib/validations/users";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, inArray, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function updateUserAvatar(rawData: {
@@ -35,21 +35,21 @@ export async function updateUserAvatar(rawData: {
       ),
     });
 
-    for (const oldAvatar of oldAvatars) {
-      // Delete from DB
-      await db.delete(attachments).where(eq(attachments.id, oldAvatar.id));
+    if (oldAvatars.length > 0) {
+      // Batch delete from DB in a single query (N+1 fix)
+      const oldAvatarIds = oldAvatars.map((a) => a.id);
+      await db.delete(attachments).where(inArray(attachments.id, oldAvatarIds));
 
-      // Delete from S3 (optional, ignore errors)
-      try {
-        if (oldAvatar.s3Key) {
-          await deleteObject(oldAvatar.s3Key);
-        }
-      } catch (err) {
-        console.warn(
-          `Failed to delete old avatar S3 object: ${oldAvatar.s3Key}`,
-          err
-        );
-      }
+      // Parallel S3 deletes (fire-and-forget, errors are logged but not blocking)
+      await Promise.allSettled(
+        oldAvatars
+          .filter((a) => a.s3Key)
+          .map((a) =>
+            deleteObject(a.s3Key).catch((err) =>
+              console.warn(`Failed to delete old avatar S3 object: ${a.s3Key}`, err)
+            )
+          )
+      );
     }
 
     revalidatePath("/profile");
@@ -120,9 +120,18 @@ export async function createUser(
     return { success: false, error: parsed.error.errors[0].message };
   }
 
-  const existingByEmployeeId = await db.query.users.findFirst({
-    where: eq(users.employeeId, parsed.data.employeeId),
-  });
+  // Parallel validation queries (N+1 optimization)
+  const [existingByEmployeeId, existingByEmail, role] = await Promise.all([
+    db.query.users.findFirst({
+      where: eq(users.employeeId, parsed.data.employeeId),
+    }),
+    parsed.data.email
+      ? db.query.users.findFirst({ where: eq(users.email, parsed.data.email) })
+      : Promise.resolve(null),
+    parsed.data.roleId
+      ? db.query.roles.findFirst({ where: eq(roles.id, parsed.data.roleId) })
+      : Promise.resolve(null),
+  ]);
 
   if (existingByEmployeeId) {
     return {
@@ -131,23 +140,12 @@ export async function createUser(
     };
   }
 
-  if (parsed.data.email) {
-    const existingByEmail = await db.query.users.findFirst({
-      where: eq(users.email, parsed.data.email),
-    });
-    if (existingByEmail) {
-      return { success: false, error: "A user with this email already exists" };
-    }
+  if (parsed.data.email && existingByEmail) {
+    return { success: false, error: "A user with this email already exists" };
   }
 
-  if (parsed.data.roleId) {
-    const role = await db.query.roles.findFirst({
-      where: eq(roles.id, parsed.data.roleId),
-    });
-
-    if (!role) {
-      return { success: false, error: "Selected role does not exist" };
-    }
+  if (parsed.data.roleId && !role) {
+    return { success: false, error: "Selected role does not exist" };
   }
 
   // Hash the PIN before storing

@@ -60,7 +60,10 @@ export async function GET(request: Request) {
         offset,
         orderBy: (equipmentTab, { asc }) => [asc(equipmentTab.name)],
         with: {
-          location: true,
+          // Payload compression: only fetch needed columns from relations
+          location: {
+            columns: { id: true, name: true, code: true },
+          },
           owner: {
             columns: {
               id: true,

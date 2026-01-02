@@ -348,6 +348,7 @@ export async function getDepartmentsWithStats() {
 
 /**
  * Get full department details with members, equipment, and work orders
+ * Optimized with parallelized queries to minimize DB round-trips
  */
 export async function getDepartmentWithDetails(id: string) {
   // Get department base info
@@ -359,97 +360,133 @@ export async function getDepartmentWithDetails(id: string) {
     return null;
   }
 
-  // Get manager with role and avatar
-  let manager = null;
-  if (department.managerId) {
-    const managerData = await db
+  // Phase 1: Fetch members and manager in parallel (independent queries)
+  const [membersData, managerData] = await Promise.all([
+    // Get department members with roles
+    db
       .select({
         id: users.id,
         name: users.name,
+        employeeId: users.employeeId,
         email: users.email,
         roleName: roles.name,
       })
       .from(users)
       .leftJoin(roles, eq(users.roleId, roles.id))
-      .where(eq(users.id, department.managerId))
-      .limit(1);
+      .where(and(eq(users.departmentId, id), eq(users.isActive, true)))
+      .orderBy(asc(users.name)),
 
-    if (managerData.length > 0) {
-      const avatar = await db
-        .select({ s3Key: attachments.s3Key })
-        .from(attachments)
-        .where(
-          and(
-            eq(attachments.entityType, "user"),
-            eq(attachments.type, "avatar"),
-            eq(attachments.entityId, department.managerId)
-          )
-        )
-        .limit(1);
+    // Get manager with role (if exists)
+    department.managerId
+      ? db
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            roleName: roles.name,
+          })
+          .from(users)
+          .leftJoin(roles, eq(users.roleId, roles.id))
+          .where(eq(users.id, department.managerId))
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
 
-      manager = {
-        ...managerData[0],
-        avatarUrl: avatar.length > 0 ? `/api/attachments/${avatar[0].s3Key}` : null,
-      };
-    }
-  }
-
-  // Get department members with their work order counts
-  const membersData = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      employeeId: users.employeeId,
-      email: users.email,
-      roleName: roles.name,
-    })
-    .from(users)
-    .leftJoin(roles, eq(users.roleId, roles.id))
-    .where(
-      and(eq(users.departmentId, id), eq(users.isActive, true))
-    )
-    .orderBy(asc(users.name));
-
-  // Get avatars for all members
   const memberIds = membersData.map((m) => m.id);
-  const memberAvatars =
-    memberIds.length > 0
-      ? await db
-          .select({
-            entityId: attachments.entityId,
-            s3Key: attachments.s3Key,
-          })
-          .from(attachments)
-          .where(
-            and(
-              eq(attachments.entityType, "user"),
-              eq(attachments.type, "avatar"),
-              inArray(attachments.entityId, memberIds)
-            )
-          )
-      : [];
 
-  // Get active work order counts per member
-  const memberWorkOrderCounts =
-    memberIds.length > 0
-      ? await db
-          .select({
-            assignedToId: workOrders.assignedToId,
-            count: sql<number>`count(*)::int`,
-          })
-          .from(workOrders)
-          .where(
-            and(
-              inArray(workOrders.assignedToId, memberIds),
-              or(
-                eq(workOrders.status, "open"),
-                eq(workOrders.status, "in_progress")
+  // Phase 2: Fetch all related data in parallel (depends on memberIds)
+  const [memberAvatars, memberWorkOrderCounts, equipmentData, workOrdersData, managerAvatar] =
+    await Promise.all([
+      // Get avatars for all members
+      memberIds.length > 0
+        ? db
+            .select({
+              entityId: attachments.entityId,
+              s3Key: attachments.s3Key,
+            })
+            .from(attachments)
+            .where(
+              and(
+                eq(attachments.entityType, "user"),
+                eq(attachments.type, "avatar"),
+                inArray(attachments.entityId, memberIds)
               )
             )
-          )
-          .groupBy(workOrders.assignedToId)
-      : [];
+        : Promise.resolve([]),
 
+      // Get active work order counts per member
+      memberIds.length > 0
+        ? db
+            .select({
+              assignedToId: workOrders.assignedToId,
+              count: sql<number>`count(*)::int`,
+            })
+            .from(workOrders)
+            .where(
+              and(
+                inArray(workOrders.assignedToId, memberIds),
+                or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress"))
+              )
+            )
+            .groupBy(workOrders.assignedToId)
+        : Promise.resolve([]),
+
+      // Get equipment assigned to department
+      db
+        .select({
+          id: equipment.id,
+          name: equipment.name,
+          code: equipment.code,
+          status: equipment.status,
+          locationName: locations.name,
+        })
+        .from(equipment)
+        .leftJoin(locations, eq(equipment.locationId, locations.id))
+        .where(eq(equipment.departmentId, id))
+        .orderBy(asc(equipment.name))
+        .limit(50),
+
+      // Get recent work orders for this department
+      db
+        .select({
+          id: workOrders.id,
+          title: workOrders.title,
+          status: workOrders.status,
+          priority: workOrders.priority,
+          createdAt: workOrders.createdAt,
+          assignedToId: workOrders.assignedToId,
+        })
+        .from(workOrders)
+        .where(eq(workOrders.departmentId, id))
+        .orderBy(desc(workOrders.createdAt))
+        .limit(20),
+
+      // Get manager avatar
+      department.managerId
+        ? db
+            .select({ s3Key: attachments.s3Key })
+            .from(attachments)
+            .where(
+              and(
+                eq(attachments.entityType, "user"),
+                eq(attachments.type, "avatar"),
+                eq(attachments.entityId, department.managerId)
+              )
+            )
+            .limit(1)
+        : Promise.resolve([]),
+    ]);
+
+  // Build manager object
+  let manager = null;
+  if (managerData.length > 0) {
+    manager = {
+      ...managerData[0],
+      avatarUrl: managerAvatar.length > 0 ? `/api/attachments/${managerAvatar[0].s3Key}` : null,
+    };
+  }
+
+  // Build lookup maps for efficient member enrichment
   const avatarMap = new Map(
     memberAvatars.map((a) => [a.entityId, `/api/attachments/${a.s3Key}`])
   );
@@ -463,41 +500,11 @@ export async function getDepartmentWithDetails(id: string) {
     activeWorkOrderCount: woCountMap.get(m.id) || 0,
   }));
 
-  // Get equipment assigned to department
-  const equipmentData = await db
-    .select({
-      id: equipment.id,
-      name: equipment.name,
-      code: equipment.code,
-      status: equipment.status,
-      locationName: locations.name,
-    })
-    .from(equipment)
-    .leftJoin(locations, eq(equipment.locationId, locations.id))
-    .where(eq(equipment.departmentId, id))
-    .orderBy(asc(equipment.name))
-    .limit(50);
-
-  // Get recent work orders for this department
-  const workOrdersData = await db
-    .select({
-      id: workOrders.id,
-      title: workOrders.title,
-      status: workOrders.status,
-      priority: workOrders.priority,
-      createdAt: workOrders.createdAt,
-      assignedToId: workOrders.assignedToId,
-    })
-    .from(workOrders)
-    .where(eq(workOrders.departmentId, id))
-    .orderBy(desc(workOrders.createdAt))
-    .limit(20);
-
-  // Get assignee names for work orders
+  // Phase 3: Fetch assignee names for work orders (depends on workOrdersData)
   const assigneeIds = workOrdersData
     .map((wo) => wo.assignedToId)
-    .filter((id): id is string => id !== null);
-  
+    .filter((assigneeId): assigneeId is string => assigneeId !== null);
+
   const assignees =
     assigneeIds.length > 0
       ? await db
@@ -505,7 +512,7 @@ export async function getDepartmentWithDetails(id: string) {
           .from(users)
           .where(inArray(users.id, assigneeIds))
       : [];
-  
+
   const assigneeMap = new Map(assignees.map((a) => [a.id, a.name]));
 
   const workOrdersList = workOrdersData.map((wo) => ({

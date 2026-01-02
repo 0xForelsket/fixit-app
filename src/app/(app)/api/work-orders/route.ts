@@ -2,6 +2,7 @@ import { db } from "@/db";
 import {
   equipment as equipmentTable,
   notifications,
+  roles,
   users,
   workOrders,
 } from "@/db/schema";
@@ -75,7 +76,10 @@ export async function GET(request: Request) {
         offset,
         orderBy: (workOrders, { desc }) => [desc(workOrders.createdAt)],
         with: {
-          equipment: true,
+          // Payload compression: only fetch needed columns from relations
+          equipment: {
+            columns: { id: true, name: true, code: true, status: true },
+          },
           reportedBy: {
             columns: { id: true, name: true, employeeId: true },
           },
@@ -157,19 +161,21 @@ export async function POST(request: Request) {
     // Get equipment details for notifications
     const equipmentItem = await db.query.equipment.findFirst({
       where: eq(equipmentTable.id, equipmentId),
+      columns: { id: true, name: true, ownerId: true },
     });
 
     // Notify techs for critical/high priority work orders
     if (priority === "critical" || priority === "high") {
-      const allUsers = await db.query.users.findMany({
-        where: eq(users.isActive, true),
-        with: { assignedRole: true },
-      });
-      const techs = allUsers.filter((u) => u.assignedRole?.name === "tech");
+      // Optimized: Query only tech user IDs with a single join (payload compression)
+      const techUsers = await db
+        .select({ id: users.id })
+        .from(users)
+        .innerJoin(roles, eq(users.roleId, roles.id))
+        .where(and(eq(roles.name, "tech"), eq(users.isActive, true)));
 
-      if (techs.length > 0) {
+      if (techUsers.length > 0) {
         await db.insert(notifications).values(
-          techs.map((tech) => ({
+          techUsers.map((tech) => ({
             userId: tech.id,
             type: "work_order_created" as const,
             title: `New ${priority} Priority Work Order`,

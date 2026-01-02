@@ -137,17 +137,13 @@ async function getWorkOrders(params: SearchParams, user: SessionUser | null) {
 }
 
 async function getTechnicians() {
-  const techRole = await db.query.roles.findFirst({
-    where: eq(roles.name, "tech"),
-  });
-
-  if (!techRole) return [];
-
-  const techs = await db.query.users.findMany({
-    where: and(eq(users.roleId, techRole.id), eq(users.isActive, true)),
-    columns: { id: true, name: true },
-    orderBy: [asc(users.name)],
-  });
+  // Single query with join (N+1 optimization - was 2 queries)
+  const techs = await db
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .innerJoin(roles, eq(users.roleId, roles.id))
+    .where(and(eq(roles.name, "tech"), eq(users.isActive, true)))
+    .orderBy(asc(users.name));
 
   return techs;
 }

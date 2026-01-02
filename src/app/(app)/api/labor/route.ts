@@ -90,8 +90,13 @@ export async function GET(request: Request) {
             eq(laborLogs.workOrderId, workOrderId)
         : undefined,
       with: {
-        user: true,
-        workOrder: true,
+        // Only fetch fields needed for display (payload compression)
+        user: {
+          columns: { id: true, name: true, employeeId: true },
+        },
+        workOrder: {
+          columns: { id: true, displayId: true, title: true, status: true },
+        },
       },
     });
 
