@@ -8,7 +8,8 @@ async function getRoleFromSession(token: string): Promise<string | null> {
     const secretKey = new TextEncoder().encode(secret);
     const { payload } = await jwtVerify(token, secretKey);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (payload as any).user?.roleName || null;
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        return (payload as any).user?.roleName || null;
   } catch {
     return null;
   }
@@ -80,13 +81,20 @@ function isSessionValid(request: NextRequest): boolean {
  */
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl;
-  const hostname = request.headers.get("host") || "";
+  const host = request.headers.get("host") || "";
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const hostname = forwardedHost || host;
+  console.log("Middleware Hostname:", hostname);
 
   const { pathname } = url;
 
   // Root domain vs App Subdomain logic
   const isAppSubdomain = hostname.startsWith("app.");
-  const isTunnel = hostname.endsWith(".trycloudflare.com");
+  const isTunnel =
+    hostname.includes(".trycloudflare.com") ||
+    hostname.includes(".serveousercontent.com") ||
+    hostname.includes(".pinggy.link") ||
+    hostname.includes(".loca.lt");
   const isLocalhost =
     hostname.startsWith("localhost:") || hostname === "localhost";
 

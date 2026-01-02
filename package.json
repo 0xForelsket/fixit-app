@@ -7,6 +7,7 @@
     "build": "next build",
     "build:check": "tsc --noEmit",
     "start": "next start",
+    "tunnel": "./scripts/tunnel.sh",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

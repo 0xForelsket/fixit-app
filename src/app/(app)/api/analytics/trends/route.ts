@@ -4,7 +4,7 @@ import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
-import { sql } from "drizzle-orm";
+import { gte, sql } from "drizzle-orm";
 
 export async function GET() {
   const requestId = generateRequestId();
@@ -24,7 +24,7 @@ export async function GET() {
         resolved_count: sql<number>`count(CASE WHEN ${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed' THEN 1 END)`,
       })
       .from(workOrders)
-      .where(sql`${workOrders.createdAt} >= ${thirtyDaysAgo}`)
+      .where(gte(workOrders.createdAt, thirtyDaysAgo))
       .groupBy(sql`day`)
       .orderBy(sql`day ASC`);
 

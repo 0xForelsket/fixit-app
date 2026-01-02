@@ -113,6 +113,25 @@ CRON_SECRET=your-cron-secret-here
 | `bun run lint` | Check code with Biome |
 | `bun run lint:fix` | Auto-fix lint issues |
 | `bun run db:push` | Push schema to database |
+### Database Access
+
+To access the database studio:
+
+```bash
+bun db:studio
+```
+
+### Remote Access (Tunnel)
+
+Since automatic tunneling tools like `untun` are blocked by the firewall in this environment, use the provided SSH tunnel script:
+
+```bash
+npm run tunnel
+# or
+./scripts/tunnel.sh
+```
+
+This will generate a public URL (via serveo.net) that you can share.
 | `bun run db:seed` | Seed development data |
 | `bun run db:studio` | Open Drizzle Studio |
 
