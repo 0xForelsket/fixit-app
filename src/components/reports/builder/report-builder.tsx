@@ -37,6 +37,7 @@ import {
 } from "recharts";
 import type { ReportConfig, WidgetConfig, WidgetType } from "./types";
 import { useRouter } from "next/navigation";
+import { ScheduleDialog } from "./schedule-dialog";
 import {
   DndContext,
   closestCenter,
@@ -240,6 +241,13 @@ export function ReportBuilder({
               <Save className="mr-2 h-4 w-4" />
               {isSaving ? "SAVING..." : "SAVE TEMPLATE"}
             </Button>
+
+            {initialTemplate?.id && (
+              <ScheduleDialog
+                templateId={initialTemplate.id}
+                templateName={config.title}
+              />
+            )}
           </div>
         </div>
       </div>

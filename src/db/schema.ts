@@ -777,9 +777,13 @@ export const reportSchedules = pgTable("report_schedules", {
     .notNull()
     .$type<string[]>()
     .default([]),
+  timezone: text("timezone").notNull().default("UTC"),
   isActive: boolean("is_active").notNull().default(true),
   lastRunAt: timestamp("last_run_at"),
   nextRunAt: timestamp("next_run_at"),
+  lastError: text("last_error"),
+  failedAt: timestamp("failed_at"),
+  retryCount: integer("retry_count").notNull().default(0),
   createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
@@ -1153,6 +1157,33 @@ export const workOrderTemplatesRelations = relations(
   })
 );
 
+// Report Templates relations
+export const reportTemplatesRelations = relations(
+  reportTemplates,
+  ({ one, many }) => ({
+    createdBy: one(users, {
+      fields: [reportTemplates.createdById],
+      references: [users.id],
+    }),
+    schedules: many(reportSchedules),
+  })
+);
+
+// Report Schedules relations
+export const reportSchedulesRelations = relations(
+  reportSchedules,
+  ({ one }) => ({
+    template: one(reportTemplates, {
+      fields: [reportSchedules.templateId],
+      references: [reportTemplates.id],
+    }),
+    createdBy: one(users, {
+      fields: [reportSchedules.createdById],
+      references: [users.id],
+    }),
+  })
+);
+
 // ============ TYPE EXPORTS ============
 
 export type Role = typeof roles.$inferSelect;
@@ -1237,9 +1268,27 @@ export type NewUserFavorite = typeof userFavorites.$inferInsert;
 export type WorkOrderTemplate = typeof workOrderTemplates.$inferSelect;
 export type NewWorkOrderTemplate = typeof workOrderTemplates.$inferInsert;
 
+// Report types
+export type ReportTemplate = typeof reportTemplates.$inferSelect;
+export type NewReportTemplate = typeof reportTemplates.$inferInsert;
+
+export type ReportSchedule = typeof reportSchedules.$inferSelect;
+export type NewReportSchedule = typeof reportSchedules.$inferInsert;
+
 // System Settings types
 export type SystemSetting = typeof systemSettings.$inferSelect;
 export type NewSystemSetting = typeof systemSettings.$inferInsert;
+
+// SMTP configuration for email sending
+export interface SmtpConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  password: string; // encrypted
+  fromAddress: string;
+  fromName: string;
+}
 
 // System settings interface for type-safe access
 export interface SystemSettingsConfig {
@@ -1258,4 +1307,5 @@ export interface SystemSettingsConfig {
     escalationAlerts: boolean;
     dailySummary: boolean;
   };
+  smtp_config?: SmtpConfig;
 }

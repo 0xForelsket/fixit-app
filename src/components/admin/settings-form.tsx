@@ -4,7 +4,8 @@ import { updateAllSystemSettings } from "@/actions/settings";
 import { Button } from "@/components/ui/button";
 import type { SystemSettingsConfig } from "@/db/schema";
 import { cn } from "@/lib/utils";
-import { Save } from "lucide-react";
+import { ChevronRight, Mail, Save } from "lucide-react";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 
 interface SettingsFormProps {
@@ -198,6 +199,25 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           />
         </div>
       </section>
+
+      {/* Email Settings Link */}
+      <Link
+        href="/admin/settings/email"
+        className="flex items-center justify-between rounded-xl border bg-white p-6 hover:bg-slate-50 transition-colors animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-4"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
+            <Mail className="h-5 w-5 text-primary-600" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Email Settings</h2>
+            <p className="text-sm text-muted-foreground">
+              Configure SMTP server for sending emails
+            </p>
+          </div>
+        </div>
+        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+      </Link>
 
       {/* Save Button */}
       <div className="flex items-center justify-end gap-3">
