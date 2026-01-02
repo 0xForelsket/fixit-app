@@ -35,22 +35,9 @@ import {
   Trash2,
   Type,
 } from "lucide-react";
-
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { DateRangePicker, WidgetDateRangePicker } from "./date-range-picker";
 import { ScheduleDialog } from "./schedule-dialog";
 import type {
@@ -60,19 +47,44 @@ import type {
   WidgetConfig,
   WidgetType,
 } from "./types";
-import { findNextWidgetPosition, WidgetGrid, WIDGET_DEFAULT_SIZES, type Layout } from "./widget-grid";
+import { findNextWidgetPosition, WIDGET_DEFAULT_SIZES, type Layout } from "./widget-grid";
 
-// Colors for pie chart segments
-const PIE_COLORS = [
-  "#3b82f6", // blue
-  "#8b5cf6", // purple
-  "#10b981", // emerald
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#06b6d4", // cyan
-  "#ec4899", // pink
-  "#84cc16", // lime
-];
+// ============ LAZY LOADED COMPONENTS ============
+
+// Loading skeleton for chart components
+function ChartSkeleton() {
+  return <Skeleton className="h-[180px] w-full rounded-lg" />;
+}
+
+// Loading skeleton for grid
+function GridSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2].map((i) => (
+        <Skeleton key={i} className="h-[200px] w-full rounded-xl" />
+      ))}
+    </div>
+  );
+}
+
+// Lazy load heavy chart components (recharts is ~200KB gzipped)
+const BarChartWidget = dynamic(
+  () => import("./charts/bar-chart-widget").then((mod) => mod.BarChartWidget),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+
+const PieChartWidget = dynamic(
+  () => import("./charts/pie-chart-widget").then((mod) => mod.PieChartWidget),
+  { ssr: false, loading: () => <ChartSkeleton /> }
+);
+
+// Lazy load the grid component (react-grid-layout)
+const WidgetGrid = dynamic(
+  () => import("./widget-grid").then((mod) => mod.WidgetGrid),
+  { ssr: false, loading: () => <GridSkeleton /> }
+);
+
+// ============ CONSTANTS ============
 
 // Data source options for widgets
 const DATA_SOURCES: { value: DataSource; label: string }[] = [
@@ -89,6 +101,8 @@ const MOCK_DATA = [
   { name: "Apr", value: 200 },
   { name: "May", value: 500 },
 ];
+
+// ============ MAIN COMPONENT ============
 
 export function ReportBuilder({
   initialTemplate,
@@ -395,28 +409,32 @@ export function ReportBuilder({
               </div>
             </div>
           ) : (
-            <WidgetGrid
-              widgets={sortedWidgets}
-              onLayoutChange={handleLayoutChange}
-            >
-              {sortedWidgets.map((widget) => (
-                <div key={widget.id}>
-                  <WidgetCard
-                    widget={widget}
-                    onRemove={removeWidget}
-                    onUpdate={updateWidget}
-                    onDuplicate={duplicateWidget}
-                    globalDateRange={config.globalDateRange}
-                  />
-                </div>
-              ))}
-            </WidgetGrid>
+            <Suspense fallback={<GridSkeleton />}>
+              <WidgetGrid
+                widgets={sortedWidgets}
+                onLayoutChange={handleLayoutChange}
+              >
+                {sortedWidgets.map((widget) => (
+                  <div key={widget.id}>
+                    <WidgetCard
+                      widget={widget}
+                      onRemove={removeWidget}
+                      onUpdate={updateWidget}
+                      onDuplicate={duplicateWidget}
+                      globalDateRange={config.globalDateRange}
+                    />
+                  </div>
+                ))}
+              </WidgetGrid>
+            </Suspense>
           )}
         </div>
       </div>
     </div>
   );
 }
+
+// ============ HELPER COMPONENTS ============
 
 /**
  * Reusable data source selector for widgets
@@ -487,6 +505,8 @@ function WidgetSkeleton({ type }: { type: WidgetType }) {
 
   return <Skeleton className="h-[100px] w-full" />;
 }
+
+// ============ WIDGET CARD COMPONENT ============
 
 /**
  * Widget card component with resize support via react-grid-layout
@@ -626,38 +646,13 @@ function WidgetCard({
               />
             )}
 
-            {/* Bar Chart */}
+            {/* Bar Chart - Lazy Loaded */}
             {widget.type === "bar_chart" && (
               <div className="h-full flex flex-col gap-2">
                 <div className="flex-1 min-h-[150px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={displayData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        vertical={false}
-                        stroke="hsl(var(--border))"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        tick={{ fontSize: 10 }}
-                        tickLine={false}
-                      />
-                      <YAxis tick={{ fontSize: 10 }} tickLine={false} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Bar
-                        dataKey="value"
-                        fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <BarChartWidget data={displayData} />
+                  </Suspense>
                 </div>
                 <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
                   <DataSourceSelect
@@ -672,43 +667,13 @@ function WidgetCard({
               </div>
             )}
 
-            {/* Pie Chart */}
+            {/* Pie Chart - Lazy Loaded */}
             {widget.type === "pie_chart" && (
               <div className="h-full flex flex-col gap-2">
                 <div className="flex-1 min-h-[150px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={displayData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={40}
-                        outerRadius={70}
-                        dataKey="value"
-                        nameKey="name"
-                        label={({ name, percent }) =>
-                          `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
-                        }
-                        labelLine={false}
-                      >
-                        {displayData.map((entry, index) => (
-                          <Cell
-                            key={entry.name}
-                            fill={PIE_COLORS[index % PIE_COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                        }}
-                      />
-                      <Legend wrapperStyle={{ fontSize: "10px" }} />
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <PieChartWidget data={displayData} />
+                  </Suspense>
                 </div>
                 <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
                   <DataSourceSelect
