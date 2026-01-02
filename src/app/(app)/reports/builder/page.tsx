@@ -20,7 +20,6 @@ export default async function BuilderPage({
       id: rawTemplate.id,
       config: rawTemplate.config as unknown as ReportConfig
   } : undefined;
-
   // TODO: Implement proper user session
   const userId = "user_01HKQ..."; 
 
