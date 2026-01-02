@@ -1,9 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 
-// Reset module state between tests
-beforeEach(() => {
-  vi.resetModules();
-});
+// Note: Tests use dynamic imports to get fresh module instances
 
 describe("rate-limit", () => {
   describe("checkRateLimit", () => {

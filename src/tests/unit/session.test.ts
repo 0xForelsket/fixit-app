@@ -1,58 +1,66 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 
-// Mock next/headers
+// Mock cookie store
+const mockCookieGet = mock();
+const mockCookieSet = mock();
+const mockCookieDelete = mock();
 const mockCookieStore = {
-  get: vi.fn(),
-  set: vi.fn(),
-  delete: vi.fn(),
+  get: mockCookieGet,
+  set: mockCookieSet,
+  delete: mockCookieDelete,
 };
 
-vi.mock("next/headers", () => ({
-  cookies: vi.fn(() => Promise.resolve(mockCookieStore)),
+// Mock functions that will be used
+const mockJwtVerify = mock();
+const mockHasPermission = mock();
+const mockHasAnyPermission = mock();
+const mockIsSessionVersionValid = mock(() => Promise.resolve(true));
+
+// Mock next/headers
+mock.module("next/headers", () => ({
+  cookies: mock(() => Promise.resolve(mockCookieStore)),
 }));
 
 // Mock jose
-vi.mock("jose", () => ({
-  SignJWT: vi.fn(() => ({
-    setProtectedHeader: vi.fn(() => ({
-      setIssuedAt: vi.fn(() => ({
-        setExpirationTime: vi.fn(() => ({
-          sign: vi.fn(() => Promise.resolve("mock-jwt-token")),
+mock.module("jose", () => ({
+  SignJWT: mock(() => ({
+    setProtectedHeader: mock(() => ({
+      setIssuedAt: mock(() => ({
+        setExpirationTime: mock(() => ({
+          sign: mock(() => Promise.resolve("mock-jwt-token")),
         })),
       })),
     })),
   })),
-  jwtVerify: vi.fn(),
+  jwtVerify: mockJwtVerify,
 }));
 
 // Mock permissions
-vi.mock("@/lib/permissions", () => ({
-  PERMISSIONS: {
-    MAINTENANCE_VIEW: "maintenance:view",
-    SYSTEM_SETTINGS: "system:settings",
-    TICKET_VIEW: "ticket:view",
-    USER_CREATE: "user:create",
-  },
-  hasPermission: vi.fn(),
-  hasAnyPermission: vi.fn(),
+const mockPERMISSIONS = {
+  MAINTENANCE_VIEW: "maintenance:view",
+  SYSTEM_SETTINGS: "system:settings",
+  TICKET_VIEW: "ticket:view",
+  USER_CREATE: "user:create",
+};
+
+mock.module("@/lib/permissions", () => ({
+  PERMISSIONS: mockPERMISSIONS,
+  hasPermission: mockHasPermission,
+  hasAnyPermission: mockHasAnyPermission,
 }));
 
 // Mock session-validator
-vi.mock("@/lib/session-validator", () => ({
-  isSessionVersionValid: vi.fn(() => Promise.resolve(true)),
+mock.module("@/lib/session-validator", () => ({
+  isSessionVersionValid: mockIsSessionVersionValid,
 }));
 
 // Set environment variable
 process.env.SESSION_SECRET =
   "test-secret-key-that-is-at-least-32-characters-long";
 
-import {
-  PERMISSIONS,
-  hasAnyPermission,
-  hasPermission,
-} from "@/lib/permissions";
-import {
-  type SessionUser,
+import type { SessionUser } from "@/lib/session";
+
+const {
   createSession,
   deleteSession,
   getCurrentUser,
@@ -63,8 +71,7 @@ import {
   requireCsrf,
   requirePermission,
   verifyCsrfToken,
-} from "@/lib/session";
-import { jwtVerify } from "jose";
+} = await import("@/lib/session");
 
 describe("Session Utilities", () => {
   const mockUser: SessionUser = {
@@ -76,12 +83,19 @@ describe("Session Utilities", () => {
     roleId: "role-1",
     departmentId: "dept-1",
     sessionVersion: 1,
-    permissions: [PERMISSIONS.MAINTENANCE_VIEW],
+    permissions: [mockPERMISSIONS.MAINTENANCE_VIEW],
     hourlyRate: 20.0,
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockCookieGet.mockClear();
+    mockCookieSet.mockClear();
+    mockCookieDelete.mockClear();
+    mockJwtVerify.mockClear();
+    mockHasPermission.mockClear();
+    mockHasAnyPermission.mockClear();
+    mockIsSessionVersionValid.mockClear();
+    mockIsSessionVersionValid.mockReturnValue(Promise.resolve(true));
   });
 
   describe("createSession", () => {
@@ -90,13 +104,13 @@ describe("Session Utilities", () => {
 
       expect(typeof csrfToken).toBe("string");
       expect(csrfToken.length).toBe(64); // 32 bytes as hex = 64 chars
-      expect(mockCookieStore.set).toHaveBeenCalledTimes(3);
+      expect(mockCookieSet).toHaveBeenCalledTimes(3);
     });
 
     it("sets httpOnly session cookie", async () => {
       await createSession(mockUser);
 
-      expect(mockCookieStore.set).toHaveBeenCalledWith(
+      expect(mockCookieSet).toHaveBeenCalledWith(
         "fixit_session",
         expect.any(String),
         expect.objectContaining({
@@ -110,7 +124,7 @@ describe("Session Utilities", () => {
     it("sets session expiry cookie", async () => {
       await createSession(mockUser);
 
-      expect(mockCookieStore.set).toHaveBeenCalledWith(
+      expect(mockCookieSet).toHaveBeenCalledWith(
         "fixit_session_exp",
         expect.any(String),
         expect.objectContaining({
@@ -123,7 +137,7 @@ describe("Session Utilities", () => {
     it("sets CSRF cookie with strict sameSite", async () => {
       await createSession(mockUser);
 
-      expect(mockCookieStore.set).toHaveBeenCalledWith(
+      expect(mockCookieSet).toHaveBeenCalledWith(
         "fixit_csrf",
         expect.any(String),
         expect.objectContaining({
@@ -136,7 +150,7 @@ describe("Session Utilities", () => {
 
   describe("getSession", () => {
     it("returns null when no session cookie", async () => {
-      mockCookieStore.get.mockReturnValue(null);
+      mockCookieGet.mockReturnValue(null);
 
       const session = await getSession();
 
@@ -144,7 +158,7 @@ describe("Session Utilities", () => {
     });
 
     it("returns null when cookie value is empty", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "" });
+      mockCookieGet.mockReturnValue({ value: "" });
 
       const session = await getSession();
 
@@ -152,8 +166,8 @@ describe("Session Utilities", () => {
     });
 
     it("returns null when JWT verification fails", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "invalid-token" });
-      vi.mocked(jwtVerify).mockRejectedValue(new Error("Invalid token"));
+      mockCookieGet.mockReturnValue({ value: "invalid-token" });
+      mockJwtVerify.mockRejectedValue(new Error("Invalid token"));
 
       const session = await getSession();
 
@@ -161,14 +175,14 @@ describe("Session Utilities", () => {
     });
 
     it("returns null when session is expired", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() - 1000, // Expired
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
 
       const session = await getSession();
 
@@ -176,13 +190,13 @@ describe("Session Utilities", () => {
     });
 
     it("returns session when valid", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
       const payload = {
         user: mockUser,
         expiresAt: Date.now() + 100000,
         csrfToken: "csrf-token",
       };
-      vi.mocked(jwtVerify).mockResolvedValue({ payload } as never);
+      mockJwtVerify.mockResolvedValue({ payload });
 
       const session = await getSession();
 
@@ -194,15 +208,15 @@ describe("Session Utilities", () => {
     it("deletes all session cookies", async () => {
       await deleteSession();
 
-      expect(mockCookieStore.delete).toHaveBeenCalledWith("fixit_session");
-      expect(mockCookieStore.delete).toHaveBeenCalledWith("fixit_session_exp");
-      expect(mockCookieStore.delete).toHaveBeenCalledWith("fixit_csrf");
+      expect(mockCookieDelete).toHaveBeenCalledWith("fixit_session");
+      expect(mockCookieDelete).toHaveBeenCalledWith("fixit_session_exp");
+      expect(mockCookieDelete).toHaveBeenCalledWith("fixit_csrf");
     });
   });
 
   describe("getCurrentUser", () => {
     it("returns null when no session", async () => {
-      mockCookieStore.get.mockReturnValue(null);
+      mockCookieGet.mockReturnValue(null);
 
       const user = await getCurrentUser();
 
@@ -210,14 +224,14 @@ describe("Session Utilities", () => {
     });
 
     it("returns user from valid session", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
 
       const user = await getCurrentUser();
 
@@ -227,20 +241,20 @@ describe("Session Utilities", () => {
 
   describe("requireAuth", () => {
     it("throws error when not authenticated", async () => {
-      mockCookieStore.get.mockReturnValue(null);
+      mockCookieGet.mockReturnValue(null);
 
       await expect(requireAuth()).rejects.toThrow("Unauthorized");
     });
 
     it("returns user when authenticated", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
 
       const user = await requireAuth();
 
@@ -250,28 +264,28 @@ describe("Session Utilities", () => {
 
   describe("requirePermission", () => {
     beforeEach(() => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
     });
 
     it("throws Forbidden when user lacks permission", async () => {
-      vi.mocked(hasPermission).mockReturnValue(false);
+      mockHasPermission.mockReturnValue(false);
 
       await expect(
-        requirePermission(PERMISSIONS.SYSTEM_SETTINGS)
+        requirePermission(mockPERMISSIONS.SYSTEM_SETTINGS)
       ).rejects.toThrow("Forbidden");
     });
 
     it("returns user when permission granted", async () => {
-      vi.mocked(hasPermission).mockReturnValue(true);
+      mockHasPermission.mockReturnValue(true);
 
-      const user = await requirePermission(PERMISSIONS.TICKET_VIEW);
+      const user = await requirePermission(mockPERMISSIONS.TICKET_VIEW);
 
       expect(user).toEqual(mockUser);
     });
@@ -279,33 +293,33 @@ describe("Session Utilities", () => {
 
   describe("requireAnyPermission", () => {
     beforeEach(() => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
     });
 
     it("throws Forbidden when user lacks all permissions", async () => {
-      vi.mocked(hasAnyPermission).mockReturnValue(false);
+      mockHasAnyPermission.mockReturnValue(false);
 
       await expect(
         requireAnyPermission([
-          PERMISSIONS.SYSTEM_SETTINGS,
-          PERMISSIONS.USER_CREATE,
+          mockPERMISSIONS.SYSTEM_SETTINGS,
+          mockPERMISSIONS.USER_CREATE,
         ])
       ).rejects.toThrow("Forbidden");
     });
 
     it("returns user when any permission granted", async () => {
-      vi.mocked(hasAnyPermission).mockReturnValue(true);
+      mockHasAnyPermission.mockReturnValue(true);
 
       const user = await requireAnyPermission([
-        PERMISSIONS.TICKET_VIEW,
-        PERMISSIONS.SYSTEM_SETTINGS,
+        mockPERMISSIONS.TICKET_VIEW,
+        mockPERMISSIONS.SYSTEM_SETTINGS,
       ]);
 
       expect(user).toEqual(mockUser);
@@ -314,7 +328,7 @@ describe("Session Utilities", () => {
 
   describe("verifyCsrfToken", () => {
     it("returns false when no session", async () => {
-      mockCookieStore.get.mockReturnValue(null);
+      mockCookieGet.mockReturnValue(null);
 
       const result = await verifyCsrfToken("some-token");
 
@@ -322,14 +336,14 @@ describe("Session Utilities", () => {
     });
 
     it("returns false when token does not match", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "correct-token",
         },
-      } as never);
+      });
 
       const result = await verifyCsrfToken("wrong-token");
 
@@ -337,14 +351,14 @@ describe("Session Utilities", () => {
     });
 
     it("returns true when token matches", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "correct-token",
         },
-      } as never);
+      });
 
       const result = await verifyCsrfToken("correct-token");
 
@@ -362,14 +376,14 @@ describe("Session Utilities", () => {
     });
 
     it("throws error when CSRF token invalid", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "correct-token",
         },
-      } as never);
+      });
 
       const request = new Request("http://localhost/api/test", {
         method: "POST",
@@ -380,14 +394,14 @@ describe("Session Utilities", () => {
     });
 
     it("passes when CSRF token is valid", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 100000,
           csrfToken: "correct-token",
         },
-      } as never);
+      });
 
       const request = new Request("http://localhost/api/test", {
         method: "POST",
@@ -400,41 +414,41 @@ describe("Session Utilities", () => {
 
   describe("refreshSessionIfNeeded", () => {
     it("does nothing when no session", async () => {
-      mockCookieStore.get.mockReturnValue(null);
+      mockCookieGet.mockReturnValue(null);
 
       await refreshSessionIfNeeded();
 
-      expect(mockCookieStore.set).not.toHaveBeenCalled();
+      expect(mockCookieSet).not.toHaveBeenCalled();
     });
 
     it("does not refresh when session has more than 1 hour left", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 2 * 60 * 60 * 1000, // 2 hours
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
 
       await refreshSessionIfNeeded();
 
-      expect(mockCookieStore.set).not.toHaveBeenCalled();
+      expect(mockCookieSet).not.toHaveBeenCalled();
     });
 
     it("refreshes session when less than 1 hour left", async () => {
-      mockCookieStore.get.mockReturnValue({ value: "valid-token" });
-      vi.mocked(jwtVerify).mockResolvedValue({
+      mockCookieGet.mockReturnValue({ value: "valid-token" });
+      mockJwtVerify.mockResolvedValue({
         payload: {
           user: mockUser,
           expiresAt: Date.now() + 30 * 60 * 1000, // 30 minutes
           csrfToken: "csrf-token",
         },
-      } as never);
+      });
 
       await refreshSessionIfNeeded();
 
-      expect(mockCookieStore.set).toHaveBeenCalled();
+      expect(mockCookieSet).toHaveBeenCalled();
     });
   });
 });

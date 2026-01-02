@@ -9,7 +9,7 @@ import {
   getStatusColor,
   truncate,
 } from "@/lib/utils";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, setSystemTime } from "bun:test";
 
 describe("cn", () => {
   it("should merge class names", () => {
@@ -54,12 +54,11 @@ describe("formatDateTime", () => {
 
 describe("formatRelativeTime", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    setSystemTime();
   });
 
   it("should return 'just now' for very recent times", () => {

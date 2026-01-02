@@ -22,7 +22,7 @@ Custom roles can be created with any combination of permissions via the Admin UI
 - **Styling**: Tailwind CSS 4
 - **Validation**: Zod schemas
 - **Auth**: JWT sessions with CSRF protection
-- **Testing**: Vitest + Testing Library, Playwright (e2e)
+- **Testing**: Bun test runner + Testing Library, Playwright (e2e)
 - **Linting**: Biomejs
 - **PWA**: next-pwa for service worker generation
 
@@ -40,8 +40,9 @@ bun run lint:fix           # Auto-fix issues
 bun run build:check        # TypeScript compilation check (tsc --noEmit)
 
 # Testing
-bun run test               # Unit tests - watch mode
-bun run test:run           # Unit tests - single run
+bun run test               # Run all unit tests
+bun test src/tests/unit/actions  # Run specific test directory
+bun test path/to/file.test.ts    # Run specific test file
 bun run e2e                # Playwright e2e tests
 bun run e2e:ui             # Playwright UI mode
 
@@ -241,15 +242,40 @@ Next.js modules are mocked in `src/tests/setup.ts`:
 When mocking `SessionUser`, use the correct shape:
 ```typescript
 const mockUser: SessionUser = {
-  id: 1,
+  id: "user-uuid",
+  displayId: 1,
   employeeId: "TECH-001",
   name: "Test User",
   roleName: "tech",              // NOT 'role'
-  roleId: 2,
+  roleId: "role-uuid",
+  departmentId: "dept-uuid",
   permissions: ["ticket:create", "ticket:view", "ticket:update"],
   hourlyRate: null,
+  sessionVersion: 1,
 };
 ```
+
+### ⚠️ Known Issue: Test Interference with mock.module()
+
+Bun's `mock.module()` modifies the **global module cache**. When running multiple test files together, mocks from one file can "leak" into another, causing unexpected failures.
+
+**Symptoms:**
+- Tests pass when run individually: `bun test src/tests/unit/actions/users.test.ts` ✅
+- Tests fail when run together: `bun test src/tests/unit/actions` ❌
+- Error messages like "Invalid permission value" or mocks not being called
+
+**Root Cause:** Unlike Jest/Vitest, Bun doesn't isolate test files into separate contexts.
+
+**Workarounds:**
+```bash
+# Run tests file-by-file (reliable but slower)
+for f in src/tests/unit/actions/*.test.ts; do bun test "$f" || exit 1; done
+
+# Run a specific test file
+bun test src/tests/unit/actions/users.test.ts
+```
+
+**Long-term fix:** Consider dependency injection pattern instead of `mock.module()` for new code.
 
 ## Common Patterns
 

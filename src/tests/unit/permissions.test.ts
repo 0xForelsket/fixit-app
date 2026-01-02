@@ -6,7 +6,7 @@ import {
   hasAnyPermission,
   hasPermission,
 } from "@/lib/permissions";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 
 describe("Permissions", () => {
   describe("hasPermission", () => {

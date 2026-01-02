@@ -6,7 +6,7 @@ import {
   loginSchema,
   updateWorkOrderSchema,
 } from "@/lib/validations";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 
 describe("loginSchema", () => {
   it("should validate correct login credentials", () => {

@@ -1,23 +1,37 @@
-import {
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+
+// Mock the logger to avoid console noise in tests
+const mockLoggerError = mock();
+const mockLoggerWarn = mock();
+const mockLoggerInfo = mock();
+const mockGenerateRequestId = mock(() => "test-request-id");
+
+mock.module("@/lib/logger", () => ({
+  apiLogger: {
+    error: mockLoggerError,
+    warn: mockLoggerWarn,
+    info: mockLoggerInfo,
+  },
+  generateRequestId: mockGenerateRequestId,
+}));
+
+const {
   ApiErrors,
   ErrorCode,
   HttpStatus,
   apiError,
   apiSuccess,
-} from "@/lib/api-error";
-import { describe, expect, it, vi } from "vitest";
-
-// Mock the logger to avoid console noise in tests
-vi.mock("@/lib/logger", () => ({
-  apiLogger: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-  generateRequestId: vi.fn(() => "test-request-id"),
-}));
+} = await import("@/lib/api-error");
 
 describe("api-error", () => {
+  beforeEach(() => {
+    mockLoggerError.mockClear();
+    mockLoggerWarn.mockClear();
+    mockLoggerInfo.mockClear();
+    mockGenerateRequestId.mockClear();
+    mockGenerateRequestId.mockReturnValue("test-request-id");
+  });
+
   describe("HttpStatus", () => {
     it("should have correct status codes", () => {
       expect(HttpStatus.OK).toBe(200);
