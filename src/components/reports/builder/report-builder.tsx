@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type AnalyticsDateRange,
   type ChartData,
   getInventoryStats,
   getLaborStats,
@@ -23,23 +24,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  DndContext,
-  type DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import {
   BarChart3,
   Copy,
   FileText,
@@ -51,8 +35,9 @@ import {
   Trash2,
   Type,
 } from "lucide-react";
+
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -66,13 +51,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { DateRangePicker, WidgetDateRangePicker } from "./date-range-picker";
 import { ScheduleDialog } from "./schedule-dialog";
 import type {
   DataSource,
+  DateRangeFilter,
   ReportConfig,
   WidgetConfig,
   WidgetType,
 } from "./types";
+import { findNextWidgetPosition, WidgetGrid, WIDGET_DEFAULT_SIZES, type Layout } from "./widget-grid";
 
 // Colors for pie chart segments
 const PIE_COLORS = [
@@ -120,73 +108,91 @@ export function ReportBuilder({
   const { toast } = useToast();
   const router = useRouter();
 
-  const addWidget = (type: WidgetType) => {
-    const newWidget: WidgetConfig = {
-      id: crypto.randomUUID(),
-      type,
-      title: type === "text_block" ? "Text Section" : "New Widget",
-      dataSource: "work_orders",
-      layout: { id: crypto.randomUUID(), x: 0, y: 0, w: 12, h: 4 },
-      filters: {},
-    };
-    setConfig((prev) => ({ ...prev, widgets: [...prev.widgets, newWidget] }));
-  };
+  const addWidget = useCallback((type: WidgetType) => {
+    const defaultSize = WIDGET_DEFAULT_SIZES[type] || { w: 6, h: 3 };
+    
+    setConfig((prev) => {
+      const position = findNextWidgetPosition(prev.widgets, type);
+      const newWidget: WidgetConfig = {
+        id: crypto.randomUUID(),
+        type,
+        title: type === "text_block" ? "Text Section" : "New Widget",
+        dataSource: "work_orders",
+        layout: {
+          id: crypto.randomUUID(),
+          ...position,
+          ...defaultSize,
+        },
+        filters: {},
+      };
+      return { ...prev, widgets: [...prev.widgets, newWidget] };
+    });
+  }, []);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const handleLayoutChange = useCallback((layouts: Layout[]) => {
+    setConfig((prev) => ({
+      ...prev,
+      widgets: prev.widgets.map((widget) => {
+        const layout = layouts.find((l) => l.i === widget.id);
+        if (layout) {
+          return {
+            ...widget,
+            layout: {
+              ...widget.layout,
+              x: layout.x,
+              y: layout.y,
+              w: layout.w,
+              h: layout.h,
+            },
+          };
+        }
+        return widget;
+      }),
+    }));
+  }, []);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setConfig((prev) => {
-        const oldIndex = prev.widgets.findIndex((w) => w.id === active.id);
-        const newIndex = prev.widgets.findIndex((w) => w.id === over.id);
-
-        return {
-          ...prev,
-          widgets: arrayMove(prev.widgets, oldIndex, newIndex),
-        };
-      });
-    }
-  };
-
-  const updateWidget = (id: string, updates: Partial<WidgetConfig>) => {
+  const updateWidget = useCallback((id: string, updates: Partial<WidgetConfig>) => {
     setConfig((prev) => ({
       ...prev,
       widgets: prev.widgets.map((w) =>
         w.id === id ? { ...w, ...updates } : w
       ),
     }));
-  };
+  }, []);
 
-  const removeWidget = (id: string) => {
+  const removeWidget = useCallback((id: string) => {
     setConfig((prev) => ({
       ...prev,
       widgets: prev.widgets.filter((w) => w.id !== id),
     }));
-  };
+  }, []);
 
-  const duplicateWidget = (id: string) => {
+  const duplicateWidget = useCallback((id: string) => {
     setConfig((prev) => {
       const widget = prev.widgets.find((w) => w.id === id);
       if (!widget) return prev;
+      
+      const position = findNextWidgetPosition(prev.widgets, widget.type);
       const newWidget: WidgetConfig = {
         ...widget,
         id: crypto.randomUUID(),
         title: `${widget.title} (Copy)`,
-        layout: { ...widget.layout, id: crypto.randomUUID() },
+        layout: {
+          ...widget.layout,
+          id: crypto.randomUUID(),
+          ...position,
+        },
       };
-      const index = prev.widgets.findIndex((w) => w.id === id);
-      const newWidgets = [...prev.widgets];
-      newWidgets.splice(index + 1, 0, newWidget);
-      return { ...prev, widgets: newWidgets };
+      return { ...prev, widgets: [...prev.widgets, newWidget] };
     });
-  };
+  }, []);
+
+  const handleGlobalDateRangeChange = useCallback((dateRange: DateRangeFilter | undefined) => {
+    setConfig((prev) => ({
+      ...prev,
+      globalDateRange: dateRange,
+    }));
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -196,7 +202,7 @@ export function ReportBuilder({
         name: config.title,
         description: config.description,
         config,
-        createdById: userId, // In real app, auth handles this
+        createdById: userId,
       });
       toast({
         title: "Report saved",
@@ -214,10 +220,18 @@ export function ReportBuilder({
     }
   };
 
+  // Sort widgets by y position then x for rendering
+  const sortedWidgets = useMemo(() => {
+    return [...config.widgets].sort((a, b) => {
+      if (a.layout.y !== b.layout.y) return a.layout.y - b.layout.y;
+      return a.layout.x - b.layout.x;
+    });
+  }, [config.widgets]);
+
   return (
     <div className="flex h-[calc(100vh-100px)] gap-6">
       {/* Sidebar Palette */}
-      <div className="w-64 flex-none space-y-6">
+      <div className="w-64 flex-none space-y-6 overflow-y-auto">
         <div className="rounded-xl border border-border bg-card p-4">
           <h3 className="mb-4 font-bold text-sm text-muted-foreground uppercase tracking-wider">
             Components
@@ -294,6 +308,16 @@ export function ReportBuilder({
                 }
               />
             </div>
+            
+            {/* Global Date Range Filter */}
+            <div className="space-y-2 pt-2 border-t border-border">
+              <Label className="text-xs uppercase tracking-wider">Global Date Range</Label>
+              <DateRangePicker
+                value={config.globalDateRange}
+                onChange={handleGlobalDateRangeChange}
+              />
+            </div>
+            
             <Button
               className="w-full font-bold"
               onClick={handleSave}
@@ -314,13 +338,20 @@ export function ReportBuilder({
       </div>
 
       {/* Main Canvas */}
-      <div className="flex-1 overflow-y-auto rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 p-8">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <div 
+        className="flex-1 overflow-y-auto rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 p-8"
+      >
+        <div className="mx-auto max-w-5xl">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-black tracking-tight">
               {config.title || "Untitled Report"}
             </h1>
             <p className="text-muted-foreground">{config.description}</p>
+            {config.globalDateRange?.startDate && (
+              <p className="text-xs text-muted-foreground mt-2 font-mono">
+                Date Range: {config.globalDateRange.startDate} — {config.globalDateRange.endDate}
+              </p>
+            )}
           </div>
 
           {config.widgets.length === 0 ? (
@@ -331,7 +362,7 @@ export function ReportBuilder({
               </h3>
               <p className="mb-6 max-w-sm text-center text-sm">
                 Add widgets from the sidebar to create your custom report. You
-                can drag to reorder them.
+                can drag to reorder and resize them.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 <Button
@@ -364,26 +395,22 @@ export function ReportBuilder({
               </div>
             </div>
           ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
+            <WidgetGrid
+              widgets={sortedWidgets}
+              onLayoutChange={handleLayoutChange}
             >
-              <SortableContext
-                items={config.widgets}
-                strategy={verticalListSortingStrategy}
-              >
-                {config.widgets.map((widget) => (
+              {sortedWidgets.map((widget) => (
+                <div key={widget.id}>
                   <WidgetCard
-                    key={widget.id}
                     widget={widget}
                     onRemove={removeWidget}
                     onUpdate={updateWidget}
                     onDuplicate={duplicateWidget}
+                    globalDateRange={config.globalDateRange}
                   />
-                ))}
-              </SortableContext>
-            </DndContext>
+                </div>
+              ))}
+            </WidgetGrid>
           )}
         </div>
       </div>
@@ -402,12 +429,12 @@ function DataSourceSelect({
   onChange: (value: DataSource) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 pt-4 border-t border-border mt-4">
+    <div className="flex items-center gap-3">
       <Label className="text-xs text-muted-foreground uppercase whitespace-nowrap">
-        Data Source:
+        Data:
       </Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-8 w-[180px]">
+        <SelectTrigger className="h-7 w-[140px] text-[10px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -442,11 +469,7 @@ function WidgetSkeleton({ type }: { type: WidgetType }) {
   if (type === "bar_chart" || type === "pie_chart") {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-[250px] w-full rounded-lg" />
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-8 w-[180px]" />
-        </div>
+        <Skeleton className="h-[180px] w-full rounded-lg" />
       </div>
     );
   }
@@ -466,63 +489,60 @@ function WidgetSkeleton({ type }: { type: WidgetType }) {
 }
 
 /**
- * Widget card component with drag-and-drop support
+ * Widget card component with resize support via react-grid-layout
  */
 function WidgetCard({
   widget,
   onRemove,
   onUpdate,
   onDuplicate,
+  globalDateRange,
 }: {
   widget: WidgetConfig;
   onRemove: (id: string) => void;
   onUpdate: (id: string, updates: Partial<WidgetConfig>) => void;
   onDuplicate: (id: string) => void;
+  globalDateRange?: DateRangeFilter;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: widget.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 1000 : 1,
-  };
-
   const [chartData, setChartData] = useState<ChartData>([]);
   const [summaryData, setSummaryData] = useState<
     { label: string; value: string | number }[]
   >([]);
   const [loading, setLoading] = useState(false);
 
+  // Use widget-specific date range if set, otherwise fall back to global
+  const effectiveDateRange = widget.dateRange || globalDateRange;
+  
+  // Convert to AnalyticsDateRange format
+  const analyticsDateRange: AnalyticsDateRange | undefined = useMemo(() => {
+    if (!effectiveDateRange?.startDate) return undefined;
+    return {
+      startDate: effectiveDateRange.startDate,
+      endDate: effectiveDateRange.endDate,
+    };
+  }, [effectiveDateRange]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         if (widget.type === "stats_summary") {
-          // getStatsSummary only supports work_orders, inventory, labor
           if (
             widget.dataSource === "work_orders" ||
             widget.dataSource === "inventory" ||
             widget.dataSource === "labor"
           ) {
-            const data = await getStatsSummary(widget.dataSource);
+            const data = await getStatsSummary(widget.dataSource, analyticsDateRange);
             setSummaryData(data);
           }
         } else if (widget.type === "bar_chart" || widget.type === "pie_chart") {
           let data: ChartData = [];
           if (widget.dataSource === "work_orders") {
-            data = await getWorkOrderStats();
+            data = await getWorkOrderStats(analyticsDateRange);
           } else if (widget.dataSource === "inventory") {
             data = await getInventoryStats();
           } else if (widget.dataSource === "labor") {
-            data = await getLaborStats();
+            data = await getLaborStats(analyticsDateRange);
           }
           setChartData(data);
         }
@@ -534,63 +554,60 @@ function WidgetCard({
     };
 
     fetchData();
-  }, [widget.dataSource, widget.type]);
+  }, [widget.dataSource, widget.type, analyticsDateRange]);
 
   const handleDataSourceChange = (value: DataSource) => {
     onUpdate(widget.id, { dataSource: value });
+  };
+
+  const handleWidgetDateRangeChange = (dateRange: DateRangeFilter | undefined) => {
+    onUpdate(widget.id, { dateRange });
   };
 
   const displayData = chartData.length > 0 ? chartData : MOCK_DATA;
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
       className={cn(
-        "group relative rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md",
-        isDragging && "scale-[1.02] border-primary/50 shadow-lg"
+        "group relative h-full rounded-xl border border-border bg-card shadow-sm transition-all hover:shadow-md flex flex-col overflow-hidden"
       )}
-      {...attributes}
     >
       {/* Widget Toolbar */}
-      <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-2">
+      <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-2 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <div
-            {...listeners}
-            className="cursor-grab hover:text-primary active:cursor-grabbing"
-          >
+          <div className="widget-drag-handle cursor-grab hover:text-primary active:cursor-grabbing">
             <GripVertical className="h-4 w-4 text-muted-foreground/50" />
           </div>
           <Input
             value={widget.title}
             onChange={(e) => onUpdate(widget.id, { title: e.target.value })}
-            className="h-8 w-[200px] border-transparent bg-transparent font-bold hover:border-border focus:border-primary"
+            className="h-7 w-[160px] border-transparent bg-transparent text-sm font-bold hover:border-border focus:border-primary"
           />
         </div>
         <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-7 w-7"
             onClick={() => onDuplicate(widget.id)}
             title="Duplicate widget"
           >
-            <Copy className="h-4 w-4" />
+            <Copy className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-destructive hover:text-destructive"
+            className="h-7 w-7 text-destructive hover:text-destructive"
             onClick={() => onRemove(widget.id)}
             title="Remove widget"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
 
       {/* Widget Content Area */}
-      <div className="p-6">
+      <div className="flex-1 p-4 overflow-auto min-h-0">
         {loading ? (
           <WidgetSkeleton type={widget.type} />
         ) : (
@@ -599,7 +616,7 @@ function WidgetCard({
             {widget.type === "text_block" && (
               <Textarea
                 placeholder="Enter text content here..."
-                className="min-h-[100px] border-dashed"
+                className="min-h-[80px] h-full border-dashed resize-none"
                 value={(widget.filters?.text as string) || ""}
                 onChange={(e) =>
                   onUpdate(widget.id, {
@@ -611,8 +628,8 @@ function WidgetCard({
 
             {/* Bar Chart */}
             {widget.type === "bar_chart" && (
-              <div className="space-y-0">
-                <div className="h-[250px] w-full">
+              <div className="h-full flex flex-col gap-2">
+                <div className="flex-1 min-h-[150px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={displayData}>
                       <CartesianGrid
@@ -622,15 +639,16 @@ function WidgetCard({
                       />
                       <XAxis
                         dataKey="name"
-                        tick={{ fontSize: 12 }}
+                        tick={{ fontSize: 10 }}
                         tickLine={false}
                       />
-                      <YAxis tick={{ fontSize: 12 }} tickLine={false} />
+                      <YAxis tick={{ fontSize: 10 }} tickLine={false} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "hsl(var(--card))",
                           border: "1px solid hsl(var(--border))",
                           borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                       />
                       <Bar
@@ -641,25 +659,31 @@ function WidgetCard({
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-                <DataSourceSelect
-                  value={widget.dataSource}
-                  onChange={handleDataSourceChange}
-                />
+                <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
+                  <DataSourceSelect
+                    value={widget.dataSource}
+                    onChange={handleDataSourceChange}
+                  />
+                  <WidgetDateRangePicker
+                    value={widget.dateRange}
+                    onChange={handleWidgetDateRangeChange}
+                  />
+                </div>
               </div>
             )}
 
             {/* Pie Chart */}
             {widget.type === "pie_chart" && (
-              <div className="space-y-0">
-                <div className="h-[250px] w-full">
+              <div className="h-full flex flex-col gap-2">
+                <div className="flex-1 min-h-[150px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={displayData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={90}
+                        innerRadius={40}
+                        outerRadius={70}
                         dataKey="value"
                         nameKey="name"
                         label={({ name, percent }) =>
@@ -679,31 +703,38 @@ function WidgetCard({
                           backgroundColor: "hsl(var(--card))",
                           border: "1px solid hsl(var(--border))",
                           borderRadius: "8px",
+                          fontSize: "12px",
                         }}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: "10px" }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <DataSourceSelect
-                  value={widget.dataSource}
-                  onChange={handleDataSourceChange}
-                />
+                <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
+                  <DataSourceSelect
+                    value={widget.dataSource}
+                    onChange={handleDataSourceChange}
+                  />
+                  <WidgetDateRangePicker
+                    value={widget.dateRange}
+                    onChange={handleWidgetDateRangeChange}
+                  />
+                </div>
               </div>
             )}
 
             {/* Stats Summary */}
             {widget.type === "stats_summary" && (
-              <div className="space-y-0">
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="h-full flex flex-col gap-2">
+                <div className="flex-1 grid grid-cols-2 gap-3 md:grid-cols-4">
                   {summaryData.length > 0
                     ? summaryData.map((s, i) => (
                         <div
                           key={i}
-                          className="rounded-lg border border-border bg-gradient-to-br from-card to-muted/30 p-4"
+                          className="rounded-lg border border-border bg-gradient-to-br from-card to-muted/30 p-3"
                         >
-                          <div className="text-2xl font-bold">{s.value}</div>
-                          <div className="text-xs font-bold uppercase text-muted-foreground">
+                          <div className="text-xl font-bold">{s.value}</div>
+                          <div className="text-[10px] font-bold uppercase text-muted-foreground">
                             {s.label}
                           </div>
                         </div>
@@ -711,38 +742,50 @@ function WidgetCard({
                     : [1, 2, 3, 4].map((i) => (
                         <div
                           key={i}
-                          className="rounded-lg border border-border bg-card p-4"
+                          className="rounded-lg border border-border bg-card p-3"
                         >
-                          <div className="text-2xl font-bold">--</div>
-                          <div className="text-xs font-bold uppercase text-muted-foreground">
+                          <div className="text-xl font-bold">--</div>
+                          <div className="text-[10px] font-bold uppercase text-muted-foreground">
                             Metric {i}
                           </div>
                         </div>
                       ))}
                 </div>
-                <DataSourceSelect
-                  value={widget.dataSource}
-                  onChange={handleDataSourceChange}
-                />
+                <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
+                  <DataSourceSelect
+                    value={widget.dataSource}
+                    onChange={handleDataSourceChange}
+                  />
+                  <WidgetDateRangePicker
+                    value={widget.dateRange}
+                    onChange={handleWidgetDateRangeChange}
+                  />
+                </div>
               </div>
             )}
 
             {/* Data Table */}
             {widget.type === "data_table" && (
-              <div className="space-y-0">
-                <div className="flex h-[200px] items-center justify-center rounded-lg border-2 border-dashed border-muted bg-muted/10">
+              <div className="h-full flex flex-col gap-2">
+                <div className="flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-muted bg-muted/10 min-h-[120px]">
                   <div className="text-center text-muted-foreground">
-                    <TableIcon className="mx-auto mb-2 h-12 w-12 opacity-50" />
-                    <p className="font-medium">Data Table Preview</p>
+                    <TableIcon className="mx-auto mb-2 h-10 w-10 opacity-50" />
+                    <p className="font-medium text-sm">Data Table Preview</p>
                     <p className="text-xs">
                       Tables are populated with live data on report generation
                     </p>
                   </div>
                 </div>
-                <DataSourceSelect
-                  value={widget.dataSource}
-                  onChange={handleDataSourceChange}
-                />
+                <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
+                  <DataSourceSelect
+                    value={widget.dataSource}
+                    onChange={handleDataSourceChange}
+                  />
+                  <WidgetDateRangePicker
+                    value={widget.dateRange}
+                    onChange={handleWidgetDateRangeChange}
+                  />
+                </div>
               </div>
             )}
           </>
