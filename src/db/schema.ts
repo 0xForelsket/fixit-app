@@ -86,6 +86,7 @@ export const notificationTypes = [
   "work_order_commented",
   "work_order_status_changed",
   "maintenance_due",
+  "low_stock_alert",
 ] as const;
 export type NotificationType = (typeof notificationTypes)[number];
 
