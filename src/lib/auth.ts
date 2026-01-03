@@ -1,4 +1,5 @@
-// Native Bun.password is used instead of bcryptjs
+// Use bcryptjs for cross-runtime compatibility (Node.js + Bun)
+import bcrypt from "bcryptjs";
 
 import {
   PERMISSIONS,
@@ -9,14 +10,11 @@ import {
 import { type SessionUser, getCurrentUser } from "./session";
 
 export async function hashPin(pin: string): Promise<string> {
-  return Bun.password.hash(pin, {
-    algorithm: "bcrypt",
-    cost: 10,
-  });
+  return bcrypt.hash(pin, 10);
 }
 
 export async function verifyPin(pin: string, hash: string): Promise<boolean> {
-  return Bun.password.verify(pin, hash);
+  return bcrypt.compare(pin, hash);
 }
 
 export const SESSION_CONFIG = {
