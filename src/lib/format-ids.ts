@@ -35,6 +35,14 @@ export function getWorkOrderPath(displayId: number): string {
   return `/maintenance/work-orders/${formatWorkOrderId(displayId)}`;
 }
 
+/**
+ * Generate the URL path for equipment
+ * @param code - The equipment code (e.g., "FORK-002")
+ * @returns URL path like "/assets/equipment/FORK-002"
+ */
+export function getEquipmentPath(code: string): string {
+  return `/assets/equipment/${code}`;
+}
+
 // Future: Add similar functions for other entities as needed
-// export function formatEquipmentId(displayId: number): string { ... }
 // export function formatScheduleId(displayId: number): string { ... }

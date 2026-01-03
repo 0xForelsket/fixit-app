@@ -45,7 +45,7 @@ async function getStats(
     .select({
       open: sql<number>`sum(case when ${workOrders.status} = 'open' then 1 else 0 end)`,
       inProgress: sql<number>`sum(case when ${workOrders.status} = 'in_progress' then 1 else 0 end)`,
-      overdue: sql<number>`sum(case when ${workOrders.dueBy} < ${now} and ${workOrders.status} = 'open' then 1 else 0 end)`,
+      overdue: sql<number>`sum(case when ${workOrders.dueBy} < ${now.toISOString()} and ${workOrders.status} = 'open' then 1 else 0 end)`,
       critical: sql<number>`sum(case when ${workOrders.priority} = 'critical' and ${workOrders.status} = 'open' then 1 else 0 end)`,
     })
     .from(workOrders);
@@ -72,7 +72,7 @@ async function getStats(
     .select({
       open: sql<number>`sum(case when ${workOrders.status} = 'open' then 1 else 0 end)`,
       inProgress: sql<number>`sum(case when ${workOrders.status} = 'in_progress' then 1 else 0 end)`,
-      overdue: sql<number>`sum(case when ${workOrders.dueBy} < ${now} and ${workOrders.status} in ('open', 'in_progress') then 1 else 0 end)`,
+      overdue: sql<number>`sum(case when ${workOrders.dueBy} < ${now.toISOString()} and ${workOrders.status} in ('open', 'in_progress') then 1 else 0 end)`,
       critical: sql<number>`sum(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 else 0 end)`,
     })
     .from(workOrders)

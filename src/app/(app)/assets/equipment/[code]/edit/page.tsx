@@ -13,11 +13,11 @@ import { EquipmentForm } from "../../equipment-form";
 export default async function EditEquipmentPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ code: string }>;
 }) {
   await requirePermission(PERMISSIONS.EQUIPMENT_UPDATE);
 
-  const { id: equipmentId } = await params;
+  const { code: equipmentCode } = await params;
 
   const [
     equipmentItem,
@@ -30,7 +30,7 @@ export default async function EditEquipmentPage({
     departmentsList,
   ] = await Promise.all([
     db.query.equipment.findFirst({
-      where: eq(equipment.id, equipmentId),
+      where: eq(equipment.code, equipmentCode.toUpperCase()),
       with: {
         type: true,
       },

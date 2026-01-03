@@ -62,7 +62,7 @@ export function EquipmentTable({
       sortable: true,
       cell: (row) => (
         <Link
-          href={`/assets/equipment/${row.id}`}
+          href={`/assets/equipment/${row.code}`}
           data-testid="equipment-link"
           className="flex items-center gap-4 group/item"
         >
@@ -74,7 +74,7 @@ export function EquipmentTable({
               {row.name}
             </p>
             <p className="text-[10px] font-mono font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
-              ID: {row.id}
+              {row.code}
             </p>
           </div>
         </Link>
@@ -172,7 +172,7 @@ export function EquipmentTable({
               className="rounded-xl hover:bg-primary hover:text-primary-foreground transition-all transform group-hover:rotate-12 text-muted-foreground"
             >
               <Link
-                href={`/assets/equipment/${row.id}/edit`}
+                href={`/assets/equipment/${row.code}/edit`}
                 aria-label={`Edit ${row.name}`}
               >
                 <Edit className="h-4 w-4" />

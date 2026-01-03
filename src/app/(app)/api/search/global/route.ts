@@ -168,7 +168,7 @@ export async function GET(request: Request) {
         type: "equipment",
         title: eq.name,
         subtitle: `${eq.code} - ${eq.status}`,
-        href: `/assets/equipment/${eq.id}`,
+        href: `/assets/equipment/${eq.code}`,
       });
     }
 

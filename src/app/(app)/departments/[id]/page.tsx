@@ -334,7 +334,7 @@ function EquipmentList({
       {equipment.map((item, index) => (
         <Link
           key={item.id}
-          href={`/assets/equipment/${item.id}`}
+          href={`/assets/equipment/${item.code}`}
           className={cn(
             "flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group",
             index < 5 && `animate-stagger-${index + 1}`

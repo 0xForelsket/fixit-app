@@ -35,9 +35,9 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-async function getEquipmentItem(id: string) {
+async function getEquipmentItem(code: string) {
   return db.query.equipment.findFirst({
-    where: eq(equipmentTable.id, id),
+    where: eq(equipmentTable.code, code.toUpperCase()),
     with: {
       type: {
         with: {
@@ -74,20 +74,22 @@ async function getEquipmentItem(id: string) {
 export default async function EquipmentDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ code: string }>;
 }) {
-  const { id: equipmentId } = await params;
+  const { code: equipmentCode } = await params;
 
   // Parallelize all initial data fetching
-  const [equipmentItem, user, favoriteResult] = await Promise.all([
-    getEquipmentItem(equipmentId),
-    getCurrentUser(),
-    isFavorite("equipment", equipmentId),
-  ]);
-
+  const equipmentItem = await getEquipmentItem(equipmentCode);
   if (!equipmentItem) {
     notFound();
   }
+  
+  const [user, favoriteResult] = await Promise.all([
+    getCurrentUser(),
+    isFavorite("equipment", equipmentItem.id),
+  ]);
+
+
 
   // Security Audit: Technicians only allowed in their department
   if (
@@ -147,7 +149,7 @@ export default async function EquipmentDetailPage({
           asChild
           className="border-primary text-primary hover:bg-primary hover:text-primary-foreground font-bold"
         >
-          <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+          <Link href={`/assets/equipment/${equipmentItem.code}/edit`}>
             <Edit className="mr-2 h-4 w-4" />
             EDIT EQUIPMENT
           </Link>
@@ -338,7 +340,7 @@ export default async function EquipmentDetailPage({
             PERMISSIONS.EQUIPMENT_UPDATE
           ) && (
             <Button variant="outline" asChild className="hidden sm:flex">
-              <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+              <Link href={`/assets/equipment/${equipmentItem.code}/edit`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Link>
@@ -467,7 +469,7 @@ export default async function EquipmentDetailPage({
           </TabsContent>
 
           <TabsContent value="logs" className="mt-6">
-            <AuditLogList entityType="equipment" entityId={equipmentId} />
+            <AuditLogList entityType="equipment" entityId={equipmentItem.id} />
           </TabsContent>
         </Tabs>
       </div>
@@ -567,7 +569,7 @@ export default async function EquipmentDetailPage({
               </div>
             </TabsContent>
             <TabsContent value="logs" className="mt-4">
-              <AuditLogList entityType="equipment" entityId={equipmentId} />
+              <AuditLogList entityType="equipment" entityId={equipmentItem.id} />
             </TabsContent>
           </Tabs>
         </div>
@@ -577,7 +579,7 @@ export default async function EquipmentDetailPage({
       {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_UPDATE) && (
         <div className="fixed bottom-16 left-0 right-0 p-4 bg-card/80 backdrop-blur-lg border-t border-border lg:hidden z-30">
           <Button asChild size="lg" className="w-full">
-            <Link href={`/assets/equipment/${equipmentItem.id}/edit`}>
+            <Link href={`/assets/equipment/${equipmentItem.code}/edit`}>
               <Edit className="mr-2 h-4 w-4" />
               Edit Equipment
             </Link>

@@ -95,7 +95,7 @@ export function FavoritesDropdown({ className }: FavoritesDropdownProps) {
                 className="cursor-pointer"
               >
                 <Link
-                  href={`/assets/equipment/${favorite.entityId}`}
+                  href={`/assets/equipment/${favorite.equipment?.code ?? ''}`}
                   className="flex items-start gap-3 p-3"
                 >
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">

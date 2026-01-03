@@ -2,7 +2,7 @@
 
 import { useOnlineStatus } from "@/hooks/use-offline";
 import { cn } from "@/lib/utils";
-import { CloudOff, Wifi, WifiOff } from "lucide-react";
+import { Wifi, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface OfflineIndicatorProps {
@@ -50,35 +50,42 @@ export function OfflineIndicator({
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ease-out",
-        showBanner ? "translate-y-0" : "translate-y-full",
+        "fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out",
+        showBanner ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none",
         className
       )}
       role="alert"
       aria-live="polite"
     >
-      {isOffline ? (
-        // Offline banner
-        <div className="bg-amber-600 text-white py-3 px-4 flex items-center justify-center gap-3 shadow-lg">
-          <WifiOff className="h-5 w-5 animate-pulse" />
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-            <span className="font-semibold">You&apos;re offline</span>
-            <span className="text-sm text-amber-100">
-              Some features may be limited. Changes will sync when you
-              reconnect.
-            </span>
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {isOffline ? (
+          // Offline toast
+          <div className="bg-amber-500/90 dark:bg-amber-600/90 backdrop-blur-md text-white py-3 px-6 rounded-2xl flex items-center gap-4 shadow-[0_8px_32px_rgba(245,158,11,0.3)] border border-amber-400/20">
+            <div className="bg-white/20 p-2 rounded-xl">
+              <WifiOff className="h-5 w-5 animate-pulse" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold tracking-tight">System Offline</span>
+              <span className="text-xs text-amber-50/90 leading-tight">
+                Limited functionality. Changes will sync later.
+              </span>
+            </div>
           </div>
-        </div>
-      ) : (
-        // Back online banner
-        <div className="bg-emerald-600 text-white py-3 px-4 flex items-center justify-center gap-3 shadow-lg">
-          <Wifi className="h-5 w-5" />
-          <span className="font-semibold">Back online!</span>
-          <span className="text-sm text-emerald-100">
-            Your connection has been restored.
-          </span>
-        </div>
-      )}
+        ) : (
+          // Back online toast
+          <div className="bg-emerald-500/90 dark:bg-emerald-600/90 backdrop-blur-md text-white py-3 px-6 rounded-2xl flex items-center gap-4 shadow-[0_8px_32px_rgba(16,185,129,0.3)] border border-emerald-400/20">
+            <div className="bg-white/20 p-2 rounded-xl">
+              <Wifi className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold tracking-tight">Back Online</span>
+              <span className="text-xs text-emerald-50/90 leading-tight">
+                Connection restored. Syncing data...
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -97,12 +104,12 @@ export function OfflineIndicatorCompact({ className }: { className?: string }) {
   return (
     <output
       className={cn(
-        "flex items-center gap-2 text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full text-sm font-medium",
+        "flex items-center gap-2 text-amber-600 bg-amber-500/10 dark:bg-amber-400/10 backdrop-blur-sm border border-amber-500/20 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider animate-pulse",
         className
       )}
       aria-label="Offline"
     >
-      <CloudOff className="h-4 w-4" />
+      <div className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
       <span>Offline</span>
     </output>
   );

@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, Wrench, X } from "lucide-react";
 import Link from "next/link";
+import { useOnlineStatus } from "@/hooks/use-offline";
 
 interface SidebarHeaderProps {
   isCollapsed?: boolean;
@@ -15,15 +16,17 @@ export function SidebarHeader({
   isCollapsed,
   onToggleCollapse,
   onClose,
-  onNavClick,
-}: SidebarHeaderProps) {
-  return (
-    <div
-      className={cn(
-        "flex h-16 items-center border-b border-border transition-all duration-300",
-        isCollapsed ? "justify-center px-0" : "justify-between px-4"
-      )}
-    >
+    onNavClick,
+  }: SidebarHeaderProps) {
+    const { isOnline } = useOnlineStatus();
+
+    return (
+      <div
+        className={cn(
+          "flex h-16 items-center border-b border-border transition-all duration-300",
+          isCollapsed ? "justify-center px-0 flex-col gap-2 py-2" : "justify-between px-4"
+        )}
+      >
       {!isCollapsed && (
         <Link
           href="/dashboard"
@@ -39,22 +42,35 @@ export function SidebarHeader({
         </Link>
       )}
 
-      <button
-        type="button"
-        onClick={onToggleCollapse}
-        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className={cn(
-          "rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          isCollapsed ? "flex" : "hidden lg:flex"
-        )}
-        title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {isCollapsed ? (
-          <PanelLeftOpen className="h-5 w-5" />
-        ) : (
-          <PanelLeftClose className="h-5 w-5" />
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        {/* LED Connectivity Indicator */}
+        <div
+          className={cn(
+            "h-2 w-2 rounded-full transition-all duration-500 shadow-lg shrink-0",
+            isOnline
+              ? "bg-emerald-500 shadow-emerald-500/50 animate-pulse"
+              : "bg-red-500 shadow-red-500/50 animate-pulse duration-[1000ms]"
+          )}
+          title={isOnline ? "Network: Online" : "Network: Offline"}
+        />
+
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className={cn(
+            "rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            isCollapsed ? "flex" : "hidden lg:flex"
+          )}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <PanelLeftOpen className="h-5 w-5" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5" />
+          )}
+        </button>
+      </div>
 
       <button
         type="button"

@@ -110,7 +110,7 @@ export function RecentDowntimeTable({ data }: RecentDowntimeTableProps) {
                     <TableCell className="px-5 py-4">
                       <div className="flex flex-col">
                         <Link
-                          href={`/assets/equipment/${event.equipmentId}`}
+                          href={`/assets/equipment/${event.equipmentCode}`}
                           className="text-sm font-bold truncate max-w-[180px] text-foreground hover:text-primary transition-colors"
                         >
                           {event.equipmentName}
