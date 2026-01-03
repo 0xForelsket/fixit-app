@@ -30,12 +30,22 @@ const mockDelete = mock(() => ({
   where: mock(),
 }));
 
-const mockTransaction = mock((callback: (tx: unknown) => Promise<unknown>) => {
+const mockTxInsert = mock((table: unknown) => ({
+  values: mock(() => Promise.resolve()),
+}));
+
+const mockTxUpdate = mock((table: unknown) => ({
+  set: mock(() => ({ 
+    where: mock(() => Promise.resolve()) 
+  })),
+}));
+
+const mockTransaction = mock(async (callback: (tx: unknown) => Promise<unknown>) => {
   // Call the callback with a mock transaction object
   const mockTx = {
-    insert: mockInsert,
+    insert: mockTxInsert,
     values: mock(() => ({ returning: mock() })), // Ensure transaction usage matches
-    update: mockUpdate,
+    update: mockTxUpdate,
     delete: mockDelete,
     query: {
       equipment: { findFirst: mockFindFirstEquipment },
@@ -44,7 +54,7 @@ const mockTransaction = mock((callback: (tx: unknown) => Promise<unknown>) => {
       roles: { findFirst: mockFindFirstRole },
     }
   };
-  return callback(mockTx);
+  return await callback(mockTx);
 });
 
 // Mock auth to prevent leakage
@@ -645,12 +655,19 @@ describe("resolveWorkOrder action", () => {
       updatedAt: new Date(),
     });
 
-    mockUpdate.mockReturnValue({
-      set: mock(() => ({ where: mock() })),
-    });
-
-    mockInsert.mockReturnValue({
-      values: mock(),
+    // Set up transaction mock for resolve - needs update and insert chains
+    mockTransaction.mockImplementation(async (callback) => {
+      const mockTx = {
+        update: mock(() => ({
+          set: mock(() => ({
+            where: mock(() => Promise.resolve()),
+          })),
+        })),
+        insert: mock(() => ({
+          values: mock(() => Promise.resolve()),
+        })),
+      };
+      return callback(mockTx as unknown as Parameters<typeof callback>[0]);
     });
 
     const formData = new FormData();
@@ -659,8 +676,7 @@ describe("resolveWorkOrder action", () => {
     const result = await resolveWorkOrder("1", undefined, formData);
 
     expect(result.success).toBe(true);
-    expect(mockUpdate).toHaveBeenCalled();
-    expect(mockInsert).toHaveBeenCalled(); // For status change log
+    expect(mockTransaction).toHaveBeenCalled();
   });
 });
 

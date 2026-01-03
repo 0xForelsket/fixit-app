@@ -79,6 +79,7 @@ export const attachmentTypes = [
   "document",
   "before",
   "after",
+  "signature",
 ] as const;
 export type AttachmentType = (typeof attachmentTypes)[number];
 

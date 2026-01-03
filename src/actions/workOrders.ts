@@ -354,6 +354,7 @@ export async function resolveWorkOrder(
 
   const rawData = {
     resolutionNotes: formData.get("resolutionNotes"),
+    signature: formData.get("signature")?.toString() || undefined,
   };
 
   const result = resolveWorkOrderSchema.safeParse(rawData);
@@ -369,52 +370,101 @@ export async function resolveWorkOrder(
     return { success: false, error: "Work order not found" };
   }
 
-  await db
-    .update(workOrders)
-    .set({
-      status: "resolved",
-      resolutionNotes: result.data.resolutionNotes,
-      resolvedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(workOrders.id, workOrderId));
+  try {
+    await db.transaction(async (tx) => {
+      // Update work order status
+      await tx
+        .update(workOrders)
+        .set({
+          status: "resolved",
+          resolutionNotes: result.data.resolutionNotes,
+          resolvedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(workOrders.id, workOrderId));
 
-  await db.insert(workOrderLogs).values({
-    workOrderId,
-    action: "status_change",
-    oldValue: existingWorkOrder.status,
-    newValue: "resolved",
-    createdById: user.id,
-  });
+      // Handle signature upload if provided
+      if (result.data.signature) {
+        // Import S3 utilities dynamically to avoid circular dependencies
+        const { uploadFile, generateS3Key } = await import("@/lib/s3");
+        const { uuidv7 } = await import("uuidv7");
+        
+        // Parse base64 data URL
+        const matches = result.data.signature.match(/^data:image\/png;base64,(.+)$/);
+        if (matches) {
+          const base64Data = matches[1];
+          const buffer = Buffer.from(base64Data, "base64");
+          const attachmentId = uuidv7();
+          const filename = `signature_${Date.now()}.png`;
+          const s3Key = generateS3Key("work_order", workOrderId, attachmentId, filename);
+          
+          // Upload to S3
+          await uploadFile(s3Key, buffer, "image/png");
+          
+          // Create attachment record
+          await tx.insert(attachments).values({
+            id: attachmentId,
+            entityType: "work_order",
+            entityId: workOrderId,
+            type: "signature",
+            filename,
+            s3Key,
+            mimeType: "image/png",
+            sizeBytes: buffer.length,
+            uploadedById: user.id,
+          });
+        }
+      }
 
-  // Notify reporter that their work order was resolved
-  if (existingWorkOrder.reportedById !== user.id) {
-    await createNotification({
-      userId: existingWorkOrder.reportedById,
-      type: "work_order_resolved",
-      title: "Your Work Order Has Been Resolved",
-      message: existingWorkOrder.title,
-      link: `/maintenance/work-orders/${workOrderId}`,
+      // Log status change
+      await tx.insert(workOrderLogs).values({
+        workOrderId,
+        action: "status_change",
+        oldValue: existingWorkOrder.status,
+        newValue: "resolved",
+        createdById: user.id,
+      });
     });
+
+    // Notify reporter that their work order was resolved
+    if (existingWorkOrder.reportedById !== user.id) {
+      await createNotification({
+        userId: existingWorkOrder.reportedById,
+        type: "work_order_resolved",
+        title: "Your Work Order Has Been Resolved",
+        message: existingWorkOrder.title,
+        link: `/maintenance/work-orders/${workOrderId}`,
+      });
+    }
+
+    // Audit log for work order resolution
+    await logAudit({
+      entityType: "work_order",
+      entityId: workOrderId,
+      action: "UPDATE",
+      details: {
+        action: "resolved",
+        previousStatus: existingWorkOrder.status,
+        resolutionNotes: result.data.resolutionNotes,
+        hasSignature: !!result.data.signature,
+      },
+    });
+
+    revalidatePath(`/maintenance/work-orders/${workOrderId}`);
+    revalidatePath("/maintenance/work-orders");
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (error) {
+    workOrderLogger.error(
+      { error, userId: user.id, workOrderId },
+      "Failed to resolve work order"
+    );
+    return {
+      success: false,
+      error: "Failed to resolve work order. Please try again.",
+    };
   }
-
-  // Audit log for work order resolution
-  await logAudit({
-    entityType: "work_order",
-    entityId: workOrderId,
-    action: "UPDATE",
-    details: {
-      action: "resolved",
-      previousStatus: existingWorkOrder.status,
-      resolutionNotes: result.data.resolutionNotes,
-    },
-  });
-
-  revalidatePath(`/maintenance/work-orders/${workOrderId}`);
-  revalidatePath("/maintenance/work-orders");
-  revalidatePath("/dashboard");
-
-  return { success: true };
 }
 
 export async function addWorkOrderComment(

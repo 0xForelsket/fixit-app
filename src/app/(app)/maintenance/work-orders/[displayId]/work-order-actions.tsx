@@ -8,6 +8,7 @@ import {
 } from "@/actions/workOrders";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { SignaturePad } from "@/components/ui/signature-pad";
 import type { User, WorkOrder } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import {
@@ -35,6 +36,7 @@ export function WorkOrderActions({
   const [isResolving, setIsResolving] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [signatureData, setSignatureData] = useState<string | null>(null);
 
   // Status/Assign actions
   const [_assignState, assignAction, isAssignPending] = useActionState(
@@ -92,7 +94,12 @@ export function WorkOrderActions({
             icon={CheckCircle2}
             label={isResolving ? "Cancel" : "Resolve"}
             variant={isResolving ? "outline" : "primary"}
-            onClick={() => setIsResolving(!isResolving)}
+            onClick={() => {
+              setIsResolving(!isResolving);
+              if (isResolving) {
+                setSignatureData(null); // Clear signature when canceling
+              }
+            }}
           />
         )}
 
@@ -117,6 +124,14 @@ export function WorkOrderActions({
                 required
               />
             </div>
+            
+            {/* Signature Pad */}
+            <input type="hidden" name="signature" value={signatureData || ""} />
+            <SignaturePad
+              onChange={setSignatureData}
+              disabled={isResolvePending}
+            />
+            
             <Button
               type="submit"
               size="sm"

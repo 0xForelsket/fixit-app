@@ -69,6 +69,7 @@ export const resolveWorkOrderSchema = z.object({
     .string()
     .min(1, "Resolution notes are required")
     .max(5000, "Resolution notes are too long"),
+  signature: z.string().optional(), // Base64 encoded PNG data URL
 });
 
 export const addCommentSchema = z.object({
