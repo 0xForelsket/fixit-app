@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.ANALYZE === "true",
-});
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// biome-ignore lint/suspicious/noExplicitAny: PWA plugin types
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   register: true,
@@ -76,6 +71,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Turbopack is default in Next.js 16, acknowledge PWA plugin's webpack config
+  turbopack: {},
   async headers() {
     return [
       {
@@ -88,5 +85,4 @@ const nextConfig: NextConfig = {
 
 const isDev = process.env.NODE_ENV === "development";
 
-// Apply plugins: bundleAnalyzer wraps the config when ANALYZE=true
-module.exports = withBundleAnalyzer(isDev ? nextConfig : withPWA(nextConfig));
+module.exports = isDev ? nextConfig : withPWA(nextConfig);

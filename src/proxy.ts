@@ -79,7 +79,7 @@ function isSessionValid(request: NextRequest): boolean {
  * since Edge Runtime has limited crypto capabilities for full JWT verification.
  * The session is fully verified server-side in requireAuth/getCurrentUser.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const url = request.nextUrl;
   const host = request.headers.get("host") || "";
   const forwardedHost = request.headers.get("x-forwarded-host");
