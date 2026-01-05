@@ -1,5 +1,10 @@
 import { isFavorite } from "@/actions/favorites";
 import { AuditLogList } from "@/components/audit/audit-log-list";
+import {
+  EndDowntimeButton,
+  RecordReadingButton,
+  ReportDowntimeDialog,
+} from "@/components/equipment";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +42,6 @@ import {
   Calendar,
   CheckCircle2,
   ClipboardList,
-  Clock,
   DollarSign,
   Edit,
   Gauge,
@@ -450,13 +454,13 @@ export default async function EquipmentDetailPage({
             <div>
               <p className="text-muted-foreground">Purchase Price</p>
               <p className="font-medium">
-                {formatCurrency(parseFloat(equipmentItem.purchasePrice!))}
+                {formatCurrency(Number.parseFloat(equipmentItem.purchasePrice!))}
               </p>
             </div>
             <div>
               <p className="text-muted-foreground">Residual Value</p>
               <p className="font-medium">
-                {formatCurrency(parseFloat(equipmentItem.residualValue || "0"))}
+                {formatCurrency(Number.parseFloat(equipmentItem.residualValue || "0"))}
               </p>
             </div>
             <div>
@@ -515,13 +519,7 @@ export default async function EquipmentDetailPage({
           <Gauge className="h-4 w-4" />
           Meters
         </h3>
-        {canRecordMeters && meters.length > 0 && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/assets/equipment/${equipmentItem.code}/edit#meters`}>
-              Record Reading
-            </Link>
-          </Button>
-        )}
+        {/* Record Reading buttons are now per-meter below */}
       </div>
       {meters.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">
@@ -538,7 +536,7 @@ export default async function EquipmentDetailPage({
                     {meter.type}
                   </p>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end gap-1">
                   <p className="font-bold text-lg">
                     {meter.currentReading || "—"}{" "}
                     <span className="text-sm font-normal text-muted-foreground">
@@ -549,6 +547,14 @@ export default async function EquipmentDetailPage({
                     <p className="text-xs text-muted-foreground">
                       {formatRelativeTime(meter.lastReadingDate)}
                     </p>
+                  )}
+                  {canRecordMeters && (
+                    <RecordReadingButton
+                      meterId={meter.id}
+                      meterName={meter.name}
+                      meterUnit={meter.unit}
+                      currentReading={meter.currentReading}
+                    />
                   )}
                 </div>
               </div>
@@ -578,10 +584,7 @@ export default async function EquipmentDetailPage({
           Downtime History
         </h3>
         {canReportDowntime && (
-          <Button variant="outline" size="sm" className="text-amber-600 border-amber-300 hover:bg-amber-50">
-            <Clock className="h-3 w-3 mr-1" />
-            Report Downtime
-          </Button>
+          <ReportDowntimeDialog equipmentId={equipmentItem.id} />
         )}
       </div>
       {recentDowntime.length === 0 ? (
@@ -611,7 +614,7 @@ export default async function EquipmentDetailPage({
                       })}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end gap-1">
                     {duration !== null ? (
                       <Badge variant="outline">
                         {duration >= 60
@@ -619,7 +622,12 @@ export default async function EquipmentDetailPage({
                           : `${duration}m`}
                       </Badge>
                     ) : (
-                      <Badge variant="danger">Ongoing</Badge>
+                      <>
+                        <Badge variant="danger">Ongoing</Badge>
+                        {canReportDowntime && (
+                          <EndDowntimeButton downtimeId={log.id} />
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -637,7 +645,7 @@ export default async function EquipmentDetailPage({
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-20 lg:pb-8">
+    <div className="mx-auto max-w-6xl space-y-6 pb-8">
       {/* Header with Back Button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -666,10 +674,10 @@ export default async function EquipmentDetailPage({
             user?.permissions ?? [],
             PERMISSIONS.EQUIPMENT_UPDATE
           ) && (
-            <Button variant="outline" asChild className="hidden sm:flex">
+            <Button variant="outline" size="sm" asChild>
               <Link href={`/assets/equipment/${equipmentItem.code}/edit`}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+                <Edit className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Edit</span>
               </Link>
             </Button>
           )}
@@ -910,17 +918,7 @@ export default async function EquipmentDetailPage({
         </div>
       </div>
 
-      {/* Fixed Mobile Bottom Action */}
-      {hasPermission(user?.permissions ?? [], PERMISSIONS.EQUIPMENT_UPDATE) && (
-        <div className="fixed bottom-16 left-0 right-0 p-4 bg-card/80 backdrop-blur-lg border-t border-border lg:hidden z-30">
-          <Button asChild size="lg" className="w-full">
-            <Link href={`/assets/equipment/${equipmentItem.code}/edit`}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Equipment
-            </Link>
-          </Button>
-        </div>
-      )}
+
     </div>
   );
 }
