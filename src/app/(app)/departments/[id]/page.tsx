@@ -31,7 +31,8 @@ export async function generateMetadata({
 
   return {
     title: `${department.name} | Departments | FixIt`,
-    description: department.description || `View ${department.name} department details`,
+    description:
+      department.description || `View ${department.name} department details`,
   };
 }
 
@@ -69,21 +70,27 @@ export default async function DepartmentDetailPage({
       <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
         <div className="p-4 text-center">
           <Users className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-          <p className="text-2xl font-bold tabular-nums">{department.memberCount}</p>
+          <p className="text-2xl font-bold tabular-nums">
+            {department.memberCount}
+          </p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
             Members
           </p>
         </div>
         <div className="p-4 text-center">
           <MonitorCog className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-          <p className="text-2xl font-bold tabular-nums">{department.equipmentCount}</p>
+          <p className="text-2xl font-bold tabular-nums">
+            {department.equipmentCount}
+          </p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
             Equipment
           </p>
         </div>
         <div className="p-4 text-center">
           <ClipboardList className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-          <p className="text-2xl font-bold tabular-nums">{department.workOrderCount}</p>
+          <p className="text-2xl font-bold tabular-nums">
+            {department.workOrderCount}
+          </p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
             Work Orders
           </p>
@@ -93,7 +100,9 @@ export default async function DepartmentDetailPage({
       {/* Description */}
       {department.description && (
         <div className="border-t border-border p-4">
-          <p className="text-sm text-muted-foreground">{department.description}</p>
+          <p className="text-sm text-muted-foreground">
+            {department.description}
+          </p>
         </div>
       )}
     </div>
@@ -156,8 +165,12 @@ export default async function DepartmentDetailPage({
           <ArrowLeft className="h-5 w-5 text-muted-foreground" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{department.name}</h1>
-          <p className="text-muted-foreground font-mono text-sm">{department.code}</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {department.name}
+          </h1>
+          <p className="text-muted-foreground font-mono text-sm">
+            {department.code}
+          </p>
         </div>
       </div>
 
@@ -293,7 +306,9 @@ function MembersList({
               <ClipboardList className="h-4 w-4" />
               <span className="font-bold">{member.activeWorkOrderCount}</span>
             </div>
-            <p className="text-[10px] text-muted-foreground uppercase">Active WOs</p>
+            <p className="text-[10px] text-muted-foreground uppercase">
+              Active WOs
+            </p>
           </div>
         </div>
       ))}
@@ -354,7 +369,9 @@ function EquipmentList({
               {item.locationName && (
                 <>
                   <span className="text-muted-foreground">•</span>
-                  <span className="text-xs text-muted-foreground">{item.locationName}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {item.locationName}
+                  </span>
                 </>
               )}
             </div>
@@ -366,7 +383,9 @@ function EquipmentList({
                 statusColors[item.status] || "bg-muted"
               )}
             />
-            <span className="text-xs font-medium capitalize">{item.status}</span>
+            <span className="text-xs font-medium capitalize">
+              {item.status}
+            </span>
           </div>
         </Link>
       ))}
@@ -409,7 +428,9 @@ function WorkOrdersList({
           )}
         >
           <div className="flex justify-between items-start mb-1">
-            <span className="font-semibold text-sm truncate pr-2">{wo.title}</span>
+            <span className="font-semibold text-sm truncate pr-2">
+              {wo.title}
+            </span>
             <span className="text-[10px] text-muted-foreground font-medium uppercase shrink-0">
               {formatRelativeTime(wo.createdAt)}
             </span>

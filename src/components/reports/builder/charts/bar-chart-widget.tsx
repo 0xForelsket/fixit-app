@@ -29,11 +29,7 @@ export function BarChartWidget({ data }: BarChartWidgetProps) {
           vertical={false}
           stroke="hsl(var(--border))"
         />
-        <XAxis
-          dataKey="name"
-          tick={{ fontSize: 10 }}
-          tickLine={false}
-        />
+        <XAxis dataKey="name" tick={{ fontSize: 10 }} tickLine={false} />
         <YAxis tick={{ fontSize: 10 }} tickLine={false} />
         <Tooltip
           contentStyle={{
@@ -43,11 +39,7 @@ export function BarChartWidget({ data }: BarChartWidgetProps) {
             fontSize: "12px",
           }}
         />
-        <Bar
-          dataKey="value"
-          fill="#3b82f6"
-          radius={[4, 4, 0, 0]}
-        />
+        <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

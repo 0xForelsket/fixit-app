@@ -21,19 +21,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
 import {
   downtimeLogs,
-  equipment as equipmentTable,
   equipmentMeters,
+  equipment as equipmentTable,
 } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { desc, eq } from "drizzle-orm";
 import {
   calculateDepreciation,
   formatCurrency,
   getDepreciationInfo,
   hasCompleteFinancialData,
 } from "@/lib/utils/depreciation";
+import { desc, eq } from "drizzle-orm";
 import {
   Activity,
   AlertCircle,
@@ -151,8 +151,6 @@ export default async function EquipmentDetailPage({
   const depreciation = depreciationInfo
     ? calculateDepreciation(depreciationInfo)
     : null;
-
-
 
   // Security Audit: Technicians only allowed in their department
   if (
@@ -454,13 +452,17 @@ export default async function EquipmentDetailPage({
             <div>
               <p className="text-muted-foreground">Purchase Price</p>
               <p className="font-medium">
-                {formatCurrency(Number.parseFloat(equipmentItem.purchasePrice!))}
+                {formatCurrency(
+                  Number.parseFloat(equipmentItem.purchasePrice!)
+                )}
               </p>
             </div>
             <div>
               <p className="text-muted-foreground">Residual Value</p>
               <p className="font-medium">
-                {formatCurrency(Number.parseFloat(equipmentItem.residualValue || "0"))}
+                {formatCurrency(
+                  Number.parseFloat(equipmentItem.residualValue || "0")
+                )}
               </p>
             </div>
             <div>
@@ -479,9 +481,7 @@ export default async function EquipmentDetailPage({
 
           <div className="pt-2 border-t text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Annual Depreciation
-              </span>
+              <span className="text-muted-foreground">Annual Depreciation</span>
               <span className="font-medium">
                 {formatCurrency(depreciation.annualDepreciation)}
               </span>
@@ -912,13 +912,14 @@ export default async function EquipmentDetailPage({
               </div>
             </TabsContent>
             <TabsContent value="logs" className="mt-4">
-              <AuditLogList entityType="equipment" entityId={equipmentItem.id} />
+              <AuditLogList
+                entityType="equipment"
+                entityId={equipmentItem.id}
+              />
             </TabsContent>
           </Tabs>
         </div>
       </div>
-
-
     </div>
   );
 }

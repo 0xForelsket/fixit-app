@@ -20,7 +20,9 @@ const SaveTemplateSchema = z.object({
   createdById: z.string(),
 });
 
-export async function saveReportTemplate(data: z.infer<typeof SaveTemplateSchema>) {
+export async function saveReportTemplate(
+  data: z.infer<typeof SaveTemplateSchema>
+) {
   const { id, name, description, config, createdById } = data;
 
   if (id) {
@@ -30,7 +32,7 @@ export async function saveReportTemplate(data: z.infer<typeof SaveTemplateSchema
       .set({
         name,
         description,
-        config: config as any,
+        config: config as unknown,
         updatedAt: new Date(),
       })
       .where(eq(reportTemplates.id, id));
@@ -39,7 +41,7 @@ export async function saveReportTemplate(data: z.infer<typeof SaveTemplateSchema
     await db.insert(reportTemplates).values({
       name,
       description,
-      config: config as any,
+      config: config as unknown,
       createdById,
     });
   }

@@ -175,7 +175,8 @@ export async function getDowntimeSummary(
 
     // Sort logs by equipment and time
     const sortedLogs = [...statusLogs].sort((a, b) => {
-      if (a.equipmentId !== b.equipmentId) return a.equipmentId.localeCompare(b.equipmentId);
+      if (a.equipmentId !== b.equipmentId)
+        return a.equipmentId.localeCompare(b.equipmentId);
       return a.changedAt.getTime() - b.changedAt.getTime();
     });
 

@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { EquipmentMeter } from "@/db/schema";
-import { Gauge, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { Edit, Gauge, Loader2, Plus, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 
 interface MetersTabProps {
@@ -37,7 +37,9 @@ interface MetersTabProps {
     meterId: string,
     data: { name: string; type: string; unit: string; currentReading?: string }
   ) => Promise<{ success: boolean; error?: string }>;
-  onDeleteMeter?: (meterId: string) => Promise<{ success: boolean; error?: string }>;
+  onDeleteMeter?: (
+    meterId: string
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 const METER_TYPES = [
@@ -49,7 +51,6 @@ const METER_TYPES = [
 ];
 
 export function MetersTab({
-  equipmentId,
   meters,
   isNew,
   onCreateMeter,
@@ -60,7 +61,9 @@ export function MetersTab({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingMeter, setEditingMeter] = useState<EquipmentMeter | null>(null);
-  const [deletingMeter, setDeletingMeter] = useState<EquipmentMeter | null>(null);
+  const [deletingMeter, setDeletingMeter] = useState<EquipmentMeter | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Form state
@@ -168,8 +171,9 @@ export function MetersTab({
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-muted/30 p-4">
         <p className="text-sm text-muted-foreground">
-          Track usage metrics like operating hours, mileage, or production cycles.
-          Multiple meters can be configured per equipment for comprehensive tracking.
+          Track usage metrics like operating hours, mileage, or production
+          cycles. Multiple meters can be configured per equipment for
+          comprehensive tracking.
         </p>
       </div>
 
@@ -230,7 +234,7 @@ export function MetersTab({
                 </p>
                 <p className="text-xl font-bold">
                   {meter.currentReading
-                    ? `${parseFloat(meter.currentReading).toLocaleString()} ${meter.unit}`
+                    ? `${Number.parseFloat(meter.currentReading).toLocaleString()} ${meter.unit}`
                     : "Not recorded"}
                 </p>
                 {meter.lastReadingDate && (

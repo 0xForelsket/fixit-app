@@ -19,7 +19,9 @@ export async function GET() {
 
     const trendResult = await db
       .select({
-        day: sql<string>`to_char(${workOrders.createdAt}, 'YYYY-MM-DD')`.as("day"),
+        day: sql<string>`to_char(${workOrders.createdAt}, 'YYYY-MM-DD')`.as(
+          "day"
+        ),
         created_count: sql<number>`count(*)`,
         resolved_count: sql<number>`count(CASE WHEN ${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed' THEN 1 END)`,
       })

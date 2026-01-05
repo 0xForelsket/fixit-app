@@ -45,7 +45,11 @@ import type {
   WidgetConfig,
   WidgetType,
 } from "./types";
-import { findNextWidgetPosition, WIDGET_DEFAULT_SIZES, type Layout } from "./widget-grid";
+import {
+  type Layout,
+  WIDGET_DEFAULT_SIZES,
+  findNextWidgetPosition,
+} from "./widget-grid";
 
 // ============ LAZY LOADED COMPONENTS ============
 
@@ -144,7 +148,7 @@ export function ReportBuilder({
 
   const addWidget = useCallback((type: WidgetType) => {
     const defaultSize = WIDGET_DEFAULT_SIZES[type] || { w: 6, h: 3 };
-    
+
     setConfig((prev) => {
       const position = findNextWidgetPosition(prev.widgets, type);
       const newWidget: WidgetConfig = {
@@ -185,14 +189,17 @@ export function ReportBuilder({
     }));
   }, []);
 
-  const updateWidget = useCallback((id: string, updates: Partial<WidgetConfig>) => {
-    setConfig((prev) => ({
-      ...prev,
-      widgets: prev.widgets.map((w) =>
-        w.id === id ? { ...w, ...updates } : w
-      ),
-    }));
-  }, []);
+  const updateWidget = useCallback(
+    (id: string, updates: Partial<WidgetConfig>) => {
+      setConfig((prev) => ({
+        ...prev,
+        widgets: prev.widgets.map((w) =>
+          w.id === id ? { ...w, ...updates } : w
+        ),
+      }));
+    },
+    []
+  );
 
   const removeWidget = useCallback((id: string) => {
     setConfig((prev) => ({
@@ -205,7 +212,7 @@ export function ReportBuilder({
     setConfig((prev) => {
       const widget = prev.widgets.find((w) => w.id === id);
       if (!widget) return prev;
-      
+
       const position = findNextWidgetPosition(prev.widgets, widget.type);
       const newWidget: WidgetConfig = {
         ...widget,
@@ -221,12 +228,15 @@ export function ReportBuilder({
     });
   }, []);
 
-  const handleGlobalDateRangeChange = useCallback((dateRange: DateRangeFilter | undefined) => {
-    setConfig((prev) => ({
-      ...prev,
-      globalDateRange: dateRange,
-    }));
-  }, []);
+  const handleGlobalDateRangeChange = useCallback(
+    (dateRange: DateRangeFilter | undefined) => {
+      setConfig((prev) => ({
+        ...prev,
+        globalDateRange: dateRange,
+      }));
+    },
+    []
+  );
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -342,16 +352,18 @@ export function ReportBuilder({
                 }
               />
             </div>
-            
+
             {/* Global Date Range Filter */}
             <div className="space-y-2 pt-2 border-t border-border">
-              <Label className="text-xs uppercase tracking-wider">Global Date Range</Label>
+              <Label className="text-xs uppercase tracking-wider">
+                Global Date Range
+              </Label>
               <DateRangePicker
                 value={config.globalDateRange}
                 onChange={handleGlobalDateRangeChange}
               />
             </div>
-            
+
             <Button
               className="w-full font-bold"
               onClick={handleSave}
@@ -372,9 +384,7 @@ export function ReportBuilder({
       </div>
 
       {/* Main Canvas */}
-      <div 
-        className="flex-1 overflow-y-auto rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 p-8"
-      >
+      <div className="flex-1 overflow-y-auto rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 p-8">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-black tracking-tight">
@@ -383,7 +393,8 @@ export function ReportBuilder({
             <p className="text-muted-foreground">{config.description}</p>
             {config.globalDateRange?.startDate && (
               <p className="text-xs text-muted-foreground mt-2 font-mono">
-                Date Range: {config.globalDateRange.startDate} — {config.globalDateRange.endDate}
+                Date Range: {config.globalDateRange.startDate} —{" "}
+                {config.globalDateRange.endDate}
               </p>
             )}
           </div>
@@ -552,7 +563,7 @@ function WidgetCard({
 
   // Use widget-specific date range if set, otherwise fall back to global
   const effectiveDateRange = widget.dateRange || globalDateRange;
-  
+
   // Convert to AnalyticsDateRange format
   const analyticsDateRange: AnalyticsDateRange | undefined = useMemo(() => {
     if (!effectiveDateRange?.startDate) return undefined;
@@ -572,7 +583,10 @@ function WidgetCard({
             widget.dataSource === "inventory" ||
             widget.dataSource === "labor"
           ) {
-            const data = await getStatsSummary(widget.dataSource, analyticsDateRange);
+            const data = await getStatsSummary(
+              widget.dataSource,
+              analyticsDateRange
+            );
             setSummaryData(data);
           }
         } else if (widget.type === "bar_chart" || widget.type === "pie_chart") {
@@ -600,7 +614,9 @@ function WidgetCard({
     onUpdate(widget.id, { dataSource: value });
   };
 
-  const handleWidgetDateRangeChange = (dateRange: DateRangeFilter | undefined) => {
+  const handleWidgetDateRangeChange = (
+    dateRange: DateRangeFilter | undefined
+  ) => {
     onUpdate(widget.id, { dateRange });
   };
 

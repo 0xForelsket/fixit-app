@@ -2,8 +2,16 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Play,
+  RefreshCw,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
-import { Calendar, Clock, Play, RefreshCw, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 
 interface MaintenanceSchedule {
   id: string;
@@ -21,7 +29,11 @@ interface SchedulerTabProps {
   upcomingCount: number;
 }
 
-export function SchedulerTab({ schedules, overdueCount, upcomingCount }: SchedulerTabProps) {
+export function SchedulerTab({
+  schedules,
+  overdueCount,
+  upcomingCount,
+}: SchedulerTabProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [lastResult, setLastResult] = useState<{
     success: boolean;
@@ -120,7 +132,9 @@ export function SchedulerTab({ schedules, overdueCount, upcomingCount }: Schedul
               <Clock className="h-5 w-5 text-slate-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{schedules.filter((s) => s.isActive).length}</p>
+              <p className="text-2xl font-bold">
+                {schedules.filter((s) => s.isActive).length}
+              </p>
               <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 Active Schedules
               </p>
@@ -135,10 +149,15 @@ export function SchedulerTab({ schedules, overdueCount, upcomingCount }: Schedul
           <div>
             <h3 className="text-lg font-semibold">Manual Scheduler Run</h3>
             <p className="text-sm text-muted-foreground">
-              Process all due maintenance schedules and escalate overdue work orders
+              Process all due maintenance schedules and escalate overdue work
+              orders
             </p>
           </div>
-          <Button onClick={runScheduler} disabled={isRunning} className="shrink-0">
+          <Button
+            onClick={runScheduler}
+            disabled={isRunning}
+            className="shrink-0"
+          >
             {isRunning ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -173,7 +192,9 @@ export function SchedulerTab({ schedules, overdueCount, upcomingCount }: Schedul
                     lastResult.success ? "text-green-800" : "text-red-800"
                   }`}
                 >
-                  {lastResult.success ? "Scheduler run completed" : "Scheduler run failed"}
+                  {lastResult.success
+                    ? "Scheduler run completed"
+                    : "Scheduler run failed"}
                 </p>
                 {lastResult.success && (
                   <p className="text-sm text-green-700 mt-1">
@@ -244,7 +265,9 @@ function ScheduleRow({
 }) {
   const nextDue = new Date(schedule.nextDue);
   const now = new Date();
-  const diffDays = Math.ceil((nextDue.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil(
+    (nextDue.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   return (
     <div className="flex items-center justify-between px-6 py-3">
@@ -255,12 +278,16 @@ function ScheduleRow({
         </p>
       </div>
       <div className="ml-4 flex items-center gap-2">
-        <Badge variant={isOverdue ? "destructive" : diffDays <= 1 ? "warning" : "secondary"}>
+        <Badge
+          variant={
+            isOverdue ? "destructive" : diffDays <= 1 ? "warning" : "secondary"
+          }
+        >
           {isOverdue
             ? `${Math.abs(diffDays)} day(s) overdue`
             : diffDays === 0
-            ? "Due today"
-            : `Due in ${diffDays} day(s)`}
+              ? "Due today"
+              : `Due in ${diffDays} day(s)`}
         </Badge>
       </div>
     </div>

@@ -151,7 +151,7 @@ const features = [
   },
 ];
 
-const containerVariants = {
+const _containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -268,7 +268,7 @@ export default function FeaturesPage() {
                     asChild
                   >
                     <Link
-                      href={`/deploy`}
+                      href="/deploy"
                       aria-label={`Learn about setup for ${feature.name}`}
                     >
                       Technical Guide{" "}

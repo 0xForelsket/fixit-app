@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 
-// biome-ignore lint/suspicious/noExplicitAny: PWA plugin types
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   register: true,

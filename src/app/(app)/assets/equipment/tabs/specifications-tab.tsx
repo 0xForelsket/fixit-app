@@ -28,8 +28,9 @@ export function SpecificationsTab({
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-muted/30 p-4">
         <p className="text-sm text-muted-foreground">
-          Track detailed specifications for your equipment. These fields help with
-          warranty tracking, manufacturer support, and asset lifecycle management.
+          Track detailed specifications for your equipment. These fields help
+          with warranty tracking, manufacturer support, and asset lifecycle
+          management.
         </p>
       </div>
 
@@ -60,10 +61,7 @@ export function SpecificationsTab({
         </FieldGroup>
 
         {/* Model Year */}
-        <FieldGroup
-          label="Model Year"
-          description="Year of manufacture"
-        >
+        <FieldGroup label="Model Year" description="Year of manufacture">
           <Input
             id="modelYear"
             type="number"

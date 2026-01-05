@@ -531,7 +531,7 @@ export default function MarketingPageV2() {
                   asChild
                 >
                   <Link href="/deploy">
-                    <span className="mr-2"></span>
+                    <span className="mr-2" />
                     Deploy to Railway
                   </Link>
                 </Button>
@@ -605,7 +605,7 @@ function DeployCard({
   children,
 }: {
   title: string;
-  icon: any;
+  icon: React.ElementType;
   description: string;
   children: React.ReactNode;
 }) {
@@ -642,6 +642,7 @@ function CodeBlock({ code }: { code: string }) {
         {code}
       </code>
       <button
+        type="button"
         onClick={copy}
         className="text-muted-foreground hover:text-foreground transition-colors p-1"
       >

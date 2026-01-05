@@ -85,8 +85,14 @@ export function DepartmentsTab({
 
   const stats = {
     total: departments.length,
-    totalMembers: departments.reduce((sum, d) => sum + Number(d.memberCount), 0),
-    totalEquipment: departments.reduce((sum, d) => sum + Number(d.equipmentCount), 0),
+    totalMembers: departments.reduce(
+      (sum, d) => sum + Number(d.memberCount),
+      0
+    ),
+    totalEquipment: departments.reduce(
+      (sum, d) => sum + Number(d.equipmentCount),
+      0
+    ),
   };
 
   const handleOpenCreate = () => {

@@ -44,7 +44,15 @@ export function useFileUpload() {
               options.attachmentType ||
               (file.type.startsWith("image/") ? "photo" : "document"),
           })) as {
-            data: { attachment: Record<string, unknown>; uploadUrl: string };
+            data: {
+              attachment: {
+                s3Key: string;
+                filename: string;
+                mimeType: string;
+                sizeBytes: number;
+              };
+              uploadUrl: string;
+            };
           };
 
           const { data } = json;

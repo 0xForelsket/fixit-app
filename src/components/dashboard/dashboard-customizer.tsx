@@ -5,7 +5,11 @@ import { cn } from "@/lib/utils";
 import { Check, Eye, EyeOff, Settings2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export type WidgetId = "personal-stats" | "global-stats" | "my-queue" | "global-queue";
+export type WidgetId =
+  | "personal-stats"
+  | "global-stats"
+  | "my-queue"
+  | "global-queue";
 
 export interface WidgetConfig {
   id: WidgetId;
@@ -129,6 +133,7 @@ export function DashboardCustomizer({
       {isOpen && (
         <>
           {/* Backdrop */}
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: Backdrop overlay */}
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
@@ -155,9 +160,12 @@ export function DashboardCustomizer({
 
             <div className="p-2 space-y-1">
               {AVAILABLE_WIDGETS.map((widget) => {
-                const isVisible = preferences.visibleWidgets.includes(widget.id);
+                const isVisible = preferences.visibleWidgets.includes(
+                  widget.id
+                );
                 return (
                   <button
+                    type="button"
                     key={widget.id}
                     onClick={() => onToggleWidget(widget.id)}
                     className={cn(

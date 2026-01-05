@@ -33,11 +33,11 @@ const mockDelete = vi.fn(() => ({
   where: vi.fn(),
 }));
 
-const mockTxInsert = vi.fn((table: unknown) => ({
+const mockTxInsert = vi.fn((_table: unknown) => ({
   values: vi.fn(() => Promise.resolve()),
 }));
 
-const mockTxUpdate = vi.fn((table: unknown) => ({
+const mockTxUpdate = vi.fn((_table: unknown) => ({
   set: vi.fn(() => ({
     where: vi.fn(() => Promise.resolve()),
   })),

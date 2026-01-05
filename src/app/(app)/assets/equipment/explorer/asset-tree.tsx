@@ -65,9 +65,9 @@ export function AssetTree({ initialEquipment }: AssetTreeProps) {
             asChild
             title="Edit Asset"
           >
-          <Link href={`/assets/equipment/${item.code}/edit`}>
-            <Settings className="h-3.5 w-3.5" />
-          </Link>
+            <Link href={`/assets/equipment/${item.code}/edit`}>
+              <Settings className="h-3.5 w-3.5" />
+            </Link>
           </Button>
           <Button
             variant="ghost"

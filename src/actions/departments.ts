@@ -1,7 +1,15 @@
 "use server";
 
 import { db } from "@/db";
-import { attachments, departments, equipment, locations, roles, users, workOrders } from "@/db/schema";
+import {
+  attachments,
+  departments,
+  equipment,
+  locations,
+  roles,
+  users,
+  workOrders,
+} from "@/db/schema";
 import { requirePermission } from "@/lib/auth";
 import { PERMISSIONS } from "@/lib/permissions";
 import type { ActionResult } from "@/lib/types/actions";
@@ -342,7 +350,9 @@ export async function getDepartmentsWithStats() {
   return departmentsList.map((dept) => ({
     ...dept,
     managerName: dept.managerId ? managerMap.get(dept.managerId) || null : null,
-    managerAvatarUrl: dept.managerId ? avatarMap.get(dept.managerId) || null : null,
+    managerAvatarUrl: dept.managerId
+      ? avatarMap.get(dept.managerId) || null
+      : null,
   }));
 }
 
@@ -395,94 +405,105 @@ export async function getDepartmentWithDetails(id: string) {
   const memberIds = membersData.map((m) => m.id);
 
   // Phase 2: Fetch all related data in parallel (depends on memberIds)
-  const [memberAvatars, memberWorkOrderCounts, equipmentData, workOrdersData, managerAvatar] =
-    await Promise.all([
-      // Get avatars for all members
-      memberIds.length > 0
-        ? db
-            .select({
-              entityId: attachments.entityId,
-              s3Key: attachments.s3Key,
-            })
-            .from(attachments)
-            .where(
-              and(
-                eq(attachments.entityType, "user"),
-                eq(attachments.type, "avatar"),
-                inArray(attachments.entityId, memberIds)
+  const [
+    memberAvatars,
+    memberWorkOrderCounts,
+    equipmentData,
+    workOrdersData,
+    managerAvatar,
+  ] = await Promise.all([
+    // Get avatars for all members
+    memberIds.length > 0
+      ? db
+          .select({
+            entityId: attachments.entityId,
+            s3Key: attachments.s3Key,
+          })
+          .from(attachments)
+          .where(
+            and(
+              eq(attachments.entityType, "user"),
+              eq(attachments.type, "avatar"),
+              inArray(attachments.entityId, memberIds)
+            )
+          )
+      : Promise.resolve([]),
+
+    // Get active work order counts per member
+    memberIds.length > 0
+      ? db
+          .select({
+            assignedToId: workOrders.assignedToId,
+            count: sql<number>`count(*)::int`,
+          })
+          .from(workOrders)
+          .where(
+            and(
+              inArray(workOrders.assignedToId, memberIds),
+              or(
+                eq(workOrders.status, "open"),
+                eq(workOrders.status, "in_progress")
               )
             )
-        : Promise.resolve([]),
+          )
+          .groupBy(workOrders.assignedToId)
+      : Promise.resolve([]),
 
-      // Get active work order counts per member
-      memberIds.length > 0
-        ? db
-            .select({
-              assignedToId: workOrders.assignedToId,
-              count: sql<number>`count(*)::int`,
-            })
-            .from(workOrders)
-            .where(
-              and(
-                inArray(workOrders.assignedToId, memberIds),
-                or(eq(workOrders.status, "open"), eq(workOrders.status, "in_progress"))
-              )
+    // Get equipment assigned to department
+    db
+      .select({
+        id: equipment.id,
+        name: equipment.name,
+        code: equipment.code,
+        status: equipment.status,
+        locationName: locations.name,
+      })
+      .from(equipment)
+      .leftJoin(locations, eq(equipment.locationId, locations.id))
+      .where(eq(equipment.departmentId, id))
+      .orderBy(asc(equipment.name))
+      .limit(50),
+
+    // Get recent work orders for this department
+    db
+      .select({
+        id: workOrders.id,
+        title: workOrders.title,
+        status: workOrders.status,
+        priority: workOrders.priority,
+        createdAt: workOrders.createdAt,
+        assignedToId: workOrders.assignedToId,
+      })
+      .from(workOrders)
+      .where(eq(workOrders.departmentId, id))
+      .orderBy(desc(workOrders.createdAt))
+      .limit(20),
+
+    // Get manager avatar
+    department.managerId
+      ? db
+          .select({ s3Key: attachments.s3Key })
+          .from(attachments)
+          .where(
+            and(
+              eq(attachments.entityType, "user"),
+              eq(attachments.type, "avatar"),
+              eq(attachments.entityId, department.managerId)
             )
-            .groupBy(workOrders.assignedToId)
-        : Promise.resolve([]),
-
-      // Get equipment assigned to department
-      db
-        .select({
-          id: equipment.id,
-          name: equipment.name,
-          code: equipment.code,
-          status: equipment.status,
-          locationName: locations.name,
-        })
-        .from(equipment)
-        .leftJoin(locations, eq(equipment.locationId, locations.id))
-        .where(eq(equipment.departmentId, id))
-        .orderBy(asc(equipment.name))
-        .limit(50),
-
-      // Get recent work orders for this department
-      db
-        .select({
-          id: workOrders.id,
-          title: workOrders.title,
-          status: workOrders.status,
-          priority: workOrders.priority,
-          createdAt: workOrders.createdAt,
-          assignedToId: workOrders.assignedToId,
-        })
-        .from(workOrders)
-        .where(eq(workOrders.departmentId, id))
-        .orderBy(desc(workOrders.createdAt))
-        .limit(20),
-
-      // Get manager avatar
-      department.managerId
-        ? db
-            .select({ s3Key: attachments.s3Key })
-            .from(attachments)
-            .where(
-              and(
-                eq(attachments.entityType, "user"),
-                eq(attachments.type, "avatar"),
-                eq(attachments.entityId, department.managerId)
-              )
-            )
-            .limit(1)
-        : Promise.resolve([]),
-    ]);
+          )
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
 
   // Build manager object
   let manager = null;
   if (managerData.length > 0) {
     manager = {
       ...managerData[0],
-      avatarUrl: managerAvatar.length > 0 ? `/api/attachments/${managerAvatar[0].s3Key}` : null,
+      avatarUrl:
+        managerAvatar.length > 0
+          ? `/api/attachments/${managerAvatar[0].s3Key}`
+          : null,
     };
   }
 
@@ -521,7 +542,9 @@ export async function getDepartmentWithDetails(id: string) {
     status: wo.status,
     priority: wo.priority,
     createdAt: wo.createdAt,
-    assigneeName: wo.assignedToId ? assigneeMap.get(wo.assignedToId) || null : null,
+    assigneeName: wo.assignedToId
+      ? assigneeMap.get(wo.assignedToId) || null
+      : null,
   }));
 
   // Get counts

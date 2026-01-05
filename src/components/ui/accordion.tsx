@@ -64,6 +64,7 @@ export function AccordionItem({
     >
       {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
+          // biome-ignore lint/suspicious/noExplicitAny: Legacy cloneElement
           return React.cloneElement(child as React.ReactElement<any>, {
             value,
           });
@@ -129,9 +130,8 @@ export function AccordionContent({
   return (
     <AnimatePresence initial={false}>
       {isActive && (
-        <motion.div
+        <motion.section
           id={contentId}
-          role="region"
           aria-labelledby={triggerId}
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: "auto", opacity: 1 }}
@@ -143,7 +143,7 @@ export function AccordionContent({
           >
             {children}
           </div>
-        </motion.div>
+        </motion.section>
       )}
     </AnimatePresence>
   );

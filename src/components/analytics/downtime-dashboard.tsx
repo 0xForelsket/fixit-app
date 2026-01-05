@@ -13,15 +13,24 @@ import dynamic from "next/dynamic";
 
 // Lazy load heavy chart components (recharts is ~200KB gzipped)
 const DowntimeByEquipmentChart = dynamic(
-  () => import("@/components/analytics/downtime-by-equipment-chart").then((mod) => mod.DowntimeByEquipmentChart),
+  () =>
+    import("@/components/analytics/downtime-by-equipment-chart").then(
+      (mod) => mod.DowntimeByEquipmentChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const DowntimeByReasonChart = dynamic(
-  () => import("@/components/analytics/downtime-by-reason-chart").then((mod) => mod.DowntimeByReasonChart),
+  () =>
+    import("@/components/analytics/downtime-by-reason-chart").then(
+      (mod) => mod.DowntimeByReasonChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const DowntimeTrendChart = dynamic(
-  () => import("@/components/analytics/downtime-trend-chart").then((mod) => mod.DowntimeTrendChart),
+  () =>
+    import("@/components/analytics/downtime-trend-chart").then(
+      (mod) => mod.DowntimeTrendChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 import {

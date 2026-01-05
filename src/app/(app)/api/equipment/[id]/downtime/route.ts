@@ -28,7 +28,10 @@ export async function GET(
 
     return apiSuccess(logs, HttpStatus.OK, requestId);
   } catch (error) {
-    apiLogger.error({ requestId, equipmentId, error }, "Get downtime logs error");
+    apiLogger.error(
+      { requestId, equipmentId, error },
+      "Get downtime logs error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }
@@ -59,7 +62,9 @@ export async function POST(
     }
 
     const body = await request.json();
-    const result = downtimeLogSchema.omit({ equipmentId: true }).safeParse(body);
+    const result = downtimeLogSchema
+      .omit({ equipmentId: true })
+      .safeParse(body);
 
     if (!result.success) {
       return ApiErrors.validationError("Invalid downtime data", requestId);
@@ -87,7 +92,10 @@ export async function POST(
         return ApiErrors.forbidden(requestId);
       }
     }
-    apiLogger.error({ requestId, equipmentId, error }, "Create downtime log error");
+    apiLogger.error(
+      { requestId, equipmentId, error },
+      "Create downtime log error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }

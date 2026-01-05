@@ -4,7 +4,7 @@ import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
-import { and, gt, isNotNull, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 export async function GET() {
   const requestId = generateRequestId();
@@ -60,13 +60,14 @@ export async function GET() {
 
     // Process results
     const mttrHours = Math.round(Number(row.avg_resolution_seconds) / 3600);
-    
+
     const resolvedCount = Number(row.resolved_30d_count);
     const compliantCount = Number(row.sla_compliant_count);
-    
-    const slaRate = resolvedCount > 0 
-      ? Math.round((compliantCount / resolvedCount) * 100) 
-      : 100;
+
+    const slaRate =
+      resolvedCount > 0
+        ? Math.round((compliantCount / resolvedCount) * 100)
+        : 100;
 
     return apiSuccess({
       openWorkOrders: Number(row.open_count),

@@ -24,19 +24,31 @@ function ChartSkeleton() {
 
 // Lazy load heavy chart components (recharts is ~200KB gzipped)
 const CostByDepartmentChart = dynamic(
-  () => import("@/components/analytics/cost-by-department-chart").then((mod) => mod.CostByDepartmentChart),
+  () =>
+    import("@/components/analytics/cost-by-department-chart").then(
+      (mod) => mod.CostByDepartmentChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const CostByEquipmentChart = dynamic(
-  () => import("@/components/analytics/cost-by-equipment-chart").then((mod) => mod.CostByEquipmentChart),
+  () =>
+    import("@/components/analytics/cost-by-equipment-chart").then(
+      (mod) => mod.CostByEquipmentChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const CostDistributionChart = dynamic(
-  () => import("@/components/analytics/cost-distribution-chart").then((mod) => mod.CostDistributionChart),
+  () =>
+    import("@/components/analytics/cost-distribution-chart").then(
+      (mod) => mod.CostDistributionChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 const CostTrendChart = dynamic(
-  () => import("@/components/analytics/cost-trend-chart").then((mod) => mod.CostTrendChart),
+  () =>
+    import("@/components/analytics/cost-trend-chart").then(
+      (mod) => mod.CostTrendChart
+    ),
   { ssr: false, loading: () => <ChartSkeleton /> }
 );
 import {

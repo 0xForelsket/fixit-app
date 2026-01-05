@@ -6,7 +6,7 @@ import { Loader2, Printer } from "lucide-react";
 import { useState } from "react";
 
 interface PrintButtonProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: Legacy component
   workOrder?: any;
 }
 

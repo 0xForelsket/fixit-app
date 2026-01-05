@@ -2,13 +2,7 @@ import { getDepartmentsWithStats } from "@/actions/departments";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { cn } from "@/lib/utils";
-import {
-  ArrowRight,
-  Building2,
-  MonitorCog,
-  Users,
-  Wrench,
-} from "lucide-react";
+import { ArrowRight, Building2, MonitorCog, Users, Wrench } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {

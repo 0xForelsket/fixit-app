@@ -86,8 +86,7 @@ export async function GET(request: Request) {
 
     const logs = await db.query.laborLogs.findMany({
       where: workOrderId
-        ? (laborLogs, { eq }) =>
-            eq(laborLogs.workOrderId, workOrderId)
+        ? (laborLogs, { eq }) => eq(laborLogs.workOrderId, workOrderId)
         : undefined,
       with: {
         // Only fetch fields needed for display (payload compression)

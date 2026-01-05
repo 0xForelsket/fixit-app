@@ -1,9 +1,8 @@
-
 import { describe, expect, it, mock } from "bun:test";
 import { add } from "./math";
 
 const vi = {
-    mock: (path: string, factory: any) => mock.module(path, factory)
+  mock: (path: string, factory: any) => mock.module(path, factory),
 };
 
 // Mock after import, but wrapped

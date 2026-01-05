@@ -1,9 +1,9 @@
 "use server";
 
 import { db } from "@/db";
-import { inventoryLevels, roles, users } from "@/db/schema";
-import { PERMISSIONS } from "@/lib/permissions";
+import { users } from "@/db/schema";
 import { createNotificationsForUsers } from "@/lib/notifications";
+import { PERMISSIONS } from "@/lib/permissions";
 import { and, eq, inArray } from "drizzle-orm";
 
 interface LowStockItem {
@@ -65,7 +65,11 @@ export async function checkAndNotifyLowStock(): Promise<{
   });
 
   if (inventoryRoles.length === 0) {
-    return { lowStockCount: lowStockItems.length, notificationsSent: 0, items: lowStockItems };
+    return {
+      lowStockCount: lowStockItems.length,
+      notificationsSent: 0,
+      items: lowStockItems,
+    };
   }
 
   // Get active users with these roles
@@ -81,16 +85,23 @@ export async function checkAndNotifyLowStock(): Promise<{
   });
 
   if (inventoryUsers.length === 0) {
-    return { lowStockCount: lowStockItems.length, notificationsSent: 0, items: lowStockItems };
+    return {
+      lowStockCount: lowStockItems.length,
+      notificationsSent: 0,
+      items: lowStockItems,
+    };
   }
 
   const userIds = inventoryUsers.map((u) => u.id);
 
   // Create a summary notification
-  const criticalCount = lowStockItems.filter((item) => item.quantity === 0).length;
-  const title = criticalCount > 0
-    ? `🚨 ${criticalCount} item(s) out of stock!`
-    : `⚠️ ${lowStockItems.length} item(s) below reorder point`;
+  const criticalCount = lowStockItems.filter(
+    (item) => item.quantity === 0
+  ).length;
+  const title =
+    criticalCount > 0
+      ? `🚨 ${criticalCount} item(s) out of stock!`
+      : `⚠️ ${lowStockItems.length} item(s) below reorder point`;
 
   const itemsSummary = lowStockItems
     .slice(0, 3)

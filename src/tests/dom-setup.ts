@@ -1,9 +1,9 @@
 /**
  * DOM Test Setup - Provides testing-library utilities with proper happy-dom initialization
- * 
+ *
  * Tests should import from this file instead of directly from @testing-library/react
  * to ensure DOM globals are available before screen is initialized.
- * 
+ *
  * Usage in test files:
  *   import { render, screen, userEvent } from "@/tests/dom-setup";
  */

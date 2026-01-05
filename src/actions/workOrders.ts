@@ -388,19 +388,26 @@ export async function resolveWorkOrder(
         // Import S3 utilities dynamically to avoid circular dependencies
         const { uploadFile, generateS3Key } = await import("@/lib/s3");
         const { uuidv7 } = await import("uuidv7");
-        
+
         // Parse base64 data URL
-        const matches = result.data.signature.match(/^data:image\/png;base64,(.+)$/);
+        const matches = result.data.signature.match(
+          /^data:image\/png;base64,(.+)$/
+        );
         if (matches) {
           const base64Data = matches[1];
           const buffer = Buffer.from(base64Data, "base64");
           const attachmentId = uuidv7();
           const filename = `signature_${Date.now()}.png`;
-          const s3Key = generateS3Key("work_order", workOrderId, attachmentId, filename);
-          
+          const s3Key = generateS3Key(
+            "work_order",
+            workOrderId,
+            attachmentId,
+            filename
+          );
+
           // Upload to S3
           await uploadFile(s3Key, buffer, "image/png");
-          
+
           // Create attachment record
           await tx.insert(attachments).values({
             id: attachmentId,
@@ -841,7 +848,10 @@ export async function assignToMe(
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_ASSIGN)) {
-    return { success: false, error: "You don't have permission to assign work orders" };
+    return {
+      success: false,
+      error: "You don't have permission to assign work orders",
+    };
   }
 
   const existingWorkOrder = await db.query.workOrders.findFirst({
@@ -888,7 +898,10 @@ export async function startWorkOrder(
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_UPDATE)) {
-    return { success: false, error: "You don't have permission to update work orders" };
+    return {
+      success: false,
+      error: "You don't have permission to update work orders",
+    };
   }
 
   const existingWorkOrder = await db.query.workOrders.findFirst({
@@ -899,8 +912,14 @@ export async function startWorkOrder(
     return { success: false, error: "Work order not found" };
   }
 
-  if (existingWorkOrder.status === "resolved" || existingWorkOrder.status === "closed") {
-    return { success: false, error: "Cannot start a resolved or closed work order" };
+  if (
+    existingWorkOrder.status === "resolved" ||
+    existingWorkOrder.status === "closed"
+  ) {
+    return {
+      success: false,
+      error: "Cannot start a resolved or closed work order",
+    };
   }
 
   const updateData: Record<string, unknown> = {
@@ -913,7 +932,10 @@ export async function startWorkOrder(
     updateData.assignedToId = user.id;
   }
 
-  await db.update(workOrders).set(updateData).where(eq(workOrders.id, workOrderId));
+  await db
+    .update(workOrders)
+    .set(updateData)
+    .where(eq(workOrders.id, workOrderId));
 
   // Log status change
   if (existingWorkOrder.status !== "in_progress") {
@@ -968,7 +990,10 @@ export async function quickResolveWorkOrder(
   }
 
   if (!userHasPermission(user, PERMISSIONS.TICKET_RESOLVE)) {
-    return { success: false, error: "You don't have permission to resolve work orders" };
+    return {
+      success: false,
+      error: "You don't have permission to resolve work orders",
+    };
   }
 
   const existingWorkOrder = await db.query.workOrders.findFirst({
@@ -979,8 +1004,14 @@ export async function quickResolveWorkOrder(
     return { success: false, error: "Work order not found" };
   }
 
-  if (existingWorkOrder.status === "resolved" || existingWorkOrder.status === "closed") {
-    return { success: false, error: "Work order is already resolved or closed" };
+  if (
+    existingWorkOrder.status === "resolved" ||
+    existingWorkOrder.status === "closed"
+  ) {
+    return {
+      success: false,
+      error: "Work order is already resolved or closed",
+    };
   }
 
   const notes = resolutionNotes || `Resolved by ${user.name}`;

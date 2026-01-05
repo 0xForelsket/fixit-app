@@ -13,10 +13,9 @@ import { sendToUser } from "./sse";
  * Maps notification types to their corresponding preference keys.
  * Note: low_stock_alert has no preference key as it's always enabled for inventory managers.
  */
-const NOTIFICATION_TYPE_TO_PREF_KEY: Partial<Record<
-  NotificationType,
-  keyof InAppNotificationPreferences
->> = {
+const NOTIFICATION_TYPE_TO_PREF_KEY: Partial<
+  Record<NotificationType, keyof InAppNotificationPreferences>
+> = {
   work_order_created: "workOrderCreated",
   work_order_assigned: "workOrderAssigned",
   work_order_escalated: "workOrderEscalated",

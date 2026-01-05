@@ -9,7 +9,16 @@ import {
   PillTabsTrigger,
 } from "@/components/ui/pill-tabs";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
-import { BarChart3, Building2, Calendar, Cog, QrCode, Shield, Upload, Users } from "lucide-react";
+import {
+  BarChart3,
+  Building2,
+  Calendar,
+  Cog,
+  QrCode,
+  Shield,
+  Upload,
+  Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { DepartmentsTab } from "./tabs/departments-tab";
 import { ImportTab } from "./tabs/import-tab";

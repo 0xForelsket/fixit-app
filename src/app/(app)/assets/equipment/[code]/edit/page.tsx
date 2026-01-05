@@ -1,5 +1,11 @@
 import { db } from "@/db";
-import { attachments, equipment, equipmentMeters, locations, users } from "@/db/schema";
+import {
+  attachments,
+  equipment,
+  equipmentMeters,
+  locations,
+  users,
+} from "@/db/schema";
 import { PERMISSIONS } from "@/lib/permissions";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { requirePermission } from "@/lib/session";

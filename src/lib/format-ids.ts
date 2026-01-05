@@ -10,7 +10,7 @@
  */
 export function formatWorkOrderId(displayId: number): string {
   // Pad to at least 3 digits, but allow growth
-  const padded = displayId.toString().padStart(3, '0');
+  const padded = displayId.toString().padStart(3, "0");
   return `WO-${padded}`;
 }
 

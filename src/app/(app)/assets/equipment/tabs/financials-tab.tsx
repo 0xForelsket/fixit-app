@@ -7,7 +7,7 @@ import {
   formatCurrency,
   getDepreciationInfo,
 } from "@/lib/utils/depreciation";
-import { DollarSign, TrendingDown, Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, DollarSign, TrendingDown } from "lucide-react";
 import { useMemo } from "react";
 
 interface FinancialsTabProps {
@@ -38,7 +38,9 @@ export function FinancialsTab({
     const info = getDepreciationInfo({
       purchasePrice,
       residualValue,
-      usefulLifeYears: usefulLifeYears ? parseInt(usefulLifeYears) : null,
+      usefulLifeYears: usefulLifeYears
+        ? Number.parseInt(usefulLifeYears)
+        : null,
       purchaseDate: purchaseDate ? new Date(purchaseDate) : null,
     });
 
@@ -50,8 +52,8 @@ export function FinancialsTab({
     <div className="space-y-6">
       <div className="rounded-xl border border-border bg-muted/30 p-4">
         <p className="text-sm text-muted-foreground">
-          Track financial data for depreciation calculations and total cost of ownership.
-          Book value is calculated using straight-line depreciation.
+          Track financial data for depreciation calculations and total cost of
+          ownership. Book value is calculated using straight-line depreciation.
         </p>
       </div>
 
@@ -137,7 +139,9 @@ export function FinancialsTab({
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <DollarSign className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase">Book Value</span>
+                <span className="text-[10px] font-black uppercase">
+                  Book Value
+                </span>
               </div>
               <p className="text-2xl font-bold text-primary">
                 {formatCurrency(depreciation.bookValue)}
@@ -148,7 +152,9 @@ export function FinancialsTab({
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <TrendingDown className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase">Accumulated</span>
+                <span className="text-[10px] font-black uppercase">
+                  Accumulated
+                </span>
               </div>
               <p className="text-2xl font-bold text-danger-600">
                 {formatCurrency(depreciation.accumulatedDepreciation)}
@@ -171,7 +177,9 @@ export function FinancialsTab({
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <Clock className="h-4 w-4" />
-                <span className="text-[10px] font-black uppercase">Remaining</span>
+                <span className="text-[10px] font-black uppercase">
+                  Remaining
+                </span>
               </div>
               <p className="text-2xl font-bold">
                 {depreciation.isFullyDepreciated

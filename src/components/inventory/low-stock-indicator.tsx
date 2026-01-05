@@ -80,6 +80,7 @@ export function LowStockIndicator({
       {isOpen && (
         <>
           {/* Backdrop */}
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: Backdrop overlay */}
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
@@ -132,7 +133,9 @@ export function LowStockIndicator({
                     <Package className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.partName}</p>
+                    <p className="text-sm font-medium truncate">
+                      {item.partName}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {item.locationName} • SKU: {item.partSku}
                     </p>

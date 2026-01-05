@@ -1,8 +1,8 @@
 "use client";
 
 import { FavoritesDropdown } from "@/components/favorites/favorites-dropdown";
-import { OfflineIndicatorCompact } from "@/components/pwa/offline-indicator";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { OfflineIndicatorCompact } from "@/components/pwa/offline-indicator";
 import { Button } from "@/components/ui/button";
 import { Menu, Search } from "lucide-react";
 import { useEffect, useState } from "react";

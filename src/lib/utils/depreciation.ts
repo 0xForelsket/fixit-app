@@ -79,7 +79,10 @@ export function calculateDepreciation(
   );
 
   // Calculate book value (never below residual value)
-  const bookValue = Math.max(purchasePrice - accumulatedDepreciation, residualValue);
+  const bookValue = Math.max(
+    purchasePrice - accumulatedDepreciation,
+    residualValue
+  );
 
   // Calculate percentage depreciated
   const percentDepreciated = Math.min(
@@ -130,7 +133,7 @@ export function hasCompleteFinancialData(equipment: {
     equipment.residualValue != null &&
     equipment.usefulLifeYears != null &&
     equipment.purchaseDate != null &&
-    parseFloat(equipment.purchasePrice) > 0 &&
+    Number.parseFloat(equipment.purchasePrice) > 0 &&
     equipment.usefulLifeYears > 0
   );
 }
@@ -149,8 +152,8 @@ export function getDepreciationInfo(equipment: {
   }
 
   return {
-    purchasePrice: parseFloat(equipment.purchasePrice!),
-    residualValue: parseFloat(equipment.residualValue || "0"),
+    purchasePrice: Number.parseFloat(equipment.purchasePrice!),
+    residualValue: Number.parseFloat(equipment.residualValue || "0"),
     usefulLifeYears: equipment.usefulLifeYears!,
     purchaseDate: new Date(equipment.purchaseDate!),
   };

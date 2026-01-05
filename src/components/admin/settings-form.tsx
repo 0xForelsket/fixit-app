@@ -13,7 +13,8 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
-  const [settings, setSettings] = useState<SystemSettingsConfig>(initialSettings);
+  const [settings, setSettings] =
+    useState<SystemSettingsConfig>(initialSettings);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
 
@@ -27,21 +28,30 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     });
   };
 
-  const updateSLA = (priority: keyof SystemSettingsConfig["sla"], value: number) => {
+  const updateSLA = (
+    priority: keyof SystemSettingsConfig["sla"],
+    value: number
+  ) => {
     setSettings((prev) => ({
       ...prev,
       sla: { ...prev.sla, [priority]: value },
     }));
   };
 
-  const updateSession = (field: keyof SystemSettingsConfig["session"], value: number) => {
+  const updateSession = (
+    field: keyof SystemSettingsConfig["session"],
+    value: number
+  ) => {
     setSettings((prev) => ({
       ...prev,
       session: { ...prev.session, [field]: value },
     }));
   };
 
-  const updateNotification = (field: keyof SystemSettingsConfig["notifications"], value: boolean) => {
+  const updateNotification = (
+    field: keyof SystemSettingsConfig["notifications"],
+    value: boolean
+  ) => {
     setSettings((prev) => ({
       ...prev,
       notifications: { ...prev.notifications, [field]: value },
@@ -54,8 +64,18 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       <section className="rounded-xl border bg-white p-6 animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-1">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-50">
-            <svg className="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="h-5 w-5 text-primary-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <div>
@@ -106,8 +126,18 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       <section className="rounded-xl border bg-white p-6 animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-2">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
-            <svg className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            <svg
+              className="h-5 w-5 text-slate-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
             </svg>
           </div>
           <div>
@@ -120,7 +150,10 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border p-4">
-            <label htmlFor="session-timeout" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="session-timeout"
+              className="block text-sm font-medium mb-2"
+            >
               Session Timeout (Idle)
             </label>
             <div className="flex items-center gap-2">
@@ -130,7 +163,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 min={1}
                 max={72}
                 value={settings.session.idleTimeout}
-                onChange={(e) => updateSession("idleTimeout", Number(e.target.value))}
+                onChange={(e) =>
+                  updateSession("idleTimeout", Number(e.target.value))
+                }
                 className="w-24 rounded-lg border bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
               <span className="text-sm text-muted-foreground">hours</span>
@@ -140,7 +175,10 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
             </p>
           </div>
           <div className="rounded-lg border p-4">
-            <label htmlFor="max-session" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="max-session"
+              className="block text-sm font-medium mb-2"
+            >
               Max Session Duration
             </label>
             <div className="flex items-center gap-2">
@@ -150,7 +188,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 min={1}
                 max={168}
                 value={settings.session.maxDuration}
-                onChange={(e) => updateSession("maxDuration", Number(e.target.value))}
+                onChange={(e) =>
+                  updateSession("maxDuration", Number(e.target.value))
+                }
                 className="w-24 rounded-lg border bg-white px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
               <span className="text-sm text-muted-foreground">hours</span>
@@ -166,8 +206,18 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       <section className="rounded-xl border bg-white p-6 animate-in fade-in slide-in-from-bottom-2 duration-500 animate-stagger-3">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50">
-            <svg className="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            <svg
+              className="h-5 w-5 text-amber-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              />
             </svg>
           </div>
           <div>

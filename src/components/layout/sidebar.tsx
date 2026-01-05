@@ -1,11 +1,11 @@
 "use client";
 
-import { hasPermission, PERMISSIONS } from "@/lib/permissions";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
-import { navGroups } from "./sidebar-nav-config";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarNav } from "./sidebar-nav";
+import { navGroups } from "./sidebar-nav-config";
 import { SidebarUserMenu } from "./sidebar-user-menu";
 
 const COLLAPSED_SECTIONS_KEY = "sidebar-collapsed-sections";

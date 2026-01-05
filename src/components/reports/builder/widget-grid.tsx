@@ -1,8 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import {
+  type ReactNode,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import GridLayoutImport from "react-grid-layout";
-import { useMemo, memo, type ReactNode, useState, useEffect, useRef } from "react";
 import type { WidgetConfig } from "./types";
 
 // Import CSS for react-grid-layout
@@ -96,15 +103,15 @@ function WidgetGridComponent({
         }
       }
     };
-    
+
     updateWidth();
-    
+
     // Use ResizeObserver for better performance
     const observer = new ResizeObserver(updateWidth);
     if (containerRef.current) {
       observer.observe(containerRef.current);
     }
-    
+
     return () => observer.disconnect();
   }, []);
 

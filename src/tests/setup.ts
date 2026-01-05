@@ -3,10 +3,10 @@ import { GlobalRegistrator } from "@happy-dom/global-registrator";
 // Must register BEFORE any other imports that depend on DOM
 GlobalRegistrator.register();
 
+import type { SessionUser } from "@/lib/session";
 // Now import testing-library (after DOM is available)
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
-import type { SessionUser } from "@/lib/session";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 
 expect.extend(matchers);

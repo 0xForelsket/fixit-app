@@ -64,18 +64,13 @@ export function SignaturePad({
           ref={sigCanvasRef}
           penColor="black"
           canvasProps={{
-            className: cn(
-              "w-full h-24",
-              disabled ? "pointer-events-none" : ""
-            ),
+            className: cn("w-full h-24", disabled ? "pointer-events-none" : ""),
           }}
           onEnd={handleEnd}
         />
         {!hasSignature && !disabled && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-xs text-muted-foreground/50">
-              Sign here
-            </span>
+            <span className="text-xs text-muted-foreground/50">Sign here</span>
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { WifiOff } from "lucide-react";
 import Link from "next/link";
 
@@ -15,9 +15,7 @@ export default function OfflinePage() {
         className="max-w-md"
       >
         <div className="mt-6 flex justify-center gap-4">
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
           <Button variant="outline" asChild>
             <Link href="/dashboard">Go to Dashboard</Link>
           </Button>

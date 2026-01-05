@@ -65,17 +65,20 @@ export function RecordReadingButton({
     setIsSubmitting(true);
     try {
       const csrfToken = getCsrfToken();
-      const response = await fetch(`/api/equipment/meters/${meterId}/readings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken ?? "",
-        },
-        body: JSON.stringify({
-          reading: values.reading,
-          notes: values.notes || undefined,
-        }),
-      });
+      const response = await fetch(
+        `/api/equipment/meters/${meterId}/readings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrfToken ?? "",
+          },
+          body: JSON.stringify({
+            reading: values.reading,
+            notes: values.notes || undefined,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -120,7 +123,9 @@ export function RecordReadingButton({
 
         <div className="bg-muted/50 rounded-lg p-3 mb-2">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">Current Reading</span>
+            <span className="text-xs text-muted-foreground">
+              Current Reading
+            </span>
             <span className="font-bold">
               {currentReading || "—"} {meterUnit}
             </span>
@@ -128,7 +133,10 @@ export function RecordReadingButton({
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 py-2">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-5 py-2"
+          >
             <FormField
               control={form.control}
               name="reading"

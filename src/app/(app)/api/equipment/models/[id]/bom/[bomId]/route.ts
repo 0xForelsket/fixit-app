@@ -23,9 +23,7 @@ export async function DELETE(
 
     const { bomId } = await params;
 
-    await db
-      .delete(equipmentBoms)
-      .where(eq(equipmentBoms.id, bomId));
+    await db.delete(equipmentBoms).where(eq(equipmentBoms.id, bomId));
 
     return apiSuccess({ success: true });
   } catch (error) {

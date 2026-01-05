@@ -47,7 +47,10 @@ export async function GET(
     if (error instanceof Error && error.message === "Unauthorized") {
       return ApiErrors.unauthorized(requestId);
     }
-    apiLogger.error({ requestId, equipmentId, error }, "Get equipment by id error");
+    apiLogger.error(
+      { requestId, equipmentId, error },
+      "Get equipment by id error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }
@@ -121,7 +124,10 @@ export async function PATCH(
         return ApiErrors.unauthorized(requestId);
       if (error.message === "Forbidden") return ApiErrors.forbidden(requestId);
     }
-    apiLogger.error({ requestId, equipmentId, error }, "Update equipment error");
+    apiLogger.error(
+      { requestId, equipmentId, error },
+      "Update equipment error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }
@@ -174,7 +180,10 @@ export async function DELETE(
         return ApiErrors.unauthorized(requestId);
       if (error.message === "Forbidden") return ApiErrors.forbidden(requestId);
     }
-    apiLogger.error({ requestId, equipmentId, error }, "Delete equipment error");
+    apiLogger.error(
+      { requestId, equipmentId, error },
+      "Delete equipment error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }

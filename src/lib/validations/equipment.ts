@@ -28,8 +28,16 @@ export const downtimeReasonSchema = z.enum([
 
 // Phase 1.1 - Specifications schema
 export const specificationsSchema = z.object({
-  serialNumber: z.string().max(100, "Serial number is too long").optional().nullable(),
-  manufacturer: z.string().max(100, "Manufacturer name is too long").optional().nullable(),
+  serialNumber: z
+    .string()
+    .max(100, "Serial number is too long")
+    .optional()
+    .nullable(),
+  manufacturer: z
+    .string()
+    .max(100, "Manufacturer name is too long")
+    .optional()
+    .nullable(),
   modelYear: z.coerce
     .number()
     .int()
@@ -46,14 +54,26 @@ export const financialsSchema = z.object({
   purchaseDate: z.coerce.date().optional().nullable(),
   purchasePrice: z
     .string()
-    .refine((val) => !val || !isNaN(parseFloat(val)), "Must be a valid number")
-    .refine((val) => !val || parseFloat(val) >= 0, "Price cannot be negative")
+    .refine(
+      (val) => !val || !Number.isNaN(Number.parseFloat(val)),
+      "Must be a valid number"
+    )
+    .refine(
+      (val) => !val || Number.parseFloat(val) >= 0,
+      "Price cannot be negative"
+    )
     .optional()
     .nullable(),
   residualValue: z
     .string()
-    .refine((val) => !val || !isNaN(parseFloat(val)), "Must be a valid number")
-    .refine((val) => !val || parseFloat(val) >= 0, "Residual value cannot be negative")
+    .refine(
+      (val) => !val || !Number.isNaN(Number.parseFloat(val)),
+      "Must be a valid number"
+    )
+    .refine(
+      (val) => !val || Number.parseFloat(val) >= 0,
+      "Residual value cannot be negative"
+    )
     .optional()
     .nullable(),
   usefulLifeYears: z.coerce
@@ -67,10 +87,16 @@ export const financialsSchema = z.object({
 
 // Phase 4 - Meter schema
 export const meterSchema = z.object({
-  name: z.string().min(1, "Meter name is required").max(100, "Name is too long"),
+  name: z
+    .string()
+    .min(1, "Meter name is required")
+    .max(100, "Name is too long"),
   type: meterTypeSchema,
   unit: z.string().min(1, "Unit is required").max(20, "Unit is too long"),
-  currentReading: z.coerce.number().min(0, "Reading cannot be negative").optional(),
+  currentReading: z.coerce
+    .number()
+    .min(0, "Reading cannot be negative")
+    .optional(),
 });
 
 // Meter reading schema
@@ -144,7 +170,13 @@ export const updateEquipmentSchema = z.object({
   purchaseDate: z.coerce.date().optional().nullable(),
   purchasePrice: z.string().optional().nullable(),
   residualValue: z.string().optional().nullable(),
-  usefulLifeYears: z.coerce.number().int().min(1).max(100).optional().nullable(),
+  usefulLifeYears: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .nullable(),
 });
 
 export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>;

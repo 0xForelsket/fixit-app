@@ -356,7 +356,8 @@ export function AuditLogTable({
                   <tr
                     key={log.id}
                     tabIndex={0}
-                    {...({ role: "button" } as any)}
+                    // biome-ignore lint/a11y/useSemanticElements: Interactive row
+                    role="button"
                     className={cn(
                       "hover:bg-muted/30 transition-colors cursor-pointer",
                       isExpanded && "bg-muted/20"

@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { systemSettings, type SystemSettingsConfig } from "@/db/schema";
+import { type SystemSettingsConfig, systemSettings } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
@@ -20,7 +20,7 @@ export async function getSystemSetting<K extends keyof SystemSettingsConfig>(
     where: eq(systemSettings.key, key),
   });
 
-  if (setting && setting.value) {
+  if (setting?.value) {
     return setting.value as SystemSettingsConfig[K];
   }
 
@@ -41,7 +41,8 @@ export async function getAllSystemSettings(): Promise<SystemSettingsConfig> {
     } else if (setting.key === "session" && setting.value) {
       result.session = setting.value as SystemSettingsConfig["session"];
     } else if (setting.key === "notifications" && setting.value) {
-      result.notifications = setting.value as SystemSettingsConfig["notifications"];
+      result.notifications =
+        setting.value as SystemSettingsConfig["notifications"];
     }
   }
 
@@ -61,7 +62,10 @@ export async function updateSystemSetting<K extends keyof SystemSettingsConfig>(
   }
 
   if (!userHasPermission(user, PERMISSIONS.SYSTEM_SETTINGS)) {
-    return { success: false, error: "You don't have permission to update settings" };
+    return {
+      success: false,
+      error: "You don't have permission to update settings",
+    };
   }
 
   try {
@@ -114,7 +118,10 @@ export async function updateAllSystemSettings(
   }
 
   if (!userHasPermission(user, PERMISSIONS.SYSTEM_SETTINGS)) {
-    return { success: false, error: "You don't have permission to update settings" };
+    return {
+      success: false,
+      error: "You don't have permission to update settings",
+    };
   }
 
   try {

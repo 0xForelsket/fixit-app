@@ -120,19 +120,19 @@ export default function ArchitecturePage() {
                 <TopologyBlock
                   icon={Globe}
                   title="EDGE_RUNTIME_LAYER"
-                  code={`// Global state & routing resolution\nexport function middleware(req: NextRequest) {\n  return resolveSubdomain(req.host);\n}`}
+                  code="// Global state & routing resolution\nexport function middleware(req: NextRequest) {\n  return resolveSubdomain(req.host);\n}"
                 />
                 <div className="border-l-2 border-dashed border-primary/20 ml-8 h-8" />
                 <TopologyBlock
                   icon={Layers}
                   title="APPLICATION_LOGIC_CORE"
-                  code={`// Server-side validation & Drizzle ORM implementation\nconst workOrder = await db.query.workOrders.findFirst({\n  where: eq(workOrders.id, params.id)\n});`}
+                  code="// Server-side validation & Drizzle ORM implementation\nconst workOrder = await db.query.workOrders.findFirst({\n  where: eq(workOrders.id, params.id)\n});"
                 />
                 <div className="border-l-2 border-dashed border-primary/20 ml-8 h-8" />
                 <TopologyBlock
                   icon={Database}
                   title="PERSISTENCE_LAYER"
-                  code={`PostgreSQL (v16+) | 256-bit AES Encryption at rest`}
+                  code="PostgreSQL (v16+) | 256-bit AES Encryption at rest"
                   isTextOnly
                 />
               </div>
@@ -355,7 +355,12 @@ function TopologyBlock({
   title,
   code,
   isTextOnly,
-}: { icon: any; title: string; code: string; isTextOnly?: boolean }) {
+}: {
+  icon: React.ElementType;
+  title: string;
+  code: string;
+  isTextOnly?: boolean;
+}) {
   return (
     <motion.div
       variants={revealVariants}

@@ -131,7 +131,7 @@ describe("encryption", () => {
 describe("encryption without APP_SECRET", () => {
   it("should throw when APP_SECRET is not set", () => {
     const original = process.env.APP_SECRET;
-    delete process.env.APP_SECRET;
+    process.env.APP_SECRET = undefined;
 
     expect(() => encrypt("test")).toThrow(
       "APP_SECRET environment variable is not set"

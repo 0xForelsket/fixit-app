@@ -116,7 +116,7 @@ describe("rate-limit", () => {
     });
 
     afterEach(() => {
-      delete process.env.VERCEL;
+      process.env.VERCEL = undefined;
     });
 
     it("should extract IP from X-Forwarded-For header", async () => {

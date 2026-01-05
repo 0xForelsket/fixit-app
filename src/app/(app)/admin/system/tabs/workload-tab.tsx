@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertTriangle, TrendingUp, User, Users } from "lucide-react";
+import { AlertTriangle, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 
 export interface TechnicianWorkload {
@@ -71,7 +71,10 @@ export function WorkloadTab({ technicians }: WorkloadTabProps) {
     (sum, t) => sum + t.inProgressCount,
     0
   );
-  const totalCritical = technicians.reduce((sum, t) => sum + t.criticalCount, 0);
+  const totalCritical = technicians.reduce(
+    (sum, t) => sum + t.criticalCount,
+    0
+  );
   const totalOverdue = technicians.reduce((sum, t) => sum + t.overdueCount, 0);
 
   // Sort by total workload (descending)
@@ -158,7 +161,8 @@ export function WorkloadTab({ technicians }: WorkloadTabProps) {
               const total = tech.openCount + tech.inProgressCount;
               const level = getWorkloadLevel(total);
               const styles = getWorkloadStyles(level);
-              const barWidth = maxWorkload > 0 ? (total / maxWorkload) * 100 : 0;
+              const barWidth =
+                maxWorkload > 0 ? (total / maxWorkload) * 100 : 0;
 
               return (
                 <div

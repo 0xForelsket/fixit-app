@@ -46,7 +46,10 @@ export async function updateUserAvatar(rawData: {
           .filter((a) => a.s3Key)
           .map((a) =>
             deleteObject(a.s3Key).catch((err) =>
-              console.warn(`Failed to delete old avatar S3 object: ${a.s3Key}`, err)
+              console.warn(
+                `Failed to delete old avatar S3 object: ${a.s3Key}`,
+                err
+              )
             )
           )
       );

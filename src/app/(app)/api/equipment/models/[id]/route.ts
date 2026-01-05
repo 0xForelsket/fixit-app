@@ -109,9 +109,7 @@ export async function DELETE(
       );
     }
 
-    await db
-      .delete(equipmentModels)
-      .where(eq(equipmentModels.id, id));
+    await db.delete(equipmentModels).where(eq(equipmentModels.id, id));
 
     return apiSuccess({ success: true });
   } catch (error) {

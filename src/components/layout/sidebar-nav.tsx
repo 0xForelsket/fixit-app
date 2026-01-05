@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import { AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { NavGroup, NavItem } from "./sidebar-nav-config";
 import { NavTooltip } from "./nav-tooltip";
+import type { NavGroup, NavItem } from "./sidebar-nav-config";
 
 interface SidebarNavProps {
   groups: NavGroup[];
@@ -95,7 +95,8 @@ export function SidebarNav({
                 <ul className="space-y-1">
                   {group.items.map((item) => {
                     const isActive = isItemActive(item);
-                    const hasChildren = item.children && item.children.length > 0;
+                    const hasChildren =
+                      item.children && item.children.length > 0;
                     const isSubmenuExpanded =
                       expandedSubmenus.has(item.href) || isSubmenuActive(item);
 
@@ -223,7 +224,9 @@ function NavItemWithSubmenu({
         <div
           className={cn(
             "overflow-hidden transition-all duration-200",
-            isSubmenuExpanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            isSubmenuExpanded
+              ? "max-h-[500px] opacity-100"
+              : "max-h-0 opacity-0"
           )}
         >
           <ul className="ml-4 mt-1 space-y-1 border-l border-border/50 pl-3">
@@ -292,7 +295,9 @@ function NavItemLink({
       <span
         className={cn(
           "shrink-0 transition-colors",
-          isActive ? "text-primary" : "text-foreground/40 group-hover:text-primary"
+          isActive
+            ? "text-primary"
+            : "text-foreground/40 group-hover:text-primary"
         )}
       >
         {item.icon}

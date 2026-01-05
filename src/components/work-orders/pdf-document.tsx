@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
 });
 
 interface WorkOrderPDFProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: Legacy PDF template
   workOrder: any;
   qrCodeUrl?: string;
 }
@@ -320,6 +320,7 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
         {workOrder.checklistItems && workOrder.checklistItems.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Safety & Task Checklist</Text>
+            {/* biome-ignore lint/suspicious/noExplicitAny: Legacy */}
             {workOrder.checklistItems.map((item: any, i: number) => (
               <View key={i} style={styles.checklistRow}>
                 <Text
@@ -351,6 +352,7 @@ export function WorkOrderPDF({ workOrder, qrCodeUrl }: WorkOrderPDFProps) {
                 <Text style={styles.partCol1}>Part Description</Text>
                 <Text style={styles.partCol2}>Quantity</Text>
               </View>
+              {/* biome-ignore lint/suspicious/noExplicitAny: Legacy */}
               {workOrder.consumedParts.map((usage: any, i: number) => (
                 <View key={i} style={styles.partsRow}>
                   <Text style={styles.partText}>

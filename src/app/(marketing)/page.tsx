@@ -53,6 +53,7 @@ export default function Page() {
     <>
       <script
         type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: Schema.org JSON-LD requires this pattern
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <MarketingPageV2 />

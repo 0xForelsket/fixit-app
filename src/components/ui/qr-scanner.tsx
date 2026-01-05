@@ -32,7 +32,7 @@ export function QRScanner({ isOpen, onClose, onScan }: QRScannerProps) {
     const initScanner = async () => {
       try {
         const { Html5QrcodeScanner } = await import("html5-qrcode");
-        
+
         if (isCancelled) return;
 
         const scanner = new Html5QrcodeScanner(

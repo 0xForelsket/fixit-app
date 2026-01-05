@@ -171,88 +171,84 @@ export interface UserPreferences {
 // ============ TABLES ============
 
 export const roles = pgTable("roles", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   name: text("name").unique().notNull(),
   description: text("description"),
-  permissions: jsonb("permissions")
-    .notNull()
-    .$type<string[]>()
-    .default([]),
-  isSystemRole: boolean("is_system_role")
-    .notNull()
-    .default(false),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  permissions: jsonb("permissions").notNull().$type<string[]>().default([]),
+  isSystemRole: boolean("is_system_role").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const departments = pgTable("departments", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   name: text("name").unique().notNull(), // e.g., "Electrical", "Mechanical", "Facilities"
   code: text("code").unique().notNull(), // e.g., "ELEC", "MECH"
   description: text("description"),
   managerId: text("manager_id"), // Dept Manager - removed explicit .references() to avoid circularity
   isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Users table
-export const users = pgTable("users", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
-  displayId: serial("display_id").notNull(),
-  employeeId: text("employee_id").unique().notNull(),
-  name: text("name").notNull(),
-  email: text("email").unique(),
-  pin: text("pin").notNull(),
-  roleId: text("role_id").references(() => roles.id),
-  departmentId: text("department_id").references(() => departments.id),
-  isActive: boolean("is_active").notNull().default(true),
-  hourlyRate: real("hourly_rate"), // For labor cost tracking
-  preferences: jsonb("preferences").$type<UserPreferences>(),
-  failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
-  lockedUntil: timestamp("locked_until"),
-  // Session version - increment when PIN changes to invalidate all existing sessions
-  sessionVersion: integer("session_version").notNull().default(1),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
-}, (table) => ({
-  deptRoleIdx: index("users_dept_role_idx").on(table.departmentId, table.roleId),
-}));
+export const users = pgTable(
+  "users",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    displayId: serial("display_id").notNull(),
+    employeeId: text("employee_id").unique().notNull(),
+    name: text("name").notNull(),
+    email: text("email").unique(),
+    pin: text("pin").notNull(),
+    roleId: text("role_id").references(() => roles.id),
+    departmentId: text("department_id").references(() => departments.id),
+    isActive: boolean("is_active").notNull().default(true),
+    hourlyRate: real("hourly_rate"), // For labor cost tracking
+    preferences: jsonb("preferences").$type<UserPreferences>(),
+    failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
+    lockedUntil: timestamp("locked_until"),
+    // Session version - increment when PIN changes to invalidate all existing sessions
+    sessionVersion: integer("session_version").notNull().default(1),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    deptRoleIdx: index("users_dept_role_idx").on(
+      table.departmentId,
+      table.roleId
+    ),
+  })
+);
 
 // Locations table (hierarchical)
 export const locations = pgTable("locations", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   code: text("code").unique().notNull(),
   description: text("description"),
   parentId: text("parent_id"), // Self-reference handled in relations
   isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // SAP-style Equipment Categories (e.g., Mechanical, Electrical)
 export const equipmentCategories = pgTable("equipment_categories", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   name: text("name").notNull(), // e.g., "M"
   label: text("label").notNull(), // e.g., "Mechanical"
   description: text("description"),
@@ -260,7 +256,9 @@ export const equipmentCategories = pgTable("equipment_categories", {
 
 // SAP-style Object Types (e.g., Pump, Motor)
 export const equipmentTypes = pgTable("equipment_types", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   categoryId: text("category_id")
     .references(() => equipmentCategories.id)
     .notNull(),
@@ -271,24 +269,24 @@ export const equipmentTypes = pgTable("equipment_types", {
 
 // Equipment Models table
 export const equipmentModels = pgTable("equipment_models", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   name: text("name").notNull(),
   manufacturer: text("manufacturer"),
   description: text("description"),
   manualUrl: text("manual_url"),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Equipment table (formerly Equipment)
 export const equipment = pgTable(
   "equipment",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     displayId: serial("display_id").notNull(),
     name: text("name").notNull(),
     code: text("code").unique().notNull(), // For QR codes
@@ -313,12 +311,8 @@ export const equipment = pgTable(
     purchasePrice: text("purchase_price"), // Stored as text for precision, parsed as decimal
     residualValue: text("residual_value"), // Stored as text for precision, parsed as decimal
     usefulLifeYears: integer("useful_life_years"),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => ({
     codeIdx: index("eq_code_idx").on(table.code),
@@ -329,7 +323,10 @@ export const equipment = pgTable(
       table.status
     ),
     // Equipment owner-status filtering (for owner's equipment list)
-    ownerStatusIdx: index("eq_owner_status_idx").on(table.ownerId, table.status),
+    ownerStatusIdx: index("eq_owner_status_idx").on(
+      table.ownerId,
+      table.status
+    ),
     // Full Text Search Index
     searchIdx: index("eq_search_idx").using(
       "gin",
@@ -342,7 +339,9 @@ export const equipment = pgTable(
 export const workOrders = pgTable(
   "work_orders",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     displayId: serial("display_id").notNull(),
     equipmentId: text("equipment_id")
       .references(() => equipment.id)
@@ -362,12 +361,8 @@ export const workOrders = pgTable(
       .notNull()
       .default("open"),
     resolutionNotes: text("resolution_notes"),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
     resolvedAt: timestamp("resolved_at"),
     escalatedAt: timestamp("escalated_at"),
     dueBy: timestamp("due_by"),
@@ -412,7 +407,9 @@ export const workOrders = pgTable(
 export const maintenanceSchedules = pgTable(
   "maintenance_schedules",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     displayId: serial("display_id").notNull(),
     equipmentId: text("equipment_id")
       .references(() => equipment.id)
@@ -423,9 +420,7 @@ export const maintenanceSchedules = pgTable(
     lastGenerated: timestamp("last_generated"),
     nextDue: timestamp("next_due").notNull(),
     isActive: boolean("is_active").notNull().default(true),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     // Active schedules by next due date (for scheduler queries)
@@ -440,7 +435,9 @@ export const maintenanceSchedules = pgTable(
 
 // Work Order logs table (audit trail)
 export const workOrderLogs = pgTable("work_order_logs", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   workOrderId: text("work_order_id")
     .references(() => workOrders.id)
     .notNull(),
@@ -450,14 +447,14 @@ export const workOrderLogs = pgTable("work_order_logs", {
   createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Attachments table (polymorphic)
 export const attachments = pgTable("attachments", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   entityType: text("entity_type", { enum: entityTypes }).notNull(),
   entityId: text("entity_id").notNull(),
   type: text("type", { enum: attachmentTypes }).notNull(),
@@ -468,16 +465,16 @@ export const attachments = pgTable("attachments", {
   uploadedById: text("uploaded_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Notifications table
 export const notifications = pgTable(
   "notifications",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     userId: text("user_id")
       .references(() => users.id)
       .notNull(),
@@ -486,9 +483,7 @@ export const notifications = pgTable(
     message: text("message").notNull(),
     link: text("link"),
     isRead: boolean("is_read").notNull().default(false),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     userIdIdx: index("notif_user_idx").on(table.userId),
@@ -502,16 +497,16 @@ export const notifications = pgTable(
 
 // Equipment status logs table (for downtime tracking)
 export const equipmentStatusLogs = pgTable("equipment_status_logs", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   equipmentId: text("equipment_id")
     .references(() => equipment.id)
     .notNull(),
   oldStatus: text("old_status", { enum: equipmentStatuses }).notNull(),
   newStatus: text("new_status", { enum: equipmentStatuses }).notNull(),
   changedById: text("changed_by_id").references(() => users.id),
-  changedAt: timestamp("changed_at")
-    .notNull()
-    .defaultNow(),
+  changedAt: timestamp("changed_at").notNull().defaultNow(),
 });
 
 // ============ EQUIPMENT PREMIUM: METERS (Phase 4) ============
@@ -520,7 +515,9 @@ export const equipmentStatusLogs = pgTable("equipment_status_logs", {
 export const equipmentMeters = pgTable(
   "equipment_meters",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     equipmentId: text("equipment_id")
       .references(() => equipment.id, { onDelete: "cascade" })
       .notNull(),
@@ -540,7 +537,9 @@ export const equipmentMeters = pgTable(
 export const meterReadings = pgTable(
   "meter_readings",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     meterId: text("meter_id")
       .references(() => equipmentMeters.id, { onDelete: "cascade" })
       .notNull(),
@@ -563,7 +562,9 @@ export const meterReadings = pgTable(
 export const downtimeLogs = pgTable(
   "downtime_logs",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     equipmentId: text("equipment_id")
       .references(() => equipment.id, { onDelete: "cascade" })
       .notNull(),
@@ -584,7 +585,9 @@ export const downtimeLogs = pgTable(
 
 // Bill of Materials (BOM) linking models to parts
 export const equipmentBoms = pgTable("equipment_boms", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   modelId: text("model_id")
     .references(() => equipmentModels.id)
     .notNull(),
@@ -593,33 +596,31 @@ export const equipmentBoms = pgTable("equipment_boms", {
     .notNull(),
   quantityRequired: integer("quantity_required").notNull().default(1),
   notes: text("notes"),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // ============ PHASE 10: MAINTENANCE CHECKLISTS ============
 
 // Checklist templates linked to maintenance schedules
 export const maintenanceChecklists = pgTable("maintenance_checklists", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   scheduleId: text("schedule_id")
     .references(() => maintenanceSchedules.id)
     .notNull(),
   stepNumber: integer("step_number").notNull(),
   description: text("description").notNull(),
-  isRequired: boolean("is_required")
-    .notNull()
-    .default(true),
+  isRequired: boolean("is_required").notNull().default(true),
   estimatedMinutes: integer("estimated_minutes"),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Completed checklist items per work order
 export const checklistCompletions = pgTable("checklist_completions", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   checklistId: text("checklist_id")
     .references(() => maintenanceChecklists.id)
     .notNull(),
@@ -639,7 +640,9 @@ export const checklistCompletions = pgTable("checklist_completions", {
 // Spare parts catalog
 // Vendors (suppliers for parts and services)
 export const vendors = pgTable("vendors", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   code: text("code").unique().notNull(), // Short code like "ACME"
@@ -650,16 +653,14 @@ export const vendors = pgTable("vendors", {
   address: text("address"),
   notes: text("notes"),
   isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const spareParts = pgTable("spare_parts", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   sku: text("sku").unique().notNull(),
@@ -671,19 +672,17 @@ export const spareParts = pgTable("spare_parts", {
   reorderPoint: integer("reorder_point").notNull().default(0),
   leadTimeDays: integer("lead_time_days"),
   isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Stock levels per location
 export const inventoryLevels = pgTable(
   "inventory_levels",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     partId: text("part_id")
       .references(() => spareParts.id)
       .notNull(),
@@ -691,9 +690,7 @@ export const inventoryLevels = pgTable(
       .references(() => locations.id)
       .notNull(),
     quantity: integer("quantity").notNull().default(0),
-    updatedAt: timestamp("updated_at")
-      .notNull()
-      .defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
   (table) => ({
     // Unique constraint to prevent duplicate inventory levels for same part+location
@@ -708,7 +705,9 @@ export const inventoryLevels = pgTable(
 
 // Inventory transactions (stock movements)
 export const inventoryTransactions = pgTable("inventory_transactions", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   partId: text("part_id")
     .references(() => spareParts.id)
@@ -725,14 +724,14 @@ export const inventoryTransactions = pgTable("inventory_transactions", {
   createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Parts used on work orders
 export const workOrderParts = pgTable("work_order_parts", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   workOrderId: text("work_order_id")
     .references(() => workOrders.id)
     .notNull(),
@@ -744,9 +743,7 @@ export const workOrderParts = pgTable("work_order_parts", {
   addedById: text("added_by_id")
     .references(() => users.id)
     .notNull(),
-  addedAt: timestamp("added_at")
-    .notNull()
-    .defaultNow(),
+  addedAt: timestamp("added_at").notNull().defaultNow(),
 });
 
 // ============ PHASE 13: LABOR TRACKING ============
@@ -755,7 +752,9 @@ export const workOrderParts = pgTable("work_order_parts", {
 export const laborLogs = pgTable(
   "labor_logs",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     workOrderId: text("work_order_id")
       .references(() => workOrders.id)
       .notNull(),
@@ -766,13 +765,9 @@ export const laborLogs = pgTable(
     endTime: timestamp("end_time"),
     durationMinutes: integer("duration_minutes"),
     hourlyRate: real("hourly_rate"),
-    isBillable: boolean("is_billable")
-      .notNull()
-      .default(true),
+    isBillable: boolean("is_billable").notNull().default(true),
     notes: text("notes"),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     // Composite index for time tracking aggregations
@@ -790,15 +785,15 @@ export type FavoriteEntityType = (typeof favoriteEntityTypes)[number];
 export const userFavorites = pgTable(
   "user_favorites",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     userId: text("user_id")
       .references(() => users.id)
       .notNull(),
     entityType: text("entity_type").notNull().$type<FavoriteEntityType>(),
     entityId: text("entity_id").notNull(),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     // Unique constraint to prevent duplicate favorites
@@ -813,7 +808,9 @@ export const userFavorites = pgTable(
 
 // Work Order Templates
 export const workOrderTemplates = pgTable("work_order_templates", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   displayId: serial("display_id").notNull(),
   name: text("name").notNull(),
   description: text("description"),
@@ -832,52 +829,43 @@ export const workOrderTemplates = pgTable("work_order_templates", {
   createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // System Settings table for persistent configuration
 export const systemSettings = pgTable("system_settings", {
   key: text("key").primaryKey(),
   value: jsonb("value").notNull(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   updatedById: text("updated_by_id").references(() => users.id),
 });
 
 // Report Templates for Custom Report Builder
 export const reportTemplates = pgTable("report_templates", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   name: text("name").notNull(),
   description: text("description"),
   config: jsonb("config").notNull(), // Stores layout and widget configuration
   createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Report Schedules
 export const reportSchedules = pgTable("report_schedules", {
-  id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => uuidv7()),
   templateId: text("template_id")
     .references(() => reportTemplates.id)
     .notNull(),
   frequency: text("frequency", { enum: reportFrequencies }).notNull(),
-  recipients: jsonb("recipients")
-    .notNull()
-    .$type<string[]>()
-    .default([]),
+  recipients: jsonb("recipients").notNull().$type<string[]>().default([]),
   timezone: text("timezone").notNull().default("UTC"),
   isActive: boolean("is_active").notNull().default(true),
   lastRunAt: timestamp("last_run_at"),
@@ -888,27 +876,23 @@ export const reportSchedules = pgTable("report_schedules", {
   createdById: text("created_by_id")
     .references(() => users.id)
     .notNull(),
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // System-wide audit logs
 export const auditLogs = pgTable(
   "audit_logs",
   {
-    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
     entityType: text("entity_type", { enum: entityTypes }).notNull(),
     entityId: text("entity_id").notNull(),
     action: text("action").notNull(), // "CREATE", "UPDATE", "DELETE", "LOGIN", etc.
     details: jsonb("details"), // JSON description of what changed
     userId: text("user_id").references(() => users.id),
-    createdAt: timestamp("created_at")
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => ({
     entityIdx: index("audit_entity_idx").on(table.entityType, table.entityId),

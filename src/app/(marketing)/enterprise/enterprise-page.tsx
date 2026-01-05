@@ -192,40 +192,58 @@ export default function EnterprisePage() {
           <form className="bg-card border border-border rounded-[2rem] p-8 md:p-12 shadow-2xl space-y-8">
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-2">
-                <label className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground">
+                <label
+                  htmlFor="enterprise-name"
+                  className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Full Name
                 </label>
                 <input
+                  id="enterprise-name"
                   type="text"
                   className="w-full bg-secondary/50 border border-border h-12 px-4 rounded-xl focus:border-primary outline-none transition-colors"
                   placeholder="John Doe"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground">
+                <label
+                  htmlFor="enterprise-email"
+                  className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Work Email
                 </label>
                 <input
+                  id="enterprise-email"
                   type="email"
                   className="w-full bg-secondary/50 border border-border h-12 px-4 rounded-xl focus:border-primary outline-none transition-colors"
                   placeholder="john@enterprise.com"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground">
+                <label
+                  htmlFor="enterprise-company"
+                  className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Company
                 </label>
                 <input
+                  id="enterprise-company"
                   type="text"
                   className="w-full bg-secondary/50 border border-border h-12 px-4 rounded-xl focus:border-primary outline-none transition-colors"
                   placeholder="Acme Corp"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground">
+                <label
+                  htmlFor="enterprise-sites"
+                  className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground"
+                >
                   Facility Sites
                 </label>
-                <select className="w-full bg-secondary/50 border border-border h-12 px-4 rounded-xl focus:border-primary outline-none transition-colors appearance-none">
+                <select
+                  id="enterprise-sites"
+                  className="w-full bg-secondary/50 border border-border h-12 px-4 rounded-xl focus:border-primary outline-none transition-colors appearance-none"
+                >
                   <option>1-5 Sites</option>
                   <option>5-20 Sites</option>
                   <option>20-100 Sites</option>
@@ -234,13 +252,17 @@ export default function EnterprisePage() {
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground">
+              <label
+                htmlFor="enterprise-inquiry"
+                className="text-[10px] font-mono font-black uppercase tracking-widest text-muted-foreground"
+              >
                 Inquiry Details
               </label>
               <textarea
+                id="enterprise-inquiry"
                 className="w-full bg-secondary/50 border border-border h-32 p-4 rounded-xl focus:border-primary outline-none transition-colors resize-none"
                 placeholder="Tell us about your operational infrastructure..."
-              ></textarea>
+              />
             </div>
             <Button
               size="lg"

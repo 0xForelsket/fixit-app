@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { QRCode } from "@/components/ui/qr-code";
 import { cn } from "@/lib/utils";
 import { MapPin, Printer, QrCode } from "lucide-react";
-import { QRCode } from "@/components/ui/qr-code";
 import { useRef, useState } from "react";
 
 interface Equipment {

@@ -1,12 +1,12 @@
 "use client";
 
 import { AttachmentCard } from "@/components/ui/attachment-card";
-import { FileUpload } from "@/components/ui/file-upload";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FileUpload } from "@/components/ui/file-upload";
 import type { Attachment } from "@/db/schema";
+import { api } from "@/lib/api-client";
 import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api-client";
 
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 

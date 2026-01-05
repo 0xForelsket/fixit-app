@@ -72,7 +72,10 @@ export async function POST(
         return ApiErrors.forbidden(requestId);
       }
     }
-    apiLogger.error({ requestId, meterId, error }, "Record meter reading error");
+    apiLogger.error(
+      { requestId, meterId, error },
+      "Record meter reading error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }

@@ -124,14 +124,14 @@ export function WorkOrderActions({
                 required
               />
             </div>
-            
+
             {/* Signature Pad */}
             <input type="hidden" name="signature" value={signatureData || ""} />
             <SignaturePad
               onChange={setSignatureData}
               disabled={isResolvePending}
             />
-            
+
             <Button
               type="submit"
               size="sm"

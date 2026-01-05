@@ -9,7 +9,7 @@ async function getRoleFromSession(token: string): Promise<string | null> {
     const { payload } = await jwtVerify(token, secretKey);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-        return (payload as any).user?.roleName || null;
+    return (payload as any).user?.roleName || null;
   } catch {
     return null;
   }

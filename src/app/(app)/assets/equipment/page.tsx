@@ -8,9 +8,10 @@ import { StatsTicker } from "@/components/ui/stats-ticker";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
+import type { EquipmentStatus } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
-import { and, asc, desc, eq, like, or, sql } from "drizzle-orm";
+import { type SQL, and, asc, desc, eq, like, or, sql } from "drizzle-orm";
 import {
   AlertCircle,
   CheckCircle2,
@@ -39,9 +40,12 @@ type SearchParams = {
   view?: "list" | "tree";
 };
 
-async function getEquipment(params: SearchParams, conditions: any[]) {
+async function getEquipment(
+  params: SearchParams,
+  conditions: (SQL | undefined)[]
+) {
   // Handle sorting in SQL
-  let orderBy;
+  let orderBy: SQL | undefined;
   const sortDir = params.dir === "desc" ? desc : asc;
 
   switch (params.sort) {
@@ -106,7 +110,7 @@ async function getEquipment(params: SearchParams, conditions: any[]) {
 }
 
 // Stats aggregation in a single query
-async function getEquipmentStats(conditions: any[]) {
+async function getEquipmentStats(conditions: (SQL | undefined)[]) {
   const [result] = await db
     .select({
       total: sql<number>`count(*)`,
@@ -143,7 +147,9 @@ export default async function EquipmentPage({
   }
 
   if (params.status && params.status !== "all") {
-    conditions.push(eq(equipmentTable.status, params.status as any));
+    conditions.push(
+      eq(equipmentTable.status, params.status as EquipmentStatus)
+    );
   }
 
   if (params.search) {

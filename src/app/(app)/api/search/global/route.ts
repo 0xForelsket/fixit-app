@@ -123,29 +123,31 @@ export async function GET(request: Request) {
     }
 
     // Execute database searches in parallel
-    const [workOrderResults, equipmentResults, partResults] = await Promise.all([
-      // Search work orders
-      db.query.workOrders.findMany({
-        where: sql`to_tsvector('english', ${workOrders.title} || ' ' || ${workOrders.description}) @@ plainto_tsquery('english', ${query})`,
-        columns: { id: true, displayId: true, title: true, status: true },
-        limit: 5,
-      }),
-      // Search equipment
-      db.query.equipment.findMany({
-        where: sql`to_tsvector('english', ${equipment.name} || ' ' || ${equipment.code}) @@ plainto_tsquery('english', ${query})`,
-        columns: { id: true, name: true, code: true, status: true },
-        limit: 5,
-      }),
-      // Search spare parts
-      db.query.spareParts.findMany({
-        where: or(
-          like(spareParts.name, searchPattern),
-          like(spareParts.sku, searchPattern)
-        ),
-        columns: { id: true, name: true, sku: true },
-        limit: 5,
-      }),
-    ]);
+    const [workOrderResults, equipmentResults, partResults] = await Promise.all(
+      [
+        // Search work orders
+        db.query.workOrders.findMany({
+          where: sql`to_tsvector('english', ${workOrders.title} || ' ' || ${workOrders.description}) @@ plainto_tsquery('english', ${query})`,
+          columns: { id: true, displayId: true, title: true, status: true },
+          limit: 5,
+        }),
+        // Search equipment
+        db.query.equipment.findMany({
+          where: sql`to_tsvector('english', ${equipment.name} || ' ' || ${equipment.code}) @@ plainto_tsquery('english', ${query})`,
+          columns: { id: true, name: true, code: true, status: true },
+          limit: 5,
+        }),
+        // Search spare parts
+        db.query.spareParts.findMany({
+          where: or(
+            like(spareParts.name, searchPattern),
+            like(spareParts.sku, searchPattern)
+          ),
+          columns: { id: true, name: true, sku: true },
+          limit: 5,
+        }),
+      ]
+    );
 
     // Process Work Order Results
     for (const wo of workOrderResults) {

@@ -202,7 +202,9 @@ export function EquipmentForm({
         purchaseDate: purchaseDate || null,
         purchasePrice: purchasePrice || null,
         residualValue: residualValue || null,
-        usefulLifeYears: usefulLifeYears ? Number.parseInt(usefulLifeYears) : null,
+        usefulLifeYears: usefulLifeYears
+          ? Number.parseInt(usefulLifeYears)
+          : null,
       };
 
       const url = isNew ? "/api/equipment" : `/api/equipment/${equipment?.id}`;
@@ -245,7 +247,10 @@ export function EquipmentForm({
 
       if (!res.ok) {
         const json = await res.json();
-        return { success: false, error: json.error || "Failed to create meter" };
+        return {
+          success: false,
+          error: json.error || "Failed to create meter",
+        };
       }
 
       router.refresh();
@@ -271,7 +276,10 @@ export function EquipmentForm({
 
       if (!res.ok) {
         const json = await res.json();
-        return { success: false, error: json.error || "Failed to update meter" };
+        return {
+          success: false,
+          error: json.error || "Failed to update meter",
+        };
       }
 
       router.refresh();
@@ -292,7 +300,10 @@ export function EquipmentForm({
 
       if (!res.ok) {
         const json = await res.json();
-        return { success: false, error: json.error || "Failed to delete meter" };
+        return {
+          success: false,
+          error: json.error || "Failed to delete meter",
+        };
       }
 
       router.refresh();

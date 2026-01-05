@@ -142,6 +142,7 @@ export default function DeployPage() {
                       Terminal
                     </div>
                     <button
+                      type="button"
                       onClick={() => copyCommand(method.id, method.command!)}
                       className="absolute top-2 right-2 p-2 hover:bg-background rounded-lg transition-colors"
                     >

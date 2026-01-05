@@ -54,7 +54,7 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
   if (!user) return null;
 
   const { displayId: rawDisplayId } = await params;
-  
+
   // Parse the WO-XXX format from the URL
   const numericDisplayId = parseWorkOrderId(rawDisplayId);
   if (numericDisplayId === null) {
@@ -66,11 +66,11 @@ export default async function WorkOrderDetailPage({ params }: PageProps) {
     where: eq(workOrders.displayId, numericDisplayId),
     columns: { id: true },
   });
-  
+
   if (!workOrderLookup) {
     notFound();
   }
-  
+
   const workOrderId = workOrderLookup.id;
 
   // Parallelize all data fetching

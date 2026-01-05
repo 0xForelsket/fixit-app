@@ -1,10 +1,16 @@
 import { getDepartments } from "@/actions/departments";
 import { getRoles } from "@/actions/roles";
 import { db } from "@/db";
-import { departments, equipment, maintenanceSchedules, roles, users, workOrders } from "@/db/schema";
+import {
+  equipment,
+  maintenanceSchedules,
+  roles,
+  users,
+  workOrders,
+} from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser, requireAnyPermission } from "@/lib/session";
-import { and, desc, eq, gte, inArray, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { SystemTabs } from "./system-tabs";
 
@@ -92,10 +98,22 @@ async function getTechnicianWorkloads() {
   const workloadData = await db
     .select({
       assignedToId: workOrders.assignedToId,
-      openCount: sql<number>`cast(count(case when ${workOrders.status} = 'open' then 1 end) as integer)`.as('open_count'),
-      inProgressCount: sql<number>`cast(count(case when ${workOrders.status} = 'in_progress' then 1 end) as integer)`.as('in_progress_count'),
-      criticalCount: sql<number>`cast(count(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 end) as integer)`.as('critical_count'),
-      overdueCount: sql<number>`cast(count(case when ${workOrders.dueBy} < ${now.toISOString()} and ${workOrders.status} in ('open', 'in_progress') then 1 end) as integer)`.as('overdue_count'),
+      openCount:
+        sql<number>`cast(count(case when ${workOrders.status} = 'open' then 1 end) as integer)`.as(
+          "open_count"
+        ),
+      inProgressCount:
+        sql<number>`cast(count(case when ${workOrders.status} = 'in_progress' then 1 end) as integer)`.as(
+          "in_progress_count"
+        ),
+      criticalCount:
+        sql<number>`cast(count(case when ${workOrders.priority} = 'critical' and ${workOrders.status} in ('open', 'in_progress') then 1 end) as integer)`.as(
+          "critical_count"
+        ),
+      overdueCount:
+        sql<number>`cast(count(case when ${workOrders.dueBy} < ${now.toISOString()} and ${workOrders.status} in ('open', 'in_progress') then 1 end) as integer)`.as(
+          "overdue_count"
+        ),
     })
     .from(workOrders)
     .where(
@@ -110,9 +128,7 @@ async function getTechnicianWorkloads() {
     .groupBy(workOrders.assignedToId);
 
   // Create a map of workload by technician ID
-  const workloadMap = new Map(
-    workloadData.map((w) => [w.assignedToId, w])
-  );
+  const workloadMap = new Map(workloadData.map((w) => [w.assignedToId, w]));
 
   // Combine technician info with workload data
   return technicians.map((tech) => {
@@ -146,16 +162,23 @@ export default async function SystemPage() {
     : false;
 
   // Fetch all data in parallel
-  const [usersList, rolesList, equipmentList, departmentsList, usersForSelect, schedulerData, technicianWorkloads] =
-    await Promise.all([
-      getUsers(),
-      getRoles({}),
-      getEquipment(),
-      getDepartments({}),
-      getUsersForSelect(),
-      getSchedulerData(),
-      getTechnicianWorkloads(),
-    ]);
+  const [
+    usersList,
+    rolesList,
+    equipmentList,
+    departmentsList,
+    usersForSelect,
+    schedulerData,
+    technicianWorkloads,
+  ] = await Promise.all([
+    getUsers(),
+    getRoles({}),
+    getEquipment(),
+    getDepartments({}),
+    getUsersForSelect(),
+    getSchedulerData(),
+    getTechnicianWorkloads(),
+  ]);
 
   // Get base URL for QR codes
   const headersList = await headers();

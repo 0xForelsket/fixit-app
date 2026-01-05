@@ -83,7 +83,8 @@ export async function PATCH(
         name: result.data.name,
         type: result.data.type,
         unit: result.data.unit,
-        currentReading: result.data.currentReading?.toString() || existing.currentReading,
+        currentReading:
+          result.data.currentReading?.toString() || existing.currentReading,
         lastReadingDate: readingChanged ? new Date() : existing.lastReadingDate,
       })
       .where(eq(equipmentMeters.id, meterId))

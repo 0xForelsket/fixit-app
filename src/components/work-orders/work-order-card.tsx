@@ -1,13 +1,24 @@
 "use client";
 
-import { assignToMe, quickResolveWorkOrder, startWorkOrder } from "@/actions/workOrders";
+import {
+  assignToMe,
+  quickResolveWorkOrder,
+  startWorkOrder,
+} from "@/actions/workOrders";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Equipment, User, WorkOrder } from "@/db/schema";
 import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import { getPriorityConfig, getStatusConfig } from "@/lib/utils/work-orders";
-import { ArrowRight, CheckCircle, Loader2, Play, Timer, UserCheck } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle,
+  Loader2,
+  Play,
+  Timer,
+  UserCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 
@@ -42,9 +53,11 @@ export function WorkOrderCard({
   const [isPending, startTransition] = useTransition();
   const [actionType, setActionType] = useState<string | null>(null);
 
-  const canAssign = !workOrder.assignedToId || workOrder.assignedToId !== currentUserId;
+  const canAssign =
+    !workOrder.assignedToId || workOrder.assignedToId !== currentUserId;
   const canStart = workOrder.status === "open";
-  const canResolve = workOrder.status !== "resolved" && workOrder.status !== "closed";
+  const canResolve =
+    workOrder.status !== "resolved" && workOrder.status !== "closed";
 
   const handleQuickAction = (
     action: "assign" | "start" | "resolve",

@@ -28,10 +28,13 @@ const DATE_PRESETS: { value: DateRangePreset; label: string }[] = [
   { value: "custom", label: "CUSTOM RANGE" },
 ];
 
-function getPresetDates(preset: DateRangePreset): { startDate: string; endDate: string } {
+function getPresetDates(preset: DateRangePreset): {
+  startDate: string;
+  endDate: string;
+} {
   const now = new Date();
   const today = now.toISOString().split("T")[0];
-  
+
   switch (preset) {
     case "today":
       return { startDate: today, endDate: today };
@@ -58,15 +61,18 @@ function getPresetDates(preset: DateRangePreset): { startDate: string; endDate: 
       const start = new Date(now.getFullYear(), 0, 1);
       return { startDate: start.toISOString().split("T")[0], endDate: today };
     }
-    case "custom":
     default:
       return { startDate: "", endDate: "" };
   }
 }
 
-export function DateRangePicker({ value, onChange, className }: DateRangePickerProps) {
+export function DateRangePicker({
+  value,
+  onChange,
+  className,
+}: DateRangePickerProps) {
   const showCustomInputs = value?.preset === "custom";
-  
+
   const displayValue = useMemo(() => {
     if (!value?.preset) return "all";
     return value.preset;
@@ -77,7 +83,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
       onChange(undefined);
       return;
     }
-    
+
     const presetValue = preset as DateRangePreset;
     if (presetValue === "custom") {
       onChange({
@@ -137,7 +143,7 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
             ))}
           </SelectContent>
         </Select>
-        
+
         {value?.preset && (
           <Button
             variant="ghost"
@@ -164,7 +170,9 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
               className="h-9 rounded-lg border-2 border-border/50 bg-card/80 px-3 text-[10px] font-bold uppercase tracking-wider transition-all focus-visible:border-primary/50 focus-visible:bg-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/5"
             />
           </div>
-          <span className="text-[10px] font-black text-muted-foreground/40">—</span>
+          <span className="text-[10px] font-black text-muted-foreground/40">
+            —
+          </span>
           <div className="relative group/date">
             <span className="absolute -top-2 left-2 px-1 bg-card text-[8px] font-black text-muted-foreground/60 tracking-tighter transition-colors group-focus-within/date:text-primary">
               TO
@@ -185,7 +193,10 @@ export function DateRangePicker({ value, onChange, className }: DateRangePickerP
 /**
  * Compact version for widget-level date range selection
  */
-export function WidgetDateRangePicker({ value, onChange }: DateRangePickerProps) {
+export function WidgetDateRangePicker({
+  value,
+  onChange,
+}: DateRangePickerProps) {
   const displayValue = useMemo(() => {
     if (!value?.preset) return "all";
     return value.preset;
@@ -196,7 +207,7 @@ export function WidgetDateRangePicker({ value, onChange }: DateRangePickerProps)
       onChange(undefined);
       return;
     }
-    
+
     const presetValue = preset as DateRangePreset;
     const dates = getPresetDates(presetValue);
     onChange({
@@ -215,7 +226,7 @@ export function WidgetDateRangePicker({ value, onChange }: DateRangePickerProps)
         <SelectItem value="all" className="text-[10px] font-bold uppercase">
           ALL TIME
         </SelectItem>
-        {DATE_PRESETS.filter(p => p.value !== "custom").map((preset) => (
+        {DATE_PRESETS.filter((p) => p.value !== "custom").map((preset) => (
           <SelectItem
             key={preset.value}
             value={preset.value}

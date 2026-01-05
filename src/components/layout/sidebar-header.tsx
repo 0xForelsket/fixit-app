@@ -1,9 +1,9 @@
 "use client";
 
+import { useOnlineStatus } from "@/hooks/use-offline";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, Wrench, X } from "lucide-react";
 import Link from "next/link";
-import { useOnlineStatus } from "@/hooks/use-offline";
 
 interface SidebarHeaderProps {
   isCollapsed?: boolean;
@@ -16,17 +16,19 @@ export function SidebarHeader({
   isCollapsed,
   onToggleCollapse,
   onClose,
-    onNavClick,
-  }: SidebarHeaderProps) {
-    const { isOnline } = useOnlineStatus();
+  onNavClick,
+}: SidebarHeaderProps) {
+  const { isOnline } = useOnlineStatus();
 
-    return (
-      <div
-        className={cn(
-          "flex h-16 items-center border-b border-border transition-all duration-300",
-          isCollapsed ? "justify-center px-0 flex-col gap-2 py-2" : "justify-between px-4"
-        )}
-      >
+  return (
+    <div
+      className={cn(
+        "flex h-16 items-center border-b border-border transition-all duration-300",
+        isCollapsed
+          ? "justify-center px-0 flex-col gap-2 py-2"
+          : "justify-between px-4"
+      )}
+    >
       {!isCollapsed && (
         <Link
           href="/dashboard"

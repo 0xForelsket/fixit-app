@@ -3,7 +3,6 @@
 import {
   DashboardCustomizer,
   useDashboardPreferences,
-  type WidgetId,
 } from "@/components/dashboard/dashboard-customizer";
 import type { ReactNode } from "react";
 
@@ -11,8 +10,11 @@ interface DashboardHeaderActionsProps {
   children: ReactNode;
 }
 
-export function DashboardHeaderActions({ children }: DashboardHeaderActionsProps) {
-  const { preferences, toggleWidget, resetToDefaults } = useDashboardPreferences();
+export function DashboardHeaderActions({
+  children,
+}: DashboardHeaderActionsProps) {
+  const { preferences, toggleWidget, resetToDefaults } =
+    useDashboardPreferences();
 
   return (
     <div className="flex items-center gap-2">
@@ -56,7 +58,9 @@ export function DashboardStats({
   return (
     <div
       className={`grid gap-6 ${
-        showPersonal && showGlobal ? "grid-cols-1 xl:grid-cols-2" : "grid-cols-1"
+        showPersonal && showGlobal
+          ? "grid-cols-1 xl:grid-cols-2"
+          : "grid-cols-1"
       }`}
     >
       {showPersonal && <div>{personalStatsWidget}</div>}

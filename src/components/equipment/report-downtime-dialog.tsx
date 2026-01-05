@@ -69,7 +69,9 @@ interface ReportDowntimeDialogProps {
   equipmentId: string;
 }
 
-export function ReportDowntimeDialog({ equipmentId }: ReportDowntimeDialogProps) {
+export function ReportDowntimeDialog({
+  equipmentId,
+}: ReportDowntimeDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -77,7 +79,9 @@ export function ReportDowntimeDialog({ equipmentId }: ReportDowntimeDialogProps)
 
   // Default start time to now
   const now = new Date();
-  const localISOString = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+  const localISOString = new Date(
+    now.getTime() - now.getTimezoneOffset() * 60000
+  )
     .toISOString()
     .slice(0, 16);
 

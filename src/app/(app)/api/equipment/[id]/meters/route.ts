@@ -27,7 +27,10 @@ export async function GET(
     if (error instanceof Error && error.message === "Unauthorized") {
       return ApiErrors.unauthorized(requestId);
     }
-    apiLogger.error({ requestId, equipmentId, error }, "Get equipment meters error");
+    apiLogger.error(
+      { requestId, equipmentId, error },
+      "Get equipment meters error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }

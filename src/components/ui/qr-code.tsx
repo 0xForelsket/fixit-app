@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 interface QRCodeProps {
   value: string;
@@ -14,12 +14,12 @@ export function QRCode({ value, size = 128, className }: QRCodeProps) {
 
   useEffect(() => {
     let isCancelled = false;
-    
+
     const generateQR = async () => {
       try {
         const QRCodeLib = await import("qrcode");
         if (isCancelled) return;
-        
+
         const svgString = await QRCodeLib.toString(value, {
           type: "svg",
           width: size,
@@ -29,7 +29,7 @@ export function QRCode({ value, size = 128, className }: QRCodeProps) {
             light: "#ffffff00", // Transparent background
           },
         });
-        
+
         if (!isCancelled) {
           setSvg(svgString);
         }
@@ -39,7 +39,7 @@ export function QRCode({ value, size = 128, className }: QRCodeProps) {
     };
 
     generateQR();
-    
+
     return () => {
       isCancelled = true;
     };
@@ -47,16 +47,17 @@ export function QRCode({ value, size = 128, className }: QRCodeProps) {
 
   if (!svg) {
     return (
-      <div 
-        style={{ width: size, height: size }} 
-        className={cn("bg-zinc-100 animate-pulse rounded-lg", className)} 
+      <div
+        style={{ width: size, height: size }}
+        className={cn("bg-zinc-100 animate-pulse rounded-lg", className)}
       />
     );
   }
 
   return (
-    <div 
+    <div
       className={cn("bg-white p-1 rounded-lg inline-block", className)}
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: QR Code SVG generation
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
