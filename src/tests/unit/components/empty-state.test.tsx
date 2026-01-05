@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
 import { AlertCircle, Inbox, Package } from "lucide-react";
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, mock } from "vitest";
 
 // Mock next/link
-mock.module("next/link", () => ({
+vi.vi.fn("next/link", () => ({
   default: ({
     children,
     href,
@@ -104,7 +104,7 @@ describe("EmptyState", () => {
     });
 
     it("renders action button with onClick handler", () => {
-      const handleClick = mock(() => {});
+      const handleClick = vi.fn(() => {});
 
       const { getByRole } = render(
         <EmptyState
@@ -121,7 +121,7 @@ describe("EmptyState", () => {
     });
 
     it("prefers href over onClick when both provided", () => {
-      const handleClick = mock(() => {});
+      const handleClick = vi.fn(() => {});
 
       const { getByRole } = render(
         <EmptyState
@@ -156,7 +156,7 @@ describe("EmptyState", () => {
   });
 
   it("combines title, description, children, and action", () => {
-    const handleClick = mock(() => {});
+    const handleClick = vi.fn(() => {});
 
     const { getByText, getByRole } = render(
       <EmptyState

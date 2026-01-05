@@ -1,7 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { render } from "@testing-library/react";
 import { createRef } from "react";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("Label", () => {
   it("renders children correctly", () => {

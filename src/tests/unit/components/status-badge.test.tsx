@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/components/ui/status-badge";
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("StatusBadge", () => {
   describe("Work Order Statuses", () => {

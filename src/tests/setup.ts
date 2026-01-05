@@ -7,7 +7,7 @@ GlobalRegistrator.register();
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
 import type { SessionUser } from "@/lib/session";
-import { afterEach, beforeEach, expect, mock } from "bun:test";
+import { afterEach, beforeEach, expect, vi } from "vitest";
 
 expect.extend(matchers);
 
@@ -61,27 +61,27 @@ export const mockTechUser: SessionUser = createMockUser({
 });
 
 // Mock next/navigation
-mock.module("next/navigation", () => ({
-  redirect: mock(),
-  usePathname: mock(() => "/"),
-  useRouter: mock(() => ({
-    push: mock(),
-    replace: mock(),
-    back: mock(),
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(),
+  usePathname: vi.fn(() => "/"),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
   })),
 }));
 
 // Mock next/headers
-mock.module("next/headers", () => ({
-  cookies: mock(() => ({
-    get: mock(),
-    set: mock(),
-    delete: mock(),
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(() => ({
+    get: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
   })),
 }));
 
 // Mock next/cache
-mock.module("next/cache", () => ({
-  revalidatePath: mock(),
-  revalidateTag: mock(),
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
 }));

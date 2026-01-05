@@ -1,28 +1,28 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindFirst = mock();
-const mockUpdateSet = mock();
-const mockUpdateWhere = mock();
-const mockUpdate = mock(() => ({
+const mockFindFirst = vi.fn();
+const mockUpdateSet = vi.fn();
+const mockUpdateWhere = vi.fn();
+const mockUpdate = vi.fn(() => ({
   set: mockUpdateSet.mockReturnValue({
     where: mockUpdateWhere,
   }),
 }));
 
-const mockGetCurrentUser = mock();
-const mockRequireCsrf = mock().mockResolvedValue(true);
+const mockGetCurrentUser = vi.fn();
+const mockRequireCsrf = vi.fn().mockResolvedValue(true);
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       notifications: {
@@ -33,12 +33,12 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));

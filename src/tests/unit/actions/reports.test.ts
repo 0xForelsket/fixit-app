@@ -3,7 +3,7 @@ import { saveReportTemplate, getReportTemplate } from "@/actions/reports";
 import { db } from "@/db";
 
 // Mock the DB and schema
-vi.mock("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     insert: vi.fn(() => ({
       values: vi.fn(),
@@ -27,17 +27,17 @@ vi.mock("@/db", () => ({
   },
 }));
 
-vi.mock("next/cache", () => ({
+vi.vi.fn("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
 // Mock schema imports - this is tricky with Drizzle but for actions we mostly just need the object refs
-vi.mock("@/db/schema", () => ({
+vi.vi.fn("@/db/schema", () => ({
   reportTemplates: { id: "reportTemplates" },
   reportSchedules: {},
 }));
 
-vi.mock("drizzle-orm", () => ({
+vi.vi.fn("drizzle-orm", () => ({
   eq: vi.fn(),
 }));
 

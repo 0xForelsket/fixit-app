@@ -1,39 +1,39 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockWorkOrdersFindMany = mock();
-const mockEquipmentFindFirst = mock();
-const mockUsersFindMany = mock();
+const mockWorkOrdersFindMany = vi.fn();
+const mockEquipmentFindFirst = vi.fn();
+const mockUsersFindMany = vi.fn();
 
-const mockInsertValues = mock();
-const mockInsertReturning = mock();
-const mockInsert = mock(() => ({
+const mockInsertValues = vi.fn();
+const mockInsertReturning = vi.fn();
+const mockInsert = vi.fn(() => ({
   values: mockInsertValues.mockReturnValue({
     returning: mockInsertReturning,
   }),
 }));
 
-const mockSelectFrom = mock();
-const mockSelectWhere = mock();
-const mockSelect = mock(() => ({
+const mockSelectFrom = vi.fn();
+const mockSelectWhere = vi.fn();
+const mockSelect = vi.fn(() => ({
   from: mockSelectFrom.mockReturnValue({
     where: mockSelectWhere,
   }),
 }));
 
-const mockRequireAuth = mock();
-const mockRequireCsrf = mock();
-const mockGetCurrentUser = mock();
+const mockRequireAuth = vi.fn();
+const mockRequireCsrf = vi.fn();
+const mockGetCurrentUser = vi.fn();
 
-const mockCheckRateLimit = mock(() => ({
+const mockCheckRateLimit = vi.fn(() => ({
   success: true,
   remaining: 99,
   reset: Date.now() + 60000,
 }));
-const mockGetClientIp = mock(() => "127.0.0.1");
+const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       workOrders: { findMany: mockWorkOrdersFindMany },
@@ -45,14 +45,14 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   requireAuth: mockRequireAuth,
   requireCsrf: mockRequireCsrf,
   getCurrentUser: mockGetCurrentUser,
 }));
 
-mock.module("@/lib/auth", () => ({
-  userHasPermission: mock(() => true),
+vi.vi.fn("@/lib/auth", () => ({
+  userHasPermission: vi.fn(() => true),
   PERMISSIONS: {
     TICKET_VIEW_ALL: "ticket:view_all",
     TICKET_CREATE: "ticket:create",
@@ -60,7 +60,7 @@ mock.module("@/lib/auth", () => ({
   },
 }));
 
-mock.module("@/lib/rate-limit", () => ({
+vi.vi.fn("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -70,13 +70,13 @@ mock.module("@/lib/rate-limit", () => ({
   },
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: {
-    error: mock(),
-    info: mock(),
-    warn: mock(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
   },
-  generateRequestId: mock(() => "test-request-id"),
+  generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
 // Dynamic imports after mock.module

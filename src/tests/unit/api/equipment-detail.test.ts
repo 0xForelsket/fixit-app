@@ -1,48 +1,48 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindFirst = mock();
-const mockInsert = mock(() => ({
-  values: mock(),
+const mockFindFirst = vi.fn();
+const mockInsert = vi.fn(() => ({
+  values: vi.fn(),
 }));
-const mockUpdateSet = mock();
-const mockUpdateWhere = mock();
-const mockUpdateReturning = mock();
-const mockUpdate = mock(() => ({
+const mockUpdateSet = vi.fn();
+const mockUpdateWhere = vi.fn();
+const mockUpdateReturning = vi.fn();
+const mockUpdate = vi.fn(() => ({
   set: mockUpdateSet.mockReturnValue({
     where: mockUpdateWhere.mockReturnValue({
       returning: mockUpdateReturning,
     }),
   }),
 }));
-const mockDeleteWhere = mock();
-const mockDelete = mock(() => ({
+const mockDeleteWhere = vi.fn();
+const mockDelete = vi.fn(() => ({
   where: mockDeleteWhere,
 }));
 
-const mockRequireAuth = mock();
-const mockRequireCsrf = mock();
-const mockRequirePermission = mock();
+const mockRequireAuth = vi.fn();
+const mockRequireCsrf = vi.fn();
+const mockRequirePermission = vi.fn();
 
-const mockCheckRateLimit = mock(() => ({
+const mockCheckRateLimit = vi.fn(() => ({
   success: true,
   remaining: 99,
   reset: Date.now() + 60000,
 }));
-const mockGetClientIp = mock(() => "127.0.0.1");
+const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
-const mockRevalidatePath = mock();
+const mockRevalidatePath = vi.fn();
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -55,13 +55,13 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   requireAuth: mockRequireAuth,
   requireCsrf: mockRequireCsrf,
   requirePermission: mockRequirePermission,
 }));
 
-mock.module("@/lib/rate-limit", () => ({
+vi.vi.fn("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -69,12 +69,12 @@ mock.module("@/lib/rate-limit", () => ({
   },
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-mock.module("next/cache", () => ({
+vi.vi.fn("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 

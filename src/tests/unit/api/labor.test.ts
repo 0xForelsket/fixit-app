@@ -1,30 +1,30 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindMany = mock();
-const mockInsertValues = mock();
-const mockInsertReturning = mock();
-const mockInsert = mock(() => ({
+const mockFindMany = vi.fn();
+const mockInsertValues = vi.fn();
+const mockInsertReturning = vi.fn();
+const mockInsert = vi.fn(() => ({
   values: mockInsertValues.mockReturnValue({
     returning: mockInsertReturning,
   }),
 }));
 
-const mockGetCurrentUser = mock();
-const mockRequireCsrf = mock().mockResolvedValue(true);
+const mockGetCurrentUser = vi.fn();
+const mockRequireCsrf = vi.fn().mockResolvedValue(true);
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
-const mockRevalidatePath = mock();
+const mockRevalidatePath = vi.fn();
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       laborLogs: {
@@ -35,17 +35,17 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-mock.module("next/cache", () => ({
+vi.vi.fn("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 

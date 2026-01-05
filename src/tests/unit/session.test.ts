@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Mock cookie store
-const mockCookieGet = mock();
-const mockCookieSet = mock();
-const mockCookieDelete = mock();
+const mockCookieGet = vi.fn();
+const mockCookieSet = vi.fn();
+const mockCookieDelete = vi.fn();
 const mockCookieStore = {
   get: mockCookieGet,
   set: mockCookieSet,
@@ -11,23 +11,23 @@ const mockCookieStore = {
 };
 
 // Mock functions that will be used
-const mockJwtVerify = mock();
-const mockHasPermission = mock();
-const mockHasAnyPermission = mock();
-const mockIsSessionVersionValid = mock(() => Promise.resolve(true));
+const mockJwtVerify = vi.fn();
+const mockHasPermission = vi.fn();
+const mockHasAnyPermission = vi.fn();
+const mockIsSessionVersionValid = vi.fn(() => Promise.resolve(true));
 
 // Mock next/headers
-mock.module("next/headers", () => ({
-  cookies: mock(() => Promise.resolve(mockCookieStore)),
+vi.vi.fn("next/headers", () => ({
+  cookies: vi.fn(() => Promise.resolve(mockCookieStore)),
 }));
 
 // Mock jose
-mock.module("jose", () => ({
-  SignJWT: mock(() => ({
-    setProtectedHeader: mock(() => ({
-      setIssuedAt: mock(() => ({
-        setExpirationTime: mock(() => ({
-          sign: mock(() => Promise.resolve("mock-jwt-token")),
+vi.vi.fn("jose", () => ({
+  SignJWT: vi.fn(() => ({
+    setProtectedHeader: vi.fn(() => ({
+      setIssuedAt: vi.fn(() => ({
+        setExpirationTime: vi.fn(() => ({
+          sign: vi.fn(() => Promise.resolve("mock-jwt-token")),
         })),
       })),
     })),
@@ -43,14 +43,14 @@ const mockPERMISSIONS = {
   USER_CREATE: "user:create",
 };
 
-mock.module("@/lib/permissions", () => ({
+vi.vi.fn("@/lib/permissions", () => ({
   PERMISSIONS: mockPERMISSIONS,
   hasPermission: mockHasPermission,
   hasAnyPermission: mockHasAnyPermission,
 }));
 
 // Mock session-validator
-mock.module("@/lib/session-validator", () => ({
+vi.vi.fn("@/lib/session-validator", () => ({
   isSessionVersionValid: mockIsSessionVersionValid,
 }));
 

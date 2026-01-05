@@ -1,53 +1,53 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindMany = mock();
-const mockFindFirst = mock();
-const mockInsertValues = mock();
-const mockInsertReturning = mock();
-const mockInsert = mock(() => ({
+const mockFindMany = vi.fn();
+const mockFindFirst = vi.fn();
+const mockInsertValues = vi.fn();
+const mockInsertReturning = vi.fn();
+const mockInsert = vi.fn(() => ({
   values: mockInsertValues.mockReturnValue({
     returning: mockInsertReturning,
   }),
 }));
-const mockUpdateSet = mock();
-const mockUpdateWhere = mock();
-const mockUpdate = mock(() => ({
+const mockUpdateSet = vi.fn();
+const mockUpdateWhere = vi.fn();
+const mockUpdate = vi.fn(() => ({
   set: mockUpdateSet.mockReturnValue({
     where: mockUpdateWhere,
   }),
 }));
-const mockDeleteWhere = mock();
-const mockDelete = mock(() => ({
+const mockDeleteWhere = vi.fn();
+const mockDelete = vi.fn(() => ({
   where: mockDeleteWhere,
 }));
 
-const mockGetCurrentUser = mock();
-const mockRequireCsrf = mock().mockResolvedValue(true);
-const mockCheckRateLimit = mock(() => ({
+const mockGetCurrentUser = vi.fn();
+const mockRequireCsrf = vi.fn().mockResolvedValue(true);
+const mockCheckRateLimit = vi.fn(() => ({
   success: true,
   remaining: 9,
   reset: Date.now() + 60000,
 }));
-const mockGetClientIp = mock(() => "127.0.0.1");
+const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
-const mockGenerateS3Key = mock(() => "work_orders/1/1.pdf");
-const mockGetPresignedUploadUrl = mock(() => "https://s3.example.com/presigned-upload");
-const mockGetPresignedDownloadUrl = mock(() => "https://s3.example.com/presigned-download");
-const mockDeleteObject = mock();
+const mockGenerateS3Key = vi.fn(() => "work_orders/1/1.pdf");
+const mockGetPresignedUploadUrl = vi.fn(() => "https://s3.example.com/presigned-upload");
+const mockGetPresignedDownloadUrl = vi.fn(() => "https://s3.example.com/presigned-download");
+const mockDeleteObject = vi.fn();
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
-const mockUserHasPermission = mock();
+const mockUserHasPermission = vi.fn();
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       attachments: {
@@ -61,12 +61,12 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-mock.module("@/lib/rate-limit", () => ({
+vi.vi.fn("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -74,19 +74,19 @@ mock.module("@/lib/rate-limit", () => ({
   },
 }));
 
-mock.module("@/lib/s3", () => ({
+vi.vi.fn("@/lib/s3", () => ({
   generateS3Key: mockGenerateS3Key,
   getPresignedUploadUrl: mockGetPresignedUploadUrl,
   getPresignedDownloadUrl: mockGetPresignedDownloadUrl,
   deleteObject: mockDeleteObject,
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     ALL: "*",
@@ -443,8 +443,8 @@ describe("POST /api/attachments", () => {
       createdAt: new Date(),
     };
     mockInsert.mockReturnValue({
-      values: mock().mockReturnValue({
-        returning: mock().mockResolvedValue([mockAttachment]),
+      values: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([mockAttachment]),
       }),
     } as any);
 
@@ -727,7 +727,7 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
     });
     mockDelete.mockReturnValue({
-      where: mock(),
+      where: vi.fn(),
     } as any);
 
     const request = new Request("http://localhost/api/attachments/1", {
@@ -779,7 +779,7 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
     });
     mockDelete.mockReturnValue({
-      where: mock(),
+      where: vi.fn(),
     } as any);
 
     const request = new Request("http://localhost/api/attachments/1", {

@@ -1,42 +1,42 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindMany = mock();
-const mockInsertValues = mock();
-const mockInsertReturning = mock();
-const mockInsert = mock(() => ({
+const mockFindMany = vi.fn();
+const mockInsertValues = vi.fn();
+const mockInsertReturning = vi.fn();
+const mockInsert = vi.fn(() => ({
   values: mockInsertValues.mockReturnValue({
     returning: mockInsertReturning,
   }),
 }));
-const mockSelectFrom = mock();
-const mockSelectWhere = mock();
-const mockSelect = mock(() => ({
+const mockSelectFrom = vi.fn();
+const mockSelectWhere = vi.fn();
+const mockSelect = vi.fn(() => ({
   from: mockSelectFrom.mockReturnValue({
     where: mockSelectWhere,
   }),
 }));
 
-const mockRequireAuth = mock();
-const mockRequireCsrf = mock();
-const mockRequirePermission = mock();
+const mockRequireAuth = vi.fn();
+const mockRequireCsrf = vi.fn();
+const mockRequirePermission = vi.fn();
 
-const mockCheckRateLimit = mock(() => ({
+const mockCheckRateLimit = vi.fn(() => ({
   success: true,
   remaining: 99,
   reset: Date.now() + 60000,
 }));
-const mockGetClientIp = mock(() => "127.0.0.1");
+const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -48,13 +48,13 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   requireAuth: mockRequireAuth,
   requireCsrf: mockRequireCsrf,
   requirePermission: mockRequirePermission,
 }));
 
-mock.module("@/lib/rate-limit", () => ({
+vi.vi.fn("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -64,7 +64,7 @@ mock.module("@/lib/rate-limit", () => ({
   },
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));

@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { render, fireEvent } from "@testing-library/react";
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, mock } from "vitest";
 
 describe("Input", () => {
   it("renders as an input element", () => {
@@ -65,7 +65,7 @@ describe("Input", () => {
     });
 
     it("handles onChange events", () => {
-      const handleChange = mock(() => {});
+      const handleChange = vi.fn(() => {});
       const { getByTestId } = render(<Input data-testid="change-test" onInput={handleChange} />);
 
       const input = getByTestId("change-test") as HTMLInputElement;
@@ -75,7 +75,7 @@ describe("Input", () => {
     });
 
     it("handles onFocus events", () => {
-      const handleFocus = mock(() => {});
+      const handleFocus = vi.fn(() => {});
       const { getByRole } = render(<Input onFocus={handleFocus} />);
 
       const input = getByRole("textbox");
@@ -85,7 +85,7 @@ describe("Input", () => {
     });
 
     it("handles onBlur events", () => {
-      const handleBlur = mock(() => {});
+      const handleBlur = vi.fn(() => {});
       const { getByRole } = render(<Input onBlur={handleBlur} />);
 
       const input = getByRole("textbox");

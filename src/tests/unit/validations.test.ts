@@ -11,7 +11,7 @@ import {
   meterReadingSchema,
   meterSchema,
 } from "@/lib/validations/equipment";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("loginSchema", () => {
   it("should validate correct login credentials", () => {

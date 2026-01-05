@@ -1,6 +1,6 @@
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "vitest";
 
 // Component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
@@ -13,7 +13,7 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 // Suppress console.error for expected error boundary logs
 const originalError = console.error;
 beforeEach(() => {
-  console.error = mock(() => {});
+  console.error = vi.fn(() => {});
 });
 
 afterEach(() => {

@@ -1,27 +1,27 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindFirst = mock();
-const mockDeleteWhere = mock();
-const mockDeleteReturning = mock();
-const mockDelete = mock(() => ({
+const mockFindFirst = vi.fn();
+const mockDeleteWhere = vi.fn();
+const mockDeleteReturning = vi.fn();
+const mockDelete = vi.fn(() => ({
   where: mockDeleteWhere.mockReturnValue({
     returning: mockDeleteReturning.mockResolvedValue([]),
   }),
 }));
 
-const mockGetCurrentUser = mock();
+const mockGetCurrentUser = vi.fn();
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       laborLogs: {
@@ -32,11 +32,11 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));

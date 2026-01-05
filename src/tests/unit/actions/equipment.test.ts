@@ -4,25 +4,25 @@ import {
   updateEquipment,
 } from "@/actions/equipment";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
-const mockFindFirst = mock();
-const mockInsert = mock(() => ({
-  values: mock(() => ({
-    returning: mock(),
+const mockFindFirst = vi.fn();
+const mockInsert = vi.fn(() => ({
+  values: vi.fn(() => ({
+    returning: vi.fn(),
   })),
 }));
-const mockUpdate = mock(() => ({
-  set: mock(() => ({
-    where: mock(),
+const mockUpdate = vi.fn(() => ({
+  set: vi.fn(() => ({
+    where: vi.fn(),
   })),
 }));
-const mockDelete = mock(() => ({
-  where: mock(),
+const mockDelete = vi.fn(() => ({
+  where: vi.fn(),
 }));
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -35,11 +35,11 @@ mock.module("@/db", () => ({
   },
 }));
 
-const mockGetCurrentUser = mock();
+const mockGetCurrentUser = vi.fn();
 
 // Mock auth module explicitly to avoid leakage
-mock.module("@/lib/auth", () => ({
-  userHasPermission: mock((user, permission) => {
+vi.vi.fn("@/lib/auth", () => ({
+  userHasPermission: vi.fn((user, permission) => {
     if (user?.permissions?.includes("*")) return true;
     return user?.permissions?.includes(permission) ?? false;
   }),
@@ -51,20 +51,20 @@ mock.module("@/lib/auth", () => ({
 }));
 
 // Mock session
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-mock.module("@/lib/audit", () => ({
-  logAudit: mock(),
+vi.vi.fn("@/lib/audit", () => ({
+  logAudit: vi.fn(),
 }));
 
 // Re-import after mocking
 import { db } from "@/db";
 // We don't import from @/lib/auth because we mocked it effectively for the action to use.
 // But wait, the action might import PERMISSIONS from the real module if my mock module didn't replace it fully?
-// mock.module("@/lib/auth", ...) replaces the module for everyone importing it via "@/lib/auth".
+// vi.vi.fn("@/lib/auth", ...) replaces the module for everyone importing it via "@/lib/auth".
 
 describe("createEquipment action", () => {
   beforeEach(() => {
@@ -178,8 +178,8 @@ describe("createEquipment action", () => {
     };
 
     mockInsert.mockReturnValue({
-      values: mock(() => ({
-        returning: mock().mockResolvedValue([mockEquipment]),
+      values: vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([mockEquipment]),
       })),
     });
 
@@ -207,8 +207,8 @@ describe("createEquipment action", () => {
     });
 
     mockInsert.mockReturnValue({
-      values: mock(() => ({
-        returning: mock().mockRejectedValue(
+      values: vi.fn(() => ({
+        returning: vi.fn().mockRejectedValue(
           new Error("UNIQUE constraint failed: equipment.code")
         ),
       })),
@@ -313,7 +313,7 @@ describe("updateEquipment action", () => {
     });
 
     mockUpdate.mockReturnValue({
-      set: mock(() => ({ where: mock() })),
+      set: vi.fn(() => ({ where: vi.fn() })),
     });
 
     const formData = new FormData();
@@ -352,11 +352,11 @@ describe("updateEquipment action", () => {
     });
 
     mockInsert.mockReturnValue({
-      values: mock(),
+      values: vi.fn(),
     });
 
     mockUpdate.mockReturnValue({
-      set: mock(() => ({ where: mock() })),
+      set: vi.fn(() => ({ where: vi.fn() })),
     });
 
     const formData = new FormData();
@@ -395,8 +395,8 @@ describe("updateEquipment action", () => {
     });
 
     mockUpdate.mockReturnValue({
-      set: mock(() => ({
-        where: mock()
+      set: vi.fn(() => ({
+        where: vi.fn()
           .mockRejectedValue(
             new Error("UNIQUE constraint failed: equipment.code")
           ),
@@ -517,7 +517,7 @@ describe("deleteEquipment action", () => {
     } as unknown as Awaited<ReturnType<typeof db.query.equipment.findFirst>>);
 
     mockDelete.mockReturnValue({
-      where: mock(),
+      where: vi.fn(),
     });
 
     const result = await deleteEquipment("1");

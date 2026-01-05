@@ -1,14 +1,14 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindFirst = mock();
-const mockFindMany = mock();
-const mockInsert = mock();
-const mockValues = mock();
-const mockReturning = mock(() => ([{ id: "1", displayId: 1 }]));
+const mockFindFirst = vi.fn();
+const mockFindMany = vi.fn();
+const mockInsert = vi.fn();
+const mockValues = vi.fn();
+const mockReturning = vi.fn(() => ([{ id: "1", displayId: 1 }]));
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       users: {
@@ -25,8 +25,8 @@ mock.module("@/db", () => ({
 }));
 
 // Mock SSE module
-mock.module("@/lib/sse", () => ({
-  sendToUser: mock(),
+vi.vi.fn("@/lib/sse", () => ({
+  sendToUser: vi.fn(),
 }));
 
 const {

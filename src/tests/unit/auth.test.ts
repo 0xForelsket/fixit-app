@@ -4,7 +4,7 @@ import {
   isAccountLocked,
   verifyPin,
 } from "@/lib/auth";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("hashPin", () => {
   it("should hash a PIN", async () => {

@@ -1,21 +1,21 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 import { NextRequest } from "next/server";
 
 // Create mocks
-const mockFindMany = mock();
+const mockFindMany = vi.fn();
 
-const mockGetCurrentUser = mock();
+const mockGetCurrentUser = vi.fn();
 
-const mockUserHasPermission = mock();
+const mockUserHasPermission = vi.fn();
 
 const mockApiLogger = {
-  error: mock(),
-  info: mock(),
+  error: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       workOrders: {
@@ -25,18 +25,18 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     REPORTS_EXPORT: "reports:export",
   },
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));

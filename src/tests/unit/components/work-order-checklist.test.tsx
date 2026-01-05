@@ -1,18 +1,18 @@
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockUpdateChecklistItem = mock();
-const mockToast = mock();
+const mockUpdateChecklistItem = vi.fn();
+const mockToast = vi.fn();
 
 // Mock the server action
-mock.module("@/actions/workOrders", () => ({
+vi.vi.fn("@/actions/workOrders", () => ({
   updateChecklistItem: mockUpdateChecklistItem,
 }));
 
 // Mock useToast
-mock.module("@/components/ui/use-toast", () => ({
+vi.vi.fn("@/components/ui/use-toast", () => ({
   useToast: () => ({
     toast: mockToast,
   }),

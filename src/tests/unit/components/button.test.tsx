@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { render } from "@testing-library/react";
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, mock } from "vitest";
 
 describe("Button", () => {
   it("renders with default props", () => {
@@ -17,7 +17,7 @@ describe("Button", () => {
   });
 
   it("handles click events", () => {
-    const handleClick = mock(() => {});
+    const handleClick = vi.fn(() => {});
 
     const { getByRole } = render(<Button onClick={handleClick}>Click me</Button>);
 
@@ -27,7 +27,7 @@ describe("Button", () => {
   });
 
   it("can be disabled", () => {
-    const handleClick = mock(() => {});
+    const handleClick = vi.fn(() => {});
 
     const { getByRole } = render(
       <Button disabled onClick={handleClick}>

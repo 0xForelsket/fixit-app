@@ -1,12 +1,12 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Mock the logger to avoid console noise in tests
-const mockLoggerError = mock();
-const mockLoggerWarn = mock();
-const mockLoggerInfo = mock();
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockLoggerError = vi.fn();
+const mockLoggerWarn = vi.fn();
+const mockLoggerInfo = vi.fn();
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: {
     error: mockLoggerError,
     warn: mockLoggerWarn,

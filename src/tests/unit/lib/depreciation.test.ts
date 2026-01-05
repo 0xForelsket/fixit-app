@@ -4,7 +4,7 @@ import {
   getDepreciationInfo,
   hasCompleteFinancialData,
 } from "@/lib/utils/depreciation";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("calculateDepreciation", () => {
   const baseInfo = {

@@ -1,28 +1,28 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockGetCurrentUser = mock();
-const mockGetPresignedUploadUrl = mock();
+const mockGetCurrentUser = vi.fn();
+const mockGetPresignedUploadUrl = vi.fn();
 
 // Mock session
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock S3
-mock.module("@/lib/s3", () => ({
+vi.vi.fn("@/lib/s3", () => ({
   getPresignedUploadUrl: mockGetPresignedUploadUrl,
 }));
 
 // Mock logger
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: {
-    error: mock(),
-    warn: mock(),
-    info: mock(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
-  generateRequestId: mock(() => "test-request-id"),
+  generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
 const { POST } = await import("@/app/(app)/api/attachments/presigned-url/route");

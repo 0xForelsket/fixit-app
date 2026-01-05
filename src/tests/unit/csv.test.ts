@@ -5,7 +5,7 @@ import {
   parseCSV,
   validateCSVFile,
 } from "@/lib/csv";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("csv utilities", () => {
   describe("parseCSV", () => {

@@ -1,56 +1,56 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockSelectFrom = mock();
-const mockSelectWhere = mock();
-const mockSelect = mock(() => ({
+const mockSelectFrom = vi.fn();
+const mockSelectWhere = vi.fn();
+const mockSelect = vi.fn(() => ({
   from: mockSelectFrom.mockReturnValue({
     where: mockSelectWhere,
   }),
 }));
 
-const mockInsertValues = mock();
-const mockInsertReturning = mock();
-const mockInsert = mock(() => ({
+const mockInsertValues = vi.fn();
+const mockInsertReturning = vi.fn();
+const mockInsert = vi.fn(() => ({
   values: mockInsertValues.mockReturnValue({
     returning: mockInsertReturning,
   }),
 }));
 
-const mockUpdateSet = mock();
-const mockUpdateWhere = mock();
-const mockUpdate = mock(() => ({
+const mockUpdateSet = vi.fn();
+const mockUpdateWhere = vi.fn();
+const mockUpdate = vi.fn(() => ({
   set: mockUpdateSet.mockReturnValue({
     where: mockUpdateWhere,
   }),
 }));
 
-const mockUsersFindMany = mock();
-const mockUsersFindFirst = mock();
-const mockRolesFindFirst = mock();
-const mockEquipmentFindFirst = mock();
+const mockUsersFindMany = vi.fn();
+const mockUsersFindFirst = vi.fn();
+const mockRolesFindFirst = vi.fn();
+const mockEquipmentFindFirst = vi.fn();
 
-const mockTransaction = mock();
+const mockTransaction = vi.fn();
 
-const mockGetCurrentUser = mock();
-const mockRequireCsrf = mock().mockResolvedValue(true);
+const mockGetCurrentUser = vi.fn();
+const mockRequireCsrf = vi.fn().mockResolvedValue(true);
 
 const mockApiLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
 const mockSchedulerLogger = {
-  error: mock(),
-  warn: mock(),
-  info: mock(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
 };
-const mockGenerateRequestId = mock(() => "test-request-id");
+const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
-const mockCreateNotification = mock().mockResolvedValue(true);
+const mockCreateNotification = vi.fn().mockResolvedValue(true);
 
 // Mock modules
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     select: mockSelect,
     insert: mockInsert,
@@ -71,18 +71,18 @@ mock.module("@/db", () => ({
   },
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   schedulerLogger: mockSchedulerLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-mock.module("@/lib/notifications", () => ({
+vi.vi.fn("@/lib/notifications", () => ({
   createNotification: mockCreateNotification,
 }));
 
@@ -292,22 +292,22 @@ describe("POST /api/scheduler/run", () => {
       const tx = {
         query: {
           users: {
-            findMany: mock(() => Promise.resolve([{ id: "1", displayId: 1, assignedRole: { name: "admin" } }])),
+            findMany: vi.fn(() => Promise.resolve([{ id: "1", displayId: 1, assignedRole: { name: "admin" } }])),
           },
         },
-        insert: mock(() => ({
-          values: mock(() => ({
-            returning: mock(() => Promise.resolve([{ id: "1", displayId: 1 }])),
+        insert: vi.fn(() => ({
+          values: vi.fn(() => ({
+            returning: vi.fn(() => Promise.resolve([{ id: "1", displayId: 1 }])),
           })),
         })),
-        select: mock(() => ({
-          from: mock(() => ({
-            where: mock(() => Promise.resolve([])),
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn(() => Promise.resolve([])),
           })),
         })),
-        update: mock(() => ({
-          set: mock(() => ({
-            where: mock(() => Promise.resolve()),
+        update: vi.fn(() => ({
+          set: vi.fn(() => ({
+            where: vi.fn(() => Promise.resolve()),
           })),
         })),
       };

@@ -1,16 +1,16 @@
 // Actions will be imported dynamically after mocks
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
-const mockFindFirstRole = mock();
-const mockFindFirstUser = mock();
-const mockSelect = mock();
-const mockInsert = mock();
-const mockUpdate = mock();
-const mockDelete = mock();
-const mockFrom = mock();
-const mockOrderBy = mock();
-const mockRevalidatePath = mock();
+const mockFindFirstRole = vi.fn();
+const mockFindFirstUser = vi.fn();
+const mockSelect = vi.fn();
+const mockInsert = vi.fn();
+const mockUpdate = vi.fn();
+const mockDelete = vi.fn();
+const mockFrom = vi.fn();
+const mockOrderBy = vi.fn();
+const mockRevalidatePath = vi.fn();
 
 // Mock dependencies of db
 mockSelect.mockReturnValue({
@@ -23,11 +23,11 @@ mockFrom.mockReturnValue({
 
 // Setup mockDelete to prevent crashes if called unexpectedly
 mockDelete.mockReturnValue({
-  where: mock(),
+  where: vi.fn(),
 });
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       roles: {
@@ -44,19 +44,19 @@ mock.module("@/db", () => ({
   },
 }));
 
-const mockRequirePermission = mock();
+const mockRequirePermission = vi.fn();
 
 // Import PERMISSIONS for use in mocks and tests
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
 
 // Mock auth
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   requirePermission: mockRequirePermission,
   PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
 // Mock next/cache
-mock.module("next/cache", () => ({
+vi.vi.fn("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
@@ -88,12 +88,12 @@ describe("roles actions", () => {
     
     // Reset defaults
     mockUpdate.mockReturnValue({
-      set: mock(() => ({
-        where: mock().mockResolvedValue(undefined),
+      set: vi.fn(() => ({
+        where: vi.fn().mockResolvedValue(undefined),
       })),
     });
     mockDelete.mockReturnValue({
-      where: mock().mockResolvedValue(undefined),
+      where: vi.fn().mockResolvedValue(undefined),
     });
   });
 
@@ -145,8 +145,8 @@ describe("roles actions", () => {
     it("should create role successfully", async () => {
       mockFindFirstRole.mockResolvedValue(undefined);
       mockInsert.mockReturnValue({
-        values: mock(() => ({
-          returning: mock().mockResolvedValue([{ id: "5", displayId: 5 }]),
+        values: vi.fn(() => ({
+          returning: vi.fn().mockResolvedValue([{ id: "5", displayId: 5 }]),
         })),
       });
 
@@ -250,8 +250,8 @@ describe("roles actions", () => {
         .mockResolvedValueOnce(undefined); // No duplicate name
 
       mockUpdate.mockReturnValue({
-        set: mock(() => ({
-          where: mock().mockResolvedValue(undefined),
+        set: vi.fn(() => ({
+          where: vi.fn().mockResolvedValue(undefined),
         })),
       });
 
@@ -279,8 +279,8 @@ describe("roles actions", () => {
       });
 
       mockUpdate.mockReturnValue({
-        set: mock(() => ({
-          where: mock().mockResolvedValue(undefined),
+        set: vi.fn(() => ({
+          where: vi.fn().mockResolvedValue(undefined),
         })),
       });
 
@@ -377,7 +377,7 @@ describe("roles actions", () => {
       mockFindFirstUser.mockResolvedValue(undefined);
 
       mockDelete.mockReturnValue({
-        where: mock().mockResolvedValue(undefined),
+        where: vi.fn().mockResolvedValue(undefined),
       });
 
       const result = await deleteRole("5");

@@ -2,22 +2,22 @@
 import { users } from "@/db/schema";
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
-const mockGetCurrentUser = mock();
-const mockRequirePermission = mock();
-const mockHashPin = mock((pin) => Promise.resolve(`hashed_${pin}`));
-const mockRevalidatePath = mock();
+const mockGetCurrentUser = vi.fn();
+const mockRequirePermission = vi.fn();
+const mockHashPin = vi.fn((pin) => Promise.resolve(`hashed_${pin}`));
+const mockRevalidatePath = vi.fn();
 
-const mockFindFirstUser = mock();
-const mockFindFirstRole = mock();
-const mockInsert = mock();
-const mockValues = mock();
-const mockReturning = mock();
-const mockUpdate = mock();
-const mockSet = mock();
-const mockWhere = mock();
-const mockDelete = mock();
+const mockFindFirstUser = vi.fn();
+const mockFindFirstRole = vi.fn();
+const mockInsert = vi.fn();
+const mockValues = vi.fn();
+const mockReturning = vi.fn();
+const mockUpdate = vi.fn();
+const mockSet = vi.fn();
+const mockWhere = vi.fn();
+const mockDelete = vi.fn();
 
 // Chainable mocks
 mockInsert.mockReturnValue({ values: mockValues });
@@ -27,30 +27,30 @@ mockSet.mockReturnValue({ where: mockWhere });
 mockDelete.mockReturnValue({ where: mockWhere }); // Add return for delete
 
 // Mock dependencies
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   requirePermission: mockRequirePermission,
   hashPin: mockHashPin,
-  hasPermission: mock((userPermissions: string[], required: string) => {
+  hasPermission: vi.fn((userPermissions: string[], required: string) => {
     if (userPermissions.includes("*")) return true;
     return userPermissions.includes(required);
   }),
-  userHasPermission: mock((user, permission) => {
+  userHasPermission: vi.fn((user, permission) => {
     if (user?.permissions?.includes("*")) return true;
     return user?.permissions?.includes(permission);
   }),
   PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
-mock.module("next/cache", () => ({
+vi.vi.fn("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       users: {

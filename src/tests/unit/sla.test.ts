@@ -7,7 +7,7 @@ import {
   getUrgencyLevel,
   isOverdue,
 } from "@/lib/sla";
-import { afterEach, beforeEach, describe, expect, it, setSystemTime } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("getSlaHours", () => {
   it("should return 2 hours for critical priority", () => {
@@ -30,11 +30,11 @@ describe("getSlaHours", () => {
 describe("calculateDueBy", () => {
   beforeEach(() => {
     
-    setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    setSystemTime();
+    vi.useRealTimers();
   });
 
   it("should calculate due date for critical priority (2 hours)", () => {
@@ -67,11 +67,11 @@ describe("calculateDueBy", () => {
 describe("isOverdue", () => {
   beforeEach(() => {
     
-    setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    setSystemTime();
+    vi.useRealTimers();
   });
 
   it("should return false for null dueBy", () => {
@@ -98,11 +98,11 @@ describe("isOverdue", () => {
 describe("getTimeRemaining", () => {
   beforeEach(() => {
     
-    setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    setSystemTime();
+    vi.useRealTimers();
   });
 
   it("should return 0 for null dueBy", () => {
@@ -123,11 +123,11 @@ describe("getTimeRemaining", () => {
 describe("formatTimeRemaining", () => {
   beforeEach(() => {
     
-    setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    setSystemTime();
+    vi.useRealTimers();
   });
 
   it("should return 'No deadline' for null", () => {
@@ -158,11 +158,11 @@ describe("formatTimeRemaining", () => {
 describe("getUrgencyLevel", () => {
   beforeEach(() => {
     
-    setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    setSystemTime();
+    vi.useRealTimers();
   });
 
   it("should return 'normal' for null dueBy", () => {
@@ -193,11 +193,11 @@ describe("getUrgencyLevel", () => {
 describe("calculateEscalationTime", () => {
   beforeEach(() => {
     
-    setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
-    setSystemTime();
+    vi.useRealTimers();
   });
 
   it("should calculate escalation at 75% of SLA for critical", () => {

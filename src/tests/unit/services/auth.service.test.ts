@@ -1,17 +1,17 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockFindFirstUser = mock();
-const mockFindFirstRole = mock();
-const mockUpdate = mock();
-const mockVerifyPin = mock();
-const mockCreateSession = mock();
-const mockAuthLoggerInfo = mock();
-const mockAuthLoggerWarn = mock();
-const mockAuthLoggerError = mock();
+const mockFindFirstUser = vi.fn();
+const mockFindFirstRole = vi.fn();
+const mockUpdate = vi.fn();
+const mockVerifyPin = vi.fn();
+const mockCreateSession = vi.fn();
+const mockAuthLoggerInfo = vi.fn();
+const mockAuthLoggerWarn = vi.fn();
+const mockAuthLoggerError = vi.fn();
 
 // Mock dependencies
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       users: {
@@ -22,22 +22,22 @@ mock.module("@/db", () => ({
       },
     },
     update: mockUpdate.mockReturnValue({
-      set: mock().mockReturnValue({
-        where: mock(),
+      set: vi.fn().mockReturnValue({
+        where: vi.fn(),
       }),
     }),
   },
 }));
 
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   verifyPin: mockVerifyPin,
 }));
 
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   createSession: mockCreateSession,
 }));
 
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   authLogger: {
     info: mockAuthLoggerInfo,
     warn: mockAuthLoggerWarn,
@@ -45,8 +45,8 @@ mock.module("@/lib/logger", () => ({
   },
 }));
 
-mock.module("@/lib/permissions", () => ({
-  getLegacyRolePermissions: mock(() => ["work_orders:read"]),
+vi.vi.fn("@/lib/permissions", () => ({
+  getLegacyRolePermissions: vi.fn(() => ["work_orders:read"]),
 }));
 
 const { authenticateUser } = await import("@/lib/services/auth.service");
@@ -95,8 +95,8 @@ describe("Auth Service", () => {
     mockAuthLoggerError.mockClear();
     // Reset the update mock chain
     mockUpdate.mockReturnValue({
-      set: mock().mockReturnValue({
-        where: mock(),
+      set: vi.fn().mockReturnValue({
+        where: vi.fn(),
       }),
     });
   });

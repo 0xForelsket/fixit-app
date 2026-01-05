@@ -1,34 +1,34 @@
 // Actions will be imported dynamically after mocks
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
-const mockGetCurrentUser = mock();
-const mockInsert = mock();
-const mockValues = mock();
-const mockReturning = mock();
+const mockGetCurrentUser = vi.fn();
+const mockInsert = vi.fn();
+const mockValues = vi.fn();
+const mockReturning = vi.fn();
 
 // Chainable mocks
 mockInsert.mockReturnValue({ values: mockValues });
 mockValues.mockReturnValue({ returning: mockReturning });
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     insert: mockInsert,
     // Add dummies to prevent crashes if other tests look for them
     query: {},
-    update: mock(),
-    delete: mock(() => ({ where: mock() })),
+    update: vi.fn(),
+    delete: vi.fn(() => ({ where: vi.fn() })),
   },
 }));
 
 // Mock auth module
-mock.module("@/lib/auth", () => ({
-  hasPermission: mock((userPermissions: string[], required: string) => {
+vi.vi.fn("@/lib/auth", () => ({
+  hasPermission: vi.fn((userPermissions: string[], required: string) => {
     if (userPermissions.includes("*")) return true;
     return userPermissions.includes(required);
   }),
-  userHasPermission: mock((user, permission) => {
+  userHasPermission: vi.fn((user, permission) => {
     if (user?.permissions?.includes("*")) return true;
     return user?.permissions?.includes(permission);
   }),
@@ -36,13 +36,13 @@ mock.module("@/lib/auth", () => ({
 }));
 
 // Mock session
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-mock.module("@/lib/audit", () => ({
-  logAudit: mock(),
+vi.vi.fn("@/lib/audit", () => ({
+  logAudit: vi.fn(),
 }));
 
 const { createAttachment } = await import("@/actions/attachments");

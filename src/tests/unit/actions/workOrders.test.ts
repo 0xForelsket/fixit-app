@@ -1,50 +1,50 @@
 // Actions will be imported dynamically after mocks
 import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
-const mockCreateNotification = mock().mockResolvedValue(true);
+const mockCreateNotification = vi.fn().mockResolvedValue(true);
 
 // Mock the notifications helper
-mock.module("@/lib/notifications", () => ({
+vi.vi.fn("@/lib/notifications", () => ({
   createNotification: mockCreateNotification,
 }));
 
-const mockFindFirstEquipment = mock();
-const mockFindManyUsers = mock();
-const mockFindFirstWorkOrder = mock();
-const mockFindFirstRole = mock();
+const mockFindFirstEquipment = vi.fn();
+const mockFindManyUsers = vi.fn();
+const mockFindFirstWorkOrder = vi.fn();
+const mockFindFirstRole = vi.fn();
 
-const mockInsert = mock(() => ({
-  values: mock(() => ({
-    returning: mock(),
+const mockInsert = vi.fn(() => ({
+  values: vi.fn(() => ({
+    returning: vi.fn(),
   })),
 }));
 
-const mockUpdate = mock(() => ({
-  set: mock(() => ({
-    where: mock(),
+const mockUpdate = vi.fn(() => ({
+  set: vi.fn(() => ({
+    where: vi.fn(),
   })),
 }));
 
-const mockDelete = mock(() => ({
-  where: mock(),
+const mockDelete = vi.fn(() => ({
+  where: vi.fn(),
 }));
 
-const mockTxInsert = mock((table: unknown) => ({
-  values: mock(() => Promise.resolve()),
+const mockTxInsert = vi.fn((table: unknown) => ({
+  values: vi.fn(() => Promise.resolve()),
 }));
 
-const mockTxUpdate = mock((table: unknown) => ({
-  set: mock(() => ({ 
-    where: mock(() => Promise.resolve()) 
+const mockTxUpdate = vi.fn((table: unknown) => ({
+  set: vi.fn(() => ({ 
+    where: vi.fn(() => Promise.resolve()) 
   })),
 }));
 
-const mockTransaction = mock(async (callback: (tx: unknown) => Promise<unknown>) => {
+const mockTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => {
   // Call the callback with a mock transaction object
   const mockTx = {
     insert: mockTxInsert,
-    values: mock(() => ({ returning: mock() })), // Ensure transaction usage matches
+    values: vi.fn(() => ({ returning: vi.fn() })), // Ensure transaction usage matches
     update: mockTxUpdate,
     delete: mockDelete,
     query: {
@@ -58,12 +58,12 @@ const mockTransaction = mock(async (callback: (tx: unknown) => Promise<unknown>)
 });
 
 // Mock auth to prevent leakage
-mock.module("@/lib/auth", () => ({
-  hasPermission: mock((userPermissions: string[], required: string) => {
+vi.vi.fn("@/lib/auth", () => ({
+  hasPermission: vi.fn((userPermissions: string[], required: string) => {
     if (userPermissions.includes("*")) return true;
     return userPermissions.includes(required);
   }),
-  userHasPermission: mock((user, permission) => {
+  userHasPermission: vi.fn((user, permission) => {
     if (user?.permissions?.includes("*")) return true;
     return user?.permissions?.includes(permission);
   }),
@@ -73,7 +73,7 @@ mock.module("@/lib/auth", () => ({
 
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -96,23 +96,23 @@ mock.module("@/db", () => ({
   },
 }));
 
-const mockGetCurrentUser = mock();
+const mockGetCurrentUser = vi.fn();
 
 // Mock session
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-mock.module("@/lib/audit", () => ({
-  logAudit: mock(),
+vi.vi.fn("@/lib/audit", () => ({
+  logAudit: vi.fn(),
 }));
 
 // Mock logger
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   workOrderLogger: {
-    info: mock(),
-    error: mock(),
+    info: vi.fn(),
+    error: vi.fn(),
   },
 }));
 
@@ -210,9 +210,9 @@ describe("createWorkOrder action", () => {
 
     mockTransaction.mockImplementation(async (callback) => {
       const mockTx = {
-        insert: mock(() => ({
-          values: mock(() => ({
-            returning: mock().mockResolvedValue([mockWorkOrder]),
+        insert: vi.fn(() => ({
+          values: vi.fn(() => ({
+            returning: vi.fn().mockResolvedValue([mockWorkOrder]),
           })),
         })),
         query: {
@@ -231,8 +231,8 @@ describe("createWorkOrder action", () => {
     });
 
     mockInsert.mockReturnValue({
-      values: mock(() => ({
-        returning: mock().mockResolvedValue([mockWorkOrder]),
+      values: vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([mockWorkOrder]),
       })),
     });
 
@@ -294,9 +294,9 @@ describe("createWorkOrder action", () => {
       updatedAt: new Date(),
     };
 
-    const mockTxInsert = mock(() => ({
-      values: mock(() => ({
-        returning: mock().mockResolvedValue([mockWorkOrder]),
+    const mockTxInsert = vi.fn(() => ({
+      values: vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([mockWorkOrder]),
       })),
     }));
 
@@ -317,8 +317,8 @@ describe("createWorkOrder action", () => {
 
     // Also verify mockInsert is called if the code falls back to db.insert or if that's what we want to test
     mockInsert.mockImplementation(() => ({
-      values: mock(() => ({
-        returning: mock().mockResolvedValue([mockWorkOrder]),
+      values: vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([mockWorkOrder]),
       })),
     }));
 
@@ -488,11 +488,11 @@ describe("updateWorkOrder action", () => {
     });
 
     mockUpdate.mockReturnValue({
-      set: mock(() => ({ where: mock() })),
+      set: vi.fn(() => ({ where: vi.fn() })),
     });
 
     mockInsert.mockReturnValue({
-      values: mock(),
+      values: vi.fn(),
     });
 
     const formData = new FormData();
@@ -536,11 +536,11 @@ describe("updateWorkOrder action", () => {
     });
 
     mockUpdate.mockReturnValue({
-      set: mock(() => ({ where: mock() })),
+      set: vi.fn(() => ({ where: vi.fn() })),
     });
 
     mockInsert.mockReturnValue({
-      values: mock(),
+      values: vi.fn(),
     });
 
     const formData = new FormData();
@@ -658,13 +658,13 @@ describe("resolveWorkOrder action", () => {
     // Set up transaction mock for resolve - needs update and insert chains
     mockTransaction.mockImplementation(async (callback) => {
       const mockTx = {
-        update: mock(() => ({
-          set: mock(() => ({
-            where: mock(() => Promise.resolve()),
+        update: vi.fn(() => ({
+          set: vi.fn(() => ({
+            where: vi.fn(() => Promise.resolve()),
           })),
         })),
-        insert: mock(() => ({
-          values: mock(() => Promise.resolve()),
+        insert: vi.fn(() => ({
+          values: vi.fn(() => Promise.resolve()),
         })),
       };
       return callback(mockTx as unknown as Parameters<typeof callback>[0]);
@@ -741,7 +741,7 @@ describe("addWorkOrderComment action", () => {
     });
 
     mockInsert.mockReturnValue({
-      values: mock(),
+      values: vi.fn(),
     });
 
     const formData = new FormData();
@@ -766,7 +766,7 @@ describe("addWorkOrderComment action", () => {
 
     let capturedValues: unknown;
     mockInsert.mockReturnValue({
-      values: mock((val) => {
+      values: vi.fn((val) => {
         capturedValues = val;
       }),
     });
@@ -846,11 +846,11 @@ describe("Notification triggers", () => {
       });
 
       mockUpdate.mockReturnValue({
-        set: mock(() => ({ where: mock() })),
+        set: vi.fn(() => ({ where: vi.fn() })),
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -898,11 +898,11 @@ describe("Notification triggers", () => {
       });
 
       mockUpdate.mockReturnValue({
-        set: mock(() => ({ where: mock() })),
+        set: vi.fn(() => ({ where: vi.fn() })),
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -946,11 +946,11 @@ describe("Notification triggers", () => {
       });
 
       mockUpdate.mockReturnValue({
-        set: mock(() => ({ where: mock() })),
+        set: vi.fn(() => ({ where: vi.fn() })),
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -998,11 +998,11 @@ describe("Notification triggers", () => {
       });
 
       mockUpdate.mockReturnValue({
-        set: mock(() => ({ where: mock() })),
+        set: vi.fn(() => ({ where: vi.fn() })),
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -1046,7 +1046,7 @@ describe("Notification triggers", () => {
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -1102,7 +1102,7 @@ describe("Notification triggers", () => {
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -1156,7 +1156,7 @@ describe("Notification triggers", () => {
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();
@@ -1203,7 +1203,7 @@ describe("Notification triggers", () => {
       });
 
       mockInsert.mockReturnValue({
-        values: mock(),
+        values: vi.fn(),
       });
 
       const formData = new FormData();

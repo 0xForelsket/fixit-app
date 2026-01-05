@@ -6,7 +6,7 @@ import {
   SkeletonTicketList,
 } from "@/components/ui/skeleton";
 import { render } from "@testing-library/react";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("Skeleton", () => {
   it("renders correctly", () => {

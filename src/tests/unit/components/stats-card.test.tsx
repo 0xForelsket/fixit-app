@@ -1,7 +1,7 @@
 import { StatsCard } from "@/components/ui/stats-card";
 import { render } from "@testing-library/react";
 import { Activity, AlertTriangle, Clock, Inbox } from "lucide-react";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "vitest";
 
 describe("StatsCard", () => {
   const defaultProps = {

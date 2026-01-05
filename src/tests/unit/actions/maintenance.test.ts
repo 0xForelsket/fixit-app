@@ -4,20 +4,20 @@ import {
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
-const mockGetCurrentUser = mock();
-const mockUserHasPermission = mock();
-const mockRevalidatePath = mock();
-const mockRedirect = mock();
+const mockGetCurrentUser = vi.fn();
+const mockUserHasPermission = vi.fn();
+const mockRevalidatePath = vi.fn();
+const mockRedirect = vi.fn();
 
-const mockInsert = mock();
-const mockValues = mock();
-const mockReturning = mock();
-const mockUpdate = mock();
-const mockSet = mock();
-const mockWhere = mock();
-const mockDelete = mock();
+const mockInsert = vi.fn();
+const mockValues = vi.fn();
+const mockReturning = vi.fn();
+const mockUpdate = vi.fn();
+const mockSet = vi.fn();
+const mockWhere = vi.fn();
+const mockDelete = vi.fn();
 
 // Chainable mocks
 mockInsert.mockReturnValue({ values: mockValues });
@@ -29,11 +29,11 @@ mockWhere.mockReturnValue({ returning: mockReturning });
 mockDelete.mockReturnValue({ where: mockWhere });
 
 // Mock dependencies
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     MAINTENANCE_CREATE: "maintenance:create",
@@ -42,11 +42,11 @@ mock.module("@/lib/auth", () => ({
   },
 }));
 
-mock.module("next/cache", () => ({
+vi.vi.fn("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-mock.module("next/navigation", () => ({
+vi.vi.fn("next/navigation", () => ({
   redirect: mockRedirect,
 }));
 
@@ -59,10 +59,10 @@ const mockTx = {
   where: mockWhere,
   delete: mockDelete,
   // transaction just calls the callback with itself
-  transaction: mock((callback: any) => callback(mockTx)),
+  transaction: vi.fn((callback: any) => callback(mockTx)),
 };
 
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: mockTx,
 }));
 

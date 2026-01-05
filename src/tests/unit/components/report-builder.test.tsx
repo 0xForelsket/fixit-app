@@ -1,27 +1,27 @@
-import { describe, expect, it, mock } from "bun:test";
+import { describe, expect, it, mock } from "vitest";
 import { ReportBuilder } from "@/components/reports/builder/report-builder";
 import type { WidgetConfig } from "@/components/reports/builder/types";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 
 // Mock server actions
-mock.module("@/actions/reports", () => ({
-  saveReportTemplate: mock(),
+vi.vi.fn("@/actions/reports", () => ({
+  saveReportTemplate: vi.fn(),
 }));
 
 // Mock ResizeObserver
-const ResizeObserverMock = mock(() => ({
-  observe: mock(),
-  unobserve: mock(),
-  disconnect: mock(),
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));
 global.ResizeObserver = ResizeObserverMock as any;
 
 // Mock crypto.randomUUID
-const randomUUID = mock(() => `uuid-${Math.random()}`);
+const randomUUID = vi.fn(() => `uuid-${Math.random()}`);
 global.crypto.randomUUID = randomUUID as any;
 
 // Mock ResponsiveContainer from recharts
-mock.module("recharts", () => ({
+vi.vi.fn("recharts", () => ({
   ResponsiveContainer: ({ children }: any) => (
     <div className="recharts-responsive-container">{children}</div>
   ),
@@ -35,15 +35,15 @@ mock.module("recharts", () => ({
 }));
 
 // Mock hooks
-mock.module("next/navigation", () => ({
+vi.vi.fn("next/navigation", () => ({
   useRouter: () => ({
-    refresh: mock(),
+    refresh: vi.fn(),
   }),
 }));
 
-mock.module("@/components/ui/use-toast", () => ({
+vi.vi.fn("@/components/ui/use-toast", () => ({
   useToast: () => ({
-    toast: mock(),
+    toast: vi.fn(),
   }),
 }));
 

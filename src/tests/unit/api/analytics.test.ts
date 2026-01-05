@@ -1,15 +1,15 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockGetCurrentUser = mock();
-const mockUserHasPermission = mock();
-const mockSelect = mock();
-const mockFrom = mock();
-const mockWhere = mock();
+const mockGetCurrentUser = vi.fn();
+const mockUserHasPermission = vi.fn();
+const mockSelect = vi.fn();
+const mockFrom = vi.fn();
+const mockWhere = vi.fn();
 
 // Mock the db module
-mock.module("@/db", () => ({
+vi.vi.fn("@/db", () => ({
   db: {
     select: mockSelect.mockReturnValue({
       from: mockFrom.mockReturnValue({
@@ -20,12 +20,12 @@ mock.module("@/db", () => ({
 }));
 
 // Mock session
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock auth
-mock.module("@/lib/auth", () => ({
+vi.vi.fn("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     ANALYTICS_VIEW: "analytics:view",
@@ -33,13 +33,13 @@ mock.module("@/lib/auth", () => ({
 }));
 
 // Mock logger
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   apiLogger: {
-    error: mock(),
-    warn: mock(),
-    info: mock(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
-  generateRequestId: mock(() => "test-request-id"),
+  generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
 const { GET } = await import("@/app/(app)/api/analytics/kpis/route");

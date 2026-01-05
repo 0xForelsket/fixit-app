@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockSend = mock();
-const mockGetSignedUrl = mock();
+const mockSend = vi.fn();
+const mockGetSignedUrl = vi.fn();
 
 // Mock AWS SDK
-mock.module("@aws-sdk/client-s3", () => ({
+vi.vi.fn("@aws-sdk/client-s3", () => ({
   S3Client: class {
     send = mockSend;
   },
@@ -20,7 +20,7 @@ mock.module("@aws-sdk/client-s3", () => ({
   },
 }));
 
-mock.module("@aws-sdk/s3-request-presigner", () => ({
+vi.vi.fn("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: mockGetSignedUrl,
 }));
 

@@ -1,29 +1,29 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "vitest";
 
 // Create mocks
-const mockGetCurrentUser = mock();
-const mockDeleteSession = mock();
+const mockGetCurrentUser = vi.fn();
+const mockDeleteSession = vi.fn();
 
 // Mock session
-mock.module("@/lib/session", () => ({
+vi.vi.fn("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   deleteSession: mockDeleteSession,
 }));
 
 // Mock logger
-mock.module("@/lib/logger", () => ({
+vi.vi.fn("@/lib/logger", () => ({
   authLogger: {
-    error: mock(),
-    warn: mock(),
-    info: mock(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
   apiLogger: {
-    error: mock(),
-    warn: mock(),
-    info: mock(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
   },
-  generateRequestId: mock(() => "test-request-id"),
+  generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
 const { POST } = await import("@/app/(app)/api/auth/logout/route");
