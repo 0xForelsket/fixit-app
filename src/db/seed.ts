@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { getWorkOrderPath } from "../lib/format-ids";
-import { DEFAULT_ROLE_PERMISSIONS } from "../lib/permissions";
+import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS } from "../lib/permissions";
 import * as schema from "./schema";
 
 const connectionString = process.env.DATABASE_URL || "postgresql://fixit:fixitpassword@127.0.0.1:5433/fixit";
@@ -16,11 +16,6 @@ async function hashPin(pin: string): Promise<string> {
     algorithm: "bcrypt",
     cost: 10,
   });
-}
-
-// Helper to generate random dates
-function randomDate(start: Date, end: Date): Date {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 
 function daysAgo(days: number): Date {
@@ -41,29 +36,39 @@ async function seed() {
   try {
     // Clear existing data
     console.log("Clearing existing data...");
-    await db.delete(schema.equipmentStatusLogs).catch(() => {});
-    await db.delete(schema.notifications).catch(() => {});
-    await db.delete(schema.attachments).catch(() => {});
-    await db.delete(schema.workOrderLogs).catch(() => {});
-    await db.delete(schema.workOrderParts).catch(() => {});
-    await db.delete(schema.laborLogs).catch(() => {});
-    await db.delete(schema.checklistCompletions).catch(() => {});
-    await db.delete(schema.maintenanceChecklists).catch(() => {});
-    await db.delete(schema.maintenanceSchedules).catch(() => {});
-    await db.delete(schema.workOrders).catch(() => {});
-    await db.delete(schema.equipment).catch(() => {});
-    await db.delete(schema.inventoryTransactions).catch(() => {});
-    await db.delete(schema.inventoryLevels).catch(() => {});
-    await db.delete(schema.equipmentBoms).catch(() => {});
-    await db.delete(schema.equipmentModels).catch(() => {});
-    await db.delete(schema.spareParts).catch(() => {});
-    await db.delete(schema.vendors).catch(() => {});
-    await db.delete(schema.equipmentTypes).catch(() => {});
-    await db.delete(schema.equipmentCategories).catch(() => {});
-    await db.delete(schema.locations).catch(() => {});
-    await db.delete(schema.users).catch(() => {});
-    await db.delete(schema.departments).catch(() => {});
-    await db.delete(schema.roles).catch(() => {});
+    await db.delete(schema.auditLogs).catch(() => console.log("      (Skipped auditLogs)"));
+    await db.delete(schema.notifications).catch(() => console.log("      (Skipped notifications)"));
+    await db.delete(schema.equipmentStatusLogs).catch(() => console.log("      (Skipped equipmentStatusLogs)"));
+    await db.delete(schema.workOrderLogs).catch(() => console.log("      (Skipped workOrderLogs)"));
+    await db.delete(schema.workOrderParts).catch(() => console.log("      (Skipped workOrderParts)"));
+    await db.delete(schema.laborLogs).catch(() => console.log("      (Skipped laborLogs)"));
+    await db.delete(schema.checklistCompletions).catch(() => console.log("      (Skipped checklistCompletions)"));
+    await db.delete(schema.meterReadings).catch(() => console.log("      (Skipped meterReadings)"));
+    await db.delete(schema.inventoryTransactions).catch(() => console.log("      (Skipped inventoryTransactions)"));
+    await db.delete(schema.attachments).catch(() => console.log("      (Skipped attachments)"));
+    await db.delete(schema.userFavorites).catch(() => console.log("      (Skipped userFavorites)"));
+    await db.delete(schema.maintenanceChecklists).catch(() => console.log("      (Skipped maintenanceChecklists)"));
+    await db.delete(schema.reportSchedules).catch(() => console.log("      (Skipped reportSchedules)"));
+    await db.delete(schema.reportTemplates).catch(() => console.log("      (Skipped reportTemplates)"));
+    await db.delete(schema.workOrderTemplates).catch(() => console.log("      (Skipped workOrderTemplates)"));
+    await db.delete(schema.workOrders).catch(() => console.log("      (Skipped workOrders)"));
+    await db.delete(schema.maintenanceSchedules).catch(() => console.log("      (Skipped maintenanceSchedules)"));
+    await db.delete(schema.equipmentMeters).catch(() => console.log("      (Skipped equipmentMeters)"));
+    await db.delete(schema.downtimeLogs).catch(() => console.log("      (Skipped downtimeLogs)"));
+    await db.delete(schema.equipmentBoms).catch(() => console.log("      (Skipped equipmentBoms)"));
+    await db.delete(schema.inventoryLevels).catch(() => console.log("      (Skipped inventoryLevels)"));
+    await db.delete(schema.spareParts).catch(() => console.log("      (Skipped spareParts)"));
+    await db.delete(schema.equipment).catch(() => console.log("      (Skipped equipment)"));
+    await db.delete(schema.equipmentModels).catch(() => console.log("      (Skipped equipmentModels)"));
+    await db.delete(schema.equipmentTypes).catch(() => console.log("      (Skipped equipmentTypes)"));
+    await db.delete(schema.equipmentCategories).catch(() => console.log("      (Skipped equipmentCategories)"));
+    await db.delete(schema.vendors).catch(() => console.log("      (Skipped vendors)"));
+    await db.delete(schema.locations).catch(() => console.log("      (Skipped locations)"));
+    await db.delete(schema.users).catch(() => console.log("      (Skipped users)"));
+    await db.update(schema.departments).set({ managerId: null }); // Break manager circularity
+    await db.delete(schema.departments).catch(() => console.log("      (Skipped departments)"));
+    await db.delete(schema.roles).catch(() => console.log("      (Skipped roles)"));
+    await db.delete(schema.systemSettings).catch(() => console.log("      (Skipped systemSettings)"));
 
     // ==================== ROLES ====================
     console.log("Creating roles...");
@@ -73,7 +78,7 @@ async function seed() {
         { name: "operator", description: "Factory floor operators who report issues", permissions: DEFAULT_ROLE_PERMISSIONS.operator, isSystemRole: true },
         { name: "tech", description: "Maintenance technicians who resolve work orders", permissions: DEFAULT_ROLE_PERMISSIONS.tech, isSystemRole: true },
         { name: "admin", description: "System administrators with full access", permissions: DEFAULT_ROLE_PERMISSIONS.admin, isSystemRole: true },
-        { name: "supervisor", description: "Team supervisors with elevated permissions", permissions: [...DEFAULT_ROLE_PERMISSIONS.tech, "reports:view", "users:view"], isSystemRole: false },
+        { name: "supervisor", description: "Team supervisors with elevated permissions", permissions: [...DEFAULT_ROLE_PERMISSIONS.tech, PERMISSIONS.EQUIPMENT_ATTACHMENT_DELETE, PERMISSIONS.REPORTS_VIEW, PERMISSIONS.USER_VIEW], isSystemRole: false },
       ])
       .returning();
     console.log("  ✓ Created 4 roles");

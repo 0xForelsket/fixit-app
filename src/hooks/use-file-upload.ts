@@ -1,3 +1,4 @@
+import { api } from "@/lib/api-client";
 import { useCallback, useState } from "react";
 
 interface UploadOptions {
@@ -33,25 +34,19 @@ export function useFileUpload() {
 
         try {
           // 1. Create attachment record & Get presigned URL
-          const response = await fetch("/api/attachments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filename: file.name,
-              mimeType: file.type,
-              sizeBytes: file.size,
-              entityType: options.entityType,
-              entityId: options.entityId,
-              attachmentType:
-                options.attachmentType ||
-                (file.type.startsWith("image/") ? "photo" : "document"),
-            }),
-          });
+          const json = (await api.post("/api/attachments", {
+            filename: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            entityType: options.entityType,
+            entityId: options.entityId,
+            attachmentType:
+              options.attachmentType ||
+              (file.type.startsWith("image/") ? "photo" : "document"),
+          })) as {
+            data: { attachment: Record<string, unknown>; uploadUrl: string };
+          };
 
-          if (!response.ok) throw new Error("Failed to get upload URL");
-
-          const json = await response.json();
-          console.log("Upload response:", json);
           const { data } = json;
 
           if (!data || !data.attachment) {

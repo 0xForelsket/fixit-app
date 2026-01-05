@@ -20,6 +20,7 @@ export const PERMISSIONS = {
   EQUIPMENT_FINANCIALS_VIEW: "equipment:financials:view",
   EQUIPMENT_METERS_RECORD: "equipment:meters:record",
   EQUIPMENT_DOWNTIME_REPORT: "equipment:downtime:report",
+  EQUIPMENT_ATTACHMENT_DELETE: "equipment:attachment:delete",
 
   LOCATION_VIEW: "location:view",
   LOCATION_CREATE: "location:create",

@@ -66,9 +66,11 @@ export async function DELETE(
       return ApiErrors.notFound("Attachment", requestId);
     }
 
-    const isOwner = attachment.uploadedById === user.id;
-    const canDeleteAny = userHasPermission(user, PERMISSIONS.ALL);
-    if (!isOwner && !canDeleteAny) {
+    const canDelete = userHasPermission(
+      user,
+      PERMISSIONS.EQUIPMENT_ATTACHMENT_DELETE
+    );
+    if (!canDelete) {
       return ApiErrors.forbidden(requestId);
     }
 

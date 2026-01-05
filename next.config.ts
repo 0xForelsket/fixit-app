@@ -62,10 +62,10 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: http://localhost:9000",
+      "img-src 'self' data: blob: http://localhost:9000 http://127.0.0.1:9000",
       "font-src 'self'",
-      "connect-src 'self' http://localhost:9000",
-      "frame-src 'self' http://localhost:9000",
+      "connect-src 'self' http://localhost:9000 http://127.0.0.1:9000",
+      "frame-src 'self' http://localhost:9000 http://127.0.0.1:9000",
     ].join("; "),
   },
 ];

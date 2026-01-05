@@ -16,7 +16,8 @@ export default async function EditEquipmentPage({
 }: {
   params: Promise<{ code: string }>;
 }) {
-  await requirePermission(PERMISSIONS.EQUIPMENT_UPDATE);
+  const user = await requirePermission(PERMISSIONS.EQUIPMENT_UPDATE);
+  const userPermissions = user.permissions;
 
   const { code: equipmentCode } = await params;
 
@@ -123,6 +124,7 @@ export default async function EditEquipmentPage({
             equipmentList={equipmentList}
             meters={metersList}
             attachments={attachmentsWithUrls}
+            userPermissions={userPermissions}
           />
         </Suspense>
       </div>

@@ -72,6 +72,7 @@ interface EquipmentFormProps {
   })[];
   meters?: EquipmentMeter[];
   isNew?: boolean;
+  userPermissions?: string[];
 }
 
 const VALID_TABS = [
@@ -97,6 +98,7 @@ export function EquipmentForm({
   attachments = [],
   meters = [],
   isNew,
+  userPermissions = [],
 }: EquipmentFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -194,13 +196,13 @@ export function EquipmentForm({
         // Specifications
         serialNumber: serialNumber || null,
         manufacturer: manufacturer || null,
-        modelYear: modelYear ? parseInt(modelYear) : null,
+        modelYear: modelYear ? Number.parseInt(modelYear) : null,
         warrantyExpiration: warrantyExpiration || null,
         // Financials
         purchaseDate: purchaseDate || null,
         purchasePrice: purchasePrice || null,
         residualValue: residualValue || null,
-        usefulLifeYears: usefulLifeYears ? parseInt(usefulLifeYears) : null,
+        usefulLifeYears: usefulLifeYears ? Number.parseInt(usefulLifeYears) : null,
       };
 
       const url = isNew ? "/api/equipment" : `/api/equipment/${equipment?.id}`;
@@ -412,6 +414,7 @@ export function EquipmentForm({
             equipmentId={equipment?.id}
             attachments={attachments}
             isNew={isNew}
+            userPermissions={userPermissions}
           />
         </PillTabsContent>
 

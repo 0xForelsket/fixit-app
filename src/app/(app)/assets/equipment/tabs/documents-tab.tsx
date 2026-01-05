@@ -6,6 +6,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import type { Attachment } from "@/db/schema";
 import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api-client";
+
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 
 interface AttachmentWithUrl extends Attachment {
   uploadedBy?: { name: string } | null;
@@ -16,14 +19,21 @@ interface DocumentsTabProps {
   equipmentId?: string;
   attachments: AttachmentWithUrl[];
   isNew?: boolean;
+  userPermissions?: string[];
 }
 
 export function DocumentsTab({
   equipmentId,
   attachments,
   isNew,
+  userPermissions = [],
 }: DocumentsTabProps) {
   const router = useRouter();
+
+  const canDelete = hasPermission(
+    userPermissions,
+    PERMISSIONS.EQUIPMENT_ATTACHMENT_DELETE
+  );
 
   if (isNew) {
     return (
@@ -97,10 +107,18 @@ export function DocumentsTab({
                   sizeBytes: attachment.sizeBytes,
                   url: attachment.url || "",
                 }}
-                onDelete={async () => {
-                  await fetch(`/api/attachments/${attachment.id}`, { method: "DELETE" });
-                  router.refresh();
-                }}
+                onDelete={
+                  canDelete
+                    ? async () => {
+                        try {
+                          await api.delete(`/api/attachments/${attachment.id}`);
+                          router.refresh();
+                        } catch (error) {
+                          console.error("Failed to delete attachment:", error);
+                        }
+                      }
+                    : undefined
+                }
               />
             ))}
           </div>
@@ -125,8 +143,12 @@ export function DocumentsTab({
                   url: attachment.url || "",
                 }}
                 onDelete={async () => {
-                  await fetch(`/api/attachments/${attachment.id}`, { method: "DELETE" });
-                  router.refresh();
+                  try {
+                    await api.delete(`/api/attachments/${attachment.id}`);
+                    router.refresh();
+                  } catch (error) {
+                    console.error("Failed to delete attachment:", error);
+                  }
                 }}
               />
             ))}
