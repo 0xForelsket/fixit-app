@@ -152,7 +152,8 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
   if (!isValid) {
     // Session is invalidated - clear cookies
-    await deleteSession();
+    // Session is invalidated - cannot clear cookies in Server Component (rendering phase)
+    // The middleware or client-side logic should handle the cleanup
     return null;
   }
 
