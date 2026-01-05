@@ -1,6 +1,6 @@
 // Actions will be imported dynamically after mocks
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGetCurrentUser = vi.fn();
 const mockInsert = vi.fn();
@@ -75,7 +75,8 @@ describe("attachments actions", () => {
 
     it("should return error for invalid data", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -99,7 +100,8 @@ describe("attachments actions", () => {
 
     it("should return error when s3Key is missing", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -123,7 +125,8 @@ describe("attachments actions", () => {
 
     it("should create attachment successfully for work order", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -133,7 +136,8 @@ describe("attachments actions", () => {
       });
 
       const mockAttachment = {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         entityType: "work_order" as any,
         entityId: "5",
         type: "photo" as any,
@@ -163,7 +167,8 @@ describe("attachments actions", () => {
 
     it("should create attachment successfully for equipment", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -173,7 +178,8 @@ describe("attachments actions", () => {
       });
 
       const mockAttachment = {
-        id: "2", displayId: 2,
+        id: "2",
+        displayId: 2,
         entityType: "equipment" as any,
         entityId: "10",
         type: "document" as any,
@@ -203,7 +209,8 @@ describe("attachments actions", () => {
 
     it("should handle database errors gracefully", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -231,7 +238,8 @@ describe("attachments actions", () => {
 
     it("should accept different attachment types", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -245,7 +253,8 @@ describe("attachments actions", () => {
       for (const type of attachmentTypes) {
         mockReturning.mockResolvedValue([
           {
-            id: "1", displayId: 1,
+            id: "1",
+            displayId: 1,
             entityType: "work_order",
             entityId: "1",
             type: type as any,

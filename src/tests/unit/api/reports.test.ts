@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
 import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -46,7 +46,8 @@ const { GET } = await import("@/app/(app)/api/reports/export/route");
 
 describe("GET /api/reports/export", () => {
   const mockUser = {
-    id: "1", displayId: 1,
+    id: "1",
+    displayId: 1,
     employeeId: "ADMIN-001",
     name: "Admin User",
     roleName: "admin",
@@ -57,7 +58,8 @@ describe("GET /api/reports/export", () => {
 
   const mockWorkOrders = [
     {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       title: "Fix conveyor belt",
       description: "Belt is slipping",
       type: "breakdown" as const,
@@ -74,7 +76,8 @@ describe("GET /api/reports/export", () => {
       dueBy: null,
       resolutionNotes: null,
       equipment: {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "Conveyor Belt A",
         location: { id: "1", displayId: 1, name: "Assembly Line 1" },
       },
@@ -82,7 +85,8 @@ describe("GET /api/reports/export", () => {
       assignedTo: { id: "2", displayId: 2, name: "Jane Smith" },
     },
     {
-      id: "2", displayId: 2,
+      id: "2",
+      displayId: 2,
       title: "Replace motor, check oil",
       description: 'Description with "quotes" and commas, here',
       type: "maintenance" as const,
@@ -291,9 +295,7 @@ describe("GET /api/reports/export", () => {
   it("handles database errors gracefully", async () => {
     mockGetCurrentUser.mockResolvedValue(mockUser);
     mockUserHasPermission.mockReturnValue(true);
-    mockFindMany.mockRejectedValue(
-      new Error("Database error")
-    );
+    mockFindMany.mockRejectedValue(new Error("Database error"));
 
     const response = await GET(createRequest());
 

@@ -4,14 +4,14 @@ import {
   updateEquipment,
 } from "@/actions/equipment";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { 
-  mockFindFirst, 
-  mockInsert, 
-  mockUpdate, 
-  mockDelete, 
-  mockGetCurrentUser 
+const {
+  mockFindFirst,
+  mockInsert,
+  mockUpdate,
+  mockDelete,
+  mockGetCurrentUser,
 } = vi.hoisted(() => ({
   mockFindFirst: vi.fn(),
   mockInsert: vi.fn(() => ({
@@ -68,7 +68,7 @@ vi.mock("@/lib/audit", () => ({
 }));
 
 // Re-import after mocking
-import { db } from "@/db";
+import type { db } from "@/db";
 // We don't import from @/lib/auth because we mocked it effectively for the action to use.
 // But wait, the action might import PERMISSIONS from the real module if my mock module didn't replace it fully?
 // vi.mock("@/lib/auth", ...) replaces the module for everyone importing it via "@/lib/auth".
@@ -97,7 +97,8 @@ describe("createEquipment action", () => {
 
   it("should reject non-admin users", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -118,7 +119,8 @@ describe("createEquipment action", () => {
 
   it("should reject operator users", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -139,7 +141,8 @@ describe("createEquipment action", () => {
 
   it("should return error for invalid input", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -160,7 +163,8 @@ describe("createEquipment action", () => {
 
   it("should create equipment successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -170,7 +174,8 @@ describe("createEquipment action", () => {
     });
 
     const mockEquipment = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Test Equipment",
       code: "TM-001",
       locationId: "1",
@@ -204,7 +209,8 @@ describe("createEquipment action", () => {
 
   it("should handle duplicate code error", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -215,9 +221,11 @@ describe("createEquipment action", () => {
 
     mockInsert.mockReturnValue({
       values: vi.fn(() => ({
-        returning: vi.fn().mockRejectedValue(
-          new Error("UNIQUE constraint failed: equipment.code")
-        ),
+        returning: vi
+          .fn()
+          .mockRejectedValue(
+            new Error("UNIQUE constraint failed: equipment.code")
+          ),
       })),
     });
 
@@ -255,7 +263,8 @@ describe("updateEquipment action", () => {
 
   it("should reject non-admin users", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -274,7 +283,8 @@ describe("updateEquipment action", () => {
 
   it("should return error for non-existent equipment", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -295,7 +305,8 @@ describe("updateEquipment action", () => {
 
   it("should update equipment successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -305,7 +316,8 @@ describe("updateEquipment action", () => {
     });
 
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Old Name",
       code: "TM-001",
       locationId: "1",
@@ -334,7 +346,8 @@ describe("updateEquipment action", () => {
 
   it("should log status change", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -344,7 +357,8 @@ describe("updateEquipment action", () => {
     });
 
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Equipment",
       code: "TM-001",
       locationId: "1",
@@ -377,7 +391,8 @@ describe("updateEquipment action", () => {
 
   it("should handle duplicate code error on update", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -387,7 +402,8 @@ describe("updateEquipment action", () => {
     });
 
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Equipment",
       code: "TM-001",
       locationId: "1",
@@ -403,7 +419,8 @@ describe("updateEquipment action", () => {
 
     mockUpdate.mockReturnValue({
       set: vi.fn(() => ({
-        where: vi.fn()
+        where: vi
+          .fn()
           .mockRejectedValue(
             new Error("UNIQUE constraint failed: equipment.code")
           ),
@@ -438,7 +455,8 @@ describe("deleteEquipment action", () => {
 
   it("should reject non-admin users", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -454,7 +472,8 @@ describe("deleteEquipment action", () => {
 
   it("should return error for non-existent equipment", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -472,7 +491,8 @@ describe("deleteEquipment action", () => {
 
   it("should prevent deletion of equipment with tickets", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -482,7 +502,8 @@ describe("deleteEquipment action", () => {
     });
 
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Equipment",
       code: "TM-001",
       locationId: "1",
@@ -502,7 +523,8 @@ describe("deleteEquipment action", () => {
 
   it("should delete equipment successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -512,7 +534,8 @@ describe("deleteEquipment action", () => {
     });
 
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Equipment",
       code: "TM-001",
       locationId: "1",

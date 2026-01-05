@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react";
 import { AlertCircle, Inbox, Package } from "lucide-react";
-import { describe, expect, it,vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 // Mock next/link
 vi.mock("next/link", () => ({
@@ -24,9 +24,7 @@ describe("EmptyState", () => {
 
   it("renders title as heading", () => {
     const { getByRole } = render(<EmptyState title="Empty Title" />);
-    expect(
-      getByRole("heading", { name: "Empty Title" })
-    ).toBeDefined();
+    expect(getByRole("heading", { name: "Empty Title" })).toBeDefined();
   });
 
   it("renders description when provided", () => {
@@ -36,9 +34,7 @@ describe("EmptyState", () => {
         description="Try adjusting your search criteria"
       />
     );
-    expect(
-      getByText("Try adjusting your search criteria")
-    ).toBeDefined();
+    expect(getByText("Try adjusting your search criteria")).toBeDefined();
   });
 
   it("does not render description when not provided", () => {
@@ -57,10 +53,14 @@ describe("EmptyState", () => {
   });
 
   it("renders custom icon when provided", () => {
-    const { container: container1 } = render(<EmptyState title="No packages" icon={Package} />);
+    const { container: container1 } = render(
+      <EmptyState title="No packages" icon={Package} />
+    );
     expect(container1.querySelector("svg")).toBeDefined();
-    
-    const { container: container2 } = render(<EmptyState title="Empty" icon={Inbox} />);
+
+    const { container: container2 } = render(
+      <EmptyState title="Empty" icon={Inbox} />
+    );
     expect(container2.querySelector("svg")).toBeDefined();
   });
 
@@ -68,15 +68,23 @@ describe("EmptyState", () => {
     const { container } = render(
       <EmptyState title="Empty" className="custom-empty-state" />
     );
-    expect(container.firstElementChild?.classList.contains("custom-empty-state")).toBe(true);
+    expect(
+      container.firstElementChild?.classList.contains("custom-empty-state")
+    ).toBe(true);
   });
 
   it("has default styling classes", () => {
     const { container } = render(<EmptyState title="Empty" />);
     expect(container.firstElementChild?.classList.contains("flex")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("flex-col")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("items-center")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("justify-center")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("flex-col")).toBe(
+      true
+    );
+    expect(
+      container.firstElementChild?.classList.contains("items-center")
+    ).toBe(true);
+    expect(
+      container.firstElementChild?.classList.contains("justify-center")
+    ).toBe(true);
   });
 
   it("renders children when provided", () => {
@@ -85,9 +93,7 @@ describe("EmptyState", () => {
         <button type="button">Custom action</button>
       </EmptyState>
     );
-    expect(
-      getByRole("button", { name: "Custom action" })
-    ).toBeDefined();
+    expect(getByRole("button", { name: "Custom action" })).toBeDefined();
   });
 
   describe("action prop", () => {
@@ -173,8 +179,6 @@ describe("EmptyState", () => {
       getByText("Get started by creating your first work order")
     ).toBeDefined();
     expect(getByText("Additional help text")).toBeDefined();
-    expect(
-      getByRole("button", { name: "Create Work Order" })
-    ).toBeDefined();
+    expect(getByRole("button", { name: "Create Work Order" })).toBeDefined();
   });
 });

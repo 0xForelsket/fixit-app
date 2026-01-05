@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockGetCurrentUser = vi.fn();
@@ -25,7 +25,9 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
-const { POST } = await import("@/app/(app)/api/attachments/presigned-url/route");
+const { POST } = await import(
+  "@/app/(app)/api/attachments/presigned-url/route"
+);
 
 describe("POST /api/attachments/presigned-url", () => {
   beforeEach(() => {
@@ -57,7 +59,8 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("returns 400 when missing required fields", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -87,7 +90,8 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("returns presigned URL and s3Key on success", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -125,7 +129,8 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("generates correct s3Key format for different entity types", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -161,7 +166,8 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("handles S3 errors gracefully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -197,7 +203,8 @@ describe("POST /api/attachments/presigned-url", () => {
 
   it("preserves file extension from filename", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",

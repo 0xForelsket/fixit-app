@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
@@ -77,7 +77,8 @@ describe("GET /api/labor/[id]", () => {
 
   it("returns 400 for invalid labor log ID", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -96,7 +97,8 @@ describe("GET /api/labor/[id]", () => {
 
   it("returns 404 when labor log not found", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -116,7 +118,8 @@ describe("GET /api/labor/[id]", () => {
 
   it("returns labor log with related data", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -126,7 +129,8 @@ describe("GET /api/labor/[id]", () => {
     });
 
     const mockLaborLog = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       userId: "1",
       workOrderId: "1",
       startTime: new Date(),
@@ -171,7 +175,8 @@ describe("DELETE /api/labor/[id]", () => {
 
   it("returns 400 for invalid labor log ID", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -192,7 +197,8 @@ describe("DELETE /api/labor/[id]", () => {
 
   it("returns 404 when labor log not found", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -214,7 +220,8 @@ describe("DELETE /api/labor/[id]", () => {
 
   it("deletes labor log successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",

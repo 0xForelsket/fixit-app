@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockGetCurrentUser = vi.fn();
@@ -70,7 +70,8 @@ describe("GET /api/analytics/kpis", () => {
 
   it("returns 401 when lacking analytics permission", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -87,7 +88,8 @@ describe("GET /api/analytics/kpis", () => {
 
   it("requires analytics permission", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -108,7 +110,8 @@ describe("GET /api/analytics/kpis", () => {
 
   it("calls userHasPermission with correct permission", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -125,7 +128,8 @@ describe("GET /api/analytics/kpis", () => {
 
   it("handles database errors gracefully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",

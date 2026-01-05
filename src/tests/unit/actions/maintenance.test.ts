@@ -4,7 +4,7 @@ import {
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockGetCurrentUser,
@@ -89,13 +89,10 @@ vi.mock("@/db", () => ({
   db: mockTx,
 }));
 
-// Import after mocking
-import { userHasPermission } from "@/lib/auth";
-import { getCurrentUser } from "@/lib/session";
-
 describe("Maintenance Actions", () => {
   const mockUser = {
-    id: "1", displayId: 1,
+    id: "1",
+    displayId: 1,
     name: "Tech User",
     employeeId: "TECH-001",
     roleName: "tech",

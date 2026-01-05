@@ -42,7 +42,9 @@ describe("StatusBadge", () => {
     });
 
     it("renders critical priority with animation class", () => {
-      const { container, getByText } = render(<StatusBadge status="critical" />);
+      const { container, getByText } = render(
+        <StatusBadge status="critical" />
+      );
       expect(getByText("Critical")).toBeDefined();
       // Critical should have animation
       expect(container.querySelector(".animate-pulse")).toBeDefined();
@@ -101,7 +103,9 @@ describe("StatusBadge", () => {
       const { container } = render(
         <StatusBadge status="open" className="custom-class" />
       );
-      expect(container.firstElementChild?.classList.contains("custom-class")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("custom-class")
+      ).toBe(true);
     });
 
     it("shows icon when showIcon is true", () => {

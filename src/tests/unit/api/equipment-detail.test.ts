@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
@@ -79,7 +79,9 @@ vi.mock("next/cache", () => ({
 }));
 
 // Dynamic imports after mock.module
-const { DELETE, GET, PATCH } = await import("@/app/(app)/api/equipment/[id]/route");
+const { DELETE, GET, PATCH } = await import(
+  "@/app/(app)/api/equipment/[id]/route"
+);
 
 describe("GET /api/equipment/[id]", () => {
   beforeEach(() => {
@@ -109,7 +111,8 @@ describe("GET /api/equipment/[id]", () => {
 
   it("returns 404 when equipment not found", async () => {
     mockRequireAuth.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -129,7 +132,8 @@ describe("GET /api/equipment/[id]", () => {
 
   it("returns equipment when found", async () => {
     mockRequireAuth.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -139,7 +143,8 @@ describe("GET /api/equipment/[id]", () => {
     });
 
     const mockEquipment = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Machine A",
       code: "MA-001",
       status: "operational" as const,
@@ -181,7 +186,7 @@ describe("PATCH /api/equipment/[id]", () => {
     mockUpdateSet.mockClear();
     mockUpdateWhere.mockClear();
     mockUpdateReturning.mockClear();
-    
+
     // Reset mock chains
     mockUpdate.mockReturnValue({
       set: mockUpdateSet.mockReturnValue({
@@ -260,7 +265,8 @@ describe("PATCH /api/equipment/[id]", () => {
     });
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -290,7 +296,8 @@ describe("PATCH /api/equipment/[id]", () => {
     });
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -300,7 +307,8 @@ describe("PATCH /api/equipment/[id]", () => {
     });
 
     const existingEquipment = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Old Name",
       code: "MA-001",
       status: "operational" as const,
@@ -313,12 +321,11 @@ describe("PATCH /api/equipment/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    mockFindFirst.mockResolvedValue(
-      existingEquipment
-    );
+    mockFindFirst.mockResolvedValue(existingEquipment);
 
     const updatedEquipment = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "New Name",
       code: "MA-001",
       status: "operational" as const,
@@ -355,7 +362,8 @@ describe("PATCH /api/equipment/[id]", () => {
     });
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -384,7 +392,7 @@ describe("DELETE /api/equipment/[id]", () => {
     mockFindFirst.mockClear();
     mockDelete.mockClear();
     mockDeleteWhere.mockClear();
-    
+
     mockDelete.mockReturnValue({
       where: mockDeleteWhere,
     });
@@ -420,7 +428,8 @@ describe("DELETE /api/equipment/[id]", () => {
   it("returns 404 when equipment not found", async () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -443,7 +452,8 @@ describe("DELETE /api/equipment/[id]", () => {
   it("returns 400 when equipment has work orders", async () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -452,7 +462,8 @@ describe("DELETE /api/equipment/[id]", () => {
       permissions: ["*"],
     });
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Machine",
       code: "MA-001",
       status: "operational" as const,
@@ -483,7 +494,8 @@ describe("DELETE /api/equipment/[id]", () => {
   it("returns 400 when equipment has children", async () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -492,7 +504,8 @@ describe("DELETE /api/equipment/[id]", () => {
       permissions: ["*"],
     });
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Machine",
       code: "MA-001",
       status: "operational" as const,
@@ -523,7 +536,8 @@ describe("DELETE /api/equipment/[id]", () => {
   it("deletes equipment successfully", async () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -532,7 +546,8 @@ describe("DELETE /api/equipment/[id]", () => {
       permissions: ["*"],
     });
     mockFindFirst.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Machine",
       code: "MA-001",
       status: "operational" as const,

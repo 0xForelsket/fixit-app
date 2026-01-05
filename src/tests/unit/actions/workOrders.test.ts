@@ -1,6 +1,9 @@
 // Actions will be imported dynamically after mocks
-import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import {
+  DEFAULT_ROLE_PERMISSIONS,
+  PERMISSIONS as PERMISSIONS_SOURCE,
+} from "@/lib/permissions";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockCreateNotification = vi.fn().mockResolvedValue(true);
 
@@ -35,27 +38,29 @@ const mockTxInsert = vi.fn((table: unknown) => ({
 }));
 
 const mockTxUpdate = vi.fn((table: unknown) => ({
-  set: vi.fn(() => ({ 
-    where: vi.fn(() => Promise.resolve()) 
+  set: vi.fn(() => ({
+    where: vi.fn(() => Promise.resolve()),
   })),
 }));
 
-const mockTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => {
-  // Call the callback with a mock transaction object
-  const mockTx = {
-    insert: mockTxInsert,
-    values: vi.fn(() => ({ returning: vi.fn() })), // Ensure transaction usage matches
-    update: mockTxUpdate,
-    delete: mockDelete,
-    query: {
-      equipment: { findFirst: mockFindFirstEquipment },
-      users: { findMany: mockFindManyUsers },
-      workOrders: { findFirst: mockFindFirstWorkOrder },
-      roles: { findFirst: mockFindFirstRole },
-    }
-  };
-  return await callback(mockTx);
-});
+const mockTransaction = vi.fn(
+  async (callback: (tx: unknown) => Promise<unknown>) => {
+    // Call the callback with a mock transaction object
+    const mockTx = {
+      insert: mockTxInsert,
+      values: vi.fn(() => ({ returning: vi.fn() })), // Ensure transaction usage matches
+      update: mockTxUpdate,
+      delete: mockDelete,
+      query: {
+        equipment: { findFirst: mockFindFirstEquipment },
+        users: { findMany: mockFindManyUsers },
+        workOrders: { findFirst: mockFindFirstWorkOrder },
+        roles: { findFirst: mockFindFirstRole },
+      },
+    };
+    return await callback(mockTx);
+  }
+);
 
 // Mock auth to prevent leakage
 vi.mock("@/lib/auth", () => ({
@@ -69,8 +74,6 @@ vi.mock("@/lib/auth", () => ({
   }),
   PERMISSIONS: PERMISSIONS_SOURCE,
 }));
-
-
 
 // Mock the db module
 vi.mock("@/db", () => ({
@@ -124,9 +127,6 @@ const {
   updateWorkOrder,
 } = await import("@/actions/workOrders");
 
-// Also import db after mocks (even if not strictly needed given we mock the module)
-import { db } from "@/db";
-
 describe("createWorkOrder action", () => {
   beforeEach(() => {
     mockCreateNotification.mockClear();
@@ -159,7 +159,8 @@ describe("createWorkOrder action", () => {
 
   it("should return error for invalid input", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -184,7 +185,8 @@ describe("createWorkOrder action", () => {
 
   it("should create work order successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -194,7 +196,8 @@ describe("createWorkOrder action", () => {
     });
 
     const mockWorkOrder = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       type: "breakdown",
       title: "Equipment stopped",
@@ -216,15 +219,15 @@ describe("createWorkOrder action", () => {
           })),
         })),
         query: {
-         roles: {
-           findFirst: mockFindFirstRole // Ensure roles.findFirst is available in transaction
-         },
-         equipment: {
-           findFirst: mockFindFirstEquipment
-         }
-        }
+          roles: {
+            findFirst: mockFindFirstRole, // Ensure roles.findFirst is available in transaction
+          },
+          equipment: {
+            findFirst: mockFindFirstEquipment,
+          },
+        },
       };
-      // We need to ensure db.insert inside transaction behaves correctly. 
+      // We need to ensure db.insert inside transaction behaves correctly.
       // The original code mocked db.insert globally. The action likely uses tx.insert or db.insert.
       // If it uses tx.insert, our mockTx covers it.
       return callback(mockTx as unknown as Parameters<typeof callback>[0]);
@@ -237,7 +240,8 @@ describe("createWorkOrder action", () => {
     });
 
     mockFindFirstEquipment.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Test Equipment",
       code: "TM-001",
       locationId: "1",
@@ -270,7 +274,8 @@ describe("createWorkOrder action", () => {
 
   it("should notify techs for critical priority work orders", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -280,7 +285,8 @@ describe("createWorkOrder action", () => {
     });
 
     const mockWorkOrder = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       type: "breakdown",
       title: "Critical issue",
@@ -301,17 +307,17 @@ describe("createWorkOrder action", () => {
     }));
 
     mockTransaction.mockImplementation(async (callback) => {
-        const mockTx = {
-            insert: mockTxInsert,
-            query: {
-                roles: {
-                    findFirst: mockFindFirstRole
-                },
-                users: {
-                    findMany: mockFindManyUsers
-                }
-            }
-        };
+      const mockTx = {
+        insert: mockTxInsert,
+        query: {
+          roles: {
+            findFirst: mockFindFirstRole,
+          },
+          users: {
+            findMany: mockFindManyUsers,
+          },
+        },
+      };
       return callback(mockTx as unknown as Parameters<typeof callback>[0]);
     });
 
@@ -323,7 +329,8 @@ describe("createWorkOrder action", () => {
     }));
 
     mockFindFirstEquipment.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Test Equipment",
       code: "TM-001",
       locationId: "1",
@@ -339,7 +346,8 @@ describe("createWorkOrder action", () => {
 
     // Mock the tech role lookup - this is required for notification logic
     mockFindFirstRole.mockResolvedValue({
-      id: "2", displayId: 2,
+      id: "2",
+      displayId: 2,
       name: "tech",
       description: "Maintenance technician",
       permissions: ["ticket:view", "ticket:update"],
@@ -350,7 +358,8 @@ describe("createWorkOrder action", () => {
 
     mockFindManyUsers.mockResolvedValue([
       {
-        id: "2", displayId: 2,
+        id: "2",
+        displayId: 2,
         employeeId: "TECH-001",
         name: "Tech User",
         pin: "hashed",
@@ -378,7 +387,7 @@ describe("createWorkOrder action", () => {
     await createWorkOrder(undefined, formData);
 
     // Should have called insert for notifications
-    expect(mockTxInsert).toHaveBeenCalled(); 
+    expect(mockTxInsert).toHaveBeenCalled();
   });
 });
 
@@ -411,7 +420,8 @@ describe("updateWorkOrder action", () => {
 
   it("should reject updates from operators", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -435,7 +445,8 @@ describe("updateWorkOrder action", () => {
 
   it("should return error for non-existent work order", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -459,7 +470,8 @@ describe("updateWorkOrder action", () => {
 
   it("should update work order status successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -469,7 +481,8 @@ describe("updateWorkOrder action", () => {
     });
 
     mockFindFirstWorkOrder.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       type: "breakdown",
       title: "Test",
@@ -507,7 +520,8 @@ describe("updateWorkOrder action", () => {
 
   it("should allow admin to update work orders", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -517,7 +531,8 @@ describe("updateWorkOrder action", () => {
     });
 
     mockFindFirstWorkOrder.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       type: "breakdown",
       title: "Test",
@@ -581,7 +596,8 @@ describe("resolveWorkOrder action", () => {
 
   it("should reject resolution from operators", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -605,7 +621,8 @@ describe("resolveWorkOrder action", () => {
 
   it("should require resolution notes", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -627,7 +644,8 @@ describe("resolveWorkOrder action", () => {
 
   it("should resolve work order successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -637,7 +655,8 @@ describe("resolveWorkOrder action", () => {
     });
 
     mockFindFirstWorkOrder.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       type: "breakdown",
       title: "Test",
@@ -709,7 +728,8 @@ describe("addWorkOrderComment action", () => {
 
   it("should require comment content", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -731,7 +751,8 @@ describe("addWorkOrderComment action", () => {
 
   it("should add comment successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -755,7 +776,8 @@ describe("addWorkOrderComment action", () => {
 
   it("should trim comment whitespace", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "OP-001",
       name: "Operator",
       roleName: "operator",
@@ -772,7 +794,8 @@ describe("addWorkOrderComment action", () => {
     });
 
     mockFindFirstWorkOrder.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       type: "breakdown",
       title: "Test",
@@ -817,7 +840,8 @@ describe("Notification triggers", () => {
   describe("updateWorkOrder notifications", () => {
     it("should notify reporter on status change", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1, // Tech user
+        id: "1",
+        displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -827,7 +851,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -869,7 +894,8 @@ describe("Notification triggers", () => {
 
     it("should not notify reporter if they made the change", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1, // Tech user
+        id: "1",
+        displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -879,7 +905,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -917,7 +944,8 @@ describe("Notification triggers", () => {
   describe("resolveWorkOrder notifications", () => {
     it("should notify reporter when work order is resolved", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1, // Tech user
+        id: "1",
+        displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -927,7 +955,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -969,7 +998,8 @@ describe("Notification triggers", () => {
 
     it("should not notify reporter if they resolved it themselves", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1, // Tech user
+        id: "1",
+        displayId: 1, // Tech user
         employeeId: "TECH-001",
         name: "Tech",
         roleName: "tech",
@@ -979,7 +1009,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -1017,7 +1048,8 @@ describe("Notification triggers", () => {
   describe("addWorkOrderComment notifications", () => {
     it("should notify reporter and assignee when comment is added", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "3", displayId: 3, // Commenter
+        id: "3",
+        displayId: 3, // Commenter
         employeeId: "OTHER-001",
         name: "Other User",
         roleName: "operator",
@@ -1027,7 +1059,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -1073,7 +1106,8 @@ describe("Notification triggers", () => {
 
     it("should not notify commenter if they are reporter or assignee", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "1", displayId: 1, // Commenter (also reporter)
+        id: "1",
+        displayId: 1, // Commenter (also reporter)
         employeeId: "OP-001",
         name: "Operator",
         roleName: "operator",
@@ -1083,7 +1117,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -1127,7 +1162,8 @@ describe("Notification triggers", () => {
 
     it("should not send duplicate notification if reporter is assignee", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "3", displayId: 3, // Commenter
+        id: "3",
+        displayId: 3, // Commenter
         employeeId: "OTHER-001",
         name: "Other User",
         roleName: "operator",
@@ -1137,7 +1173,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",
@@ -1174,7 +1211,8 @@ describe("Notification triggers", () => {
 
     it("should not notify when work order has no assignee", async () => {
       mockGetCurrentUser.mockResolvedValue({
-        id: "3", displayId: 3, // Commenter
+        id: "3",
+        displayId: 3, // Commenter
         employeeId: "OTHER-001",
         name: "Other User",
         roleName: "operator",
@@ -1184,7 +1222,8 @@ describe("Notification triggers", () => {
       });
 
       mockFindFirstWorkOrder.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "1",
         type: "breakdown",
         title: "Test Work Order",

@@ -1,6 +1,6 @@
 import { WorkOrderChecklist } from "@/components/work-orders/work-order-checklist";
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it,vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const { mockUpdateChecklistItem, mockToast } = vi.hoisted(() => ({
   mockUpdateChecklistItem: vi.fn(),
@@ -21,7 +21,8 @@ vi.mock("@/components/ui/use-toast", () => ({
 
 const mockItems = [
   {
-    id: "1", displayId: 1,
+    id: "1",
+    displayId: 1,
     status: "pending" as const,
     notes: null,
     checklist: {
@@ -32,7 +33,8 @@ const mockItems = [
     },
   },
   {
-    id: "2", displayId: 2,
+    id: "2",
+    displayId: 2,
     status: "completed" as const,
     notes: null,
     checklist: {
@@ -46,7 +48,9 @@ const mockItems = [
 
 describe("WorkOrderChecklist", () => {
   it("renders checklist items correctly", () => {
-    const { getByText } = render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
+    const { getByText } = render(
+      <WorkOrderChecklist workOrderId={"123"} items={mockItems} />
+    );
 
     expect(getByText("Check oil level")).toBeDefined();
     expect(getByText("Inspect belts")).toBeDefined();
@@ -57,7 +61,9 @@ describe("WorkOrderChecklist", () => {
     // Mock successful response
     mockUpdateChecklistItem.mockResolvedValue({ success: true });
 
-    const { getAllByRole } = render(<WorkOrderChecklist workOrderId={"123"} items={mockItems} />);
+    const { getAllByRole } = render(
+      <WorkOrderChecklist workOrderId={"123"} items={mockItems} />
+    );
 
     const buttons = getAllByRole("button");
     // Click the first item (pending -> completed)

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const {
@@ -155,16 +155,21 @@ describe("POST /api/equipment/[id]/downtime", () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockRejectedValue(new Error("Unauthorized"));
 
-    const request = new Request("http://localhost/api/equipment/equip-1/downtime", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reasonCode: "mechanical_failure",
-        startTime: new Date().toISOString(),
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/equipment/equip-1/downtime",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reasonCode: "mechanical_failure",
+          startTime: new Date().toISOString(),
+        }),
+      }
+    );
 
-    const response = await POST(request, { params: Promise.resolve({ id: "equip-1" }) });
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "equip-1" }),
+    });
     expect(response.status).toBe(401);
   });
 
@@ -173,34 +178,46 @@ describe("POST /api/equipment/[id]/downtime", () => {
     mockRequirePermission.mockImplementation(() => Promise.resolve(mockUser));
     mockFindFirst.mockImplementation(() => Promise.resolve(null));
 
-    const request = new Request("http://localhost/api/equipment/nonexistent/downtime", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reasonCode: "mechanical_failure",
-        startTime: new Date().toISOString(),
-      }),
-    });
+    const request = new Request(
+      "http://localhost/api/equipment/nonexistent/downtime",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reasonCode: "mechanical_failure",
+          startTime: new Date().toISOString(),
+        }),
+      }
+    );
 
-    const response = await POST(request, { params: Promise.resolve({ id: "nonexistent" }) });
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "nonexistent" }),
+    });
     expect(response.status).toBe(404);
   });
 
   it("returns 400 for invalid input", async () => {
     mockRequireCsrf.mockImplementation(() => Promise.resolve(undefined));
     mockRequirePermission.mockImplementation(() => Promise.resolve(mockUser));
-    mockFindFirst.mockImplementation(() => Promise.resolve({ id: "equip-1", name: "Machine A" }));
+    mockFindFirst.mockImplementation(() =>
+      Promise.resolve({ id: "equip-1", name: "Machine A" })
+    );
 
-    const request = new Request("http://localhost/api/equipment/equip-1/downtime", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reasonCode: "invalid_reason", // Invalid reason code
-        startTime: new Date().toISOString(),
-      }),
+    const request = new Request(
+      "http://localhost/api/equipment/equip-1/downtime",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reasonCode: "invalid_reason", // Invalid reason code
+          startTime: new Date().toISOString(),
+        }),
+      }
+    );
+
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "equip-1" }),
     });
-
-    const response = await POST(request, { params: Promise.resolve({ id: "equip-1" }) });
     expect(response.status).toBe(400);
   });
 
@@ -208,30 +225,39 @@ describe("POST /api/equipment/[id]/downtime", () => {
     const now = new Date();
     mockRequireCsrf.mockImplementation(() => Promise.resolve(undefined));
     mockRequirePermission.mockImplementation(() => Promise.resolve(mockUser));
-    mockFindFirst.mockImplementation(() => Promise.resolve({ id: "equip-1", name: "Machine A" }));
-    mockInsertReturning.mockImplementation(() => Promise.resolve([
+    mockFindFirst.mockImplementation(() =>
+      Promise.resolve({ id: "equip-1", name: "Machine A" })
+    );
+    mockInsertReturning.mockImplementation(() =>
+      Promise.resolve([
+        {
+          id: "downtime-1",
+          equipmentId: "equip-1",
+          reasonCode: "mechanical_failure",
+          startTime: now,
+          endTime: null,
+          notes: "Motor failure",
+          reportedById: "user-1",
+        },
+      ])
+    );
+
+    const request = new Request(
+      "http://localhost/api/equipment/equip-1/downtime",
       {
-        id: "downtime-1",
-        equipmentId: "equip-1",
-        reasonCode: "mechanical_failure",
-        startTime: now,
-        endTime: null,
-        notes: "Motor failure",
-        reportedById: "user-1",
-      },
-    ]));
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reasonCode: "mechanical_failure",
+          startTime: now.toISOString(),
+          notes: "Motor failure",
+        }),
+      }
+    );
 
-    const request = new Request("http://localhost/api/equipment/equip-1/downtime", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reasonCode: "mechanical_failure",
-        startTime: now.toISOString(),
-        notes: "Motor failure",
-      }),
+    const response = await POST(request, {
+      params: Promise.resolve({ id: "equip-1" }),
     });
-
-    const response = await POST(request, { params: Promise.resolve({ id: "equip-1" }) });
     expect(response.status).toBe(201);
 
     const data = await response.json();
@@ -269,12 +295,17 @@ describe("PATCH /api/equipment/downtime/[downtimeId]", () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockRejectedValue(new Error("Unauthorized"));
 
-    const request = new Request("http://localhost/api/equipment/downtime/downtime-1", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-    });
+    const request = new Request(
+      "http://localhost/api/equipment/downtime/downtime-1",
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-    const response = await PATCH(request, { params: Promise.resolve({ downtimeId: "downtime-1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ downtimeId: "downtime-1" }),
+    });
     expect(response.status).toBe(401);
   });
 
@@ -283,12 +314,17 @@ describe("PATCH /api/equipment/downtime/[downtimeId]", () => {
     mockRequirePermission.mockResolvedValue(mockUser);
     mockFindFirst.mockResolvedValue(null);
 
-    const request = new Request("http://localhost/api/equipment/downtime/nonexistent", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-    });
+    const request = new Request(
+      "http://localhost/api/equipment/downtime/nonexistent",
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-    const response = await PATCH(request, { params: Promise.resolve({ downtimeId: "nonexistent" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ downtimeId: "nonexistent" }),
+    });
     expect(response.status).toBe(404);
   });
 
@@ -300,12 +336,17 @@ describe("PATCH /api/equipment/downtime/[downtimeId]", () => {
       endTime: new Date(), // Already ended
     });
 
-    const request = new Request("http://localhost/api/equipment/downtime/downtime-1", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-    });
+    const request = new Request(
+      "http://localhost/api/equipment/downtime/downtime-1",
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-    const response = await PATCH(request, { params: Promise.resolve({ downtimeId: "downtime-1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ downtimeId: "downtime-1" }),
+    });
     expect(response.status).toBe(400);
   });
 
@@ -324,12 +365,17 @@ describe("PATCH /api/equipment/downtime/[downtimeId]", () => {
       },
     ]);
 
-    const request = new Request("http://localhost/api/equipment/downtime/downtime-1", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-    });
+    const request = new Request(
+      "http://localhost/api/equipment/downtime/downtime-1",
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
-    const response = await PATCH(request, { params: Promise.resolve({ downtimeId: "downtime-1" }) });
+    const response = await PATCH(request, {
+      params: Promise.resolve({ downtimeId: "downtime-1" }),
+    });
     expect(response.status).toBe(200);
 
     const data = await response.json();

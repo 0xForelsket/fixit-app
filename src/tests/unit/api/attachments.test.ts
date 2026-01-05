@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -33,8 +33,12 @@ const mockCheckRateLimit = vi.fn(() => ({
 const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
 const mockGenerateS3Key = vi.fn(() => "work_orders/1/1.pdf");
-const mockGetPresignedUploadUrl = vi.fn(() => "https://s3.example.com/presigned-upload");
-const mockGetPresignedDownloadUrl = vi.fn(() => "https://s3.example.com/presigned-download");
+const mockGetPresignedUploadUrl = vi.fn(
+  () => "https://s3.example.com/presigned-upload"
+);
+const mockGetPresignedDownloadUrl = vi.fn(
+  () => "https://s3.example.com/presigned-download"
+);
 const mockDeleteObject = vi.fn();
 
 const mockApiLogger = {
@@ -94,7 +98,9 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 // Dynamic imports after mock.module
-const { DELETE, GET: GET_BY_ID } = await import("@/app/(app)/api/attachments/[id]/route");
+const { DELETE, GET: GET_BY_ID } = await import(
+  "@/app/(app)/api/attachments/[id]/route"
+);
 const { GET, POST } = await import("@/app/(app)/api/attachments/route");
 
 beforeEach(() => {
@@ -123,7 +129,7 @@ beforeEach(() => {
   mockUserHasPermission.mockClear();
 
   mockUserHasPermission.mockReturnValue(true);
-  
+
   // Re-setup mock chains if needed
   mockInsert.mockReturnValue({
     values: mockInsertValues.mockReturnValue({

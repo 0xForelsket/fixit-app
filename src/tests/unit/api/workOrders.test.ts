@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockWorkOrdersFindMany = vi.fn();
@@ -124,7 +124,7 @@ describe("POST /api/work-orders", () => {
     mockRequireCsrf.mockClear();
     mockGetCurrentUser.mockClear();
     mockCheckRateLimit.mockClear();
-    
+
     // Reset chains
     mockInsert.mockReturnValue({
       values: mockInsertValues.mockReturnValue({
@@ -203,7 +203,8 @@ describe("POST /api/work-orders", () => {
     });
     mockRequireCsrf.mockResolvedValue(undefined);
     const mockUser = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Test User",
       roleId: "2",

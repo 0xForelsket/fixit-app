@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -85,7 +85,8 @@ describe("GET /api/labor", () => {
 
   it("returns labor logs when authenticated", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -96,7 +97,8 @@ describe("GET /api/labor", () => {
 
     const mockLogs = [
       {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         workOrderId: "5",
         userId: "1",
         startTime: new Date(),
@@ -124,7 +126,8 @@ describe("GET /api/labor", () => {
 
   it("filters by workOrderId when provided", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -164,7 +167,8 @@ describe("POST /api/labor", () => {
 
   it("returns 400 when missing required fields", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -191,7 +195,8 @@ describe("POST /api/labor", () => {
 
   it("creates labor log successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -201,7 +206,8 @@ describe("POST /api/labor", () => {
     });
 
     const mockLog = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       workOrderId: "5",
       userId: "1",
       durationMinutes: 90,
@@ -236,7 +242,8 @@ describe("POST /api/labor", () => {
 
   it("sets isBillable to true by default", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -249,7 +256,9 @@ describe("POST /api/labor", () => {
     mockInsertValues.mockImplementation((vals: any) => {
       capturedValues = vals;
       return {
-        returning: mockInsertReturning.mockResolvedValue([{ id: "1", displayId: 1, isBillable: true }]),
+        returning: mockInsertReturning.mockResolvedValue([
+          { id: "1", displayId: 1, isBillable: true },
+        ]),
       };
     });
 

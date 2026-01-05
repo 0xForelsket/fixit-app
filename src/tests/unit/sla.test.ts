@@ -29,8 +29,8 @@ describe("getSlaHours", () => {
 
 describe("calculateDueBy", () => {
   beforeEach(() => {
-    
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
@@ -66,8 +66,8 @@ describe("calculateDueBy", () => {
 
 describe("isOverdue", () => {
   beforeEach(() => {
-    
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
@@ -97,8 +97,8 @@ describe("isOverdue", () => {
 
 describe("getTimeRemaining", () => {
   beforeEach(() => {
-    
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
@@ -122,8 +122,8 @@ describe("getTimeRemaining", () => {
 
 describe("formatTimeRemaining", () => {
   beforeEach(() => {
-    
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
@@ -157,8 +157,8 @@ describe("formatTimeRemaining", () => {
 
 describe("getUrgencyLevel", () => {
   beforeEach(() => {
-    
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {
@@ -192,8 +192,8 @@ describe("getUrgencyLevel", () => {
 
 describe("calculateEscalationTime", () => {
   beforeEach(() => {
-    
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {

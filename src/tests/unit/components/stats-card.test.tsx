@@ -18,7 +18,9 @@ describe("StatsCard", () => {
   });
 
   it("formats numeric values with locale", () => {
-    const { getByText } = render(<StatsCard {...defaultProps} value={1234567} />);
+    const { getByText } = render(
+      <StatsCard {...defaultProps} value={1234567} />
+    );
 
     // Should format with commas (or locale-specific separator)
     expect(getByText("1,234,567")).toBeDefined();
@@ -31,13 +33,17 @@ describe("StatsCard", () => {
   });
 
   it("renders description when provided", () => {
-    const { getByText } = render(<StatsCard {...defaultProps} description="last 24 hours" />);
+    const { getByText } = render(
+      <StatsCard {...defaultProps} description="last 24 hours" />
+    );
 
     expect(getByText("last 24 hours")).toBeDefined();
   });
 
   it("renders as a link when href is provided", () => {
-    const { getByRole } = render(<StatsCard {...defaultProps} href="/tickets" />);
+    const { getByRole } = render(
+      <StatsCard {...defaultProps} href="/tickets" />
+    );
 
     const link = getByRole("link");
     expect(link.getAttribute("href")).toBe("/tickets");
@@ -55,7 +61,9 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} />
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-card")).toBe(true);
+      expect(container.firstElementChild?.classList.contains("bg-card")).toBe(
+        true
+      );
     });
 
     it("applies primary variant styles", () => {
@@ -63,7 +71,9 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="primary" />
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-primary/10")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-primary/10")
+      ).toBe(true);
     });
 
     it("applies success variant styles", () => {
@@ -71,7 +81,9 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="success" />
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-success-500/15")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-success-500/15")
+      ).toBe(true);
     });
 
     it("applies warning variant styles", () => {
@@ -79,7 +91,9 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="warning" />
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-warning-500/15")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-warning-500/15")
+      ).toBe(true);
     });
 
     it("applies danger variant styles", () => {
@@ -87,7 +101,9 @@ describe("StatsCard", () => {
         <StatsCard title="Test" value={10} icon={Activity} variant="danger" />
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-danger-500/15")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-danger-500/15")
+      ).toBe(true);
     });
   });
 
@@ -98,7 +114,9 @@ describe("StatsCard", () => {
       );
 
       // Active state should have special styling
-      expect(container.firstElementChild?.classList.contains("border-primary/40")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("border-primary/40")
+      ).toBe(true);
     });
 
     it("shows pulse animation when active", () => {
@@ -160,7 +178,9 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(getByText("+10%").classList.contains("bg-success-500/10")).toBe(true);
+      expect(getByText("+10%").classList.contains("bg-success-500/10")).toBe(
+        true
+      );
     });
 
     it("applies correct color for negative trend", () => {
@@ -173,7 +193,9 @@ describe("StatsCard", () => {
         />
       );
 
-      expect(getByText("10%").classList.contains("bg-destructive/10")).toBe(true);
+      expect(getByText("10%").classList.contains("bg-destructive/10")).toBe(
+        true
+      );
     });
   });
 
@@ -204,7 +226,9 @@ describe("StatsCard", () => {
         <StatsCard {...defaultProps} className="my-custom-class" />
       );
 
-      expect(container.firstElementChild?.classList.contains("my-custom-class")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("my-custom-class")
+      ).toBe(true);
     });
   });
 });

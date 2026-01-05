@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -116,7 +116,8 @@ describe("GET /api/equipment", () => {
   it("returns equipment list with pagination", async () => {
     mockRequireAuth.mockResolvedValue({
       id: "user-1",
-      displayId: 1, name: "Tech",
+      displayId: 1,
+      name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
       roleId: "role-2",
@@ -138,7 +139,8 @@ describe("GET /api/equipment", () => {
     const mockEquipment = [
       {
         id: "equip-1",
-        displayId: 1, name: "Machine A",
+        displayId: 1,
+        name: "Machine A",
         code: "MA-001",
         status: "operational" as const,
         locationId: "loc-1",
@@ -152,7 +154,7 @@ describe("GET /api/equipment", () => {
       },
       {
         id: "equip-2",
-       displayId: 2,
+        displayId: 2,
         name: "Machine B",
         code: "MB-001",
         status: "operational" as const,
@@ -186,7 +188,8 @@ describe("GET /api/equipment", () => {
   it("accepts locationId filter parameter", async () => {
     mockRequireAuth.mockResolvedValue({
       id: "user-1",
-      displayId: 1, name: "Tech",
+      displayId: 1,
+      name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
       roleId: "role-2",
@@ -208,7 +211,8 @@ describe("GET /api/equipment", () => {
     const mockEquipment = [
       {
         id: "equip-1",
-        displayId: 1, name: "Machine A",
+        displayId: 1,
+        name: "Machine A",
         code: "MA-001",
         status: "operational" as const,
         locationId: "loc-5",
@@ -225,7 +229,9 @@ describe("GET /api/equipment", () => {
     mockFindMany.mockResolvedValue(mockEquipment);
     mockSelectWhere.mockResolvedValue([{ count: 1 }]);
 
-    const request = new Request("http://localhost/api/equipment?locationId=loc-5");
+    const request = new Request(
+      "http://localhost/api/equipment?locationId=loc-5"
+    );
     const response = await GET(request);
 
     // Should not return an error - 200 or 500 depends on internal implementation
@@ -236,7 +242,8 @@ describe("GET /api/equipment", () => {
   it("accepts status filter parameter", async () => {
     mockRequireAuth.mockResolvedValue({
       id: "user-1",
-      displayId: 1, name: "Tech",
+      displayId: 1,
+      name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
       roleId: "role-2",
@@ -268,7 +275,8 @@ describe("GET /api/equipment", () => {
   it("accepts search parameter", async () => {
     mockRequireAuth.mockResolvedValue({
       id: "user-1",
-      displayId: 1, name: "Tech",
+      displayId: 1,
+      name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
       roleId: "role-2",
@@ -311,7 +319,7 @@ describe("POST /api/equipment", () => {
     mockRequireCsrf.mockClear();
     mockRequirePermission.mockClear();
     mockCheckRateLimit.mockClear();
-    
+
     // Reset chains
     mockInsert.mockReturnValue({
       values: mockInsertValues.mockReturnValue({
@@ -410,7 +418,8 @@ describe("POST /api/equipment", () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
       id: "user-1",
-      displayId: 1, employeeId: "ADMIN-001",
+      displayId: 1,
+      employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
       roleId: "role-3",
@@ -440,7 +449,8 @@ describe("POST /api/equipment", () => {
     mockRequireCsrf.mockResolvedValue(undefined);
     mockRequirePermission.mockResolvedValue({
       id: "user-1",
-      displayId: 1, employeeId: "ADMIN-001",
+      displayId: 1,
+      employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
       roleId: "role-3",
@@ -450,7 +460,7 @@ describe("POST /api/equipment", () => {
 
     const mockEquipment = {
       id: "equip-10",
-     displayId: 10,
+      displayId: 10,
       name: "New Machine",
       code: "NM-001",
       locationId: "loc-1",

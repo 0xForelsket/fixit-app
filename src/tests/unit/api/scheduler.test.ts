@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it,vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockSelectFrom = vi.fn();
@@ -182,7 +182,8 @@ describe("POST /api/scheduler/run", () => {
   it("authorizes with user having scheduler permission", async () => {
     process.env.CRON_SECRET = undefined;
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -210,7 +211,8 @@ describe("POST /api/scheduler/run", () => {
   it("authorizes with wildcard permission", async () => {
     process.env.CRON_SECRET = undefined;
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "ADMIN-001",
       name: "Admin",
       roleName: "admin",
@@ -236,7 +238,8 @@ describe("POST /api/scheduler/run", () => {
   it("rejects user without scheduler permission", async () => {
     process.env.CRON_SECRET = ""; // Empty string
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -264,7 +267,8 @@ describe("POST /api/scheduler/run", () => {
     process.env.CRON_SECRET = "test-secret";
 
     const mockSchedule = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       title: "Monthly Maintenance",
       type: "preventive" as const,
@@ -292,12 +296,18 @@ describe("POST /api/scheduler/run", () => {
       const tx = {
         query: {
           users: {
-            findMany: vi.fn(() => Promise.resolve([{ id: "1", displayId: 1, assignedRole: { name: "admin" } }])),
+            findMany: vi.fn(() =>
+              Promise.resolve([
+                { id: "1", displayId: 1, assignedRole: { name: "admin" } },
+              ])
+            ),
           },
         },
         insert: vi.fn(() => ({
           values: vi.fn(() => ({
-            returning: vi.fn(() => Promise.resolve([{ id: "1", displayId: 1 }])),
+            returning: vi.fn(() =>
+              Promise.resolve([{ id: "1", displayId: 1 }])
+            ),
           })),
         })),
         select: vi.fn(() => ({
@@ -333,7 +343,8 @@ describe("POST /api/scheduler/run", () => {
     process.env.CRON_SECRET = "test-secret";
 
     const mockSchedule = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       equipmentId: "1",
       title: "Maintenance",
       type: "preventive" as const,
@@ -354,9 +365,7 @@ describe("POST /api/scheduler/run", () => {
     });
 
     mockRolesFindFirst.mockResolvedValue(undefined);
-    mockTransaction.mockRejectedValue(
-      new Error("Transaction failed")
-    );
+    mockTransaction.mockRejectedValue(new Error("Transaction failed"));
 
     const request = new Request("http://localhost/api/scheduler/run", {
       method: "POST",
@@ -378,7 +387,8 @@ describe("POST /api/scheduler/run", () => {
       process.env.CRON_SECRET = "test-secret";
 
       const overdueWorkOrder = {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "10",
         title: "Fix Machine A",
         status: "open",
@@ -398,14 +408,16 @@ describe("POST /api/scheduler/run", () => {
 
       // Mock admin role and users
       mockRolesFindFirst.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "admin",
       } as any);
       mockUsersFindMany.mockResolvedValue([
         { id: "2", displayId: 2, name: "Admin User" },
       ] as any[]);
       mockEquipmentFindFirst.mockResolvedValue({
-        id: "10", displayId: 10,
+        id: "10",
+        displayId: 10,
         name: "Machine A",
       } as any);
 
@@ -471,7 +483,8 @@ describe("POST /api/scheduler/run", () => {
       process.env.CRON_SECRET = "test-secret";
 
       const unassignedOverdueWorkOrder = {
-        id: "2", displayId: 2,
+        id: "2",
+        displayId: 2,
         equipmentId: "10",
         title: "Unassigned Work Order",
         status: "open",
@@ -490,7 +503,8 @@ describe("POST /api/scheduler/run", () => {
       });
 
       mockRolesFindFirst.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "admin",
       } as any);
       mockUsersFindMany.mockResolvedValue([
@@ -498,7 +512,8 @@ describe("POST /api/scheduler/run", () => {
         { id: "3", displayId: 3, name: "Admin 2" },
       ] as any[]);
       mockEquipmentFindFirst.mockResolvedValue({
-        id: "10", displayId: 10,
+        id: "10",
+        displayId: 10,
         name: "Equipment X",
       } as any);
 
@@ -523,7 +538,8 @@ describe("POST /api/scheduler/run", () => {
       process.env.CRON_SECRET = "test-secret";
 
       const overdueWorkOrder = {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         equipmentId: "10",
         title: "Problematic Work Order",
         status: "in_progress",
@@ -542,7 +558,8 @@ describe("POST /api/scheduler/run", () => {
       });
 
       mockRolesFindFirst.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "admin",
       } as any);
       mockUsersFindMany.mockResolvedValue([] as any[]);

@@ -1,6 +1,6 @@
 // Actions will be imported dynamically after mocks
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockFindFirstRole = vi.fn();
 const mockFindFirstUser = vi.fn();
@@ -65,7 +65,8 @@ const { createRole, deleteRole, updateRole } = await import("@/actions/roles");
 
 describe("roles actions", () => {
   const mockUser: SessionUser = {
-    id: "1", displayId: 1,
+    id: "1",
+    displayId: 1,
     name: "Admin",
     employeeId: "ADMIN-001",
     roleId: "3",
@@ -85,7 +86,7 @@ describe("roles actions", () => {
     mockDelete.mockClear();
     mockRequirePermission.mockClear();
     mockRequirePermission.mockResolvedValue(mockUser);
-    
+
     // Reset defaults
     mockUpdate.mockReturnValue({
       set: vi.fn(() => ({
@@ -121,7 +122,8 @@ describe("roles actions", () => {
 
     it("should reject duplicate role name", async () => {
       mockFindFirstRole.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "existing-role",
         description: null,
         permissions: [],
@@ -182,7 +184,8 @@ describe("roles actions", () => {
 
     it("should reject updates to system roles", async () => {
       mockFindFirstRole.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "admin",
         description: "System administrator",
         permissions: ["*"],
@@ -206,7 +209,8 @@ describe("roles actions", () => {
       // First call: find the role being updated
       mockFindFirstRole
         .mockResolvedValueOnce({
-          id: "5", displayId: 5,
+          id: "5",
+          displayId: 5,
           name: "custom-role",
           description: null,
           permissions: ["ticket:view"],
@@ -216,7 +220,8 @@ describe("roles actions", () => {
         })
         // Second call: check for existing role with new name
         .mockResolvedValueOnce({
-          id: "6", displayId: 6,
+          id: "6",
+          displayId: 6,
           name: "existing-role",
           description: null,
           permissions: [],
@@ -239,7 +244,8 @@ describe("roles actions", () => {
     it("should update role successfully", async () => {
       mockFindFirstRole
         .mockResolvedValueOnce({
-          id: "5", displayId: 5,
+          id: "5",
+          displayId: 5,
           name: "custom-role",
           description: null,
           permissions: ["ticket:view"],
@@ -269,7 +275,8 @@ describe("roles actions", () => {
 
     it("should allow updating same name (no rename)", async () => {
       mockFindFirstRole.mockResolvedValueOnce({
-        id: "5", displayId: 5,
+        id: "5",
+        displayId: 5,
         name: "custom-role",
         description: null,
         permissions: ["ticket:view"],
@@ -309,7 +316,8 @@ describe("roles actions", () => {
 
     it("should reject deletion of system roles", async () => {
       mockFindFirstRole.mockResolvedValue({
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "admin",
         description: "System administrator",
         permissions: ["*"],
@@ -328,7 +336,8 @@ describe("roles actions", () => {
 
     it("should reject deletion when users are assigned", async () => {
       mockFindFirstRole.mockResolvedValueOnce({
-        id: "5", displayId: 5,
+        id: "5",
+        displayId: 5,
         name: "custom-role",
         description: null,
         permissions: ["ticket:view"],
@@ -338,7 +347,8 @@ describe("roles actions", () => {
       });
 
       mockFindFirstUser.mockResolvedValue({
-        id: "10", displayId: 10,
+        id: "10",
+        displayId: 10,
         employeeId: "EMP-001",
         name: "Test User",
         pin: "hashed",
@@ -365,7 +375,8 @@ describe("roles actions", () => {
 
     it("should delete role successfully when no users assigned", async () => {
       mockFindFirstRole.mockResolvedValueOnce({
-        id: "5", displayId: 5,
+        id: "5",
+        displayId: 5,
         name: "unused-role",
         description: null,
         permissions: ["ticket:view"],

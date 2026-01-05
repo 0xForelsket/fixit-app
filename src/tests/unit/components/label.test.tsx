@@ -47,7 +47,9 @@ describe("Label", () => {
   });
 
   it("passes through additional props", () => {
-    const { getByTestId } = render(<Label data-testid="test-label">Label</Label>);
+    const { getByTestId } = render(
+      <Label data-testid="test-label">Label</Label>
+    );
     expect(getByTestId("test-label")).toBeDefined();
   });
 
@@ -78,7 +80,9 @@ describe("Label", () => {
         Field
       </Label>
     );
-    expect(getByTestId("label").getAttribute("aria-describedby")).toBe("help-text");
+    expect(getByTestId("label").getAttribute("aria-describedby")).toBe(
+      "help-text"
+    );
   });
 
   it("can wrap form controls", () => {

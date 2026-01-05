@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the logger to avoid console noise in tests
 const mockLoggerError = vi.fn();
@@ -15,13 +15,9 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: mockGenerateRequestId,
 }));
 
-const {
-  ApiErrors,
-  ErrorCode,
-  HttpStatus,
-  apiError,
-  apiSuccess,
-} = await import("@/lib/api-error");
+const { ApiErrors, ErrorCode, HttpStatus, apiError, apiSuccess } = await import(
+  "@/lib/api-error"
+);
 
 describe("api-error", () => {
   beforeEach(() => {
@@ -134,7 +130,10 @@ describe("api-error", () => {
     });
 
     it("should handle array data", async () => {
-      const data = [{ id: "1", displayId: 1 }, { id: "2", displayId: 2 }];
+      const data = [
+        { id: "1", displayId: 1 },
+        { id: "2", displayId: 2 },
+      ];
       const response = apiSuccess(data);
       const body = await response.json();
 

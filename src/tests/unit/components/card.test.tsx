@@ -21,7 +21,9 @@ describe("Card", () => {
   });
 
   it("passes through additional props", () => {
-    const { getByTestId } = render(<Card data-testid="test-card">Content</Card>);
+    const { getByTestId } = render(
+      <Card data-testid="test-card">Content</Card>
+    );
     expect(getByTestId("test-card")).toBeDefined();
   });
 
@@ -40,12 +42,16 @@ describe("CardHeader", () => {
   });
 
   it("applies custom className", () => {
-    const { getByText } = render(<CardHeader className="custom-header">Header</CardHeader>);
+    const { getByText } = render(
+      <CardHeader className="custom-header">Header</CardHeader>
+    );
     expect(getByText("Header").classList.contains("custom-header")).toBe(true);
   });
 
   it("has default flex styling", () => {
-    const { getByTestId } = render(<CardHeader data-testid="header">Header</CardHeader>);
+    const { getByTestId } = render(
+      <CardHeader data-testid="header">Header</CardHeader>
+    );
     expect(getByTestId("header").classList.contains("flex")).toBe(true);
     expect(getByTestId("header").classList.contains("flex-col")).toBe(true);
   });
@@ -59,7 +65,9 @@ describe("CardTitle", () => {
   });
 
   it("applies custom className", () => {
-    const { getByText } = render(<CardTitle className="custom-title">Title</CardTitle>);
+    const { getByText } = render(
+      <CardTitle className="custom-title">Title</CardTitle>
+    );
     expect(getByText("Title").classList.contains("custom-title")).toBe(true);
   });
 
@@ -73,19 +81,27 @@ describe("CardTitle", () => {
 
 describe("CardDescription", () => {
   it("renders as paragraph element", () => {
-    const { getByText } = render(<CardDescription>Description text</CardDescription>);
+    const { getByText } = render(
+      <CardDescription>Description text</CardDescription>
+    );
     const desc = getByText("Description text");
     expect(desc.tagName).toBe("P");
   });
 
   it("applies custom className", () => {
-    const { getByText } = render(<CardDescription className="custom-desc">Desc</CardDescription>);
+    const { getByText } = render(
+      <CardDescription className="custom-desc">Desc</CardDescription>
+    );
     expect(getByText("Desc").classList.contains("custom-desc")).toBe(true);
   });
 
   it("has muted foreground styling", () => {
-    const { getByText } = render(<CardDescription>Description</CardDescription>);
-    expect(getByText("Description").classList.contains("text-muted-foreground")).toBe(true);
+    const { getByText } = render(
+      <CardDescription>Description</CardDescription>
+    );
+    expect(
+      getByText("Description").classList.contains("text-muted-foreground")
+    ).toBe(true);
   });
 });
 
@@ -96,12 +112,18 @@ describe("CardContent", () => {
   });
 
   it("applies custom className", () => {
-    const { getByText } = render(<CardContent className="custom-content">Content</CardContent>);
-    expect(getByText("Content").classList.contains("custom-content")).toBe(true);
+    const { getByText } = render(
+      <CardContent className="custom-content">Content</CardContent>
+    );
+    expect(getByText("Content").classList.contains("custom-content")).toBe(
+      true
+    );
   });
 
   it("has default padding", () => {
-    const { getByTestId } = render(<CardContent data-testid="content">Content</CardContent>);
+    const { getByTestId } = render(
+      <CardContent data-testid="content">Content</CardContent>
+    );
     expect(getByTestId("content").classList.contains("p-6")).toBe(true);
   });
 });
@@ -113,12 +135,16 @@ describe("CardFooter", () => {
   });
 
   it("applies custom className", () => {
-    const { getByText } = render(<CardFooter className="custom-footer">Footer</CardFooter>);
+    const { getByText } = render(
+      <CardFooter className="custom-footer">Footer</CardFooter>
+    );
     expect(getByText("Footer").classList.contains("custom-footer")).toBe(true);
   });
 
   it("has flex items-center styling", () => {
-    const { getByTestId } = render(<CardFooter data-testid="footer">Footer</CardFooter>);
+    const { getByTestId } = render(
+      <CardFooter data-testid="footer">Footer</CardFooter>
+    );
     const footer = getByTestId("footer");
     expect(footer.classList.contains("flex")).toBe(true);
     expect(footer.classList.contains("items-center")).toBe(true);

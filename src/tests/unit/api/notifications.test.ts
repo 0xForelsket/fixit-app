@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -56,7 +56,8 @@ describe("GET /api/notifications", () => {
 
   it("returns notifications for authenticated user", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -67,7 +68,8 @@ describe("GET /api/notifications", () => {
 
     const mockNotifications = [
       {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         userId: "1",
         type: "work_order_assigned" as const,
         title: "New work order assigned",
@@ -77,7 +79,8 @@ describe("GET /api/notifications", () => {
         createdAt: new Date(),
       },
       {
-        id: "2", displayId: 2,
+        id: "2",
+        displayId: 2,
         userId: "1",
         type: "work_order_escalated" as const,
         title: "Critical issue reported",
@@ -88,9 +91,7 @@ describe("GET /api/notifications", () => {
       },
     ];
 
-    mockFindMany.mockResolvedValue(
-      mockNotifications
-    );
+    mockFindMany.mockResolvedValue(mockNotifications);
 
     const response = await GET();
     const data = await response.json();
@@ -102,7 +103,8 @@ describe("GET /api/notifications", () => {
 
   it("returns empty array when user has no notifications", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -122,7 +124,8 @@ describe("GET /api/notifications", () => {
 
   it("handles database errors gracefully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -131,9 +134,7 @@ describe("GET /api/notifications", () => {
       sessionVersion: 1,
     });
 
-    mockFindMany.mockRejectedValue(
-      new Error("Connection timeout")
-    );
+    mockFindMany.mockRejectedValue(new Error("Connection timeout"));
 
     const response = await GET();
     const data = await response.json();

@@ -1,6 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { saveReportTemplate, getReportTemplate } from "@/actions/reports";
+import { getReportTemplate, saveReportTemplate } from "@/actions/reports";
 import { db } from "@/db";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the DB and schema
 vi.mock("@/db", () => ({
@@ -65,10 +65,12 @@ describe("Actions: Reports", () => {
       await saveReportTemplate(mockData);
 
       expect(db.insert).toHaveBeenCalled();
-      expect(mockValues).toHaveBeenCalledWith(expect.objectContaining({
+      expect(mockValues).toHaveBeenCalledWith(
+        expect.objectContaining({
           name: "Test Report",
-          createdById: "user123"
-      }));
+          createdById: "user123",
+        })
+      );
     });
 
     it("should update an existing template when ID is provided", async () => {
@@ -90,20 +92,24 @@ describe("Actions: Reports", () => {
       await saveReportTemplate(mockData);
 
       expect(db.update).toHaveBeenCalled();
-      expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-          name: "Updated Report"
-      }));
+      expect(mockSet).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: "Updated Report",
+        })
+      );
       expect(mockWhere).toHaveBeenCalled();
     });
   });
 
   describe("getReportTemplate", () => {
-      it("should fetch a template by ID", async () => {
-          const mockTemplate = { id: "123", name: "Test" };
-          (db.query.reportTemplates.findFirst as any).mockResolvedValue(mockTemplate);
+    it("should fetch a template by ID", async () => {
+      const mockTemplate = { id: "123", name: "Test" };
+      (db.query.reportTemplates.findFirst as any).mockResolvedValue(
+        mockTemplate
+      );
 
-          const result = await getReportTemplate("123");
-          expect(result).toEqual(mockTemplate);
-      });
+      const result = await getReportTemplate("123");
+      expect(result).toEqual(mockTemplate);
+    });
   });
 });

@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
 const mockFindMany = vi.fn();
 const mockInsert = vi.fn();
 const mockValues = vi.fn();
-const mockReturning = vi.fn(() => ([{ id: "1", displayId: 1 }]));
+const mockReturning = vi.fn(() => [{ id: "1", displayId: 1 }]);
 
 // Mock the db module
 vi.mock("@/db", () => ({
@@ -243,22 +243,26 @@ describe("notifications helper", () => {
     it("respects each user preferences individually", async () => {
       mockFindMany.mockResolvedValue([
         { id: "1", preferences: null }, // User 1: no prefs, create
-        { id: "2", preferences: { // User 2: disabled, skip
-          theme: "system",
-          density: "comfortable",
-          notifications: {
-            email: true,
-            inApp: {
-              workOrderCreated: false,
-              workOrderAssigned: false,
-              workOrderEscalated: false,
-              workOrderResolved: false,
-              workOrderCommented: false,
-              workOrderStatusChanged: false,
-              maintenanceDue: false,
+        {
+          id: "2",
+          preferences: {
+            // User 2: disabled, skip
+            theme: "system",
+            density: "comfortable",
+            notifications: {
+              email: true,
+              inApp: {
+                workOrderCreated: false,
+                workOrderAssigned: false,
+                workOrderEscalated: false,
+                workOrderResolved: false,
+                workOrderCommented: false,
+                workOrderStatusChanged: false,
+                maintenanceDue: false,
+              },
             },
           },
-        }},
+        },
         { id: "3", preferences: null }, // User 3: no prefs, create
       ]);
       mockReturning.mockResolvedValue([

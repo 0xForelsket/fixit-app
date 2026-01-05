@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
@@ -65,7 +65,9 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 // Dynamic imports after mock.module
-const { DELETE, GET, PATCH } = await import("@/app/(app)/api/inventory/parts/[id]/route");
+const { DELETE, GET, PATCH } = await import(
+  "@/app/(app)/api/inventory/parts/[id]/route"
+);
 
 beforeEach(() => {
   mockFindFirst.mockClear();
@@ -113,7 +115,8 @@ describe("GET /api/inventory/parts/[id]", () => {
 
   it("returns 400 for invalid part ID", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -143,7 +146,8 @@ describe("GET /api/inventory/parts/[id]", () => {
 
   it("returns 404 when part not found", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -174,7 +178,8 @@ describe("GET /api/inventory/parts/[id]", () => {
 
   it("returns part details", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -195,7 +200,8 @@ describe("GET /api/inventory/parts/[id]", () => {
     } as any);
 
     const mockPart = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Bearing SKF-123",
       sku: "SKF-123",
       barcode: null,
@@ -242,7 +248,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 401 when user lacks permission", async () => {
     mockUserHasPermission.mockReturnValue(false);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Operator",
       email: "op@example.com",
       pin: "hashed",
@@ -277,7 +284,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     mockUserHasPermission.mockReturnValue(true);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
@@ -312,7 +320,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     mockUserHasPermission.mockReturnValue(true);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
@@ -348,7 +357,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
   it("updates part successfully", async () => {
     mockUserHasPermission.mockReturnValue(true);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
@@ -369,7 +379,8 @@ describe("PATCH /api/inventory/parts/[id]", () => {
     } as any);
 
     const updatedPart = {
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Updated Bearing",
       sku: "SKF-123",
       unitCost: 30.0,
@@ -409,7 +420,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 401 when user lacks permission", async () => {
     mockUserHasPermission.mockReturnValue(false);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       employeeId: "TECH-001",
       name: "Tech",
       roleName: "tech",
@@ -433,7 +445,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 400 for invalid part ID", async () => {
     mockUserHasPermission.mockReturnValue(true);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
@@ -466,7 +479,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("returns 404 when part not found", async () => {
     mockUserHasPermission.mockReturnValue(true);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",
@@ -500,7 +514,8 @@ describe("DELETE /api/inventory/parts/[id]", () => {
   it("deletes part successfully", async () => {
     mockUserHasPermission.mockReturnValue(true);
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       email: "admin@example.com",
       pin: "hashed",

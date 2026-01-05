@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { render } from "@testing-library/react";
-import { describe, expect, it,vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 describe("Button", () => {
   it("renders with default props", () => {
@@ -19,7 +19,9 @@ describe("Button", () => {
   it("handles click events", () => {
     const handleClick = vi.fn(() => {});
 
-    const { getByRole } = render(<Button onClick={handleClick}>Click me</Button>);
+    const { getByRole } = render(
+      <Button onClick={handleClick}>Click me</Button>
+    );
 
     getByRole("button").click();
 
@@ -44,17 +46,27 @@ describe("Button", () => {
   });
 
   it("applies variant classes correctly", () => {
-    const { container, rerender } = render(<Button variant="default">Default</Button>);
-    expect(container.firstElementChild?.classList.contains("bg-primary")).toBe(true);
+    const { container, rerender } = render(
+      <Button variant="default">Default</Button>
+    );
+    expect(container.firstElementChild?.classList.contains("bg-primary")).toBe(
+      true
+    );
 
     rerender(<Button variant="destructive">Destructive</Button>);
-    expect(container.firstElementChild?.classList.contains("bg-danger-600")).toBe(true);
+    expect(
+      container.firstElementChild?.classList.contains("bg-danger-600")
+    ).toBe(true);
 
     rerender(<Button variant="outline">Outline</Button>);
-    expect(container.firstElementChild?.classList.contains("border-2")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("border-2")).toBe(
+      true
+    );
 
     rerender(<Button variant="ghost">Ghost</Button>);
-    expect(container.firstElementChild?.classList.contains("hover:bg-muted")).toBe(true);
+    expect(
+      container.firstElementChild?.classList.contains("hover:bg-muted")
+    ).toBe(true);
   });
 
   it("applies size classes correctly", () => {
@@ -72,9 +84,13 @@ describe("Button", () => {
   });
 
   it("merges custom className", () => {
-    const { container } = render(<Button className="custom-class">Custom</Button>);
+    const { container } = render(
+      <Button className="custom-class">Custom</Button>
+    );
 
-    expect(container.firstElementChild?.classList.contains("custom-class")).toBe(true);
+    expect(
+      container.firstElementChild?.classList.contains("custom-class")
+    ).toBe(true);
   });
 
   it("renders children correctly", () => {

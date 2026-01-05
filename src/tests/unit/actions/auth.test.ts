@@ -1,12 +1,14 @@
 import { login } from "@/actions/auth";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockAuthenticateUser, mockDeleteSession, mockRedirect } = vi.hoisted(() => ({
-  mockAuthenticateUser: vi.fn(),
-  mockDeleteSession: vi.fn(),
-  mockRedirect: vi.fn(),
-}));
+const { mockAuthenticateUser, mockDeleteSession, mockRedirect } = vi.hoisted(
+  () => ({
+    mockAuthenticateUser: vi.fn(),
+    mockDeleteSession: vi.fn(),
+    mockRedirect: vi.fn(),
+  })
+);
 
 vi.mock("@/lib/services/auth.service", () => ({
   authenticateUser: mockAuthenticateUser,
@@ -19,10 +21,6 @@ vi.mock("@/lib/session", () => ({
 vi.mock("next/navigation", () => ({
   redirect: mockRedirect,
 }));
-
-// We must import after mocking
-import { authenticateUser } from "@/lib/services/auth.service";
-import { redirect } from "next/navigation";
 
 describe("login action", () => {
   beforeEach(() => {
@@ -124,7 +122,8 @@ describe("login action", () => {
     mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",
@@ -149,7 +148,8 @@ describe("login action", () => {
     mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "ADMIN-001",
         name: "Admin User",
         roleName: "admin",
@@ -174,7 +174,8 @@ describe("login action", () => {
     mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "OP-001",
         name: "Operator User",
         roleName: "operator",

@@ -1,5 +1,5 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
-import { encrypt, decrypt, isEncrypted } from "@/lib/encryption";
+import { decrypt, encrypt, isEncrypted } from "@/lib/encryption";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Store original env value
 const originalAppSecret = process.env.APP_SECRET;
@@ -7,7 +7,8 @@ const originalAppSecret = process.env.APP_SECRET;
 describe("encryption", () => {
   beforeAll(() => {
     // Set a test secret (32 bytes hex = 64 chars)
-    process.env.APP_SECRET = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    process.env.APP_SECRET =
+      "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
   });
 
   afterAll(() => {
@@ -132,7 +133,9 @@ describe("encryption without APP_SECRET", () => {
     const original = process.env.APP_SECRET;
     delete process.env.APP_SECRET;
 
-    expect(() => encrypt("test")).toThrow("APP_SECRET environment variable is not set");
+    expect(() => encrypt("test")).toThrow(
+      "APP_SECRET environment variable is not set"
+    );
 
     process.env.APP_SECRET = original;
   });

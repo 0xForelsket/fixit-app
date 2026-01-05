@@ -1,7 +1,7 @@
-import { describe, expect, it,vi } from "vitest";
 import { ReportBuilder } from "@/components/reports/builder/report-builder";
 import type { WidgetConfig } from "@/components/reports/builder/types";
 import { fireEvent, render, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 // Mock server actions
 vi.mock("@/actions/reports", () => ({
@@ -49,7 +49,9 @@ vi.mock("@/components/ui/use-toast", () => ({
 
 // Mock components that are lazy loaded
 vi.mock("@/components/reports/builder/widget-grid", () => ({
-  WidgetGrid: ({ children }: any) => <div data-testid="widget-grid">{children}</div>,
+  WidgetGrid: ({ children }: any) => (
+    <div data-testid="widget-grid">{children}</div>
+  ),
   findNextWidgetPosition: vi.fn(() => ({ x: 0, y: 0 })),
   WIDGET_DEFAULT_SIZES: {
     stats_summary: { w: 12, h: 3 },

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockSend = vi.fn();
@@ -112,9 +112,7 @@ describe("S3 Utilities", () => {
 
   describe("getPresignedDownloadUrl", () => {
     it("generates presigned download URL", async () => {
-      mockGetSignedUrl.mockResolvedValue(
-        "https://s3.example.com/download-url"
-      );
+      mockGetSignedUrl.mockResolvedValue("https://s3.example.com/download-url");
 
       const url = await getPresignedDownloadUrl("test/key.pdf");
 

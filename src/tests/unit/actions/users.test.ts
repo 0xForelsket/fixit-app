@@ -2,7 +2,7 @@
 import { users } from "@/db/schema";
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGetCurrentUser = vi.fn();
 const mockRequirePermission = vi.fn();
@@ -71,7 +71,8 @@ const { createUser, deleteUser, updateUser } = await import("@/actions/users");
 
 describe("users actions", () => {
   const mockUser: SessionUser = {
-    id: "1", displayId: 1,
+    id: "1",
+    displayId: 1,
     name: "Admin",
     employeeId: "ADMIN-001",
     roleId: "3",
@@ -142,7 +143,9 @@ describe("users actions", () => {
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe("A user with this Employee ID already exists");
+        expect(result.error).toBe(
+          "A user with this Employee ID already exists"
+        );
       }
     });
 

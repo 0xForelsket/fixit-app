@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
@@ -45,7 +45,9 @@ vi.mock("@/lib/logger", () => ({
 
 // Dynamic imports after mock.module
 const { PATCH } = await import("@/app/(app)/api/notifications/[id]/route");
-const { POST: POST_READ_ALL } = await import("@/app/(app)/api/notifications/read-all/route");
+const { POST: POST_READ_ALL } = await import(
+  "@/app/(app)/api/notifications/read-all/route"
+);
 
 beforeEach(() => {
   mockFindFirst.mockClear();
@@ -148,7 +150,7 @@ describe("PATCH /api/notifications/[id]", () => {
     });
     mockFindFirst.mockResolvedValue({
       id: "1",
-      
+
       userId: "1", // Belongs to user 1
       type: "work_order_created" as const,
       title: "New Work Order",
@@ -184,7 +186,7 @@ describe("PATCH /api/notifications/[id]", () => {
     });
     mockFindFirst.mockResolvedValue({
       id: "1",
-      
+
       userId: "1", // Same user
       type: "work_order_created" as const,
       title: "New Work Order",
@@ -223,7 +225,7 @@ describe("PATCH /api/notifications/[id]", () => {
     });
     mockFindFirst.mockResolvedValue({
       id: "1",
-      
+
       userId: "1",
       type: "work_order_created" as const,
       title: "New Work Order",

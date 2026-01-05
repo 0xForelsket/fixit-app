@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { isValidEmail, validateEmails } from "@/lib/email";
+import { describe, expect, it } from "vitest";
 
 describe("isValidEmail", () => {
   it("should return true for valid emails", () => {
@@ -35,7 +35,10 @@ describe("validateEmails", () => {
       "@bad.com",
     ]);
 
-    expect(result.valid).toEqual(["valid@example.com", "also.valid@domain.org"]);
+    expect(result.valid).toEqual([
+      "valid@example.com",
+      "also.valid@domain.org",
+    ]);
     expect(result.invalid).toEqual(["invalid", "@bad.com"]);
   });
 
@@ -56,11 +59,7 @@ describe("validateEmails", () => {
   });
 
   it("should handle all valid emails", () => {
-    const result = validateEmails([
-      "a@b.com",
-      "c@d.org",
-      "e@f.net",
-    ]);
+    const result = validateEmails(["a@b.com", "c@d.org", "e@f.net"]);
 
     expect(result.valid.length).toBe(3);
     expect(result.invalid.length).toBe(0);

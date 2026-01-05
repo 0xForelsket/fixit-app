@@ -20,8 +20,12 @@ describe("Skeleton", () => {
   });
 
   it("applies custom className", () => {
-    const { getByTestId } = render(<Skeleton className="custom-class" data-testid="skeleton" />);
-    expect(getByTestId("skeleton").classList.contains("custom-class")).toBe(true);
+    const { getByTestId } = render(
+      <Skeleton className="custom-class" data-testid="skeleton" />
+    );
+    expect(getByTestId("skeleton").classList.contains("custom-class")).toBe(
+      true
+    );
   });
 
   it("renders as div element", () => {
@@ -30,7 +34,9 @@ describe("Skeleton", () => {
   });
 
   it("handles default variant", () => {
-    const { getByTestId } = render(<Skeleton variant="default" data-testid="skeleton" />);
+    const { getByTestId } = render(
+      <Skeleton variant="default" data-testid="skeleton" />
+    );
     const skeleton = getByTestId("skeleton");
     expect(skeleton.classList.contains("skeleton")).toBe(true);
     expect(skeleton.classList.contains("rounded-full")).toBe(false);
@@ -38,22 +44,36 @@ describe("Skeleton", () => {
   });
 
   it("handles circular variant", () => {
-    const { getByTestId } = render(<Skeleton variant="circular" data-testid="skeleton" />);
-    expect(getByTestId("skeleton").classList.contains("rounded-full")).toBe(true);
+    const { getByTestId } = render(
+      <Skeleton variant="circular" data-testid="skeleton" />
+    );
+    expect(getByTestId("skeleton").classList.contains("rounded-full")).toBe(
+      true
+    );
   });
 
   it("handles rectangular variant", () => {
-    const { getByTestId } = render(<Skeleton variant="rectangular" data-testid="skeleton" />);
-    expect(getByTestId("skeleton").classList.contains("rounded-none")).toBe(true);
+    const { getByTestId } = render(
+      <Skeleton variant="rectangular" data-testid="skeleton" />
+    );
+    expect(getByTestId("skeleton").classList.contains("rounded-none")).toBe(
+      true
+    );
   });
 
   it("passes through additional props", () => {
-    const { getByTestId } = render(<Skeleton aria-label="Loading..." data-testid="skeleton" />);
-    expect(getByTestId("skeleton").getAttribute("aria-label")).toBe("Loading...");
+    const { getByTestId } = render(
+      <Skeleton aria-label="Loading..." data-testid="skeleton" />
+    );
+    expect(getByTestId("skeleton").getAttribute("aria-label")).toBe(
+      "Loading..."
+    );
   });
 
   it("can have custom dimensions via className", () => {
-    const { getByTestId } = render(<Skeleton className="h-10 w-20" data-testid="skeleton" />);
+    const { getByTestId } = render(
+      <Skeleton className="h-10 w-20" data-testid="skeleton" />
+    );
     const skeleton = getByTestId("skeleton");
     expect(skeleton.classList.contains("h-10")).toBe(true);
     expect(skeleton.classList.contains("w-20")).toBe(true);
@@ -74,9 +94,15 @@ describe("SkeletonCard", () => {
 
   it("has card-like styling", () => {
     const { container } = render(<SkeletonCard />);
-    expect(container.firstElementChild?.classList.contains("rounded-xl")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("border")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("bg-card")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("rounded-xl")).toBe(
+      true
+    );
+    expect(container.firstElementChild?.classList.contains("border")).toBe(
+      true
+    );
+    expect(container.firstElementChild?.classList.contains("bg-card")).toBe(
+      true
+    );
   });
 });
 
@@ -157,9 +183,15 @@ describe("SkeletonTable", () => {
 
   it("has table-like styling", () => {
     const { container } = render(<SkeletonTable />);
-    expect(container.firstElementChild?.classList.contains("rounded-xl")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("border")).toBe(true);
-    expect(container.firstElementChild?.classList.contains("overflow-hidden")).toBe(true);
+    expect(container.firstElementChild?.classList.contains("rounded-xl")).toBe(
+      true
+    );
+    expect(container.firstElementChild?.classList.contains("border")).toBe(
+      true
+    );
+    expect(
+      container.firstElementChild?.classList.contains("overflow-hidden")
+    ).toBe(true);
   });
 
   it("has header section", () => {

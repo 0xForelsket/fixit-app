@@ -54,7 +54,8 @@ describe("formatDateTime", () => {
 
 describe("formatRelativeTime", () => {
   beforeEach(() => {
-    vi.useFakeTimers(); vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T10:00:00Z"));
   });
 
   afterEach(() => {

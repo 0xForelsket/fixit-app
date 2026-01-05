@@ -1,6 +1,6 @@
 // Actions will be imported dynamically after mocks
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockGetCurrentUser = vi.fn();
 const mockUserHasPermission = vi.fn((user: any, permission: string) => {

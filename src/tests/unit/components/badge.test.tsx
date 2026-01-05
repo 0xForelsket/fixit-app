@@ -13,7 +13,9 @@ describe("Badge", () => {
     it("renders default variant", () => {
       const { container } = render(<Badge variant="default">Default</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("bg-primary")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-primary")
+      ).toBe(true);
     });
 
     it("renders secondary variant", () => {
@@ -21,7 +23,9 @@ describe("Badge", () => {
         <Badge variant="secondary">Secondary</Badge>
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-secondary")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-secondary")
+      ).toBe(true);
     });
 
     it("renders destructive variant", () => {
@@ -29,47 +33,69 @@ describe("Badge", () => {
         <Badge variant="destructive">Destructive</Badge>
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-destructive")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-destructive")
+      ).toBe(true);
     });
 
     it("renders outline variant", () => {
       const { container } = render(<Badge variant="outline">Outline</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("text-foreground")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("text-foreground")
+      ).toBe(true);
     });
 
     it("renders success variant", () => {
       const { container } = render(<Badge variant="success">Success</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("bg-success-500/15")).toBe(true);
-      expect(container.firstElementChild?.classList.contains("text-success-700")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-success-500/15")
+      ).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("text-success-700")
+      ).toBe(true);
     });
 
     it("renders warning variant", () => {
       const { container } = render(<Badge variant="warning">Warning</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("bg-warning-500/15")).toBe(true);
-      expect(container.firstElementChild?.classList.contains("text-warning-700")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-warning-500/15")
+      ).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("text-warning-700")
+      ).toBe(true);
     });
 
     it("renders danger variant", () => {
       const { container } = render(<Badge variant="danger">Danger</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("bg-danger-500/15")).toBe(true);
-      expect(container.firstElementChild?.classList.contains("text-danger-700")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-danger-500/15")
+      ).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("text-danger-700")
+      ).toBe(true);
     });
 
     it("renders critical variant with animation", () => {
       const { container } = render(<Badge variant="critical">Critical</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("animate-gentle-pulse")).toBe(true);
-      expect(container.firstElementChild?.classList.contains("from-danger-500")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("animate-gentle-pulse")
+      ).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("from-danger-500")
+      ).toBe(true);
     });
 
     it("uses default variant when not specified", () => {
       const { container } = render(<Badge>Default</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("bg-primary")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-primary")
+      ).toBe(true);
     });
   });
 
@@ -77,8 +103,12 @@ describe("Badge", () => {
     it("applies base badge styles", () => {
       const { container } = render(<Badge>Badge</Badge>);
 
-      expect(container.firstElementChild?.classList.contains("inline-flex")).toBe(true);
-      expect(container.firstElementChild?.classList.contains("items-center")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("inline-flex")
+      ).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("items-center")
+      ).toBe(true);
     });
 
     it("applies custom className", () => {
@@ -86,7 +116,9 @@ describe("Badge", () => {
         <Badge className="custom-class">Badge</Badge>
       );
 
-      expect(container.firstElementChild?.classList.contains("custom-class")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("custom-class")
+      ).toBe(true);
     });
 
     it("merges custom className with variant styles", () => {
@@ -96,8 +128,12 @@ describe("Badge", () => {
         </Badge>
       );
 
-      expect(container.firstElementChild?.classList.contains("bg-success-500/15")).toBe(true);
-      expect(container.firstElementChild?.classList.contains("extra-styling")).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("bg-success-500/15")
+      ).toBe(true);
+      expect(
+        container.firstElementChild?.classList.contains("extra-styling")
+      ).toBe(true);
     });
   });
 

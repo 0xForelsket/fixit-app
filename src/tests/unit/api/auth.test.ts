@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockAuthenticateUser = vi.fn();
 const mockCheckRateLimit = vi.fn();
@@ -111,7 +111,8 @@ describe("POST /api/auth/login", () => {
     mockAuthenticateUser.mockResolvedValue({
       success: true,
       user: {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         employeeId: "TECH-001",
         name: "Test User",
         roleName: "tech",

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it,vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -89,7 +89,8 @@ describe("GET /api/inventory/parts", () => {
 
   it("returns parts list when authenticated", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -111,7 +112,8 @@ describe("GET /api/inventory/parts", () => {
 
     const mockParts = [
       {
-        id: "1", displayId: 1,
+        id: "1",
+        displayId: 1,
         name: "Bearing",
         sku: "BRG-001",
         barcode: null,
@@ -126,7 +128,8 @@ describe("GET /api/inventory/parts", () => {
         updatedAt: new Date(),
       },
       {
-        id: "2", displayId: 2,
+        id: "2",
+        displayId: 2,
         name: "Motor",
         sku: "MTR-001",
         barcode: null,
@@ -154,7 +157,8 @@ describe("GET /api/inventory/parts", () => {
 
   it("handles database errors gracefully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Tech",
       email: "tech@example.com",
       pin: "hashed",
@@ -174,9 +178,7 @@ describe("GET /api/inventory/parts", () => {
       updatedAt: new Date(),
     } as any);
 
-    mockFindMany.mockRejectedValue(
-      new Error("Database connection lost")
-    );
+    mockFindMany.mockRejectedValue(new Error("Database connection lost"));
 
     const response = await GET();
     const data = await response.json();
@@ -210,7 +212,8 @@ describe("POST /api/inventory/parts", () => {
 
   it("returns 401 when lacking permission", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Operator",
       employeeId: "OP-001",
       email: "op@example.com",
@@ -248,7 +251,8 @@ describe("POST /api/inventory/parts", () => {
 
   it("returns 400 when missing required fields", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
@@ -287,7 +291,8 @@ describe("POST /api/inventory/parts", () => {
 
   it("creates part successfully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
@@ -295,7 +300,6 @@ describe("POST /api/inventory/parts", () => {
       roleId: "3",
       departmentId: "1",
       isActive: true,
-      employeeId: "ADMIN-001",
       hourlyRate: 50.0,
       preferences: {
         theme: "light",
@@ -310,7 +314,8 @@ describe("POST /api/inventory/parts", () => {
     mockUserHasPermission.mockReturnValue(true);
 
     const mockPart = {
-      id: "5", displayId: 5,
+      id: "5",
+      displayId: 5,
       name: "New Bearing",
       sku: "NB-001",
       barcode: null,
@@ -349,7 +354,8 @@ describe("POST /api/inventory/parts", () => {
 
   it("sets default values for optional fields", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
@@ -357,7 +363,6 @@ describe("POST /api/inventory/parts", () => {
       roleId: "3",
       departmentId: "1",
       isActive: true,
-      employeeId: "ADMIN-001",
       hourlyRate: 50.0,
       preferences: {
         theme: "light",
@@ -372,7 +377,8 @@ describe("POST /api/inventory/parts", () => {
     mockUserHasPermission.mockReturnValue(true);
 
     const mockPart = {
-      id: "6", displayId: 6,
+      id: "6",
+      displayId: 6,
       name: "Basic Part",
       sku: "BP-001",
       barcode: null,
@@ -414,7 +420,8 @@ describe("POST /api/inventory/parts", () => {
 
   it("handles database errors gracefully", async () => {
     mockGetCurrentUser.mockResolvedValue({
-      id: "1", displayId: 1,
+      id: "1",
+      displayId: 1,
       name: "Admin",
       employeeId: "ADMIN-001",
       email: "admin@example.com",
@@ -422,7 +429,6 @@ describe("POST /api/inventory/parts", () => {
       roleId: "3",
       departmentId: "1",
       isActive: true,
-      employeeId: "ADMIN-001",
       hourlyRate: 50.0,
       preferences: {
         theme: "light",
