@@ -85,8 +85,8 @@ export function DepartmentsTab({
 
   const stats = {
     total: departments.length,
-    totalMembers: departments.reduce((sum, d) => sum + d.memberCount, 0),
-    totalEquipment: departments.reduce((sum, d) => sum + d.equipmentCount, 0),
+    totalMembers: departments.reduce((sum, d) => sum + Number(d.memberCount), 0),
+    totalEquipment: departments.reduce((sum, d) => sum + Number(d.equipmentCount), 0),
   };
 
   const handleOpenCreate = () => {
@@ -146,29 +146,13 @@ export function DepartmentsTab({
 
   return (
     <div className="space-y-6">
+      {/* Header row with action button */}
       <div className="flex items-center justify-between">
-        <StatsTicker
-          stats={[
-            {
-              label: "Departments",
-              value: stats.total,
-              icon: Building2,
-              variant: "default",
-            },
-            {
-              label: "Members",
-              value: stats.totalMembers,
-              icon: Users,
-              variant: "primary",
-            },
-            {
-              label: "Equipment",
-              value: stats.totalEquipment,
-              icon: MonitorCog,
-              variant: "default",
-            },
-          ]}
-        />
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Department Management
+          </h3>
+        </div>
         {canEdit && (
           <Button
             onClick={handleOpenCreate}
@@ -179,6 +163,30 @@ export function DepartmentsTab({
           </Button>
         )}
       </div>
+
+      {/* Stats row */}
+      <StatsTicker
+        stats={[
+          {
+            label: "Departments",
+            value: stats.total,
+            icon: Building2,
+            variant: "default",
+          },
+          {
+            label: "Members",
+            value: stats.totalMembers,
+            icon: Users,
+            variant: "primary",
+          },
+          {
+            label: "Equipment",
+            value: stats.totalEquipment,
+            icon: MonitorCog,
+            variant: "default",
+          },
+        ]}
+      />
 
       {departments.length === 0 ? (
         <EmptyState

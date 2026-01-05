@@ -36,29 +36,13 @@ interface RolesTabProps {
 export function RolesTab({ roles, stats }: RolesTabProps) {
   return (
     <div className="space-y-6">
+      {/* Header row with action button */}
       <div className="flex items-center justify-between">
-        <StatsTicker
-          stats={[
-            {
-              label: "Total Roles",
-              value: stats.total,
-              icon: Shield,
-              variant: "default",
-            },
-            {
-              label: "System",
-              value: stats.system,
-              icon: ShieldCheck,
-              variant: "primary",
-            },
-            {
-              label: "Custom",
-              value: stats.custom,
-              icon: Shield,
-              variant: "default",
-            },
-          ]}
-        />
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Role Management
+          </h3>
+        </div>
         <Button
           asChild
           className="rounded-full font-black text-[10px] uppercase tracking-wider h-10 px-6"
@@ -69,6 +53,30 @@ export function RolesTab({ roles, stats }: RolesTabProps) {
           </Link>
         </Button>
       </div>
+
+      {/* Stats row */}
+      <StatsTicker
+        stats={[
+          {
+            label: "Total Roles",
+            value: stats.total,
+            icon: Shield,
+            variant: "default",
+          },
+          {
+            label: "System",
+            value: stats.system,
+            icon: ShieldCheck,
+            variant: "primary",
+          },
+          {
+            label: "Custom",
+            value: stats.custom,
+            icon: Shield,
+            variant: "default",
+          },
+        ]}
+      />
 
       {roles.length === 0 ? (
         <EmptyState

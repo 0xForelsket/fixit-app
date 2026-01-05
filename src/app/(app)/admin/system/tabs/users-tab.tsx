@@ -42,35 +42,13 @@ interface UsersTabProps {
 export function UsersTab({ users, stats }: UsersTabProps) {
   return (
     <div className="space-y-6">
+      {/* Header row with action button */}
       <div className="flex items-center justify-between">
-        <StatsTicker
-          stats={[
-            {
-              label: "Total",
-              value: stats.total,
-              icon: Users,
-              variant: "default",
-            },
-            {
-              label: "Operators",
-              value: stats.operators,
-              icon: User,
-              variant: "default",
-            },
-            {
-              label: "Technicians",
-              value: stats.techs,
-              icon: Wrench,
-              variant: "primary",
-            },
-            {
-              label: "Admins",
-              value: stats.admins,
-              icon: Shield,
-              variant: "danger",
-            },
-          ]}
-        />
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            User Management
+          </h3>
+        </div>
         <Button
           asChild
           className="rounded-full font-black text-[10px] uppercase tracking-wider h-10 px-6"
@@ -81,6 +59,36 @@ export function UsersTab({ users, stats }: UsersTabProps) {
           </Link>
         </Button>
       </div>
+
+      {/* Stats row */}
+      <StatsTicker
+        stats={[
+          {
+            label: "Total",
+            value: stats.total,
+            icon: Users,
+            variant: "default",
+          },
+          {
+            label: "Operators",
+            value: stats.operators,
+            icon: User,
+            variant: "default",
+          },
+          {
+            label: "Technicians",
+            value: stats.techs,
+            icon: Wrench,
+            variant: "primary",
+          },
+          {
+            label: "Admins",
+            value: stats.admins,
+            icon: Shield,
+            variant: "danger",
+          },
+        ]}
+      />
 
       {users.length === 0 ? (
         <EmptyState
