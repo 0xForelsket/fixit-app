@@ -20,11 +20,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
 import {
+  attachments,
   downtimeLogs,
   equipmentMeters,
   equipment as equipmentTable,
 } from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
+import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
 import {
@@ -33,9 +35,9 @@ import {
   getDepreciationInfo,
   hasCompleteFinancialData,
 } from "@/lib/utils/depreciation";
-import { desc, eq } from "drizzle-orm";
+// Removed duplicate import
+import { and, desc, eq } from "drizzle-orm";
 import {
-  Activity,
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
@@ -43,7 +45,9 @@ import {
   CheckCircle2,
   ClipboardList,
   DollarSign,
+  // Removed duplicate import
   Edit,
+  FileText,
   Gauge,
   History,
   Info,
@@ -54,6 +58,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DocumentsTab } from "../tabs/documents-tab";
 
 async function getEquipmentItem(code: string) {
   return db.query.equipment.findFirst({
@@ -125,12 +130,32 @@ export default async function EquipmentDetailPage({
     notFound();
   }
 
-  const [user, favoriteResult, meters, recentDowntime] = await Promise.all([
-    getCurrentUser(),
-    isFavorite("equipment", equipmentItem.id),
-    getEquipmentMeters(equipmentItem.id),
-    getDowntimeLogs(equipmentItem.id),
-  ]);
+  const [user, favoriteResult, meters, recentDowntime, attachmentsList] =
+    await Promise.all([
+      getCurrentUser(),
+      isFavorite("equipment", equipmentItem.id),
+      getEquipmentMeters(equipmentItem.id),
+      getDowntimeLogs(equipmentItem.id),
+      db.query.attachments.findMany({
+        where: and(
+          eq(attachments.entityType, "equipment"),
+          eq(attachments.entityId, equipmentItem.id)
+        ),
+        with: {
+          uploadedBy: {
+            columns: { name: true },
+          },
+        },
+      }),
+    ]);
+
+  // Generate signed URLs for attachments
+  const attachmentsWithUrls = await Promise.all(
+    attachmentsList.map(async (attachment) => ({
+      ...attachment,
+      url: await getPresignedDownloadUrl(attachment.s3Key),
+    }))
+  );
 
   // Check permissions
   const canViewFinancials = hasPermission(
@@ -644,6 +669,16 @@ export default async function EquipmentDetailPage({
     </div>
   );
 
+  const DocumentsSection = (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <DocumentsTab
+        equipmentId={equipmentItem.id}
+        attachments={attachmentsWithUrls}
+        userPermissions={user?.permissions ?? []}
+      />
+    </div>
+  );
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-8">
       {/* Header with Back Button */}
@@ -686,21 +721,21 @@ export default async function EquipmentDetailPage({
 
       <div className="space-y-6 lg:hidden">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 h-12">
+          <TabsList className="grid w-full grid-cols-5 h-12">
             <TabsTrigger value="overview">
               <Info className="h-4 w-4" />
             </TabsTrigger>
             <TabsTrigger value="history">
               <History className="h-4 w-4" />
             </TabsTrigger>
+            <TabsTrigger value="documents">
+              <FileText className="h-4 w-4" />
+            </TabsTrigger>
             <TabsTrigger value="bom">
               <Package className="h-4 w-4" />
             </TabsTrigger>
             <TabsTrigger value="schedules">
               <Calendar className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="logs">
-              <Activity className="h-4 w-4" />
             </TabsTrigger>
           </TabsList>
 
@@ -715,6 +750,10 @@ export default async function EquipmentDetailPage({
 
           <TabsContent value="history" className="mt-6">
             {HistorySection}
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-6">
+            {DocumentsSection}
           </TabsContent>
 
           <TabsContent value="bom" className="mt-6">
@@ -825,14 +864,20 @@ export default async function EquipmentDetailPage({
         </div>
         <div className="col-span-8 space-y-6">
           <Tabs defaultValue="history" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="documents">
+                Documents ({attachmentsWithUrls.length})
+              </TabsTrigger>
               <TabsTrigger value="bom">Parts (BOM)</TabsTrigger>
               <TabsTrigger value="schedules">Schedules</TabsTrigger>
               <TabsTrigger value="logs">System Logs</TabsTrigger>
             </TabsList>
             <TabsContent value="history" className="mt-4">
               {HistorySection}
+            </TabsContent>
+            <TabsContent value="documents" className="mt-4">
+              {DocumentsSection}
             </TabsContent>
             <TabsContent value="bom" className="mt-4">
               {/* Full table for desktop */}

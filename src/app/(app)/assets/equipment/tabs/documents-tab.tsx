@@ -75,20 +75,22 @@ export function DocumentsTab({
       </div>
 
       {/* Upload Section */}
-      <div className="space-y-4">
-        <h3 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
-          Upload Documents
-        </h3>
-        <FileUpload
-          entityType="equipment"
-          entityId={equipmentId}
-          onUploadComplete={() => router.refresh()}
-          accept="application/pdf,.pdf,image/jpeg,.jpg,.jpeg,image/png,.png,image/webp,.webp"
-          attachmentType="document"
-          label="Drop files here or click to upload"
-          maxSizeMB={10}
-        />
-      </div>
+      {hasPermission(userPermissions, PERMISSIONS.EQUIPMENT_UPDATE) && (
+        <div className="space-y-4">
+          <h3 className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">
+            Upload Documents
+          </h3>
+          <FileUpload
+            entityType="equipment"
+            entityId={equipmentId}
+            onUploadComplete={() => router.refresh()}
+            accept="application/pdf,.pdf,image/jpeg,.jpg,.jpeg,image/png,.png,image/webp,.webp"
+            attachmentType="document"
+            label="Drop files here or click to upload"
+            maxSizeMB={10}
+          />
+        </div>
+      )}
 
       {/* Manuals & Documents */}
       {manuals.length > 0 && (
