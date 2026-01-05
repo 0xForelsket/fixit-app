@@ -1,7 +1,7 @@
 import { Textarea } from "@/components/ui/textarea";
 import { render, fireEvent } from "@testing-library/react";
 import { createRef } from "react";
-import { describe, expect, it, mock } from "vitest";
+import { describe, expect, it,vi } from "vitest";
 
 describe("Textarea", () => {
   it("renders correctly", () => {

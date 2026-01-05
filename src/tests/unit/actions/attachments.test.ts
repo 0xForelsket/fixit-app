@@ -1,6 +1,6 @@
 // Actions will be imported dynamically after mocks
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 const mockGetCurrentUser = vi.fn();
 const mockInsert = vi.fn();
@@ -12,7 +12,7 @@ mockInsert.mockReturnValue({ values: mockValues });
 mockValues.mockReturnValue({ returning: mockReturning });
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     insert: mockInsert,
     // Add dummies to prevent crashes if other tests look for them
@@ -23,7 +23,7 @@ vi.vi.fn("@/db", () => ({
 }));
 
 // Mock auth module
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   hasPermission: vi.fn((userPermissions: string[], required: string) => {
     if (userPermissions.includes("*")) return true;
     return userPermissions.includes(required);
@@ -36,12 +36,12 @@ vi.vi.fn("@/lib/auth", () => ({
 }));
 
 // Mock session
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-vi.vi.fn("@/lib/audit", () => ({
+vi.mock("@/lib/audit", () => ({
   logAudit: vi.fn(),
 }));
 

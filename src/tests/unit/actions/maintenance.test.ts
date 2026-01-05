@@ -4,36 +4,71 @@ import {
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
-const mockGetCurrentUser = vi.fn();
-const mockUserHasPermission = vi.fn();
-const mockRevalidatePath = vi.fn();
-const mockRedirect = vi.fn();
+const {
+  mockGetCurrentUser,
+  mockUserHasPermission,
+  mockRevalidatePath,
+  mockRedirect,
+  mockInsert,
+  mockValues,
+  mockReturning,
+  mockUpdate,
+  mockSet,
+  mockWhere,
+  mockDelete,
+  mockTx,
+} = vi.hoisted(() => {
+  const mInsert = vi.fn();
+  const mValues = vi.fn();
+  const mReturning = vi.fn();
+  const mUpdate = vi.fn();
+  const mSet = vi.fn();
+  const mWhere = vi.fn();
+  const mDelete = vi.fn();
 
-const mockInsert = vi.fn();
-const mockValues = vi.fn();
-const mockReturning = vi.fn();
-const mockUpdate = vi.fn();
-const mockSet = vi.fn();
-const mockWhere = vi.fn();
-const mockDelete = vi.fn();
+  // Chainable mocks
+  mInsert.mockReturnValue({ values: mValues });
+  mValues.mockReturnValue({ returning: mReturning });
+  mUpdate.mockReturnValue({ set: mSet });
+  mSet.mockReturnValue({ where: mWhere });
+  mWhere.mockReturnValue({ returning: mReturning });
+  mDelete.mockReturnValue({ where: mWhere });
 
-// Chainable mocks
-mockInsert.mockReturnValue({ values: mockValues });
-mockValues.mockReturnValue({ returning: mockReturning });
-mockUpdate.mockReturnValue({ set: mockSet });
-mockSet.mockReturnValue({ where: mockWhere });
-mockWhere.mockReturnValue({ returning: mockReturning });
-// For delete
-mockDelete.mockReturnValue({ where: mockWhere });
+  const tx = {
+    insert: mInsert,
+    values: mValues,
+    returning: mReturning,
+    update: mUpdate,
+    set: mSet,
+    where: mWhere,
+    delete: mDelete,
+    transaction: vi.fn((callback: any) => callback(tx)),
+  };
+
+  return {
+    mockGetCurrentUser: vi.fn(),
+    mockUserHasPermission: vi.fn(),
+    mockRevalidatePath: vi.fn(),
+    mockRedirect: vi.fn(),
+    mockInsert: mInsert,
+    mockValues: mValues,
+    mockReturning: mReturning,
+    mockUpdate: mUpdate,
+    mockSet: mSet,
+    mockWhere: mWhere,
+    mockDelete: mDelete,
+    mockTx: tx,
+  };
+});
 
 // Mock dependencies
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     MAINTENANCE_CREATE: "maintenance:create",
@@ -42,27 +77,15 @@ vi.vi.fn("@/lib/auth", () => ({
   },
 }));
 
-vi.vi.fn("next/cache", () => ({
+vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-vi.vi.fn("next/navigation", () => ({
+vi.mock("next/navigation", () => ({
   redirect: mockRedirect,
 }));
 
-const mockTx = {
-  insert: mockInsert,
-  values: mockValues,
-  returning: mockReturning,
-  update: mockUpdate,
-  set: mockSet,
-  where: mockWhere,
-  delete: mockDelete,
-  // transaction just calls the callback with itself
-  transaction: vi.fn((callback: any) => callback(mockTx)),
-};
-
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: mockTx,
 }));
 

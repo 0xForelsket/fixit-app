@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -47,7 +47,7 @@ const mockGenerateRequestId = vi.fn(() => "test-request-id");
 const mockUserHasPermission = vi.fn();
 
 // Mock modules
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       attachments: {
@@ -61,12 +61,12 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-vi.vi.fn("@/lib/rate-limit", () => ({
+vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -74,19 +74,19 @@ vi.vi.fn("@/lib/rate-limit", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/s3", () => ({
+vi.mock("@/lib/s3", () => ({
   generateS3Key: mockGenerateS3Key,
   getPresignedUploadUrl: mockGetPresignedUploadUrl,
   getPresignedDownloadUrl: mockGetPresignedDownloadUrl,
   deleteObject: mockDeleteObject,
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     ALL: "*",

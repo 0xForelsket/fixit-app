@@ -4,25 +4,34 @@ import {
   updateEquipment,
 } from "@/actions/equipment";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
-const mockFindFirst = vi.fn();
-const mockInsert = vi.fn(() => ({
-  values: vi.fn(() => ({
-    returning: vi.fn(),
+const { 
+  mockFindFirst, 
+  mockInsert, 
+  mockUpdate, 
+  mockDelete, 
+  mockGetCurrentUser 
+} = vi.hoisted(() => ({
+  mockFindFirst: vi.fn(),
+  mockInsert: vi.fn(() => ({
+    values: vi.fn(() => ({
+      returning: vi.fn(),
+    })),
   })),
-}));
-const mockUpdate = vi.fn(() => ({
-  set: vi.fn(() => ({
+  mockUpdate: vi.fn(() => ({
+    set: vi.fn(() => ({
+      where: vi.fn(),
+    })),
+  })),
+  mockDelete: vi.fn(() => ({
     where: vi.fn(),
   })),
-}));
-const mockDelete = vi.fn(() => ({
-  where: vi.fn(),
+  mockGetCurrentUser: vi.fn(),
 }));
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -35,10 +44,8 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-const mockGetCurrentUser = vi.fn();
-
 // Mock auth module explicitly to avoid leakage
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: vi.fn((user, permission) => {
     if (user?.permissions?.includes("*")) return true;
     return user?.permissions?.includes(permission) ?? false;
@@ -51,12 +58,12 @@ vi.vi.fn("@/lib/auth", () => ({
 }));
 
 // Mock session
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-vi.vi.fn("@/lib/audit", () => ({
+vi.mock("@/lib/audit", () => ({
   logAudit: vi.fn(),
 }));
 
@@ -64,7 +71,7 @@ vi.vi.fn("@/lib/audit", () => ({
 import { db } from "@/db";
 // We don't import from @/lib/auth because we mocked it effectively for the action to use.
 // But wait, the action might import PERMISSIONS from the real module if my mock module didn't replace it fully?
-// vi.vi.fn("@/lib/auth", ...) replaces the module for everyone importing it via "@/lib/auth".
+// vi.mock("@/lib/auth", ...) replaces the module for everyone importing it via "@/lib/auth".
 
 describe("createEquipment action", () => {
   beforeEach(() => {

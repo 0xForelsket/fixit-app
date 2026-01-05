@@ -1,45 +1,77 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
-const mockFindFirst = vi.fn();
-const mockInsertValues = vi.fn();
-const mockInsertReturning = vi.fn();
-const mockInsert = vi.fn(() => ({
-  values: mockInsertValues.mockReturnValue({
-    returning: mockInsertReturning,
-  }),
-}));
-const mockUpdateSet = vi.fn();
-const mockUpdateWhere = vi.fn();
-const mockUpdateReturning = vi.fn();
-const mockUpdate = vi.fn(() => ({
-  set: mockUpdateSet.mockReturnValue({
-    where: mockUpdateWhere.mockReturnValue({
-      returning: mockUpdateReturning,
+const {
+  mockFindFirst,
+  mockInsertValues,
+  mockInsertReturning,
+  mockInsert,
+  mockUpdateSet,
+  mockUpdateWhere,
+  mockUpdateReturning,
+  mockUpdate,
+  mockRequireAuth,
+  mockRequireCsrf,
+  mockRequirePermission,
+  mockCheckRateLimit,
+  mockGetClientIp,
+  mockLoggerError,
+  mockLoggerWarn,
+  mockLoggerInfo,
+  mockGenerateRequestId,
+} = vi.hoisted(() => {
+  const mFindFirst = vi.fn();
+  const mInsertValues = vi.fn();
+  const mInsertReturning = vi.fn();
+  const mInsert = vi.fn(() => ({
+    values: mInsertValues.mockReturnValue({
+      returning: mInsertReturning,
     }),
-  }),
-}));
+  }));
+  const mUpdateSet = vi.fn();
+  const mUpdateWhere = vi.fn();
+  const mUpdateReturning = vi.fn();
+  const mUpdate = vi.fn(() => ({
+    set: mUpdateSet.mockReturnValue({
+      where: mUpdateWhere.mockReturnValue({
+        returning: mUpdateReturning,
+      }),
+    }),
+  }));
 
-const mockRequireAuth = vi.fn();
-const mockRequireCsrf = vi.fn();
-const mockRequirePermission = vi.fn();
-
-const mockCheckRateLimit = vi.fn(() => ({
-  success: true,
-  remaining: 99,
-  reset: Date.now() + 60000,
-}));
-const mockGetClientIp = vi.fn(() => "127.0.0.1");
+  return {
+    mockFindFirst: mFindFirst,
+    mockInsertValues: mInsertValues,
+    mockInsertReturning: mInsertReturning,
+    mockInsert: mInsert,
+    mockUpdateSet: mUpdateSet,
+    mockUpdateWhere: mUpdateWhere,
+    mockUpdateReturning: mUpdateReturning,
+    mockUpdate: mUpdate,
+    mockRequireAuth: vi.fn(),
+    mockRequireCsrf: vi.fn(),
+    mockRequirePermission: vi.fn(),
+    mockCheckRateLimit: vi.fn(() => ({
+      success: true,
+      remaining: 99,
+      reset: Date.now() + 60000,
+    })),
+    mockGetClientIp: vi.fn(() => "127.0.0.1"),
+    mockLoggerError: vi.fn(),
+    mockLoggerWarn: vi.fn(),
+    mockLoggerInfo: vi.fn(),
+    mockGenerateRequestId: vi.fn(() => "test-request-id"),
+  };
+});
 
 const mockApiLogger = {
-  error: vi.fn(),
-  warn: vi.fn(),
-  info: vi.fn(),
+  error: mockLoggerError,
+  warn: mockLoggerWarn,
+  info: mockLoggerInfo,
 };
-const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 // Mock modules
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       equipment: { findFirst: mockFindFirst },
@@ -50,14 +82,14 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockRequireAuth,
   requireAuth: mockRequireAuth,
   requireCsrf: mockRequireCsrf,
   requirePermission: mockRequirePermission,
 }));
 
-vi.vi.fn("@/lib/rate-limit", () => ({
+vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -67,7 +99,7 @@ vi.vi.fn("@/lib/rate-limit", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));
@@ -99,6 +131,11 @@ describe("POST /api/equipment/[id]/downtime", () => {
     mockRequirePermission.mockClear();
     mockCheckRateLimit.mockClear();
     mockApiLogger.error.mockClear();
+    mockRequireAuth.mockClear();
+
+    // Default authenticated state
+    mockRequireAuth.mockResolvedValue(mockUser);
+    mockRequirePermission.mockResolvedValue(mockUser);
 
     // Reset chains
     mockInsert.mockReturnValue({

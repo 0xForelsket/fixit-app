@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
@@ -33,7 +33,7 @@ const mockGenerateRequestId = vi.fn(() => "test-request-id");
 const mockUserHasPermission = vi.fn();
 
 // Mock modules
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       spareParts: {
@@ -45,17 +45,17 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     INVENTORY_VIEW: "inventory:view",

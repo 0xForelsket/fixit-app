@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockFindFirst = vi.fn();
@@ -8,7 +8,7 @@ const mockValues = vi.fn();
 const mockReturning = vi.fn(() => ([{ id: "1", displayId: 1 }]));
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       users: {
@@ -25,7 +25,7 @@ vi.vi.fn("@/db", () => ({
 }));
 
 // Mock SSE module
-vi.vi.fn("@/lib/sse", () => ({
+vi.mock("@/lib/sse", () => ({
   sendToUser: vi.fn(),
 }));
 

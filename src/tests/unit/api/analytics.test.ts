@@ -1,5 +1,5 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockGetCurrentUser = vi.fn();
@@ -9,7 +9,7 @@ const mockFrom = vi.fn();
 const mockWhere = vi.fn();
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     select: mockSelect.mockReturnValue({
       from: mockFrom.mockReturnValue({
@@ -20,12 +20,12 @@ vi.vi.fn("@/db", () => ({
 }));
 
 // Mock session
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock auth
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   PERMISSIONS: {
     ANALYTICS_VIEW: "analytics:view",
@@ -33,7 +33,7 @@ vi.vi.fn("@/lib/auth", () => ({
 }));
 
 // Mock logger
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: {
     error: vi.fn(),
     warn: vi.fn(),

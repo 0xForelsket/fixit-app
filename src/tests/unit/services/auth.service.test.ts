@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockFindFirstUser = vi.fn();
@@ -11,7 +11,7 @@ const mockAuthLoggerWarn = vi.fn();
 const mockAuthLoggerError = vi.fn();
 
 // Mock dependencies
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       users: {
@@ -29,15 +29,15 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   verifyPin: mockVerifyPin,
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   createSession: mockCreateSession,
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   authLogger: {
     info: mockAuthLoggerInfo,
     warn: mockAuthLoggerWarn,
@@ -45,7 +45,7 @@ vi.vi.fn("@/lib/logger", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/permissions", () => ({
+vi.mock("@/lib/permissions", () => ({
   getLegacyRolePermissions: vi.fn(() => ["work_orders:read"]),
 }));
 

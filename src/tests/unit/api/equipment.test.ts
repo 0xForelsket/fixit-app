@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockFindMany = vi.fn();
@@ -36,7 +36,7 @@ const mockApiLogger = {
 const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 // Mock modules
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -48,13 +48,13 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   requireAuth: mockRequireAuth,
   requireCsrf: mockRequireCsrf,
   requirePermission: mockRequirePermission,
 }));
 
-vi.vi.fn("@/lib/rate-limit", () => ({
+vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -64,7 +64,7 @@ vi.vi.fn("@/lib/rate-limit", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   generateRequestId: mockGenerateRequestId,
 }));

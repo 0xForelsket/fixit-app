@@ -1,18 +1,18 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockGetCurrentUser = vi.fn();
 const mockDeleteSession = vi.fn();
 
 // Mock session
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   deleteSession: mockDeleteSession,
 }));
 
 // Mock logger
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   authLogger: {
     error: vi.fn(),
     warn: vi.fn(),

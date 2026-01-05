@@ -1,19 +1,19 @@
-import { describe, expect, it, mock } from "vitest";
+import { describe, expect, it,vi } from "vitest";
 import { ReportBuilder } from "@/components/reports/builder/report-builder";
 import type { WidgetConfig } from "@/components/reports/builder/types";
 import { fireEvent, render, waitFor } from "@testing-library/react";
 
 // Mock server actions
-vi.vi.fn("@/actions/reports", () => ({
+vi.mock("@/actions/reports", () => ({
   saveReportTemplate: vi.fn(),
 }));
 
 // Mock ResizeObserver
-const ResizeObserverMock = vi.fn(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
+class ResizeObserverMock {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
 global.ResizeObserver = ResizeObserverMock as any;
 
 // Mock crypto.randomUUID
@@ -21,7 +21,7 @@ const randomUUID = vi.fn(() => `uuid-${Math.random()}`);
 global.crypto.randomUUID = randomUUID as any;
 
 // Mock ResponsiveContainer from recharts
-vi.vi.fn("recharts", () => ({
+vi.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: any) => (
     <div className="recharts-responsive-container">{children}</div>
   ),
@@ -35,16 +35,45 @@ vi.vi.fn("recharts", () => ({
 }));
 
 // Mock hooks
-vi.vi.fn("next/navigation", () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     refresh: vi.fn(),
   }),
 }));
 
-vi.vi.fn("@/components/ui/use-toast", () => ({
+vi.mock("@/components/ui/use-toast", () => ({
   useToast: () => ({
     toast: vi.fn(),
   }),
+}));
+
+// Mock components that are lazy loaded
+vi.mock("@/components/reports/builder/widget-grid", () => ({
+  WidgetGrid: ({ children }: any) => <div data-testid="widget-grid">{children}</div>,
+  findNextWidgetPosition: vi.fn(() => ({ x: 0, y: 0 })),
+  WIDGET_DEFAULT_SIZES: {
+    stats_summary: { w: 12, h: 3 },
+    bar_chart: { w: 6, h: 4 },
+    pie_chart: { w: 6, h: 4 },
+    data_table: { w: 12, h: 5 },
+    text_block: { w: 6, h: 2 },
+  },
+}));
+
+vi.mock("@/components/reports/builder/charts/bar-chart-widget", () => ({
+  BarChartWidget: () => <div data-testid="bar-chart-widget" />,
+}));
+
+vi.mock("@/components/reports/builder/charts/pie-chart-widget", () => ({
+  PieChartWidget: () => <div data-testid="pie-chart-widget" />,
+}));
+
+// Mock next/dynamic to be synchronous and simple in tests
+vi.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () => {
+    return (props: any) => <>{props.children}</>;
+  },
 }));
 
 describe("ReportBuilder", () => {
@@ -88,7 +117,7 @@ describe("ReportBuilder", () => {
 
     await waitFor(() => {
       expect(getByDisplayValue("New Widget")).toBeDefined();
-      expect(getByText(/Data Source/i)).toBeDefined();
+      expect(getByText(/Data:/i)).toBeDefined();
     });
   });
 

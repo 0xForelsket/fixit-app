@@ -1,6 +1,6 @@
 // Actions will be imported dynamically after mocks
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 const mockFindFirstRole = vi.fn();
 const mockFindFirstUser = vi.fn();
@@ -27,7 +27,7 @@ mockDelete.mockReturnValue({
 });
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       roles: {
@@ -50,13 +50,13 @@ const mockRequirePermission = vi.fn();
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
 
 // Mock auth
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   requirePermission: mockRequirePermission,
   PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
 // Mock next/cache
-vi.vi.fn("next/cache", () => ({
+vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 

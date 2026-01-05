@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { render, fireEvent } from "@testing-library/react";
-import { describe, expect, it, mock } from "vitest";
+import { describe, expect, it,vi } from "vitest";
 
 describe("Input", () => {
   it("renders as an input element", () => {

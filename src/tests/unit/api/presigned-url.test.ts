@@ -1,22 +1,22 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockGetCurrentUser = vi.fn();
 const mockGetPresignedUploadUrl = vi.fn();
 
 // Mock session
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock S3
-vi.vi.fn("@/lib/s3", () => ({
+vi.mock("@/lib/s3", () => ({
   getPresignedUploadUrl: mockGetPresignedUploadUrl,
 }));
 
 // Mock logger
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: {
     error: vi.fn(),
     warn: vi.fn(),

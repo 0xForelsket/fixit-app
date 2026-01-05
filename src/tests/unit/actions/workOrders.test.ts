@@ -1,11 +1,11 @@
 // Actions will be imported dynamically after mocks
 import { DEFAULT_ROLE_PERMISSIONS, PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 const mockCreateNotification = vi.fn().mockResolvedValue(true);
 
 // Mock the notifications helper
-vi.vi.fn("@/lib/notifications", () => ({
+vi.mock("@/lib/notifications", () => ({
   createNotification: mockCreateNotification,
 }));
 
@@ -58,7 +58,7 @@ const mockTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>
 });
 
 // Mock auth to prevent leakage
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   hasPermission: vi.fn((userPermissions: string[], required: string) => {
     if (userPermissions.includes("*")) return true;
     return userPermissions.includes(required);
@@ -73,7 +73,7 @@ vi.vi.fn("@/lib/auth", () => ({
 
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       equipment: {
@@ -99,17 +99,17 @@ vi.vi.fn("@/db", () => ({
 const mockGetCurrentUser = vi.fn();
 
 // Mock session
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
 // Mock audit
-vi.vi.fn("@/lib/audit", () => ({
+vi.mock("@/lib/audit", () => ({
   logAudit: vi.fn(),
 }));
 
 // Mock logger
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   workOrderLogger: {
     info: vi.fn(),
     error: vi.fn(),

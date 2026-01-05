@@ -1,6 +1,6 @@
 // Actions will be imported dynamically after mocks
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 const mockGetCurrentUser = vi.fn();
 const mockUserHasPermission = vi.fn((user: any, permission: string) => {
@@ -25,24 +25,24 @@ mockSet.mockReturnValue({ where: mockWhere });
 mockDelete.mockReturnValue({ where: mockWhere });
 
 // Mock dependencies
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: mockUserHasPermission,
   requirePermission: vi.fn(() => true),
   hasPermission: vi.fn(() => true),
   PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   inventoryLogger: {
     error: mockLogError,
   },
 }));
 
-vi.vi.fn("next/cache", () => ({
+vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
@@ -64,7 +64,7 @@ const mockTx = {
   delete: mockDelete,
 };
 
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     transaction: vi.fn((callback: any) => callback(mockTx)),
     query: {

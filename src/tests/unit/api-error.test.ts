@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Mock the logger to avoid console noise in tests
 const mockLoggerError = vi.fn();
@@ -6,7 +6,7 @@ const mockLoggerWarn = vi.fn();
 const mockLoggerInfo = vi.fn();
 const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: {
     error: mockLoggerError,
     warn: mockLoggerWarn,

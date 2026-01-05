@@ -1,9 +1,9 @@
 import { render } from "@testing-library/react";
 import { AlertCircle, Inbox, Package } from "lucide-react";
-import { describe, expect, it, mock } from "vitest";
+import { describe, expect, it,vi } from "vitest";
 
 // Mock next/link
-vi.vi.fn("next/link", () => ({
+vi.mock("next/link", () => ({
   default: ({
     children,
     href,

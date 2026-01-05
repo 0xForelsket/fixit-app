@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mock functions
 const mockFrom = vi.fn();
 const mockSelect = vi.fn(() => ({ from: mockFrom }));
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     select: mockSelect,
   },

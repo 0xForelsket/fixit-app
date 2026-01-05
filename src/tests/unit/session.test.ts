@@ -1,37 +1,48 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Mock cookie store
-const mockCookieGet = vi.fn();
-const mockCookieSet = vi.fn();
-const mockCookieDelete = vi.fn();
-const mockCookieStore = {
-  get: mockCookieGet,
-  set: mockCookieSet,
-  delete: mockCookieDelete,
-};
+const {
+  mockCookieGet,
+  mockCookieSet,
+  mockCookieDelete,
+  mockCookieStore,
+  mockJwtVerify,
+  mockHasPermission,
+  mockHasAnyPermission,
+  mockIsSessionVersionValid,
+} = vi.hoisted(() => ({
+  mockCookieGet: vi.fn(),
+  mockCookieSet: vi.fn(),
+  mockCookieDelete: vi.fn(),
+  mockCookieStore: {
+    get: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
+  },
+  mockJwtVerify: vi.fn(),
+  mockHasPermission: vi.fn(),
+  mockHasAnyPermission: vi.fn(),
+  mockIsSessionVersionValid: vi.fn(() => Promise.resolve(true)),
+}));
 
-// Mock functions that will be used
-const mockJwtVerify = vi.fn();
-const mockHasPermission = vi.fn();
-const mockHasAnyPermission = vi.fn();
-const mockIsSessionVersionValid = vi.fn(() => Promise.resolve(true));
+// Manually link the mock methods to the store since we want to clear them specifically
+mockCookieStore.get = mockCookieGet;
+mockCookieStore.set = mockCookieSet;
+mockCookieStore.delete = mockCookieDelete;
 
 // Mock next/headers
-vi.vi.fn("next/headers", () => ({
+vi.mock("next/headers", () => ({
   cookies: vi.fn(() => Promise.resolve(mockCookieStore)),
 }));
 
 // Mock jose
-vi.vi.fn("jose", () => ({
-  SignJWT: vi.fn(() => ({
-    setProtectedHeader: vi.fn(() => ({
-      setIssuedAt: vi.fn(() => ({
-        setExpirationTime: vi.fn(() => ({
-          sign: vi.fn(() => Promise.resolve("mock-jwt-token")),
-        })),
-      })),
-    })),
-  })),
+vi.mock("jose", () => ({
+  SignJWT: class {
+    setProtectedHeader = vi.fn().mockReturnThis();
+    setIssuedAt = vi.fn().mockReturnThis();
+    setExpirationTime = vi.fn().mockReturnThis();
+    sign = vi.fn().mockResolvedValue("mock-jwt-token");
+  },
   jwtVerify: mockJwtVerify,
 }));
 
@@ -43,14 +54,14 @@ const mockPERMISSIONS = {
   USER_CREATE: "user:create",
 };
 
-vi.vi.fn("@/lib/permissions", () => ({
+vi.mock("@/lib/permissions", () => ({
   PERMISSIONS: mockPERMISSIONS,
   hasPermission: mockHasPermission,
   hasAnyPermission: mockHasAnyPermission,
 }));
 
 // Mock session-validator
-vi.vi.fn("@/lib/session-validator", () => ({
+vi.mock("@/lib/session-validator", () => ({
   isSessionVersionValid: mockIsSessionVersionValid,
 }));
 

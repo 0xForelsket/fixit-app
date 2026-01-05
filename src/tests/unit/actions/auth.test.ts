@@ -1,20 +1,22 @@
 import { login } from "@/actions/auth";
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
-const mockAuthenticateUser = vi.fn();
-const mockDeleteSession = vi.fn();
-const mockRedirect = vi.fn();
+const { mockAuthenticateUser, mockDeleteSession, mockRedirect } = vi.hoisted(() => ({
+  mockAuthenticateUser: vi.fn(),
+  mockDeleteSession: vi.fn(),
+  mockRedirect: vi.fn(),
+}));
 
-vi.vi.fn("@/lib/services/auth.service", () => ({
+vi.mock("@/lib/services/auth.service", () => ({
   authenticateUser: mockAuthenticateUser,
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   deleteSession: mockDeleteSession,
 }));
 
-vi.vi.fn("next/navigation", () => ({
+vi.mock("next/navigation", () => ({
   redirect: mockRedirect,
 }));
 

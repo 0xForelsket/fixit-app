@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockSelectFrom = vi.fn();
@@ -50,7 +50,7 @@ const mockGenerateRequestId = vi.fn(() => "test-request-id");
 const mockCreateNotification = vi.fn().mockResolvedValue(true);
 
 // Mock modules
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     select: mockSelect,
     insert: mockInsert,
@@ -71,18 +71,18 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   requireCsrf: mockRequireCsrf,
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: mockApiLogger,
   schedulerLogger: mockSchedulerLogger,
   generateRequestId: mockGenerateRequestId,
 }));
 
-vi.vi.fn("@/lib/notifications", () => ({
+vi.mock("@/lib/notifications", () => ({
   createNotification: mockCreateNotification,
 }));
 

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 // Create mocks
 const mockWorkOrdersFindMany = vi.fn();
@@ -33,7 +33,7 @@ const mockCheckRateLimit = vi.fn(() => ({
 const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
 // Mock modules
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       workOrders: { findMany: mockWorkOrdersFindMany },
@@ -45,13 +45,13 @@ vi.vi.fn("@/db", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   requireAuth: mockRequireAuth,
   requireCsrf: mockRequireCsrf,
   getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   userHasPermission: vi.fn(() => true),
   PERMISSIONS: {
     TICKET_VIEW_ALL: "ticket:view_all",
@@ -60,7 +60,7 @@ vi.vi.fn("@/lib/auth", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/rate-limit", () => ({
+vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {
@@ -70,7 +70,7 @@ vi.vi.fn("@/lib/rate-limit", () => ({
   },
 }));
 
-vi.vi.fn("@/lib/logger", () => ({
+vi.mock("@/lib/logger", () => ({
   apiLogger: {
     error: vi.fn(),
     info: vi.fn(),

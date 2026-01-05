@@ -1,15 +1,15 @@
 import { DEFAULT_ROLE_PERMISSIONS } from "@/lib/permissions";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 const mockAuthenticateUser = vi.fn();
 const mockCheckRateLimit = vi.fn();
 const mockGetClientIp = vi.fn(() => "127.0.0.1");
 
-vi.vi.fn("@/lib/services/auth.service", () => ({
+vi.mock("@/lib/services/auth.service", () => ({
   authenticateUser: mockAuthenticateUser,
 }));
 
-vi.vi.fn("@/lib/rate-limit", () => ({
+vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   getClientIp: mockGetClientIp,
   RATE_LIMITS: {

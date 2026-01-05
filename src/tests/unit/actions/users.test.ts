@@ -2,7 +2,7 @@
 import { users } from "@/db/schema";
 import { PERMISSIONS as PERMISSIONS_SOURCE } from "@/lib/permissions";
 import type { SessionUser } from "@/lib/session";
-import { beforeEach, describe, expect, it, mock } from "vitest";
+import { beforeEach, describe, expect, it,vi } from "vitest";
 
 const mockGetCurrentUser = vi.fn();
 const mockRequirePermission = vi.fn();
@@ -27,11 +27,11 @@ mockSet.mockReturnValue({ where: mockWhere });
 mockDelete.mockReturnValue({ where: mockWhere }); // Add return for delete
 
 // Mock dependencies
-vi.vi.fn("@/lib/session", () => ({
+vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.vi.fn("@/lib/auth", () => ({
+vi.mock("@/lib/auth", () => ({
   requirePermission: mockRequirePermission,
   hashPin: mockHashPin,
   hasPermission: vi.fn((userPermissions: string[], required: string) => {
@@ -45,12 +45,12 @@ vi.vi.fn("@/lib/auth", () => ({
   PERMISSIONS: PERMISSIONS_SOURCE,
 }));
 
-vi.vi.fn("next/cache", () => ({
+vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
 // Mock the db module
-vi.vi.fn("@/db", () => ({
+vi.mock("@/db", () => ({
   db: {
     query: {
       users: {
