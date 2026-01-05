@@ -4,6 +4,7 @@ import { db } from "@/db";
 import {
   attachments,
   checklistCompletions,
+  downtimeLogs,
   equipment as equipmentTable,
   notifications,
   roles,
@@ -25,7 +26,7 @@ import {
   updateChecklistItemSchema,
   updateWorkOrderSchema,
 } from "@/lib/validations";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 
@@ -431,6 +432,28 @@ export async function resolveWorkOrder(
         newValue: "resolved",
         createdById: user.id,
       });
+
+      // Auto-resolve linked downtime
+      const linkedDowntime = await tx.query.downtimeLogs.findFirst({
+        where: and(
+          eq(downtimeLogs.workOrderId, workOrderId),
+          isNull(downtimeLogs.endTime) // Only close if still open
+        ),
+      });
+
+      if (linkedDowntime) {
+        // End the downtime
+        await tx
+          .update(downtimeLogs)
+          .set({ endTime: new Date() })
+          .where(eq(downtimeLogs.id, linkedDowntime.id));
+
+        // Set equipment back to operational
+        await tx
+          .update(equipmentTable)
+          .set({ status: "operational" })
+          .where(eq(equipmentTable.id, existingWorkOrder.equipmentId));
+      }
     });
 
     // Notify reporter that their work order was resolved

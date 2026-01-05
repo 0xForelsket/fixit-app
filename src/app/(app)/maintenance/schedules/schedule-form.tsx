@@ -4,6 +4,7 @@ import {
   createScheduleAction,
   updateScheduleAction,
 } from "@/actions/maintenance";
+import { getMeters } from "@/actions/meters"; // Import getMeters
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FormGrid, FormSection } from "@/components/ui/form-layout";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import type {
   Equipment,
+  EquipmentMeter,
   MaintenanceChecklist,
   MaintenanceSchedule,
 } from "@/db/schema";
@@ -24,7 +26,7 @@ import { insertMaintenanceScheduleSchema } from "@/lib/validations/schedules";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, GripVertical, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -48,6 +50,7 @@ export function ScheduleForm({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [meters, setMeters] = useState<EquipmentMeter[]>([]);
 
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(insertMaintenanceScheduleSchema),
@@ -56,6 +59,8 @@ export function ScheduleForm({
       equipmentId: schedule?.equipmentId || undefined,
       type: (schedule?.type as "maintenance" | "calibration") || "maintenance",
       frequencyDays: schedule?.frequencyDays || 30,
+      meterId: schedule?.meterId || null,
+      meterInterval: schedule?.meterInterval || null,
       isActive: schedule?.isActive ?? true,
       checklists:
         checklists.length > 0
@@ -77,7 +82,26 @@ export function ScheduleForm({
     formState: { errors },
     watch,
     setValue,
+    getValues,
   } = form;
+
+  const selectedEquipmentId = watch("equipmentId");
+
+  useEffect(() => {
+    async function loadMeters() {
+      if (selectedEquipmentId) {
+        const result = await getMeters(selectedEquipmentId);
+        if (result.success && result.data) {
+          setMeters(result.data as EquipmentMeter[]);
+        } else {
+          setMeters([]);
+        }
+      } else {
+        setMeters([]);
+      }
+    }
+    loadMeters();
+  }, [selectedEquipmentId]);
 
   const { fields, append, remove, update } = useFieldArray({
     control,
@@ -183,17 +207,97 @@ export function ScheduleForm({
           </Select>
         </FieldGroup>
 
-        <FieldGroup
-          label="Frequency (days)"
-          error={errors.frequencyDays?.message}
-        >
-          <Input
-            type="number"
-            min="1"
-            {...register("frequencyDays", { valueAsNumber: true })}
-            className={cn(errors.frequencyDays && "border-danger-500")}
-          />
-        </FieldGroup>
+        <div className="col-span-full">
+          <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Trigger Type
+          </span>
+          <div className="flex items-center gap-4 mt-2">
+            <Button
+              type="button"
+              variant={!watch("meterId") ? "default" : "outline"}
+              onClick={() => {
+                setValue("meterId", null);
+                setValue("meterInterval", null);
+                // Set default frequency if missing
+                if (!getValues("frequencyDays")) {
+                  setValue("frequencyDays", 30);
+                }
+              }}
+              className="h-9"
+            >
+              Time Based
+            </Button>
+            <Button
+              type="button"
+              variant={watch("meterId") ? "default" : "outline"}
+              onClick={() => {
+                setValue("frequencyDays", null);
+                // If meters exist, select first?
+                if (meters.length > 0 && !getValues("meterId")) {
+                  setValue("meterId", meters[0].id);
+                }
+              }}
+              className="h-9"
+            >
+              Usage Based
+            </Button>
+          </div>
+        </div>
+
+        {!watch("meterId") ? (
+          <FieldGroup
+            label="Frequency (days)"
+            error={errors.frequencyDays?.message}
+          >
+            <Input
+              type="number"
+              min="1"
+              {...register("frequencyDays", { valueAsNumber: true })}
+              className={cn(errors.frequencyDays && "border-danger-500")}
+            />
+          </FieldGroup>
+        ) : (
+          <>
+            <FieldGroup label="Meter" required error={errors.meterId?.message}>
+              <Select
+                value={watch("meterId") || ""}
+                onValueChange={(val) => setValue("meterId", val)}
+              >
+                <SelectTrigger
+                  className={cn(errors.meterId && "border-danger-500")}
+                >
+                  <SelectValue placeholder="Select meter..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {meters.map((meter) => (
+                    <SelectItem key={meter.id} value={meter.id}>
+                      {meter.name} ({meter.unit})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldGroup>
+
+            <FieldGroup
+              label="Interval"
+              required
+              error={errors.meterInterval?.message}
+            >
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  min="1"
+                  {...register("meterInterval", { valueAsNumber: true })}
+                  className={cn(errors.meterInterval && "border-danger-500")}
+                />
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  {meters.find((m) => m.id === watch("meterId"))?.unit ||
+                    "units"}
+                </span>
+              </div>
+            </FieldGroup>
+          </>
+        )}
 
         <div className="flex items-center gap-3 md:col-span-2 pt-2">
           <button

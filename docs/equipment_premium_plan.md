@@ -37,22 +37,35 @@ This document outlines the roadmap to elevate the Equipment Module from a basic 
 
 ---
 
-## Phase 3: Reliability & Downtime Tracking (OEE)
-**Objective:** Shift from tracking "what happened" to "how reliable is it".
+## Phase 3: Reliability & Downtime Tracking
+**Objective:** Automate downtime tracking for breakdowns and calculate reliability metrics.
 
-### 3.1 Downtime Events
-*   **New Table:** `DowntimeLog`
-    *   `EquipmentId`
-    *   `StartDate`, `EndDate`
-    *   `ReasonCode` (e.g., "Mechanical Failure", "No Operator", "Planned Maintenance")
-*   **UI:** "Report Downtime" button on the equipment page.
+### 3.1 Schema Updates
+#### [MODIFY] [schema.ts](file:///home/sdhui/projects/fixit-app/src/db/schema.ts)
+- Add `workOrderId` to `downtimeLogs` table (foreign key to `workOrders`).
 
-### 3.2 Metrics Dashboard
-*   **Calcuations:**
-    *   **MTBF** (Mean Time Between Failures)
-    *   **MTTR** (Mean Time To Repair)
-    *   **Availability %** = (Uptime / Total Time) * 100
-*   **UI:** Reliability Card on Equipment Detail Overview.
+### 3.2 Automated Logic
+#### [MODIFY] [work-orders/route.ts](file:///home/sdhui/projects/fixit-app/src/app/(app)/api/work-orders/route.ts)
+- **POST (Create):** If type is `breakdown`:
+    - Create a `DowntimeLog` entry automatically.
+    - Set `startTime` = `createdAt` (or user input if added later).
+    - Link to the nwe `workOrderId`.
+    - Update Equipment Status to `down`.
+
+#### [MODIFY] [work-orders/[id]/resolution/route.ts](file:///home/sdhui/projects/fixit-app/src/app/(app)/api/work-orders/[id]/resolution/route.ts)
+- **POST (Resolve):** If work order has a linked `DowntimeLog`:
+    - Set `DowntimeLog.endTime` = `resolvedAt`.
+    - Prompt/Auto-update Equipment Status to `operational`.
+
+### 3.3 UI Components
+#### [NEW] [downtime-log-list.tsx](file:///home/sdhui/projects/fixit-app/src/components/equipment/downtime-log-list.tsx)
+- Reusable component to list downtime history.
+
+#### [NEW] [reliability-card.tsx](file:///home/sdhui/projects/fixit-app/src/components/equipment/reliability-card.tsx)
+- Dashboard card showing:
+    - MTBF (Mean Time Between Failures)
+    - MTTR (Mean Time To Repair)
+    - Availability %
 
 ---
 

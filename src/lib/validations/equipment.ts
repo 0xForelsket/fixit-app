@@ -104,6 +104,7 @@ export const meterReadingSchema = z.object({
   meterId: z.string().min(1, "Meter is required"),
   reading: z.coerce.number().min(0, "Reading cannot be negative"),
   notes: z.string().max(500, "Notes too long").optional(),
+  workOrderId: z.string().min(1).optional(),
 });
 
 // Downtime log schema

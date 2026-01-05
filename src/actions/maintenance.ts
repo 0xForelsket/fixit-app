@@ -1,7 +1,11 @@
 "use server";
 
 import { db } from "@/db";
-import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
+import {
+  equipmentMeters,
+  maintenanceChecklists,
+  maintenanceSchedules,
+} from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import {
@@ -54,11 +58,29 @@ export async function createScheduleAction(
     return { error: `Invalid data: ${validated.error.message}` };
   }
 
-  const { title, equipmentId, type, frequencyDays, isActive, checklists } =
-    validated.data;
+  const {
+    title,
+    equipmentId,
+    type,
+    frequencyDays,
+    isActive,
+    checklists,
+    meterId,
+    meterInterval,
+  } = validated.data;
 
   try {
-    const nextDue = new Date(); // Due immediately for first run
+    let nextDue: Date | null = new Date(); // Default immediately due for time-based
+    let lastTriggerReading: string | undefined;
+
+    if (meterId) {
+      nextDue = null; // Usage-based doesn't necessarily have a date due
+      const meter = await db.query.equipmentMeters.findFirst({
+        where: eq(equipmentMeters.id, meterId),
+      });
+      // Initialize trigger reading to current reading so it triggers after interval passes from NOW
+      lastTriggerReading = meter?.currentReading || "0";
+    }
 
     const [schedule] = await db
       .insert(maintenanceSchedules)
@@ -66,7 +88,10 @@ export async function createScheduleAction(
         title,
         equipmentId,
         type,
-        frequencyDays,
+        frequencyDays: frequencyDays || null,
+        meterId,
+        meterInterval,
+        lastTriggerReading,
         isActive: isActive ?? true,
         nextDue,
       })
@@ -106,21 +131,49 @@ export async function updateScheduleAction(
     return { error: `Invalid data: ${validated.error.message}` };
   }
 
-  const { title, equipmentId, type, frequencyDays, isActive, checklists } =
-    validated.data;
+  const {
+    title,
+    equipmentId,
+    type,
+    frequencyDays,
+    isActive,
+    checklists,
+    meterId,
+    meterInterval,
+  } = validated.data;
 
   try {
     // Use transaction to ensure atomic update of schedule and checklists
     const schedule = await db.transaction(async (tx) => {
+      // If switching to usage-based, initialize trigger reading if not set?
+      // For updates, we might restart the counter or keep history?
+      // Simplest: if meterId changed or added, reset trigger?
+      // Or just update fields. User can reset manually if needed.
+
+      // biome-ignore lint/suspicious/noExplicitAny: Dynamic payload construction
+      const updatePayload: Record<string, any> = {
+        title,
+        equipmentId,
+        type,
+        frequencyDays: frequencyDays || null,
+        isActive,
+        meterId: meterId || null,
+        meterInterval: meterInterval || null,
+      };
+
+      // If switching TO meter-based, ensure we have a start point if we want to defer first trigger
+      // But typically update just preserves state.
+      // However, check if we need to clear lastTriggerReading if switching to time based?
+      if (!meterId) {
+        updatePayload.lastTriggerReading = null;
+        updatePayload.nextDue = new Date(); // Reset to time based immediately? Or calculate?
+      } else {
+        updatePayload.nextDue = null;
+      }
+
       const [updatedSchedule] = await tx
         .update(maintenanceSchedules)
-        .set({
-          title,
-          equipmentId,
-          type,
-          frequencyDays,
-          isActive,
-        })
+        .set(updatePayload)
         .where(eq(maintenanceSchedules.id, id))
         .returning();
 

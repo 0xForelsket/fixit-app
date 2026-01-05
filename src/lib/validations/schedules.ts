@@ -10,19 +10,34 @@ export const checklistItemSchema = z.object({
   estimatedMinutes: z.coerce.number().nullable(),
 });
 
-export const insertMaintenanceScheduleSchema = z.object({
+const baseScheduleSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title is too long"),
-  equipmentId: z.string().min(1, "Equipment is required"), // String for UUID support
+  equipmentId: z.string().min(1, "Equipment is required"),
   type: scheduleTypeSchema,
   frequencyDays: z.coerce
     .number()
     .min(1, "Frequency must be at least 1 day")
-    .max(365 * 5, "Frequency cannot exceed 5 years"),
+    .optional()
+    .nullable(),
+  meterId: z.string().optional().nullable(),
+  meterInterval: z.coerce.number().min(1).optional().nullable(),
   isActive: z.boolean().default(true),
   checklists: z.array(checklistItemSchema).optional(),
 });
 
-export const updateMaintenanceScheduleSchema = insertMaintenanceScheduleSchema
+export const insertMaintenanceScheduleSchema = baseScheduleSchema.refine(
+  (data) => {
+    const hasTime = !!data.frequencyDays;
+    const hasUsage = !!data.meterId && !!data.meterInterval;
+    return hasTime || hasUsage;
+  },
+  {
+    message: "Must specify either time-based or usage-based interval",
+    path: ["frequencyDays"],
+  }
+);
+
+export const updateMaintenanceScheduleSchema = baseScheduleSchema
   .partial()
   .extend({
     checklists: z.array(checklistItemSchema).optional(),

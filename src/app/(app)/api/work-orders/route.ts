@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import {
+  downtimeLogs,
   equipment as equipmentTable,
   notifications,
   roles,
@@ -144,19 +145,41 @@ export async function POST(request: Request) {
     const dueBy = calculateDueBy(priority);
 
     // Create the work order
-    const [workOrder] = await db
-      .insert(workOrders)
-      .values({
-        equipmentId,
-        type,
-        title,
-        description,
-        priority,
-        reportedById: user.id,
-        status: "open",
-        dueBy,
-      })
-      .returning();
+    const [workOrder] = await db.transaction(async (tx) => {
+      const [wo] = await tx
+        .insert(workOrders)
+        .values({
+          equipmentId,
+          type,
+          title,
+          description,
+          priority,
+          reportedById: user.id,
+          status: "open",
+          dueBy,
+        })
+        .returning();
+
+      // If this is a breakdown, automatically start downtime
+      if (type === "breakdown") {
+        await tx.insert(downtimeLogs).values({
+          equipmentId,
+          startTime: new Date(),
+          reasonCode: "mechanical_failure", // Default, can be updated later
+          reportedById: user.id,
+          workOrderId: wo.id,
+          notes: `Auto-generated from Work Order: ${title}`,
+        });
+
+        // Update equipment status to "down"
+        await tx
+          .update(equipmentTable)
+          .set({ status: "down" })
+          .where(eq(equipmentTable.id, equipmentId));
+      }
+
+      return [wo];
+    });
 
     // Get equipment details for notifications
     const equipmentItem = await db.query.equipment.findFirst({

@@ -403,55 +403,6 @@ export const workOrders = pgTable(
   })
 );
 
-// ============ EQUIPMENT PREMIUM: METERS (Phase 4) ============
-
-// Equipment meters (multiple meters per equipment)
-export const equipmentMeters = pgTable(
-  "equipment_meters",
-  {
-    id: text("id")
-      .primaryKey()
-      .$defaultFn(() => uuidv7()),
-    equipmentId: text("equipment_id")
-      .references(() => equipment.id, { onDelete: "cascade" })
-      .notNull(),
-    name: text("name").notNull(), // e.g., "Engine Hours", "Odometer"
-    type: text("type", { enum: meterTypes }).notNull(),
-    unit: text("unit").notNull(), // e.g., "hrs", "mi", "km"
-    currentReading: text("current_reading"), // Stored as text for precision
-    lastReadingDate: timestamp("last_reading_date"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    equipmentIdx: index("em_equipment_idx").on(table.equipmentId),
-  })
-);
-
-// Meter readings history
-export const meterReadings = pgTable(
-  "meter_readings",
-  {
-    id: text("id")
-      .primaryKey()
-      .$defaultFn(() => uuidv7()),
-    meterId: text("meter_id")
-      .references(() => equipmentMeters.id, { onDelete: "cascade" })
-      .notNull(),
-    reading: text("reading").notNull(), // Stored as text for precision
-    recordedAt: timestamp("recorded_at").notNull().defaultNow(),
-    recordedById: text("recorded_by_id")
-      .references(() => users.id)
-      .notNull(),
-    workOrderId: text("work_order_id").references(() => workOrders.id),
-    notes: text("notes"),
-  },
-  (table) => ({
-    meterIdx: index("mr_meter_idx").on(table.meterId),
-    recordedAtIdx: index("mr_recorded_at_idx").on(table.recordedAt),
-    workOrderIdx: index("mr_work_order_idx").on(table.workOrderId),
-  })
-);
-
 // Maintenance schedules table
 export const maintenanceSchedules = pgTable(
   "maintenance_schedules",
@@ -465,15 +416,9 @@ export const maintenanceSchedules = pgTable(
       .notNull(),
     title: text("title").notNull(),
     type: text("type", { enum: scheduleTypes }).notNull(),
-    frequencyDays: integer("frequency_days"), // Removed .notNull() for usage-based support
-
-    // Usage-based maintenance (Phase 4.2)
-    meterId: text("meter_id").references(() => equipmentMeters.id),
-    meterInterval: integer("meter_interval"), // Trigger every X units
-    lastTriggerReading: text("last_trigger_reading"), // Reading when last triggered
-
+    frequencyDays: integer("frequency_days").notNull(),
     lastGenerated: timestamp("last_generated"),
-    nextDue: timestamp("next_due"), // Optional for usage-based
+    nextDue: timestamp("next_due").notNull(),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
@@ -485,8 +430,6 @@ export const maintenanceSchedules = pgTable(
     ),
     // Equipment's maintenance schedules
     equipmentIdx: index("ms_equipment_idx").on(table.equipmentId),
-    // Meter-based schedules index
-    meterIdx: index("ms_meter_idx").on(table.meterId),
   })
 );
 
@@ -565,6 +508,55 @@ export const equipmentStatusLogs = pgTable("equipment_status_logs", {
   changedById: text("changed_by_id").references(() => users.id),
   changedAt: timestamp("changed_at").notNull().defaultNow(),
 });
+
+// ============ EQUIPMENT PREMIUM: METERS (Phase 4) ============
+
+// Equipment meters (multiple meters per equipment)
+export const equipmentMeters = pgTable(
+  "equipment_meters",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    equipmentId: text("equipment_id")
+      .references(() => equipment.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(), // e.g., "Engine Hours", "Odometer"
+    type: text("type", { enum: meterTypes }).notNull(),
+    unit: text("unit").notNull(), // e.g., "hrs", "mi", "km"
+    currentReading: text("current_reading"), // Stored as text for precision
+    lastReadingDate: timestamp("last_reading_date"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    equipmentIdx: index("em_equipment_idx").on(table.equipmentId),
+  })
+);
+
+// Meter readings history
+export const meterReadings = pgTable(
+  "meter_readings",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    meterId: text("meter_id")
+      .references(() => equipmentMeters.id, { onDelete: "cascade" })
+      .notNull(),
+    reading: text("reading").notNull(), // Stored as text for precision
+    recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+    recordedById: text("recorded_by_id")
+      .references(() => users.id)
+      .notNull(),
+    workOrderId: text("work_order_id").references(() => workOrders.id),
+    notes: text("notes"),
+  },
+  (table) => ({
+    meterIdx: index("mr_meter_idx").on(table.meterId),
+    recordedAtIdx: index("mr_recorded_at_idx").on(table.recordedAt),
+    workOrderIdx: index("mr_work_order_idx").on(table.workOrderId),
+  })
+);
 
 // ============ EQUIPMENT PREMIUM: DOWNTIME (Phase 3) ============
 

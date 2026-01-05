@@ -1,8 +1,9 @@
 import { isFavorite } from "@/actions/favorites";
 import { AuditLogList } from "@/components/audit/audit-log-list";
 import {
-  EndDowntimeButton,
-  RecordReadingButton,
+  DowntimeLogList,
+  RecordMeterReadingDialog,
+  ReliabilityCard,
   ReportDowntimeDialog,
 } from "@/components/equipment";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
@@ -241,6 +242,53 @@ export default async function EquipmentDetailPage({
           </Link>
         </Button>
       )}
+    </div>
+  );
+
+  // Reliability Logic
+  const periodDays = 365;
+  const now = new Date();
+  // Filter downtime to last 365 days
+  const periodStart = new Date(
+    now.getTime() - periodDays * 24 * 60 * 60 * 1000
+  );
+  const relevantDowntime = recentDowntime.filter(
+    (log) => log.startTime >= periodStart
+  );
+
+  const totalPossibleHours = periodDays * 24;
+  const totalDowntimeMs = relevantDowntime.reduce((acc, log) => {
+    const end = log.endTime || new Date();
+    return acc + (end.getTime() - log.startTime.getTime());
+  }, 0);
+  const totalDowntimeHours = totalDowntimeMs / (1000 * 60 * 60);
+
+  const numberOfFailures = relevantDowntime.length;
+  // MTBF = (Total Operating Time) / Number of Failures
+  // Total Operating Time = Total Possible Time - Total Downtime
+  const totalOperatingTime = totalPossibleHours - totalDowntimeHours;
+  const mtbf =
+    numberOfFailures > 0
+      ? totalOperatingTime / numberOfFailures
+      : totalOperatingTime;
+
+  // MTTR = Total Downtime / Number of Failures
+  const mttr = numberOfFailures > 0 ? totalDowntimeHours / numberOfFailures : 0;
+
+  // Availability = (Operating Time / Total Time) * 100
+  const availability = (totalOperatingTime / totalPossibleHours) * 100;
+
+  const ReliabilitySection = (
+    <div className="mb-6">
+      <ReliabilityCard
+        metrics={{
+          mtbf,
+          mttr,
+          availability,
+          totalDowntime: totalDowntimeHours,
+          periodDays,
+        }}
+      />
     </div>
   );
 
@@ -574,10 +622,10 @@ export default async function EquipmentDetailPage({
                     </p>
                   )}
                   {canRecordMeters && (
-                    <RecordReadingButton
+                    <RecordMeterReadingDialog
                       meterId={meter.id}
                       meterName={meter.name}
-                      meterUnit={meter.unit}
+                      unit={meter.unit}
                       currentReading={meter.currentReading}
                     />
                   )}
@@ -591,15 +639,6 @@ export default async function EquipmentDetailPage({
   );
 
   // Downtime Section
-  const downtimeReasonLabels: Record<string, string> = {
-    mechanical_failure: "Mechanical Failure",
-    electrical_failure: "Electrical Failure",
-    no_operator: "No Operator",
-    no_materials: "No Materials",
-    planned_maintenance: "Planned Maintenance",
-    changeover: "Changeover",
-    other: "Other",
-  };
 
   const DowntimeSection = (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -612,60 +651,10 @@ export default async function EquipmentDetailPage({
           <ReportDowntimeDialog equipmentId={equipmentItem.id} />
         )}
       </div>
-      {recentDowntime.length === 0 ? (
-        <div className="p-8 text-center text-muted-foreground">
-          No downtime recorded
-        </div>
-      ) : (
-        <div className="divide-y">
-          {recentDowntime.map((log) => {
-            const duration = log.endTime
-              ? Math.round(
-                  (log.endTime.getTime() - log.startTime.getTime()) / 60000
-                )
-              : null;
-            return (
-              <div key={log.id} className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-sm">
-                      {downtimeReasonLabels[log.reasonCode] || log.reasonCode}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {log.startTime.toLocaleDateString()}{" "}
-                      {log.startTime.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-1">
-                    {duration !== null ? (
-                      <Badge variant="outline">
-                        {duration >= 60
-                          ? `${Math.floor(duration / 60)}h ${duration % 60}m`
-                          : `${duration}m`}
-                      </Badge>
-                    ) : (
-                      <>
-                        <Badge variant="danger">Ongoing</Badge>
-                        {canReportDowntime && (
-                          <EndDowntimeButton downtimeId={log.id} />
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-                {log.notes && (
-                  <p className="text-xs text-muted-foreground mt-2 italic">
-                    {log.notes}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <DowntimeLogList
+        logs={recentDowntime}
+        canReportDowntime={canReportDowntime}
+      />
     </div>
   );
 
@@ -741,6 +730,7 @@ export default async function EquipmentDetailPage({
 
           <TabsContent value="overview" className="space-y-6 mt-6">
             {StatusSection}
+            {ReliabilitySection}
             {SpecificationsSection}
             {FinancialsSection}
             {MetersSection}
@@ -856,6 +846,7 @@ export default async function EquipmentDetailPage({
       <div className="hidden lg:grid grid-cols-12 gap-8">
         <div className="col-span-4 space-y-6">
           {StatusSection}
+          {ReliabilitySection}
           {SpecificationsSection}
           {FinancialsSection}
           {MetersSection}

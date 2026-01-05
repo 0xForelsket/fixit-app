@@ -16,6 +16,7 @@ const mockFindFirstEquipment = vi.fn();
 const mockFindManyUsers = vi.fn();
 const mockFindFirstWorkOrder = vi.fn();
 const mockFindFirstRole = vi.fn();
+const mockFindFirstDowntimeLog = vi.fn();
 
 const mockInsert = vi.fn(() => ({
   values: vi.fn(() => ({
@@ -56,6 +57,7 @@ const mockTransaction = vi.fn(
         users: { findMany: mockFindManyUsers },
         workOrders: { findFirst: mockFindFirstWorkOrder },
         roles: { findFirst: mockFindFirstRole },
+        downtimeLogs: { findFirst: mockFindFirstDowntimeLog },
       },
     };
     return await callback(mockTx);
@@ -90,6 +92,9 @@ vi.mock("@/db", () => ({
       },
       roles: {
         findFirst: mockFindFirstRole,
+      },
+      downtimeLogs: {
+        findFirst: mockFindFirstDowntimeLog,
       },
     },
     transaction: mockTransaction,
@@ -578,6 +583,7 @@ describe("resolveWorkOrder action", () => {
     mockUpdate.mockClear();
     mockTransaction.mockClear();
     mockGetCurrentUser.mockClear();
+    mockFindFirstDowntimeLog.mockClear();
   });
 
   it("should return error when not logged in", async () => {
@@ -685,6 +691,11 @@ describe("resolveWorkOrder action", () => {
         insert: vi.fn(() => ({
           values: vi.fn(() => Promise.resolve()),
         })),
+        query: {
+          downtimeLogs: {
+            findFirst: mockFindFirstDowntimeLog,
+          },
+        },
       };
       return callback(mockTx as unknown as Parameters<typeof callback>[0]);
     });
@@ -788,8 +799,9 @@ describe("addWorkOrderComment action", () => {
 
     let capturedValues: unknown;
     mockInsert.mockReturnValue({
-      values: vi.fn((val) => {
-        capturedValues = val;
+      values: vi.fn((...args: unknown[]) => {
+        capturedValues = args[0];
+        return { returning: vi.fn() };
       }),
     });
 
