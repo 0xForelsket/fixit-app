@@ -6,6 +6,11 @@ import {
   loginSchema,
   updateWorkOrderSchema,
 } from "@/lib/validations";
+import {
+  downtimeLogSchema,
+  meterReadingSchema,
+  meterSchema,
+} from "@/lib/validations/equipment";
 import { describe, expect, it } from "bun:test";
 
 describe("loginSchema", () => {
@@ -335,5 +340,179 @@ describe("updateWorkOrderSchema", () => {
       resolutionNotes: "Fixed by replacing the motor.",
     });
     expect(result.success).toBe(true);
+  });
+});
+
+describe("meterSchema", () => {
+  it("should validate correct meter data", () => {
+    const result = meterSchema.safeParse({
+      name: "Odometer",
+      type: "hours",
+      unit: "km",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should require name", () => {
+    const result = meterSchema.safeParse({
+      name: "",
+      type: "hours",
+      unit: "km",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should require unit", () => {
+    const result = meterSchema.safeParse({
+      name: "Odometer",
+      type: "hours",
+      unit: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should accept optional currentReading", () => {
+    const result = meterSchema.safeParse({
+      name: "Odometer",
+      type: "hours",
+      unit: "km",
+      currentReading: 12500,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject negative currentReading", () => {
+    const result = meterSchema.safeParse({
+      name: "Odometer",
+      type: "hours",
+      unit: "km",
+      currentReading: -100,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should accept valid meter types", () => {
+    for (const type of ["hours", "miles", "kilometers", "cycles", "units"]) {
+      const result = meterSchema.safeParse({
+        name: "Test Meter",
+        type,
+        unit: "units",
+      });
+      expect(result.success).toBe(true);
+    }
+  });
+});
+
+describe("meterReadingSchema", () => {
+  it("should validate correct reading data", () => {
+    const result = meterReadingSchema.safeParse({
+      meterId: "meter-123",
+      reading: 15000,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept optional notes", () => {
+    const result = meterReadingSchema.safeParse({
+      meterId: "meter-123",
+      reading: 15000,
+      notes: "Regular reading",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should require meterId", () => {
+    const result = meterReadingSchema.safeParse({
+      meterId: "",
+      reading: 15000,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject negative reading", () => {
+    const result = meterReadingSchema.safeParse({
+      meterId: "meter-123",
+      reading: -500,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject notes over 500 characters", () => {
+    const result = meterReadingSchema.safeParse({
+      meterId: "meter-123",
+      reading: 15000,
+      notes: "A".repeat(501),
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("downtimeLogSchema", () => {
+  it("should validate correct downtime data", () => {
+    const result = downtimeLogSchema.safeParse({
+      equipmentId: "equip-123",
+      startTime: new Date(),
+      reasonCode: "mechanical_failure",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should allow null endTime for ongoing downtime", () => {
+    const result = downtimeLogSchema.safeParse({
+      equipmentId: "equip-123",
+      startTime: new Date(),
+      endTime: null,
+      reasonCode: "no_operator",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should accept valid reason codes", () => {
+    const reasonCodes = [
+      "mechanical_failure",
+      "electrical_failure",
+      "no_operator",
+      "no_materials",
+      "planned_maintenance",
+      "changeover",
+      "other",
+    ];
+    for (const reasonCode of reasonCodes) {
+      const result = downtimeLogSchema.safeParse({
+        equipmentId: "equip-123",
+        startTime: new Date(),
+        reasonCode,
+      });
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it("should reject invalid reason code", () => {
+    const result = downtimeLogSchema.safeParse({
+      equipmentId: "equip-123",
+      startTime: new Date(),
+      reasonCode: "invalid_reason",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should accept optional notes", () => {
+    const result = downtimeLogSchema.safeParse({
+      equipmentId: "equip-123",
+      startTime: new Date(),
+      reasonCode: "other",
+      notes: "Waiting for spare parts",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("should reject notes over 1000 characters", () => {
+    const result = downtimeLogSchema.safeParse({
+      equipmentId: "equip-123",
+      startTime: new Date(),
+      reasonCode: "other",
+      notes: "A".repeat(1001),
+    });
+    expect(result.success).toBe(false);
   });
 });
