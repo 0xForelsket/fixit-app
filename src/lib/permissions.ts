@@ -17,6 +17,9 @@ export const PERMISSIONS = {
   EQUIPMENT_UPDATE: "equipment:update",
   EQUIPMENT_DELETE: "equipment:delete",
   EQUIPMENT_MANAGE_MODELS: "equipment:manage_models",
+  EQUIPMENT_FINANCIALS_VIEW: "equipment:financials:view",
+  EQUIPMENT_METERS_RECORD: "equipment:meters:record",
+  EQUIPMENT_DOWNTIME_REPORT: "equipment:downtime:report",
 
   LOCATION_VIEW: "location:view",
   LOCATION_CREATE: "location:create",
@@ -70,6 +73,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.TICKET_RESOLVE,
     PERMISSIONS.TICKET_CLOSE,
     PERMISSIONS.EQUIPMENT_VIEW,
+    PERMISSIONS.EQUIPMENT_METERS_RECORD,
+    PERMISSIONS.EQUIPMENT_DOWNTIME_REPORT,
     PERMISSIONS.LOCATION_VIEW,
     PERMISSIONS.INVENTORY_VIEW,
     PERMISSIONS.INVENTORY_USE_PARTS,

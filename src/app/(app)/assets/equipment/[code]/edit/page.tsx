@@ -1,8 +1,9 @@
 import { db } from "@/db";
-import { equipment, locations, users } from "@/db/schema";
+import { attachments, equipment, equipmentMeters, locations, users } from "@/db/schema";
 import { PERMISSIONS } from "@/lib/permissions";
+import { getPresignedDownloadUrl } from "@/lib/s3";
 import { requirePermission } from "@/lib/session";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -54,6 +55,32 @@ export default async function EditEquipmentPage({
     notFound();
   }
 
+  // Load meters and attachments for this equipment
+  const [metersList, attachmentsList] = await Promise.all([
+    db.query.equipmentMeters.findMany({
+      where: eq(equipmentMeters.equipmentId, equipmentItem.id),
+    }),
+    db.query.attachments.findMany({
+      where: and(
+        eq(attachments.entityType, "equipment"),
+        eq(attachments.entityId, equipmentItem.id)
+      ),
+      with: {
+        uploadedBy: {
+          columns: { name: true },
+        },
+      },
+    }),
+  ]);
+
+  // Generate signed URLs for attachments
+  const attachmentsWithUrls = await Promise.all(
+    attachmentsList.map(async (attachment) => ({
+      ...attachment,
+      url: await getPresignedDownloadUrl(attachment.s3Key),
+    }))
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -94,6 +121,8 @@ export default async function EditEquipmentPage({
             categories={categoriesList}
             types={typesList}
             equipmentList={equipmentList}
+            meters={metersList}
+            attachments={attachmentsWithUrls}
           />
         </Suspense>
       </div>

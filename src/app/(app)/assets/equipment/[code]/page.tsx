@@ -14,22 +14,38 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { db } from "@/db";
-import { equipment as equipmentTable } from "@/db/schema";
+import {
+  downtimeLogs,
+  equipment as equipmentTable,
+  equipmentMeters,
+} from "@/db/schema";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { cn, formatRelativeTime } from "@/lib/utils";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import {
+  calculateDepreciation,
+  formatCurrency,
+  getDepreciationInfo,
+  hasCompleteFinancialData,
+} from "@/lib/utils/depreciation";
 import {
   Activity,
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Calendar,
   CheckCircle2,
+  ClipboardList,
+  Clock,
+  DollarSign,
   Edit,
+  Gauge,
   History,
   Info,
   MapPin,
   Package,
+  Shield,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
@@ -46,6 +62,7 @@ async function getEquipmentItem(code: string) {
       },
       location: true,
       owner: true,
+      responsibleDepartment: true,
       model: {
         with: {
           bom: {
@@ -71,6 +88,26 @@ async function getEquipmentItem(code: string) {
   });
 }
 
+async function getEquipmentMeters(equipmentId: string) {
+  return db.query.equipmentMeters.findMany({
+    where: eq(equipmentMeters.equipmentId, equipmentId),
+    orderBy: [desc(equipmentMeters.createdAt)],
+  });
+}
+
+async function getDowntimeLogs(equipmentId: string) {
+  return db.query.downtimeLogs.findMany({
+    where: eq(downtimeLogs.equipmentId, equipmentId),
+    orderBy: [desc(downtimeLogs.startTime)],
+    limit: 10,
+    with: {
+      reportedBy: {
+        columns: { name: true },
+      },
+    },
+  });
+}
+
 export default async function EquipmentDetailPage({
   params,
 }: {
@@ -83,11 +120,33 @@ export default async function EquipmentDetailPage({
   if (!equipmentItem) {
     notFound();
   }
-  
-  const [user, favoriteResult] = await Promise.all([
+
+  const [user, favoriteResult, meters, recentDowntime] = await Promise.all([
     getCurrentUser(),
     isFavorite("equipment", equipmentItem.id),
+    getEquipmentMeters(equipmentItem.id),
+    getDowntimeLogs(equipmentItem.id),
   ]);
+
+  // Check permissions
+  const canViewFinancials = hasPermission(
+    user?.permissions ?? [],
+    PERMISSIONS.EQUIPMENT_FINANCIALS_VIEW
+  );
+  const canRecordMeters = hasPermission(
+    user?.permissions ?? [],
+    PERMISSIONS.EQUIPMENT_METERS_RECORD
+  );
+  const canReportDowntime = hasPermission(
+    user?.permissions ?? [],
+    PERMISSIONS.EQUIPMENT_DOWNTIME_REPORT
+  );
+
+  // Calculate depreciation if financial data is complete
+  const depreciationInfo = getDepreciationInfo(equipmentItem);
+  const depreciation = depreciationInfo
+    ? calculateDepreciation(depreciationInfo)
+    : null;
 
 
 
@@ -309,6 +368,274 @@ export default async function EquipmentDetailPage({
     </div>
   );
 
+  // Specifications Section
+  const SpecificationsSection = (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">
+        <ClipboardList className="h-4 w-4 text-primary" />
+        Specifications
+      </h3>
+      <div className="space-y-3">
+        {equipmentItem.serialNumber && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Serial Number</span>
+            <span className="font-mono font-medium">
+              {equipmentItem.serialNumber}
+            </span>
+          </div>
+        )}
+        {equipmentItem.manufacturer && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Manufacturer</span>
+            <span className="font-medium">{equipmentItem.manufacturer}</span>
+          </div>
+        )}
+        {equipmentItem.modelYear && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Model Year</span>
+            <span className="font-medium">{equipmentItem.modelYear}</span>
+          </div>
+        )}
+        {equipmentItem.warrantyExpiration && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Warranty Expires</span>
+            <span
+              className={cn(
+                "font-medium flex items-center gap-1",
+                equipmentItem.warrantyExpiration < new Date()
+                  ? "text-rose-600"
+                  : "text-emerald-600"
+              )}
+            >
+              <Shield className="h-3 w-3" />
+              {equipmentItem.warrantyExpiration.toLocaleDateString()}
+            </span>
+          </div>
+        )}
+        {!equipmentItem.serialNumber &&
+          !equipmentItem.manufacturer &&
+          !equipmentItem.modelYear &&
+          !equipmentItem.warrantyExpiration && (
+            <p className="text-sm text-muted-foreground text-center py-2">
+              No specifications recorded
+            </p>
+          )}
+      </div>
+    </div>
+  );
+
+  // Financials Section (permission protected)
+  const FinancialsSection = canViewFinancials ? (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <h3 className="font-semibold mb-4 flex items-center gap-2">
+        <DollarSign className="h-4 w-4 text-primary" />
+        Financial Information
+      </h3>
+      {hasCompleteFinancialData(equipmentItem) && depreciation ? (
+        <div className="space-y-4">
+          {/* Book Value Highlight */}
+          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+              Current Book Value
+            </p>
+            <p className="text-2xl font-bold text-primary">
+              {formatCurrency(depreciation.bookValue)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {depreciation.percentDepreciated}% depreciated
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Purchase Price</p>
+              <p className="font-medium">
+                {formatCurrency(parseFloat(equipmentItem.purchasePrice!))}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Residual Value</p>
+              <p className="font-medium">
+                {formatCurrency(parseFloat(equipmentItem.residualValue || "0"))}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Purchase Date</p>
+              <p className="font-medium">
+                {equipmentItem.purchaseDate?.toLocaleDateString()}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Useful Life</p>
+              <p className="font-medium">
+                {equipmentItem.usefulLifeYears} years
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">
+                Annual Depreciation
+              </span>
+              <span className="font-medium">
+                {formatCurrency(depreciation.annualDepreciation)}
+              </span>
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="text-muted-foreground">Months Remaining</span>
+              <span
+                className={cn(
+                  "font-medium",
+                  depreciation.isFullyDepreciated
+                    ? "text-amber-600"
+                    : "text-emerald-600"
+                )}
+              >
+                {depreciation.isFullyDepreciated
+                  ? "Fully depreciated"
+                  : `${depreciation.monthsRemaining} months`}
+              </span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground text-center py-2">
+          No financial data recorded
+        </p>
+      )}
+    </div>
+  ) : null;
+
+  // Meters Section
+  const MetersSection = (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="border-b p-4 flex items-center justify-between">
+        <h3 className="font-semibold flex items-center gap-2">
+          <Gauge className="h-4 w-4" />
+          Meters
+        </h3>
+        {canRecordMeters && meters.length > 0 && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/assets/equipment/${equipmentItem.code}/edit#meters`}>
+              Record Reading
+            </Link>
+          </Button>
+        )}
+      </div>
+      {meters.length === 0 ? (
+        <div className="p-8 text-center text-muted-foreground">
+          No meters configured
+        </div>
+      ) : (
+        <div className="divide-y">
+          {meters.map((meter) => (
+            <div key={meter.id} className="p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-medium text-sm">{meter.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {meter.type}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg">
+                    {meter.currentReading || "—"}{" "}
+                    <span className="text-sm font-normal text-muted-foreground">
+                      {meter.unit}
+                    </span>
+                  </p>
+                  {meter.lastReadingDate && (
+                    <p className="text-xs text-muted-foreground">
+                      {formatRelativeTime(meter.lastReadingDate)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // Downtime Section
+  const downtimeReasonLabels: Record<string, string> = {
+    mechanical_failure: "Mechanical Failure",
+    electrical_failure: "Electrical Failure",
+    no_operator: "No Operator",
+    no_materials: "No Materials",
+    planned_maintenance: "Planned Maintenance",
+    changeover: "Changeover",
+    other: "Other",
+  };
+
+  const DowntimeSection = (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="border-b p-4 flex items-center justify-between">
+        <h3 className="font-semibold flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" />
+          Downtime History
+        </h3>
+        {canReportDowntime && (
+          <Button variant="outline" size="sm" className="text-amber-600 border-amber-300 hover:bg-amber-50">
+            <Clock className="h-3 w-3 mr-1" />
+            Report Downtime
+          </Button>
+        )}
+      </div>
+      {recentDowntime.length === 0 ? (
+        <div className="p-8 text-center text-muted-foreground">
+          No downtime recorded
+        </div>
+      ) : (
+        <div className="divide-y">
+          {recentDowntime.map((log) => {
+            const duration = log.endTime
+              ? Math.round(
+                  (log.endTime.getTime() - log.startTime.getTime()) / 60000
+                )
+              : null;
+            return (
+              <div key={log.id} className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-medium text-sm">
+                      {downtimeReasonLabels[log.reasonCode] || log.reasonCode}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {log.startTime.toLocaleDateString()}{" "}
+                      {log.startTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    {duration !== null ? (
+                      <Badge variant="outline">
+                        {duration >= 60
+                          ? `${Math.floor(duration / 60)}h ${duration % 60}m`
+                          : `${duration}m`}
+                      </Badge>
+                    ) : (
+                      <Badge variant="danger">Ongoing</Badge>
+                    )}
+                  </div>
+                </div>
+                {log.notes && (
+                  <p className="text-xs text-muted-foreground mt-2 italic">
+                    {log.notes}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-20 lg:pb-8">
       {/* Header with Back Button */}
@@ -371,7 +698,11 @@ export default async function EquipmentDetailPage({
 
           <TabsContent value="overview" className="space-y-6 mt-6">
             {StatusSection}
+            {SpecificationsSection}
+            {FinancialsSection}
+            {MetersSection}
             {HealthSection}
+            {DowntimeSection}
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
@@ -478,7 +809,11 @@ export default async function EquipmentDetailPage({
       <div className="hidden lg:grid grid-cols-12 gap-8">
         <div className="col-span-4 space-y-6">
           {StatusSection}
+          {SpecificationsSection}
+          {FinancialsSection}
+          {MetersSection}
           {HealthSection}
+          {DowntimeSection}
         </div>
         <div className="col-span-8 space-y-6">
           <Tabs defaultValue="history" className="w-full">
