@@ -104,6 +104,28 @@ export const checklistItemStatuses = [
 ] as const;
 export type ChecklistItemStatus = (typeof checklistItemStatuses)[number];
 
+// Equipment Premium: Meter types (Phase 4)
+export const meterTypes = [
+  "hours",
+  "miles",
+  "kilometers",
+  "cycles",
+  "units",
+] as const;
+export type MeterType = (typeof meterTypes)[number];
+
+// Equipment Premium: Downtime reasons (Phase 3)
+export const downtimeReasons = [
+  "mechanical_failure",
+  "electrical_failure",
+  "no_operator",
+  "no_materials",
+  "planned_maintenance",
+  "changeover",
+  "other",
+] as const;
+export type DowntimeReason = (typeof downtimeReasons)[number];
+
 // Phase 12: Inventory enums
 export const partCategories = [
   "electrical",
@@ -281,6 +303,16 @@ export const equipment = pgTable(
     status: text("status", { enum: equipmentStatuses })
       .notNull()
       .default("operational"),
+    // Phase 1.1 - Specifications
+    serialNumber: text("serial_number"),
+    manufacturer: text("manufacturer"),
+    modelYear: integer("model_year"),
+    warrantyExpiration: timestamp("warranty_expiration"),
+    // Phase 1.2 - Financials
+    purchaseDate: timestamp("purchase_date"),
+    purchasePrice: text("purchase_price"), // Stored as text for precision, parsed as decimal
+    residualValue: text("residual_value"), // Stored as text for precision, parsed as decimal
+    usefulLifeYears: integer("useful_life_years"),
     createdAt: timestamp("created_at")
       .notNull()
       .defaultNow(),
@@ -481,6 +513,74 @@ export const equipmentStatusLogs = pgTable("equipment_status_logs", {
     .notNull()
     .defaultNow(),
 });
+
+// ============ EQUIPMENT PREMIUM: METERS (Phase 4) ============
+
+// Equipment meters (multiple meters per equipment)
+export const equipmentMeters = pgTable(
+  "equipment_meters",
+  {
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    equipmentId: text("equipment_id")
+      .references(() => equipment.id, { onDelete: "cascade" })
+      .notNull(),
+    name: text("name").notNull(), // e.g., "Engine Hours", "Odometer"
+    type: text("type", { enum: meterTypes }).notNull(),
+    unit: text("unit").notNull(), // e.g., "hrs", "mi", "km"
+    currentReading: text("current_reading"), // Stored as text for precision
+    lastReadingDate: timestamp("last_reading_date"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    equipmentIdx: index("em_equipment_idx").on(table.equipmentId),
+  })
+);
+
+// Meter readings history
+export const meterReadings = pgTable(
+  "meter_readings",
+  {
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    meterId: text("meter_id")
+      .references(() => equipmentMeters.id, { onDelete: "cascade" })
+      .notNull(),
+    reading: text("reading").notNull(), // Stored as text for precision
+    recordedAt: timestamp("recorded_at").notNull().defaultNow(),
+    recordedById: text("recorded_by_id")
+      .references(() => users.id)
+      .notNull(),
+    notes: text("notes"),
+  },
+  (table) => ({
+    meterIdx: index("mr_meter_idx").on(table.meterId),
+    recordedAtIdx: index("mr_recorded_at_idx").on(table.recordedAt),
+  })
+);
+
+// ============ EQUIPMENT PREMIUM: DOWNTIME (Phase 3) ============
+
+// Downtime logs for reliability tracking
+export const downtimeLogs = pgTable(
+  "downtime_logs",
+  {
+    id: text("id").primaryKey().$defaultFn(() => uuidv7()),
+    equipmentId: text("equipment_id")
+      .references(() => equipment.id, { onDelete: "cascade" })
+      .notNull(),
+    startTime: timestamp("start_time").notNull(),
+    endTime: timestamp("end_time"),
+    reasonCode: text("reason_code", { enum: downtimeReasons }).notNull(),
+    notes: text("notes"),
+    reportedById: text("reported_by_id")
+      .references(() => users.id)
+      .notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    equipmentIdx: index("dl_equipment_idx").on(table.equipmentId),
+    timeRangeIdx: index("dl_time_range_idx").on(table.startTime, table.endTime),
+  })
+);
 
 // Bill of Materials (BOM) linking models to parts
 export const equipmentBoms = pgTable("equipment_boms", {
@@ -917,6 +1017,8 @@ export const equipmentRelations = relations(equipment, ({ one, many }) => ({
   workOrders: many(workOrders),
   maintenanceSchedules: many(maintenanceSchedules),
   statusLogs: many(equipmentStatusLogs),
+  meters: many(equipmentMeters),
+  downtimeLogs: many(downtimeLogs),
 }));
 
 export const workOrdersRelations = relations(workOrders, ({ one, many }) => ({
@@ -990,6 +1092,41 @@ export const equipmentStatusLogsRelations = relations(
     }),
   })
 );
+
+// Equipment Premium: Meter relations
+export const equipmentMetersRelations = relations(
+  equipmentMeters,
+  ({ one, many }) => ({
+    equipment: one(equipment, {
+      fields: [equipmentMeters.equipmentId],
+      references: [equipment.id],
+    }),
+    readings: many(meterReadings),
+  })
+);
+
+export const meterReadingsRelations = relations(meterReadings, ({ one }) => ({
+  meter: one(equipmentMeters, {
+    fields: [meterReadings.meterId],
+    references: [equipmentMeters.id],
+  }),
+  recordedBy: one(users, {
+    fields: [meterReadings.recordedById],
+    references: [users.id],
+  }),
+}));
+
+// Equipment Premium: Downtime relations
+export const downtimeLogsRelations = relations(downtimeLogs, ({ one }) => ({
+  equipment: one(equipment, {
+    fields: [downtimeLogs.equipmentId],
+    references: [equipment.id],
+  }),
+  reportedBy: one(users, {
+    fields: [downtimeLogs.reportedById],
+    references: [users.id],
+  }),
+}));
 
 export const equipmentModelsRelations = relations(
   equipmentModels,
@@ -1228,6 +1365,17 @@ export type NewNotification = typeof notifications.$inferInsert;
 
 export type EquipmentStatusLog = typeof equipmentStatusLogs.$inferSelect;
 export type NewEquipmentStatusLog = typeof equipmentStatusLogs.$inferInsert;
+
+// Equipment Premium: Meter types
+export type EquipmentMeter = typeof equipmentMeters.$inferSelect;
+export type NewEquipmentMeter = typeof equipmentMeters.$inferInsert;
+
+export type MeterReading = typeof meterReadings.$inferSelect;
+export type NewMeterReading = typeof meterReadings.$inferInsert;
+
+// Equipment Premium: Downtime types
+export type DowntimeLog = typeof downtimeLogs.$inferSelect;
+export type NewDowntimeLog = typeof downtimeLogs.$inferInsert;
 
 // Phase 10: Checklist types
 export type MaintenanceChecklist = typeof maintenanceChecklists.$inferSelect;
