@@ -127,7 +127,10 @@ export default async function MaintenancePage({
       }
     >
       <SchedulesClient
-        schedules={schedules}
+        schedules={schedules.map((s) => ({
+          ...s,
+          frequencyDays: s.frequencyDays ?? 0,
+        }))}
         initialMonth={currentMonth}
         initialYear={currentYear}
       />

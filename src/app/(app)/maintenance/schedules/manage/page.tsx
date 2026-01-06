@@ -77,8 +77,8 @@ async function getSchedules(params: SearchParams) {
           valB = b.equipment?.name.toLowerCase() || "";
           break;
         case "frequency":
-          valA = a.frequencyDays;
-          valB = b.frequencyDays;
+          valA = a.frequencyDays ?? 0;
+          valB = b.frequencyDays ?? 0;
           break;
         case "nextDue":
           valA = a.nextDue ? new Date(a.nextDue).getTime() : 0;

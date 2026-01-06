@@ -46,7 +46,7 @@ export function DowntimeByEquipmentChart({
         </div>
       </CardHeader>
       <CardContent className="pt-6">
-        <div className="h-[300px]">
+        <div className="h-[300px] w-full min-w-0">
           {data.length === 0 ? (
             <EmptyState
               title="No equipment data"

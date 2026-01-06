@@ -51,19 +51,23 @@ async function getSchedulerData() {
     orderBy: [desc(maintenanceSchedules.nextDue)],
   });
 
-  const formattedSchedules = schedules.map((s) => ({
-    id: s.id,
-    title: s.title,
-    equipmentName: s.equipment?.name || "Unknown Equipment",
-    frequencyDays: s.frequencyDays,
-    nextDue: s.nextDue,
-    lastGenerated: s.lastGenerated,
-    isActive: s.isActive,
-  }));
+  const formattedSchedules = schedules
+    .filter((s) => s.nextDue !== null)
+    .map((s) => ({
+      id: s.id,
+      title: s.title,
+      equipmentName: s.equipment?.name || "Unknown Equipment",
+      frequencyDays: s.frequencyDays ?? 0,
+      nextDue: s.nextDue!,
+      lastGenerated: s.lastGenerated,
+      isActive: s.isActive,
+    }));
 
-  const overdueCount = schedules.filter((s) => s.nextDue < now).length;
+  const overdueCount = schedules.filter(
+    (s) => s.nextDue && s.nextDue < now
+  ).length;
   const upcomingCount = schedules.filter(
-    (s) => s.nextDue >= now && s.nextDue <= oneWeekFromNow
+    (s) => s.nextDue && s.nextDue >= now && s.nextDue <= oneWeekFromNow
   ).length;
 
   return {

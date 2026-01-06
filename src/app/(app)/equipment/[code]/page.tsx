@@ -111,7 +111,7 @@ export default async function EquipmentPage({ params }: PageProps) {
   // Check if any PM is due (within 7 days or overdue)
   const now = new Date();
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const hasDuePM = schedules.some((s) => s.nextDue <= sevenDaysFromNow);
+  const hasDuePM = schedules.some((s) => s.nextDue && s.nextDue <= sevenDaysFromNow);
 
   const statusColorMap: Record<
     string,
@@ -221,15 +221,17 @@ export default async function EquipmentPage({ params }: PageProps) {
             }
             historyContent={<EquipmentHistory workOrders={workOrderHistory} />}
             maintenanceContent={
-              <EquipmentMaintenance
-                schedules={schedules.map((s) => ({
-                  id: s.id,
-                  name: s.title,
-                  type: s.type,
-                  nextDueDate: s.nextDue,
-                  frequencyDays: s.frequencyDays,
-                  workOrderId: null,
-                }))}
+                <EquipmentMaintenance
+                schedules={schedules
+                  .filter((s) => s.nextDue !== null)
+                  .map((s) => ({
+                    id: s.id,
+                    name: s.title,
+                    type: s.type,
+                    nextDueDate: s.nextDue!,
+                    frequencyDays: s.frequencyDays ?? 0,
+                    workOrderId: null,
+                  }))}
               />
             }
             reportContent={<ReportForm equipment={equipmentItem} />}
