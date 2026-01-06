@@ -1,5 +1,6 @@
 import { getDepartmentsWithStats } from "@/actions/departments";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Building2, MonitorCog, Users, Wrench } from "lucide-react";
@@ -24,44 +25,43 @@ export default async function DepartmentsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 pb-20 lg:pb-8">
-      {/* Page Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Departments</h1>
-        <p className="text-muted-foreground">
-          View the organizational structure, department heads, and team members.
-        </p>
-      </div>
-
-      {/* Stats Overview */}
-      <StatsTicker
-        stats={[
-          {
-            label: "Departments",
-            value: departments.length,
-            icon: Building2,
-            variant: "primary",
-          },
-          {
-            label: "Total Members",
-            value: totalMembers,
-            icon: Users,
-            variant: "default",
-          },
-          {
-            label: "Equipment",
-            value: totalEquipment,
-            icon: MonitorCog,
-            variant: "default",
-          },
-          {
-            label: "Active Work Orders",
-            value: totalActiveWorkOrders,
-            icon: Wrench,
-            variant: totalActiveWorkOrders > 10 ? "warning" : "default",
-          },
-        ]}
-      />
+    <PageLayout
+      id="departments-page"
+      title="Departments"
+      subtitle="Organization"
+      description="VIEW THE ORGANIZATIONAL STRUCTURE, DEPARTMENT HEADS, AND TEAM MEMBERS"
+      bgSymbol="DP"
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Departments",
+              value: departments.length,
+              icon: Building2,
+              variant: "primary",
+            },
+            {
+              label: "Total Members",
+              value: totalMembers,
+              icon: Users,
+              variant: "default",
+            },
+            {
+              label: "Equipment",
+              value: totalEquipment,
+              icon: MonitorCog,
+              variant: "default",
+            },
+            {
+              label: "Active Work Orders",
+              value: totalActiveWorkOrders,
+              icon: Wrench,
+              variant: totalActiveWorkOrders > 10 ? "warning" : "default",
+            },
+          ]}
+        />
+      }
+    >
 
       {/* Departments Grid */}
       {departments.length === 0 ? (
@@ -180,6 +180,6 @@ export default async function DepartmentsPage() {
           ))}
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }
