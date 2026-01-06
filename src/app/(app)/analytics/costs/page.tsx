@@ -1,6 +1,5 @@
 import { CostDashboard } from "@/components/analytics/cost-dashboard";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -13,16 +12,14 @@ export default async function CostAnalyticsPage() {
   }
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Cost Analytics"
-        subtitle="Financial Tracking"
-        description="Labor and parts cost analysis across work orders, equipment, and departments"
-        bgSymbol="$"
-      />
-      <div className="relative">
-        <CostDashboard />
-      </div>
-    </PageContainer>
+    <PageLayout
+      id="cost-analytics-page"
+      title="Cost Analytics"
+      subtitle="Financial Tracking"
+      description="LABOR AND PARTS COST ANALYSIS ACROSS WORK ORDERS, EQUIPMENT, AND DEPARTMENTS"
+      bgSymbol="$"
+    >
+      <CostDashboard />
+    </PageLayout>
   );
 }

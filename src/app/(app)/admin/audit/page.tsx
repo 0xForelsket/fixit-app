@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { db } from "@/db";
 import { auditLogs, entityTypes, users } from "@/db/schema";
@@ -157,70 +156,69 @@ export default async function AuditLogPage({
   const actions = ["CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT"];
 
   return (
-    <PageContainer className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="Audit Log"
-        subtitle="System Activity"
-        description={`${stats.total} TOTAL ENTRIES • ${stats.today} TODAY`}
-        bgSymbol="AU"
-        actions={
-          <Button
-            variant="outline"
-            asChild
-            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+    <PageLayout
+      id="audit-page"
+      title="Audit Log"
+      subtitle="System Activity"
+      description={`${stats.total} TOTAL ENTRIES • ${stats.today} TODAY`}
+      bgSymbol="AU"
+      headerActions={
+        <Button
+          variant="outline"
+          asChild
+          className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+        >
+          <a
+            href={`/api/audit/export?${new URLSearchParams(
+              Object.entries(params).filter(([_, v]) => v) as [
+                string,
+                string,
+              ][]
+            ).toString()}`}
+            download
           >
-            <a
-              href={`/api/audit/export?${new URLSearchParams(
-                Object.entries(params).filter(([_, v]) => v) as [
-                  string,
-                  string,
-                ][]
-              ).toString()}`}
-              download
-            >
-              <Download className="mr-2 h-4 w-4" />
-              EXPORT CSV
-            </a>
-          </Button>
-        }
-      />
-
-      {/* Stats Ticker */}
-      <StatsTicker
-        stats={[
-          {
-            label: "This Week",
-            value: stats.thisWeek,
-            icon: Calendar,
-            variant: "default",
-          },
-          {
-            label: "Creates",
-            value: stats.creates,
-            icon: Plus,
-            variant: "success",
-          },
-          {
-            label: "Updates",
-            value: stats.updates,
-            icon: Pencil,
-            variant: "primary",
-          },
-          {
-            label: "Deletes",
-            value: stats.deletes,
-            icon: Trash2,
-            variant: "danger",
-          },
-          {
-            label: "Logins",
-            value: stats.logins,
-            icon: LogIn,
-            variant: "default",
-          },
-        ]}
-      />
+            <Download className="mr-2 h-4 w-4" />
+            EXPORT CSV
+          </a>
+        </Button>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "This Week",
+              value: stats.thisWeek,
+              icon: Calendar,
+              variant: "default",
+            },
+            {
+              label: "Creates",
+              value: stats.creates,
+              icon: Plus,
+              variant: "success",
+            },
+            {
+              label: "Updates",
+              value: stats.updates,
+              icon: Pencil,
+              variant: "primary",
+            },
+            {
+              label: "Deletes",
+              value: stats.deletes,
+              icon: Trash2,
+              variant: "danger",
+            },
+            {
+              label: "Logins",
+              value: stats.logins,
+              icon: LogIn,
+              variant: "default",
+            },
+          ]}
+        />
+      }
+    >
 
       {/* Filters and Table */}
       <AuditLogTable
@@ -231,6 +229,6 @@ export default async function AuditLogPage({
         actions={actions}
         entityTypes={[...entityTypes]}
       />
-    </PageContainer>
+    </PageLayout>
   );
 }

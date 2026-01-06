@@ -1,4 +1,5 @@
 import { ReceiveStockForm } from "@/components/inventory/receive-stock-form";
+import { PageLayout } from "@/components/ui/page-layout";
 import { db } from "@/db";
 import { locations, spareParts } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -28,15 +29,18 @@ export default async function ReceivePage() {
   const { parts, locations } = await getData();
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Receive Stock</h1>
-        <p className="text-muted-foreground">Add new inventory to stock</p>
+    <PageLayout
+      id="receive-stock-page"
+      title="Receive Stock"
+      subtitle="Inventory Control"
+      description="ADD NEW INVENTORY TO STOCK"
+      bgSymbol="RS"
+    >
+      <div className="mx-auto max-w-2xl">
+        <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <ReceiveStockForm parts={parts} locations={locations} />
+        </div>
       </div>
-
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <ReceiveStockForm parts={parts} locations={locations} />
-      </div>
-    </div>
+    </PageLayout>
   );
 }

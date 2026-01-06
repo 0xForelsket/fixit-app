@@ -1,6 +1,5 @@
 import { DowntimeDashboard } from "@/components/analytics/downtime-dashboard";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -13,16 +12,14 @@ export default async function DowntimeAnalyticsPage() {
   }
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Downtime Analytics"
-        subtitle="Equipment Availability"
-        description="Track equipment downtime, availability metrics, and identify problematic assets"
-        bgSymbol="!"
-      />
-      <div className="relative">
-        <DowntimeDashboard />
-      </div>
-    </PageContainer>
+    <PageLayout
+      id="downtime-analytics-page"
+      title="Downtime Analytics"
+      subtitle="Equipment Availability"
+      description="TRACK EQUIPMENT DOWNTIME, AVAILABILITY METRICS, AND IDENTIFY PROBLEMATIC ASSETS"
+      bgSymbol="!"
+    >
+      <DowntimeDashboard />
+    </PageLayout>
   );
 }

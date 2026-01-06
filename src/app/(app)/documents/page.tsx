@@ -3,7 +3,7 @@ import {
   getAllAttachments,
 } from "@/actions/attachments";
 import { DocumentsView } from "@/components/documents/documents-view";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/session";
@@ -46,16 +46,18 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
   const isUserAdmin = dbUser?.assignedRole?.name === "admin";
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <PageHeader
-        title="Documents"
-        description="Manage and organized all system files and attachments."
-      />
+    <PageLayout
+      id="documents-page"
+      title="Documents"
+      subtitle="File Management"
+      description="MANAGE AND ORGANIZE ALL SYSTEM FILES AND ATTACHMENTS"
+      bgSymbol="DC"
+    >
       <DocumentsView
         initialAttachments={attachments || []}
         currentUserId={user?.id}
         isUserAdmin={isUserAdmin}
       />
-    </div>
+    </PageLayout>
   );
 }

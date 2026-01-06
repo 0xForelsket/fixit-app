@@ -1,4 +1,5 @@
 import { TransactionsTable } from "@/components/inventory/transactions-table";
+import { PageLayout } from "@/components/ui/page-layout";
 import { db } from "@/db";
 import {
   inventoryTransactions,
@@ -104,22 +105,17 @@ export default async function TransactionsPage(props: {
   const transactions = await getTransactions(props.searchParams);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Transaction History
-          </h1>
-          <p className="text-muted-foreground">
-            Log of all stock movements and adjustments
-          </p>
-        </div>
-      </div>
-
+    <PageLayout
+      id="transactions-page"
+      title="Transaction History"
+      subtitle="Inventory Control"
+      description="LOG OF ALL STOCK MOVEMENTS AND ADJUSTMENTS"
+      bgSymbol="TX"
+    >
       <TransactionsTable
         transactions={transactions}
         searchParams={searchParams}
       />
-    </div>
+    </PageLayout>
   );
 }

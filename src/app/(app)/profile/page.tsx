@@ -3,7 +3,7 @@ import { attachments } from "@/db/schema";
 import { User } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import { and, eq } from "drizzle-orm";
@@ -30,8 +30,13 @@ export default async function ProfilePage() {
   const avatarUrl = avatar ? await getPresignedDownloadUrl(avatar.s3Key) : null;
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <PageHeader title="My Profile" subtitle="User Settings" />
+    <PageLayout
+      id="profile-page"
+      title="My Profile"
+      subtitle="User Settings"
+      description="MANAGE YOUR ACCOUNT AND PREFERENCES"
+      bgSymbol="PR"
+    >
 
       <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
@@ -83,6 +88,6 @@ export default async function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

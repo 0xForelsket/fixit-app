@@ -1,5 +1,3 @@
-"use server";
-
 // Shared imports for work order actions
 export { db } from "@/db";
 export {

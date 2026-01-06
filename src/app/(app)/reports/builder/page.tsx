@@ -1,8 +1,7 @@
 import { getReportTemplate } from "@/actions/reports";
 import { ReportBuilder } from "@/components/reports/builder/report-builder";
 import { Button } from "@/components/ui/button";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -26,8 +25,13 @@ export default async function BuilderPage({
   const userId = "user_01HKQ...";
 
   return (
-    <PageContainer>
-      <div className="mb-6">
+    <PageLayout
+      id="report-builder-page"
+      title={template ? "Edit Report Template" : "New Custom Report"}
+      subtitle="Report Builder"
+      description="DESIGN YOUR CUSTOM REPORT LAYOUT BY DRAGGING AND DROPPING WIDGETS"
+      bgSymbol="RB"
+      headerActions={
         <Link href="/reports">
           <Button
             variant="ghost"
@@ -38,17 +42,9 @@ export default async function BuilderPage({
             Back to Reports
           </Button>
         </Link>
-      </div>
-      <PageHeader
-        title={template ? "Edit Report Template" : "New Custom Report"}
-        subtitle="Report Builder"
-        description="Design your custom report layout by dragging and dropping widgets."
-        bgSymbol="RB"
-      />
-
-      <div className="mt-8">
-        <ReportBuilder initialTemplate={template} userId={userId} />
-      </div>
-    </PageContainer>
+      }
+    >
+      <ReportBuilder initialTemplate={template} userId={userId} />
+    </PageLayout>
   );
 }

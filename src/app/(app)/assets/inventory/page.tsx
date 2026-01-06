@@ -1,8 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
@@ -65,71 +64,70 @@ export default async function InventoryPage() {
   const recentParts = await getRecentParts();
 
   return (
-    <PageContainer className="space-y-10 animate-in">
-      {/* Header */}
-      <PageHeader
-        title="Inventory Control"
-        subtitle="Stock Management"
-        description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
-        bgSymbol="IV"
-        actions={
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              asChild
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/assets/inventory/import">
-                <Upload className="mr-2 h-4 w-4" />
-                IMPORT DATA
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              asChild
-              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/assets/inventory/parts">
-                <Package className="mr-2 h-4 w-4" />
-                CATALOG
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
-            >
-              <Link href="/assets/inventory/parts/new">
-                <Plus className="mr-2 h-4 w-4" />
-                ADD NEW PART
-              </Link>
-            </Button>
-          </div>
-        }
-      />
-
-      {/* Stats Ticker */}
-      <StatsTicker
-        stats={[
-          {
-            label: "Total Parts",
-            value: stats.totalParts,
-            icon: Box,
-            variant: "default",
-          },
-          {
-            label: "Low Stock Warning",
-            value: stats.lowStockCount,
-            icon: AlertTriangle,
-            variant: stats.lowStockCount > 0 ? "danger" : "default",
-          },
-          {
-            label: "Inventory Assets",
-            value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}`,
-            icon: TrendingDown,
-            variant: "success",
-          },
-        ]}
-      />
+    <PageLayout
+      id="inventory-page"
+      title="Inventory Control"
+      subtitle="Stock Management"
+      description={`${stats.totalParts} UNIQUE SKUS | STOCK VALUE: $${stats.totalValue.toLocaleString()}`}
+      bgSymbol="IV"
+      headerActions={
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <Link href="/assets/inventory/import">
+              <Upload className="mr-2 h-4 w-4" />
+              IMPORT DATA
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <Link href="/assets/inventory/parts">
+              <Package className="mr-2 h-4 w-4" />
+              CATALOG
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+          >
+            <Link href="/assets/inventory/parts/new">
+              <Plus className="mr-2 h-4 w-4" />
+              ADD NEW PART
+            </Link>
+          </Button>
+        </div>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Parts",
+              value: stats.totalParts,
+              icon: Box,
+              variant: "default",
+            },
+            {
+              label: "Low Stock Warning",
+              value: stats.lowStockCount,
+              icon: AlertTriangle,
+              variant: stats.lowStockCount > 0 ? "danger" : "default",
+            },
+            {
+              label: "Inventory Assets",
+              value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}`,
+              icon: TrendingDown,
+              variant: "success",
+            },
+          ]}
+        />
+      }
+    >
 
       {/* Low Stock Alerts */}
       {stats.lowStockCount > 0 && (
@@ -294,7 +292,7 @@ export default async function InventoryPage() {
           </div>
         )}
       </div>
-    </PageContainer>
+    </PageLayout>
   );
 }
 

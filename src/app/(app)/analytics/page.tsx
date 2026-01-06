@@ -1,6 +1,5 @@
 import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -13,16 +12,14 @@ export default async function AnalyticsPage() {
   }
 
   return (
-    <PageContainer>
-      <PageHeader
-        title="Analytics Engine"
-        subtitle="System Performance"
-        description="Real-time metrics and system performance insights"
-        bgSymbol="AN"
-      />
-      <div className="relative">
-        <AnalyticsDashboard />
-      </div>
-    </PageContainer>
+    <PageLayout
+      id="analytics-page"
+      title="Analytics Engine"
+      subtitle="System Performance"
+      description="REAL-TIME METRICS AND SYSTEM PERFORMANCE INSIGHTS"
+      bgSymbol="AN"
+    >
+      <AnalyticsDashboard />
+    </PageLayout>
   );
 }

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { StatsCard } from "@/components/ui/stats-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -23,13 +23,13 @@ import Link from "next/link";
 
 export default function DesignSystemPage() {
   return (
-    <div className="space-y-12 pb-20">
-      <PageHeader
-        title="Industrial UI"
-        subtitle="Design System"
-        description="Core components and design tokens for the FixIt application."
-        bgSymbol="UI"
-      />
+    <PageLayout
+      id="design-system-page"
+      title="Industrial UI"
+      subtitle="Design System"
+      description="CORE COMPONENTS AND DESIGN TOKENS FOR THE FIXIT APPLICATION"
+      bgSymbol="UI"
+    >
 
       {/* Documentation Link */}
       <Card className="bg-primary/5 border-primary/20">
@@ -583,7 +583,7 @@ export default function DesignSystemPage() {
           </CardContent>
         </Card>
       </section>
-    </div>
+    </PageLayout>
   );
 }
 

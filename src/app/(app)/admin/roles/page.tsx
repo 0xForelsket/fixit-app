@@ -1,8 +1,7 @@
 import { getRoles } from "@/actions/roles";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import {
@@ -30,47 +29,48 @@ export default async function RolesPage({
   const roles = await getRoles(params);
 
   return (
-    <PageContainer className="space-y-6">
-      <PageHeader
-        title="Role Management"
-        subtitle="Access Control"
-        description={`${roles.length} ROLES CONFIGURED`}
-        bgSymbol="RO"
-        actions={
-          <Button
-            asChild
-            className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
-          >
-            <Link href="/admin/roles/new">
-              <Plus className="mr-2 h-4 w-4" />
-              CREATE ROLE
-            </Link>
-          </Button>
-        }
-      />
-
-      <StatsTicker
-        stats={[
-          {
-            label: "Total Roles",
-            value: roles.length,
-            icon: Shield,
-            variant: "default",
-          },
-          {
-            label: "System Roles",
-            value: roles.filter((r) => r.isSystemRole).length,
-            icon: ShieldCheck,
-            variant: "primary",
-          },
-          {
-            label: "Custom Roles",
-            value: roles.filter((r) => !r.isSystemRole).length,
-            icon: Shield,
-            variant: "default",
-          },
-        ]}
-      />
+    <PageLayout
+      id="roles-page"
+      title="Role Management"
+      subtitle="Access Control"
+      description={`${roles.length} ROLES CONFIGURED`}
+      bgSymbol="RO"
+      headerActions={
+        <Button
+          asChild
+          className="rounded-full font-black text-[10px] uppercase tracking-wider h-11 px-8 shadow-xl shadow-primary-500/20 active:scale-95 transition-all"
+        >
+          <Link href="/admin/roles/new">
+            <Plus className="mr-2 h-4 w-4" />
+            CREATE ROLE
+          </Link>
+        </Button>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Roles",
+              value: roles.length,
+              icon: Shield,
+              variant: "default",
+            },
+            {
+              label: "System Roles",
+              value: roles.filter((r) => r.isSystemRole).length,
+              icon: ShieldCheck,
+              variant: "primary",
+            },
+            {
+              label: "Custom Roles",
+              value: roles.filter((r) => !r.isSystemRole).length,
+              icon: Shield,
+              variant: "default",
+            },
+          ]}
+        />
+      }
+    >
 
       {roles.length === 0 ? (
         <EmptyState
@@ -207,6 +207,6 @@ export default async function RolesPage({
           </Table>
         </div>
       )}
-    </PageContainer>
+    </PageLayout>
   );
 }

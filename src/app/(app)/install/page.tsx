@@ -1,10 +1,15 @@
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { Monitor, Smartphone } from "lucide-react";
 
 export default function InstallPage() {
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <PageHeader title="Install Application" subtitle="Get Started" />
+    <PageLayout
+      id="install-page"
+      title="Install Application"
+      subtitle="Get Started"
+      description="ADD FIXIT TO YOUR DEVICE FOR QUICK ACCESS"
+      bgSymbol="IN"
+    >
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
@@ -97,6 +102,6 @@ export default function InstallPage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 import { getCurrentUser } from "@/lib/session";
 import { ArrowLeft, FileSpreadsheet, Lock } from "lucide-react";
@@ -21,24 +20,21 @@ export default async function ImportPartsPage() {
   );
 
   return (
-    <PageContainer className="space-y-8 animate-in">
-      {/* Header */}
-      <PageHeader
-        title="Import Parts"
-        subtitle="Bulk Data Import"
-        description="UPLOAD CSV FILE TO BULK IMPORT PARTS INTO INVENTORY"
-        bgSymbol="IM"
-        actions={
-          <Button variant="outline" asChild className="rounded-full">
-            <Link href="/assets/inventory">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              BACK TO INVENTORY
-            </Link>
-          </Button>
-        }
-      />
-
-      {/* Main Content */}
+    <PageLayout
+      id="import-parts-page"
+      title="Import Parts"
+      subtitle="Bulk Data Import"
+      description="UPLOAD CSV FILE TO BULK IMPORT PARTS INTO INVENTORY"
+      bgSymbol="IM"
+      headerActions={
+        <Button variant="outline" asChild className="rounded-full">
+          <Link href="/assets/inventory">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            BACK TO INVENTORY
+          </Link>
+        </Button>
+      }
+    >
       <div className="max-w-4xl mx-auto">
         {canImport ? (
           <div className="rounded-2xl border bg-card p-6 shadow-sm">
@@ -78,6 +74,6 @@ export default async function ImportPartsPage() {
           </div>
         )}
       </div>
-    </PageContainer>
+    </PageLayout>
   );
 }
