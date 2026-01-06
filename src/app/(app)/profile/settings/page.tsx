@@ -1,14 +1,9 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { PageLayout } from "@/components/ui/page-layout";
 import { getProfileData } from "@/data/profile";
-import { ArrowLeft, Bell, Globe, Palette, Settings, Shield } from "lucide-react";
+import { ArrowLeft, Bell, Globe, Palette, Shield } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -26,30 +21,24 @@ export default async function ProfileSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="mx-auto max-w-2xl px-4 space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/profile" className="gap-2 text-muted-foreground">
-              <ArrowLeft className="h-4 w-4" />
-              {t("backToProfile")}
-            </Link>
-          </Button>
-        </div>
-
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Settings className="h-8 w-8 text-primary" />
-            {t("title")}
-          </h1>
-          <p className="text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
-
+    <PageLayout
+      id="settings-page"
+      title={t("title")}
+      subtitle={t("profile")}
+      description={t("subtitle")}
+      bgSymbol="ST"
+      headerActions={
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/profile" className="gap-2 text-muted-foreground">
+            <ArrowLeft className="h-4 w-4" />
+            {t("backToProfile")}
+          </Link>
+        </Button>
+      }
+    >
+      <div className="mx-auto max-w-2xl space-y-8 pb-8">
         {/* Profile Section */}
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100 fill-mode-both">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               {t("profile")}
@@ -65,15 +54,13 @@ export default async function ProfileSettingsPage() {
         </Card>
 
         {/* Security Section */}
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200 fill-mode-both">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
               {t("security")}
             </CardTitle>
-            <CardDescription>
-              {t("securityDesc")}
-            </CardDescription>
+            <CardDescription>{t("securityDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <SecurityForm />
@@ -81,15 +68,13 @@ export default async function ProfileSettingsPage() {
         </Card>
 
         {/* Language Section */}
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300 fill-mode-both">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
               {t("language")}
             </CardTitle>
-            <CardDescription>
-              {t("languageDesc")}
-            </CardDescription>
+            <CardDescription>{t("languageDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -105,15 +90,13 @@ export default async function ProfileSettingsPage() {
         </Card>
 
         {/* Appearance Section */}
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[400ms] fill-mode-both">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Palette className="h-5 w-5 text-primary" />
               {t("appearance")}
             </CardTitle>
-            <CardDescription>
-              {t("appearanceDesc")}
-            </CardDescription>
+            <CardDescription>{t("appearanceDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <AppearanceForm preferences={profile.preferences} />
@@ -121,15 +104,13 @@ export default async function ProfileSettingsPage() {
         </Card>
 
         {/* Notifications Section */}
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[500ms] fill-mode-both">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Bell className="h-5 w-5 text-primary" />
               {t("notifications")}
             </CardTitle>
-            <CardDescription>
-              {t("notificationsDesc")}
-            </CardDescription>
+            <CardDescription>{t("notificationsDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <NotificationsForm preferences={profile.preferences} />
@@ -137,7 +118,7 @@ export default async function ProfileSettingsPage() {
         </Card>
 
         {/* Account Info (read-only) */}
-        <Card className="bg-muted/30">
+        <Card className="bg-muted/30 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-[600ms] fill-mode-both">
           <CardHeader>
             <CardTitle className="text-lg">{t("account")}</CardTitle>
           </CardHeader>
@@ -167,6 +148,6 @@ export default async function ProfileSettingsPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageLayout>
   );
 }
