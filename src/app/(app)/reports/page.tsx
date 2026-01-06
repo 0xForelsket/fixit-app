@@ -48,6 +48,7 @@ import {
   Plus,
   Timer,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 type SearchParams = {
@@ -302,6 +303,8 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const t = await getTranslations("reports");
+  const tCommon = await getTranslations("common");
   const params = await searchParams;
   const {
     workOrders: workOrdersList,
@@ -333,9 +336,9 @@ export default async function ReportsPage({
   return (
     <PageLayout
       id="reports-page"
-      title="System Reports"
-      subtitle="Performance Analytics"
-      description={`${total} WORK ORDERS PROCESSED${hasFilters ? " • FILTERED RESULTS" : ""}`}
+      title={t("title")}
+      subtitle={t("subtitle")}
+      description={`${total} ${t("workOrdersProcessed")}${hasFilters ? ` • ${t("filteredResults")}` : ""}`}
       bgSymbol="RE"
       headerActions={
         <div className="flex gap-2">
@@ -346,7 +349,7 @@ export default async function ReportsPage({
           >
             <Link href="/reports/builder">
               <Plus className="mr-2 h-4 w-4" />
-              New Report
+              {t("newReport")}
             </Link>
           </Button>
           <Button
@@ -356,7 +359,7 @@ export default async function ReportsPage({
           >
             <a href={csvUrl} download="work-order-report.csv">
               <Download className="mr-2 h-4 w-4" />
-              EXPORT CSV
+              {t("exportCsv")}
             </a>
           </Button>
         </div>
@@ -365,31 +368,31 @@ export default async function ReportsPage({
         <StatsTicker
           stats={[
             {
-              label: "Total Work Orders",
+              label: t("totalWorkOrders"),
               value: stats.total,
               icon: FileText,
               variant: "default",
             },
             {
-              label: "Open",
+              label: t("open"),
               value: stats.open,
               icon: Inbox,
               variant: "warning",
             },
             {
-              label: "Resolved",
+              label: t("resolved"),
               value: stats.resolved,
               icon: CheckCircle2,
               variant: "success",
             },
             {
-              label: "Critical",
+              label: t("critical"),
               value: stats.critical,
               icon: AlertTriangle,
               variant: "danger",
             },
             {
-              label: "Avg Resolution",
+              label: t("avgResolution"),
               value: `${stats.avgResolutionHours}h`,
               icon: Timer,
               variant: "default",
@@ -415,8 +418,8 @@ export default async function ReportsPage({
     >
       {workOrdersList.length === 0 ? (
         <EmptyState
-          title="No work orders found"
-          description="Try adjusting your date range or filters to find what you're looking for."
+          title={t("noWorkOrdersFound")}
+          description={t("noWorkOrdersDescription")}
           icon={FileText}
         />
       ) : (
@@ -425,7 +428,7 @@ export default async function ReportsPage({
             <TableHeader className="bg-muted/50">
               <TableRow className="border-b border-border hover:bg-transparent">
                 <SortHeader
-                  label="ID"
+                  label={t("id")}
                   field="id"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -433,7 +436,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 />
                 <SortHeader
-                  label="Title"
+                  label={t("titleColumn")}
                   field="title"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -441,7 +444,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 />
                 <SortHeader
-                  label="Equipment"
+                  label={t("equipment")}
                   field="equipment"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -449,7 +452,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden md:table-cell"
                 />
                 <SortHeader
-                  label="Location"
+                  label={t("location")}
                   field="location"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -457,7 +460,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden lg:table-cell"
                 />
                 <SortHeader
-                  label="Status"
+                  label={t("status")}
                   field="status"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -465,7 +468,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 />
                 <SortHeader
-                  label="Priority"
+                  label={t("priority")}
                   field="priority"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -473,7 +476,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
                 />
                 <SortHeader
-                  label="Reported By"
+                  label={t("reportedBy")}
                   field="reportedBy"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -481,7 +484,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden xl:table-cell"
                 />
                 <SortHeader
-                  label="Assigned To"
+                  label={t("assignedTo")}
                   field="assignedTo"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -489,7 +492,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground hidden xl:table-cell"
                 />
                 <SortHeader
-                  label="Created"
+                  label={t("created")}
                   field="createdAt"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -497,7 +500,7 @@ export default async function ReportsPage({
                   className="p-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
                 />
                 <SortHeader
-                  label="Resolved"
+                  label={t("resolvedDate")}
                   field="resolvedAt"
                   currentSort={params.sort}
                   currentDir={params.dir}
@@ -512,6 +515,7 @@ export default async function ReportsPage({
                   key={workOrder.id}
                   workOrder={workOrder}
                   index={index}
+                  unassignedLabel={t("unassigned")}
                 />
               ))}
             </TableBody>
@@ -523,8 +527,11 @@ export default async function ReportsPage({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            Showing {(page - 1) * PAGE_SIZE + 1} to{" "}
-            {Math.min(page * PAGE_SIZE, total)} of {total}
+            {t("showing", {
+              start: (page - 1) * PAGE_SIZE + 1,
+              end: Math.min(page * PAGE_SIZE, total),
+              total,
+            })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -538,11 +545,11 @@ export default async function ReportsPage({
                 <Link
                   href={`/reports?${buildSearchParams({ ...params, page: String(page - 1) })}`}
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" /> PREVIOUS
+                  <ArrowLeft className="mr-2 h-4 w-4" /> {tCommon("previous")}
                 </Link>
               ) : (
                 <span>
-                  <ArrowLeft className="mr-2 h-4 w-4" /> PREVIOUS
+                  <ArrowLeft className="mr-2 h-4 w-4" /> {tCommon("previous")}
                 </span>
               )}
             </Button>
@@ -557,11 +564,11 @@ export default async function ReportsPage({
                 <Link
                   href={`/reports?${buildSearchParams({ ...params, page: String(page + 1) })}`}
                 >
-                  NEXT <ArrowRight className="ml-2 h-4 w-4" />
+                  {tCommon("next")} <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               ) : (
                 <span>
-                  NEXT <ArrowRight className="ml-2 h-4 w-4" />
+                 {tCommon("next")} <ArrowRight className="ml-2 h-4 w-4" />
                 </span>
               )}
             </Button>
@@ -588,9 +595,11 @@ interface WorkOrderWithRelations {
 function WorkOrderRow({
   workOrder,
   index,
+  unassignedLabel,
 }: {
   workOrder: WorkOrderWithRelations;
   index: number;
+  unassignedLabel: string;
 }) {
   const staggerClass =
     index < 5
@@ -640,7 +649,7 @@ function WorkOrderRow({
         {workOrder.reportedBy?.name || "—"}
       </TableCell>
       <TableCell className="p-5 hidden xl:table-cell text-muted-foreground text-sm">
-        {workOrder.assignedTo?.name || "Unassigned"}
+        {workOrder.assignedTo?.name || unassignedLabel}
       </TableCell>
       <TableCell className="p-5 text-muted-foreground text-sm font-mono">
         {new Date(workOrder.createdAt).toLocaleDateString()}

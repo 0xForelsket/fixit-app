@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { AlertTriangle, ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavTooltip } from "./nav-tooltip";
@@ -13,7 +14,7 @@ interface SidebarNavProps {
   collapsedSections: Set<string>;
   expandedSubmenus: Set<string>;
   canCreateTicket: boolean;
-  onToggleSection: (label: string) => void;
+  onToggleSection: (key: string) => void;
   onToggleSubmenu: (href: string) => void;
   onNavClick?: () => void;
 }
@@ -29,11 +30,11 @@ export function SidebarNav({
   onNavClick,
 }: SidebarNavProps) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   const isItemActive = (item: NavItem): boolean => {
     if (pathname === item.href) return true;
     if (item.href !== "/dashboard" && pathname.startsWith(item.href)) {
-      // Don't mark parent as active if we're in a child route and parent has children
       if (item.children?.some((c) => pathname === c.href)) {
         return false;
       }
@@ -60,18 +61,18 @@ export function SidebarNav({
     >
       <div className="space-y-2">
         {groups.map((group) => {
-          const isSectionCollapsed = collapsedSections.has(group.label);
+          const isSectionCollapsed = collapsedSections.has(group.key);
 
           return (
-            <div key={group.label}>
+            <div key={group.key}>
               {!isCollapsed ? (
                 <button
                   type="button"
-                  onClick={() => onToggleSection(group.label)}
+                  onClick={() => onToggleSection(group.key)}
                   className="mb-2 px-3 flex items-center justify-between w-full text-left group cursor-pointer"
                 >
                   <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-foreground/40 whitespace-nowrap overflow-hidden">
-                    {group.label}
+                    {t(group.key)}
                   </h3>
                   <ChevronDown
                     className={cn(
@@ -111,6 +112,8 @@ export function SidebarNav({
                             pathname={pathname}
                             onToggleSubmenu={onToggleSubmenu}
                             onNavClick={onNavClick}
+                            label={t(item.key)}
+                            // translate children map logic in sub component? No pass it down or translate here
                           />
                         ) : (
                           <NavItemLink
@@ -118,6 +121,7 @@ export function SidebarNav({
                             isCollapsed={isCollapsed}
                             isActive={isActive}
                             onNavClick={onNavClick}
+                            label={t(item.key)}
                           />
                         )}
                       </li>
@@ -148,10 +152,10 @@ export function SidebarNav({
             <AlertTriangle className="h-5 w-5 shrink-0" />
             {!isCollapsed && (
               <span className="whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
-                Report Issue
+                {t("reportIssue")}
               </span>
             )}
-            <NavTooltip label="Report Issue" show={!!isCollapsed} />
+            <NavTooltip label={t("reportIssue")} show={!!isCollapsed} />
           </Link>
         </div>
       )}
@@ -168,6 +172,7 @@ interface NavItemWithSubmenuProps {
   pathname: string;
   onToggleSubmenu: (href: string) => void;
   onNavClick?: () => void;
+  label: string;
 }
 
 function NavItemWithSubmenu({
@@ -178,7 +183,10 @@ function NavItemWithSubmenu({
   pathname,
   onToggleSubmenu,
   onNavClick,
+  label,
 }: NavItemWithSubmenuProps) {
+  const t = useTranslations("nav");
+  
   return (
     <>
       <button
@@ -205,7 +213,7 @@ function NavItemWithSubmenu({
         {!isCollapsed && (
           <>
             <span className="whitespace-nowrap overflow-hidden flex-1 text-left">
-              {item.label}
+              {label}
             </span>
             <ChevronRight
               className={cn(
@@ -215,7 +223,7 @@ function NavItemWithSubmenu({
             />
           </>
         )}
-        <NavTooltip label={item.label} show={!!isCollapsed} />
+        <NavTooltip label={label} show={!!isCollapsed} />
         {isCollapsed && isSubmenuActive && (
           <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
         )}
@@ -232,6 +240,7 @@ function NavItemWithSubmenu({
           <ul className="ml-4 mt-1 space-y-1 border-l border-border/50 pl-3">
             {item.children?.map((child) => {
               const isChildActive = pathname === child.href;
+              const childLabel = t(child.key);
               return (
                 <li key={child.href}>
                   <Link
@@ -254,7 +263,7 @@ function NavItemWithSubmenu({
                     >
                       {child.icon}
                     </span>
-                    <span>{child.label}</span>
+                    <span>{childLabel}</span>
                   </Link>
                 </li>
               );
@@ -266,12 +275,12 @@ function NavItemWithSubmenu({
   );
 }
 
-// Sub-component for simple nav item links
 interface NavItemLinkProps {
   item: NavItem;
   isCollapsed?: boolean;
   isActive: boolean;
   onNavClick?: () => void;
+  label: string;
 }
 
 function NavItemLink({
@@ -279,6 +288,7 @@ function NavItemLink({
   isCollapsed,
   isActive,
   onNavClick,
+  label,
 }: NavItemLinkProps) {
   return (
     <Link
@@ -304,13 +314,14 @@ function NavItemLink({
       </span>
       {!isCollapsed && (
         <span className="whitespace-nowrap overflow-hidden animate-in fade-in slide-in-from-left-2">
-          {item.label}
+          {label}
         </span>
       )}
-      <NavTooltip label={item.label} show={!!isCollapsed} />
+      <NavTooltip label={label} show={!!isCollapsed} />
       {isCollapsed && isActive && (
         <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
       )}
     </Link>
   );
 }
+

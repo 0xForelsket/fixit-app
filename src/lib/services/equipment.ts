@@ -347,7 +347,7 @@ export async function updateEquipmentStatus(
   id: string,
   status: "operational" | "down" | "maintenance",
   userId: string,
-  notes?: string
+  _notes?: string
 ) {
   const current = await db.query.equipment.findFirst({
     where: eq(equipment.id, id),

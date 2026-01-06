@@ -4,6 +4,7 @@ import { QRScanner } from "@/components/ui/qr-scanner";
 import { PERMISSIONS, type Permission, hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { ClipboardList, Home, ScanLine, User, Wrench } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,6 +17,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const t = useTranslations("nav");
 
   const canCreateTicket = hasPermission(permissions, PERMISSIONS.TICKET_CREATE);
 
@@ -31,14 +33,14 @@ export function BottomNav({ permissions }: BottomNavProps) {
     permission?: Permission;
   }[] = [
     {
-      label: "Home",
+      label: t("home"),
       href: hasPermission(permissions, PERMISSIONS.TICKET_VIEW_ALL)
         ? "/dashboard"
         : "/",
       icon: <Home className="h-6 w-6" />,
     },
     {
-      label: "WOs",
+      label: t("workOrdersShort"),
       href: hasPermission(permissions, PERMISSIONS.TICKET_VIEW_ALL)
         ? "/maintenance/work-orders"
         : "/my-work-orders",
@@ -53,13 +55,13 @@ export function BottomNav({ permissions }: BottomNavProps) {
     permission?: Permission;
   }[] = [
     {
-      label: "Services",
+      label: t("schedules"),
       href: "/maintenance/schedules",
       icon: <Wrench className="h-6 w-6" />,
       permission: PERMISSIONS.MAINTENANCE_VIEW,
     },
     {
-      label: "Profile",
+      label: t("profile"),
       href: "/profile",
       icon: <User className="h-6 w-6" />,
     },
@@ -136,7 +138,7 @@ export function BottomNav({ permissions }: BottomNavProps) {
           type="button"
           onClick={() => setIsScannerOpen(true)}
           className="absolute left-1/2 -translate-x-1/2 top-0 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/90 backdrop-blur-md text-primary-foreground shadow-[0_8px_32px_rgba(var(--primary),0.3)] active:scale-95 transition-all cursor-pointer border-4 border-background/20 z-[60]"
-          aria-label="Scan Equipment"
+          aria-label={t("scanEquipment")}
         >
           <ScanLine className="h-6 w-6" />
         </button>
@@ -150,3 +152,4 @@ export function BottomNav({ permissions }: BottomNavProps) {
     </nav>
   );
 }
+

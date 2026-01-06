@@ -21,6 +21,7 @@ import {
   LogOut,
   User,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { NavTooltip } from "./nav-tooltip";
 
@@ -39,6 +40,9 @@ export function SidebarUserMenu({
   avatarUrl,
   isCollapsed,
 }: SidebarUserMenuProps) {
+  const t = useTranslations("nav");
+  const tSettings = useTranslations("settings");
+
   return (
     <div className="border-t border-border p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] lg:pb-4">
       <DropdownMenu>
@@ -100,26 +104,25 @@ export function SidebarUserMenu({
             <DropdownMenuItem asChild>
               <Link href="/profile" className="w-full cursor-pointer">
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>{t("profile")}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/profile/settings" className="w-full cursor-pointer">
                 <Cog className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>{t("settings")}</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <Globe className="mr-2 h-4 w-4" />
-              <span>Language</span>
-              <span className="ml-auto text-xs text-muted-foreground opacity-70">
-                (Coming Soon)
-              </span>
+            <DropdownMenuItem asChild>
+              <Link href="/profile/settings" className="w-full cursor-pointer">
+                <Globe className="mr-2 h-4 w-4" />
+                <span>{tSettings("language")}</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/docs" className="w-full cursor-pointer">
                 <HelpCircle className="mr-2 h-4 w-4" />
-                <span>Get help</span>
+                <span>{t("help")}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -131,7 +134,7 @@ export function SidebarUserMenu({
               className="cursor-pointer"
             >
               <Keyboard className="mr-2 h-4 w-4" />
-              <span>Keyboard Shortcuts</span>
+              <span>{t("shortcuts")}</span>
               <span className="ml-auto text-xs text-muted-foreground opacity-70">
                 ?
               </span>
@@ -142,17 +145,18 @@ export function SidebarUserMenu({
             <DropdownMenuItem asChild>
               <Link href="/install" className="w-full cursor-pointer">
                 <Download className="mr-2 h-4 w-4" />
-                <span>Download App</span>
+                <span>{t("downloadApp")}</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
             <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
+            <span>{t("logout")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   );
 }
+

@@ -3,6 +3,7 @@
 import { useOnlineStatus } from "@/hooks/use-offline";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen, Wrench, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 interface SidebarHeaderProps {
@@ -19,6 +20,7 @@ export function SidebarHeader({
   onNavClick,
 }: SidebarHeaderProps) {
   const { isOnline } = useOnlineStatus();
+  const t = useTranslations("nav");
 
   return (
     <div
@@ -53,18 +55,18 @@ export function SidebarHeader({
               ? "bg-emerald-500 shadow-emerald-500/50 animate-pulse"
               : "bg-red-500 shadow-red-500/50 animate-pulse duration-[1000ms]"
           )}
-          title={isOnline ? "Network: Online" : "Network: Offline"}
+          title={isOnline ? t("networkOnline") : t("networkOffline")}
         />
 
         <button
           type="button"
           onClick={onToggleCollapse}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
           className={cn(
             "rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isCollapsed ? "flex" : "hidden lg:flex"
           )}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isCollapsed ? t("expandSidebar") : t("collapseSidebar")}
         >
           {isCollapsed ? (
             <PanelLeftOpen className="h-5 w-5" />
@@ -77,7 +79,7 @@ export function SidebarHeader({
       <button
         type="button"
         onClick={onClose}
-        aria-label="Close sidebar"
+        aria-label={t("closeSidebar")}
         className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <X className="h-5 w-5" />
@@ -85,3 +87,4 @@ export function SidebarHeader({
     </div>
   );
 }
+

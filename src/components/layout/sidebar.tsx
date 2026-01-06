@@ -56,13 +56,13 @@ export function Sidebar({
     }
   }, []);
 
-  const toggleSection = useCallback((label: string) => {
+  const toggleSection = useCallback((key: string) => {
     setCollapsedSections((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) {
-        next.delete(label);
+      if (next.has(key)) {
+        next.delete(key);
       } else {
-        next.add(label);
+        next.add(key);
       }
       try {
         localStorage.setItem(COLLAPSED_SECTIONS_KEY, JSON.stringify([...next]));

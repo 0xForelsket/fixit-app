@@ -31,10 +31,14 @@ export function FormErrorSummary({
 }: FormErrorSummaryProps) {
   const [dismissed, setDismissed] = React.useState(false);
 
+  // Create a stable key from errors to track changes
+  const errorKey = JSON.stringify({ error, fieldErrors, formErrors });
+
   // Reset dismissed state when errors change
+  // biome-ignore lint/correctness/useExhaustiveDependencies: errorKey tracks error changes intentionally
   React.useEffect(() => {
     setDismissed(false);
-  }, [error, fieldErrors, formErrors]);
+  }, [errorKey]);
 
   // Collect all errors
   const allErrors: { field?: string; message: string }[] = [];

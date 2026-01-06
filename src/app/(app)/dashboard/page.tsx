@@ -21,6 +21,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -156,6 +157,7 @@ function FeedLoading() {
 }
 
 async function PersonalStatsSection({ user }: { user: SessionUser }) {
+  const t = await getTranslations("dashboard");
   const { personal: myStats } = await getStats(user);
   if (!myStats) return null;
 
@@ -166,35 +168,35 @@ async function PersonalStatsSection({ user }: { user: SessionUser }) {
       <div className="flex items-center gap-2">
         <User className="h-4 w-4 text-primary" />
         <h2 className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">
-          My Assigned Work Orders
+          {t("myAssignedWorkOrders")}
         </h2>
         <span className="text-[8px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
-          {myTotalActive} active
+          {myTotalActive} {t("active")}
         </span>
       </div>
       <StatsTicker
         variant="compact"
         stats={[
           {
-            label: "My Open",
+            label: t("myOpen"),
             value: myStats.open,
             icon: Inbox,
             variant: "primary",
           },
           {
-            label: "My In Progress",
+            label: t("myInProgress"),
             value: myStats.inProgress,
             icon: Timer,
             variant: "default",
           },
           {
-            label: "My Overdue",
+            label: t("myOverdue"),
             value: myStats.overdue,
             icon: Clock,
             variant: "danger",
           },
           {
-            label: "My Critical",
+            label: t("myCritical"),
             value: myStats.critical,
             icon: AlertTriangle,
             variant: "danger",
@@ -206,6 +208,7 @@ async function PersonalStatsSection({ user }: { user: SessionUser }) {
 }
 
 async function PersonalQueueSection({ userId }: { userId: string }) {
+  const t = await getTranslations("dashboard");
   const myWorkOrders = await getMyWorkOrders(userId);
 
   return (
@@ -214,7 +217,7 @@ async function PersonalQueueSection({ userId }: { userId: string }) {
         <div className="flex items-center gap-2">
           <div className="h-1 w-6 bg-primary rounded-full" />
           <h2 className="text-xs font-black text-muted-foreground uppercase tracking-wider">
-            My Queue
+            {t("myQueue")}
           </h2>
         </div>
         <Button
@@ -224,7 +227,7 @@ async function PersonalQueueSection({ userId }: { userId: string }) {
           className="h-7 text-[9px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest transition-colors"
         >
           <Link href="/maintenance/work-orders?assigned=me" className="gap-1.5">
-            LIST VIEW <ArrowRight className="h-2.5 w-2.5" />
+            {t("listView")} <ArrowRight className="h-2.5 w-2.5" />
           </Link>
         </Button>
       </div>
@@ -235,9 +238,12 @@ async function PersonalQueueSection({ userId }: { userId: string }) {
 }
 
 async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
+  const t = await getTranslations("dashboard");
   const { global: globalStats } = await getStats(user);
   const title =
-    user?.roleName === "tech" ? "Departmental Overview" : "System Overview";
+    user?.roleName === "tech"
+      ? t("departmentalOverview")
+      : t("systemOverview");
 
   return (
     <div className="space-y-4">
@@ -251,25 +257,25 @@ async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
         variant="compact"
         stats={[
           {
-            label: "Open WOs",
+            label: t("openWOs"),
             value: globalStats.open,
             icon: Inbox,
             variant: "default",
           },
           {
-            label: "In Progress",
+            label: t("inProgress"),
             value: globalStats.inProgress,
             icon: Timer,
             variant: "default",
           },
           {
-            label: "Overdue",
+            label: t("overdue"),
             value: globalStats.overdue,
             icon: Clock,
             variant: "danger",
           },
           {
-            label: "Critical",
+            label: t("critical"),
             value: globalStats.critical,
             icon: AlertTriangle,
             variant: "danger",
@@ -281,11 +287,12 @@ async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
 }
 
 async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
+  const t = await getTranslations("dashboard");
   const recentWorkOrders = await getRecentWorkOrders(user);
   const title =
     user?.roleName === "tech"
-      ? "Department Priority Queue"
-      : "System Priority Queue";
+      ? t("departmentPriorityQueue")
+      : t("systemPriorityQueue");
 
   return (
     <div className="space-y-4">
@@ -303,7 +310,7 @@ async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
           className="h-7 text-[9px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest transition-colors"
         >
           <Link href="/maintenance/work-orders" className="gap-1.5">
-            ALL TICKETS <ArrowRight className="h-2.5 w-2.5" />
+            {t("allTickets")} <ArrowRight className="h-2.5 w-2.5" />
           </Link>
         </Button>
       </div>
@@ -314,6 +321,7 @@ async function GlobalQueueSection({ user }: { user: SessionUser | null }) {
 }
 
 export default async function DashboardPage() {
+  const t = await getTranslations("dashboard");
   const user = await getCurrentUser();
 
   if (!user) {
@@ -329,9 +337,9 @@ export default async function DashboardPage() {
   return (
     <PageLayout
       id="dashboard-page"
-      title="Technician Terminal"
-      subtitle="Infrastructure Control"
-      description="CENTRALIZED CONTROL PANEL FOR MAINTENANCE OPERATIONS"
+      title={t("title")}
+      subtitle={t("subtitle")}
+      description={t("description")}
       bgSymbol="TT"
       headerActions={
         <DashboardHeaderActions>
@@ -341,14 +349,14 @@ export default async function DashboardPage() {
             className="h-8 text-[10px] font-black uppercase tracking-widest border-primary/30 hover:bg-primary/10"
             asChild
           >
-            <Link href="/assets/qr-codes">SCAN QR</Link>
+            <Link href="/assets/qr-codes">{t("scanQr")}</Link>
           </Button>
           <Button
             size="sm"
             className="h-8 text-[10px] font-black uppercase tracking-widest"
             asChild
           >
-            <Link href="/">REPORT ISSUE</Link>
+            <Link href="/">{t("reportIssue")}</Link>
           </Button>
         </DashboardHeaderActions>
       }

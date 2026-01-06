@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export interface NavItem {
-  label: string;
+  key: string; // Translation key
   href: string;
   icon: React.ReactNode;
   permission: Permission;
@@ -26,40 +26,40 @@ export interface NavItem {
 }
 
 export interface NavGroup {
-  label: string;
+  key: string; // Translation key
   items: NavItem[];
 }
 
 export const navGroups: NavGroup[] = [
   {
-    label: "Overview",
+    key: "overview", // nav.overview
     items: [
       {
-        label: "Dashboard",
+        key: "dashboard", // nav.dashboard
         href: "/dashboard",
         icon: <Home className="h-5 w-5" />,
         permission: PERMISSIONS.TICKET_VIEW_ALL,
       },
       {
-        label: "Analytics",
+        key: "analytics", // nav.analytics
         href: "/analytics",
         icon: <BarChart3 className="h-5 w-5" />,
         permission: PERMISSIONS.ANALYTICS_VIEW,
         children: [
           {
-            label: "Overview",
+            key: "overview", // nav.overview
             href: "/analytics",
             icon: <BarChart3 className="h-4 w-4" />,
             permission: PERMISSIONS.ANALYTICS_VIEW,
           },
           {
-            label: "Costs",
+            key: "costs", // nav.costs
             href: "/analytics/costs",
             icon: <DollarSign className="h-4 w-4" />,
             permission: PERMISSIONS.ANALYTICS_VIEW,
           },
           {
-            label: "Downtime",
+            key: "downtime", // nav.downtime
             href: "/analytics/downtime",
             icon: <Clock className="h-4 w-4" />,
             permission: PERMISSIONS.ANALYTICS_VIEW,
@@ -67,19 +67,19 @@ export const navGroups: NavGroup[] = [
         ],
       },
       {
-        label: "Reports",
+        key: "reports", // nav.reports
         href: "/reports",
         icon: <FileText className="h-5 w-5" />,
         permission: PERMISSIONS.REPORTS_VIEW,
       },
       {
-        label: "Documents",
+        key: "documents", // nav.documents
         href: "/documents",
         icon: <Folder className="h-5 w-5" />,
         permission: PERMISSIONS.TICKET_VIEW_ALL,
       },
       {
-        label: "Departments",
+        key: "departments", // nav.departments
         href: "/departments",
         icon: <Building2 className="h-5 w-5" />,
         permission: PERMISSIONS.TICKET_VIEW_ALL,
@@ -87,16 +87,16 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Maintenance",
+    key: "maintenance", // nav.maintenance
     items: [
       {
-        label: "Work Orders",
+        key: "workOrders", // nav.workOrders
         href: "/maintenance/work-orders",
         icon: <ClipboardList className="h-5 w-5" />,
         permission: PERMISSIONS.TICKET_VIEW_ALL,
       },
       {
-        label: "Schedules",
+        key: "schedules", // nav.schedules
         href: "/maintenance/schedules",
         icon: <Wrench className="h-5 w-5" />,
         permission: PERMISSIONS.MAINTENANCE_VIEW,
@@ -104,28 +104,28 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Asset Management",
+    key: "assetManagement", // nav.assetManagement
     items: [
       {
-        label: "Equipment",
+        key: "equipment", // nav.equipment
         href: "/assets/equipment",
         icon: <MonitorCog className="h-5 w-5" />,
         permission: PERMISSIONS.EQUIPMENT_VIEW,
       },
       {
-        label: "Locations",
+        key: "locations", // nav.locations
         href: "/assets/locations",
         icon: <MapPin className="h-5 w-5" />,
         permission: PERMISSIONS.LOCATION_VIEW,
       },
       {
-        label: "Inventory",
+        key: "inventory", // nav.inventory
         href: "/assets/inventory",
         icon: <Package className="h-5 w-5" />,
         permission: PERMISSIONS.INVENTORY_VIEW,
       },
       {
-        label: "Vendors",
+        key: "vendors", // nav.vendors
         href: "/assets/vendors",
         icon: <Factory className="h-5 w-5" />,
         permission: PERMISSIONS.INVENTORY_VIEW,
@@ -133,10 +133,10 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Administration",
+    key: "administration", // nav.administration
     items: [
       {
-        label: "System",
+        key: "system", // nav.system
         href: "/admin/system",
         icon: <Settings2 className="h-5 w-5" />,
         permission: PERMISSIONS.USER_VIEW,
@@ -147,7 +147,7 @@ export const navGroups: NavGroup[] = [
 
 // Quick action for reporting issues
 export const reportIssueItem = {
-  label: "Report Issue",
+  key: "reportIssue", // nav.reportIssue
   href: "/report",
   icon: <AlertTriangle className="h-5 w-5" />,
   permission: PERMISSIONS.TICKET_CREATE,
