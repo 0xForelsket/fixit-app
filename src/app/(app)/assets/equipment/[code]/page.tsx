@@ -381,9 +381,9 @@ export default async function EquipmentDetailPage({
 
   const AnalyticsSection = (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <PredictionsCard predictions={predictions} />
-      {ReliabilitySection}
       {HealthSection}
+      {ReliabilitySection}
+      <PredictionsCard predictions={predictions} />
     </div>
   );
 
