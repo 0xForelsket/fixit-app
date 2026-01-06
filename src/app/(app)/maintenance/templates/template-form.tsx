@@ -69,6 +69,11 @@ const typeConfig: Record<
     icon: ArrowUpCircle,
     description: "Improvement",
   },
+  inspection: {
+    label: "Inspection",
+    icon: Scale, // Reusing Scale or another icon
+    description: "System check",
+  },
 };
 
 const priorityConfig: Record<

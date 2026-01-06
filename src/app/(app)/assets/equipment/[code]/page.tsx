@@ -1,7 +1,13 @@
 import { isFavorite } from "@/actions/favorites";
+import {
+  getEquipmentAnomalies,
+  getEquipmentPredictions,
+} from "@/actions/predictions";
 import { AuditLogList } from "@/components/audit/audit-log-list";
 import {
+  AnomalyAlerts,
   DowntimeLogList,
+  PredictionsCard,
   RecordMeterReadingDialog,
   ReliabilityCard,
   ReportDowntimeDialog,
@@ -131,24 +137,40 @@ export default async function EquipmentDetailPage({
     notFound();
   }
 
-  const [user, favoriteResult, meters, recentDowntime, attachmentsList] =
-    await Promise.all([
-      getCurrentUser(),
-      isFavorite("equipment", equipmentItem.id),
-      getEquipmentMeters(equipmentItem.id),
-      getDowntimeLogs(equipmentItem.id),
-      db.query.attachments.findMany({
-        where: and(
-          eq(attachments.entityType, "equipment"),
-          eq(attachments.entityId, equipmentItem.id)
-        ),
-        with: {
-          uploadedBy: {
-            columns: { name: true },
-          },
+  const [
+    user,
+    favoriteResult,
+    meters,
+    recentDowntime,
+    attachmentsList,
+    predictionsResult,
+    anomaliesResult,
+  ] = await Promise.all([
+    getCurrentUser(),
+    isFavorite("equipment", equipmentItem.id),
+    getEquipmentMeters(equipmentItem.id),
+    getDowntimeLogs(equipmentItem.id),
+    db.query.attachments.findMany({
+      where: and(
+        eq(attachments.entityType, "equipment"),
+        eq(attachments.entityId, equipmentItem.id)
+      ),
+      with: {
+        uploadedBy: {
+          columns: { name: true },
         },
-      }),
-    ]);
+      },
+    }),
+    getEquipmentPredictions(equipmentItem.id),
+    getEquipmentAnomalies(equipmentItem.id),
+  ]);
+
+  const predictions =
+    predictionsResult.success && predictionsResult.data
+      ? predictionsResult.data
+      : [];
+  const anomalies =
+    anomaliesResult.success && anomaliesResult.data ? anomaliesResult.data : [];
 
   // Generate signed URLs for attachments
   const attachmentsWithUrls = await Promise.all(
@@ -708,6 +730,8 @@ export default async function EquipmentDetailPage({
         </div>
       </div>
 
+      <AnomalyAlerts anomalies={anomalies} />
+
       <div className="space-y-6 lg:hidden">
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-5 h-12">
@@ -729,6 +753,7 @@ export default async function EquipmentDetailPage({
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
+            <PredictionsCard predictions={predictions} />
             {StatusSection}
             {ReliabilitySection}
             {SpecificationsSection}
@@ -819,12 +844,12 @@ export default async function EquipmentDetailPage({
                   <p
                     className={cn(
                       "text-xs font-bold mt-2",
-                      schedule.nextDue < new Date()
+                      schedule.nextDue && schedule.nextDue < new Date()
                         ? "text-red-600"
                         : "text-emerald-600"
                     )}
                   >
-                    Next: {formatRelativeTime(schedule.nextDue)}
+                    Next: {schedule.nextDue ? formatRelativeTime(schedule.nextDue) : "Not set"}
                   </p>
                 </div>
               ))}
@@ -845,6 +870,7 @@ export default async function EquipmentDetailPage({
       {/* Desktop Grid Layout */}
       <div className="hidden lg:grid grid-cols-12 gap-8">
         <div className="col-span-4 space-y-6">
+          <PredictionsCard predictions={predictions} />
           {StatusSection}
           {ReliabilitySection}
           {SpecificationsSection}
@@ -941,7 +967,7 @@ export default async function EquipmentDetailPage({
                   >
                     <span>{schedule.title}</span>
                     <Badge variant="outline">
-                      {formatRelativeTime(schedule.nextDue)}
+                      {schedule.nextDue ? formatRelativeTime(schedule.nextDue) : "Not set"}
                     </Badge>
                   </div>
                 ))}

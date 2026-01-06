@@ -6,6 +6,7 @@ export const workOrderTypeSchema = z.enum([
   "calibration",
   "safety",
   "upgrade",
+  "inspection",
 ]);
 
 export const workOrderPrioritySchema = z.enum([
