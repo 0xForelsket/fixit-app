@@ -11,6 +11,7 @@ import { getDateRangeStart } from "@/lib/utils/date-filters";
 import { and, asc, count, desc, eq, gte, like, lt, or, sql } from "drizzle-orm";
 import { ArrowLeft, ArrowRight, Plus, User as UserIcon } from "lucide-react";
 import { AlertTriangle, CheckCircle2, Inbox, Timer } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 type SearchParams = {
@@ -192,6 +193,8 @@ export default async function WorkOrdersPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  const t = await getTranslations("workOrders");
+  const tCommon = await getTranslations("common");
   const user = await getCurrentUser();
   const params = await searchParams;
   const [
@@ -218,13 +221,13 @@ export default async function WorkOrdersPage({
       id="work-orders-page"
       title={
         params.overdue === "true"
-          ? "Overdue Queue"
+          ? t("overdueQueue")
           : isMyWorkOrdersView
-            ? "My Work Queue"
-            : "Work Order Queue"
+            ? t("myWorkQueue")
+            : t("workOrderQueue")
       }
-      subtitle="Maintenance Operations"
-      description="CENTRALIZED WORK ORDER DISPATCH AND MONITORING TERMINAL"
+      subtitle={t("maintenanceOperations")}
+      description={t("dispatcherTerminal")}
       bgSymbol="WQ"
       headerActions={
         <div className="flex items-center gap-2">
@@ -232,12 +235,12 @@ export default async function WorkOrdersPage({
             selectedValue={isMyWorkOrdersView ? "me" : "all"}
             options={[
               {
-                label: "All",
+                label: t("filterAll"),
                 value: "all",
                 href: "/maintenance/work-orders",
               },
               {
-                label: "Mine",
+                label: t("filterMine"),
                 value: "me",
                 icon: <UserIcon className="h-3 w-3 shrink-0" />,
                 href: "/maintenance/work-orders?assigned=me",
@@ -251,7 +254,7 @@ export default async function WorkOrdersPage({
           >
             <Link href="/report">
               <Plus className="mr-2 h-3.5 w-3.5" />
-              NEW TICKET
+              {t("newTicket")}
             </Link>
           </Button>
         </div>
@@ -261,25 +264,25 @@ export default async function WorkOrdersPage({
           variant="compact"
           stats={[
             {
-              label: "Open",
+              label: t("statuses.open"),
               value: stats.open,
               icon: Inbox,
               variant: "primary",
             },
             {
-              label: "In Progress",
+              label: t("statuses.inProgress"),
               value: stats.inProgress,
               icon: Timer,
               variant: "default",
             },
             {
-              label: "Resolved",
+              label: t("statuses.resolved"),
               value: stats.resolved,
               icon: CheckCircle2,
               variant: "success",
             },
             {
-              label: "Critical",
+              label: t("statuses.critical"),
               value: stats.critical,
               icon: AlertTriangle,
               variant: "danger",
@@ -299,8 +302,8 @@ export default async function WorkOrdersPage({
         workOrders={workOrdersList}
         emptyMessage={
           activeFilters
-            ? "Try adjusting your filters"
-            : "No work orders have been created yet."
+            ? t("tryAdjustingFilters")
+            : t("noWorkOrdersCreated")
         }
         searchParams={params}
         technicians={technicians}
@@ -326,12 +329,12 @@ export default async function WorkOrdersPage({
                   href={`/maintenance/work-orders?${buildSearchParams({ ...params, page: String(page - 1) })}`}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Prev
+                  {tCommon("previous")}
                 </Link>
               ) : (
                 <span>
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  Prev
+                  {tCommon("previous")}
                 </span>
               )}
             </Button>
@@ -346,12 +349,12 @@ export default async function WorkOrdersPage({
                 <Link
                   href={`/maintenance/work-orders?${buildSearchParams({ ...params, page: String(page + 1) })}`}
                 >
-                  Next
+                  {tCommon("next")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               ) : (
                 <span>
-                  Next
+                  {tCommon("next")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </span>
               )}
