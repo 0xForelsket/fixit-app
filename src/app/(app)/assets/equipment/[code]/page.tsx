@@ -48,6 +48,7 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowLeft,
+  BarChart2,
   Calendar,
   CheckCircle2,
   ClipboardList,
@@ -375,6 +376,14 @@ export default async function EquipmentDetailPage({
           );
         })()}
       </div>
+    </div>
+  );
+
+  const AnalyticsSection = (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <PredictionsCard predictions={predictions} />
+      {ReliabilitySection}
+      {HealthSection}
     </div>
   );
 
@@ -734,9 +743,12 @@ export default async function EquipmentDetailPage({
 
       <div className="space-y-6 lg:hidden">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 h-12">
+          <TabsList className="grid w-full grid-cols-6 h-12">
             <TabsTrigger value="overview">
               <Info className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <BarChart2 className="h-4 w-4" />
             </TabsTrigger>
             <TabsTrigger value="history">
               <History className="h-4 w-4" />
@@ -753,14 +765,15 @@ export default async function EquipmentDetailPage({
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6 mt-6">
-            <PredictionsCard predictions={predictions} />
             {StatusSection}
-            {ReliabilitySection}
             {SpecificationsSection}
             {FinancialsSection}
             {MetersSection}
-            {HealthSection}
             {DowntimeSection}
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            {AnalyticsSection}
           </TabsContent>
 
           <TabsContent value="history" className="mt-6">
@@ -849,7 +862,10 @@ export default async function EquipmentDetailPage({
                         : "text-emerald-600"
                     )}
                   >
-                    Next: {schedule.nextDue ? formatRelativeTime(schedule.nextDue) : "Not set"}
+                    Next:{" "}
+                    {schedule.nextDue
+                      ? formatRelativeTime(schedule.nextDue)
+                      : "Not set"}
                   </p>
                 </div>
               ))}
@@ -870,19 +886,17 @@ export default async function EquipmentDetailPage({
       {/* Desktop Grid Layout */}
       <div className="hidden lg:grid grid-cols-12 gap-8">
         <div className="col-span-4 space-y-6">
-          <PredictionsCard predictions={predictions} />
           {StatusSection}
-          {ReliabilitySection}
           {SpecificationsSection}
           {FinancialsSection}
           {MetersSection}
-          {HealthSection}
           {DowntimeSection}
         </div>
         <div className="col-span-8 space-y-6">
           <Tabs defaultValue="history" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="documents">
                 Documents ({attachmentsWithUrls.length})
               </TabsTrigger>
@@ -892,6 +906,9 @@ export default async function EquipmentDetailPage({
             </TabsList>
             <TabsContent value="history" className="mt-4">
               {HistorySection}
+            </TabsContent>
+            <TabsContent value="analytics" className="mt-4">
+              {AnalyticsSection}
             </TabsContent>
             <TabsContent value="documents" className="mt-4">
               {DocumentsSection}
@@ -967,7 +984,9 @@ export default async function EquipmentDetailPage({
                   >
                     <span>{schedule.title}</span>
                     <Badge variant="outline">
-                      {schedule.nextDue ? formatRelativeTime(schedule.nextDue) : "Not set"}
+                      {schedule.nextDue
+                        ? formatRelativeTime(schedule.nextDue)
+                        : "Not set"}
                     </Badge>
                   </div>
                 ))}
