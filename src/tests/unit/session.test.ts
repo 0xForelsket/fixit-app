@@ -52,7 +52,7 @@ const mockPERMISSIONS = {
   SYSTEM_SETTINGS: "system:settings",
   TICKET_VIEW: "ticket:view",
   USER_CREATE: "user:create",
-};
+} as const;
 
 vi.mock("@/lib/permissions", () => ({
   PERMISSIONS: mockPERMISSIONS,

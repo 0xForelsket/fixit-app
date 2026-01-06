@@ -223,9 +223,9 @@ describe("notifications helper", () => {
         { id: "3", preferences: null },
       ]);
       mockReturning.mockResolvedValue([
-        { id: "n1", userId: "1" },
-        { id: "n2", userId: "2" },
-        { id: "n3", userId: "3" },
+        { id: "n1", displayId: 1 },
+        { id: "n2", displayId: 2 },
+        { id: "n3", displayId: 3 },
       ]);
 
       const result = await createNotificationsForUsers(
@@ -266,8 +266,8 @@ describe("notifications helper", () => {
         { id: "3", preferences: null }, // User 3: no prefs, create
       ]);
       mockReturning.mockResolvedValue([
-        { id: "n1", userId: "1" },
-        { id: "n3", userId: "3" },
+        { id: "n1", displayId: 1 },
+        { id: "n3", displayId: 3 },
       ]);
 
       const result = await createNotificationsForUsers(
