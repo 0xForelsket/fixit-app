@@ -127,16 +127,22 @@ export async function recordReading(_prevState: unknown, formData: FormData) {
 
   try {
     const data = validation.data;
+    let recordedReadingId: string | null = null;
 
     await db.transaction(async (tx) => {
       // 1. Record the reading history
-      await tx.insert(meterReadings).values({
-        meterId: data.meterId,
-        reading: data.reading.toString(),
-        notes: data.notes,
-        workOrderId: data.workOrderId,
-        recordedById: user.id,
-      });
+      const [inserted] = await tx
+        .insert(meterReadings)
+        .values({
+          meterId: data.meterId,
+          reading: data.reading.toString(),
+          notes: data.notes,
+          workOrderId: data.workOrderId,
+          recordedById: user.id,
+        })
+        .returning();
+
+      recordedReadingId = inserted.id;
 
       // 2. Update the meter's current reading
       await tx
@@ -203,6 +209,17 @@ export async function recordReading(_prevState: unknown, formData: FormData) {
         }
       }
     });
+
+    // 4. Check for anomalies (Phase 7)
+    if (recordedReadingId) {
+      const { checkAndRecordAnomaly } = await import("@/actions/predictions");
+      await checkAndRecordAnomaly(
+        data.meterId,
+        recordedReadingId,
+        data.reading,
+        user.id
+      );
+    }
 
     revalidatePath("/assets/equipment");
     revalidatePath("/maintenance/work-orders"); // Update WO list

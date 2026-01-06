@@ -34,6 +34,7 @@ export const workOrderTypes = [
   "calibration",
   "safety",
   "upgrade",
+  "inspection",
 ] as const;
 export type WorkOrderType = (typeof workOrderTypes)[number];
 
@@ -594,6 +595,91 @@ export const downtimeLogs = pgTable(
   })
 );
 
+// ============ EQUIPMENT PREMIUM: PREDICTIVE MAINTENANCE (Phase 7) ============
+
+export const predictionTypes = [
+  "failure",
+  "maintenance_due",
+  "replacement",
+] as const;
+export type PredictionType = (typeof predictionTypes)[number];
+
+export const anomalyTypes = [
+  "spike",
+  "drop",
+  "trend_deviation",
+  "out_of_range",
+] as const;
+export type AnomalyType = (typeof anomalyTypes)[number];
+
+export const anomalySeverities = ["low", "medium", "high", "critical"] as const;
+export type AnomalySeverity = (typeof anomalySeverities)[number];
+
+// Equipment failure predictions
+export const equipmentPredictions = pgTable(
+  "equipment_predictions",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    equipmentId: text("equipment_id")
+      .references(() => equipment.id, { onDelete: "cascade" })
+      .notNull(),
+    predictionType: text("prediction_type", {
+      enum: predictionTypes,
+    }).notNull(),
+    probability: text("probability").notNull(), // 0-1, stored as text for precision
+    estimatedDate: timestamp("estimated_date"),
+    confidence: text("confidence"), // 0-1 model confidence
+    factors: text("factors"), // JSON string of contributing factors
+    isAcknowledged: boolean("is_acknowledged").notNull().default(false),
+    acknowledgedById: text("acknowledged_by_id").references(() => users.id),
+    acknowledgedAt: timestamp("acknowledged_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    equipmentIdx: index("ep_equipment_idx").on(table.equipmentId),
+    activeIdx: index("ep_active_idx").on(
+      table.equipmentId,
+      table.isAcknowledged
+    ),
+  })
+);
+
+// Meter reading anomalies
+export const meterAnomalies = pgTable(
+  "meter_anomalies",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => uuidv7()),
+    meterId: text("meter_id")
+      .references(() => equipmentMeters.id, { onDelete: "cascade" })
+      .notNull(),
+    readingId: text("reading_id")
+      .references(() => meterReadings.id, { onDelete: "cascade" })
+      .notNull(),
+    anomalyType: text("anomaly_type", { enum: anomalyTypes }).notNull(),
+    severity: text("severity", { enum: anomalySeverities }).notNull(),
+    expectedValue: text("expected_value").notNull(), // Moving average prediction
+    actualValue: text("actual_value").notNull(),
+    deviationPercent: text("deviation_percent").notNull(),
+    workOrderId: text("work_order_id").references(() => workOrders.id),
+    isResolved: boolean("is_resolved").notNull().default(false),
+    resolvedById: text("resolved_by_id").references(() => users.id),
+    resolvedAt: timestamp("resolved_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    meterIdx: index("ma_meter_idx").on(table.meterId),
+    unresolvedIdx: index("ma_unresolved_idx").on(
+      table.meterId,
+      table.isResolved
+    ),
+  })
+);
+
 // Bill of Materials (BOM) linking models to parts
 export const equipmentBoms = pgTable("equipment_boms", {
   id: text("id")
@@ -1127,6 +1213,41 @@ export const downtimeLogsRelations = relations(downtimeLogs, ({ one }) => ({
   }),
 }));
 
+// Equipment Premium: Prediction relations (Phase 7)
+export const equipmentPredictionsRelations = relations(
+  equipmentPredictions,
+  ({ one }) => ({
+    equipment: one(equipment, {
+      fields: [equipmentPredictions.equipmentId],
+      references: [equipment.id],
+    }),
+    acknowledgedBy: one(users, {
+      fields: [equipmentPredictions.acknowledgedById],
+      references: [users.id],
+    }),
+  })
+);
+
+// Equipment Premium: Anomaly relations (Phase 7)
+export const meterAnomaliesRelations = relations(meterAnomalies, ({ one }) => ({
+  meter: one(equipmentMeters, {
+    fields: [meterAnomalies.meterId],
+    references: [equipmentMeters.id],
+  }),
+  reading: one(meterReadings, {
+    fields: [meterAnomalies.readingId],
+    references: [meterReadings.id],
+  }),
+  workOrder: one(workOrders, {
+    fields: [meterAnomalies.workOrderId],
+    references: [workOrders.id],
+  }),
+  resolvedBy: one(users, {
+    fields: [meterAnomalies.resolvedById],
+    references: [users.id],
+  }),
+}));
+
 export const equipmentModelsRelations = relations(
   equipmentModels,
   ({ many }) => ({
@@ -1408,6 +1529,13 @@ export type NewDepartment = typeof departments.$inferInsert;
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
+
+// Phase 7: Predictive Maintenance types
+export type EquipmentPrediction = typeof equipmentPredictions.$inferSelect;
+export type NewEquipmentPrediction = typeof equipmentPredictions.$inferInsert;
+
+export type MeterAnomaly = typeof meterAnomalies.$inferSelect;
+export type NewMeterAnomaly = typeof meterAnomalies.$inferInsert;
 
 export type UserFavorite = typeof userFavorites.$inferSelect;
 export type NewUserFavorite = typeof userFavorites.$inferInsert;
