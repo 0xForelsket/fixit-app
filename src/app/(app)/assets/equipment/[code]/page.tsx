@@ -743,13 +743,23 @@ export default async function EquipmentDetailPage({
 
       <div className="space-y-6 lg:hidden">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 h-12">
+          <TabsList
+            className={cn(
+              "grid w-full h-12",
+              canViewFinancials ? "grid-cols-7" : "grid-cols-6"
+            )}
+          >
             <TabsTrigger value="overview">
               <Info className="h-4 w-4" />
             </TabsTrigger>
             <TabsTrigger value="analytics">
               <BarChart2 className="h-4 w-4" />
             </TabsTrigger>
+            {canViewFinancials && (
+              <TabsTrigger value="financials">
+                <DollarSign className="h-4 w-4" />
+              </TabsTrigger>
+            )}
             <TabsTrigger value="history">
               <History className="h-4 w-4" />
             </TabsTrigger>
@@ -767,9 +777,12 @@ export default async function EquipmentDetailPage({
           <TabsContent value="overview" className="space-y-6 mt-6">
             {StatusSection}
             {SpecificationsSection}
-            {FinancialsSection}
             {MetersSection}
             {DowntimeSection}
+          </TabsContent>
+
+          <TabsContent value="financials" className="mt-6">
+            {FinancialsSection}
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
@@ -883,20 +896,26 @@ export default async function EquipmentDetailPage({
         </Tabs>
       </div>
 
-      {/* Desktop Grid Layout */}
       <div className="hidden lg:grid grid-cols-12 gap-8">
         <div className="col-span-4 space-y-6">
           {StatusSection}
           {SpecificationsSection}
-          {FinancialsSection}
           {MetersSection}
           {DowntimeSection}
         </div>
         <div className="col-span-8 space-y-6">
           <Tabs defaultValue="history" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList
+              className={cn(
+                "grid w-full",
+                canViewFinancials ? "grid-cols-7" : "grid-cols-6"
+              )}
+            >
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              {canViewFinancials && (
+                <TabsTrigger value="financials">Financials</TabsTrigger>
+              )}
               <TabsTrigger value="documents">
                 Documents ({attachmentsWithUrls.length})
               </TabsTrigger>
@@ -909,6 +928,9 @@ export default async function EquipmentDetailPage({
             </TabsContent>
             <TabsContent value="analytics" className="mt-4">
               {AnalyticsSection}
+            </TabsContent>
+            <TabsContent value="financials" className="mt-4">
+              {FinancialsSection}
             </TabsContent>
             <TabsContent value="documents" className="mt-4">
               {DocumentsSection}
