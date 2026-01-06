@@ -10,12 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LanguageSwitcherSub } from "@/components/ui/language-switcher";
 import { cn } from "@/lib/utils";
 import {
   ChevronsUpDown,
   Cog,
   Download,
-  Globe,
   HelpCircle,
   Keyboard,
   LogOut,
@@ -41,7 +41,6 @@ export function SidebarUserMenu({
   isCollapsed,
 }: SidebarUserMenuProps) {
   const t = useTranslations("nav");
-  const tSettings = useTranslations("settings");
 
   return (
     <div className="border-t border-border p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] lg:pb-4">
@@ -86,7 +85,7 @@ export function SidebarUserMenu({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          className="w-56 z-[100]"
+          className="w-56"
           side={isCollapsed ? "right" : "top"}
           align="end"
           sideOffset={8}
@@ -113,12 +112,7 @@ export function SidebarUserMenu({
                 <span>{t("settings")}</span>
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/profile/settings" className="w-full cursor-pointer">
-                <Globe className="mr-2 h-4 w-4" />
-                <span>{tSettings("language")}</span>
-              </Link>
-            </DropdownMenuItem>
+            <LanguageSwitcherSub />
             <DropdownMenuItem asChild>
               <Link href="/docs" className="w-full cursor-pointer">
                 <HelpCircle className="mr-2 h-4 w-4" />

@@ -15,6 +15,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
@@ -65,7 +69,7 @@ export function LanguageSwitcher({
             onClick={() => handleLocaleChange(l)}
             className={cn(
               "flex items-center justify-between cursor-pointer",
-              l === locale && "bg-accent"
+              l === locale && "bg-accent text-accent-foreground"
             )}
           >
             <span>{localeNativeNames[l]}</span>
@@ -74,5 +78,45 @@ export function LanguageSwitcher({
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+export function LanguageSwitcherSub() {
+  const locale = useLocale() as Locale;
+  const t = useTranslations("settings");
+  const [isPending, startTransition] = useTransition();
+
+  const handleLocaleChange = (newLocale: Locale) => {
+    startTransition(async () => {
+      await setLocale(newLocale);
+    });
+  };
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger
+        className={cn(isPending && "opacity-50 pointer-events-none")}
+      >
+        <Globe className="mr-2 h-4 w-4" />
+        <span>{t("language")}</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent className="min-w-[160px]">
+          {locales.map((l) => (
+            <DropdownMenuItem
+              key={l}
+              onClick={() => handleLocaleChange(l)}
+              className={cn(
+                "flex items-center justify-between cursor-pointer",
+                l === locale && "bg-accent text-accent-foreground"
+              )}
+            >
+              <span>{localeNativeNames[l]}</span>
+              {l === locale && <Check className="h-4 w-4 text-primary" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
   );
 }

@@ -13,12 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useActionState } from "react";
 
-import { ThemeToggle } from "@/components/layout/theme-toggle"; // Add import
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { useTranslations } from "next-intl";
 
 const initialState: LoginState = {};
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(login, initialState);
+  const tAuth = useTranslations("auth");
 
   const demoAccounts =
     process.env.NEXT_PUBLIC_SHOW_DEMO_ACCOUNTS === "true"
@@ -152,7 +155,8 @@ export default function LoginPage() {
 
       {/* Right Panel - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-gradient-to-br from-zinc-50 via-white to-orange-50 relative">
-        <div className="absolute top-4 right-4 z-20">
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
         {/* Decorative elements */}
@@ -171,10 +175,10 @@ export default function LoginPage() {
               F
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-              Welcome Back
+              {tAuth("welcomeBack")}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Sign in with your Employee ID and PIN
+              {tAuth("signInWith")}
             </CardDescription>
           </CardHeader>
 
@@ -182,12 +186,12 @@ export default function LoginPage() {
             <form action={formAction} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="employeeId" className="text-sm font-medium">
-                  Employee ID
+                  {tAuth("employeeId")}
                 </Label>
                 <Input
                   id="employeeId"
                   name="employeeId"
-                  placeholder="e.g., TECH-001"
+                  placeholder={tAuth("employeeIdPlaceholder")}
                   autoComplete="username"
                   disabled={isPending}
                   required
@@ -197,13 +201,13 @@ export default function LoginPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="pin" className="text-sm font-medium">
-                  PIN
+                  {tAuth("pin")}
                 </Label>
                 <Input
                   id="pin"
                   name="pin"
                   type="password"
-                  placeholder="Enter your PIN"
+                  placeholder={tAuth("pinPlaceholder")}
                   autoComplete="current-password"
                   disabled={isPending}
                   required
@@ -257,10 +261,10 @@ export default function LoginPage() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                       />
                     </svg>
-                    Signing in...
+                    {tAuth("signingIn")}
                   </span>
                 ) : (
-                  "Sign In"
+                  tAuth("signIn")
                 )}
               </Button>
             </form>
@@ -271,7 +275,7 @@ export default function LoginPage() {
                 <div className="flex items-center gap-2 mb-4 justify-center">
                   <div className="h-px bg-zinc-200 flex-1" />
                   <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
-                    Demo Access
+                    {tAuth("demoAccess")}
                   </span>
                   <div className="h-px bg-zinc-200 flex-1" />
                 </div>

@@ -260,7 +260,15 @@
     "enterPin": "输入您的 PIN 码",
     "invalidPin": "无效的 PIN 码",
     "accountLocked": "账户已锁定，请稍后再试。",
-    "sessionExpired": "会话已过期，请重新登录。"
+    "sessionExpired": "会话已过期，请重新登录。",
+    "welcomeBack": "欢迎回来",
+    "signInWith": "使用您的员工 ID 和 PIN 码登录",
+    "employeeId": "员工 ID",
+    "employeeIdPlaceholder": "例如：TECH-001",
+    "pinPlaceholder": "输入您的 PIN 码",
+    "signingIn": "登录中...",
+    "signIn": "登录",
+    "demoAccess": "演示访问"
   },
   "errors": {
     "generic": "出错了，请重试。",

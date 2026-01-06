@@ -260,7 +260,15 @@
     "enterPin": "Enter your PIN",
     "invalidPin": "Invalid PIN",
     "accountLocked": "Account locked. Try again later.",
-    "sessionExpired": "Session expired. Please log in again."
+    "sessionExpired": "Session expired. Please log in again.",
+    "welcomeBack": "Welcome Back",
+    "signInWith": "Sign in with your Employee ID and PIN",
+    "employeeId": "Employee ID",
+    "employeeIdPlaceholder": "e.g., TECH-001",
+    "pinPlaceholder": "Enter your PIN",
+    "signingIn": "Signing in...",
+    "signIn": "Sign In",
+    "demoAccess": "Demo Access"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
