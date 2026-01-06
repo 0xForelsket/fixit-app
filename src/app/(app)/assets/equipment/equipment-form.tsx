@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FormErrorSummary } from "@/components/ui/form-error-summary";
 import {
   PillTabs,
   PillTabsContent,
@@ -13,6 +14,7 @@ import type {
   EquipmentMeter,
   EquipmentType,
 } from "@/db/schema";
+import { getCsrfToken } from "@/lib/api-client";
 import {
   Building2,
   FileText,
@@ -209,9 +211,13 @@ export function EquipmentForm({
 
       const url = isNew ? "/api/equipment" : `/api/equipment/${equipment?.id}`;
 
+      const csrfToken = getCsrfToken();
       const res = await fetch(url, {
         method: isNew ? "POST" : "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -239,9 +245,13 @@ export function EquipmentForm({
     if (!equipment?.id) return { success: false, error: "Equipment not saved" };
 
     try {
+      const csrfToken = getCsrfToken();
       const res = await fetch(`/api/equipment/${equipment.id}/meters`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+        },
         body: JSON.stringify(data),
       });
 
@@ -268,9 +278,13 @@ export function EquipmentForm({
     data: { name: string; type: string; unit: string; currentReading?: string }
   ) => {
     try {
+      const csrfToken = getCsrfToken();
       const res = await fetch(`/api/equipment/meters/${meterId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "x-csrf-token": csrfToken } : {}),
+        },
         body: JSON.stringify(data),
       });
 
@@ -294,8 +308,10 @@ export function EquipmentForm({
 
   const handleDeleteMeter = async (meterId: string) => {
     try {
+      const csrfToken = getCsrfToken();
       const res = await fetch(`/api/equipment/meters/${meterId}`, {
         method: "DELETE",
+        headers: csrfToken ? { "x-csrf-token": csrfToken } : {},
       });
 
       if (!res.ok) {
@@ -318,11 +334,7 @@ export function EquipmentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
-          {error}
-        </div>
-      )}
+      <FormErrorSummary error={error || undefined} onDismiss={() => setError(null)} />
 
       <PillTabs value={activeTab} onValueChange={handleTabChange}>
         <PillTabsList className="overflow-x-auto">

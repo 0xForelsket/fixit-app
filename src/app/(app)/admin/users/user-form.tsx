@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FormErrorSummary } from "@/components/ui/form-error-summary";
 import type { Role } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { Check, Loader2 } from "lucide-react";
@@ -69,11 +70,7 @@ export function UserForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      {error && (
-        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
-          {error}
-        </div>
-      )}
+      <FormErrorSummary error={error || undefined} onDismiss={() => setError(null)} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">

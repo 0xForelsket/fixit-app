@@ -7,6 +7,7 @@ import {
 import { getMeters } from "@/actions/meters"; // Import getMeters
 import { Button } from "@/components/ui/button";
 import { FieldGroup, FormGrid, FormSection } from "@/components/ui/form-layout";
+import { FormErrorSummary } from "@/components/ui/form-error-summary";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -149,12 +150,14 @@ export function ScheduleForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* Global Error Banner (Root or Delete) */}
-      {(errors.root || deleteError) && (
-        <div className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
-          {errors.root?.message || deleteError}
-        </div>
-      )}
+      <FormErrorSummary
+        error={errors.root?.message || deleteError || undefined}
+        formErrors={errors}
+        onDismiss={() => {
+          form.clearErrors("root");
+          setDeleteError(null);
+        }}
+      />
 
       <FormGrid>
         <FieldGroup label="Title" required error={errors.title?.message}>

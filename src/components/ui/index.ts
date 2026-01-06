@@ -23,3 +23,4 @@ export {
   SegmentedControl,
   type SegmentedControlOption,
 } from "./segmented-control";
+export { FormErrorSummary } from "./form-error-summary";

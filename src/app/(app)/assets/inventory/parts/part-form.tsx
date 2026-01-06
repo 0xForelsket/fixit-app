@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FormErrorSummary } from "@/components/ui/form-error-summary";
 import type { SparePart, Vendor } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
@@ -114,6 +115,8 @@ export function PartForm({ part, isNew, vendors = [] }: PartFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <FormErrorSummary error={error || undefined} onDismiss={() => setError(null)} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
