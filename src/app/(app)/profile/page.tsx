@@ -37,7 +37,6 @@ export default async function ProfilePage() {
       description="MANAGE YOUR ACCOUNT AND PREFERENCES"
       bgSymbol="PR"
     >
-
       <div className="grid gap-6 md:grid-cols-[1fr_2fr]">
         <div className="space-y-6">
           {/* Avatar Card */}

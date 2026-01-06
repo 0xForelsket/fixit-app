@@ -334,7 +334,10 @@ export function EquipmentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <FormErrorSummary error={error || undefined} onDismiss={() => setError(null)} />
+      <FormErrorSummary
+        error={error || undefined}
+        onDismiss={() => setError(null)}
+      />
 
       <PillTabs value={activeTab} onValueChange={handleTabChange}>
         <PillTabsList className="overflow-x-auto">

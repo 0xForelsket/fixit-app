@@ -71,7 +71,6 @@ export default async function RolesPage({
         />
       }
     >
-
       {roles.length === 0 ? (
         <EmptyState
           title="No roles defined"

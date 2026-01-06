@@ -19,12 +19,12 @@ const {
   const mockDeleteFn = vi.fn(() => ({
     where: vi.fn(),
   }));
-  
+
   // Global mock state we can manipulate in tests
-  let mockSelectResponseSchedules: unknown[] = [];
-  let mockSelectResponseEquipment: unknown[] = [];
+  const mockSelectResponseSchedules: unknown[] = [];
+  const mockSelectResponseEquipment: unknown[] = [];
   let mockSelectCalls = 0;
-  
+
   // Helper to create chainable query mocks
   const createMockQuery = (resolvedValue: unknown = []) => {
     const promise = Promise.resolve(resolvedValue);
@@ -36,7 +36,7 @@ const {
     promise.from = vi.fn(() => createMockQuery(resolvedValue));
     return promise;
   };
-  
+
   const mockTransactionFn = vi.fn(
     async (callback: (tx: unknown) => Promise<unknown>) => {
       mockSelectCalls = 0; // Reset for each transaction
@@ -67,7 +67,7 @@ const {
       return await callback(mockTx);
     }
   );
-  
+
   return {
     mockFindFirstEquipment: vi.fn(),
     mockFindManyUsers: vi.fn(),

@@ -10,7 +10,6 @@ export default function InstallPage() {
       description="ADD FIXIT TO YOUR DEVICE FOR QUICK ACCESS"
       bgSymbol="IN"
     >
-
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-3">

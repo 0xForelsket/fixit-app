@@ -1,15 +1,11 @@
 import { db } from "@/db";
-import {
-  notifications,
-  workOrderLogs,
-  workOrders,
-} from "@/db/schema";
+import { notifications, workOrderLogs, workOrders } from "@/db/schema";
 import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { requireAuth, requireCsrf } from "@/lib/session";
 import { updateWorkOrderSchema } from "@/lib/validations";
-import { eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function GET(
@@ -24,10 +20,10 @@ export async function GET(
 
     // Try to find by UUID or displayId
     const isDisplayId = /^\d+$/.test(workOrderId);
-    
+
     const workOrder = await db.query.workOrders.findFirst({
       where: isDisplayId
-        ? eq(workOrders.displayId, parseInt(workOrderId, 10))
+        ? eq(workOrders.displayId, Number.parseInt(workOrderId, 10))
         : eq(workOrders.id, workOrderId),
       with: {
         equipment: {
@@ -63,7 +59,10 @@ export async function GET(
 
     // Check if user can view this work order
     if (!userHasPermission(user, PERMISSIONS.TICKET_VIEW_ALL)) {
-      if (workOrder.reportedById !== user.id && workOrder.assignedToId !== user.id) {
+      if (
+        workOrder.reportedById !== user.id &&
+        workOrder.assignedToId !== user.id
+      ) {
         return ApiErrors.forbidden(requestId);
       }
     }
@@ -104,7 +103,7 @@ export async function PATCH(
     const isDisplayId = /^\d+$/.test(workOrderId);
     const existing = await db.query.workOrders.findFirst({
       where: isDisplayId
-        ? eq(workOrders.displayId, parseInt(workOrderId, 10))
+        ? eq(workOrders.displayId, Number.parseInt(workOrderId, 10))
         : eq(workOrders.id, workOrderId),
     });
 
@@ -186,7 +185,10 @@ export async function PATCH(
         return ApiErrors.forbidden(requestId);
       }
     }
-    apiLogger.error({ requestId, workOrderId, error }, "Update work order error");
+    apiLogger.error(
+      { requestId, workOrderId, error },
+      "Update work order error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }

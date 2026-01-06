@@ -128,7 +128,6 @@ export default async function InventoryPage() {
         />
       }
     >
-
       {/* Low Stock Alerts */}
       {stats.lowStockCount > 0 && (
         <div className="rounded-2xl border-2 border-danger-200 bg-danger-50 p-6 shadow-lg shadow-danger-500/5 backdrop-blur-sm overflow-hidden relative">

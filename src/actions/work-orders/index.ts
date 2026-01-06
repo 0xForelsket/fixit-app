@@ -5,7 +5,11 @@
 export { createWorkOrder } from "./create";
 
 // Updates and comments
-export { addWorkOrderComment, updateChecklistItem, updateWorkOrder } from "./update";
+export {
+  addWorkOrderComment,
+  updateChecklistItem,
+  updateWorkOrder,
+} from "./update";
 
 // Resolution
 export { resolveWorkOrder } from "./resolve";
@@ -15,4 +19,8 @@ export { bulkUpdateWorkOrders, duplicateWorkOrder } from "./bulk";
 export type { BulkUpdateData } from "./bulk";
 
 // Quick actions (one-click operations)
-export { assignToMe, quickResolveWorkOrder, startWorkOrder } from "./quick-actions";
+export {
+  assignToMe,
+  quickResolveWorkOrder,
+  startWorkOrder,
+} from "./quick-actions";

@@ -62,7 +62,6 @@ export default async function DepartmentsPage() {
         />
       }
     >
-
       {/* Departments Grid */}
       {departments.length === 0 ? (
         <EmptyState

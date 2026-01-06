@@ -44,7 +44,7 @@ export async function GET(
     if (!equipmentItem) {
       return ApiErrors.notFound("Equipment", requestId);
     }
-    
+
     return apiSuccess(equipmentItem, HttpStatus.OK, requestId);
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -67,7 +67,7 @@ export async function PATCH(
 
   try {
     // Rate limit check...
-    
+
     await requireCsrf(request);
     await requirePermission(PERMISSIONS.EQUIPMENT_UPDATE);
 
@@ -80,8 +80,8 @@ export async function PATCH(
 
     const existing = await db.query.equipment.findFirst({
       where: or(
-         eq(equipmentTable.id, equipmentId),
-         eq(equipmentTable.code, equipmentId)
+        eq(equipmentTable.id, equipmentId),
+        eq(equipmentTable.code, equipmentId)
       ),
     });
 
@@ -108,12 +108,12 @@ export async function PATCH(
       })
       .where(eq(equipmentTable.id, existing.id))
       .returning();
-    
+
     revalidatePath("/assets/equipment");
     revalidatePath(`/assets/equipment/${existing.code}`);
     // Handle case where code might have changed (though it's usually static/rarely changed, the schema allows it)
     if (result.data.code && result.data.code !== existing.code) {
-        revalidatePath(`/assets/equipment/${result.data.code}`);
+      revalidatePath(`/assets/equipment/${result.data.code}`);
     }
     // Also revalidate the ID-based path if that's ever used
     revalidatePath(`/assets/equipment/${existing.id}`);
@@ -129,9 +129,9 @@ export async function PATCH(
         error.message === "CSRF token invalid"
       ) {
         return apiError(
-             "Security check failed (CSRF): Please refresh the page and try again",
-             HttpStatus.FORBIDDEN,
-             { requestId }
+          "Security check failed (CSRF): Please refresh the page and try again",
+          HttpStatus.FORBIDDEN,
+          { requestId }
         );
       }
     }
@@ -196,9 +196,9 @@ export async function DELETE(
         error.message === "CSRF token invalid"
       ) {
         return apiError(
-             "Security check failed (CSRF): Please refresh the page and try again",
-             HttpStatus.FORBIDDEN,
-             { requestId }
+          "Security check failed (CSRF): Please refresh the page and try again",
+          HttpStatus.FORBIDDEN,
+          { requestId }
         );
       }
     }

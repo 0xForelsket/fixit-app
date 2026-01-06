@@ -38,7 +38,7 @@ export async function POST(
     const isDisplayId = /^\d+$/.test(workOrderId);
     const existing = await db.query.workOrders.findFirst({
       where: isDisplayId
-        ? eq(workOrders.displayId, parseInt(workOrderId, 10))
+        ? eq(workOrders.displayId, Number.parseInt(workOrderId, 10))
         : eq(workOrders.id, workOrderId),
     });
 
@@ -50,7 +50,11 @@ export async function POST(
 
     // No change needed
     if (assignedToId === existing.assignedToId) {
-      return apiSuccess({ message: "No changes made" }, HttpStatus.OK, requestId);
+      return apiSuccess(
+        { message: "No changes made" },
+        HttpStatus.OK,
+        requestId
+      );
     }
 
     // Update the work order
@@ -111,7 +115,10 @@ export async function POST(
         return ApiErrors.forbidden(requestId);
       }
     }
-    apiLogger.error({ requestId, workOrderId, error }, "Assign work order error");
+    apiLogger.error(
+      { requestId, workOrderId, error },
+      "Assign work order error"
+    );
     return ApiErrors.internal(error, requestId);
   }
 }

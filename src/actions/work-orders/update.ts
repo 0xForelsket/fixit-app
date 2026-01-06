@@ -1,6 +1,6 @@
 "use server";
 
-import { db, eq, notifications, workOrderLogs, workOrders } from "./shared";
+import { checklistCompletions } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { workOrderLogger } from "@/lib/logger";
@@ -11,9 +11,9 @@ import {
   updateChecklistItemSchema,
   updateWorkOrderSchema,
 } from "@/lib/validations";
-import { checklistCompletions } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
+import { db, eq, notifications, workOrderLogs, workOrders } from "./shared";
 
 export async function updateWorkOrder(
   workOrderId: string,

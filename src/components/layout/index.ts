@@ -1,11 +1,11 @@
 export { BottomNav } from "./bottom-nav";
 export { DashboardShell } from "./dashboard-shell";
 export {
-	EntityDetailLayout,
-	EntityHeader,
-	EntityGrid,
-	EntityStatusCard,
-	EntityDetailItem,
+  EntityDetailLayout,
+  EntityHeader,
+  EntityGrid,
+  EntityStatusCard,
+  EntityDetailItem,
 } from "./entity-detail";
 export { Header } from "./header";
 export { NavTooltip } from "./nav-tooltip";

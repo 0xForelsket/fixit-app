@@ -70,7 +70,10 @@ export function UserForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <FormErrorSummary error={error || undefined} onDismiss={() => setError(null)} />
+      <FormErrorSummary
+        error={error || undefined}
+        onDismiss={() => setError(null)}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-2">

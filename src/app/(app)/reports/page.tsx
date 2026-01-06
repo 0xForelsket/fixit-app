@@ -1,8 +1,7 @@
 import { ReportsFilters } from "@/components/reports/reports-filters";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageContainer } from "@/components/ui/page-container";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { SortHeader } from "@/components/ui/sort-header";
 import { StatsTicker } from "@/components/ui/stats-ticker";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -332,91 +331,88 @@ export default async function ReportsPage({
   const csvUrl = `/api/reports/export?${csvParams.toString()}`;
 
   return (
-    <PageContainer className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="System Reports"
-        subtitle="Performance Analytics"
-        description={`${total} WORK ORDERS PROCESSED${hasFilters ? " • FILTERED RESULTS" : ""}`}
-        bgSymbol="RE"
-        actions={
-          <div className="flex gap-2">
-            <Button
-              asChild
-              variant="outline"
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <Link href="/reports/builder">
-                <Plus className="mr-2 h-4 w-4" />
-                New Report
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
-            >
-              <a href={csvUrl} download="work-order-report.csv">
-                <Download className="mr-2 h-4 w-4" />
-                EXPORT CSV
-              </a>
-            </Button>
-          </div>
-        }
-      />
-
-      {/* Summary Stats */}
-      <StatsTicker
-        stats={[
-          {
-            label: "Total Work Orders",
-            value: stats.total,
-            icon: FileText,
-            variant: "default",
-          },
-          {
-            label: "Open",
-            value: stats.open,
-            icon: Inbox,
-            variant: "warning",
-          },
-          {
-            label: "Resolved",
-            value: stats.resolved,
-            icon: CheckCircle2,
-            variant: "success",
-          },
-          {
-            label: "Critical",
-            value: stats.critical,
-            icon: AlertTriangle,
-            variant: "danger",
-          },
-          {
-            label: "Avg Resolution",
-            value: `${stats.avgResolutionHours}h`,
-            icon: Timer,
-            variant: "default",
-          },
-        ]}
-      />
-
-      {/* Filters */}
-      <ReportsFilters
-        searchParams={params}
-        hasActiveFilters={
-          !!(
-            (params.status && params.status !== "all") ||
-            (params.priority && params.priority !== "all") ||
-            (params.dateRange && params.dateRange !== "all") ||
-            params.search ||
-            params.from ||
-            params.to
-          )
-        }
-      />
-
-      {/* Work Orders Table */}
+    <PageLayout
+      id="reports-page"
+      title="System Reports"
+      subtitle="Performance Analytics"
+      description={`${total} WORK ORDERS PROCESSED${hasFilters ? " • FILTERED RESULTS" : ""}`}
+      bgSymbol="RE"
+      headerActions={
+        <div className="flex gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <Link href="/reports/builder">
+              <Plus className="mr-2 h-4 w-4" />
+              New Report
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-full border-2 font-black text-[10px] uppercase tracking-wider h-11 px-6 hover:bg-muted transition-all"
+          >
+            <a href={csvUrl} download="work-order-report.csv">
+              <Download className="mr-2 h-4 w-4" />
+              EXPORT CSV
+            </a>
+          </Button>
+        </div>
+      }
+      stats={
+        <StatsTicker
+          stats={[
+            {
+              label: "Total Work Orders",
+              value: stats.total,
+              icon: FileText,
+              variant: "default",
+            },
+            {
+              label: "Open",
+              value: stats.open,
+              icon: Inbox,
+              variant: "warning",
+            },
+            {
+              label: "Resolved",
+              value: stats.resolved,
+              icon: CheckCircle2,
+              variant: "success",
+            },
+            {
+              label: "Critical",
+              value: stats.critical,
+              icon: AlertTriangle,
+              variant: "danger",
+            },
+            {
+              label: "Avg Resolution",
+              value: `${stats.avgResolutionHours}h`,
+              icon: Timer,
+              variant: "default",
+            },
+          ]}
+        />
+      }
+      filters={
+        <ReportsFilters
+          searchParams={params}
+          hasActiveFilters={
+            !!(
+              (params.status && params.status !== "all") ||
+              (params.priority && params.priority !== "all") ||
+              (params.dateRange && params.dateRange !== "all") ||
+              params.search ||
+              params.from ||
+              params.to
+            )
+          }
+        />
+      }
+    >
       {workOrdersList.length === 0 ? (
         <EmptyState
           title="No work orders found"
@@ -572,7 +568,7 @@ export default async function ReportsPage({
           </div>
         </div>
       )}
-    </PageContainer>
+    </PageLayout>
   );
 }
 

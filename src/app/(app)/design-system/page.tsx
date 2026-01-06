@@ -30,7 +30,6 @@ export default function DesignSystemPage() {
       description="CORE COMPONENTS AND DESIGN TOKENS FOR THE FIXIT APPLICATION"
       bgSymbol="UI"
     >
-
       {/* Documentation Link */}
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="p-4">

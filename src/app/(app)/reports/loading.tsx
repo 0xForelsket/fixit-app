@@ -1,29 +1,27 @@
-import { PageHeader } from "@/components/ui/page-header";
+import { PageLayout } from "@/components/ui/page-layout";
 import { SkeletonStatsGrid, SkeletonTable } from "@/components/ui/skeleton";
 
 export default function ReportsLoading() {
   return (
-    <div className="space-y-10 animate-in">
-      <PageHeader
-        title="Reports"
-        subtitle="Analytics"
-        description="GENERATING OPERATIONAL SUMMARY..."
-        bgSymbol="RE"
-      />
-
-      <SkeletonStatsGrid />
-
-      <div className="space-y-6">
+    <PageLayout
+      id="reports-page"
+      title="System Reports"
+      subtitle="Performance Analytics"
+      description="GENERATING OPERATIONAL SUMMARY..."
+      bgSymbol="RE"
+      stats={<SkeletonStatsGrid />}
+      filters={
         <div className="flex flex-col sm:flex-row gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-10 w-32 rounded-lg bg-zinc-100 animate-pulse"
+              className="h-10 w-32 rounded-lg bg-muted animate-pulse"
             />
           ))}
         </div>
-        <SkeletonTable rows={10} cols={6} />
-      </div>
-    </div>
+      }
+    >
+      <SkeletonTable rows={10} cols={6} />
+    </PageLayout>
   );
 }

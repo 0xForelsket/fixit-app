@@ -170,10 +170,7 @@ export default async function AuditLogPage({
         >
           <a
             href={`/api/audit/export?${new URLSearchParams(
-              Object.entries(params).filter(([_, v]) => v) as [
-                string,
-                string,
-              ][]
+              Object.entries(params).filter(([_, v]) => v) as [string, string][]
             ).toString()}`}
             download
           >
@@ -219,7 +216,6 @@ export default async function AuditLogPage({
         />
       }
     >
-
       {/* Filters and Table */}
       <AuditLogTable
         logs={logs}

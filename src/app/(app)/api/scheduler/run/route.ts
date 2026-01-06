@@ -120,7 +120,9 @@ export async function POST(request: Request) {
           // C. Update Schedule
           // Calculate next due date from NOW to avoid drift stacking if system was off
           const nextDueDate = new Date(now);
-          nextDueDate.setDate(nextDueDate.getDate() + (schedule.frequencyDays ?? 0));
+          nextDueDate.setDate(
+            nextDueDate.getDate() + (schedule.frequencyDays ?? 0)
+          );
 
           await tx
             .update(maintenanceSchedules)
