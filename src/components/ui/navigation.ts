@@ -7,13 +7,21 @@
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
 
 // Pill Tabs
-export { PillTabs, PillTabsList, PillTabsTrigger, PillTabsContent } from "./pill-tabs";
+export {
+  PillTabs,
+  PillTabsList,
+  PillTabsTrigger,
+  PillTabsContent,
+} from "./pill-tabs";
 
 // Breadcrumbs
 export { Breadcrumbs, type BreadcrumbItem } from "./breadcrumbs";
 
 // Segmented Control
-export { SegmentedControl, type SegmentedControlOption } from "./segmented-control";
+export {
+  SegmentedControl,
+  type SegmentedControlOption,
+} from "./segmented-control";
 
 // View Toggle
 export { ViewToggle } from "./view-toggle";
