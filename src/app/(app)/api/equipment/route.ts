@@ -1,13 +1,18 @@
 import { db } from "@/db";
 import { equipment as equipmentTable } from "@/db/schema";
-import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
+import {
+  ApiErrors,
+  HttpStatus,
+  apiSuccess,
+  apiSuccessPaginated,
+  handleApiError,
+} from "@/lib/api-error";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { PERMISSIONS } from "@/lib/permissions";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { requireAuth, requireCsrf, requirePermission } from "@/lib/session";
 import { createEquipmentSchema, paginationSchema } from "@/lib/validations";
 import { and, eq, like, sql } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const requestId = generateRequestId();
@@ -79,21 +84,19 @@ export async function GET(request: Request) {
         .where(conditions.length > 0 ? and(...conditions) : undefined),
     ]);
 
-    return NextResponse.json({
-      data: results,
-      pagination: {
+    const total = Number(totalResult[0].count);
+    return apiSuccessPaginated(
+      results,
+      {
         page: pagination.page,
         limit: pagination.limit,
-        total: Number(totalResult[0].count),
-        totalPages: Math.ceil(Number(totalResult[0].count) / pagination.limit),
+        total,
+        totalPages: Math.ceil(total / pagination.limit),
       },
-    });
+      { cacheDuration: 30 } // 30 second cache for equipment list
+    );
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return ApiErrors.unauthorized(requestId);
-    }
-    apiLogger.error({ requestId, error }, "Get equipment error");
-    return ApiErrors.internal(error, requestId);
+    return handleApiError(error, requestId, "Get equipment error");
   }
 }
 

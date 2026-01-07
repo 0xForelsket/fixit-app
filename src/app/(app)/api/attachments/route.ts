@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return apiSuccess({ attachments: attachmentList });
+    return apiSuccess(attachmentList);
   } catch (error) {
     apiLogger.error({ requestId, error }, "Failed to list attachments");
     return ApiErrors.internal(error, requestId);

@@ -7,7 +7,13 @@ import {
   users,
   workOrders,
 } from "@/db/schema";
-import { ApiErrors, HttpStatus, apiSuccess } from "@/lib/api-error";
+import {
+  ApiErrors,
+  HttpStatus,
+  apiSuccess,
+  apiSuccessPaginated,
+  handleApiError,
+} from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -16,7 +22,6 @@ import { calculateDueBy } from "@/lib/sla";
 import { createWorkOrderSchema, paginationSchema } from "@/lib/validations";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { after } from "next/server";
-import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const requestId = generateRequestId();
@@ -96,21 +101,15 @@ export async function GET(request: Request) {
         .where(conditions.length > 0 ? and(...conditions) : undefined),
     ]);
 
-    return NextResponse.json({
-      data: results,
-      pagination: {
-        page: pagination.page,
-        limit: pagination.limit,
-        total: Number(totalResult[0].count),
-        totalPages: Math.ceil(Number(totalResult[0].count) / pagination.limit),
-      },
+    const total = Number(totalResult[0].count);
+    return apiSuccessPaginated(results, {
+      page: pagination.page,
+      limit: pagination.limit,
+      total,
+      totalPages: Math.ceil(total / pagination.limit),
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return ApiErrors.unauthorized(requestId);
-    }
-    apiLogger.error({ requestId, error }, "Failed to fetch work orders");
-    return ApiErrors.internal(error, requestId);
+    return handleApiError(error, requestId, "Failed to fetch work orders");
   }
 }
 
@@ -247,19 +246,6 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === "Unauthorized") {
-        return ApiErrors.unauthorized(requestId);
-      }
-      if (
-        error.message === "CSRF token missing" ||
-        error.message === "CSRF token invalid"
-      ) {
-        return ApiErrors.forbidden(requestId);
-      }
-    }
-    apiLogger.error({ requestId, error }, "Failed to create work order");
-    return ApiErrors.internal(error, requestId);
+    return handleApiError(error, requestId, "Failed to create work order");
   }
 }
-

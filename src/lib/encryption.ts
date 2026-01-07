@@ -1,12 +1,33 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  pbkdf2Sync,
+  randomBytes,
+} from "node:crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12; // GCM recommended IV length
 const AUTH_TAG_LENGTH = 16;
 
+// PBKDF2 configuration for secure key derivation
+const PBKDF2_ITERATIONS = 100000; // OWASP recommended minimum
+const PBKDF2_KEY_LENGTH = 32; // 256 bits for AES-256
+const PBKDF2_DIGEST = "sha256";
+
+// Static salt for key derivation (application-specific)
+// This provides consistent key derivation from the same secret
+// The salt doesn't need to be secret, it prevents rainbow table attacks
+const PBKDF2_SALT = Buffer.from("fixit-cmms-encryption-salt-v1", "utf8");
+
+// Cache the derived key to avoid repeated PBKDF2 computation
+let cachedKey: Buffer | null = null;
+let cachedSecret: string | null = null;
+
 /**
- * Get encryption key from environment variable.
- * Key must be 32 bytes (256 bits) for AES-256.
+ * Get encryption key from environment variable using PBKDF2 key derivation.
+ * Key will be 32 bytes (256 bits) for AES-256.
+ *
+ * Uses PBKDF2 with SHA-256 and 100,000 iterations as recommended by OWASP.
  */
 function getEncryptionKey(): Buffer {
   const secret = process.env.APP_SECRET;
@@ -14,18 +35,30 @@ function getEncryptionKey(): Buffer {
     throw new Error("APP_SECRET environment variable is not set");
   }
 
-  // If the secret is hex-encoded (64 chars = 32 bytes), decode it
-  if (/^[a-f0-9]{64}$/i.test(secret)) {
-    return Buffer.from(secret, "hex");
+  // Return cached key if secret hasn't changed
+  if (cachedKey && cachedSecret === secret) {
+    return cachedKey;
   }
 
-  // Otherwise, hash it to get a consistent 32-byte key
-  // Using a simple approach: pad/truncate to 32 bytes
-  // For production, consider using a proper KDF like PBKDF2
-  const keyBuffer = Buffer.alloc(32);
-  const secretBuffer = Buffer.from(secret, "utf8");
-  secretBuffer.copy(keyBuffer, 0, 0, Math.min(secretBuffer.length, 32));
-  return keyBuffer;
+  // If the secret is hex-encoded (64 chars = 32 bytes), use it directly
+  // This allows users to provide a pre-derived key for performance
+  if (/^[a-f0-9]{64}$/i.test(secret)) {
+    cachedKey = Buffer.from(secret, "hex");
+    cachedSecret = secret;
+    return cachedKey;
+  }
+
+  // Derive key using PBKDF2 for cryptographic strength
+  // This handles any secret format (short passwords, passphrases, etc.)
+  cachedKey = pbkdf2Sync(
+    secret,
+    PBKDF2_SALT,
+    PBKDF2_ITERATIONS,
+    PBKDF2_KEY_LENGTH,
+    PBKDF2_DIGEST
+  );
+  cachedSecret = secret;
+  return cachedKey;
 }
 
 /**

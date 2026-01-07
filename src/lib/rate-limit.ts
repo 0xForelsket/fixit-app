@@ -102,40 +102,108 @@ class InMemoryRateLimitProvider implements RateLimitProvider {
 }
 
 /**
- * Placeholder for Redis rate limit provider.
- * Uncomment and implement when Redis is available.
+ * Redis-based rate limit provider using Upstash.
  *
- * Example implementation with @upstash/ratelimit:
+ * To enable Redis rate limiting:
+ * 1. Install: bun add @upstash/ratelimit @upstash/redis
+ * 2. Set environment variables:
+ *    - UPSTASH_REDIS_REST_URL
+ *    - UPSTASH_REDIS_REST_TOKEN
+ *    - RATELIMIT_PROVIDER=redis
  *
- * import { Ratelimit } from "@upstash/ratelimit";
- * import { Redis } from "@upstash/redis";
- *
- * class RedisRateLimitProvider implements RateLimitProvider {
- *   private redis: Redis;
- *
- *   constructor() {
- *     this.redis = Redis.fromEnv();
- *   }
- *
- *   async check(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
- *     const ratelimit = new Ratelimit({
- *       redis: this.redis,
- *       limiter: Ratelimit.slidingWindow(limit, `${windowMs}ms`),
- *     });
- *
- *     const result = await ratelimit.limit(key);
- *     return {
- *       success: result.success,
- *       remaining: result.remaining,
- *       reset: result.reset,
- *     };
- *   }
- *
- *   async reset(key: string): Promise<void> {
- *     // Redis keys auto-expire, but you can explicitly delete if needed
- *   }
- * }
+ * This provider works with serverless deployments (Vercel, AWS Lambda, etc.)
+ * and provides consistent rate limiting across multiple instances.
  */
+class UpstashRateLimitProvider implements RateLimitProvider {
+  private redis: unknown;
+  private rateLimiters: Map<string, unknown> = new Map();
+  private initialized = false;
+
+  constructor() {
+    // Dynamic import to avoid requiring @upstash/redis if not used
+    this.redis = null;
+  }
+
+  private async ensureInitialized(): Promise<boolean> {
+    if (this.initialized) {
+      return this.redis !== null;
+    }
+    this.initialized = true;
+
+    try {
+      // Use string concatenation to prevent Vite from analyzing the import
+      const moduleName = "@upstash" + "/redis";
+      const module = await import(/* @vite-ignore */ moduleName);
+      this.redis = module.Redis.fromEnv();
+      return true;
+    } catch {
+      console.error(
+        "[rate-limit] Failed to initialize Upstash Redis. Ensure @upstash/redis is installed."
+      );
+      return false;
+    }
+  }
+
+  async check(
+    key: string,
+    limit: number,
+    windowMs: number
+  ): Promise<RateLimitResult> {
+    const isReady = await this.ensureInitialized();
+    if (!isReady || !this.redis) {
+      // Fall back to allowing request if Redis not available
+      console.warn(
+        "[rate-limit] Redis not available, allowing request through"
+      );
+      return { success: true, remaining: limit, reset: Date.now() + windowMs };
+    }
+
+    try {
+      // Use string concatenation to prevent Vite from analyzing the import
+      const moduleName = "@upstash" + "/ratelimit";
+      const { Ratelimit } = await import(/* @vite-ignore */ moduleName);
+
+      // Create or reuse rate limiter for this configuration
+      const limiterKey = `${limit}:${windowMs}`;
+      let ratelimit = this.rateLimiters.get(limiterKey);
+
+      if (!ratelimit) {
+        ratelimit = new Ratelimit({
+          redis: this.redis,
+          limiter: Ratelimit.slidingWindow(limit, `${windowMs} ms`),
+          analytics: true, // Enable analytics in Upstash dashboard
+          prefix: "fixit:ratelimit",
+        });
+        this.rateLimiters.set(limiterKey, ratelimit);
+      }
+
+      // @ts-expect-error - Dynamic type
+      const result = await ratelimit.limit(key);
+      return {
+        success: result.success,
+        remaining: result.remaining,
+        reset: result.reset,
+      };
+    } catch (error) {
+      console.error("[rate-limit] Upstash rate limit check failed:", error);
+      // On error, allow the request but log the issue
+      return { success: true, remaining: limit, reset: Date.now() + windowMs };
+    }
+  }
+
+  async reset(key: string): Promise<void> {
+    // Upstash rate limiter handles expiration automatically
+    // For manual reset, we'd need to delete the key from Redis
+    if (this.redis) {
+      try {
+        // @ts-expect-error - Dynamic type
+        await this.redis.del(`fixit:ratelimit:${key}`);
+      } catch {
+        // Ignore reset errors
+      }
+    }
+  }
+}
 
 // Singleton instance of the rate limit provider
 let rateLimitProvider: RateLimitProvider | null = null;
@@ -144,24 +212,37 @@ let rateLimitProvider: RateLimitProvider | null = null;
  * Get the configured rate limit provider.
  * Uses environment variable RATELIMIT_PROVIDER to determine which provider to use.
  * Defaults to in-memory for simplicity.
+ *
+ * Options:
+ * - RATELIMIT_PROVIDER=redis: Use Upstash Redis (requires @upstash/redis package)
+ * - RATELIMIT_PROVIDER=memory (or unset): Use in-memory Map (single instance only)
  */
 function getRateLimitProvider(): RateLimitProvider {
   if (!rateLimitProvider) {
     const provider = process.env.RATELIMIT_PROVIDER;
 
     if (provider === "redis") {
-      // TODO: Implement Redis provider when needed
-      console.warn(
-        "[rate-limit] Redis provider requested but not implemented. Falling back to in-memory."
-      );
-      rateLimitProvider = new InMemoryRateLimitProvider();
+      // Check if required environment variables are set
+      if (
+        !process.env.UPSTASH_REDIS_REST_URL ||
+        !process.env.UPSTASH_REDIS_REST_TOKEN
+      ) {
+        console.warn(
+          "[rate-limit] Redis provider requested but UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set. " +
+            "Falling back to in-memory."
+        );
+        rateLimitProvider = new InMemoryRateLimitProvider();
+      } else {
+        console.info("[rate-limit] Using Upstash Redis rate limiting");
+        rateLimitProvider = new UpstashRateLimitProvider();
+      }
     } else {
       // Log warning in production about in-memory limitations
       if (process.env.NODE_ENV === "production") {
         console.warn(
           "[rate-limit] Using in-memory rate limiting. " +
             "This will not work correctly with multiple instances or serverless deployments. " +
-            "Set RATELIMIT_PROVIDER=redis and configure Redis for production scaling."
+            "Set RATELIMIT_PROVIDER=redis and configure Upstash for production scaling."
         );
       }
       rateLimitProvider = new InMemoryRateLimitProvider();
@@ -349,4 +430,10 @@ export const RATE_LIMITS = {
 
   /** Account lockout threshold */
   lockout: { limit: 10, windowMs: 15 * 60 * 1000 }, // 10 attempts per 15 min
+
+  /** Search operations - expensive full-text queries */
+  search: { limit: 30, windowMs: 60 * 1000 }, // 30 searches per minute
+
+  /** Analytics queries - expensive aggregations */
+  analytics: { limit: 20, windowMs: 60 * 1000 }, // 20 analytics requests per minute
 } as const;

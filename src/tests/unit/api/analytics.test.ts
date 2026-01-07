@@ -42,7 +42,22 @@ vi.mock("@/lib/logger", () => ({
   generateRequestId: vi.fn(() => "test-request-id"),
 }));
 
+// Mock rate limiting
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn(() => ({ success: true, remaining: 10, reset: 0 })),
+  getClientIp: vi.fn(() => "127.0.0.1"),
+  RATE_LIMITS: {
+    analytics: { limit: 20, windowMs: 60000 },
+  },
+}));
+
 const { GET } = await import("@/app/(app)/api/analytics/kpis/route");
+
+// Helper to create mock request
+const createMockRequest = () =>
+  new Request("http://localhost/api/analytics/kpis", {
+    method: "GET",
+  });
 
 describe("GET /api/analytics/kpis", () => {
   beforeEach(() => {
@@ -63,7 +78,7 @@ describe("GET /api/analytics/kpis", () => {
     mockGetCurrentUser.mockResolvedValue(null);
     mockUserHasPermission.mockReturnValue(false);
 
-    const response = await GET();
+    const response = await GET(createMockRequest());
 
     expect(response.status).toBe(401);
   });
@@ -81,7 +96,7 @@ describe("GET /api/analytics/kpis", () => {
     });
     mockUserHasPermission.mockReturnValue(false);
 
-    const response = await GET();
+    const response = await GET(createMockRequest());
 
     expect(response.status).toBe(401);
   });
@@ -102,7 +117,7 @@ describe("GET /api/analytics/kpis", () => {
     // The endpoint requires complex db queries - just verify auth passes
     // When permission is granted, it should attempt to query the database
     // Mock will cause 500, but that's expected in unit tests without full db setup
-    const response = await GET();
+    const response = await GET(createMockRequest());
 
     // Should not be 401 when authenticated with permission
     expect(response.status).not.toBe(401);
@@ -121,7 +136,7 @@ describe("GET /api/analytics/kpis", () => {
     });
     mockUserHasPermission.mockReturnValue(true);
 
-    await GET();
+    await GET(createMockRequest());
 
     expect(mockUserHasPermission).toHaveBeenCalled();
   });
@@ -140,7 +155,7 @@ describe("GET /api/analytics/kpis", () => {
     mockUserHasPermission.mockReturnValue(true);
     mockWhere.mockRejectedValue(new Error("Database error"));
 
-    const response = await GET();
+    const response = await GET(createMockRequest());
     const data = await response.json();
 
     expect(response.status).toBe(500);

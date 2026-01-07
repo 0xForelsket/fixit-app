@@ -21,7 +21,7 @@ export async function GET() {
       limit: 20,
     });
 
-    return apiSuccess({ notifications: userNotifications });
+    return apiSuccess(userNotifications);
   } catch (error) {
     apiLogger.error({ requestId, error }, "Failed to fetch notifications");
     return ApiErrors.internal(error, requestId);

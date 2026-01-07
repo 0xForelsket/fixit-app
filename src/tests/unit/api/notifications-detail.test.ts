@@ -49,6 +49,13 @@ const { POST: POST_READ_ALL } = await import(
   "@/app/(app)/api/notifications/read-all/route"
 );
 
+// Helper to create mock request with CSRF header for read-all
+const createMockReadAllRequest = () =>
+  new Request("http://localhost/api/notifications/read-all", {
+    method: "POST",
+    headers: { "x-csrf-token": "valid-csrf-token" },
+  });
+
 beforeEach(() => {
   mockFindFirst.mockClear();
   mockUpdate.mockClear();
@@ -252,10 +259,14 @@ describe("PATCH /api/notifications/[id]", () => {
 });
 
 describe("POST /api/notifications/read-all", () => {
+  beforeEach(() => {
+    mockRequireCsrf.mockResolvedValue(undefined);
+  });
+
   it("returns 401 when not authenticated", async () => {
     mockGetCurrentUser.mockResolvedValue(null);
 
-    const response = await POST_READ_ALL();
+    const response = await POST_READ_ALL(createMockReadAllRequest());
 
     expect(response.status).toBe(401);
   });
@@ -272,7 +283,7 @@ describe("POST /api/notifications/read-all", () => {
       sessionVersion: 1,
     });
 
-    const response = await POST_READ_ALL();
+    const response = await POST_READ_ALL(createMockReadAllRequest());
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -295,8 +306,16 @@ describe("POST /api/notifications/read-all", () => {
       throw new Error("Database error");
     });
 
-    const response = await POST_READ_ALL();
+    const response = await POST_READ_ALL(createMockReadAllRequest());
 
     expect(response.status).toBe(500);
+  });
+
+  it("returns 403 when CSRF token is invalid", async () => {
+    mockRequireCsrf.mockRejectedValue(new Error("CSRF token invalid"));
+
+    const response = await POST_READ_ALL(createMockReadAllRequest());
+
+    expect(response.status).toBe(403);
   });
 });

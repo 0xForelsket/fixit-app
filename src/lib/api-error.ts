@@ -6,10 +6,122 @@
  * - Request ID correlation for debugging
  * - Proper HTTP status codes
  * - No implementation details leaked to clients
+ * - Type-safe custom error classes
  */
 
 import { NextResponse } from "next/server";
 import { apiLogger, generateRequestId } from "./logger";
+
+/**
+ * Custom error classes for type-safe error handling
+ * Use these instead of throwing errors with string messages
+ */
+
+/** Base class for API errors */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+/** Thrown when user is not authenticated */
+export class UnauthorizedError extends ApiError {
+  constructor(message = "Unauthorized") {
+    super(message, "UNAUTHORIZED");
+    this.name = "UnauthorizedError";
+  }
+}
+
+/** Thrown when user lacks permission */
+export class ForbiddenError extends ApiError {
+  constructor(message = "Forbidden") {
+    super(message, "FORBIDDEN");
+    this.name = "ForbiddenError";
+  }
+}
+
+/** Thrown when CSRF token is missing or invalid */
+export class CsrfError extends ApiError {
+  constructor(message = "CSRF token invalid") {
+    super(message, "CSRF_ERROR");
+    this.name = "CsrfError";
+  }
+}
+
+/** Thrown when resource is not found */
+export class NotFoundError extends ApiError {
+  constructor(resource = "Resource") {
+    super(`${resource} not found`, "NOT_FOUND");
+    this.name = "NotFoundError";
+  }
+}
+
+/** Thrown when validation fails */
+export class ValidationError extends ApiError {
+  constructor(
+    message = "Validation failed",
+    public readonly fieldErrors?: Record<string, string[]>
+  ) {
+    super(message, "VALIDATION_ERROR");
+    this.name = "ValidationError";
+  }
+}
+
+/**
+ * Helper to handle errors in API routes consistently
+ * Converts custom error classes to appropriate API responses
+ */
+export function handleApiError(
+  error: unknown,
+  requestId: string,
+  context?: string
+): NextResponse {
+  // Handle custom error types
+  if (error instanceof UnauthorizedError) {
+    return ApiErrors.unauthorized(requestId);
+  }
+
+  if (error instanceof ForbiddenError || error instanceof CsrfError) {
+    return ApiErrors.forbidden(requestId);
+  }
+
+  if (error instanceof NotFoundError) {
+    return ApiErrors.notFound(
+      error.message.replace(" not found", ""),
+      requestId
+    );
+  }
+
+  if (error instanceof ValidationError) {
+    return ApiErrors.validationError(error.message, requestId);
+  }
+
+  // Handle legacy string-based errors for backwards compatibility
+  if (error instanceof Error) {
+    if (error.message === "Unauthorized") {
+      return ApiErrors.unauthorized(requestId);
+    }
+    if (error.message === "Forbidden") {
+      return ApiErrors.forbidden(requestId);
+    }
+    if (
+      error.message === "CSRF token missing" ||
+      error.message === "CSRF token invalid"
+    ) {
+      return ApiErrors.forbidden(requestId);
+    }
+  }
+
+  // Log and return generic error for unknown errors
+  if (context) {
+    apiLogger.error({ requestId, error }, context);
+  }
+  return ApiErrors.internal(error, requestId);
+}
 
 /**
  * Standard API error response format
@@ -27,6 +139,23 @@ export interface ApiErrorResponse {
 export interface ApiSuccessResponse<T> {
   data: T;
   requestId?: string;
+}
+
+/**
+ * Pagination metadata for list responses
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+/**
+ * API success response with pagination
+ */
+export interface ApiPaginatedResponse<T> extends ApiSuccessResponse<T[]> {
+  pagination: PaginationMeta;
 }
 
 /**
@@ -207,3 +336,39 @@ export function apiSuccess<T>(
   );
 }
 
+/**
+ * Create a standardized paginated success response for list endpoints
+ *
+ * @param data - Array of items
+ * @param pagination - Pagination metadata
+ * @param options - Optional response configuration (headers, caching, etc.)
+ */
+export function apiSuccessPaginated<T>(
+  data: T[],
+  pagination: PaginationMeta,
+  options?: {
+    headers?: Record<string, string>;
+    /** Cache duration in seconds for private (authenticated) endpoints */
+    cacheDuration?: number;
+  }
+): NextResponse<ApiPaginatedResponse<T>> {
+  const headers: Record<string, string> = { ...options?.headers };
+
+  // Add private cache header if cacheDuration is specified
+  // Using 'private' since these are authenticated endpoints
+  if (options?.cacheDuration) {
+    headers["Cache-Control"] =
+      `private, max-age=${options.cacheDuration}, stale-while-revalidate=${Math.floor(options.cacheDuration / 2)}`;
+  }
+
+  return NextResponse.json(
+    {
+      data,
+      pagination,
+    },
+    {
+      status: HttpStatus.OK,
+      headers: Object.keys(headers).length > 0 ? headers : undefined,
+    }
+  );
+}

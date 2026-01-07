@@ -4,11 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 // Create mocks
 const mockGetCurrentUser = vi.fn();
 const mockDeleteSession = vi.fn();
+const mockRequireCsrf = vi.fn();
 
 // Mock session
 vi.mock("@/lib/session", () => ({
   getCurrentUser: mockGetCurrentUser,
   deleteSession: mockDeleteSession,
+  requireCsrf: mockRequireCsrf,
 }));
 
 // Mock logger
@@ -28,6 +30,13 @@ vi.mock("@/lib/logger", () => ({
 
 const { POST } = await import("@/app/(app)/api/auth/logout/route");
 const { GET } = await import("@/app/(app)/api/auth/me/route");
+
+// Helper to create mock request with CSRF header
+const createMockLogoutRequest = () =>
+  new Request("http://localhost/api/auth/logout", {
+    method: "POST",
+    headers: { "x-csrf-token": "valid-csrf-token" },
+  });
 
 describe("GET /api/auth/me", () => {
   beforeEach(() => {
@@ -97,12 +106,14 @@ describe("POST /api/auth/logout", () => {
   beforeEach(() => {
     mockGetCurrentUser.mockClear();
     mockDeleteSession.mockClear();
+    mockRequireCsrf.mockClear();
+    mockRequireCsrf.mockResolvedValue(undefined);
   });
 
   it("logs out successfully", async () => {
     mockDeleteSession.mockResolvedValue(undefined);
 
-    const response = await POST();
+    const response = await POST(createMockLogoutRequest());
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -113,8 +124,16 @@ describe("POST /api/auth/logout", () => {
   it("handles logout errors", async () => {
     mockDeleteSession.mockRejectedValue(new Error("Logout failed"));
 
-    const response = await POST();
+    const response = await POST(createMockLogoutRequest());
 
     expect(response.status).toBe(500);
+  });
+
+  it("returns 403 when CSRF token is missing", async () => {
+    mockRequireCsrf.mockRejectedValue(new Error("CSRF token missing"));
+
+    const response = await POST(createMockLogoutRequest());
+
+    expect(response.status).toBe(403);
   });
 });

@@ -320,8 +320,8 @@ describe("GET /api/attachments", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.attachments).toHaveLength(1);
-    expect(data.data.attachments[0].filename).toBe("report.pdf");
+    expect(data.data).toHaveLength(1);
+    expect(data.data[0].filename).toBe("report.pdf");
   });
 });
 

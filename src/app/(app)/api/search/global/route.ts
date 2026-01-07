@@ -1,11 +1,11 @@
 import { db } from "@/db";
 import { equipment, spareParts, workOrders } from "@/db/schema";
-import { ApiErrors } from "@/lib/api-error";
+import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { formatWorkOrderId, getWorkOrderPath } from "@/lib/format-ids";
-import { generateRequestId } from "@/lib/logger";
+import { apiLogger, generateRequestId } from "@/lib/logger";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/session";
 import { eq, like, or, sql } from "drizzle-orm";
-import { NextResponse } from "next/server";
 
 export type SearchResult = {
   id: string;
@@ -80,6 +80,19 @@ export async function GET(request: Request) {
   const requestId = generateRequestId();
 
   try {
+    // Rate limiting for expensive full-text search operations
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(
+      `search:${clientIp}`,
+      RATE_LIMITS.search.limit,
+      RATE_LIMITS.search.windowMs
+    );
+
+    if (!rateLimit.success) {
+      const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+      return ApiErrors.rateLimited(retryAfter, requestId);
+    }
+
     const user = await getCurrentUser();
     if (!user) {
       return ApiErrors.unauthorized(requestId);
@@ -89,7 +102,7 @@ export async function GET(request: Request) {
     const query = searchParams.get("q")?.trim() || "";
 
     if (!query || query.length < 2) {
-      return NextResponse.json({ results: [] });
+      return apiSuccess([]);
     }
 
     const results: SearchResult[] = [];
@@ -185,9 +198,9 @@ export async function GET(request: Request) {
       });
     }
 
-    return NextResponse.json({ results: results.slice(0, 15) });
+    return apiSuccess(results.slice(0, 15));
   } catch (error) {
-    console.error("Search error:", error);
+    apiLogger.error({ requestId, error }, "Search error");
     return ApiErrors.internal(error, requestId);
   }
 }

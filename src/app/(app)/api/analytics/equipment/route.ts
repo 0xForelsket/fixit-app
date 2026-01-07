@@ -3,11 +3,26 @@ import { equipment, workOrders } from "@/db/schema";
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
+import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/session";
 import { desc, eq, sql } from "drizzle-orm";
 
-export async function GET() {
+export async function GET(request: Request) {
   const requestId = generateRequestId();
+
+  // Rate limiting for expensive analytics queries
+  const clientIp = getClientIp(request);
+  const rateLimit = checkRateLimit(
+    `analytics:${clientIp}`,
+    RATE_LIMITS.analytics.limit,
+    RATE_LIMITS.analytics.windowMs
+  );
+
+  if (!rateLimit.success) {
+    const retryAfter = Math.ceil((rateLimit.reset - Date.now()) / 1000);
+    return ApiErrors.rateLimited(retryAfter, requestId);
+  }
+
   const user = await getCurrentUser();
 
   if (!user || !userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {

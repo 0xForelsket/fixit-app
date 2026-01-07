@@ -97,8 +97,8 @@ describe("GET /api/notifications", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.notifications).toHaveLength(2);
-    expect(data.data.notifications[0].type).toBe("work_order_assigned");
+    expect(data.data).toHaveLength(2);
+    expect(data.data[0].type).toBe("work_order_assigned");
   });
 
   it("returns empty array when user has no notifications", async () => {
@@ -119,7 +119,7 @@ describe("GET /api/notifications", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.data.notifications).toEqual([]);
+    expect(data.data).toEqual([]);
   });
 
   it("handles database errors gracefully", async () => {
