@@ -1,26 +1,39 @@
-export { Button, buttonVariants } from "./button";
-export { Input } from "./input";
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "./card";
-export { Label } from "./label";
-export { Badge, badgeVariants } from "./badge";
-export {
-  Skeleton,
-  SkeletonCard,
-  SkeletonTicketList,
-  SkeletonStatsGrid,
-  SkeletonTable,
-} from "./skeleton";
-export { FieldGroup, FormGrid, FormSection } from "./form-layout";
-export { SelectionCard, SelectionGrid } from "./selection-cards";
-export {
-  SegmentedControl,
-  type SegmentedControlOption,
-} from "./segmented-control";
-export { FormErrorSummary } from "./form-error-summary";
+/**
+ * UI Components Index
+ *
+ * This file re-exports all UI components organized by category.
+ * You can import from specific categories for better organization:
+ *
+ * @example
+ * // Category imports (recommended for multiple from same category)
+ * import { Button, Card, Badge } from "@/components/ui/primitives";
+ * import { DataTable, StatsCard } from "@/components/ui/data-display";
+ * import { useToast, Skeleton } from "@/components/ui/feedback";
+ *
+ * // Or import everything from this file
+ * import { Button, DataTable, useToast } from "@/components/ui";
+ */
+
+// Primitives - Core building blocks
+export * from "./primitives";
+
+// Forms - Form-related components
+export * from "./forms";
+
+// Feedback - Status, loading, and error states
+export * from "./feedback";
+
+// Data Display - Tables, stats, and data visualization
+export * from "./data-display";
+
+// Navigation - Navigation and routing components
+export * from "./navigation";
+
+// Overlays - Dialogs, dropdowns, and modals
+export * from "./overlays";
+
+// Layout - Page structure components
+export * from "./layout";
+
+// Filters - Filtering and sorting components
+export * from "./filters";
