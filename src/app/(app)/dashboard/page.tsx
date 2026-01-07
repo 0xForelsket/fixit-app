@@ -241,9 +241,7 @@ async function GlobalStatsSection({ user }: { user: SessionUser | null }) {
   const t = await getTranslations("dashboard");
   const { global: globalStats } = await getStats(user);
   const title =
-    user?.roleName === "tech"
-      ? t("departmentalOverview")
-      : t("systemOverview");
+    user?.roleName === "tech" ? t("departmentalOverview") : t("systemOverview");
 
   return (
     <div className="space-y-4">

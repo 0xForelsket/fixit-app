@@ -301,9 +301,7 @@ export default async function WorkOrdersPage({
       <WorkOrderList
         workOrders={workOrdersList}
         emptyMessage={
-          activeFilters
-            ? t("tryAdjustingFilters")
-            : t("noWorkOrdersCreated")
+          activeFilters ? t("tryAdjustingFilters") : t("noWorkOrdersCreated")
         }
         searchParams={params}
         technicians={technicians}

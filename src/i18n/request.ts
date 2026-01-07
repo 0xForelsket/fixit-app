@@ -1,8 +1,8 @@
 import { getRequestConfig } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 import {
-  type Locale,
   LOCALE_COOKIE_NAME,
+  type Locale,
   defaultLocale,
   locales,
 } from "./config";
@@ -34,9 +34,7 @@ export default getRequestConfig(async () => {
         // Handle full locale codes like "de-DE" -> "de"
         return locale.split("-")[0].toLowerCase();
       })
-      .filter((lang): lang is Locale =>
-        locales.includes(lang as Locale)
-      );
+      .filter((lang): lang is Locale => locales.includes(lang as Locale));
 
     if (preferredLocales.length > 0) {
       const locale = preferredLocales[0];

@@ -186,7 +186,7 @@ function NavItemWithSubmenu({
   label,
 }: NavItemWithSubmenuProps) {
   const t = useTranslations("nav");
-  
+
   return (
     <>
       <button
@@ -324,4 +324,3 @@ function NavItemLink({
     </Link>
   );
 }
-

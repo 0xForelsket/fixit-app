@@ -1,9 +1,9 @@
 import { OfflineIndicator } from "@/components/pwa/offline-indicator";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -81,4 +81,3 @@ export default async function RootLayout({
     </html>
   );
 }
-

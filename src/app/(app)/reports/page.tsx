@@ -568,7 +568,7 @@ export default async function ReportsPage({
                 </Link>
               ) : (
                 <span>
-                 {tCommon("next")} <ArrowRight className="ml-2 h-4 w-4" />
+                  {tCommon("next")} <ArrowRight className="ml-2 h-4 w-4" />
                 </span>
               )}
             </Button>

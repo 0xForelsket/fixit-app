@@ -1,11 +1,7 @@
 "use client";
 
 import { setLocale } from "@/actions/locale";
-import {
-  type Locale,
-  localeNativeNames,
-  locales,
-} from "@/i18n/config";
+import { type Locale, localeNativeNames, locales } from "@/i18n/config";
 import { cn } from "@/lib/utils";
 import { Check, Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";

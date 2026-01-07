@@ -5,11 +5,11 @@ import type { ReactNode } from "react";
 
 interface PageLayoutProps {
   /** The main title of the page */
-  title: string;
+  title: ReactNode;
   /** Small subtitle above the title */
   subtitle?: string;
   /** Descriptive text below the title */
-  description?: string;
+  description?: ReactNode;
   /** Large background decorative symbol */
   bgSymbol?: string;
   /** Actions to display in the header (buttons, links) */

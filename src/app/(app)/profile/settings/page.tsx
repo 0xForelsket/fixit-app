@@ -73,7 +73,9 @@ export default async function ProfileSettingsPage() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold">{t("profile")}</h2>
-                <p className="text-sm text-muted-foreground">{t("profileDesc")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("profileDesc")}
+                </p>
               </div>
             </div>
             <ProfileForm
@@ -88,21 +90,33 @@ export default async function ProfileSettingsPage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">{t("employeeId")}</p>
-                <p className="font-mono text-sm font-bold">{profile.employeeId}</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">
+                  {t("employeeId")}
+                </p>
+                <p className="font-mono text-sm font-bold">
+                  {profile.employeeId}
+                </p>
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">{t("role")}</p>
-                <p className="text-sm font-bold capitalize">{profile.roleName}</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">
+                  {t("role")}
+                </p>
+                <p className="text-sm font-bold capitalize">
+                  {profile.roleName}
+                </p>
               </div>
               {profile.departmentName && (
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">{t("department")}</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">
+                    {t("department")}
+                  </p>
                   <p className="text-sm font-bold">{profile.departmentName}</p>
                 </div>
               )}
               <div>
-                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">{t("memberSince")}</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground mb-1">
+                  {t("memberSince")}
+                </p>
                 <p className="text-sm font-bold">
                   {new Date(profile.createdAt).toLocaleDateString()}
                 </p>
@@ -119,7 +133,9 @@ export default async function ProfileSettingsPage() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold">{t("security")}</h2>
-                <p className="text-sm text-muted-foreground">{t("securityDesc")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("securityDesc")}
+                </p>
               </div>
             </div>
             <SecurityForm />
@@ -135,7 +151,9 @@ export default async function ProfileSettingsPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold">{t("appearance")}</h2>
-                  <p className="text-sm text-muted-foreground">{t("appearanceDesc")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("appearanceDesc")}
+                  </p>
                 </div>
               </div>
               <AppearanceForm preferences={profile.preferences} />
@@ -147,8 +165,12 @@ export default async function ProfileSettingsPage() {
                   <Bell className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold">{t("notifications")}</h2>
-                  <p className="text-sm text-muted-foreground">{t("notificationsDesc")}</p>
+                  <h2 className="text-lg font-semibold">
+                    {t("notifications")}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {t("notificationsDesc")}
+                  </p>
                 </div>
               </div>
               <NotificationsForm preferences={profile.preferences} />
@@ -161,7 +183,9 @@ export default async function ProfileSettingsPage() {
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold">{t("language")}</h2>
-                  <p className="text-sm text-muted-foreground">{t("languageDesc")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("languageDesc")}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">

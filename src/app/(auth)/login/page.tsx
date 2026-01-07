@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useActionState } from "react";
 
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useTranslations } from "next-intl";
 
 const initialState: LoginState = {};

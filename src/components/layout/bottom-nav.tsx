@@ -152,4 +152,3 @@ export function BottomNav({ permissions }: BottomNavProps) {
     </nav>
   );
 }
-
