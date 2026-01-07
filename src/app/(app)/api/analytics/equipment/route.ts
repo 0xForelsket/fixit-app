@@ -40,7 +40,11 @@ export async function GET() {
       downtimeHours: Number(m.breakdowns) * 2 + Math.floor(Math.random() * 5), // Mock logic: ~2h per breakdown + noise
     }));
 
-    return apiSuccess(equipmentWithMockDowntime);
+    return apiSuccess(equipmentWithMockDowntime, undefined, undefined, {
+      headers: {
+        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=60",
+      },
+    });
   } catch (error) {
     apiLogger.error({ requestId, error }, "Equipment analytics error");
     return ApiErrors.internal(error, requestId);

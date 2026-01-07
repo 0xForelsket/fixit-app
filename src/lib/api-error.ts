@@ -183,17 +183,27 @@ export const ApiErrors = {
 
 /**
  * Create a standardized success response
+ *
+ * @param data - The response data
+ * @param status - HTTP status code (default: 200)
+ * @param requestId - Optional request ID for correlation
+ * @param options - Optional response configuration (headers, etc.)
  */
 export function apiSuccess<T>(
   data: T,
   status: number = HttpStatus.OK,
-  requestId?: string
+  requestId?: string,
+  options?: { headers?: Record<string, string> }
 ): NextResponse<ApiSuccessResponse<T>> {
   return NextResponse.json(
     {
       data,
       ...(requestId && { requestId }),
     },
-    { status }
+    {
+      status,
+      headers: options?.headers,
+    }
   );
 }
+

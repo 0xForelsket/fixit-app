@@ -33,7 +33,14 @@ export async function GET() {
         ...r,
         resolvedCount: Number(r.resolvedCount),
         activeCount: Number(r.activeCount),
-      }))
+      })),
+      undefined,
+      undefined,
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=60",
+        },
+      }
     );
   } catch (error) {
     apiLogger.error({ requestId, error }, "Tech stats error");

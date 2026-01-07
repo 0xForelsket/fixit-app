@@ -35,7 +35,14 @@ export async function GET() {
         ...t,
         created_count: Number(t.created_count),
         resolved_count: Number(t.resolved_count),
-      }))
+      })),
+      undefined,
+      undefined,
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+        },
+      }
     );
   } catch (error) {
     apiLogger.error({ requestId, error }, "Trends error");

@@ -69,13 +69,22 @@ export async function GET() {
         ? Math.round((compliantCount / resolvedCount) * 100)
         : 100;
 
-    return apiSuccess({
-      openWorkOrders: Number(row.open_count),
-      highPriorityOpen: Number(row.high_priority_count),
-      mttrHours,
-      slaRate,
-      period: "30d",
-    });
+    return apiSuccess(
+      {
+        openWorkOrders: Number(row.open_count),
+        highPriorityOpen: Number(row.high_priority_count),
+        mttrHours,
+        slaRate,
+        period: "30d",
+      },
+      undefined,
+      undefined,
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",
+        },
+      }
+    );
   } catch (error) {
     apiLogger.error({ requestId, error }, "KPIs error");
     return ApiErrors.internal(error, requestId);
