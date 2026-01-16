@@ -435,5 +435,5 @@ export const RATE_LIMITS = {
   search: { limit: 30, windowMs: 60 * 1000 }, // 30 searches per minute
 
   /** Analytics queries - expensive aggregations */
-  analytics: { limit: 20, windowMs: 60 * 1000 }, // 20 analytics requests per minute
+  analytics: { limit: 60, windowMs: 60 * 1000 }, // 60 analytics requests per minute
 } as const;

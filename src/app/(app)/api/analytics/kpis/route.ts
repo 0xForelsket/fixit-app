@@ -30,6 +30,24 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Parse query parameters for filtering
+    const { searchParams } = new URL(request.url);
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
+    const technicianId = searchParams.get("technicianId");
+
+    // Default to last 30 days if no date range specified
+    const endDate = endDateParam ? new Date(endDateParam) : new Date();
+    const startDate = startDateParam
+      ? new Date(startDateParam)
+      : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Build dynamic WHERE clause conditions
+    const dateCondition = sql`${workOrders.createdAt} >= ${startDate} AND ${workOrders.createdAt} <= ${endDate}`;
+    const technicianCondition = technicianId
+      ? sql`AND ${workOrders.assignedToId} = ${technicianId}`
+      : sql``;
+
     // Calculate all KPIs in a single efficient SQL query
     const result = await db.execute(sql`
       SELECT
@@ -42,33 +60,35 @@ export async function GET(request: Request) {
           ${workOrders.priority} IN ('critical', 'high')
         )::int as high_priority_count,
         
-        -- 3. MTTR (Mean Time To Repair) - Last 30 days
-        -- COALESCE to 0 to handle case with no resolved tickets
+        -- 3. MTTR (Mean Time To Repair) within date range
         COALESCE(
           AVG(
             EXTRACT(EPOCH FROM (${workOrders.resolvedAt} - ${workOrders.createdAt}))
           ) FILTER (
             WHERE ${workOrders.status} = 'resolved' 
-            AND ${workOrders.resolvedAt} > NOW() - INTERVAL '30 days'
+            AND ${workOrders.resolvedAt} >= ${startDate}
+            AND ${workOrders.resolvedAt} <= ${endDate}
           ), 
           0
         ) as avg_resolution_seconds,
         
-        -- 4. SLA Compliance Rate data
-        -- Count resolved in last 30d
+        -- 4. SLA Compliance Rate data within date range
         COUNT(*) FILTER (
           WHERE ${workOrders.status} = 'resolved' 
-          AND ${workOrders.resolvedAt} > NOW() - INTERVAL '30 days'
-        )::int as resolved_30d_count,
+          AND ${workOrders.resolvedAt} >= ${startDate}
+          AND ${workOrders.resolvedAt} <= ${endDate}
+        )::int as resolved_count,
         
-        -- Count compliant in last 30d (resolved <= dueBy or dueBy is null)
+        -- Count compliant (resolved <= dueBy or dueBy is null)
         COUNT(*) FILTER (
           WHERE ${workOrders.status} = 'resolved' 
-          AND ${workOrders.resolvedAt} > NOW() - INTERVAL '30 days'
+          AND ${workOrders.resolvedAt} >= ${startDate}
+          AND ${workOrders.resolvedAt} <= ${endDate}
           AND (${workOrders.resolvedAt} <= ${workOrders.dueBy} OR ${workOrders.dueBy} IS NULL)
         )::int as sla_compliant_count
 
       FROM ${workOrders}
+      WHERE ${dateCondition} ${technicianCondition}
     `);
 
     const row = result[0]; // Postgres-js returns array of rows
@@ -76,7 +96,7 @@ export async function GET(request: Request) {
     // Process results
     const mttrHours = Math.round(Number(row.avg_resolution_seconds) / 3600);
 
-    const resolvedCount = Number(row.resolved_30d_count);
+    const resolvedCount = Number(row.resolved_count);
     const compliantCount = Number(row.sla_compliant_count);
 
     const slaRate =

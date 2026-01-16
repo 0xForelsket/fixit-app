@@ -5,7 +5,7 @@ import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getCurrentUser } from "@/lib/session";
-import { gte, sql } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 
 export async function GET(request: Request) {
   const requestId = generateRequestId();
@@ -30,7 +30,23 @@ export async function GET(request: Request) {
   }
 
   try {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    // Parse query parameters for filtering
+    const { searchParams } = new URL(request.url);
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
+    const technicianId = searchParams.get("technicianId");
+
+    // Default to last 30 days if no date range specified
+    const endDate = endDateParam ? new Date(endDateParam) : new Date();
+    const startDate = startDateParam
+      ? new Date(startDateParam)
+      : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // Build conditions
+    const conditions = [gte(workOrders.createdAt, startDate)];
+    if (technicianId) {
+      conditions.push(eq(workOrders.assignedToId, technicianId));
+    }
 
     const trendResult = await db
       .select({
@@ -41,7 +57,7 @@ export async function GET(request: Request) {
         resolved_count: sql<number>`count(CASE WHEN ${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed' THEN 1 END)`,
       })
       .from(workOrders)
-      .where(gte(workOrders.createdAt, thirtyDaysAgo))
+      .where(and(...conditions))
       .groupBy(sql`day`)
       .orderBy(sql`day ASC`);
 

@@ -30,12 +30,23 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Parse query parameters for filtering
+    const { searchParams } = new URL(request.url);
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
+
+    // Default to last 30 days if no date range specified
+    const endDate = endDateParam ? new Date(endDateParam) : new Date();
+    const startDate = startDateParam
+      ? new Date(startDateParam)
+      : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+
     const result = await db
       .select({
         id: users.id,
         name: users.name,
-        resolvedCount: sql<number>`count(CASE WHEN ${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed' THEN 1 END)`,
-        activeCount: sql<number>`count(CASE WHEN ${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress' THEN 1 END)`,
+        resolvedCount: sql<number>`count(CASE WHEN (${workOrders.status} = 'resolved' OR ${workOrders.status} = 'closed') AND ${workOrders.createdAt} >= ${startDate} AND ${workOrders.createdAt} <= ${endDate} THEN 1 END)`,
+        activeCount: sql<number>`count(CASE WHEN (${workOrders.status} = 'open' OR ${workOrders.status} = 'in_progress') AND ${workOrders.createdAt} >= ${startDate} AND ${workOrders.createdAt} <= ${endDate} THEN 1 END)`,
       })
       .from(users)
       .leftJoin(roles, eq(users.roleId, roles.id))

@@ -109,6 +109,10 @@ export async function proxy(request: NextRequest) {
   ];
   const isMarketingPath = MARKETING_PATHS.includes(pathname);
 
+  if (process.env.DISABLE_LANDING_PAGE === "true" && isMarketingPath) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   // Consider it "App Context" if:
   // 1. We're on the app. subdomain
   // 2. We're on a tunnel AND it's not a marketing path
