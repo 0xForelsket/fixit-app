@@ -53,6 +53,13 @@ export async function getSchedulesForTemplate(
     return { success: false, error: "You must be logged in" };
   }
 
+  if (!userHasPermission(user, PERMISSIONS.REPORTS_VIEW)) {
+    return {
+      success: false,
+      error: "You don't have permission to view schedules",
+    };
+  }
+
   const schedules = await db.query.reportSchedules.findMany({
     where: eq(reportSchedules.templateId, templateId),
   });
@@ -69,6 +76,13 @@ export async function getSchedule(
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "You must be logged in" };
+  }
+
+  if (!userHasPermission(user, PERMISSIONS.REPORTS_VIEW)) {
+    return {
+      success: false,
+      error: "You don't have permission to view schedules",
+    };
   }
 
   const schedule = await db.query.reportSchedules.findFirst({

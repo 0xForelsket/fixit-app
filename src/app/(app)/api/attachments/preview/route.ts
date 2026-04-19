@@ -1,4 +1,5 @@
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { authorizeAttachmentAccessByKey } from "@/lib/attachments-auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
@@ -28,7 +29,23 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const downloadUrl = await getPresignedDownloadUrl(key, 300); // 5 minute expiry
+    const access = await authorizeAttachmentAccessByKey({
+      user,
+      key,
+    });
+
+    if (!access.exists || !access.attachment) {
+      return ApiErrors.notFound("Attachment", requestId);
+    }
+
+    if (!access.allowed) {
+      return ApiErrors.forbidden(requestId);
+    }
+
+    const downloadUrl = await getPresignedDownloadUrl(
+      access.attachment.s3Key,
+      300
+    );
 
     // Check if we should return the URL or redirect
     const format = searchParams.get("format");

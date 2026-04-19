@@ -2,6 +2,7 @@ import { getDueSchedules, markScheduleRun } from "@/actions/report-schedules";
 import { db } from "@/db";
 import { reportTemplates, systemSettings } from "@/db/schema";
 import { sendEmailWithRetry } from "@/lib/email";
+import { apiLogger, generateRequestId } from "@/lib/logger";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -107,12 +108,14 @@ function generateReportHtml(
 }
 
 export async function GET(request: Request) {
+  const requestId = generateRequestId();
+
   // Verify cron secret
   const cronSecret = request.headers.get("x-cron-secret");
   const expectedSecret = process.env.CRON_SECRET;
 
   if (!expectedSecret) {
-    console.error("CRON_SECRET not configured");
+    apiLogger.error({ requestId }, "CRON_SECRET not configured");
     return NextResponse.json(
       { error: "Cron endpoint not configured" },
       { status: 500 }
@@ -125,6 +128,7 @@ export async function GET(request: Request) {
 
   // Try to acquire lock
   const lockAcquired = await acquireLock();
+  apiLogger.info({ requestId, lockAcquired }, "Report cron lock attempt");
   if (!lockAcquired) {
     return NextResponse.json(
       { message: "Another process is already running" },
@@ -132,12 +136,13 @@ export async function GET(request: Request) {
     );
   }
 
+  let lockHeld = true;
+
   try {
     // Get due schedules
     const dueSchedules = await getDueSchedules();
 
     if (dueSchedules.length === 0) {
-      await releaseLock();
       return NextResponse.json({
         message: "No schedules due",
         processed: 0,
@@ -158,8 +163,13 @@ export async function GET(request: Request) {
         });
 
         if (!template) {
-          console.warn(
-            `Template ${schedule.templateId} not found for schedule ${schedule.id}`
+          apiLogger.warn(
+            {
+              requestId,
+              scheduleId: schedule.id,
+              templateId: schedule.templateId,
+            },
+            "Template not found for scheduled report"
           );
           await markScheduleRun(schedule.id, false, "Template not found");
           results.push({
@@ -198,7 +208,10 @@ export async function GET(request: Request) {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        console.error(`Error processing schedule ${schedule.id}:`, error);
+        apiLogger.error(
+          { requestId, scheduleId: schedule.id, error },
+          "Error processing scheduled report"
+        );
         await markScheduleRun(schedule.id, false, errorMessage);
         results.push({
           scheduleId: schedule.id,
@@ -207,8 +220,6 @@ export async function GET(request: Request) {
         });
       }
     }
-
-    await releaseLock();
 
     const successful = results.filter((r) => r.success).length;
     const failed = results.filter((r) => !r.success).length;
@@ -221,12 +232,17 @@ export async function GET(request: Request) {
       results,
     });
   } catch (error) {
-    console.error("Error processing reports:", error);
-    await releaseLock();
+    apiLogger.error({ requestId, error }, "Error processing reports");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
     );
+  } finally {
+    if (lockHeld) {
+      await releaseLock();
+      apiLogger.info({ requestId }, "Report cron lock released");
+      lockHeld = false;
+    }
   }
 }
 

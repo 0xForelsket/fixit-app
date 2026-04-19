@@ -4,7 +4,7 @@ import {
   updateScheduleAction,
 } from "@/actions/maintenance";
 import { maintenanceChecklists, maintenanceSchedules } from "@/db/schema";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
   mockGetCurrentUser,
@@ -107,6 +107,9 @@ describe("Maintenance Actions", () => {
   };
 
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-04-19T08:00:00.000Z"));
+
     mockGetCurrentUser.mockClear();
     mockUserHasPermission.mockClear();
     mockRevalidatePath.mockClear();
@@ -121,6 +124,10 @@ describe("Maintenance Actions", () => {
 
     mockGetCurrentUser.mockResolvedValue(mockUser);
     mockUserHasPermission.mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe("createScheduleAction", () => {
@@ -162,6 +169,7 @@ describe("Maintenance Actions", () => {
         expect.objectContaining({
           title: "Monthly Service",
           equipmentId: "1",
+          nextDue: new Date("2026-05-19T08:00:00.000Z"),
         })
       );
 
@@ -198,6 +206,7 @@ describe("Maintenance Actions", () => {
         expect.objectContaining({
           title: "Updated Service",
           frequencyDays: 60,
+          nextDue: new Date("2026-06-18T08:00:00.000Z"),
         })
       );
     });

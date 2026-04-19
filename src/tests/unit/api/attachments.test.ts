@@ -49,6 +49,9 @@ const mockApiLogger = {
 const mockGenerateRequestId = vi.fn(() => "test-request-id");
 
 const mockUserHasPermission = vi.fn();
+const mockAuthorizeAttachmentEntityAccess = vi.fn();
+const mockAuthorizeAttachmentAccessById = vi.fn();
+const mockAuthorizeAttachmentAccessByKey = vi.fn();
 
 // Mock modules
 vi.mock("@/db", () => ({
@@ -97,11 +100,20 @@ vi.mock("@/lib/auth", () => ({
   },
 }));
 
+vi.mock("@/lib/attachments-auth", () => ({
+  authorizeAttachmentEntityAccess: mockAuthorizeAttachmentEntityAccess,
+  authorizeAttachmentAccessById: mockAuthorizeAttachmentAccessById,
+  authorizeAttachmentAccessByKey: mockAuthorizeAttachmentAccessByKey,
+}));
+
 // Dynamic imports after mock.module
 const { DELETE, GET: GET_BY_ID } = await import(
   "@/app/(app)/api/attachments/[id]/route"
 );
 const { GET, POST } = await import("@/app/(app)/api/attachments/route");
+const { GET: GET_PREVIEW } = await import(
+  "@/app/(app)/api/attachments/preview/route"
+);
 
 beforeEach(() => {
   mockFindMany.mockClear();
@@ -127,8 +139,47 @@ beforeEach(() => {
   mockApiLogger.info.mockClear();
   mockGenerateRequestId.mockClear();
   mockUserHasPermission.mockClear();
+  mockAuthorizeAttachmentEntityAccess.mockClear();
+  mockAuthorizeAttachmentAccessById.mockClear();
+  mockAuthorizeAttachmentAccessByKey.mockClear();
 
   mockUserHasPermission.mockReturnValue(true);
+  mockAuthorizeAttachmentEntityAccess.mockResolvedValue({
+    allowed: true,
+    exists: true,
+  });
+  mockAuthorizeAttachmentAccessById.mockResolvedValue({
+    allowed: true,
+    exists: true,
+    attachment: {
+      id: "1",
+      entityType: "work_order",
+      entityId: "1",
+      type: "document",
+      filename: "report.pdf",
+      s3Key: "work_orders/1/1.pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 1024,
+      uploadedById: "1",
+      createdAt: new Date(),
+    },
+  });
+  mockAuthorizeAttachmentAccessByKey.mockResolvedValue({
+    allowed: true,
+    exists: true,
+    attachment: {
+      id: "1",
+      entityType: "work_order",
+      entityId: "1",
+      type: "photo",
+      filename: "image.jpg",
+      s3Key: "work_orders/1/1.jpg",
+      mimeType: "image/jpeg",
+      sizeBytes: 1024,
+      uploadedById: "1",
+      createdAt: new Date(),
+    },
+  });
 
   // Re-setup mock chains if needed
   mockInsert.mockReturnValue({
@@ -323,6 +374,35 @@ describe("GET /api/attachments", () => {
     expect(data.data).toHaveLength(1);
     expect(data.data[0].filename).toBe("report.pdf");
   });
+
+  it("returns 403 when entity access is denied", async () => {
+    mockGetCurrentUser.mockResolvedValue({
+      id: "1",
+      employeeId: "TECH-001",
+      displayId: 1,
+      name: "Tech",
+      roleName: "tech",
+      permissions: ["ticket:view"],
+      sessionVersion: 1,
+    } as any);
+    mockAuthorizeAttachmentEntityAccess.mockResolvedValue({
+      allowed: false,
+      exists: true,
+    });
+
+    const request = new Request(
+      "http://localhost/api/attachments?entityType=work_order&entityId=1"
+    ) as unknown as import("next/server").NextRequest;
+    Object.defineProperty(request, "nextUrl", {
+      value: new URL(
+        "http://localhost/api/attachments?entityType=work_order&entityId=1"
+      ),
+    });
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(403);
+  });
 });
 
 describe("POST /api/attachments", () => {
@@ -477,6 +557,47 @@ describe("POST /api/attachments", () => {
     expect(data.data.attachment).toBeDefined();
     expect(data.data.uploadUrl).toBe("https://s3.example.com/presigned-upload");
   });
+
+  it("returns 403 when upload access is denied", async () => {
+    mockCheckRateLimit.mockReturnValue({
+      success: true,
+      remaining: 9,
+      reset: Date.now() + 60000,
+    });
+    mockGetCurrentUser.mockResolvedValue({
+      id: "1",
+      employeeId: "TECH-001",
+      displayId: 1,
+      name: "Tech",
+      roleName: "tech",
+      permissions: ["equipment:view"],
+      sessionVersion: 1,
+    } as any);
+    mockAuthorizeAttachmentEntityAccess.mockResolvedValue({
+      allowed: false,
+      exists: true,
+    });
+
+    const request = new Request("http://localhost/api/attachments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        entityType: "equipment",
+        entityId: "1",
+        attachmentType: "document",
+        filename: "manual.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 1024,
+      }),
+    }) as unknown as import("next/server").NextRequest;
+    Object.defineProperty(request, "nextUrl", {
+      value: new URL("http://localhost/api/attachments"),
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(403);
+  });
 });
 
 describe("GET /api/attachments/[id]", () => {
@@ -520,6 +641,11 @@ describe("GET /api/attachments/[id]", () => {
       "http://localhost/api/attachments/abc"
     ) as unknown as import("next/server").NextRequest;
 
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: false,
+      exists: false,
+    });
+
     const response = await GET_BY_ID(request, {
       params: Promise.resolve({ id: "abc" }),
     });
@@ -548,7 +674,10 @@ describe("GET /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    mockFindFirst.mockResolvedValue(undefined);
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: false,
+      exists: false,
+    });
 
     const request = new Request(
       "http://localhost/api/attachments/999"
@@ -595,7 +724,11 @@ describe("GET /api/attachments/[id]", () => {
       uploadedById: "1",
       createdAt: new Date(),
     };
-    mockFindFirst.mockResolvedValue(mockAttachment);
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: true,
+      exists: true,
+      attachment: mockAttachment,
+    });
 
     const request = new Request(
       "http://localhost/api/attachments/1"
@@ -611,6 +744,44 @@ describe("GET /api/attachments/[id]", () => {
     expect(data.data.downloadUrl).toBe(
       "https://s3.example.com/presigned-download"
     );
+  });
+
+  it("returns 403 when user cannot read attachment", async () => {
+    mockGetCurrentUser.mockResolvedValue({
+      id: "2",
+      employeeId: "TECH-002",
+      displayId: 2,
+      name: "Other Tech",
+      roleName: "tech",
+      permissions: ["ticket:view"],
+      sessionVersion: 1,
+    } as any);
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: false,
+      exists: true,
+      attachment: {
+        id: "1",
+        entityType: "work_order",
+        entityId: "1",
+        type: "document",
+        filename: "report.pdf",
+        s3Key: "work_orders/1/1.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 1024,
+        uploadedById: "1",
+        createdAt: new Date(),
+      },
+    });
+
+    const request = new Request(
+      "http://localhost/api/attachments/1"
+    ) as unknown as import("next/server").NextRequest;
+
+    const response = await GET_BY_ID(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
+
+    expect(response.status).toBe(403);
   });
 });
 
@@ -650,7 +821,10 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    mockFindFirst.mockResolvedValue(undefined);
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: false,
+      exists: false,
+    });
 
     const request = new Request("http://localhost/api/attachments/999", {
       method: "DELETE",
@@ -664,7 +838,6 @@ describe("DELETE /api/attachments/[id]", () => {
   });
 
   it("returns 403 when user is not owner and not admin", async () => {
-    mockUserHasPermission.mockReturnValue(false);
     mockGetCurrentUser.mockResolvedValue({
       displayId: 2,
       id: "2", // Different user
@@ -675,17 +848,21 @@ describe("DELETE /api/attachments/[id]", () => {
       permissions: DEFAULT_ROLE_PERMISSIONS.tech,
       sessionVersion: 1,
     });
-    mockFindFirst.mockResolvedValue({
-      id: "1",
-      entityType: "work_order" as const,
-      entityId: "1",
-      type: "document" as const,
-      filename: "report.pdf",
-      s3Key: "work_orders/1/1.pdf",
-      mimeType: "application/pdf",
-      sizeBytes: 1024,
-      uploadedById: "1", // Owned by user 1
-      createdAt: new Date(),
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: false,
+      exists: true,
+      attachment: {
+        id: "1",
+        entityType: "work_order" as const,
+        entityId: "1",
+        type: "document" as const,
+        filename: "report.pdf",
+        s3Key: "work_orders/1/1.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 1024,
+        uploadedById: "1",
+        createdAt: new Date(),
+      },
     });
 
     const request = new Request("http://localhost/api/attachments/1", {
@@ -720,17 +897,21 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    mockFindFirst.mockResolvedValue({
-      id: "1",
-      entityType: "work_order" as const,
-      entityId: "1",
-      type: "document" as const,
-      filename: "report.pdf",
-      s3Key: "work_orders/1/1.pdf",
-      mimeType: "application/pdf",
-      sizeBytes: 1024,
-      uploadedById: "1", // Same user
-      createdAt: new Date(),
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: true,
+      exists: true,
+      attachment: {
+        id: "1",
+        entityType: "work_order" as const,
+        entityId: "1",
+        type: "document" as const,
+        filename: "report.pdf",
+        s3Key: "work_orders/1/1.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 1024,
+        uploadedById: "1",
+        createdAt: new Date(),
+      },
     });
     mockDelete.mockReturnValue({
       where: vi.fn(),
@@ -772,17 +953,21 @@ describe("DELETE /api/attachments/[id]", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     } as any);
-    mockFindFirst.mockResolvedValue({
-      id: "1",
-      entityType: "work_order" as const,
-      entityId: "1",
-      type: "document" as const,
-      filename: "report.pdf",
-      s3Key: "work_orders/1/1.pdf",
-      mimeType: "application/pdf",
-      sizeBytes: 1024,
-      uploadedById: "1", // Different user
-      createdAt: new Date(),
+    mockAuthorizeAttachmentAccessById.mockResolvedValue({
+      allowed: true,
+      exists: true,
+      attachment: {
+        id: "1",
+        entityType: "work_order" as const,
+        entityId: "1",
+        type: "document" as const,
+        filename: "report.pdf",
+        s3Key: "work_orders/1/1.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 1024,
+        uploadedById: "1",
+        createdAt: new Date(),
+      },
     });
     mockDelete.mockReturnValue({
       where: vi.fn(),
@@ -799,5 +984,121 @@ describe("DELETE /api/attachments/[id]", () => {
 
     expect(response.status).toBe(200);
     expect(data.data.success).toBe(true);
+  });
+});
+
+describe("GET /api/attachments/preview", () => {
+  it("returns 401 when not authenticated", async () => {
+    mockGetCurrentUser.mockResolvedValue(null);
+
+    const request = new Request(
+      "http://localhost/api/attachments/preview?key=work_orders/1/1.jpg"
+    ) as unknown as import("next/server").NextRequest;
+    Object.defineProperty(request, "nextUrl", {
+      value: new URL(
+        "http://localhost/api/attachments/preview?key=work_orders/1/1.jpg"
+      ),
+    });
+
+    const response = await GET_PREVIEW(request);
+
+    expect(response.status).toBe(401);
+  });
+
+  it("returns 404 when key is not tied to an attachment row", async () => {
+    mockGetCurrentUser.mockResolvedValue({
+      id: "1",
+      employeeId: "TECH-001",
+      displayId: 1,
+      name: "Tech",
+      roleName: "tech",
+      permissions: ["ticket:view"],
+      sessionVersion: 1,
+    } as any);
+    mockAuthorizeAttachmentAccessByKey.mockResolvedValue({
+      allowed: false,
+      exists: false,
+    });
+
+    const request = new Request(
+      "http://localhost/api/attachments/preview?key=missing.jpg&format=json"
+    ) as unknown as import("next/server").NextRequest;
+    Object.defineProperty(request, "nextUrl", {
+      value: new URL(
+        "http://localhost/api/attachments/preview?key=missing.jpg&format=json"
+      ),
+    });
+
+    const response = await GET_PREVIEW(request);
+
+    expect(response.status).toBe(404);
+  });
+
+  it("returns 403 when user cannot preview the attachment", async () => {
+    mockGetCurrentUser.mockResolvedValue({
+      id: "2",
+      employeeId: "TECH-002",
+      displayId: 2,
+      name: "Other Tech",
+      roleName: "tech",
+      permissions: ["ticket:view"],
+      sessionVersion: 1,
+    } as any);
+    mockAuthorizeAttachmentAccessByKey.mockResolvedValue({
+      allowed: false,
+      exists: true,
+      attachment: {
+        id: "1",
+        entityType: "work_order",
+        entityId: "1",
+        type: "photo",
+        filename: "image.jpg",
+        s3Key: "work_orders/1/1.jpg",
+        mimeType: "image/jpeg",
+        sizeBytes: 1024,
+        uploadedById: "1",
+        createdAt: new Date(),
+      },
+    });
+
+    const request = new Request(
+      "http://localhost/api/attachments/preview?key=work_orders/1/1.jpg&format=json"
+    ) as unknown as import("next/server").NextRequest;
+    Object.defineProperty(request, "nextUrl", {
+      value: new URL(
+        "http://localhost/api/attachments/preview?key=work_orders/1/1.jpg&format=json"
+      ),
+    });
+
+    const response = await GET_PREVIEW(request);
+
+    expect(response.status).toBe(403);
+  });
+
+  it("returns a preview url for authorized requests", async () => {
+    mockGetCurrentUser.mockResolvedValue({
+      id: "1",
+      employeeId: "TECH-001",
+      displayId: 1,
+      name: "Tech",
+      roleName: "tech",
+      permissions: ["ticket:view"],
+      sessionVersion: 1,
+    } as any);
+
+    const request = new Request(
+      "http://localhost/api/attachments/preview?key=work_orders/1/1.jpg&format=json"
+    ) as unknown as import("next/server").NextRequest;
+    Object.defineProperty(request, "nextUrl", {
+      value: new URL(
+        "http://localhost/api/attachments/preview?key=work_orders/1/1.jpg&format=json"
+      ),
+    });
+
+    const response = await GET_PREVIEW(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.data.url).toBe("https://s3.example.com/presigned-download");
   });
 });

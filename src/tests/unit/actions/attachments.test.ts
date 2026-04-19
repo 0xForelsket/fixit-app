@@ -6,6 +6,7 @@ const mockGetCurrentUser = vi.fn();
 const mockInsert = vi.fn();
 const mockValues = vi.fn();
 const mockReturning = vi.fn();
+const mockAuthorizeAttachmentEntityAccess = vi.fn();
 
 // Chainable mocks
 mockInsert.mockReturnValue({ values: mockValues });
@@ -45,6 +46,11 @@ vi.mock("@/lib/audit", () => ({
   logAudit: vi.fn(),
 }));
 
+vi.mock("@/lib/attachments-auth", () => ({
+  authorizeAttachmentEntityAccess: mockAuthorizeAttachmentEntityAccess,
+  authorizeAttachmentAccessById: vi.fn(),
+}));
+
 const { createAttachment } = await import("@/actions/attachments");
 
 describe("attachments actions", () => {
@@ -53,6 +59,12 @@ describe("attachments actions", () => {
     mockInsert.mockClear();
     mockValues.mockClear();
     mockReturning.mockClear();
+    mockAuthorizeAttachmentEntityAccess.mockClear();
+
+    mockAuthorizeAttachmentEntityAccess.mockResolvedValue({
+      allowed: true,
+      exists: true,
+    });
   });
 
   describe("createAttachment", () => {

@@ -7,6 +7,7 @@ import {
   maintenanceSchedules,
 } from "@/db/schema";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { calculateNextScheduleDueDate } from "@/lib/maintenance-schedules";
 import { getCurrentUser } from "@/lib/session";
 import {
   insertMaintenanceScheduleSchema,
@@ -49,7 +50,9 @@ export async function createScheduleAction(
   } = validated.data;
 
   try {
-    let nextDue: Date | null = new Date(); // Default immediately due for time-based
+    let nextDue: Date | null = frequencyDays
+      ? calculateNextScheduleDueDate(frequencyDays)
+      : null;
     let lastTriggerReading: string | undefined;
 
     if (meterId) {
@@ -145,7 +148,9 @@ export async function updateScheduleAction(
       // However, check if we need to clear lastTriggerReading if switching to time based?
       if (!meterId) {
         updatePayload.lastTriggerReading = null;
-        updatePayload.nextDue = new Date(); // Reset to time based immediately? Or calculate?
+        updatePayload.nextDue = frequencyDays
+          ? calculateNextScheduleDueDate(frequencyDays)
+          : null;
       } else {
         updatePayload.nextDue = null;
       }

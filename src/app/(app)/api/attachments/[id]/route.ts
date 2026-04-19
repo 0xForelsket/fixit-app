@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { attachments } from "@/db/schema";
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
-import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import { authorizeAttachmentAccessById } from "@/lib/attachments-auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { deleteObject, getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
@@ -23,14 +23,21 @@ export async function GET(
 
     const { id: attachmentId } = await params;
 
-    const attachment = await db.query.attachments.findFirst({
-      where: eq(attachments.id, attachmentId),
+    const access = await authorizeAttachmentAccessById({
+      user,
+      attachmentId,
+      action: "view",
     });
 
-    if (!attachment) {
+    if (!access.exists || !access.attachment) {
       return ApiErrors.notFound("Attachment", requestId);
     }
 
+    if (!access.allowed) {
+      return ApiErrors.forbidden(requestId);
+    }
+
+    const attachment = access.attachment;
     const downloadUrl = await getPresignedDownloadUrl(attachment.s3Key);
 
     return apiSuccess({
@@ -58,21 +65,21 @@ export async function DELETE(
 
     const { id: attachmentId } = await params;
 
-    const attachment = await db.query.attachments.findFirst({
-      where: eq(attachments.id, attachmentId),
+    const access = await authorizeAttachmentAccessById({
+      user,
+      attachmentId,
+      action: "delete",
     });
 
-    if (!attachment) {
+    if (!access.exists || !access.attachment) {
       return ApiErrors.notFound("Attachment", requestId);
     }
 
-    const canDelete = userHasPermission(
-      user,
-      PERMISSIONS.EQUIPMENT_ATTACHMENT_DELETE
-    );
-    if (!canDelete) {
+    if (!access.allowed) {
       return ApiErrors.forbidden(requestId);
     }
+
+    const attachment = access.attachment;
 
     // Delete from S3
     try {

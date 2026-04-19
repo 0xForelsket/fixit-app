@@ -11,6 +11,7 @@ import {
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
 import { PERMISSIONS, userHasPermission } from "@/lib/auth";
 import { generateRequestId, schedulerLogger } from "@/lib/logger";
+import { calculateNextScheduleDueDate } from "@/lib/maintenance-schedules";
 import { createNotification } from "@/lib/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getCurrentUser, requireCsrf } from "@/lib/session";
@@ -119,9 +120,9 @@ export async function POST(request: Request) {
 
           // C. Update Schedule
           // Calculate next due date from NOW to avoid drift stacking if system was off
-          const nextDueDate = new Date(now);
-          nextDueDate.setDate(
-            nextDueDate.getDate() + (schedule.frequencyDays ?? 0)
+          const nextDueDate = calculateNextScheduleDueDate(
+            schedule.frequencyDays ?? 0,
+            now
           );
 
           await tx

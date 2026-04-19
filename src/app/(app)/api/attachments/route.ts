@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { type AttachmentType, type EntityType, attachments } from "@/db/schema";
 import { ApiErrors, apiSuccess } from "@/lib/api-error";
+import { authorizeAttachmentEntityAccess } from "@/lib/attachments-auth";
 import { apiLogger, generateRequestId } from "@/lib/logger";
 import { RATE_LIMITS, checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateS3Key, getPresignedUploadUrl } from "@/lib/s3";
@@ -27,6 +28,21 @@ export async function GET(request: NextRequest) {
         "entityType and entityId are required",
         requestId
       );
+    }
+
+    const access = await authorizeAttachmentEntityAccess({
+      user,
+      entityType,
+      entityId,
+      action: "view",
+    });
+
+    if (!access.exists) {
+      return ApiErrors.notFound("Attachment parent", requestId);
+    }
+
+    if (!access.allowed) {
+      return ApiErrors.forbidden(requestId);
     }
 
     const attachmentList = await db.query.attachments.findMany({
@@ -94,6 +110,21 @@ export async function POST(request: NextRequest) {
         "Missing required fields: entityType, entityId, attachmentType, filename, mimeType, sizeBytes",
         requestId
       );
+    }
+
+    const access = await authorizeAttachmentEntityAccess({
+      user,
+      entityType: entityType as EntityType,
+      entityId,
+      action: "upload",
+    });
+
+    if (!access.exists) {
+      return ApiErrors.notFound("Attachment parent", requestId);
+    }
+
+    if (!access.allowed) {
+      return ApiErrors.forbidden(requestId);
     }
 
     // Create attachment record first to get ID

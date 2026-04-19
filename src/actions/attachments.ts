@@ -3,7 +3,10 @@
 import { db } from "@/db";
 import type { Attachment } from "@/db/schema";
 import { attachments, equipment, workOrders } from "@/db/schema";
-import { PERMISSIONS, userHasPermission } from "@/lib/auth";
+import {
+  authorizeAttachmentAccessById,
+  authorizeAttachmentEntityAccess,
+} from "@/lib/attachments-auth";
 import { deleteObject, getPresignedDownloadUrl } from "@/lib/s3";
 import { getCurrentUser } from "@/lib/session";
 import type { ActionResult } from "@/lib/types/actions";
@@ -18,7 +21,13 @@ import { revalidatePath } from "next/cache";
 export type CreateAttachmentInput = UploadAttachmentInput & { s3Key: string };
 
 export interface GetAttachmentsFilters {
-  entityType?: "work_order" | "equipment";
+  entityType?:
+    | "work_order"
+    | "equipment"
+    | "user"
+    | "location"
+    | "vendor"
+    | "spare_part";
   mimeType?: string; // e.g. "image/" or "application/pdf"
   search?: string;
 }
@@ -29,37 +38,6 @@ export async function getAllAttachments(
   const user = await getCurrentUser();
   if (!user) {
     return { success: false, error: "Unauthorized" };
-  }
-
-  // Check permission based on entity type filter
-  // If no filter, user needs permission to view both work orders and equipment
-  if (filters?.entityType === "work_order") {
-    if (!userHasPermission(user, PERMISSIONS.TICKET_VIEW)) {
-      return {
-        success: false,
-        error: "You don't have permission to view work order attachments",
-      };
-    }
-  } else if (filters?.entityType === "equipment") {
-    if (!userHasPermission(user, PERMISSIONS.EQUIPMENT_VIEW)) {
-      return {
-        success: false,
-        error: "You don't have permission to view equipment attachments",
-      };
-    }
-  } else {
-    // No filter - need at least one view permission
-    const canViewWorkOrders = userHasPermission(user, PERMISSIONS.TICKET_VIEW);
-    const canViewEquipment = userHasPermission(
-      user,
-      PERMISSIONS.EQUIPMENT_VIEW
-    );
-    if (!canViewWorkOrders && !canViewEquipment) {
-      return {
-        success: false,
-        error: "You don't have permission to view attachments",
-      };
-    }
   }
 
   const conditions = [];
@@ -81,11 +59,26 @@ export async function getAllAttachments(
     orderBy: (attachments, { desc }) => [desc(attachments.createdAt)],
   });
 
+  const authorizedData = (
+    await Promise.all(
+      data.map(async (file) => {
+        const access = await authorizeAttachmentEntityAccess({
+          user,
+          entityType: file.entityType,
+          entityId: file.entityId,
+          action: "view",
+        });
+
+        return access.allowed ? file : null;
+      })
+    )
+  ).filter((file): file is (typeof data)[number] => file !== null);
+
   // Extract Entity IDs to fetch names in bulk
   const workOrderIds = new Set<string>();
   const equipmentIds = new Set<string>();
 
-  for (const file of data) {
+  for (const file of authorizedData) {
     if (file.entityType === "work_order") {
       workOrderIds.add(file.entityId);
     } else if (file.entityType === "equipment") {
@@ -118,7 +111,7 @@ export async function getAllAttachments(
   }
 
   const dataWithUrls = await Promise.all(
-    data.map(async (file) => ({
+    authorizedData.map(async (file) => ({
       ...file,
       url: await getPresignedDownloadUrl(file.s3Key),
       entityName: entityNames.get(`${file.entityType}-${file.entityId}`),
@@ -152,6 +145,21 @@ export async function createAttachment(
 
   if (!rawData.s3Key) {
     return { error: "S3 Key is required" };
+  }
+
+  const access = await authorizeAttachmentEntityAccess({
+    user,
+    entityType,
+    entityId,
+    action: "upload",
+  });
+
+  if (!access.exists) {
+    return { error: "Attachment parent not found" };
+  }
+
+  if (!access.allowed) {
+    return { error: "Forbidden" };
   }
 
   try {
@@ -192,43 +200,24 @@ export async function deleteAttachment(
     return { success: false, error: "Unauthorized" };
   }
 
-  const attachment = await db.query.attachments.findFirst({
-    where: eq(attachments.id, attachmentId),
+  const access = await authorizeAttachmentAccessById({
+    user,
+    attachmentId,
+    action: "delete",
   });
 
-  if (!attachment) {
+  if (!access.exists || !access.attachment) {
     return { success: false, error: "Attachment not found" };
   }
 
-  // Check permissions - user can delete if:
-  // 1. They uploaded the attachment (owner)
-  // 2. They have the appropriate delete permission for the entity type
-  const isOwner = attachment.uploadedById === user.id;
-
-  if (!isOwner) {
-    // Check entity-specific delete permissions
-    let hasDeletePermission = false;
-
-    if (attachment.entityType === "work_order") {
-      hasDeletePermission = userHasPermission(user, PERMISSIONS.TICKET_UPDATE);
-    } else if (attachment.entityType === "equipment") {
-      hasDeletePermission = userHasPermission(
-        user,
-        PERMISSIONS.EQUIPMENT_UPDATE
-      );
-    } else {
-      // For other entity types, require wildcard permission
-      hasDeletePermission = userHasPermission(user, PERMISSIONS.ALL);
-    }
-
-    if (!hasDeletePermission) {
-      return {
-        success: false,
-        error:
-          "Forbidden: You can only delete your own uploads or need appropriate permissions",
-      };
-    }
+  if (!access.allowed) {
+    return {
+      success: false,
+      error: "Forbidden",
+    };
   }
+
+  const attachment = access.attachment;
 
   try {
     // 1. Delete from S3
