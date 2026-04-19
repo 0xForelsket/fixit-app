@@ -3,7 +3,7 @@
 This file provides guidance for AI agents working with this codebase.
 
 > **Last Updated:** April 19, 2026  
-> **See Also:** `improvement_plan.md` for current technical debt and priorities
+> **See Also:** `ROADMAP.md` for product direction and `docs/README.md` for current project documentation
 
 ## Project Overview
 
@@ -307,7 +307,8 @@ if (!success) {
 | `src/lib/rate-limit.ts` | Rate limiting for API routes |
 | `src/lib/validations/*.ts` | Zod validation schemas |
 | `src/actions/*.ts` | Server Actions for mutations |
-| `improvement_plan.md` | Current technical debt and priorities |
+| `ROADMAP.md` | Product direction and upcoming priorities |
+| `docs/README.md` | Index of current project documentation |
 
 ## Before Submitting Changes
 

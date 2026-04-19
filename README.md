@@ -67,6 +67,11 @@ bun run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Documentation
+
+- Current project docs: [`docs/README.md`](docs/README.md)
+- Product direction: [`ROADMAP.md`](ROADMAP.md)
+
 ### Default Login Credentials
 
 | Role     | Employee ID | PIN  |
