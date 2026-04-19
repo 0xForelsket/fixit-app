@@ -7,6 +7,36 @@ It is intentionally practical:
 - It separates trust-and-correctness work from feature work.
 - It includes concrete implementation targets, not just themes.
 
+## Progress Checklist
+
+### Phase 1: Immediate Risk and Correctness
+
+- [x] **1. Attachment Authorization Hardening** (P0) — shared auth helpers in `src/lib/attachments-auth.ts`, entity-level checks on all routes
+- [x] **2. Maintenance Schedule `nextDue` Behavior** (P0) — `calculateNextScheduleDueDate` helper, time-based schedules compute future due date
+- [x] **3. Report Schedule Authorization** (P1) — `reports:view` permission checks on all read actions
+- [x] **4. Cron Lock Robustness** (P1) — lock released in `finally` block
+
+### Phase 2: High-Value Product Work
+
+- [ ] **5. Real Scheduled Reports** (P1) — still using placeholder HTML emails
+- [ ] **6. Timezone-Correct Report Scheduling** (P1) — `nextRunAt` ignores stored timezone
+- [ ] **7. Procurement Workflow** (P1) — no purchase order tables or actions
+- [ ] **8. Inventory Reservation / Allocation** (P1) — no reservation fields or logic
+- [ ] **9. Offline Workflow Wiring** (P1) — queue primitive exists but not wired into forms
+- [ ] **10. Push Notifications** (P2) — in-app SSE only, no web push
+
+### Phase 3: Annoying but Survivable Work
+
+- [ ] **11. Meter-Based Schedule UI Cleanup** (P2) — renders "Every nulld" for usage-based schedules
+- [ ] **12. Admin System Tabs Permission Cleanup** (P2) — permissions filtered but bypassed with hardcoded `["*"]`
+- [ ] **13. Query Efficiency Improvements** (P2) — in-memory filtering instead of SQL
+- [ ] **14. System-Generated Actor Cleanup** (P3) — auto-generated work attributed to triggering user
+- [x] **15. Favorites Scope Cleanup** (P3) — explicitly scoped to equipment-only via `favoriteEntityTypes = ["equipment"]`
+
+---
+
+**Completed: 5 / 15**
+
 ## Planning Principles
 
 1. Fix trust failures before adding headline features.
