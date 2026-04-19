@@ -1,5 +1,5 @@
-import { getVendors } from "@/data/vendors";
 import { PERMISSIONS } from "@/lib/permissions";
+import { getVendors } from "@/lib/services/inventory";
 import { requirePermission } from "@/lib/session";
 import { PartForm } from "../part-form";
 

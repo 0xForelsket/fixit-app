@@ -2,7 +2,7 @@
 
 A lightweight, self-hosted Computerized Maintenance Management System (CMMS) for tracking machine maintenance requests in manufacturing environments.
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0-38bdf8?style=flat-square&logo=tailwindcss)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
@@ -23,9 +23,9 @@ A lightweight, self-hosted Computerized Maintenance Management System (CMMS) for
 
 | Category | Technology |
 |----------|------------|
-| **Framework** | Next.js 15 with App Router (React 19) |
+| **Framework** | Next.js 16 with App Router (React 19) |
 | **Language** | TypeScript (strict mode) |
-| **Database** | SQLite/LibSQL with Drizzle ORM |
+| **Database** | PostgreSQL with Drizzle ORM |
 | **Styling** | Tailwind CSS 4 + Radix UI primitives |
 | **Storage** | S3/MinIO for file attachments |
 | **Auth** | JWT sessions with PIN-based login + CSRF protection |
@@ -71,15 +71,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 | Role     | Employee ID | PIN  |
 |----------|-------------|------|
-| Admin    | ADMIN-001   | 1234 |
-| Tech     | TECH-001    | 5678 |
-| Operator | OP-001      | 0000 |
+| Admin    | ADMIN-001   | 123456 |
+| Tech     | TECH-001    | 567890 |
+| Operator | OP-001      | 000000 |
 
 ## Environment Variables
 
 ```bash
 # Database
-DATABASE_URL=file:./data/local.db
+DATABASE_URL=postgresql://fixit:fixitpassword@127.0.0.1:5433/fixit
 
 # Session (REQUIRED - must be 32+ characters)
 SESSION_SECRET=your-secret-key-here-must-be-at-least-32-chars
@@ -106,34 +106,22 @@ CRON_SECRET=your-cron-secret-here
 | `bun run build` | Build for production |
 | `bun run build:check` | TypeScript compilation check |
 | `bun run start` | Start production server |
-| `bun run test` | Run unit tests (watch mode) |
+| `bun run test` | Run unit tests once |
 | `bun run test:run` | Run unit tests once |
+| `bun run test:watch` | Run unit tests in watch mode |
 | `bun run e2e` | Run Playwright e2e tests |
 | `bun run e2e:ui` | Open Playwright UI |
 | `bun run lint` | Check code with Biome |
 | `bun run lint:fix` | Auto-fix lint issues |
 | `bun run db:push` | Push schema to database |
-### Database Access
-
-To access the database studio:
-
-```bash
-bun db:studio
-```
-
-### Remote Access (Tunnel)
-
-Since automatic tunneling tools like `untun` are blocked by the firewall in this environment, use the provided SSH tunnel script:
-
-```bash
-npm run tunnel
-# or
-./scripts/tunnel.sh
-```
-
-This will generate a public URL (via serveo.net) that you can share.
 | `bun run db:seed` | Seed development data |
 | `bun run db:studio` | Open Drizzle Studio |
+
+### Database Access
+
+```bash
+bun run db:studio
+```
 
 ## Project Structure
 
@@ -141,7 +129,7 @@ This will generate a public URL (via serveo.net) that you can share.
 src/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Login page
-│   ├── (main)/            # Main authenticated routes
+│   ├── (app)/             # Main authenticated routes
 │   │   ├── admin/         # Admin panel (users, roles, settings)
 │   │   ├── dashboard/     # Technician dashboard
 │   │   ├── maintenance/   # Work orders, schedules
@@ -172,7 +160,7 @@ src/
 │   └── validations/      # Zod schemas
 ├── hooks/                 # React hooks
 ├── tests/                 # Unit tests
-└── middleware.ts          # Auth middleware
+└── proxy.ts               # Auth middleware and routing
 e2e/                       # Playwright e2e tests
 ```
 

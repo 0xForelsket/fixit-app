@@ -1,9 +1,9 @@
 import { AuditLogList } from "@/components/audit/audit-log-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getVendors } from "@/data/vendors";
 import { db } from "@/db";
 import { spareParts } from "@/db/schema";
 import { PERMISSIONS } from "@/lib/permissions";
+import { getVendors } from "@/lib/services/inventory";
 import { requirePermission } from "@/lib/session";
 import { eq } from "drizzle-orm";
 import { History, Info } from "lucide-react";

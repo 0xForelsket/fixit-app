@@ -1,3 +1,4 @@
+import { saveReportTemplate } from "@/actions/reports";
 import { ReportBuilder } from "@/components/reports/builder/report-builder";
 import type { WidgetConfig } from "@/components/reports/builder/types";
 import { fireEvent, render, waitFor } from "@testing-library/react";
@@ -7,6 +8,14 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/actions/reports", () => ({
   saveReportTemplate: vi.fn(),
 }));
+
+global.fetch = vi.fn(
+  async () =>
+    ({
+      ok: true,
+      json: async () => ({}),
+    }) as Response
+) as any;
 
 // Mock ResizeObserver
 class ResizeObserverMock {
@@ -80,12 +89,12 @@ vi.mock("next/dynamic", () => ({
 
 describe("ReportBuilder", () => {
   it("renders the initial state", () => {
-    const { getByText } = render(<ReportBuilder userId="user1" />);
+    const { getByText } = render(<ReportBuilder />);
     expect(getByText("New Report")).toBeDefined();
     expect(getByText("Start Building Your Report")).toBeDefined();
   });
 
-  it("renders initial widgets", () => {
+  it("renders initial widgets", async () => {
     const widget: WidgetConfig = {
       id: "w1",
       type: "bar_chart",
@@ -102,15 +111,16 @@ describe("ReportBuilder", () => {
     };
 
     const { getByDisplayValue } = render(
-      <ReportBuilder userId="user1" initialTemplate={initialTemplate} />
+      <ReportBuilder initialTemplate={initialTemplate as any} />
     );
-    expect(getByDisplayValue("Initial Widget")).toBeDefined();
+
+    await waitFor(() => {
+      expect(getByDisplayValue("Initial Widget")).toBeDefined();
+    });
   });
 
   it("allows adding widgets", async () => {
-    const { getByText, getByDisplayValue } = render(
-      <ReportBuilder userId="user1" />
-    );
+    const { getByText, getByDisplayValue } = render(<ReportBuilder />);
 
     const addChartBtn = getByText("Bar Chart");
     fireEvent.click(addChartBtn);
@@ -124,9 +134,7 @@ describe("ReportBuilder", () => {
   });
 
   it("allows updating report title", () => {
-    const { container, getByDisplayValue } = render(
-      <ReportBuilder userId="user1" />
-    );
+    const { container, getByDisplayValue } = render(<ReportBuilder />);
 
     // Select by ID
     const titleInput = container.querySelector("#report-title");
@@ -140,9 +148,24 @@ describe("ReportBuilder", () => {
   });
 
   it("allows saving the report", async () => {
-    const { saveReportTemplate } = await import("@/actions/reports");
+    vi.mocked(saveReportTemplate).mockResolvedValue({
+      success: true,
+      data: {
+        id: "template-1",
+        name: "New Report",
+        description: "",
+        config: {
+          title: "New Report",
+          description: "",
+          widgets: [],
+        },
+        createdById: "user-1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    } as any);
 
-    const { getByText } = render(<ReportBuilder userId="user1" />);
+    const { getByText } = render(<ReportBuilder />);
 
     const saveBtn = getByText("SAVE TEMPLATE");
     fireEvent.click(saveBtn);

@@ -86,9 +86,16 @@ export function DateRangePicker({
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div
+          <button
+            type="button"
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" || event.key === "Enter") {
+                setIsOpen(false);
+              }
+            }}
+            aria-label="Close date range picker"
           />
 
           {/* Dropdown */}
@@ -128,6 +135,7 @@ export function DateRangePicker({
             </div>
             {PRESETS.map((preset) => (
               <button
+                type="button"
                 key={preset.days}
                 onClick={() => handlePresetClick(preset.days)}
                 className="w-full text-left px-3 py-2.5 text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
@@ -141,4 +149,3 @@ export function DateRangePicker({
     </div>
   );
 }
-

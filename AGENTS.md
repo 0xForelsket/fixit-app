@@ -2,7 +2,7 @@
 
 This file provides guidance for AI agents working with this codebase.
 
-> **Last Updated:** December 28, 2025  
+> **Last Updated:** April 19, 2026  
 > **See Also:** `improvement_plan.md` for current technical debt and priorities
 
 ## Project Overview
@@ -16,13 +16,13 @@ Custom roles can be created with any combination of permissions via the Admin UI
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 with App Router (React 19)
+- **Framework**: Next.js 16 with App Router (React 19)
 - **Language**: TypeScript (strict mode)
-- **Database**: SQLite/LibSQL via Drizzle ORM
+- **Database**: PostgreSQL via Drizzle ORM
 - **Styling**: Tailwind CSS 4
 - **Validation**: Zod schemas
 - **Auth**: JWT sessions with CSRF protection
-- **Testing**: Bun test runner + Testing Library, Playwright (e2e)
+- **Testing**: Vitest + Testing Library, Playwright (e2e)
 - **Linting**: Biomejs
 - **PWA**: next-pwa for service worker generation
 
@@ -40,9 +40,11 @@ bun run lint:fix           # Auto-fix issues
 bun run build:check        # TypeScript compilation check (tsc --noEmit)
 
 # Testing
-bun run test               # Run all unit tests
-bun test src/tests/unit/actions  # Run specific test directory
-bun test path/to/file.test.ts    # Run specific test file
+bun run test               # Run all unit tests once
+bun run test:watch         # Run unit tests in watch mode
+bun run test:run           # Alias for CI-style unit test run
+bun run test:actions       # Run action tests
+bun run test:api           # Run API tests
 bun run e2e                # Playwright e2e tests
 bun run e2e:ui             # Playwright UI mode
 
@@ -59,7 +61,7 @@ bun run db:studio          # Open Drizzle Studio
 src/
 ├── app/                   # Next.js pages and routes
 │   ├── (auth)/           # Auth routes (login)
-│   ├── (main)/           # Main authenticated routes
+│   ├── (app)/            # Main authenticated routes
 │   │   ├── admin/        # Admin panel
 │   │   ├── dashboard/    # Technician dashboard
 │   │   ├── maintenance/  # Work orders, schedules
@@ -162,13 +164,16 @@ if (state && !state.success) {
 ### SessionUser Shape
 ```typescript
 interface SessionUser {
-  id: number;
+  id: string;
+  displayId: number;
   employeeId: string;
   name: string;
   roleName: string;           // Role name (e.g., "operator", "tech", "admin")
-  roleId?: number | null;     // FK to roles table
+  roleId?: string | null;     // FK to roles table
+  departmentId?: string | null;
   permissions: string[];      // Array of permission strings
   hourlyRate?: number | null;
+  sessionVersion: number;
 }
 ```
 
@@ -254,28 +259,6 @@ const mockUser: SessionUser = {
   sessionVersion: 1,
 };
 ```
-
-### ⚠️ Known Issue: Test Interference with mock.module()
-
-Bun's `mock.module()` modifies the **global module cache**. When running multiple test files together, mocks from one file can "leak" into another, causing unexpected failures.
-
-**Symptoms:**
-- Tests pass when run individually: `bun test src/tests/unit/actions/users.test.ts` ✅
-- Tests fail when run together: `bun test src/tests/unit/actions` ❌
-- Error messages like "Invalid permission value" or mocks not being called
-
-**Root Cause:** Unlike Jest/Vitest, Bun doesn't isolate test files into separate contexts.
-
-**Workarounds:**
-```bash
-# Run tests file-by-file (reliable but slower)
-for f in src/tests/unit/actions/*.test.ts; do bun test "$f" || exit 1; done
-
-# Run a specific test file
-bun test src/tests/unit/actions/users.test.ts
-```
-
-**Long-term fix:** Consider dependency injection pattern instead of `mock.module()` for new code.
 
 ## Common Patterns
 

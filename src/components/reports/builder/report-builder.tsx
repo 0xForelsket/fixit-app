@@ -1,14 +1,9 @@
 "use client";
 
 import {
-  type AnalyticsDateRange,
-  type ChartData,
-  getInventoryStats,
-  getLaborStats,
-  getStatsSummary,
-  getWorkOrderStats,
-} from "@/actions/analytics";
-import { saveReportTemplate } from "@/actions/reports";
+  type StoredReportTemplate,
+  saveReportTemplate,
+} from "@/actions/reports";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,23 +112,23 @@ const DATA_SOURCES: { value: DataSource; label: string }[] = [
   { value: "labor", label: "Labor Hours" },
 ];
 
-// Placeholder data for previews
-const MOCK_DATA = [
-  { name: "Jan", value: 400 },
-  { name: "Feb", value: 300 },
-  { name: "Mar", value: 600 },
-  { name: "Apr", value: 200 },
-  { name: "May", value: 500 },
-];
+type ChartData = {
+  name: string;
+  value: number;
+}[];
+
+type WidgetDataResponse = {
+  chartData?: ChartData;
+  summaryData?: { label: string; value: string | number }[];
+  error?: string;
+};
 
 // ============ MAIN COMPONENT ============
 
 export function ReportBuilder({
   initialTemplate,
-  userId,
 }: {
-  initialTemplate?: { id?: string; config: ReportConfig };
-  userId: string;
+  initialTemplate?: StoredReportTemplate;
 }) {
   const [config, setConfig] = useState<ReportConfig>(
     initialTemplate?.config || {
@@ -241,13 +236,22 @@ export function ReportBuilder({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await saveReportTemplate({
+      const result = await saveReportTemplate({
         id: initialTemplate?.id,
         name: config.title,
         description: config.description,
         config,
-        createdById: userId,
       });
+
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Report saved",
         description: "Your report template has been saved successfully.",
@@ -564,51 +568,74 @@ function WidgetCard({
   // Use widget-specific date range if set, otherwise fall back to global
   const effectiveDateRange = widget.dateRange || globalDateRange;
 
-  // Convert to AnalyticsDateRange format
-  const analyticsDateRange: AnalyticsDateRange | undefined = useMemo(() => {
-    if (!effectiveDateRange?.startDate) return undefined;
-    return {
-      startDate: effectiveDateRange.startDate,
-      endDate: effectiveDateRange.endDate,
-    };
-  }, [effectiveDateRange]);
-
   useEffect(() => {
+    if (
+      widget.type !== "stats_summary" &&
+      widget.type !== "bar_chart" &&
+      widget.type !== "pie_chart"
+    ) {
+      return;
+    }
+
+    const abortController = new AbortController();
+
     const fetchData = async () => {
       setLoading(true);
       try {
+        const params = new URLSearchParams({
+          widgetType: widget.type,
+          dataSource: widget.dataSource,
+        });
+
+        if (effectiveDateRange?.startDate) {
+          params.set("startDate", effectiveDateRange.startDate);
+        }
+        if (effectiveDateRange?.endDate) {
+          params.set("endDate", effectiveDateRange.endDate);
+        }
+
+        const response = await fetch(
+          `/api/reports/widget-data?${params.toString()}`,
+          {
+            signal: abortController.signal,
+          }
+        );
+        const payload = (await response.json()) as WidgetDataResponse;
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Failed to fetch widget data");
+        }
+
         if (widget.type === "stats_summary") {
-          if (
-            widget.dataSource === "work_orders" ||
-            widget.dataSource === "inventory" ||
-            widget.dataSource === "labor"
-          ) {
-            const data = await getStatsSummary(
-              widget.dataSource,
-              analyticsDateRange
-            );
-            setSummaryData(data);
-          }
-        } else if (widget.type === "bar_chart" || widget.type === "pie_chart") {
-          let data: ChartData = [];
-          if (widget.dataSource === "work_orders") {
-            data = await getWorkOrderStats(analyticsDateRange);
-          } else if (widget.dataSource === "inventory") {
-            data = await getInventoryStats();
-          } else if (widget.dataSource === "labor") {
-            data = await getLaborStats(analyticsDateRange);
-          }
-          setChartData(data);
+          setSummaryData(payload.summaryData || []);
+        } else {
+          setChartData(payload.chartData || []);
         }
       } catch (error) {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         console.error("Failed to fetch widget data", error);
+        setSummaryData([]);
+        setChartData([]);
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, [widget.dataSource, widget.type, analyticsDateRange]);
+    return () => {
+      abortController.abort();
+    };
+  }, [
+    effectiveDateRange?.endDate,
+    effectiveDateRange?.startDate,
+    widget.dataSource,
+    widget.type,
+  ]);
 
   const handleDataSourceChange = (value: DataSource) => {
     onUpdate(widget.id, { dataSource: value });
@@ -619,8 +646,6 @@ function WidgetCard({
   ) => {
     onUpdate(widget.id, { dateRange });
   };
-
-  const displayData = chartData.length > 0 ? chartData : MOCK_DATA;
 
   return (
     <div
@@ -687,7 +712,7 @@ function WidgetCard({
               <div className="h-full flex flex-col gap-2">
                 <div className="flex-1 min-h-[150px]">
                   <Suspense fallback={<ChartSkeleton />}>
-                    <BarChartWidget data={displayData} />
+                    <BarChartWidget data={chartData} />
                   </Suspense>
                 </div>
                 <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">
@@ -708,7 +733,7 @@ function WidgetCard({
               <div className="h-full flex flex-col gap-2">
                 <div className="flex-1 min-h-[150px]">
                   <Suspense fallback={<ChartSkeleton />}>
-                    <PieChartWidget data={displayData} />
+                    <PieChartWidget data={chartData} />
                   </Suspense>
                 </div>
                 <div className="flex items-center gap-3 pt-2 border-t border-border flex-shrink-0">

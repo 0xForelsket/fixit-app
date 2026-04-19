@@ -22,27 +22,6 @@ export type ScheduleActionState = {
   success?: boolean;
 };
 
-export async function createSchedule(
-  _prevState: ScheduleActionState,
-  _formData: FormData
-): Promise<ScheduleActionState> {
-  const user = await getCurrentUser();
-  if (!user || !userHasPermission(user, PERMISSIONS.MAINTENANCE_CREATE)) {
-    return { error: "Unauthorized" };
-  }
-
-  // Parse raw form data into object
-  // Note: For complex nested data like checklists, FormData is tricky.
-  // In our Client Component, we were sending JSON.
-  // To keep using the robust Zod schema with nested arrays, we can:
-  // 1. Continue using JSON but call the action directly (cleaner for nested data).
-  // 2. Parse dot notation from formData (messy).
-  // Let's accept the raw object as an argument instead of FormData for this specific complex form.
-  // BUT, Server Actions usually take FormData if used in <form action={...}>.
-  // Since we are using RHF `handleSubmit`, we can just call the action as a function with the data object.
-  return { error: "Invalid call" }; // Placeholder, see actual implementation below
-}
-
 // Better approach for RHF + Server Actions with nested data:
 // The action takes the data object directly.
 export async function createScheduleAction(

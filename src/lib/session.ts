@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { z } from "zod";
 import {
   type Permission,
   hasAnyPermission as checkAnyPermission,
@@ -24,6 +25,25 @@ export interface SessionPayload {
   expiresAt: number;
   csrfToken: string;
 }
+
+const sessionUserSchema = z.object({
+  id: z.string(),
+  displayId: z.number().int(),
+  employeeId: z.string(),
+  name: z.string(),
+  roleName: z.string(),
+  roleId: z.string().nullable().optional(),
+  departmentId: z.string().nullable().optional(),
+  permissions: z.array(z.string()),
+  hourlyRate: z.number().nullable().optional(),
+  sessionVersion: z.number().int(),
+});
+
+const sessionPayloadSchema = z.object({
+  user: sessionUserSchema,
+  expiresAt: z.number(),
+  csrfToken: z.string(),
+});
 
 const SESSION_COOKIE_NAME = "fixit_session";
 const SESSION_EXPIRY_COOKIE_NAME = "fixit_session_exp";
@@ -64,7 +84,8 @@ async function encodeSession(payload: SessionPayload): Promise<string> {
 async function decodeSession(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecretKey());
-    return payload as unknown as SessionPayload;
+    const result = sessionPayloadSchema.safeParse(payload);
+    return result.success ? result.data : null;
   } catch {
     return null;
   }

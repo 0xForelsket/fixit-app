@@ -96,7 +96,7 @@ export async function createReportSchedule(data: {
     return { success: false, error: "You must be logged in" };
   }
 
-  if (!userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {
+  if (!userHasPermission(user, PERMISSIONS.REPORTS_VIEW)) {
     return {
       success: false,
       error: "You don't have permission to create schedules",
@@ -154,7 +154,7 @@ export async function createReportSchedule(data: {
     });
 
     revalidatePath("/reports");
-    revalidatePath(`/reports/builder/${data.templateId}`);
+    revalidatePath("/reports/builder");
 
     return { success: true, data: schedule };
   } catch (error) {
@@ -180,7 +180,7 @@ export async function updateReportSchedule(
     return { success: false, error: "You must be logged in" };
   }
 
-  if (!userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {
+  if (!userHasPermission(user, PERMISSIONS.REPORTS_VIEW)) {
     return {
       success: false,
       error: "You don't have permission to update schedules",
@@ -266,7 +266,7 @@ export async function deleteReportSchedule(
     return { success: false, error: "You must be logged in" };
   }
 
-  if (!userHasPermission(user, PERMISSIONS.ANALYTICS_VIEW)) {
+  if (!userHasPermission(user, PERMISSIONS.REPORTS_VIEW)) {
     return {
       success: false,
       error: "You don't have permission to delete schedules",

@@ -1,6 +1,6 @@
 "use server";
 
-import { DEFAULT_PREFERENCES } from "@/data/profile";
+import { resolveUserPreferences } from "@/data/profile";
 import { db } from "@/db";
 import { type UserPreferences, users } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
@@ -42,6 +42,17 @@ const updatePreferencesSchema = z.object({
   density: z.enum(["compact", "comfortable"]),
   notifications: z.object({
     email: z.boolean(),
+    inApp: z
+      .object({
+        workOrderCreated: z.boolean(),
+        workOrderAssigned: z.boolean(),
+        workOrderEscalated: z.boolean(),
+        workOrderResolved: z.boolean(),
+        workOrderCommented: z.boolean(),
+        workOrderStatusChanged: z.boolean(),
+        maintenanceDue: z.boolean(),
+      })
+      .optional(),
   }),
 });
 
@@ -193,13 +204,47 @@ export async function updatePreferences(
     });
 
     // Merge with existing preferences (or defaults)
-    const currentPrefs = userRecord?.preferences ?? DEFAULT_PREFERENCES;
+    const currentPrefs = resolveUserPreferences(userRecord?.preferences);
+    const currentInAppPreferences = currentPrefs.notifications.inApp ?? {
+      workOrderCreated: true,
+      workOrderAssigned: true,
+      workOrderEscalated: true,
+      workOrderResolved: true,
+      workOrderCommented: true,
+      workOrderStatusChanged: true,
+      maintenanceDue: true,
+    };
+    const nextInAppPreferences = {
+      workOrderCreated:
+        preferences.notifications?.inApp?.workOrderCreated ??
+        currentInAppPreferences.workOrderCreated,
+      workOrderAssigned:
+        preferences.notifications?.inApp?.workOrderAssigned ??
+        currentInAppPreferences.workOrderAssigned,
+      workOrderEscalated:
+        preferences.notifications?.inApp?.workOrderEscalated ??
+        currentInAppPreferences.workOrderEscalated,
+      workOrderResolved:
+        preferences.notifications?.inApp?.workOrderResolved ??
+        currentInAppPreferences.workOrderResolved,
+      workOrderCommented:
+        preferences.notifications?.inApp?.workOrderCommented ??
+        currentInAppPreferences.workOrderCommented,
+      workOrderStatusChanged:
+        preferences.notifications?.inApp?.workOrderStatusChanged ??
+        currentInAppPreferences.workOrderStatusChanged,
+      maintenanceDue:
+        preferences.notifications?.inApp?.maintenanceDue ??
+        currentInAppPreferences.maintenanceDue,
+    };
+
     const newPrefs: UserPreferences = {
       ...currentPrefs,
       ...preferences,
       notifications: {
         ...currentPrefs.notifications,
         ...preferences.notifications,
+        inApp: nextInAppPreferences,
       },
     };
 

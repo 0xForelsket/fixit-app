@@ -1,8 +1,7 @@
-"use server";
-
 import { db } from "@/db";
 import {
   inventoryLevels,
+  inventoryTransactions,
   laborLogs,
   spareParts,
   users,
@@ -26,13 +25,10 @@ export type ChartData = {
 }[];
 
 export interface AnalyticsDateRange {
-  startDate?: string; // ISO date string
-  endDate?: string; // ISO date string
+  startDate?: string;
+  endDate?: string;
 }
 
-/**
- * Build date filter conditions for work orders
- */
 function buildWorkOrderDateFilters(dateRange?: AnalyticsDateRange) {
   const conditions = [];
   if (dateRange?.startDate) {
@@ -44,9 +40,6 @@ function buildWorkOrderDateFilters(dateRange?: AnalyticsDateRange) {
   return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
-/**
- * Build date filter conditions for labor logs
- */
 function buildLaborDateFilters(dateRange?: AnalyticsDateRange) {
   const conditions = [];
   if (dateRange?.startDate) {
@@ -58,10 +51,24 @@ function buildLaborDateFilters(dateRange?: AnalyticsDateRange) {
   return conditions.length > 0 ? and(...conditions) : undefined;
 }
 
-export async function getWorkOrderStats(
+function buildInventoryTransactionDateFilters(dateRange?: AnalyticsDateRange) {
+  const conditions = [];
+  if (dateRange?.startDate) {
+    conditions.push(
+      gte(inventoryTransactions.createdAt, new Date(dateRange.startDate))
+    );
+  }
+  if (dateRange?.endDate) {
+    conditions.push(
+      lte(inventoryTransactions.createdAt, new Date(dateRange.endDate))
+    );
+  }
+  return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+export async function getWorkOrderChartData(
   dateRange?: AnalyticsDateRange
 ): Promise<ChartData> {
-  // Count work orders by status
   const dateFilter = buildWorkOrderDateFilters(dateRange);
 
   const query = db
@@ -75,14 +82,13 @@ export async function getWorkOrderStats(
     ? await query.where(dateFilter).groupBy(workOrders.status)
     : await query.groupBy(workOrders.status);
 
-  return stats.map((s) => ({
-    name: s.name.replace("_", " ").toUpperCase(),
-    value: Number(s.value),
+  return stats.map((stat) => ({
+    name: stat.name.replace("_", " ").toUpperCase(),
+    value: Number(stat.value),
   }));
 }
 
-export async function getInventoryStats(): Promise<ChartData> {
-  // Get top 5 parts by quantity on hand
+export async function getInventoryChartData(): Promise<ChartData> {
   const stats = await db
     .select({
       name: spareParts.name,
@@ -94,16 +100,15 @@ export async function getInventoryStats(): Promise<ChartData> {
     .orderBy(desc(sum(inventoryLevels.quantity)))
     .limit(5);
 
-  return stats.map((s) => ({
-    name: s.name,
-    value: Number(s.value || 0),
+  return stats.map((stat) => ({
+    name: stat.name,
+    value: Number(stat.value || 0),
   }));
 }
 
-export async function getLaborStats(
+export async function getLaborChartData(
   dateRange?: AnalyticsDateRange
 ): Promise<ChartData> {
-  // Get total labor hours by user (technician)
   const dateFilter = buildLaborDateFilters(dateRange);
 
   const query = db
@@ -125,9 +130,9 @@ export async function getLaborStats(
         .orderBy(desc(sum(laborLogs.durationMinutes)))
         .limit(5);
 
-  return stats.map((s) => ({
-    name: s.name,
-    value: Math.round(Number(s.value || 0) / 60), // Convert to hours
+  return stats.map((stat) => ({
+    name: stat.name,
+    value: Math.round(Number(stat.value || 0) / 60),
   }));
 }
 
@@ -138,27 +143,23 @@ export async function getStatsSummary(
   if (type === "work_orders") {
     const dateFilter = buildWorkOrderDateFilters(dateRange);
 
-    // Total work orders
     const totalQuery = db.select({ count: count() }).from(workOrders);
     const total = dateFilter
       ? await totalQuery.where(dateFilter)
       : await totalQuery;
 
-    // Open work orders
     const openQuery = db.select({ count: count() }).from(workOrders);
     const openConditions = dateFilter
       ? and(eq(workOrders.status, "open"), dateFilter)
       : eq(workOrders.status, "open");
     const open = await openQuery.where(openConditions);
 
-    // High priority work orders
     const highPriorityQuery = db.select({ count: count() }).from(workOrders);
     const highConditions = dateFilter
       ? and(eq(workOrders.priority, "high"), dateFilter)
       : eq(workOrders.priority, "high");
     const highPriority = await highPriorityQuery.where(highConditions);
 
-    // Completion rate: (resolved + closed) / total * 100
     const resolvedQuery = db.select({ count: count() }).from(workOrders);
     const resolvedConditions = dateFilter
       ? and(eq(workOrders.status, "resolved"), dateFilter)
@@ -177,7 +178,7 @@ export async function getStatsSummary(
       totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
     return [
-      { label: "Total WOs", value: total[0].count },
+      { label: "Total WOs", value: totalCount },
       { label: "Open WOs", value: open[0].count },
       { label: "High Priority", value: highPriority[0].count },
       { label: "Completion Rate", value: `${completionRate}%` },
@@ -185,10 +186,8 @@ export async function getStatsSummary(
   }
 
   if (type === "inventory") {
-    // Total SKUs
     const totalParts = await db.select({ count: count() }).from(spareParts);
 
-    // Low stock: COUNT where quantity <= reorderPoint
     const lowStockResult = await db
       .select({ count: count() })
       .from(inventoryLevels)
@@ -196,7 +195,6 @@ export async function getStatsSummary(
       .where(sql`${inventoryLevels.quantity} <= ${spareParts.reorderPoint}`);
     const lowStock = lowStockResult[0].count;
 
-    // Total value: SUM(quantity * unitCost)
     const totalValueResult = await db
       .select({
         value: sql<number>`COALESCE(SUM(${inventoryLevels.quantity} * ${spareParts.unitCost}), 0)`,
@@ -210,10 +208,34 @@ export async function getStatsSummary(
         ? `$${(totalValue / 1000).toFixed(1)}k`
         : `$${totalValue.toFixed(0)}`;
 
-    // Stock turn: This would need historical data to calculate properly
-    // For now, we calculate as: parts used in last 12 months / average inventory
-    // Simplified: using a placeholder as accurate calculation requires transaction history
-    const stockTurn = "4.2"; // Placeholder - would need proper calculation
+    const pastYear = new Date();
+    pastYear.setFullYear(pastYear.getFullYear() - 1);
+
+    const usageConditions = buildInventoryTransactionDateFilters({
+      startDate: pastYear.toISOString(),
+    });
+    const outflowConditions = usageConditions
+      ? and(eq(inventoryTransactions.type, "out"), usageConditions)
+      : eq(inventoryTransactions.type, "out");
+
+    const [usageResult, stockResult] = await Promise.all([
+      db
+        .select({
+          value: sql<number>`COALESCE(SUM(${inventoryTransactions.quantity}), 0)`,
+        })
+        .from(inventoryTransactions)
+        .where(outflowConditions),
+      db
+        .select({
+          value: sql<number>`COALESCE(SUM(${inventoryLevels.quantity}), 0)`,
+        })
+        .from(inventoryLevels),
+    ]);
+
+    const annualUsage = Number(usageResult[0].value || 0);
+    const currentStock = Number(stockResult[0].value || 0);
+    const stockTurn =
+      currentStock > 0 ? (annualUsage / currentStock).toFixed(1) : "0.0";
 
     return [
       { label: "Total SKUs", value: totalParts[0].count },
@@ -223,10 +245,8 @@ export async function getStatsSummary(
     ];
   }
 
-  // Labor stats
   const dateFilter = buildLaborDateFilters(dateRange);
 
-  // Total hours
   const totalHoursQuery = db
     .select({ value: sum(laborLogs.durationMinutes) })
     .from(laborLogs);
@@ -235,7 +255,6 @@ export async function getStatsSummary(
     : await totalHoursQuery;
   const hours = Math.round(Number(totalHours[0].value || 0) / 60);
 
-  // Active technicians: COUNT DISTINCT users with labor logs
   const activeTechsQuery = db
     .select({ count: countDistinct(laborLogs.userId) })
     .from(laborLogs);
@@ -243,7 +262,6 @@ export async function getStatsSummary(
     ? await activeTechsQuery.where(dateFilter)
     : await activeTechsQuery;
 
-  // Average cost per hour: AVG(hourlyRate) from laborLogs where hourlyRate is set
   const avgRateResult = await db
     .select({ avg: sql<number>`AVG(${laborLogs.hourlyRate})` })
     .from(laborLogs)
@@ -251,7 +269,6 @@ export async function getStatsSummary(
   const avgRate = avgRateResult[0].avg || 0;
   const formattedRate = `$${Math.round(avgRate)}`;
 
-  // Efficiency: billable hours / total hours * 100
   const billableQuery = db
     .select({ value: sum(laborLogs.durationMinutes) })
     .from(laborLogs);

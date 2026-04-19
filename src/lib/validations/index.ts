@@ -5,6 +5,7 @@ export * from "./locations";
 export * from "./equipment";
 export * from "./workOrders";
 export * from "./attachments";
+export * from "./reports";
 export * from "./schedules";
 export * from "./workOrderTemplates";
 

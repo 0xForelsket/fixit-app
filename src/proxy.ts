@@ -7,9 +7,21 @@ async function getRoleFromSession(token: string): Promise<string | null> {
   try {
     const secretKey = new TextEncoder().encode(secret);
     const { payload } = await jwtVerify(token, secretKey);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    return (payload as any).user?.roleName || null;
+    const payloadUser =
+      typeof payload === "object" && payload !== null && "user" in payload
+        ? payload.user
+        : null;
+
+    if (
+      payloadUser &&
+      typeof payloadUser === "object" &&
+      "roleName" in payloadUser &&
+      typeof payloadUser.roleName === "string"
+    ) {
+      return payloadUser.roleName;
+    }
+
+    return null;
   } catch {
     return null;
   }
@@ -84,7 +96,6 @@ export async function proxy(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const forwardedHost = request.headers.get("x-forwarded-host");
   const hostname = forwardedHost || host;
-  console.log("Middleware Hostname:", hostname);
 
   const { pathname } = url;
 

@@ -149,7 +149,9 @@ export function PredictiveMaintenanceWidget() {
               <div className="p-4 rounded-xl border border-border bg-card hover:bg-accent/50 transition-colors">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
-                    <p className="font-bold text-sm">{prediction.equipmentName}</p>
+                    <p className="font-bold text-sm">
+                      {prediction.equipmentName}
+                    </p>
                     <p className="text-xs text-muted-foreground font-mono">
                       {prediction.equipmentCode}
                     </p>

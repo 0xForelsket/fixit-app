@@ -2,27 +2,29 @@ import { getReportTemplate } from "@/actions/reports";
 import { ReportBuilder } from "@/components/reports/builder/report-builder";
 import { Button } from "@/components/ui/button";
 import { PageLayout } from "@/components/ui/page-layout";
+import { PERMISSIONS } from "@/lib/permissions";
+import { requirePermission } from "@/lib/session";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-
-import type { ReportConfig } from "@/components/reports/builder/types";
+import { notFound } from "next/navigation";
 
 export default async function BuilderPage({
   searchParams,
 }: {
   searchParams: Promise<{ id?: string }>;
 }) {
-  const { id } = await searchParams;
-  const rawTemplate = id ? await getReportTemplate(id) : undefined;
+  await requirePermission(PERMISSIONS.REPORTS_VIEW);
 
-  const template = rawTemplate
-    ? {
-        id: rawTemplate.id,
-        config: rawTemplate.config as unknown as ReportConfig,
-      }
-    : undefined;
-  // TODO: Implement proper user session
-  const userId = "user_01HKQ...";
+  const { id } = await searchParams;
+  const templateResult = id ? await getReportTemplate(id) : undefined;
+  if (
+    id &&
+    (!templateResult || !templateResult.success || !templateResult.data)
+  ) {
+    notFound();
+  }
+
+  const template = templateResult?.success ? templateResult.data : undefined;
 
   return (
     <PageLayout
@@ -44,7 +46,7 @@ export default async function BuilderPage({
         </Link>
       }
     >
-      <ReportBuilder initialTemplate={template} userId={userId} />
+      <ReportBuilder initialTemplate={template} />
     </PageLayout>
   );
 }

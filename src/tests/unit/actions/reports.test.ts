@@ -6,11 +6,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/db", () => ({
   db: {
     insert: vi.fn(() => ({
-      values: vi.fn(),
+      values: vi.fn(() => ({
+        returning: vi.fn(),
+      })),
     })),
     update: vi.fn(() => ({
       set: vi.fn(() => ({
-        where: vi.fn(),
+        where: vi.fn(() => ({
+          returning: vi.fn(),
+        })),
       })),
     })),
     delete: vi.fn(() => ({
@@ -27,6 +31,18 @@ vi.mock("@/db", () => ({
   },
 }));
 
+vi.mock("@/lib/session", () => ({
+  requirePermission: vi.fn(async () => ({
+    id: "user123",
+    displayId: 1,
+    employeeId: "ADMIN-001",
+    name: "Admin User",
+    roleName: "admin",
+    permissions: ["*"],
+    sessionVersion: 1,
+  })),
+}));
+
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
@@ -38,6 +54,7 @@ vi.mock("@/db/schema", () => ({
 }));
 
 vi.mock("drizzle-orm", () => ({
+  desc: vi.fn(),
   eq: vi.fn(),
 }));
 
@@ -55,14 +72,28 @@ describe("Actions: Reports", () => {
           title: "Test Report",
           widgets: [],
         },
-        createdById: "user123",
       };
 
       // Ensure mock chaining works
-      const mockValues = vi.fn().mockResolvedValue(undefined);
+      const mockValues = vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([
+          {
+            id: "template123",
+            name: "Test Report",
+            description: "A test report",
+            config: {
+              title: "Test Report",
+              widgets: [],
+            },
+            createdById: "user123",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]),
+      }));
       (db.insert as any).mockReturnValue({ values: mockValues });
 
-      await saveReportTemplate(mockData);
+      const result = await saveReportTemplate(mockData);
 
       expect(db.insert).toHaveBeenCalled();
       expect(mockValues).toHaveBeenCalledWith(
@@ -71,6 +102,7 @@ describe("Actions: Reports", () => {
           createdById: "user123",
         })
       );
+      expect(result.success).toBe(true);
     });
 
     it("should update an existing template when ID is provided", async () => {
@@ -82,14 +114,41 @@ describe("Actions: Reports", () => {
           title: "Updated Report",
           widgets: [],
         },
-        createdById: "user123",
       };
 
-      const mockWhere = vi.fn().mockResolvedValue(undefined);
+      (db.query.reportTemplates.findFirst as any).mockResolvedValue({
+        id: "template123",
+        name: "Existing Report",
+        description: "Existing description",
+        config: {
+          title: "Existing Report",
+          widgets: [],
+        },
+        createdById: "user123",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const mockWhere = vi.fn(() => ({
+        returning: vi.fn().mockResolvedValue([
+          {
+            id: "template123",
+            name: "Updated Report",
+            description: "Updated description",
+            config: {
+              title: "Updated Report",
+              widgets: [],
+            },
+            createdById: "user123",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+        ]),
+      }));
       const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
       (db.update as any).mockReturnValue({ set: mockSet });
 
-      await saveReportTemplate(mockData);
+      const result = await saveReportTemplate(mockData);
 
       expect(db.update).toHaveBeenCalled();
       expect(mockSet).toHaveBeenCalledWith(
@@ -98,18 +157,30 @@ describe("Actions: Reports", () => {
         })
       );
       expect(mockWhere).toHaveBeenCalled();
+      expect(result.success).toBe(true);
     });
   });
 
   describe("getReportTemplate", () => {
     it("should fetch a template by ID", async () => {
-      const mockTemplate = { id: "123", name: "Test" };
+      const mockTemplate = {
+        id: "123",
+        name: "Test",
+        description: null,
+        config: {
+          title: "Test",
+          widgets: [],
+        },
+        createdById: "user123",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       (db.query.reportTemplates.findFirst as any).mockResolvedValue(
         mockTemplate
       );
 
       const result = await getReportTemplate("123");
-      expect(result).toEqual(mockTemplate);
+      expect(result).toEqual({ success: true, data: mockTemplate });
     });
   });
 });
